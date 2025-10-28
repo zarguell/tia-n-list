@@ -5,6 +5,7 @@ and other providers using the OpenAI API format.
 """
 
 import json
+import re
 import time
 import logging
 from typing import Dict, Any, List, Optional
@@ -114,10 +115,18 @@ Only return the JSON response, no additional text.
         )
 
         try:
-            return json.loads(response_text)
+            # Clean up response text to handle OpenRouter extra tokens
+            cleaned_response = self._clean_json_response(response_text)
+            return json.loads(cleaned_response)
         except json.JSONDecodeError as e:
             logger.error(f"Failed to parse JSON response: {response_text[:200]}...")
-            return {"iocs": [], "ttps": []}
+            # Try more aggressive cleaning
+            try:
+                cleaned_response = self._aggressive_json_clean(response_text)
+                return json.loads(cleaned_response)
+            except json.JSONDecodeError:
+                logger.error(f"All JSON parsing attempts failed for: {response_text[:500]}...")
+                return {"iocs": [], "ttps": []}
 
     def batch_generate(self, prompts: List[str], max_tokens: int = 1000) -> List[str]:
         """Generate responses for multiple prompts in a single call.
@@ -328,3 +337,80 @@ class OpenRouterProvider(OpenAIProvider):
             Generated text response.
         """
         return self._generate_with_fallbacks(model, prompt, max_tokens, temperature)
+
+    def _clean_json_response(self, response_text: str) -> str:
+        """Clean JSON response to handle common OpenRouter formatting issues.
+
+        Args:
+            response_text: Raw response text from LLM
+
+        Returns:
+            Cleaned JSON text ready for parsing
+        """
+        if not response_text:
+            return "{}"
+
+        # Remove common extra tokens from OpenRouter
+        cleaned = response_text.strip()
+
+        # Remove leading/trailing ```json and ```
+        if cleaned.startswith("```json"):
+            cleaned = cleaned[7:]
+        if cleaned.startswith("```"):
+            cleaned = cleaned[3:]
+        if cleaned.endswith("```"):
+            cleaned = cleaned[:-3]
+
+        # Remove extra tokens like <｜begin▁of▁sentence｜>
+        cleaned = re.sub(r'<｜[^｜]+｜>', '', cleaned)
+        cleaned = re.sub(r'<[^>]+>', '', cleaned)  # Remove any other XML-like tags
+
+        # Remove trailing punctuation after JSON
+        cleaned = re.sub(r'[^}]\s*$', '', cleaned)
+
+        # Find JSON boundaries - look for first { and last }
+        first_brace = cleaned.find('{')
+        if first_brace == -1:
+            return "{}"
+
+        last_brace = cleaned.rfind('}')
+        if last_brace == -1:
+            return cleaned[first_brace:]
+
+        return cleaned[first_brace:last_brace + 1]
+
+    def _aggressive_json_clean(self, response_text: str) -> str:
+        """More aggressive JSON cleaning for difficult cases.
+
+        Args:
+            response_text: Raw response text from LLM
+
+        Returns:
+            Cleaned JSON text ready for parsing
+        """
+        if not response_text:
+            return "{}"
+
+        cleaned = response_text.strip()
+
+        # Extract JSON using regex for difficult cases
+        json_match = re.search(r'\{.*\}', cleaned, re.DOTALL)
+        if json_match:
+            return json_match.group(0)
+
+        # Try to find JSON-like structure
+        brace_count = 0
+        start_idx = -1
+
+        for i, char in enumerate(cleaned):
+            if char == '{':
+                if brace_count == 0:
+                    start_idx = i
+                brace_count += 1
+            elif char == '}':
+                brace_count -= 1
+                if brace_count == 0 and start_idx != -1:
+                    return cleaned[start_idx:i + 1]
+
+        # Fallback - return empty JSON
+        return "{}"

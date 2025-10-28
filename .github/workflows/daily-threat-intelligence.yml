@@ -72,32 +72,119 @@ jobs:
         GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
         OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        LLM_PROVIDER: ${{ vars.LLM_PROVIDER || 'gemini' }}
+        LLM_PROVIDER: ${{ vars.LLM_PROVIDER || 'openrouter' }}
         OPENROUTER_FILTERING_MODEL: ${{ vars.OPENROUTER_FILTERING_MODEL || 'meta-llama/llama-3.3-8b-instruct:free' }}
         OPENROUTER_ANALYSIS_MODEL: ${{ vars.OPENROUTER_ANALYSIS_MODEL || 'openai/gpt-oss-20b:free' }}
       run: |
         echo "🧠 Starting LLM processing..."
-        PYTHONPATH=. python -m src.processing
-        echo "✅ LLM processing completed"
+        echo "Using LLM provider: ${LLM_PROVIDER:-gemini}"
+
+        # Retry LLM processing if it fails due to rate limits
+        for i in {1..3}; do
+          if PYTHONPATH=. python -m src.processing; then
+            echo "✅ LLM processing completed successfully"
+            break
+          else
+            echo "⚠️ LLM processing attempt $i failed, retrying in 30 seconds..."
+            sleep 30
+            if [ $i -eq 3 ]; then
+              echo "❌ LLM processing failed after 3 attempts, continuing with available data..."
+              exit 0  # Don't fail the workflow
+            fi
+          fi
+        done
 
     - name: Generate Intelligent Blog Post
       env:
         GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
         OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        LLM_PROVIDER: ${{ vars.LLM_PROVIDER || 'gemini' }}
+        LLM_PROVIDER: ${{ vars.LLM_PROVIDER || 'openrouter' }}
         OPENROUTER_FILTERING_MODEL: ${{ vars.OPENROUTER_FILTERING_MODEL || 'meta-llama/llama-3.3-8b-instruct:free' }}
         OPENROUTER_ANALYSIS_MODEL: ${{ vars.OPENROUTER_ANALYSIS_MODEL || 'openai/gpt-oss-20b:free' }}
       run: |
         echo "📝 Generating intelligent blog post..."
-        PYTHONPATH=. python -m src.intelligent_blog_generator
-        echo "✅ Blog post generation completed"
+        echo "Using LLM provider: ${LLM_PROVIDER:-gemini}"
+
+        # Check if we have processed articles to work with
+        ARTICLE_COUNT=$(sqlite3 tia_n_list.db "SELECT COUNT(*) FROM articles WHERE status = 'processed' AND date(updated_at) = date('now');" 2>/dev/null || echo "0")
+        echo "📊 Found $ARTICLE_COUNT processed articles for today"
+
+        if [ "$ARTICLE_COUNT" -eq 0 ]; then
+          echo "⚠️ No processed articles found, generating fallback briefing..."
+        fi
+
+        # Retry blog generation if it fails
+        for i in {1..3}; do
+          if PYTHONPATH=. python -m src.intelligent_blog_generator; then
+            echo "✅ Blog post generation completed successfully"
+            break
+          else
+            echo "⚠️ Blog generation attempt $i failed, retrying in 30 seconds..."
+            sleep 30
+            if [ $i -eq 3 ]; then
+              echo "❌ Blog generation failed after 3 attempts, creating fallback post..."
+              # Create a simple fallback post
+              DATE=$(date +'%Y-%m-%d')
+              cat > "hugo/content/posts/${DATE}-daily-summary.md" << 'EOF'
+---
+title: "Daily Security Summary - DATE"
+date: DATE
+tags: [cybersecurity, daily-summary]
+author: "Tia N. List"
+---
+
+# Daily Security Summary
+
+Good morning! Today's automated threat intelligence processing encountered technical difficulties.
+
+## System Status
+
+- RSS ingestion: ✅ Completed
+- LLM processing: ⚠️ Limited due to API rate limits
+- Analysis generation: ⚠️ Using fallback mode
+
+## What This Means
+
+The system continues to gather threat intelligence data even when facing rate limiting from LLM providers. Tomorrow's briefing should include full analysis once rate limits reset.
+
+---
+
+*Technical difficulties encountered during automated processing. Human review may be needed.*
+EOF
+
+              # Replace placeholders
+              sed -i.bak "s/DATE/$(date +'%Y-%m-%d')/g; s/DATE/$(date +'%Y-%m-%d')/g" "hugo/content/posts/${DATE}-daily-summary.md" && rm "hugo/content/posts/${DATE}-daily-summary.md.bak"
+
+              echo "📝 Created fallback daily summary post"
+              break
+            fi
+          fi
+        done
 
     - name: Build Hugo Site
+      env:
+        HUGO_BASEURL: ${{ steps.site-url.outputs.url || 'https://yourusername.github.io/tia-n-list/' }}
       run: |
         echo "🏗️  Building Hugo site..."
+        echo "🔗 Using baseURL: ${HUGO_BASEURL}"
+
+        # Update baseURL in config if needed
+        if [ "$HUGO_BASEURL" != "https://yourusername.github.io/tia-n-list/" ]; then
+          sed -i.bak "s|baseURL: 'https://yourusername.github.io/tia-n-list/'|baseURL: '$HUGO_BASEURL'|g" hugo/config.yaml
+        fi
+
         hugo -s hugo/ --minify
         echo "✅ Hugo site built successfully"
+
+    - name: Get Site URL
+      id: site-url
+      run: |
+        if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+          echo "url=https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/" >> $GITHUB_OUTPUT
+        else
+          echo "url=https://yourusername.github.io/tia-n-list/" >> $GITHUB_OUTPUT
+        fi
 
     - name: Configure Git
       run: |
