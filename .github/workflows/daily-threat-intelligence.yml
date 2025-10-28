@@ -1,0 +1,208 @@
+name: Daily Threat Intelligence Briefing
+
+on:
+  schedule:
+    # Run daily at 6:00 AM EST (11:00 AM UTC)
+    - cron: '0 11 * * *'
+  workflow_dispatch: # Allow manual triggering
+
+jobs:
+  daily-intelligence:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Cache pip dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Cache Hugo
+      uses: actions/cache@v3
+      with:
+        path: /tmp/hugo
+        key: ${{ runner.os }}-hugo-${{ hashFiles('**/hugo/versions.conf') }}
+        restore-keys: |
+          ${{ runner.os }}-hugo-
+
+    - name: Setup Hugo
+      uses: peaceiris/actions-hugo@v2
+      with:
+        hugo-version: 'latest'
+        extended: true
+
+    - name: Create data directory
+      run: |
+        mkdir -p data
+
+    - name: Run RSS Feed Ingestion
+      env:
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        LLM_PROVIDER: ${{ vars.LLM_PROVIDER || 'gemini' }}
+        OPENROUTER_FILTERING_MODEL: ${{ vars.OPENROUTER_FILTERING_MODEL || 'meta-llama/llama-3.3-8b-instruct:free' }}
+        OPENROUTER_ANALYSIS_MODEL: ${{ vars.OPENROUTER_ANALYSIS_MODEL || 'openai/gpt-oss-20b:free' }}
+      run: |
+        echo "🔄 Starting RSS feed ingestion..."
+        PYTHONPATH=. python -m src.ingestion
+        echo "✅ RSS ingestion completed"
+
+    - name: Run LLM Processing
+      env:
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        LLM_PROVIDER: ${{ vars.LLM_PROVIDER || 'gemini' }}
+        OPENROUTER_FILTERING_MODEL: ${{ vars.OPENROUTER_FILTERING_MODEL || 'meta-llama/llama-3.3-8b-instruct:free' }}
+        OPENROUTER_ANALYSIS_MODEL: ${{ vars.OPENROUTER_ANALYSIS_MODEL || 'openai/gpt-oss-20b:free' }}
+      run: |
+        echo "🧠 Starting LLM processing..."
+        PYTHONPATH=. python -m src.processing
+        echo "✅ LLM processing completed"
+
+    - name: Generate Intelligent Blog Post
+      env:
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        LLM_PROVIDER: ${{ vars.LLM_PROVIDER || 'gemini' }}
+        OPENROUTER_FILTERING_MODEL: ${{ vars.OPENROUTER_FILTERING_MODEL || 'meta-llama/llama-3.3-8b-instruct:free' }}
+        OPENROUTER_ANALYSIS_MODEL: ${{ vars.OPENROUTER_ANALYSIS_MODEL || 'openai/gpt-oss-20b:free' }}
+      run: |
+        echo "📝 Generating intelligent blog post..."
+        PYTHONPATH=. python -m src.intelligent_blog_generator
+        echo "✅ Blog post generation completed"
+
+    - name: Build Hugo Site
+      run: |
+        echo "🏗️  Building Hugo site..."
+        hugo -s hugo/ --minify
+        echo "✅ Hugo site built successfully"
+
+    - name: Configure Git
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+
+    - name: Check for changes
+      id: verify-changed-files
+      run: |
+        if [ -n "$(git status --porcelain)" ]; then
+          echo "changed=true" >> $GITHUB_OUTPUT
+          echo "📊 Changes detected, preparing to commit..."
+        else
+          echo "changed=false" >> $GITHUB_OUTPUT
+          echo "ℹ️  No changes to commit"
+        fi
+
+    - name: Commit and push changes
+      if: steps.verify-changed-files.outputs.changed == 'true'
+      run: |
+        echo "📝 Committing daily threat intelligence update..."
+        git add .
+        git status
+
+        # Get current date for commit message
+        DATE=$(date +'%Y-%m-%d')
+        TIME=$(date +'%H:%M:%S')
+
+        git commit -m "🛡️ Daily Threat Intelligence Briefing - $DATE
+
+        🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+        Co-Authored-By: Claude <noreply@anthropic.com>"
+
+        echo "🚀 Pushing changes to repository..."
+        git push
+
+    - name: Summary of changes
+      run: |
+        echo "## 🛡️ Daily Threat Intelligence Briefing Summary" >> $GITHUB_STEP_SUMMARY
+        echo "**Date:** $(date +'%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+
+        # Check if blog post was generated
+        if ls hugo/content/posts/*-strategic-threat-analysis.md 1> /dev/null 2>&1; then
+          echo "✅ **Blog Post Generated:** Successfully created strategic threat analysis" >> $GITHUB_STEP_SUMMARY
+          LATEST_POST=$(ls -t hugo/content/posts/*-strategic-threat-analysis.md | head -1)
+          if [ -f "$LATEST_POST" ]; then
+            WORD_COUNT=$(wc -w < "$LATEST_POST")
+            echo "- **Word Count:** $WORD_COUNT words" >> $GITHUB_STEP_SUMMARY
+            echo "- **File:** $(basename $LATEST_POST)" >> $GITHUB_STEP_SUMMARY
+          fi
+        else
+          echo "⚠️ **Blog Post:** No new strategic analysis generated" >> $GITHUB_STEP_SUMMARY
+        fi
+
+        echo "" >> $GITHUB_STEP_SUMMARY
+
+        # Check database status
+        if [ -f "tia_n_list.db" ]; then
+          ARTICLE_COUNT=$(sqlite3 tia_n_list.db "SELECT COUNT(*) FROM articles WHERE date(created_at) = date('now');" 2>/dev/null || echo "0")
+          PROCESSED_COUNT=$(sqlite3 tia_n_list.db "SELECT COUNT(*) FROM articles WHERE status = 'processed' AND date(updated_at) = date('now');" 2>/dev/null || echo "0")
+          echo "📊 **Database Statistics:**" >> $GITHUB_STEP_SUMMARY
+          echo "- **New Articles:** $ARTICLE_COUNT" >> $GITHUB_STEP_SUMMARY
+          echo "- **Processed Articles:** $PROCESSED_COUNT" >> $GITHUB_STEP_SUMMARY
+        fi
+
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "🔗 **View Site:** Check the [Hugo site](https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/) for the latest briefing." >> $GITHUB_STEP_SUMMARY
+
+  # Optional: Build and deploy to GitHub Pages
+  build-and-deploy:
+    needs: daily-intelligence
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    permissions:
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup Hugo
+      uses: peaceiris/actions-hugo@v2
+      with:
+        hugo-version: 'latest'
+        extended: true
+
+    - name: Build Hugo site
+      run: hugo -s hugo/ --minify
+
+    - name: Setup Pages
+      uses: actions/configure-pages@v3
+
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v2
+      with:
+        path: ./hugo/public
+
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v2
