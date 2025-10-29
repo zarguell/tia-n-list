@@ -339,7 +339,8 @@ Let's dive into what you need to know...
     def _generate_fallback_post(self, target_date: date, stats: Dict[str, Any],
                                error: str = None) -> Dict[str, Any]:
         """Generate fallback post when no content is available."""
-        fallback_content = f"""# Daily Security Summary - {target_date.strftime('%Y-%m-%d')}
+        date_str = target_date.strftime('%Y-%m-%d')
+        fallback_content = f"""# Daily Security Summary - {date_str}
 
 Good morning! Today's automated threat intelligence processing encountered technical difficulties.
 
@@ -358,7 +359,7 @@ The automated system successfully ingested and enhanced content from threat inte
 - LLM provider responses required additional parsing
 - System resources were constrained
 
-{("## Technical Error\n\n" + error + "\n\n") if error else ""}
+{("## Technical Error" + "\n\n" + error + "\n\n") if error else ""}
 
 ## Tomorrow's Briefing
 
@@ -378,7 +379,7 @@ The system will automatically attempt full processing again tomorrow. All techni
         self.hugo_content_dir.mkdir(parents=True, exist_ok=True)
 
         frontmatter = f"""---
-title: "Daily Security Summary - {target_date.strftime('%Y-%m-%d')}"
+title: "Daily Security Summary - {date_str}"
 date: {target_date.isoformat()}
 tags: [cybersecurity, daily-summary]
 author: "Tia N. List"
