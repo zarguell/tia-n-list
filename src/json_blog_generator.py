@@ -322,17 +322,17 @@ Let's dive into what you need to know...
         }
 
         # Convert to YAML
-        frontmatter_yaml = "---\n"
+        frontmatter_yaml = "---" + "\n"
         for key, value in frontmatter.items():
             if isinstance(value, dict):
-                frontmatter_yaml += f"{key}:\n"
+                frontmatter_yaml += f"{key}:" + "\n"
                 for subkey, subvalue in value.items():
-                    frontmatter_yaml += f"  {subkey}: {subvalue}\n"
+                    frontmatter_yaml += f"  {subkey}: {subvalue}" + "\n"
             elif isinstance(value, list):
-                frontmatter_yaml += f"{key}: {json.dumps(value)}\n"
+                frontmatter_yaml += f"{key}: {json.dumps(value)}" + "\n"
             else:
-                frontmatter_yaml += f"{key}: {value}\n"
-        frontmatter_yaml += "---\n\n"
+                frontmatter_yaml += f"{key}: {value}" + "\n"
+        frontmatter_yaml += "---" + "\n" + "\n"
 
         return frontmatter_yaml + content
 
@@ -358,7 +358,7 @@ The automated system successfully ingested and enhanced content from threat inte
 - LLM provider responses required additional parsing
 - System resources were constrained
 
-{f'## Technical Error\n\n{error}\n\n' if error else ''}
+{("## Technical Error\n\n" + error + "\n\n") if error else ""}
 
 ## Tomorrow's Briefing
 
