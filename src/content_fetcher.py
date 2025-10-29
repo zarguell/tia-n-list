@@ -93,7 +93,7 @@ class ContentFetcher:
         return any(indicator in content_lower for indicator in paywall_indicators)
 
     def _extract_with_trafilatura(self, url: str) -> Optional[str]:
-        """Extract content using Trafilatura library.
+        """Extract content using Trafilatura library with timeout protection.
 
         Args:
             url: URL to extract content from.
@@ -101,14 +101,31 @@ class ContentFetcher:
         Returns:
             Extracted content or None if extraction failed.
         """
-        try:
-            downloaded = fetch_url(url)
-            if downloaded is None:
-                return None
+        def _trafilatura_with_timeout():
+            try:
+                # Use the session with timeout for consistent behavior
+                response = self.session.get(url, timeout=15)
+                response.raise_for_status()
 
-            result = extract(downloaded, include_comments=False, include_formatting=False)
-            if result and len(result.strip()) > 100:  # Minimum content length
-                return result.strip()
+                result = extract(response.text, include_comments=False, include_formatting=False)
+                if result and len(result.strip()) > 100:  # Minimum content length
+                    return result.strip()
+
+            except Exception as e:
+                print(f"Trafilatura extraction failed for {url}: {e}")
+
+            return None
+
+        try:
+            # Use thread-based timeout for Trafilatura since it doesn't support timeout directly
+            import concurrent.futures
+            with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
+                future = executor.submit(_trafilatura_with_timeout)
+                try:
+                    return future.result(timeout=20)  # 20 second timeout for Trafilatura
+                except concurrent.futures.TimeoutError:
+                    print(f"Trafilatura timeout for {url} after 20s")
+                    return None
 
         except Exception as e:
             print(f"Trafilatura extraction failed for {url}: {e}")
