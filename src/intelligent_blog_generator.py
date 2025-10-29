@@ -10,7 +10,8 @@ import signal
 import re
 from pathlib import Path
 from typing import List, Dict, Any, Set
-from src import database, persona
+from src import persona
+from src.json_storage import JSONStorage
 from src.llm_client_multi import MultiLLMClient
 
 
@@ -20,6 +21,7 @@ class ThreatIntelligenceSynthesizer:
     def __init__(self):
         """Initialize the synthesizer."""
         self.llm_client = MultiLLMClient()
+        self.storage = JSONStorage()
         self.memory_file = Path("data/report_memory.json")
         self.memory_file.parent.mkdir(exist_ok=True)
         self.report_memory = self._load_report_memory()
@@ -276,7 +278,7 @@ Every specific claim (CVE, vendor, product, CISA ID) must be traceable to the pr
             }
 
             # Add IOCs if available
-            iocs = database.get_iocs_by_article_id(article['id'])
+            iocs = self.storage.get_article_iocs(article['id'])
             if iocs:
                 article_data['iocs'] = [
                     f"{ioc['type']}: {ioc['value']}"
@@ -401,7 +403,7 @@ Focus on providing genuine value to security engineers based on real, verifiable
             }
 
             # Add IOCs if available (filter out non-security IOCs)
-            iocs = database.get_iocs_by_article_id(article['id'])
+            iocs = self.storage.get_article_iocs(article['id'])
             filtered_iocs = []
             if iocs:
                 for ioc in iocs[:5]:
@@ -1003,7 +1005,8 @@ def generate_intelligent_blog_post() -> bool:
         print("Generating intelligent threat intelligence briefing...")
 
         # Get top articles
-        articles = database.get_top_articles(12)  # Get more articles for better analysis
+        storage = JSONStorage()
+        articles = storage.get_top_articles(12)  # Get more articles for better analysis
         if not articles:
             print("No articles found for analysis")
             return False

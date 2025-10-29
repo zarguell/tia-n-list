@@ -344,6 +344,22 @@ class JSONStorage:
         all_iocs.sort(key=lambda x: x["extracted_at"], reverse=True)
         return all_iocs
 
+    def get_article_iocs(self, article_id: str) -> List[Dict[str, Any]]:
+        """Get all IOCs for a specific article."""
+        # Search through recent IOC files for the article
+        all_iocs = []
+        current_date = date.fromordinal(datetime.utcnow().date().toordinal() - 30)  # Search last 30 days
+
+        while current_date <= datetime.utcnow().date():
+            daily_iocs = self.get_iocs_by_date(current_date)
+            article_iocs = [ioc for ioc in daily_iocs if ioc.get("article_id") == article_id]
+            all_iocs.extend(article_iocs)
+            current_date = date.fromordinal(current_date.toordinal() + 1)
+
+        # Sort by extraction time (newest first)
+        all_iocs.sort(key=lambda x: x["extracted_at"], reverse=True)
+        return all_iocs
+
     # Statistics and Reporting
     def get_statistics(self) -> Dict[str, Any]:
         """Get comprehensive statistics about stored data."""

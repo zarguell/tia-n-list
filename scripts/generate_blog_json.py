@@ -13,7 +13,7 @@ def main():
     print("📝 Generating JSON-based blog post...")
 
     generator = JSONBlogGenerator()
-    result = generator.generate_daily_summary(target_date=date.today(), use_intelligent_synthesis=False)
+    result = generator.generate_daily_summary(target_date=date.today(), use_intelligent_synthesis=True)
 
     print(f"Blog generation completed: {result['success']}")
 
