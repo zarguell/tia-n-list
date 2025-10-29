@@ -124,17 +124,35 @@ Only return the JSON response, no additional text.
 
         try:
             # Clean up response text to handle OpenRouter extra tokens
-            cleaned_response = self._clean_json_response(response_text)
-            return json.loads(cleaned_response)
+            if response_text and len(response_text.strip()) > 0:
+                cleaned_response = self._clean_json_response(response_text)
+                result = json.loads(cleaned_response)
+                # Ensure result has expected structure
+                if isinstance(result, dict):
+                    return result
+                else:
+                    logger.warning(f"Response is not a dict: {type(result)}")
+                    return {"iocs": [], "ttps": []}
+            else:
+                logger.warning("Empty response received from LLM")
+                return {"iocs": [], "ttps": []}
         except json.JSONDecodeError as e:
             logger.error(f"Failed to parse JSON response: {response_text[:200]}...")
             # Try more aggressive cleaning
             try:
                 cleaned_response = self._aggressive_json_clean(response_text)
-                return json.loads(cleaned_response)
+                result = json.loads(cleaned_response)
+                if isinstance(result, dict):
+                    return result
+                else:
+                    logger.warning(f"Cleaned response is not a dict: {type(result)}")
+                    return {"iocs": [], "ttps": []}
             except json.JSONDecodeError:
                 logger.error(f"All JSON parsing attempts failed for: {response_text[:500]}...")
                 return {"iocs": [], "ttps": []}
+        except Exception as e:
+            logger.error(f"Unexpected error processing response: {e}")
+            return {"iocs": [], "ttps": []}
 
     def batch_generate(self, prompts: List[str], max_tokens: int = 1000) -> List[str]:
         """Generate responses for multiple prompts in a single call.
@@ -284,25 +302,35 @@ class OpenRouterProvider(OpenAIProvider):
             config: Configuration dictionary. Uses OpenRouter defaults:
                 - base_url: https://openrouter.ai/api/v1
                 - filtering_model: meta-llama/llama-3.3-8b-instruct:free
-                - analysis_model: deepseek/deepseek-chat-v3.1:free
+                - analysis_model: openai/gpt-oss-20b:free
                 - fallback_models: List of fallback models for robustness
         """
         # Set OpenRouter defaults with fallback models
+        # Only set defaults if not provided in config to avoid overriding
         openrouter_config = {
             'base_url': 'https://openrouter.ai/api/v1',
-            'filtering_model': 'meta-llama/llama-3.3-8b-instruct:free',
-            'analysis_model': 'deepseek/deepseek-chat-v3.1:free',
             'fallback_models': [
                 'z-ai/glm-4.5-air:free',        # Primary fallback
                 'qwen/qwen3-235b-a22b:free',     # 1st fallback
                 'microsoft/mai-ds-r1:free',      # 2nd fallback
                 'google/gemini-2.0-flash-exp:free' # 3rd fallback
             ],
-            **config  # Allow override of defaults
         }
+
+        # Set default models only if not provided in config
+        if 'model' not in config:
+            openrouter_config['model'] = 'openai/gpt-oss-20b:free'
+        if 'filtering_model' not in config:
+            openrouter_config['filtering_model'] = 'meta-llama/llama-3.3-8b-instruct:free'
+        if 'analysis_model' not in config:
+            openrouter_config['analysis_model'] = 'openai/gpt-oss-20b:free'
+
+        # Merge with provided config (config takes precedence)
+        openrouter_config.update(config)
 
         super().__init__(openrouter_config)
         self.name = 'OpenRouter'
+        self._last_request_time = 0
 
     def initialize(self) -> None:
         """Initialize OpenRouter client with custom headers."""
@@ -333,7 +361,7 @@ class OpenRouterProvider(OpenAIProvider):
             raise LLMProviderAPIError(f"Failed to connect to OpenRouter: {e}")
 
     def _generate_with_model(self, model: str, prompt: str, max_tokens: int, temperature: float) -> str:
-        """Override to use fallback models for OpenRouter.
+        """Override to use fallback models for OpenRouter with proactive rate limiting.
 
         Args:
             model: Primary model name to use.
@@ -344,7 +372,54 @@ class OpenRouterProvider(OpenAIProvider):
         Returns:
             Generated text response.
         """
+        # Proactive throttling for OpenRouter free tier (20 requests/minute = 3 seconds between requests)
+        current_time = time.time()
+        time_since_last_request = current_time - self._last_request_time
+
+        if time_since_last_request < 3.0:  # 3 second minimum between requests
+            sleep_time = 3.0 - time_since_last_request
+            logger.debug(f"OpenRouter rate limiting: sleeping {sleep_time:.2f}s")
+            time.sleep(sleep_time)
+
+        self._last_request_time = time.time()
         return self._generate_with_fallbacks(model, prompt, max_tokens, temperature)
+
+    def _retry_with_backoff(self, func, max_retries: Optional[int] = None):
+        """Retry function with exponential backoff and OpenRouter rate limiting.
+
+        Args:
+            func: Function to retry.
+            max_retries: Maximum retry attempts (uses instance default if None).
+
+        Returns:
+            Function result.
+
+        Raises:
+            LLMProviderAPIError: If all retries fail.
+        """
+        if max_retries is None:
+            max_retries = self.max_retries
+
+        for attempt in range(max_retries + 1):
+            try:
+                return func()
+            except Exception as e:
+                if attempt == max_retries:
+                    raise LLMProviderAPIError(f"Failed after {max_retries} retries: {e}")
+
+                # Check for OpenRouter rate limiting (HTTP 429)
+                error_str = str(e).lower()
+                if '429' in error_str or 'rate limit' in error_str:
+                    # OpenRouter free tier: 20 requests/minute
+                    # Wait 65 seconds to ensure we're well within the limit
+                    delay = 65
+                    logger.warning(f"OpenRouter rate limit hit, waiting {delay}s for rate limit reset: {e}")
+                    time.sleep(delay)
+                else:
+                    # Standard exponential backoff for other errors
+                    delay = self.retry_delay * (2 ** attempt)
+                    logger.warning(f"Attempt {attempt + 1} failed, retrying in {delay}s: {e}")
+                    time.sleep(delay)
 
     def _clean_json_response(self, response_text: str) -> str:
         """Clean JSON response to handle common OpenRouter formatting issues.

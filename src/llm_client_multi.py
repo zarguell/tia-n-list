@@ -6,6 +6,7 @@ the existing LLM client while adding provider selection and fallback capabilitie
 """
 
 import os
+import re
 import logging
 from typing import Dict, Any, List, Optional, Union
 from .providers import create_provider, get_available_providers
@@ -48,7 +49,19 @@ class MultiLLMClient:
             config = self._get_provider_config(self.provider_name)
             self.provider = create_provider(self.provider_name, config)
             self.provider.initialize()
-            logger.info(f"Successfully initialized primary provider: {self.provider_name}")
+
+            # Log the actual models being used for debugging
+            if hasattr(self.provider, 'model'):
+                logger.info(f"Successfully initialized primary provider: {self.provider_name}")
+                logger.info(f"Model: {getattr(self.provider, 'model', 'unknown')}")
+                logger.info(f"Filtering model: {getattr(self.provider, 'filtering_model', 'unknown')}")
+                logger.info(f"Analysis model: {getattr(self.provider, 'analysis_model', 'unknown')}")
+                # Log the actual config for debugging
+                if hasattr(self.provider, 'api_key'):
+                    logger.info(f"Base URL: {getattr(self.provider, 'base_url', 'unknown')}")
+            else:
+                logger.info(f"Successfully initialized primary provider: {self.provider_name}")
+
         except Exception as e:
             logger.error(f"Failed to initialize primary provider '{self.provider_name}': {e}")
             self._try_fallback_providers()
@@ -103,6 +116,7 @@ class MultiLLMClient:
         elif provider_name == 'openrouter':
             config.update({
                 'api_key': os.getenv('OPENROUTER_API_KEY'),
+                'model': os.getenv('OPENROUTER_MODEL', 'openai/gpt-oss-20b:free'),
                 'filtering_model': os.getenv('OPENROUTER_FILTERING_MODEL', 'meta-llama/llama-3.3-8b-instruct:free'),
                 'analysis_model': os.getenv('OPENROUTER_ANALYSIS_MODEL', 'openai/gpt-oss-20b:free'),
             })
@@ -344,15 +358,28 @@ Focus on actionable threat intelligence, new threats, and practical security ins
                 for j, response in enumerate(responses):
                     try:
                         import json
-                        result = json.loads(response)
-                        results.append(result)
-                    except (json.JSONDecodeError, KeyError) as e:
+
+                        # Clean the response before parsing
+                        if response and len(response.strip()) > 0:
+                            # Apply JSON cleaning similar to the OpenAI provider
+                            cleaned_response = self._clean_batch_response(response)
+                            result = json.loads(cleaned_response)
+                            results.append(result)
+                        else:
+                            # Empty response
+                            results.append({
+                                "article_id": batch[j]['id'],
+                                "is_relevant": False,
+                                "relevance_score": 0,
+                                "reasoning": "Empty response from LLM provider"
+                            })
+                    except (json.JSONDecodeError, KeyError, Exception) as e:
                         # Fallback result if parsing fails
                         results.append({
                             "article_id": batch[j]['id'],
                             "is_relevant": False,
                             "relevance_score": 0,
-                            "reasoning": f"Parse error: {e}"
+                            "reasoning": f"Parse error: {str(e)[:100]}"
                         })
 
             except Exception as e:
@@ -367,6 +394,46 @@ Focus on actionable threat intelligence, new threats, and practical security ins
                     })
 
         return results
+
+    def _clean_batch_response(self, response: str) -> str:
+        """Clean JSON response for batch processing to handle OpenRouter formatting issues.
+
+        Args:
+            response: Raw response text from LLM
+
+        Returns:
+            Cleaned JSON text ready for parsing
+        """
+        if not response:
+            return "{}"
+
+        cleaned = response.strip()
+
+        # Remove leading/trailing ```json and ```
+        if cleaned.startswith("```json"):
+            cleaned = cleaned[7:]
+        if cleaned.startswith("```"):
+            cleaned = cleaned[3:]
+        if cleaned.endswith("```"):
+            cleaned = cleaned[:-3]
+
+        # Remove extra tokens like <｜begin▁of▁sentence｜>
+        cleaned = re.sub(r'<｜[^｜]+｜>', '', cleaned)
+        cleaned = re.sub(r'<[^>]+>', '', cleaned)  # Remove any other XML-like tags
+
+        # Remove trailing punctuation after JSON
+        cleaned = re.sub(r'[^}]\s*$', '', cleaned)
+
+        # Find JSON boundaries - look for first { and last }
+        first_brace = cleaned.find('{')
+        if first_brace == -1:
+            return "{}"
+
+        last_brace = cleaned.rfind('}')
+        if last_brace == -1:
+            return cleaned[first_brace:]
+
+        return cleaned[first_brace:last_brace + 1]
 
     def get_provider_info(self) -> Dict[str, Any]:
         """Get information about current provider configuration.

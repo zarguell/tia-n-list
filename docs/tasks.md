@@ -212,7 +212,7 @@ export GEMINI_API_KEY=your_gemini_key  # Fallback
 
 **Priority Free OpenRouter Models:**
 - Filtering: `meta-llama/llama-3.3-8b-instruct:free`
-- Analysis: `deepseek/deepseek-chat-v3.1:free`
+- Analysis: `openai/gpt-oss-20b:free`
 
 ### Milestone 4: Manual Setup & Finalization
 - [x] [manual] Initialize the Python project with a `pyproject.toml` file for dependency management.

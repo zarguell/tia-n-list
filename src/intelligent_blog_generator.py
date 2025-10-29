@@ -79,8 +79,13 @@ class ThreatIntelligenceSynthesizer:
         mentioned = set()
         for date_str, reports in self.report_memory.get('reports', {}).items():
             if date_str >= cutoff_str:
-                for report in reports:
-                    mentioned.update(report.get('mentioned_articles', []))
+                # Handle both list and single report cases
+                if isinstance(reports, list):
+                    for report in reports:
+                        if isinstance(report, dict):
+                            mentioned.update(report.get('mentioned_articles', []))
+                elif isinstance(reports, dict):
+                    mentioned.update(reports.get('mentioned_articles', []))
 
         return mentioned
 

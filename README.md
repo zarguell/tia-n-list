@@ -221,7 +221,7 @@ export GEMINI_API_KEY=your_gemini_key  # Automatic fallback
 
 **OpenRouter Fallback Models:**
 - Primary: `meta-llama/llama-3.3-8b-instruct:free` (filtering)
-- Analysis: `deepseek/deepseek-chat-v3.1:free` (analysis)
+- Analysis: `openai/gpt-oss-20b:free` (analysis)
 - Fallbacks: GLM-4.5-Air, Qwen3-235B, MAI-DS-R1, Gemini-2.0-Flash
 
 ### LLM Model Configuration

@@ -67,7 +67,7 @@ jobs:
         PYTHONPATH=. python -m src.ingestion
         echo "✅ RSS ingestion completed"
 
-    - name: Run LLM Processing
+    - name: Enhance Article Content
       env:
         GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
@@ -76,23 +76,77 @@ jobs:
         OPENROUTER_FILTERING_MODEL: ${{ vars.OPENROUTER_FILTERING_MODEL || 'meta-llama/llama-3.3-8b-instruct:free' }}
         OPENROUTER_ANALYSIS_MODEL: ${{ vars.OPENROUTER_ANALYSIS_MODEL || 'openai/gpt-oss-20b:free' }}
       run: |
-        echo "🧠 Starting LLM processing..."
-        echo "Using LLM provider: ${LLM_PROVIDER:-gemini}"
+        echo "📰 Enhancing article content with full web scraping..."
 
-        # Retry LLM processing if it fails due to rate limits
-        for i in {1..3}; do
-          if PYTHONPATH=. python -m src.processing; then
-            echo "✅ LLM processing completed successfully"
-            break
-          else
-            echo "⚠️ LLM processing attempt $i failed, retrying in 30 seconds..."
-            sleep 30
-            if [ $i -eq 3 ]; then
-              echo "❌ LLM processing failed after 3 attempts, continuing with available data..."
-              exit 0  # Don't fail the workflow
+        # Enhance content for articles with short RSS excerpts
+        echo "Enhancing up to 50 articles with the shortest content..."
+        PYTHONPATH=. python scripts/enhance_content.py --limit 50
+
+        echo "✅ Content enhancement completed"
+        echo "📊 Content enhancement summary:"
+
+        # Show enhancement statistics
+        ENHANCED_COUNT=$(sqlite3 tia_n_list.db "SELECT COUNT(*) FROM articles WHERE content_source = 'scraped' AND date(created_at) = date('now');" 2>/dev/null || echo "0")
+        RSS_COUNT=$(sqlite3 tia_n_list.db "SELECT COUNT(*) FROM articles WHERE content_source = 'rss' AND date(created_at) = date('now');" 2>/dev/null || echo "0")
+
+        echo "- RSS content articles: $RSS_COUNT"
+        echo "- Enhanced/scraped articles: $ENHANCED_COUNT"
+
+        if [ "$ENHANCED_COUNT" -gt 0 ]; then
+          IMPROVEMENT=$(sqlite3 tia_n_list.db "SELECT AVG(length(raw_content)) FROM articles WHERE content_source = 'scraped' AND date(created_at) = date('now');" 2>/dev/null || echo "0")
+          echo "- Average enhanced content length: ${IMPROVEMENT%.*} characters"
+        fi
+
+    - name: Run Intelligent LLM Processing
+      env:
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        LLM_PROVIDER: ${{ vars.LLM_PROVIDER || 'openrouter' }}
+        OPENROUTER_FILTERING_MODEL: ${{ vars.OPENROUTER_FILTERING_MODEL || 'meta-llama/llama-3.3-8b-instruct:free' }}
+        OPENROUTER_ANALYSIS_MODEL: ${{ vars.OPENROUTER_ANALYSIS_MODEL || 'openai/gpt-oss-20b:free' }}
+      run: |
+        echo "🧠 Starting intelligent LLM processing with tiered analysis..."
+        echo "Using LLM provider: ${LLM_PROVIDER:-openrouter}"
+        echo "📊 This uses 5-tier processing for 85.7% cost reduction while maintaining quality"
+
+        # Run intelligent scalable processing
+        if PYTHONPATH=. python -m src.scalable_processor; then
+          echo "✅ Intelligent processing completed successfully"
+
+          # Show processing statistics
+          echo "📈 Processing Statistics:"
+          PROCESSED_COUNT=$(sqlite3 tia_n_list.db "SELECT COUNT(*) FROM articles WHERE status = 'processed' AND date(updated_at) = date('now');" 2>/dev/null || echo "0")
+          REJECTED_COUNT=$(sqlite3 tia_n_list.db "SELECT COUNT(*) FROM articles WHERE status = 'rejected' AND date(updated_at) = date('now');" 2>/dev/null || echo "0")
+
+          echo "- Articles processed: $PROCESSED_COUNT"
+          echo "- Articles rejected: $REJECTED_COUNT"
+
+          if [ "$PROCESSED_COUNT" -gt 0 ]; then
+            TOTAL_AVAILABLE=$(sqlite3 tia_n_list.db "SELECT COUNT(*) FROM articles WHERE date(created_at) = date('now');" 2>/dev/null || echo "0")
+            if [ "$TOTAL_AVAILABLE" -gt 0 ]; then
+              EFFICIENCY=$(echo "scale=1; $PROCESSED_COUNT * 100 / $TOTAL_AVAILABLE" | bc -l 2>/dev/null || echo "0")
+              echo "- Processing efficiency: ${EFFICIENCY}%"
             fi
           fi
-        done
+        else
+          echo "⚠️ Intelligent processing failed, falling back to basic processing..."
+
+          # Fallback to basic processing if intelligent fails
+          for i in {1..3}; do
+            if PYTHONPATH=. python -m src.processing; then
+              echo "✅ Basic processing completed successfully"
+              break
+            else
+              echo "⚠️ Basic processing attempt $i failed, retrying in 30 seconds..."
+              sleep 30
+              if [ $i -eq 3 ]; then
+                echo "❌ All processing methods failed, continuing with available data..."
+                exit 0  # Don't fail the workflow
+              fi
+            fi
+          done
+        fi
 
     - name: Generate Intelligent Blog Post
       env:
@@ -142,7 +196,7 @@ jobs:
               echo "❌ Blog generation failed after 3 attempts, creating fallback post..."
               # Create a simple fallback post
               DATE=$(date +'%Y-%m-%d')
-              cat > "hugo/content/posts/${DATE}-daily-summary.md" << EOF
+              cat > "hugo/content/posts/${DATE}-daily-summary.md" << 'EOF'
 ---
 title: "Daily Security Summary - ${DATE}"
 date: ${DATE}

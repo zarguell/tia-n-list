@@ -52,6 +52,10 @@ class ScalableProcessor:
             return {
                 'success': True,
                 'processed_count': 0,
+                'skipped_count': 0,
+                'processing_efficiency': 0,
+                'overall_efficiency': 0,
+                'cost_savings': 0,
                 'message': 'No articles to process'
             }
 
