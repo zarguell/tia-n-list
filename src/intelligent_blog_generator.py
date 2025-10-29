@@ -6,6 +6,7 @@ identify trends, and generate authentic, insightful content that learns from the
 
 import datetime
 import json
+import os
 import signal
 import re
 from pathlib import Path
@@ -317,6 +318,18 @@ Every specific claim (CVE, vendor, product, CISA ID) must be traceable to the pr
         # Format article data for the prompt
         article_data = self._format_articles_for_tia_prompt(context['articles'])
 
+        # Analyze article data size and content
+        article_data_lines = len(article_data.split('\n'))
+        print(f"🔍 Article data: {article_data_lines} lines, {len(article_data)} chars")
+
+        # Analyze content efficiency
+        articles_with_iocs = sum(1 for article in context['articles'] if self.storage.get_article_iocs(article['id']))
+        print(f"🔍 Articles with IOCs: {articles_with_iocs}/{len(context['articles'])}")
+
+        # Check for redundant content
+        avg_summary_length = sum(len(str(article.get('summary', '')).strip()) for article in context['articles']) / len(context['articles']) if context['articles'] else 0
+        print(f"🔍 Average summary length: {avg_summary_length:.0f} chars")
+
         # Add fact-checking constraints
         fact_checking = self._create_fact_checking_prompt_addition(constraints)
 
@@ -544,8 +557,25 @@ Content: {article['content']}
         # Prepare context
         context = self.prepare_threat_landscape_context(fresh_articles, constraints)
 
-        # Create analysis prompt with fact-checking
-        prompt = self.create_comprehensive_analysis_prompt(context, constraints)
+        # Choose prompt strategy based on configuration
+        use_optimized_prompt = os.getenv('USE_OPTIMIZED_PROMPT', 'true').lower() == 'true'
+
+        if use_optimized_prompt:
+            # Use optimized prompt for token efficiency
+            from .optimized_prompt_generator import OptimizedPromptGenerator
+            optimizer = OptimizedPromptGenerator()
+            prompt = optimizer.create_compact_prompt(fresh_articles, constraints)
+            print(f"🚀 Using OPTIMIZED prompt for token efficiency")
+        else:
+            # Use comprehensive prompt for maximum detail
+            prompt = self.create_comprehensive_analysis_prompt(context, constraints)
+            print(f"📋 Using COMPREHENSIVE prompt for maximum detail")
+
+        # Analyze prompt token usage
+        prompt_tokens = len(prompt.split()) * 1.3  # Rough estimate: 1 word ≈ 1.3 tokens
+        print(f"🔍 Prompt analysis: ~{prompt_tokens:.0f} tokens, {len(prompt)} characters")
+        print(f"🔍 Articles included: {len(fresh_articles)} articles")
+        print(f"🔍 Prompt type: {'OPTIMIZED' if use_optimized_prompt else 'COMPREHENSIVE'}")
 
         try:
             # Try multi-provider synthesis with OpenRouter priority
@@ -976,10 +1006,29 @@ A balanced mindset leads to better decision-making.
         references += "**Primary Sources:**\n\n"
 
         for i, article in enumerate(articles, 1):
-            source_name = article.get('source_name', article.get('source', 'Unknown Source'))
+            # Get full article data from storage using ID if article is simplified
+            if 'source_id' not in article and 'id' in article:
+                full_article = self.storage.get_article(article['id'])
+                if full_article:
+                    article = full_article
+
+            # Try to get source name from article first, then look up by source_id
+            source_name = article.get('source_name', article.get('source', None))
+            if not source_name and 'source_id' in article:
+                source = self.storage.get_source(article['source_id'])
+                source_name = source['name'] if source else 'Unknown Source'
+                if i == 1:
+                    print(f"🔍 Looked up source: {source}")
+
+            if not source_name:
+                source_name = 'Unknown Source'
+
             title = article['title']
             url = article['url']
+            # Get score from analysis structure (JSON storage format)
             score = article.get('score', 0)
+            if score == 0 and 'analysis' in article:
+                score = article['analysis'].get('score', 0)
 
             references += f"{i}. **{title}**\n"
             references += f"   - Source: {source_name} (Relevance: {score}/100)\n"
