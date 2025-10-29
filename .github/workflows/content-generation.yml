@@ -1,0 +1,208 @@
+name: Daily Content Generation
+
+on:
+  schedule:
+    # Run daily at 6:00 AM EST (11:00 AM UTC)
+    - cron: '0 11 * * *'
+  workflow_dispatch: # Allow manual triggering
+
+jobs:
+  generate-content:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Cache pip dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Create data directory
+      run: |
+        mkdir -p data
+
+    - name: Run JSON RSS Feed Ingestion
+      env:
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        LLM_PROVIDER: ${{ vars.LLM_PROVIDER || 'openrouter' }}
+        OPENROUTER_FILTERING_MODEL: ${{ vars.OPENROUTER_FILTERING_MODEL || 'meta-llama/llama-3.3-8b-instruct:free' }}
+        OPENROUTER_ANALYSIS_MODEL: ${{ vars.OPENROUTER_ANALYSIS_MODEL || 'openai/gpt-oss-20b:free' }}
+      run: |
+        echo "🔄 Starting JSON-based RSS feed ingestion..."
+        PYTHONPATH=. python -m src.json_ingestion
+        echo "✅ JSON RSS ingestion completed"
+        echo "📊 System statistics:"
+        PYTHONPATH=. python -c "from src.json_storage import JSONStorage; print(JSONStorage().get_statistics())"
+
+    - name: Enhance Article Content
+      env:
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        LLM_PROVIDER: ${{ vars.LLM_PROVIDER || 'openrouter' }}
+        OPENROUTER_FILTERING_MODEL: ${{ vars.OPENROUTER_FILTERING_MODEL || 'meta-llama/llama-3.3-8b-instruct:free' }}
+        OPENROUTER_ANALYSIS_MODEL: ${{ vars.OPENROUTER_ANALYSIS_MODEL || 'openai/gpt-oss-20b:free' }}
+      run: |
+        echo "📰 Enhancing article content with timeout protection..."
+        echo "🔒 Using enhanced script with per-article and overall timeouts"
+        PYTHONPATH=. python scripts/enhance_content_with_timeout.py
+
+    - name: Run JSON LLM Processing
+      env:
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        LLM_PROVIDER: ${{ vars.LLM_PROVIDER || 'openrouter' }}
+        OPENROUTER_FILTERING_MODEL: ${{ vars.OPENROUTER_FILTERING_MODEL || 'meta-llama/llama-3.3-8b-instruct:free' }}
+        OPENROUTER_ANALYSIS_MODEL: ${{ vars.OPENROUTER_ANALYSIS_MODEL || 'openai/gpt-oss-20b:free' }}
+      run: |
+        echo "🧠 Starting JSON-based LLM processing..."
+        echo "Using LLM provider: ${LLM_PROVIDER:-openrouter}"
+        echo "📊 Processing articles with AI analysis and IOC extraction"
+        PYTHONPATH=. python -m src.json_processing
+
+    - name: Generate JSON Blog Post
+      env:
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        LLM_PROVIDER: ${{ vars.LLM_PROVIDER || 'openrouter' }}
+        OPENROUTER_FILTERING_MODEL: ${{ vars.OPENROUTER_FILTERING_MODEL || 'meta-llama/llama-3.3-8b-instruct:free' }}
+        OPENROUTER_ANALYSIS_MODEL: ${{ vars.OPENROUTER_ANALYSIS_MODEL || 'openai/gpt-oss-20b:free' }}
+      run: |
+        echo "📝 Generating JSON-based blog post..."
+        echo "Using LLM provider: ${LLM_PROVIDER:-openrouter}"
+        PYTHONPATH=. python scripts/generate_blog_json.py
+
+    - name: Check for generated content
+      id: check-content
+      run: |
+        echo "🔍 Checking for generated content..."
+
+        # Check JSON data
+        JSON_CHANGES=false
+        if [ -n "$(git status --porcelain data/)" ]; then
+          JSON_CHANGES=true
+          echo "✅ Found JSON data changes"
+        fi
+
+        # Check blog posts
+        BLOG_CHANGES=false
+        if [ -n "$(git status --porcelain hugo/content/posts/)" ]; then
+          BLOG_CHANGES=true
+          echo "✅ Found blog post changes"
+        fi
+
+        # Set outputs for debugging
+        echo "json-changes=$JSON_CHANGES" >> $GITHUB_OUTPUT
+        echo "blog-changes=$BLOG_CHANGES" >> $GITHUB_OUTPUT
+
+        if [ "$JSON_CHANGES" = "true" ] || [ "$BLOG_CHANGES" = "true" ]; then
+          echo "has-changes=true" >> $GITHUB_OUTPUT
+          echo "🎉 Found new content to commit"
+        else
+          echo "has-changes=false" >> $GITHUB_OUTPUT
+          echo "ℹ️  No new content generated"
+        fi
+
+    - name: Commit and push generated content
+      if: steps.check-content.outputs.has-changes == 'true'
+      run: |
+        echo "📝 Committing generated content..."
+
+        # Configure git
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+
+        # Show what we're committing
+        echo "📊 Git status:"
+        git status
+
+        echo "📋 Changes to be committed:"
+        git diff --name-only
+
+        # Stage only source content (NOT Hugo build output)
+        git add data/
+        git add hugo/content/posts/
+
+        # Verify staged changes
+        echo "✅ Staged changes:"
+        git diff --staged --name-only
+
+        # Commit with detailed message
+        DATE=$(date +'%Y-%m-%d')
+        TIME=$(date +'%H:%M:%S')
+
+        git commit -m "🛡️ Daily Threat Intelligence Briefing - $DATE
+
+        📊 Content Generation Summary:
+        • JSON Data: ${{ steps.check-content.outputs.json-changes }}
+        • Blog Posts: ${{ steps.check-content.outputs.blog-changes }}
+        • Generated: $TIME UTC
+
+        🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+        Co-Authored-By: Claude <noreply@anthropic.com>"
+
+        echo "🚀 Pushing changes to repository..."
+        git push
+
+    - name: Content Generation Summary
+      run: |
+        echo "## 🛡️ Content Generation Summary" >> $GITHUB_STEP_SUMMARY
+        echo "**Date:** $(date +'%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+        echo "**Status:** ${{ steps.check-content.outputs.has-changes == 'true' && '✅ Content Generated' || 'ℹ️ No New Content' }}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+
+        echo "### 📊 Generation Results:" >> $GITHUB_STEP_SUMMARY
+        echo "- **JSON Data:** ${{ steps.check-content.outputs.json-changes == 'true' && '✅ Updated' || 'ℹ️ No changes' }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Blog Posts:** ${{ steps.check-content.outputs.blog-changes == 'true' && '✅ Generated' || 'ℹ️ No changes' }}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+
+        # Check JSON storage status
+        if [ -d "data" ]; then
+          ARTICLE_COUNT=$(find data/articles -name "*.json" -type f 2>/dev/null | wc -l)
+          PROCESSED_COUNT=$(find data/articles -name "*.json" -type f -exec grep -l '"status": "processed"' {} \; 2>/dev/null | wc -l)
+          echo "### 📈 System Statistics:" >> $GITHUB_STEP_SUMMARY
+          echo "- **Total Articles:** $ARTICLE_COUNT" >> $GITHUB_STEP_SUMMARY
+          echo "- **Processed Articles:** $PROCESSED_COUNT" >> $GITHUB_STEP_SUMMARY
+          echo "- **Processing Rate:** $(echo "scale=1; $PROCESSED_COUNT * 100 / $ARTICLE_COUNT" | bc -l 2>/dev/null || echo "N/A")%" >> $GITHUB_STEP_SUMMARY
+        fi
+
+        # Check latest blog post
+        if ls hugo/content/posts/*-daily-summary.md 1> /dev/null 2>&1; then
+          LATEST_POST=$(ls -t hugo/content/posts/*-daily-summary.md | head -1)
+          if [ -f "$LATEST_POST" ]; then
+            WORD_COUNT=$(wc -w < "$LATEST_POST" 2>/dev/null || echo "0")
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### 📝 Latest Blog Post:" >> $GITHUB_STEP_SUMMARY
+            echo "- **File:** $(basename $LATEST_POST)" >> $GITHUB_STEP_SUMMARY
+            echo "- **Word Count:** $WORD_COUNT words" >> $GITHUB_STEP_SUMMARY
+          fi
+        fi
+
+        if [ "${{ steps.check-content.outputs.has-changes }}" = "true" ]; then
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "🚀 **Next Step:** Hugo build will be triggered automatically" >> $GITHUB_STEP_SUMMARY
+        fi

@@ -1,0 +1,144 @@
+name: Hugo Build & Deploy
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'hugo/content/posts/**'          # Trigger on new blog posts
+      - 'hugo/config.toml'               # Trigger on config changes
+      - 'hugo/themes/**'                 # Trigger on theme changes
+      - 'hugo/layouts/**'                # Trigger on layout changes
+      - 'hugo/static/**'                 # Trigger on static file changes
+      - '.github/workflows/hugo-build-deploy.yml'  # Trigger on workflow changes
+  workflow_dispatch:  # Allow manual triggering
+  repository_dispatch:  # Allow API triggering
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Get full history for proper Hugo builds
+
+    - name: Setup Hugo
+      uses: peaceiris/actions-hugo@v3
+      with:
+        hugo-version: 'latest'
+        extended: true
+
+    - name: Setup Pages
+      uses: actions/configure-pages@v5
+
+    - name: Get Site URL
+      id: site-url
+      run: |
+        if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+          echo "url=https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/" >> $GITHUB_OUTPUT
+        else
+          echo "url=https://yourusername.github.io/tia-n-list/" >> $GITHUB_OUTPUT
+        fi
+        echo "🔗 Site URL: $(echo ${{ steps.site-url.outputs.url }})"
+
+    - name: Build Hugo Site
+      env:
+        HUGO_BASEURL: ${{ steps.site-url.outputs.url }}
+      run: |
+        echo "🏗️  Building Hugo site..."
+        echo "🔗 Using baseURL: ${HUGO_BASEURL}"
+
+        # Update baseURL in config for current environment
+        if [ "$HUGO_BASEURL" != "https://yourusername.github.io/tia-n-list/" ]; then
+          sed -i.bak "s|baseURL = 'https://yourusername.github.io/tia-n-list/'|baseURL = '$HUGO_BASEURL'|g" hugo/config.toml
+        fi
+
+        # Build with verbose output for debugging
+        cd hugo && hugo --minify --verbose
+        echo "✅ Hugo site built successfully"
+
+        # Show build statistics
+        echo "📊 Build Statistics:"
+        echo "   Pages generated: $(find public -name "*.html" | wc -l)"
+        echo "   Total size: $(du -sh public | cut -f1)"
+        echo "   Latest posts:"
+        ls -la public/posts/ | head -5 || echo "   No posts directory found"
+
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: ./hugo/public
+
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4
+
+    - name: Build Summary
+      run: |
+        echo "## 🚀 Hugo Build & Deploy Summary" >> $GITHUB_STEP_SUMMARY
+        echo "**Date:** $(date +'%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+        echo "**Status:** ✅ Successfully Built and Deployed" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+
+        echo "### 🏗️ Build Details:" >> $GITHUB_STEP_SUMMARY
+        echo "- **Base URL:** ${{ steps.site-url.outputs.url }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Hugo Version:** $(hugo version)" >> $GITHUB_STEP_SUMMARY
+        echo "- **Build Mode:** Minified" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+
+        # Count generated content
+        if [ -d "hugo/public" ]; then
+          HTML_COUNT=$(find hugo/public -name "*.html" | wc -l)
+          SITE_SIZE=$(du -sh hugo/public | cut -f1)
+
+          echo "### 📊 Site Statistics:" >> $GITHUB_STEP_SUMMARY
+          echo "- **HTML Pages:** $HTML_COUNT" >> $GITHUB_STEP_SUMMARY
+          echo "- **Site Size:** $SITE_SIZE" >> $GITHUB_STEP_SUMMARY
+
+          # Check for blog posts
+          POST_COUNT=$(find hugo/public/posts -name "*.html" 2>/dev/null | wc -l)
+          if [ "$POST_COUNT" -gt 0 ]; then
+            echo "- **Blog Posts:** $POST_COUNT" >> $GITHUB_STEP_SUMMARY
+          fi
+        fi
+
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### 🔗 Links:" >> $GITHUB_STEP_SUMMARY
+        echo "- **🌐 Live Site:** [${{ steps.site-url.outputs.url }}](${{ steps.site-url.outputs.url }})" >> $GITHUB_STEP_SUMMARY
+        echo "- **📝 RSS Feed:** [${{ steps.site-url.outputs.url }}/index.xml](${{ steps.site-url.outputs.url }}/index.xml)" >> $GITHUB_STEP_SUMMARY
+        echo "- **🔍 Search:** [${{ steps.site-url.outputs.url }}/search/](${{ steps.site-url.outputs.url }}/search/)" >> $GITHUB_STEP_SUMMARY
+
+        # Trigger information
+        if [ "${{ github.event_name }}" = "push" ]; then
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🎯 Trigger:" >> $GITHUB_STEP_SUMMARY
+          echo "**Event:** Push to main branch" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit:** [${{ github.sha }}](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})" >> $GITHUB_STEP_SUMMARY
+
+          # Show what files changed
+          if [ "${{ github.event.commits[0].added }}" != "" ] || [ "${{ github.event.commits[0].modified }}" != "" ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### 📝 Content Changes:" >> $GITHUB_STEP_SUMMARY
+            for file in ${{ github.event.commits[0].added }} ${{ github.event.commits[0].modified }}; do
+              if [[ "$file" == hugo/content/posts/* ]]; then
+                echo "- 📄 New/Updated Blog Post: \`$file\`" >> $GITHUB_STEP_SUMMARY
+              elif [[ "$file" == data/* ]]; then
+                echo "- 📊 New/Updated Data: \`$file\`" >> $GITHUB_STEP_SUMMARY
+              fi
+            done
+          fi
+        elif [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🎯 Trigger:" >> $GITHUB_STEP_SUMMARY
+          echo "**Event:** Manual workflow dispatch" >> $GITHUB_STEP_SUMMARY
+        fi
