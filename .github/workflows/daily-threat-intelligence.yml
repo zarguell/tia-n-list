@@ -54,18 +54,20 @@ jobs:
       run: |
         mkdir -p data
 
-    - name: Run RSS Feed Ingestion
+    - name: Run JSON RSS Feed Ingestion
       env:
         GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
         OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        LLM_PROVIDER: ${{ vars.LLM_PROVIDER || 'gemini' }}
+        LLM_PROVIDER: ${{ vars.LLM_PROVIDER || 'openrouter' }}
         OPENROUTER_FILTERING_MODEL: ${{ vars.OPENROUTER_FILTERING_MODEL || 'meta-llama/llama-3.3-8b-instruct:free' }}
         OPENROUTER_ANALYSIS_MODEL: ${{ vars.OPENROUTER_ANALYSIS_MODEL || 'openai/gpt-oss-20b:free' }}
       run: |
-        echo "🔄 Starting RSS feed ingestion..."
-        PYTHONPATH=. python -m src.ingestion
-        echo "✅ RSS ingestion completed"
+        echo "🔄 Starting JSON-based RSS feed ingestion..."
+        PYTHONPATH=. python -m src.json_ingestion
+        echo "✅ JSON RSS ingestion completed"
+        echo "📊 System statistics:"
+        PYTHONPATH=. python -c "from src.json_storage import JSONStorage; print(JSONStorage().get_statistics())"
 
     - name: Enhance Article Content
       env:
@@ -77,27 +79,9 @@ jobs:
         OPENROUTER_ANALYSIS_MODEL: ${{ vars.OPENROUTER_ANALYSIS_MODEL || 'openai/gpt-oss-20b:free' }}
       run: |
         echo "📰 Enhancing article content with full web scraping..."
+        PYTHONPATH=. python scripts/enhance_content_json.py
 
-        # Enhance content for articles with short RSS excerpts
-        echo "Enhancing up to 50 articles with the shortest content..."
-        PYTHONPATH=. python scripts/enhance_content.py --limit 50
-
-        echo "✅ Content enhancement completed"
-        echo "📊 Content enhancement summary:"
-
-        # Show enhancement statistics
-        ENHANCED_COUNT=$(sqlite3 tia_n_list.db "SELECT COUNT(*) FROM articles WHERE content_source = 'scraped' AND date(created_at) = date('now');" 2>/dev/null || echo "0")
-        RSS_COUNT=$(sqlite3 tia_n_list.db "SELECT COUNT(*) FROM articles WHERE content_source = 'rss' AND date(created_at) = date('now');" 2>/dev/null || echo "0")
-
-        echo "- RSS content articles: $RSS_COUNT"
-        echo "- Enhanced/scraped articles: $ENHANCED_COUNT"
-
-        if [ "$ENHANCED_COUNT" -gt 0 ]; then
-          IMPROVEMENT=$(sqlite3 tia_n_list.db "SELECT AVG(length(raw_content)) FROM articles WHERE content_source = 'scraped' AND date(created_at) = date('now');" 2>/dev/null || echo "0")
-          echo "- Average enhanced content length: ${IMPROVEMENT%.*} characters"
-        fi
-
-    - name: Run Intelligent LLM Processing
+    - name: Run JSON LLM Processing
       env:
         GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
@@ -106,49 +90,14 @@ jobs:
         OPENROUTER_FILTERING_MODEL: ${{ vars.OPENROUTER_FILTERING_MODEL || 'meta-llama/llama-3.3-8b-instruct:free' }}
         OPENROUTER_ANALYSIS_MODEL: ${{ vars.OPENROUTER_ANALYSIS_MODEL || 'openai/gpt-oss-20b:free' }}
       run: |
-        echo "🧠 Starting intelligent LLM processing with tiered analysis..."
+        echo "🧠 Starting JSON-based LLM processing..."
         echo "Using LLM provider: ${LLM_PROVIDER:-openrouter}"
-        echo "📊 This uses 5-tier processing for 85.7% cost reduction while maintaining quality"
+        echo "📊 Processing articles with AI analysis and IOC extraction"
 
-        # Run intelligent scalable processing
-        if PYTHONPATH=. python -m src.scalable_processor; then
-          echo "✅ Intelligent processing completed successfully"
+        # Run JSON-based processing
+        PYTHONPATH=. python -m src.json_processing
 
-          # Show processing statistics
-          echo "📈 Processing Statistics:"
-          PROCESSED_COUNT=$(sqlite3 tia_n_list.db "SELECT COUNT(*) FROM articles WHERE status = 'processed' AND date(updated_at) = date('now');" 2>/dev/null || echo "0")
-          REJECTED_COUNT=$(sqlite3 tia_n_list.db "SELECT COUNT(*) FROM articles WHERE status = 'rejected' AND date(updated_at) = date('now');" 2>/dev/null || echo "0")
-
-          echo "- Articles processed: $PROCESSED_COUNT"
-          echo "- Articles rejected: $REJECTED_COUNT"
-
-          if [ "$PROCESSED_COUNT" -gt 0 ]; then
-            TOTAL_AVAILABLE=$(sqlite3 tia_n_list.db "SELECT COUNT(*) FROM articles WHERE date(created_at) = date('now');" 2>/dev/null || echo "0")
-            if [ "$TOTAL_AVAILABLE" -gt 0 ]; then
-              EFFICIENCY=$(echo "scale=1; $PROCESSED_COUNT * 100 / $TOTAL_AVAILABLE" | bc -l 2>/dev/null || echo "0")
-              echo "- Processing efficiency: ${EFFICIENCY}%"
-            fi
-          fi
-        else
-          echo "⚠️ Intelligent processing failed, falling back to basic processing..."
-
-          # Fallback to basic processing if intelligent fails
-          for i in {1..3}; do
-            if PYTHONPATH=. python -m src.processing; then
-              echo "✅ Basic processing completed successfully"
-              break
-            else
-              echo "⚠️ Basic processing attempt $i failed, retrying in 30 seconds..."
-              sleep 30
-              if [ $i -eq 3 ]; then
-                echo "❌ All processing methods failed, continuing with available data..."
-                exit 0  # Don't fail the workflow
-              fi
-            fi
-          done
-        fi
-
-    - name: Generate Intelligent Blog Post
+    - name: Generate JSON Blog Post
       env:
         GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
@@ -157,30 +106,30 @@ jobs:
         OPENROUTER_FILTERING_MODEL: ${{ vars.OPENROUTER_FILTERING_MODEL || 'meta-llama/llama-3.3-8b-instruct:free' }}
         OPENROUTER_ANALYSIS_MODEL: ${{ vars.OPENROUTER_ANALYSIS_MODEL || 'openai/gpt-oss-20b:free' }}
       run: |
-        echo "📝 Generating intelligent blog post..."
+        echo "📝 Generating JSON-based blog post..."
         echo "Using LLM provider: ${LLM_PROVIDER:-openrouter}"
+        PYTHONPATH=. python scripts/generate_blog_json.py
 
-        # Use the dedicated blog generation script (no time-based filtering)
-        if PYTHONPATH=. python scripts/generate_blog.py; then
-          echo "✅ Blog post generation completed successfully"
+    - name: Commit JSON Data and Generated Content
+      run: |
+        echo "💾 Committing JSON data and generated content to git..."
 
-          # Show generated file info
-          echo "📁 Generated blog posts:"
-          find hugo/content/posts -name "*.md" -type f -newermt "10 minutes ago" -exec ls -la {} \; 2>/dev/null || echo "No recent files found"
+        # Configure git user
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
 
-          # Show database statistics
-          echo "📊 Database Statistics:"
-          PROCESSED_COUNT=$(sqlite3 tia_n_list.db "SELECT COUNT(*) FROM articles WHERE status = 'processed';" 2>/dev/null || echo "0")
-          REJECTED_COUNT=$(sqlite3 tia_n_list.db "SELECT COUNT(*) FROM articles WHERE status = 'rejected';" 2>/dev/null || echo "0")
-          FETCHED_COUNT=$(sqlite3 tia_n_list.db "SELECT COUNT(*) FROM articles WHERE status = 'fetched';" 2>/dev/null || echo "0")
+        # Add all JSON data and generated content
+        git add data/
+        git add hugo/content/posts/
 
-          echo "- Processed articles: $PROCESSED_COUNT"
-          echo "- Rejected articles: $REJECTED_COUNT"
-          echo "- Fetched articles: $FETCHED_COUNT"
-
+        # Check if there are changes to commit
+        if git diff --staged --quiet; then
+          echo "No new content to commit"
         else
-          echo "❌ Blog generation failed"
-          exit 1
+          # Commit with detailed message
+          DATE=$(date +%Y-%m-%d)
+          git commit -m "Daily threat intelligence processing - $DATE - 🤖 Generated with Claude Code"
+          echo "✅ Committed JSON data and generated content"
         fi
 
     - name: Build Hugo Site
@@ -250,26 +199,26 @@ jobs:
         echo "" >> $GITHUB_STEP_SUMMARY
 
         # Check if blog post was generated
-        if ls hugo/content/posts/*-strategic-threat-analysis.md 1> /dev/null 2>&1; then
-          echo "✅ **Blog Post Generated:** Successfully created strategic threat analysis" >> $GITHUB_STEP_SUMMARY
-          LATEST_POST=$(ls -t hugo/content/posts/*-strategic-threat-analysis.md | head -1)
+        if ls hugo/content/posts/*-daily-summary.md 1> /dev/null 2>&1; then
+          echo "✅ **Blog Post Generated:** Successfully created daily threat intelligence briefing" >> $GITHUB_STEP_SUMMARY
+          LATEST_POST=$(ls -t hugo/content/posts/*-daily-summary.md | head -1)
           if [ -f "$LATEST_POST" ]; then
             WORD_COUNT=$(wc -w < "$LATEST_POST")
             echo "- **Word Count:** $WORD_COUNT words" >> $GITHUB_STEP_SUMMARY
             echo "- **File:** $(basename $LATEST_POST)" >> $GITHUB_STEP_SUMMARY
           fi
         else
-          echo "⚠️ **Blog Post:** No new strategic analysis generated" >> $GITHUB_STEP_SUMMARY
+          echo "⚠️ **Blog Post:** No new daily briefing generated" >> $GITHUB_STEP_SUMMARY
         fi
 
         echo "" >> $GITHUB_STEP_SUMMARY
 
-        # Check database status
-        if [ -f "tia_n_list.db" ]; then
-          ARTICLE_COUNT=$(sqlite3 tia_n_list.db "SELECT COUNT(*) FROM articles WHERE date(created_at) = date('now');" 2>/dev/null || echo "0")
-          PROCESSED_COUNT=$(sqlite3 tia_n_list.db "SELECT COUNT(*) FROM articles WHERE status = 'processed' AND date(updated_at) = date('now');" 2>/dev/null || echo "0")
-          echo "📊 **Database Statistics:**" >> $GITHUB_STEP_SUMMARY
-          echo "- **New Articles:** $ARTICLE_COUNT" >> $GITHUB_STEP_SUMMARY
+        # Check JSON storage status
+        if [ -d "data" ]; then
+          ARTICLE_COUNT=$(find data/articles -name "*.json" -type f | wc -l)
+          PROCESSED_COUNT=$(find data/articles -name "*.json" -type f -exec grep -l '"status": "processed"' {} \; | wc -l)
+          echo "📊 **JSON Storage Statistics:**" >> $GITHUB_STEP_SUMMARY
+          echo "- **Total Articles:** $ARTICLE_COUNT" >> $GITHUB_STEP_SUMMARY
           echo "- **Processed Articles:** $PROCESSED_COUNT" >> $GITHUB_STEP_SUMMARY
         fi
 

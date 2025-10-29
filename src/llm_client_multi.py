@@ -473,6 +473,45 @@ Focus on actionable threat intelligence, new threats, and practical security ins
 
         return cleaned[first_brace:last_brace + 1]
 
+    def generate_structured(self, prompt: str, schema: Dict[str, Any], **kwargs) -> Dict[str, Any]:
+        """Generate structured output using the current provider.
+
+        Args:
+            prompt: The prompt to send to the LLM
+            schema: JSON schema for structured output
+            **kwargs: Additional arguments for the generation
+
+        Returns:
+            Structured output as dictionary
+        """
+        if not self.provider and not self.fallback_provider:
+            raise LLMProviderUnavailableError("No providers available")
+
+        # Try primary provider first
+        provider = self.provider or self.fallback_provider
+
+        try:
+            response = provider.generate_structured(prompt, schema, **kwargs)
+            return response
+        except Exception as e:
+            logger.error(f"Structured generation failed with {provider.__class__.__name__}: {e}")
+
+            # Try fallback provider if available
+            if self.fallback_provider and self.fallback_provider != provider:
+                try:
+                    logger.info(f"Trying fallback provider: {self.fallback_provider.__class__.__name__}")
+                    response = self.fallback_provider.generate_structured(prompt, schema, **kwargs)
+                    return response
+                except Exception as fallback_error:
+                    logger.error(f"Fallback provider also failed: {fallback_error}")
+
+            # If all providers fail, return basic fallback
+            return {
+                "is_relevant": False,
+                "relevance_score": 0,
+                "error": f"Structured generation failed: {str(e)}"
+            }
+
     def get_provider_info(self) -> Dict[str, Any]:
         """Get information about current provider configuration.
 
