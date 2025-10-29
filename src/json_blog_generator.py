@@ -359,7 +359,11 @@ The automated system successfully ingested and enhanced content from threat inte
 - LLM provider responses required additional parsing
 - System resources were constrained
 
-{("## Technical Error" + "\n\n" + error + "\n\n") if error else ""}
+{f"""## Technical Error
+
+{error}
+
+""" if error else ""}
 
 ## Tomorrow's Briefing
 
