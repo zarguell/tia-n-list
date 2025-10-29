@@ -109,7 +109,22 @@ class JSONBlogGenerator:
         try:
             from .intelligent_blog_generator import ThreatIntelligenceSynthesizer
             synthesizer = ThreatIntelligenceSynthesizer()
-            return synthesizer.synthesize_threat_intelligence(context['articles'])
+            result = synthesizer.synthesize_threat_intelligence(context['articles'])
+
+            # Extract content if result contains frontmatter (complete Hugo post)
+            if result.startswith('---\n'):
+                # Find the end of frontmatter
+                frontmatter_end = result.find('\n---\n', 4)
+                if frontmatter_end != -1:
+                    # Extract just the content after frontmatter
+                    content = result[frontmatter_end + 5:]  # Skip the closing ---\n
+                    print("✅ Extracted content from intelligent synthesis (frontmatter detected)")
+                    return content
+
+            # Return as-is if no frontmatter detected
+            print("✅ Using intelligent synthesis content directly")
+            return result
+
         except ImportError:
             print("Intelligent synthesizer not available, falling back to template generation")
             return self._template_based_generation(context)

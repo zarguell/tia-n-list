@@ -551,11 +551,11 @@ Content: {article['content']}
             # Try multi-provider synthesis with OpenRouter priority
             response = self._attempt_synthesis_with_providers(prompt)
 
-            if response and len(response.strip()) > 500:
+            if response and len(response.strip()) > 200:
                 print(f"✅ Successful synthesis with {len(response)} characters")
                 return self._format_synthesized_content(response, context)
             else:
-                print("⚠️  Response too short, using fallback synthesis")
+                print(f"⚠️  Response too short ({len(response.strip()) if response else 0} chars), using fallback synthesis")
                 return self._fallback_synthesis(context)
 
         except Exception as e:
@@ -602,9 +602,13 @@ Content: {article['content']}
 
                         if response and len(response.strip()) > 50:
                             print(f"✅ Successful synthesis with {provider}")
+                            print(f"🔍 {provider} response length: {len(response.strip())} chars")
                             return response
                         else:
                             print(f"⚠️  {provider} response too short or empty")
+                            print(f"🔍 {provider} response length: {len(response.strip()) if response else 0} chars")
+                            if response:
+                                print(f"🔍 {provider} response preview: {response.strip()[:100]}...")
 
                     except json.JSONDecodeError as e:
                         print(f"⚠️  {provider} JSON parsing error: {str(e)[:100]}...")
@@ -699,47 +703,93 @@ Content: {article['content']}
         Returns:
             Synthesized text content.
         """
+        import openai
+        import os
+
+        # Configure OpenAI client for OpenRouter
+        client = openai.OpenAI(
+            api_key=os.getenv('OPENROUTER_API_KEY'),
+            base_url="https://openrouter.ai/api/v1"
+        )
+
+        # Use the analysis model
+        model = os.getenv('OPENROUTER_ANALYSIS_MODEL', 'openai/gpt-oss-20b:free')
+
+        print(f"🎯 Using OpenRouter model: {model}")
+
+        # Make direct API call for synthesis
         try:
-            import openai
-            import os
+                response = client.chat.completions.create(
+                    model=model,
+                    messages=[
+                        {
+                            "role": "system",
+                            "content": "You are Tia N. List, a seasoned Threat Intelligence Analyst writing daily briefings for security engineers. Your tone is direct, analytical, and professional, reflecting deep expertise in cyber threat intelligence, but with a friendly and sometimes humorous tone - an entertaining writer."
+                        },
+                        {
+                            "role": "user",
+                            "content": prompt
+                        }
+                    ],
+                    max_tokens=1500,
+                    temperature=0.7
+                )
 
-            # Configure OpenAI client for OpenRouter
-            client = openai.OpenAI(
-                api_key=os.getenv('OPENROUTER_API_KEY'),
-                base_url="https://openrouter.ai/api/v1"
-            )
+                print(f"🔍 OpenRouter response received")
+                print(f"🔍 Response object type: {type(response)}")
 
-            # Use the analysis model
-            model = os.getenv('OPENROUTER_ANALYSIS_MODEL', 'openai/gpt-oss-20b:free')
+                if hasattr(response, 'usage') and response.usage:
+                    print(f"🔍 Token usage: {response.usage}")
 
-            print(f"🎯 Using OpenRouter model: {model}")
+                if hasattr(response, 'choices') and response.choices:
+                    print(f"🔍 Number of choices: {len(response.choices)}")
+                    if response.choices:
+                        choice = response.choices[0]
+                        print(f"🔍 Choice finish reason: {getattr(choice, 'finish_reason', 'Unknown')}")
+                        if hasattr(choice, 'message') and choice.message:
+                            content = choice.message.content
+                            print(f"🔍 OpenRouter raw response length: {len(content) if content else 0}")
+                            if content:
+                                print(f"🔍 OpenRouter response preview: {content[:200]}...")
+                            if content and len(content.strip()) > 100:
+                                return content.strip()
+                            else:
+                                print(f"⚠️  OpenRouter content too short: {len(content.strip()) if content else 0} chars")
+                        else:
+                            print(f"⚠️  OpenRouter choice has no message")
+                    else:
+                        print(f"⚠️  OpenRouter choices list is empty")
+                else:
+                    print(f"⚠️  OpenRouter response has no choices attribute")
 
-            # Make direct API call for synthesis
-            response = client.chat.completions.create(
-                model=model,
-                messages=[
-                    {
-                        "role": "system",
-                        "content": "You are Tia N. List, a seasoned Threat Intelligence Analyst writing daily briefings for security engineers. Your tone is direct, analytical, and professional, reflecting deep expertise in cyber threat intelligence, but with a friendly and sometimes humorous tone - an entertaining writer."
-                    },
-                    {
-                        "role": "user",
-                        "content": prompt
-                    }
-                ],
-                max_tokens=1500,
-                temperature=0.7
-            )
+                # Try to get more response details for debugging
+                if hasattr(response, 'model'):
+                    print(f"🔍 Model used: {response.model}")
+                if hasattr(response, 'id'):
+                    print(f"🔍 Response ID: {response.id}")
+                if hasattr(response, 'object'):
+                    print(f"🔍 Response object: {response.object}")
 
-            if response and response.choices:
-                content = response.choices[0].message.content
-                if content and len(content.strip()) > 100:
-                    return content.strip()
-
-            return None
+                return None
 
         except Exception as e:
-            print(f"⚠️  OpenRouter direct synthesis failed: {str(e)[:100]}...")
+            print(f"⚠️  OpenRouter direct synthesis failed: {str(e)[:200]}...")
+
+            # Check for specific OpenRouter/OpenAI errors
+            error_str = str(e).lower()
+            if 'rate' in error_str and 'limit' in error_str:
+                print(f"🚫 OpenRouter rate limit detected - free tier likely exhausted")
+            elif 'unauthorized' in error_str or 'authentication' in error_str:
+                print(f"🚫 OpenRouter authentication error - check API key")
+            elif 'model' in error_str and 'not' in error_str:
+                print(f"🚫 OpenRouter model error - model not available")
+            elif 'insufficient' in error_str and 'quota' in error_str:
+                print(f"🚫 OpenRouter quota exceeded")
+            elif 'content' in error_str and 'policy' in error_str:
+                print(f"🚫 OpenRouter content policy violation")
+            else:
+                print(f"🚫 OpenRouter unknown error: {error_str}")
+
             return None
 
     def _fallback_provider_synthesis(self, prompt: str, provider: str) -> str:
