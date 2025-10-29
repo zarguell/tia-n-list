@@ -384,3 +384,83 @@ generation_metadata:
 - [ ] [manual] Create a separate, manually triggered workflow for publishing custom deep-dive articles.
 - [ ] [manual] Add analytics tracking configuration to the Hugo site.
 - [ ] [manual] Perform a full end-to-end run of the daily workflow to confirm all parts work together.
+
+### Milestone 6: Enterprise-Grade CTI Enhancement - Phase 2
+
+Based on feedback assessment of October 29, 2025 briefing output. Elevate from "very good" to "enterprise-grade professional CTI product."
+
+**Priority 1: Intelligence Quality & Standards (High Impact)**
+- [ ] [auto] **Confidence Assessment Framework**: Implement Low/Medium/High confidence levels for threat assessments using industry-standard analytic confidence language
+  - [ ] [auto] Create confidence scoring module (`src/confidence_scorer.py`)
+  - [ ] [auto] Integrate confidence levels with LLM synthesis prompts
+  - [ ] [auto] Add confidence indicators to Hugo frontmatter and blog formatting
+  - [ ] [auto] Test confidence assessment accuracy with historical data
+- [ ] [auto] **MITRE ATT&CK Integration**: Add standardized threat classification with technique references
+  - [ ] [auto] Create ATT&CK mapper module (`src/attack_mapper.py`) for automatic technique identification
+  - [ ] [auto] Build ATT&CK knowledge base integration (technique IDs, tactics, descriptions)
+  - [ ] [auto] Integrate ATT&CK references into blog generation (e.g., "T1090.002 Proxy: External Proxy")
+  - [ ] [auto] Add ATT&CK technique filtering and prioritization logic
+- [ ] [auto] **Trend Analysis Engine**: Implement temporal context and threat trend indicators
+  - [ ] [auto] Create trend analysis module (`src/trend_analyzer.py`) comparing current vs historical data
+  - [ ] [auto] Implement 7-day, 30-day, and 90-day trend calculations
+  - [ ] [auto] Add trend indicators (increasing/decreasing/stable) to threat assessments
+  - [ ] [auto] Create trend visualization components for blog posts
+- [ ] [auto] **Intelligence Gap Identification**: Explicitly state missing or uncertain information
+  - [ ] [auto] Enhance LLM prompts to identify and articulate intelligence gaps
+  - [ ] [auto] Add gap analysis section to blog template
+  - [ ] [auto] Create uncertainty scoring for threat assessments
+  - [ ] [auto] Implement gap tracking across multiple reporting periods
+
+**Priority 2: Business Impact & Executive Context (Medium Impact)**
+- [ ] [auto] **Executive Risk Quantification**: Add business impact assessment and industry exposure analysis
+  - [ ] [auto] Create industry impact analyzer (`src/impact_analyzer.py`)
+  - [ ] [auto] Build industry exposure calculation based on vendor/product mentions
+  - [ ] [auto] Add executive summary with business risk context
+  - [ ] [auto] Implement sector-specific impact assessment frameworks
+- [ ] [auto] **Detection & Response Guidance**: Add actionable detection opportunities and response priorities
+  - [ ] [auto] Create detection guidance module (`src/detection_advisor.py`)
+  - [ ] [auto] Generate specific log source recommendations and behavioral indicators
+  - [ ] [auto] Add response priority scoring and timeline recommendations
+  - [ ] [auto] Integrate with MITRE ATT&CK detection patterns
+
+**Priority 3: Professional CTI Standards (Medium Impact)**
+- [ ] [auto] **TLP Markings Implementation**: Add Traffic Light Protocol sensitivity ratings
+  - [ ] [auto] Create TLP classifier (`src/tlp_classifier.py`)
+  - [ ] [auto] Implement automatic TLP assignment based on content sensitivity
+  - [ ] [auto] Add TLP indicators to blog posts and Hugo frontmatter
+  - [ ] [auto] Create TLP handling guidelines and documentation
+- [ ] [auto] **Enhanced IOC Appendix**: Separate machine-readable IOC section with comprehensive indicators
+  - [ ] [auto] Create IOC formatter (`src/ioc_formatter.py`) for structured output
+  - [ ] [auto] Add file hashes, IP addresses, domains in machine-readable formats
+  - [ ] [auto] Implement IOC validation and deduplication
+  - [ ] [auto] Create downloadable IOC files (JSON, CSV, STIX formats)
+- [ ] [auto] **Source Reliability Scoring**: Implement Admiralty Scale ratings for intelligence quality assessment
+  - [ ] [auto] Create source reliability module (`src/source_reliability.py`)
+  - [ ] [auto] Implement A-F reliability scale and 1-6 information credibility scoring
+  - [ ] [auto] Add reliability indicators to threat assessments
+  - [ ] [auto] Create source quality tracking over time
+
+**Priority 4: Content & Presentation Polish (Low Impact)**
+- [ ] [auto] **Professional Tone Enhancement**: Review and optimize content presentation for executive audience
+  - [ ] [auto] Remove or relocate joke section to maintain professional urgency
+  - [ ] [auto] Implement tone analysis module for content appropriateness
+  - [ ] [auto] Add executive summary optimization for C-level audience
+  - [ ] [auto] Create content review checklist for professional standards
+- [ ] [auto] **Title Accuracy Improvement**: Ensure blog titles accurately reflect content scope
+  - [ ] [auto] Enhance title generator to avoid misleading vendor focus
+  - [ ] [auto] Implement title accuracy validation against article content
+  - [ ] [auto] Add neutral title templates for balanced reporting
+  - [ ] [auto] Create title scoring system for relevance and accuracy
+
+**Expected Outcomes for Phase 2:**
+- ✅ **Enterprise-Grade Quality**: Professional CTI briefings meeting industry standards
+- ✅ **Enhanced Actionability**: Better detection/response guidance and business impact context
+- ✅ **Standardized Classification**: MITRE ATT&CK integration and confidence assessments
+- ✅ **Professional Presentation**: TLP markings, reliability scoring, and executive polish
+
+**Implementation Timeline:**
+- **Week 1**: Confidence assessment framework and MITRE ATT&CK integration
+- **Week 2**: Trend analysis engine and intelligence gap identification
+- **Week 3**: Business impact analysis and detection guidance
+- **Week 4**: Professional CTI standards and content polish
+
