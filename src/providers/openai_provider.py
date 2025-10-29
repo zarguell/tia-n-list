@@ -10,6 +10,7 @@ import time
 import logging
 from typing import Dict, Any, List, Optional
 from ..llm_provider import BaseLLMProvider, LLMProviderAPIError, LLMProviderSafetyError
+from ..response_parser import parse_llm_response, ParsedResponse
 
 logger = logging.getLogger(__name__)
 
@@ -99,7 +100,7 @@ class OpenAIProvider(BaseLLMProvider):
         )
 
     def generate_structured(self, prompt: str, schema: Dict[str, Any], max_tokens: int = 4000) -> Dict[str, Any]:
-        """Generate structured data (JSON) response from a prompt.
+        """Generate structured data (JSON) response from a prompt with robust parsing.
 
         Args:
             prompt: Input prompt for generation.
@@ -107,7 +108,7 @@ class OpenAIProvider(BaseLLMProvider):
             max_tokens: Maximum tokens in response.
 
         Returns:
-            Parsed structured data matching the schema.
+            Parsed structured data matching the schema (with fallbacks for imperfect responses).
         """
         enhanced_prompt = f"""
 {prompt}
@@ -122,37 +123,60 @@ Only return the JSON response, no additional text.
             lambda: self._generate_with_model(self.analysis_model, enhanced_prompt, max_tokens, 0.1)
         )
 
-        try:
-            # Clean up response text to handle OpenRouter extra tokens
-            if response_text and len(response_text.strip()) > 0:
-                cleaned_response = self._clean_json_response(response_text)
-                result = json.loads(cleaned_response)
-                # Ensure result has expected structure
-                if isinstance(result, dict):
-                    return result
-                else:
-                    logger.warning(f"Response is not a dict: {type(result)}")
-                    return {"iocs": [], "ttps": []}
-            else:
-                logger.warning("Empty response received from LLM")
-                return {"iocs": [], "ttps": []}
-        except json.JSONDecodeError as e:
-            logger.error(f"Failed to parse JSON response: {response_text[:200]}...")
-            # Try more aggressive cleaning
-            try:
-                cleaned_response = self._aggressive_json_clean(response_text)
-                result = json.loads(cleaned_response)
-                if isinstance(result, dict):
-                    return result
-                else:
-                    logger.warning(f"Cleaned response is not a dict: {type(result)}")
-                    return {"iocs": [], "ttps": []}
-            except json.JSONDecodeError:
-                logger.error(f"All JSON parsing attempts failed for: {response_text[:500]}...")
-                return {"iocs": [], "ttps": []}
-        except Exception as e:
-            logger.error(f"Unexpected error processing response: {e}")
-            return {"iocs": [], "ttps": []}
+        # Use robust parsing to handle imperfect responses
+        parsed_response = parse_llm_response(response_text, schema)
+
+        if parsed_response.success:
+            # Log the parsing method and confidence
+            if parsed_response.confidence < 1.0:
+                logger.info(f"Used {parsed_response.parsing_method} parser (confidence: {parsed_response.confidence:.2f})")
+                if parsed_response.warnings:
+                    logger.debug(f"Parsing warnings: {parsed_response.warnings}")
+
+            # Ensure we have the expected structure with fallbacks
+            result = parsed_response.data
+
+            # Ensure required fields exist with reasonable defaults
+            if 'iocs' not in result:
+                result['iocs'] = []
+            if 'ttps' not in result:
+                result['ttps'] = []
+
+            # Add metadata about parsing
+            result['_parsing'] = {
+                'method': parsed_response.parsing_method,
+                'confidence': parsed_response.confidence,
+                'warnings': parsed_response.warnings
+            }
+
+            return result
+        else:
+            # All parsing failed - return fallback structure
+            logger.warning(f"All parsing methods failed: {parsed_response.warnings}")
+            logger.debug(f"Raw response: {response_text[:200]}...")
+
+            # Try to extract any useful information from the raw text
+            fallback_result = {
+                "iocs": [],
+                "ttps": [],
+                "_parsing": {
+                    "method": "fallback",
+                    "confidence": 0.0,
+                    "warnings": parsed_response.warnings,
+                    "raw_response": response_text[:500] if response_text else ""
+                }
+            }
+
+            # Basic text analysis for fallback
+            if response_text:
+                # Look for any security-related content
+                security_keywords = ['vulnerability', 'exploit', 'malware', 'threat', 'attack']
+                found_keywords = [kw for kw in security_keywords if kw.lower() in response_text.lower()]
+                if found_keywords:
+                    fallback_result['_parsing']['found_keywords'] = found_keywords
+                    fallback_result['_parsing']['has_security_content'] = True
+
+            return fallback_result
 
     def batch_generate(self, prompts: List[str], max_tokens: int = 1000) -> List[str]:
         """Generate responses for multiple prompts in a single call.

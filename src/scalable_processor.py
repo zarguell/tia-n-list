@@ -175,8 +175,9 @@ class ScalableProcessor:
                         # Update article with extracted data
                         database.update_article_processed_content(
                             article['id'],
-                            iocs_result.get('summary', ''),
-                            iocs_result.get('relevance_score', 0)
+                            article.get('raw_content', ''),  # processed_content parameter
+                            iocs_result.get('summary', ''),   # summary parameter
+                            iocs_result.get('relevance_score', 0)  # score parameter
                         )
 
                         # Store IOCs if any

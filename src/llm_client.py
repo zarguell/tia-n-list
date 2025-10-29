@@ -11,6 +11,7 @@ import logging
 from typing import Dict, Any, Optional, Callable
 import google.generativeai as genai
 from google.generativeai.types import HarmCategory, HarmBlockThreshold
+from .response_parser import parse_llm_response
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -246,13 +247,36 @@ Only return the JSON response, no additional text.
                     logger.warning(f"Content generation ended unexpectedly: finish_reason={candidate.finish_reason}")
                     return {"iocs": [], "ttps": []}
 
-            # Parse JSON response
-            import json
-            try:
-                return json.loads(response.text)
-            except json.JSONDecodeError as e:
-                logger.error(f"Failed to parse JSON response: {response.text[:200]}...")
-                return {"iocs": [], "ttps": []}
+            # Use robust parsing for JSON response
+            parsed_response = parse_llm_response(response.text)
+
+            if parsed_response.success:
+                # Ensure expected structure
+                result = parsed_response.data
+                if 'iocs' not in result:
+                    result['iocs'] = []
+                if 'ttps' not in result:
+                    result['ttps'] = []
+
+                # Add parsing metadata for debugging
+                result['_parsing'] = {
+                    'method': parsed_response.parsing_method,
+                    'confidence': parsed_response.confidence,
+                    'warnings': parsed_response.warnings
+                }
+
+                return result
+            else:
+                logger.warning(f"Robust parsing failed for Gemini response: {parsed_response.warnings}")
+                return {
+                    "iocs": [],
+                    "ttps": [],
+                    "_parsing": {
+                        "method": "failed",
+                        "confidence": 0.0,
+                        "warnings": parsed_response.warnings
+                    }
+                }
 
         try:
             return self._retry_with_backoff(_extract)

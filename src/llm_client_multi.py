@@ -11,6 +11,7 @@ import logging
 from typing import Dict, Any, List, Optional, Union
 from .providers import create_provider, get_available_providers
 from .llm_provider import BaseLLMProvider, LLMProviderError, LLMProviderUnavailableError
+from .response_parser import parse_llm_response, extract_field_with_fallback
 
 logger = logging.getLogger(__name__)
 
@@ -354,32 +355,69 @@ Focus on actionable threat intelligence, new threats, and practical security ins
                 # Generate responses for the batch
                 responses = self._execute_with_fallback('batch_generate', batch_prompts)
 
-                # Parse responses
+                # Parse responses using robust parsing
                 for j, response in enumerate(responses):
                     try:
-                        import json
+                        # Use robust parsing to handle imperfect responses
+                        parsed_response = parse_llm_response(response)
 
-                        # Clean the response before parsing
-                        if response and len(response.strip()) > 0:
-                            # Apply JSON cleaning similar to the OpenAI provider
-                            cleaned_response = self._clean_batch_response(response)
-                            result = json.loads(cleaned_response)
+                        if parsed_response.success:
+                            # Extract required fields with fallbacks
+                            result = {
+                                "article_id": batch[j]['id'],
+                                "is_relevant": extract_field_with_fallback(parsed_response, 'is_relevant', False),
+                                "relevance_score": extract_field_with_fallback(parsed_response, 'relevance_score', 0),
+                                "reasoning": extract_field_with_fallback(parsed_response, 'reasoning', 'Processed with robust parsing'),
+                                "_parsing": {
+                                    "method": parsed_response.parsing_method,
+                                    "confidence": parsed_response.confidence
+                                }
+                            }
+
+                            # Convert string representations to proper types
+                            if isinstance(result['is_relevant'], str):
+                                result['is_relevant'] = result['is_relevant'].lower() in ['true', 'yes', '1']
+
+                            try:
+                                result['relevance_score'] = int(float(result['relevance_score']))
+                            except (ValueError, TypeError):
+                                result['relevance_score'] = 0
+
+                            # Cap score to valid range
+                            result['relevance_score'] = max(0, min(100, result['relevance_score']))
+
                             results.append(result)
+
+                            # Log low confidence parses
+                            if parsed_response.confidence < 0.8:
+                                logger.debug(f"Low confidence parsing ({parsed_response.confidence:.2f}) for article {batch[j]['id']}")
+
                         else:
-                            # Empty response
+                            # Robust parsing failed - create fallback result
                             results.append({
                                 "article_id": batch[j]['id'],
                                 "is_relevant": False,
                                 "relevance_score": 0,
-                                "reasoning": "Empty response from LLM provider"
+                                "reasoning": f"Robust parsing failed: {parsed_response.warnings[0] if parsed_response.warnings else 'Unknown error'}",
+                                "_parsing": {
+                                    "method": "failed",
+                                    "confidence": 0.0,
+                                    "warnings": parsed_response.warnings
+                                }
                             })
-                    except (json.JSONDecodeError, KeyError, Exception) as e:
-                        # Fallback result if parsing fails
+
+                    except Exception as e:
+                        # Unexpected error - create fallback result
+                        logger.error(f"Unexpected error parsing response for article {batch[j]['id']}: {e}")
                         results.append({
                             "article_id": batch[j]['id'],
                             "is_relevant": False,
                             "relevance_score": 0,
-                            "reasoning": f"Parse error: {str(e)[:100]}"
+                            "reasoning": f"Processing error: {str(e)[:100]}",
+                            "_parsing": {
+                                "method": "error",
+                                "confidence": 0.0
+                            }
                         })
 
             except Exception as e:
