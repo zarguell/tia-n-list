@@ -340,6 +340,12 @@ Let's dive into what you need to know...
                                error: str = None) -> Dict[str, Any]:
         """Generate fallback post when no content is available."""
         date_str = target_date.strftime('%Y-%m-%d')
+
+        # Build technical error section separately
+        error_section = ""
+        if error:
+            error_section = "## Technical Error\n\n" + error + "\n\n"
+
         fallback_content = f"""# Daily Security Summary - {date_str}
 
 Good morning! Today's automated threat intelligence processing encountered technical difficulties.
@@ -359,12 +365,7 @@ The automated system successfully ingested and enhanced content from threat inte
 - LLM provider responses required additional parsing
 - System resources were constrained
 
-{f"""## Technical Error
-
-{error}
-
-""" if error else ""}
-
+{error_section}
 ## Tomorrow's Briefing
 
 The system will automatically attempt full processing again tomorrow. All technical issues have been logged for review.
