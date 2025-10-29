@@ -45,9 +45,17 @@ class OpenAIProvider(BaseLLMProvider):
 
         self.api_key = config.get('api_key')
         self.base_url = config.get('base_url', 'https://api.openai.com/v1')
-        self.model = config.get('model', 'gpt-3.5-turbo')
-        self.filtering_model = config.get('filtering_model', self.model)
-        self.analysis_model = config.get('analysis_model', self.model)
+
+        # Set default models based on provider (OpenRouter vs OpenAI)
+        if 'openrouter' in self.base_url:
+            self.model = config.get('model', 'openai/gpt-oss-20b:free')
+            self.filtering_model = config.get('filtering_model', 'meta-llama/llama-3.3-8b-instruct:free')
+            self.analysis_model = config.get('analysis_model', 'openai/gpt-oss-20b:free')
+        else:
+            # OpenAI or other providers
+            self.model = config.get('model', 'openai/gpt-oss-20b:free')
+            self.filtering_model = config.get('filtering_model', self.model)
+            self.analysis_model = config.get('analysis_model', self.model)
         self.timeout = config.get('timeout', 60)
         self.max_retries = config.get('max_retries', 3)
         self.retry_delay = config.get('retry_delay', 1.0)

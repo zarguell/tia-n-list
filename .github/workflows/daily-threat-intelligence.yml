@@ -107,10 +107,26 @@ jobs:
         echo "Using LLM provider: ${LLM_PROVIDER:-gemini}"
 
         # Check if we have processed articles to work with
-        ARTICLE_COUNT=$(sqlite3 tia_n_list.db "SELECT COUNT(*) FROM articles WHERE status = 'processed' AND date(updated_at) = date('now');" 2>/dev/null || echo "0")
-        echo "📊 Found $ARTICLE_COUNT processed articles for today"
+        echo "🔍 Checking for processed articles..."
 
-        if [ "$ARTICLE_COUNT" -eq 0 ]; then
+        # Check recent processed articles (last 3 days to handle timezone issues)
+        RECENT_COUNT=$(sqlite3 tia_n_list.db "SELECT COUNT(*) FROM articles WHERE status = 'processed' AND updated_at >= date('now', '-3 days');" 2>/dev/null || echo "0")
+        TODAY_COUNT=$(sqlite3 tia_n_list.db "SELECT COUNT(*) FROM articles WHERE status = 'processed' AND date(updated_at) = date('now');" 2>/dev/null || echo "0")
+
+        echo "📊 Found $TODAY_COUNT processed articles today, $RECENT_COUNT in last 3 days"
+
+        # Get a few sample processed articles for debugging
+        if [ "$RECENT_COUNT" -gt 0 ]; then
+          echo "🔍 Sample recent articles:"
+          sqlite3 tia_n_list.db "SELECT id, title, status, date(updated_at) FROM articles WHERE status = 'processed' ORDER BY updated_at DESC LIMIT 3;" 2>/dev/null || echo "Could not fetch sample articles"
+        fi
+
+        # Use recent articles if today's count is 0 but we have recent ones
+        ARTICLE_COUNT=$TODAY_COUNT
+        if [ "$TODAY_COUNT" -eq 0 ] && [ "$RECENT_COUNT" -gt 0 ]; then
+          echo "⚠️ No articles processed today, but found recent articles. Using recent articles for briefing..."
+          ARTICLE_COUNT=$RECENT_COUNT
+        elif [ "$TODAY_COUNT" -eq 0 ]; then
           echo "⚠️ No processed articles found, generating fallback briefing..."
         fi
 
@@ -126,10 +142,10 @@ jobs:
               echo "❌ Blog generation failed after 3 attempts, creating fallback post..."
               # Create a simple fallback post
               DATE=$(date +'%Y-%m-%d')
-              cat > "hugo/content/posts/${DATE}-daily-summary.md" << 'EOF'
+              cat > "hugo/content/posts/${DATE}-daily-summary.md" << EOF
 ---
-title: "Daily Security Summary - DATE"
-date: DATE
+title: "Daily Security Summary - ${DATE}"
+date: ${DATE}
 tags: [cybersecurity, daily-summary]
 author: "Tia N. List"
 ---
@@ -152,9 +168,6 @@ The system continues to gather threat intelligence data even when facing rate li
 
 *Technical difficulties encountered during automated processing. Human review may be needed.*
 EOF
-
-              # Replace placeholders
-              sed -i.bak "s/DATE/$(date +'%Y-%m-%d')/g; s/DATE/$(date +'%Y-%m-%d')/g" "hugo/content/posts/${DATE}-daily-summary.md" && rm "hugo/content/posts/${DATE}-daily-summary.md.bak"
 
               echo "📝 Created fallback daily summary post"
               break
