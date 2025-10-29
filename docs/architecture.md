@@ -7,6 +7,8 @@ This document outlines the architecture for the automated threat intelligence ag
 - **FR-02: Multi-Stage Content Processing**: A tiered LLM approach will filter, de-duplicate, analyze, extract IOCs/TTPs, and enrich content.
 - **FR-03: JSON-Based Data Storage**: All processed data, including articles, IOCs, and analysis, will be stored in JSON files for git tracking and persistence.
 - **FR-04: Automated Blog Generation**: A daily summary blog post will be generated in Markdown and placed in the `hugo/content/posts/` directory.
+- **FR-04.1: Dynamic Title Generation**: Blog posts will feature dynamic, engaging titles based on content themes with emoji integration.
+- **FR-04.2: Smart Tag Generation**: Blog posts will include intelligent tags extracted from articles using 6-category taxonomy.
 - **FR-05: Manual Content Workflow**: A separate, manually triggered workflow will allow for publishing deep-dive articles.
 - **FR-06: Automated Newsletter Generation**: The system will compile top articles into an HTML newsletter using a predefined template.
 - **FR-07: Newsletter Distribution**: The generated newsletter will be sent to subscribers via the Beehiiv API.
@@ -66,9 +68,22 @@ The system includes advanced AI-powered content synthesis capabilities:
 - **Memory System**: 7-day rolling memory prevents content repetition
 - **Professional Output**: Strategic intelligence briefings with authentic voice
 
+**Dynamic Content Generation System:**
+- **Title Generator**:
+  - Theme analysis extracting vulnerabilities, threat actors, vendors, industries
+  - Template-based generation with emoji integration
+  - Uniqueness checking with 7-day memory cache
+  - LLM-powered generation with fallback strategies
+- **Tag Generator**:
+  - 6-category taxonomy: Technical, malware families, threat actors, vendors, industries, severity
+  - 42 pattern recognition rules for entity extraction
+  - Smart normalization: 25 vendor mappings, 28 industry mappings
+  - Confidence scoring and importance prioritization
+
 **Content Generation Methods:**
 1. **Template-Based Generation**: Structured, predictable output using templates
 2. **Intelligent AI Synthesis**: Advanced LLM-powered analysis with strategic insights
+3. **Dynamic Enhancement**: Integrated title and tag generation for engaging content
 
 **Response Processing:**
 - Handles both structured JSON and unstructured text LLM responses
