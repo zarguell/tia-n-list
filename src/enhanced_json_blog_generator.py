@@ -156,6 +156,7 @@ class EnhancedJSONBlogGenerator:
         # Import here to avoid circular dependencies
         try:
             from .intelligent_blog_generator import ThreatIntelligenceSynthesizer
+            from datetime import datetime
             synthesizer = ThreatIntelligenceSynthesizer()
             result = synthesizer.synthesize_threat_intelligence(context['articles'])
 
@@ -167,10 +168,14 @@ class EnhancedJSONBlogGenerator:
                     # Extract just the content after frontmatter
                     content = result[frontmatter_end + 5:]  # Skip the closing ---\n
                     print("✅ Extracted content from intelligent synthesis (frontmatter detected)")
+                    # Save to memory to prevent future duplication
+                    synthesizer._save_report_to_memory(context['articles'], content, datetime.now())
                     return content
 
             # Return as-is if no frontmatter detected
             print("✅ Using intelligent synthesis content directly")
+            # Save to memory to prevent future duplication
+            synthesizer._save_report_to_memory(context['articles'], result, datetime.now())
             return result
 
         except ImportError:

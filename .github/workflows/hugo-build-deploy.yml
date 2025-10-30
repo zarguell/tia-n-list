@@ -12,10 +12,16 @@ on:
       - '.github/workflows/hugo-build-deploy.yml'  # Trigger on workflow changes
   workflow_dispatch:  # Allow manual triggering
   repository_dispatch:  # Allow API triggering
+  workflow_run:
+    workflows: ["Daily Content Generation"]
+    types:
+      - completed
+    branches: [main]
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'push' || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success') }}
 
     permissions:
       contents: read

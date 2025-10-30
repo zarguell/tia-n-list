@@ -37,7 +37,14 @@ class ThreatIntelligenceSynthesizer:
         try:
             if self.memory_file.exists():
                 with open(self.memory_file, 'r', encoding='utf-8') as f:
-                    return json.load(f)
+                    data = json.load(f)
+                    # Convert lists back to sets
+                    data['mentioned_cves'] = set(data.get('mentioned_cves', []))
+                    data['mentioned_articles'] = set(data.get('mentioned_articles', []))
+                    data['mentioned_vulnerabilities'] = set(data.get('mentioned_vulnerabilities', []))
+                    data['mentioned_incidents'] = set(data.get('mentioned_incidents', []))
+                    data['mentioned_cisa_ids'] = set(data.get('mentioned_cisa_ids', []))
+                    return data
         except Exception as e:
             print(f"⚠️  Could not load report memory: {e}")
 
@@ -77,18 +84,39 @@ class ThreatIntelligenceSynthesizer:
             Set of article IDs mentioned in recent reports.
         """
         cutoff_date = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=days)
-        cutoff_str = cutoff_date.strftime('%Y-%m-%d')
 
         mentioned = set()
         for date_str, reports in self.report_memory.get('reports', {}).items():
-            if date_str >= cutoff_str:
-                # Handle both list and single report cases
-                if isinstance(reports, list):
-                    for report in reports:
-                        if isinstance(report, dict):
-                            mentioned.update(report.get('mentioned_articles', []))
-                elif isinstance(reports, dict):
-                    mentioned.update(reports.get('mentioned_articles', []))
+            try:
+                # Handle both date formats: 'YYYY-MM-DD' and ISO datetime with time
+                if 'T' in date_str:
+                    # ISO datetime format - ensure it has timezone info
+                    if date_str.endswith('Z'):
+                        report_date = datetime.datetime.fromisoformat(date_str.replace('Z', '+00:00'))
+                    else:
+                        report_date = datetime.datetime.fromisoformat(date_str)
+                        if report_date.tzinfo is None:
+                            report_date = report_date.replace(tzinfo=datetime.timezone.utc)
+                else:
+                    # YYYY-MM-DD format
+                    report_date = datetime.datetime.strptime(date_str, '%Y-%m-%d')
+                    report_date = report_date.replace(tzinfo=datetime.timezone.utc)
+
+                if report_date >= cutoff_date:
+                    # Handle both list and single report cases
+                    if isinstance(reports, list):
+                        for report in reports:
+                            if isinstance(report, dict):
+                                # Check both possible key names
+                                articles_in_report = report.get('article_ids', []) or report.get('mentioned_articles', [])
+                                mentioned.update(articles_in_report)
+                    elif isinstance(reports, dict):
+                        # Check both possible key names
+                        articles_in_report = reports.get('article_ids', []) or reports.get('mentioned_articles', [])
+                        mentioned.update(articles_in_report)
+            except (ValueError, TypeError) as e:
+                print(f"⚠️  Could not parse date '{date_str}': {e}")
+                continue
 
         return mentioned
 
@@ -114,12 +142,18 @@ class ThreatIntelligenceSynthesizer:
             Filtered list of fresh articles.
         """
         fresh_articles = []
+        filtered_count = 0
+
         for article in articles:
             article_id = str(article['id'])
             if article_id not in self.recently_mentioned_articles:
                 fresh_articles.append(article)
+            else:
+                filtered_count += 1
 
-        print(f"📊 Article filtering: {len(articles)} total → {len(fresh_articles)} fresh articles")
+        print(f"📊 Article filtering: {len(articles)} total → {len(fresh_articles)} fresh articles (filtered {filtered_count} duplicates)")
+        if filtered_count > 0:
+            print(f"🔍 Successfully filtered {filtered_count} duplicate articles")
         return fresh_articles
 
     def _extract_factual_constraints(self, articles: List[Dict]) -> Dict[str, Set[str]]:
@@ -282,7 +316,7 @@ Every specific claim (CVE, vendor, product, CISA ID) must be traceable to the pr
             iocs = self.storage.get_article_iocs(article['id'])
             if iocs:
                 article_data['iocs'] = [
-                    f"{ioc['type']}: {ioc['value']}"
+                    f"{ioc.get('type', 'unknown')}: {ioc.get('value', 'unknown')}"
                     for ioc in iocs[:5]  # Limit IOCs
                 ]
 
@@ -421,18 +455,21 @@ Focus on providing genuine value to security engineers based on real, verifiable
             if iocs:
                 for ioc in iocs[:5]:
                     # Filter out common non-security URLs and domains
-                    if ioc['type'] == 'url':
-                        url = ioc['value'].lower()
+                    ioc_type = ioc.get('type', 'unknown')
+                    ioc_value = ioc.get('value', '')
+
+                    if ioc_type == 'url':
+                        url = ioc_value.lower()
                         # Skip obvious non-security URLs
                         if any(skip in url for skip in ['youtube.com', 'youtu.be', 'wikipedia.org', 'github.com']):
                             continue
-                    elif ioc['type'] == 'domain':
-                        domain = ioc['value'].lower()
+                    elif ioc_type == 'domain':
+                        domain = ioc_value.lower()
                         # Skip obvious non-security domains
                         if any(skip in domain for skip in ['google.com', 'microsoft.com', 'github.com']):
                             continue
 
-                    filtered_iocs.append(f"{ioc['type']}: {ioc['value']}")
+                    filtered_iocs.append(f"{ioc_type}: {ioc_value}")
 
             if filtered_iocs:
                 article_info['iocs'] = filtered_iocs
