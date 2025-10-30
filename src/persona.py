@@ -1,46 +1,15 @@
 """Persona module for Tia N. List project.
 
-This module handles the Tia N. List persona including joke fetching
-and content formatting to maintain consistent brand voice.
+This module handles the Tia N. List persona and content formatting
+to maintain consistent professional brand voice for executive audience.
 """
 
-import requests
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, List
 from src import database
 
 
-def fetch_joke_of_the_day() -> Optional[str]:
-    """Fetch a random joke from the official joke API.
-
-    Returns:
-        Joke text or None if fetching fails.
-    """
-    try:
-        response = requests.get('https://official-joke-api.appspot.com/random_joke', timeout=10)
-        response.raise_for_status()
-
-        joke_data = response.json()
-
-        # Combine setup and punchline
-        setup = joke_data.get('setup', '')
-        punchline = joke_data.get('punchline', '')
-
-        if setup and punchline:
-            return f"{setup} {punchline}"
-        elif punchline:
-            return punchline
-        elif setup:
-            return setup
-
-        return "Why don't scientists trust atoms? Because they make up everything!"
-
-    except Exception as e:
-        print(f"Error fetching joke: {e}")
-        return None
-
-
 def format_article_summary(title: str, content: str, score: int) -> str:
-    """Format article summary in Tia N. List persona.
+    """Format article summary in Tia N. List persona for executive audience.
 
     Args:
         title: Article title.
@@ -48,7 +17,8 @@ def format_article_summary(title: str, content: str, score: int) -> str:
         score: Relevance score (0-100).
 
     Returns:
-        Formatted article summary.
+        Professionally formatted article summary with relevance indicators
+        and executive-appropriate insights.
     """
     # Add Tia's signature based on relevance
     relevance_emoji = "🔴" if score < 30 else "🟡" if score < 70 else "🟢" if score < 90 else "🟢"
@@ -108,20 +78,3 @@ def get_top_articles_for_summary(limit: int = 5) -> List[Dict[str, Any]]:
         return []
 
 
-def add_joke_to_content(content: str) -> str:
-    """Add a joke to content in Tia's style.
-
-    Args:
-        content: Original content.
-
-    Returns:
-        Content with joke appended.
-    """
-    joke = fetch_joke_of_the_day()
-
-    if joke:
-        # Add joke as a postscript with separator
-        return f"{content}\n\n---\n\n📝 **Today's Cybersecurity Wisdom:**\n{joke}\n\n---"
-    else:
-        # Fallback if joke fetching fails
-        return f"{content}\n\n---\n\n📝 **Today's Cybersecurity Wisdom:**\nWhy did the cybersecurity researcher cross the road? Because he was looking for vulnerabilities!\n\n---"

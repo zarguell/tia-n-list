@@ -1,29 +1,34 @@
-## Tia N. List (TI Analyst) Architecture
+## Tia N. List (TI Analyst) - Enterprise-Grade Architecture
 
-This document outlines the architecture for the automated threat intelligence aggregator, mailing list, and static site generator.
+This document outlines the architecture for the automated threat intelligence aggregator that generates **C-level executive briefings** with industry-standard confidence assessments, MITRE ATT&CK mapping, and business impact analysis.
 
 ### Functional Requirements
 - **FR-01: Automated Data Ingestion**: The system will automatically fetch entries from RSS/Atom feeds defined in `data/sources/` on a daily schedule.
-- **FR-02: Multi-Stage Content Processing**: A tiered LLM approach will filter, de-duplicate, analyze, extract IOCs/TTPs, and enrich content.
+- **FR-02: Multi-Stage Content Processing**: A tiered LLM approach will filter, de-duplicate, analyze, extract IOCs/TTPs, and enrich content with confidence assessments.
 - **FR-03: JSON-Based Data Storage**: All processed data, including articles, IOCs, and analysis, will be stored in JSON files for git tracking and persistence.
-- **FR-04: Automated Blog Generation**: A daily summary blog post will be generated in Markdown and placed in the `hugo/content/posts/` directory.
+- **FR-04: Enterprise-Grade Blog Generation**: Daily C-level executive briefings will be generated with industry-standard confidence assessments, MITRE ATT&CK mapping, and business impact analysis.
 - **FR-04.1: Dynamic Title Generation**: Blog posts will feature dynamic, engaging titles based on content themes with emoji integration.
 - **FR-04.2: Smart Tag Generation**: Blog posts will include intelligent tags extracted from articles using 6-category taxonomy.
 - **FR-05: Manual Content Workflow**: A separate, manually triggered workflow will allow for publishing deep-dive articles.
 - **FR-06: Automated Newsletter Generation**: The system will compile top articles into an HTML newsletter using a predefined template.
 - **FR-07: Newsletter Distribution**: The generated newsletter will be sent to subscribers via the Beehiiv API.
 - **FR-08: Subscriber Management**: A script will provide a mechanism to add new subscribers to Beehiiv via its API.
-- **FR-09: Persona Integration**: All generated content will adopt the "Tia N. List" persona and include a "joke of the day" from an external API.
+- **FR-09: Professional Persona Integration**: All generated content will adopt the professional "Tia N. List" persona optimized for C-level executive audience.
 - **FR-10: Analytics Tracking**: The Hugo site and newsletter will include support for an analytics service like Plausible or Google Analytics.
+- **FR-11: Enterprise-Grade Prompts**: Configurable prompt system with industry-standard confidence assessments and MITRE ATT&CK integration.
+- **FR-12: Intelligence Gap Analysis**: System will explicitly identify information limitations and collection priorities for transparency.
+- **FR-13: Business Impact Assessment**: All threat intelligence will include sector-specific exposure analysis and risk quantification.
 
 ### Technology Stack
-- **Language**: Python 3.11+
-- **CI/CD**: GitHub Actions
+- **Language**: Python 3.11+ (3.13+ recommended)
+- **CI/CD**: GitHub Actions with dual workflow architecture
 - **Data Storage**: JSON files with git tracking
-- **Static Site Generator**: Hugo
-- **LLM Provider**: Multi-provider (OpenRouter, OpenAI, Google Gemini)
+- **Static Site Generator**: Hugo with modern theme
+- **LLM Provider**: Multi-provider (OpenRouter, OpenAI, Google Gemini) with automatic fallbacks
 - **Email Service**: Beehiiv
-- **Joke API**: `https://official-joke-api.appspot.com/random_joke`
+- **Prompt Configuration**: Enterprise-grade configurable prompt system with A/B testing
+- **Content Enhancement**: Web scraping with trafilatura and beautifulsoup
+- **Professional Standards**: MITRE ATT&CK framework, industry-standard confidence assessments
 
 ### JSON-Based Data Architecture
 
@@ -153,6 +158,118 @@ The system includes advanced AI-powered content synthesis capabilities:
       "extracted_at": "2025-10-29T10:05:00Z"
     }
   ]
+}
+```
+
+### Enterprise-Grade Prompt Configuration System
+
+The system includes a comprehensive prompt configuration architecture for enterprise-grade CTI enhancement:
+
+**Configuration Directory Structure (`config/prompts/`):**
+```
+config/prompts/
+├── threat_intelligence_synthesis.json     # Main synthesis template (v2.0.0)
+├── confidence_assessment.json             # Industry-standard confidence framework
+├── mitre_attack_guidance.json             # Comprehensive ATT&CK integration
+├── industry_impact_guidance.json          # Business impact analysis
+├── intelligence_gap_guidance.json         # Intelligence gap analysis
+└── tlp_banner.json                        # TLP marking templates
+```
+
+**Main Synthesis Template (`config/prompts/threat_intelligence_synthesis.json`):**
+```json
+{
+  "version": "2.0.0",
+  "description": "Enhanced prompt template for executive-grade threat intelligence synthesis",
+  "persona": {
+    "name": "Tia N. List",
+    "role": "Senior Threat Intelligence Analyst",
+    "tone": "C-level executive briefing - concise, actionable, business-focused",
+    "expertise": "Enterprise cybersecurity risk assessment and strategic threat analysis"
+  },
+  "sections": {
+    "executive_format_requirements": {
+      "template": "EXECUTIVE BRIEFING FORMAT:\n\n**Executive Summary** (3-4 bullet points with confidence levels)\n\n**Threat Landscape Analysis** (business impact focus)\n\n**Risk Quantification** (sector-specific exposure)\n\n**Intelligence Gaps** (transparency about limitations)\n\n**Strategic Recommendations** (actionable guidance)"
+    }
+  }
+}
+```
+
+**Confidence Assessment Framework (`config/prompts/confidence_assessment.json`):**
+```json
+{
+  "confidence_levels": {
+    "high": {
+      "description": "High confidence (80-100%) based on multiple reliable sources",
+      "executive_framing": "Actionable intelligence with high reliability for strategic decision-making"
+    },
+    "medium": {
+      "description": "Medium confidence (50-80%) with adequately corroborated information",
+      "executive_framing": "Probabilistic assessment suitable for operational planning"
+    },
+    "low": {
+      "description": "Low confidence (20-50%) due to information gaps or limited sources",
+      "executive_framing": "Early warning intelligence requiring additional verification"
+    }
+  }
+}
+```
+
+**MITRE ATT&CK Integration (`config/prompts/mitre_attack_guidance.json`):**
+```json
+{
+  "tactics": {
+    "TA0001": "Initial Access",
+    "TA0002": "Execution",
+    "TA0040": "Impact"
+  },
+  "common_techniques": {
+    "T1190": "Exploit Public-Facing Application",
+    "T1566": "Phishing",
+    "T1486": "Data Encrypted for Impact"
+  },
+  "detection_guidance": {
+    "include_detection_indicators": "For each technique referenced, include relevant detection methods",
+    "log_sources": {
+      "T1190": "Web application logs, WAF alerts, IDS/IPS signatures"
+    }
+  }
+}
+```
+
+**Industry Impact Analysis (`config/prompts/industry_impact_guidance.json`):**
+```json
+{
+  "industry_mappings": {
+    "technology": {
+      "impact_factors": ["Service availability", "Customer data exposure", "Revenue impact"],
+      "risk_indicators": ["API endpoints", "Authentication systems", "Data centers"]
+    },
+    "healthcare": {
+      "impact_factors": ["Patient safety", "HIPAA compliance", "Care delivery"],
+      "risk_indicators": ["Electronic health records", "Medical devices", "Telemedicine platforms"]
+    }
+  },
+  "business_impact_framework": {
+    "financial_impact": ["Remediation expenses", "Regulatory fines", "Revenue loss"],
+    "operational_impact": ["Service disruption", "Productivity loss", "Supply chain effects"]
+  }
+}
+```
+
+**Intelligence Gap Analysis (`config/prompts/intelligence_gap_guidance.json`):**
+```json
+{
+  "gap_categories": {
+    "attribution_gaps": "Missing information about threat actor attribution and motivation",
+    "technical_gaps": "Incomplete technical details about vulnerabilities or attack methods",
+    "impact_gaps": "Unclear or incomplete assessment of business/operational impact",
+    "temporal_gaps": "Unclear timeline of events or ongoing activity",
+    "mitigation_gaps": "Missing guidance on detection, response, or prevention"
+  },
+  "executive_reporting": {
+    "format": "Intelligence Gaps section should concisely identify: 1) What we don't know, 2) Why it matters, 3) Priority for filling the gap"
+  }
 }
 ```
 

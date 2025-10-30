@@ -1002,30 +1002,7 @@ summary: "Strategic threat intelligence analysis synthesizing patterns and trend
 
 """
 
-        # Add joke section if desired
-        joke = persona.fetch_joke_of_the_day()
-        if joke:
-            joke_section = f"""
-
-## 🎭 Intelligence Perspective
-
-While analyzing serious threats, remember to maintain perspective:
-
-_{joke}_
-
-A balanced mindset leads to better decision-making.
-
----
-
-"""
-        else:
-            joke_section = """
-
----
-
-"""
-
-        return front_matter + content + joke_section + references_section
+        return front_matter + content + references_section
 
     def _generate_references_section(self, articles: List[Dict]) -> str:
         """Generate a references section with source URLs.

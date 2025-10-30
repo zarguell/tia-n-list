@@ -4,28 +4,47 @@ This module integrates the title and tag generators to create more dynamic
 and engaging blog posts while maintaining all existing functionality.
 """
 
-from datetime import datetime, date, timezone
+from datetime import datetime, date
 from pathlib import Path
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Tuple
 import json
 
 from .json_storage import JSONStorage
 from .context_builder import AIContextBuilder
 from .title_generator import TitleGenerator
 from .tag_generator import TagGenerator
+from .prompt_loader import PromptLoader, PromptVersionManager
 
 
 class EnhancedJSONBlogGenerator:
     """Enhanced JSON-based blog generation system with dynamic titles and tags."""
 
     def __init__(self, storage: JSONStorage = None, context_builder: AIContextBuilder = None,
-                 title_generator: TitleGenerator = None, tag_generator: TagGenerator = None):
+                 title_generator: TitleGenerator = None, tag_generator: TagGenerator = None,
+                 prompt_loader: PromptLoader = None, prompt_version_manager: PromptVersionManager = None):
         """Initialize enhanced blog generator with all components."""
         self.storage = storage or JSONStorage()
         self.context_builder = context_builder or AIContextBuilder(self.storage)
         self.title_generator = title_generator or TitleGenerator(self.storage)
         self.tag_generator = tag_generator or TagGenerator(self.storage)
         self.hugo_content_dir = Path("hugo/content/posts")
+
+        # Initialize prompt configuration system
+        self.prompt_loader = prompt_loader
+        self.prompt_version_manager = prompt_version_manager
+
+        # Try to initialize prompt loader if not provided
+        if self.prompt_loader is None:
+            try:
+                self.prompt_loader = PromptLoader(Path("config/prompts"))
+                print("✅ Prompt configuration system loaded")
+                if self.prompt_version_manager is None:
+                    self.prompt_version_manager = PromptVersionManager(Path("config/prompts"))
+                    print("✅ Prompt versioning system loaded")
+            except (FileNotFoundError, Exception) as e:
+                print(f"⚠️  Prompt configuration system unavailable: {e}")
+                self.prompt_loader = None
+                self.prompt_version_manager = None
 
     def generate_daily_summary(self, target_date: date = None,
                              use_intelligent_synthesis: bool = True,
@@ -66,7 +85,9 @@ class EnhancedJSONBlogGenerator:
             'unique_sources': len(context['statistics']['articles']['sources']),
             'dynamic_title_used': False,
             'dynamic_tags_used': False,
-            'intelligent_synthesis_used': False
+            'intelligent_synthesis_used': False,
+            'ab_test_variant': None,
+            'prompt_version_used': None
         }
 
         if not context['articles']:
@@ -103,11 +124,14 @@ class EnhancedJSONBlogGenerator:
             # Generate content using intelligent synthesis or template
             if use_intelligent_synthesis:
                 print("🧠 Using intelligent synthesis...")
-                final_content = self._intelligent_synthesis(context)
+                final_content, synthesis_metadata = self._intelligent_synthesis(context)
                 stats['intelligent_synthesis_used'] = True
+                # Update stats with synthesis metadata
+                stats.update(synthesis_metadata)
             else:
                 print("📝 Using template-based generation...")
                 final_content = self._template_based_generation(context)
+                stats['synthesis_method'] = 'template_based'
 
             # Generate Hugo post with dynamic title and tags
             hugo_content = self._create_enhanced_hugo_post(
@@ -151,12 +175,38 @@ class EnhancedJSONBlogGenerator:
             print(f"Error generating enhanced blog post: {e}")
             return self._generate_fallback_post(target_date, stats, error=str(e))
 
-    def _intelligent_synthesis(self, context: Dict[str, Any]) -> str:
-        """Use AI to synthesize intelligent blog post from context."""
-        # Import here to avoid circular dependencies
+    def _intelligent_synthesis(self, context: Dict[str, Any]) -> Tuple[str, Dict[str, Any]]:
+        """Use AI to synthesize intelligent blog post from context using prompt configuration."""
+        from datetime import datetime
+
+        # Initialize metadata for tracking
+        metadata = {
+            'ab_test_variant': None,
+            'prompt_version_used': None,
+            'synthesis_method': 'unknown'
+        }
+
+        # Try prompt configuration system first
+        if self.prompt_loader:
+            try:
+                print("🔧 Attempting enhanced prompt configuration synthesis...")
+                content, ab_variant, prompt_version = self._synthesis_with_prompt_config(context)
+                metadata.update({
+                    'ab_test_variant': ab_variant,
+                    'prompt_version_used': prompt_version,
+                    'synthesis_method': 'enhanced_prompt_config'
+                })
+                print(f"✅ Enhanced prompt configuration succeeded with version {prompt_version}")
+                return content, metadata
+            except Exception as e:
+                import traceback
+                print(f"⚠️  Prompt configuration synthesis failed: {e}")
+                print(f"🔍 Full error traceback: {traceback.format_exc()}")
+                print("🔄 Falling back to legacy intelligent synthesis...")
+
+        # Fallback to legacy intelligent synthesis
         try:
             from .intelligent_blog_generator import ThreatIntelligenceSynthesizer
-            from datetime import datetime
             synthesizer = ThreatIntelligenceSynthesizer()
             result = synthesizer.synthesize_threat_intelligence(context['articles'])
 
@@ -167,20 +217,203 @@ class EnhancedJSONBlogGenerator:
                 if frontmatter_end != -1:
                     # Extract just the content after frontmatter
                     content = result[frontmatter_end + 5:]  # Skip the closing ---\n
-                    print("✅ Extracted content from intelligent synthesis (frontmatter detected)")
+                    print("✅ Extracted content from legacy intelligent synthesis (frontmatter detected)")
                     # Save to memory to prevent future duplication
                     synthesizer._save_report_to_memory(context['articles'], content, datetime.now())
-                    return content
+                    metadata['synthesis_method'] = 'legacy_intelligent'
+                    return content, metadata
 
             # Return as-is if no frontmatter detected
-            print("✅ Using intelligent synthesis content directly")
+            print("✅ Using legacy intelligent synthesis content directly")
             # Save to memory to prevent future duplication
             synthesizer._save_report_to_memory(context['articles'], result, datetime.now())
-            return result
+            metadata['synthesis_method'] = 'legacy_intelligent'
+            return result, metadata
 
         except ImportError:
-            print("Intelligent synthesizer not available, falling back to template generation")
-            return self._template_based_generation(context)
+            print("⚠️  Legacy intelligent synthesizer not available, falling back to template generation")
+            content = self._template_based_generation(context)
+            metadata['synthesis_method'] = 'template_based'
+            return content, metadata
+
+    def _synthesis_with_prompt_config(self, context: Dict[str, Any]) -> Tuple[str, str, str]:
+        """Synthesize content using enhanced prompt configuration system."""
+        from datetime import datetime, date
+
+        # Import here to avoid circular dependencies
+        from .intelligent_blog_generator import ThreatIntelligenceSynthesizer
+
+        print("🧠 Using enhanced prompt configuration for intelligent synthesis...")
+
+        try:
+            # Step 1: Get enhanced context for prompt configuration
+            print("📊 Step 1: Building enhanced context...")
+            enhanced_context = self.context_builder.build_context_for_synthesis(
+                target_date=date.today(),
+                days_back=7,
+                include_io_cs=True,
+                max_articles=25
+            )
+            print(f"✅ Enhanced context built with {len(enhanced_context.get('articles', []))} articles")
+        except Exception as e:
+            print(f"❌ Step 1 failed - Context building: {e}")
+            raise
+
+        # Step 2: Prepare articles data for prompt
+        try:
+            print("📝 Step 2: Preparing articles data for prompt...")
+            articles_data = ""
+            for i, article in enumerate(enhanced_context['articles'][:20], 1):
+                articles_data += f"{i}. **{article['title']}**\n"
+                articles_data += f"   Source: {article.get('source', 'Unknown')}\n"
+
+                # Debug article content structure (only first article)
+                if i == 1:
+                    print(f"🔍 Article {i} content structure:")
+                    print(f"   - Keys: {list(article.keys())}")
+                    if 'content' in article:
+                        content_obj = article['content']
+                        print(f"   - Content type: {type(content_obj)}")
+                        if isinstance(content_obj, dict):
+                            print(f"   - Content keys: {list(content_obj.keys())}")
+                            for key, value in content_obj.items():
+                                print(f"     - {key}: {type(value)} ({len(str(value)) if value else 'None'} chars)")
+                        else:
+                            print(f"   - Content value type: {type(content_obj)}")
+
+                # Safely extract content with multiple fallbacks
+                content_text = ""
+                if isinstance(article.get('content'), dict):
+                    content_dict = article['content']
+                    # Handle None values properly - use '' as default for None values
+                    processed = content_dict.get('processed') or ''
+                    full = content_dict.get('full') or ''
+                    raw = content_dict.get('raw') or ''
+
+                    content_text = processed or full or raw
+                elif isinstance(article.get('content'), str):
+                    content_text = article['content']
+                else:
+                    content_text = str(article.get('content', '')) if article.get('content') else ''
+
+                # Ensure we have a string and handle any remaining None/edge cases
+                if not isinstance(content_text, str) or not content_text:
+                    content_text = str(content_text) if content_text else ""
+
+                articles_data += f"   Content: {content_text[:500]}...\n\n"
+            print(f"✅ Articles data prepared: {len(articles_data)} characters from {len(enhanced_context['articles'][:20])} articles")
+        except Exception as e:
+            print(f"❌ Step 2 failed - Articles data preparation: {e}")
+            raise
+
+        # Prepare factual constraints from available data
+        print(f"🔍 Enhanced context keys: {list(enhanced_context.keys())}")
+        factual_constraints = "FACTUAL CONSTRAINTS:\n"
+
+        # Extract constraints from IOCs
+        iocs = enhanced_context.get('iocs', [])
+        print(f"🔍 IOCs structure: {type(iocs)}, sample: {iocs[:3] if iocs else 'None'}")
+
+        # IOCs is a list with different structures - handle both 'value' and 'values' fields
+        cves = []
+        cisa_ids = []
+
+        for ioc in iocs:
+            if ioc.get('type') == 'cve':
+                if 'value' in ioc:
+                    cves.append(ioc['value'])
+                elif 'values' in ioc and isinstance(ioc['values'], list):
+                    cves.extend(ioc['values'])
+            elif ioc.get('type') == 'cisa_id':
+                if 'value' in ioc:
+                    cisa_ids.append(ioc['value'])
+                elif 'values' in ioc and isinstance(ioc['values'], list):
+                    cisa_ids.extend(ioc['values'])
+
+        # Limit to 5 each
+        cves = cves[:5]
+        cisa_ids = cisa_ids[:5]
+
+        if cves:
+            factual_constraints += f"CVEs explicitly mentioned: {', '.join(cves)}\n"
+        if cisa_ids:
+            factual_constraints += f"CISA advisories: {', '.join(cisa_ids)}\n"
+
+        # Extract from threat landscape analysis
+        threat_landscape = enhanced_context.get('threat_landscape', {})
+        if threat_landscape.get('key_vendors'):
+            factual_constraints += f"Vendors mentioned: {', '.join(threat_landscape['key_vendors'][:5])}\n"
+        if threat_landscape.get('key_industries'):
+            factual_constraints += f"Industries affected: {', '.join(threat_landscape['key_industries'][:5])}\n"
+
+        # Add article count constraint
+        article_count = len(enhanced_context.get('articles', []))
+        factual_constraints += f"Analysis based on {article_count} articles\n"
+
+        # Step 3: Build enhanced synthesis prompt using prompt configuration
+        try:
+            print("🔨 Step 3: Building enhanced synthesis prompt...")
+            enhanced_prompt = self.prompt_loader.build_enhanced_synthesis_prompt(
+                articles_data=articles_data,
+                factual_constraints=factual_constraints,
+                current_date=datetime.now().strftime('%B %d, %Y')
+            )
+            print(f"✅ Enhanced prompt built: {len(enhanced_prompt)} characters")
+        except Exception as e:
+            print(f"❌ Step 3 failed - Prompt building: {e}")
+            raise
+
+        # Handle A/B testing if enabled
+        ab_test_variant = None
+        prompt_version = "2.0.0"  # Default version
+
+        if self.prompt_version_manager:
+            try:
+                # Load template to check for A/B testing and get version
+                template = self.prompt_loader.load_main_prompt()
+                prompt_version = template.version
+                ab_test_variant = self.prompt_version_manager.select_ab_test_variant(template)
+
+                if ab_test_variant:
+                    print(f"🧪 A/B Testing: Using variant '{ab_test_variant}'")
+                    # You could modify the prompt based on the variant here
+            except Exception as e:
+                print(f"⚠️  A/B testing setup failed: {e}")
+
+        # Step 4: Generate content using LLM with enhanced prompt
+        try:
+            print("🤖 Step 4: Running LLM synthesis with enhanced prompt...")
+            synthesizer = ThreatIntelligenceSynthesizer()
+
+            # Use the enhanced prompt instead of the default
+            print("🎯 Using enhanced prompt with confidence assessment and ATT&CK guidance...")
+            result = synthesizer._attempt_synthesis_with_providers(enhanced_prompt)
+            print(f"✅ LLM synthesis completed: {len(result)} characters")
+        except Exception as e:
+            print(f"❌ Step 4 failed - LLM synthesis: {e}")
+            raise
+
+        # Extract content if result contains frontmatter (complete Hugo post)
+        if result.startswith('---\n'):
+            # Find the end of frontmatter
+            frontmatter_end = result.find('\n---\n', 4)
+            if frontmatter_end != -1:
+                # Extract just the content after frontmatter
+                content = result[frontmatter_end + 5:]  # Skip the closing ---\n
+                print("✅ Extracted content from enhanced synthesis (frontmatter detected)")
+                # Save to memory to prevent future duplication
+                synthesizer._save_report_to_memory(context['articles'], content, datetime.now())
+
+                # Return content and metadata
+                return content, ab_test_variant, prompt_version
+
+        # Return as-is if no frontmatter detected
+        print("✅ Using enhanced synthesis content directly")
+        # Save to memory to prevent future duplication
+        synthesizer._save_report_to_memory(context['articles'], result, datetime.now())
+
+        # Return content and metadata
+        return result, ab_test_variant, prompt_version
 
     def _template_based_generation(self, context: Dict[str, Any]) -> str:
         """Generate blog post using template-based approach."""
@@ -191,7 +424,7 @@ class EnhancedJSONBlogGenerator:
         content_parts = []
 
         # Header
-        content_parts.append(f"# Daily Threat Intelligence Briefing")
+        content_parts.append("# Daily Threat Intelligence Briefing")
         content_parts.append(f"*Published: {datetime.now().strftime('%B %d, %Y at %I:%M %p')}*")
         content_parts.append("")
 
@@ -226,8 +459,12 @@ class EnhancedJSONBlogGenerator:
                 content_parts.append("")
 
                 # Add a brief excerpt if available
-                content = article.get('content', {}).get('processed', '') or article.get('content', {}).get('raw', '')
-                if content:
+                content_dict = article.get('content', {})
+                if isinstance(content_dict, dict):
+                    content = content_dict.get('processed', '') or content_dict.get('raw', '')
+                else:
+                    content = str(content_dict) if content_dict else ''
+                if content and isinstance(content, str):
                     excerpt = content[:200] + "..." if len(content) > 200 else content
                     content_parts.append(excerpt)
                     content_parts.append("")
@@ -250,7 +487,7 @@ class EnhancedJSONBlogGenerator:
                 ioc_types[ioc_type].append(ioc['value'])
 
             for ioc_type, values in ioc_types.items():
-                if values:
+                if values and isinstance(values, list):
                     content_parts.append(f"### {ioc_type.title()}")
                     content_parts.append("")
                     for value in values[:10]:  # Limit to 10 per type
@@ -400,7 +637,7 @@ def main():
 
     # Print system statistics
     stats = enhanced_blog_generator.get_generation_statistics()
-    print(f"📊 System Status:")
+    print("📊 System Status:")
     print(f"   Title Generator: {'✅' if stats['title_generator_available'] else '❌'}")
     print(f"   Tag Generator: {'✅' if stats['tag_generator_available'] else '❌'}")
     print(f"   Supported Features: {', '.join([k for k, v in stats['supported_features'].items() if v])}")
@@ -421,7 +658,7 @@ def main():
         print("ℹ️  Blog generation completed with fallback mode")
 
     # Print generation summary
-    print(f"\n📈 Generation Summary:")
+    print("\n📈 Generation Summary:")
     print(f"   Dynamic Title: {'✅' if result.get('dynamic_title_used') else '❌'}")
     print(f"   Dynamic Tags: {'✅' if result.get('dynamic_tags_used') else '❌'}")
     print(f"   Intelligent Synthesis: {'✅' if result.get('intelligent_synthesis_used') else '❌'}")
