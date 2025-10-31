@@ -66,6 +66,20 @@ The system includes advanced AI-powered content synthesis capabilities:
 - **Fallback 1**: OpenAI (GPT models)
 - **Fallback 2**: Google Gemini (Flash/Pro models)
 
+**Enhanced LLM Configuration:**
+- **Configurable Token Limits**: Environment-based token configuration for different use cases
+  - Blog generation: 3000 tokens (increased from 1500, configurable via `LLM_MAX_TOKENS_BLOG`)
+  - Relevance filtering: 1000 tokens (`LLM_MAX_TOKENS_FILTERING`)
+  - IOC/TTP analysis: 4000 tokens (`LLM_MAX_TOKENS_ANALYSIS`)
+- **Model Compatibility**: Automatic `max_tokens`/`max_completion_tokens` parameter handling
+  - GPT-5-nano and similar models: Automatic fallback to `max_completion_tokens`
+  - Standard models: Uses `max_tokens` by default
+  - Error-transparent retry with intelligent parameter switching
+- **Custom Provider Support**: OpenAI-compatible API endpoint configuration
+  - `OPENAI_BASE_URL` environment variable for custom endpoints
+  - Support for private deployments and alternative providers
+  - Maintains backward compatibility with existing configurations
+
 **Intelligence Synthesis Features:**
 - **Context Engineering**: Comprehensive article context preparation (titles, content, IOCs, sources)
 - **Cross-Article Pattern Recognition**: Identifies trends and threat landscape patterns
@@ -275,3 +289,4 @@ config/prompts/
 
 ### Security
 - All API keys and secrets for Gemini, Beehiiv, and other services will be stored as GitHub Secrets and accessed as environment variables in the GitHub Actions workflow. No secrets shall be hardcoded in the source code.
+- **Enhanced Provider Security**: Support for custom OpenAI-compatible endpoints enables secure private deployments and on-premises LLM solutions while maintaining the same interface and functionality.

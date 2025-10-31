@@ -784,11 +784,16 @@ Content: {article['content']}
 
         print(f"🎯 Using OpenRouter model: {model}")
 
+        # Use configurable max_tokens for blog generation with higher default
+        max_tokens = int(os.getenv('LLM_MAX_TOKENS_BLOG', '3000'))  # Higher default for blog generation
+        print(f"🎯 Using max_tokens: {max_tokens}")
+
         # Make direct API call for synthesis
         try:
-                response = client.chat.completions.create(
-                    model=model,
-                    messages=[
+                # Prepare completion parameters
+                completion_params = {
+                    "model": model,
+                    "messages": [
                         {
                             "role": "system",
                             "content": "You are Tia N. List, a seasoned Threat Intelligence Analyst writing daily briefings for security engineers. Your tone is direct, analytical, and professional, reflecting deep expertise in cyber threat intelligence, but with a friendly and sometimes humorous tone - an entertaining writer."
@@ -798,9 +803,25 @@ Content: {article['content']}
                             "content": prompt
                         }
                     ],
-                    max_tokens=1500,
-                    temperature=0.7
-                )
+                    "temperature": 0.7
+                }
+
+                # Try max_tokens first, fallback to max_completion_tokens if it fails
+                try:
+                    completion_params["max_tokens"] = max_tokens
+                    response = client.chat.completions.create(**completion_params)
+                except Exception as first_error:
+                    error_str = str(first_error).lower()
+                    if "max_completion_tokens" in error_str or "not supported" in error_str:
+                        # Model requires max_completion_tokens instead
+                        print(f"🔄 Model {model} requires max_completion_tokens, retrying...")
+                        if "max_tokens" in completion_params:
+                            del completion_params["max_tokens"]
+                        completion_params["max_completion_tokens"] = max_tokens
+                        response = client.chat.completions.create(**completion_params)
+                    else:
+                        # Re-raise the original error if it's not a parameter issue
+                        raise first_error
 
                 print(f"🔍 OpenRouter response received")
                 print(f"🔍 Response object type: {type(response)}")

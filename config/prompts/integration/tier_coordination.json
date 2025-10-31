@@ -1,0 +1,99 @@
+{
+  "version": "1.0.0",
+  "description": "Two-tier analysis workflow coordination and configuration",
+  "workflow_configuration": {
+    "enabled": true,
+    "fallback_strategy": "single_tier_on_failure",
+    "tier_sequence": ["synthesis", "enhancement"],
+    "retry_policy": {
+      "max_retries_per_tier": 2,
+      "exponential_backoff": true,
+      "provider_fallback": true
+    }
+  },
+  "tier_configurations": {
+    "synthesis": {
+      "prompt_directory": "config/prompts/synthesis/",
+      "default_template": "threat_analysis_v1.json",
+      "llm_model_preference": "analysis_model",
+      "token_budget": 2400,
+      "output_type": "structured_technical_analysis"
+    },
+    "enhancement": {
+      "prompt_directory": "config/prompts/enhancement/",
+      "default_template": "executive_formatting_v1.json",
+      "llm_model_preference": "analysis_model",
+      "token_budget": 800,
+      "output_type": "executive_briefing"
+    }
+  },
+  "feature_flags": {
+    "use_two_tier_analysis": {
+      "description": "Enable two-tier analysis workflow",
+      "default_value": false,
+      "environment_variable": "USE_TWO_TIER_ANALYSIS",
+      "rollout_strategy": "gradual"
+    },
+    "force_enhancement": {
+      "description": "Force enhancement tier even if synthesis succeeds",
+      "default_value": true,
+      "environment_variable": "FORCE_ENHANCEMENT_TIER"
+    },
+    "enable_tier_logging": {
+      "description": "Enable detailed logging for each tier",
+      "default_value": true,
+      "environment_variable": "ENABLE_TIER_LOGGING"
+    }
+  },
+  "ab_testing_configuration": {
+    "enabled": true,
+    "independent_tier_testing": true,
+    "test_groups": [
+      {
+        "name": "control",
+        "description": "Current single-tier approach",
+        "synthesis_template": "threat_analysis_v1.json",
+        "enhancement_template": "executive_formatting_v1.json",
+        "weight": 0.5
+      },
+      {
+        "name": "experimental",
+        "description": "Two-tier approach with focused prompts",
+        "synthesis_template": "threat_analysis_v1.json",
+        "enhancement_template": "executive_formatting_v1.json",
+        "weight": 0.5
+      }
+    ]
+  },
+  "monitoring_configuration": {
+    "track_metrics": [
+      "tier_success_rate",
+      "token_usage_per_tier",
+      "processing_time_per_tier",
+      "content_quality_comparison",
+      "cost_analysis"
+    ],
+    "alert_thresholds": {
+      "tier_failure_rate": 0.1,
+      "processing_time_increase": 1.5,
+      "token_usage_increase": 1.2
+    }
+  },
+  "integration_points": {
+    "memory_system": {
+      "save_synthesis_output": true,
+      "save_enhancement_output": true,
+      "track_tier_metadata": true
+    },
+    "multi_provider_llm": {
+      "synthesis_providers": ["openrouter", "openai", "gemini"],
+      "enhancement_providers": ["openrouter", "openai", "gemini"],
+      "provider_priority": "cost_optimized"
+    },
+    "a_b_testing": {
+      "independent_tier_testing": true,
+      "cross_tier_correlation": true,
+      "result_comparison": true
+    }
+  }
+}

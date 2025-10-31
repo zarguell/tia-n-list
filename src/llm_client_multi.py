@@ -124,6 +124,7 @@ class MultiLLMClient:
         elif provider_name == 'openai':
             config.update({
                 'api_key': os.getenv('OPENAI_API_KEY'),
+                'base_url': os.getenv('OPENAI_BASE_URL', 'https://api.openai.com/v1'),
                 'filtering_model': os.getenv('OPENAI_FILTERING_MODEL', 'gpt-4o-mini'),
                 'analysis_model': os.getenv('OPENAI_ANALYSIS_MODEL', 'gpt-4o-mini'),
             })
@@ -133,6 +134,11 @@ class MultiLLMClient:
             'timeout': int(os.getenv('LLM_TIMEOUT', '60')),
             'max_retries': int(os.getenv('LLM_MAX_RETRIES', '3')),
             'retry_delay': float(os.getenv('LLM_RETRY_DELAY', '1.0')),
+            # Enhanced token configuration with different defaults for different use cases
+            'max_tokens': int(os.getenv('LLM_MAX_TOKENS', '1500')),
+            'max_tokens_filtering': int(os.getenv('LLM_MAX_TOKENS_FILTERING', '1000')),
+            'max_tokens_analysis': int(os.getenv('LLM_MAX_TOKENS_ANALYSIS', '4000')),
+            'max_tokens_blog': int(os.getenv('LLM_MAX_TOKENS_BLOG', '3000')),
         })
 
         return config

@@ -44,6 +44,14 @@ Configure these variables in GitHub repository settings (`Settings` → `Secrets
 LLM_PROVIDER=openrouter                    # Options: gemini, openrouter, openai
 OPENROUTER_FILTERING_MODEL=meta-llama/llama-3.3-8b-instruct:free
 OPENROUTER_ANALYSIS_MODEL=openai/gpt-oss-20b:free
+
+# Enhanced Token Configuration (Optional)
+LLM_MAX_TOKENS_BLOG=10000                  # Blog generation token limit (increased from 1500)
+LLM_MAX_TOKENS_FILTERING=1000              # Relevance filtering token limit
+LLM_MAX_TOKENS_ANALYSIS=4000               # IOC/TTP analysis token limit
+
+# Custom Provider Support (Optional)
+OPENAI_BASE_URL=https://api.openai.com/v1  # Custom OpenAI-compatible API endpoint
 ```
 
 ### 3. GitHub Pages (Optional)

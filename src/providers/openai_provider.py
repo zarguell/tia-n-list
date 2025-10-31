@@ -211,15 +211,34 @@ Only return the JSON response, no additional text.
             Generated text response.
         """
         try:
-            response = self.client.chat.completions.create(
-                model=model,
-                messages=[
+            # Determine which parameter to use based on model
+            # Some models (like GPT-5-nano) require max_completion_tokens instead of max_tokens
+            completion_params = {
+                "model": model,
+                "messages": [
                     {"role": "system", "content": "You are a helpful cybersecurity analyst."},
                     {"role": "user", "content": prompt}
                 ],
-                max_tokens=max_tokens,
-                temperature=temperature
-            )
+                "temperature": temperature
+            }
+
+            # Try max_tokens first (most common), fallback to max_completion_tokens if it fails
+            try:
+                completion_params["max_tokens"] = max_tokens
+                response = self.client.chat.completions.create(**completion_params)
+            except Exception as first_error:
+                error_str = str(first_error).lower()
+                if "max_completion_tokens" in error_str or "not supported" in error_str:
+                    # Model requires max_completion_tokens instead
+                    logger.info(f"Model {model} requires max_completion_tokens, retrying...")
+                    if "max_tokens" in completion_params:
+                        del completion_params["max_tokens"]
+                    completion_params["max_completion_tokens"] = max_tokens
+                    response = self.client.chat.completions.create(**completion_params)
+                else:
+                    # Re-raise the original error if it's not a parameter issue
+                    raise first_error
+
             return response.choices[0].message.content.strip()
         except Exception as e:
             raise LLMProviderAPIError(f"OpenAI API error: {e}")
@@ -243,29 +262,36 @@ Only return the JSON response, no additional text.
 
         for attempt, current_model in enumerate(all_models):
             try:
+                # Prepare completion parameters
+                completion_params = {
+                    "model": current_model,
+                    "messages": [
+                        {"role": "system", "content": "You are a helpful cybersecurity analyst."},
+                        {"role": "user", "content": prompt}
+                    ],
+                    "temperature": temperature
+                }
+
+                # Handle OpenRouter fallback mechanism
                 if self.name == 'OpenRouter' and len(all_models) > 1:
-                    # Use OpenRouter's fallback mechanism
-                    response = self.client.chat.completions.create(
-                        model=current_model,
-                        models=all_models,  # OpenRouter fallback list
-                        messages=[
-                            {"role": "system", "content": "You are a helpful cybersecurity analyst."},
-                            {"role": "user", "content": prompt}
-                        ],
-                        max_tokens=max_tokens,
-                        temperature=temperature
-                    )
-                else:
-                    # Standard single model call
-                    response = self.client.chat.completions.create(
-                        model=current_model,
-                        messages=[
-                            {"role": "system", "content": "You are a helpful cybersecurity analyst."},
-                            {"role": "user", "content": prompt}
-                        ],
-                        max_tokens=max_tokens,
-                        temperature=temperature
-                    )
+                    completion_params["models"] = all_models  # OpenRouter fallback list
+
+                # Try max_tokens first, fallback to max_completion_tokens
+                try:
+                    completion_params["max_tokens"] = max_tokens
+                    response = self.client.chat.completions.create(**completion_params)
+                except Exception as first_error:
+                    error_str = str(first_error).lower()
+                    if "max_completion_tokens" in error_str or "not supported" in error_str:
+                        # Model requires max_completion_tokens instead
+                        logger.info(f"Model {current_model} requires max_completion_tokens, retrying...")
+                        if "max_tokens" in completion_params:
+                            del completion_params["max_tokens"]
+                        completion_params["max_completion_tokens"] = max_tokens
+                        response = self.client.chat.completions.create(**completion_params)
+                    else:
+                        # Re-raise the original error if it's not a parameter issue
+                        raise first_error
 
                 result = response.choices[0].message.content.strip()
 

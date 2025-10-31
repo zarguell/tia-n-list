@@ -234,6 +234,10 @@ tia-n-list/
 | `GEMINI_API_KEY` | Google Gemini API key | Optional | - |
 | `USE_OPTIMIZED_PROMPT` | Use token-efficient prompts (true/false) | Optional | `true` |
 | `USE_ENHANCED_PROMPTS` | Use enterprise-grade prompt configuration (true/false) | Optional | `true` |
+| `LLM_MAX_TOKENS_BLOG` | Blog generation token limit (increased from 1500) | Optional | `3000` |
+| `LLM_MAX_TOKENS_FILTERING` | Relevance filtering token limit | Optional | `1000` |
+| `LLM_MAX_TOKENS_ANALYSIS` | IOC/TTP analysis token limit | Optional | `4000` |
+| `OPENAI_BASE_URL` | Custom OpenAI-compatible API endpoint | Optional | `https://api.openai.com/v1` |
 
 ### Multi-Provider LLM Configuration
 
@@ -254,6 +258,15 @@ export GEMINI_API_KEY=your_gemini_key_here
 export LLM_PROVIDER=openrouter
 export OPENROUTER_API_KEY=your_key
 export GEMINI_API_KEY=your_gemini_key  # Automatic fallback
+
+# Enhanced configuration with higher token limits
+export LLM_MAX_TOKENS_BLOG=4000          # Comprehensive threat intelligence briefings
+export LLM_MAX_TOKENS_ANALYSIS=5000     # Detailed IOC/TTP analysis
+
+# Custom OpenAI-compatible provider
+export LLM_PROVIDER=openai
+export OPENAI_API_KEY=your_key
+export OPENAI_BASE_URL=https://custom-provider.com/v1
 ```
 
 **Prompt Engineering Configuration:**

@@ -6,6 +6,7 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 from src.enhanced_json_blog_generator import EnhancedJSONBlogGenerator
+from src.two_tier_blog_generator import TwoTierBlogGenerator
 from datetime import date
 
 def main():
@@ -15,14 +16,28 @@ def main():
     # Read environment variables for feature control
     use_dynamic_titles = os.getenv('USE_DYNAMIC_TITLES', 'true').lower() == 'true'
     use_dynamic_tags = os.getenv('USE_DYNAMIC_TAGS', 'true').lower() == 'true'
+    use_two_tier_analysis = os.getenv('USE_TWO_TIER_ANALYSIS', 'false').lower() == 'true'
 
-    generator = EnhancedJSONBlogGenerator()
-    result = generator.generate_daily_summary(
-        target_date=date.today(),
-        use_intelligent_synthesis=True,
-        use_dynamic_title=use_dynamic_titles,
-        use_dynamic_tags=use_dynamic_tags
-    )
+    # Choose generator based on configuration
+    if use_two_tier_analysis:
+        print("🔄 Using Two-Tier Blog Generator...")
+        generator = TwoTierBlogGenerator()
+        result = generator.generate_daily_summary(
+            target_date=date.today(),
+            use_intelligent_synthesis=True,
+            use_dynamic_title=use_dynamic_titles,
+            use_dynamic_tags=use_dynamic_tags,
+            use_two_tier_analysis=True
+        )
+    else:
+        print("✨ Using Enhanced Blog Generator...")
+        generator = EnhancedJSONBlogGenerator()
+        result = generator.generate_daily_summary(
+            target_date=date.today(),
+            use_intelligent_synthesis=True,
+            use_dynamic_title=use_dynamic_titles,
+            use_dynamic_tags=use_dynamic_tags
+        )
 
     print(f"Enhanced blog generation completed: {result['success']}")
 
@@ -38,9 +53,20 @@ def main():
             features_used.append("dynamic tags")
         if result.get('intelligent_synthesis_used'):
             features_used.append("intelligent synthesis")
+        if result.get('two_tier_analysis_used'):
+            features_used.append("two-tier analysis")
 
         if features_used:
             print(f"🎯 Features used: {', '.join(features_used)}")
+
+        # Two-tier specific reporting
+        if result.get('two_tier_analysis_used'):
+            metadata = result.get('metadata', {})
+            print(f"📊 Tier 1 success: {metadata.get('tier_1_success', False)}")
+            print(f"📊 Tier 2 success: {metadata.get('tier_2_success', False)}")
+            print(f"🔤 Tier 1 tokens: {metadata.get('tier_1_tokens', 0)}")
+            print(f"🔤 Tier 2 tokens: {metadata.get('tier_2_tokens', 0)}")
+            print(f"🔄 Fallback used: {metadata.get('fallback_used', False)}")
 
         if result.get('generated_tags_count'):
             print(f"🏷️  Tags generated: {result['generated_tags_count']}")
