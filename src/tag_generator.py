@@ -13,22 +13,23 @@ from typing import List, Dict, Any, Set, Tuple
 from collections import Counter, defaultdict
 from pathlib import Path
 
-from src.json_storage import JSONStorage
-from src.llm_client_multi import MultiLLMClient
+from .storage_provider import StorageProvider
+from .storage_registry import get_default_storage_provider
+from .llm_registry import get_registry
 
 
 class TagGenerator:
     """Generates intelligent tags for cybersecurity articles."""
 
-    def __init__(self, storage: JSONStorage = None, llm_client: MultiLLMClient = None):
+    def __init__(self, storage: StorageProvider = None, llm_registry=None):
         """Initialize tag generator.
 
         Args:
-            storage: JSON storage instance for accessing article data
-            llm_client: LLM client for enhanced tag generation
+            storage: Storage provider instance for accessing article data
+            llm_registry: LLM registry for enhanced tag generation
         """
-        self.storage = storage or JSONStorage()
-        self.llm_client = llm_client
+        self.storage = storage or get_default_storage_provider()
+        self.llm_registry = llm_registry
 
         # Load tag taxonomy and normalization maps
         self.tag_taxonomy = self._load_tag_taxonomy()

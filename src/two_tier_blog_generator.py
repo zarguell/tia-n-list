@@ -8,8 +8,9 @@ from typing import Dict, List, Any, Optional, Tuple
 from .enhanced_json_blog_generator import EnhancedJSONBlogGenerator
 from .prompt_loader import PromptLoader
 from .context_builder import AIContextBuilder
-from .json_storage import JSONStorage
-from .llm_client_multi import MultiLLMClient
+from .storage_provider import StorageProvider
+from .storage_registry import get_default_storage_provider
+from .llm_registry import get_registry
 
 
 class TwoTierBlogGenerator(EnhancedJSONBlogGenerator):
@@ -22,8 +23,8 @@ class TwoTierBlogGenerator(EnhancedJSONBlogGenerator):
         # Load two-tier specific components
         self.prompt_loader = PromptLoader(Path("config/prompts"))
         self.context_builder = AIContextBuilder()
-        self.storage = JSONStorage()
-        self.llm_client = MultiLLMClient()
+        self.storage = get_default_storage_provider()
+        self.llm_registry = get_registry()
 
         # Load tier coordination configuration
         try:

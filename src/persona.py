@@ -5,7 +5,9 @@ to maintain consistent professional brand voice for executive audience.
 """
 
 from typing import Dict, Any, List
-from src import database
+from datetime import date
+from .storage_provider import StorageProvider
+from .storage_registry import get_default_storage_provider
 
 
 def format_article_summary(title: str, content: str, score: int) -> str:
@@ -50,25 +52,34 @@ def get_top_articles_for_summary(limit: int = 5) -> List[Dict[str, Any]]:
         List of top scoring articles.
     """
     try:
-        articles = database.get_top_articles(limit)
+        storage = get_default_storage_provider()
+        articles = storage.get_articles_by_date_range(
+            start_date=date.today(),
+            end_date=date.today(),
+            status="processed"
+        )
+
+        # Sort by score and take top articles
+        articles.sort(key=lambda x: x.get('analysis', {}).get('score', 0), reverse=True)
+        top_articles = articles[:limit]
 
         # Add source names and format for display
         formatted_articles = []
-        for article in articles:
-            # Get source name
-            sources = database.get_all_sources()
+        for article in top_articles:
+            # Get source name from sources
+            sources = storage.get_all_sources()
             source_name = "Unknown Source"
             for source in sources:
-                if source['id'] == article['source_id']:
+                if source['id'] == article.get('source_id'):
                     source_name = source['name']
                     break
 
             formatted_articles.append({
-                'title': article['title'],
+                'title': article.get('title', 'No title'),
                 'source': source_name,
-                'url': article['url'],
-                'score': article['score'],
-                'summary': article['summary'] or 'No summary available'
+                'url': article.get('url', ''),
+                'score': article.get('analysis', {}).get('score', 0),
+                'summary': article.get('analysis', {}).get('summary', 'No summary available')
             })
 
         return formatted_articles

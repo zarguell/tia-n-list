@@ -97,8 +97,8 @@ Deliver genuine intelligence value, not generic commentary."""
     def _get_top_iocs(self, article_id: str, limit: int = 2) -> List[str]:
         """Get top IOCs for an article."""
         try:
-            from .json_storage import JSONStorage
-            storage = JSONStorage()
+            from .storage_registry import get_default_storage_provider
+            storage = get_default_storage_provider()
             iocs = storage.get_article_iocs(article_id)
 
             # Prioritize important IOC types

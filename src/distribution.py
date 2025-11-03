@@ -1,6 +1,17 @@
 """Newsletter distribution module for Tia N. List project.
 
-This module handles newsletter distribution via the Beehiiv API.
+NOTE: This module is NOT IMPLEMENTED for production use.
+This is a placeholder for future newsletter integration.
+
+This module is intended to handle newsletter distribution via the Beehiiv API
+or similar newsletter distribution services.
+
+Future Integration Status:
+- Code architecture is complete but not integrated into production workflows
+- GitHub Actions workflows do not use newsletter distribution
+- May not use Beehiiv as currently implemented when production-ready
+- Preserved for future development of newsletter distribution capabilities
+- Contains API integration patterns that can be adapted for other newsletter services
 """
 
 import os

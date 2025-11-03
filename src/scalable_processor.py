@@ -8,15 +8,18 @@ strategies.
 import time
 from typing import List, Dict, Any, Optional
 from datetime import datetime, timezone
-from src import database, llm_client_multi, tiered_processor
+from src import tiered_processor
+from .llm_registry import get_registry, is_relevant_article, extract_iocs_and_ttps
+from .json_storage import JSONStorage
 
 
 class ScalableProcessor:
     """Optimized LLM processor for handling large feed volumes efficiently."""
 
     def __init__(self):
-        self.llm_client = llm_client_multi.MultiLLMClient()
-        self.tiered_processor = tiered_processor.TieredArticleProcessor(self.llm_client)
+        self.llm_registry = get_registry()
+        self.storage = JSONStorage()
+        self.tiered_processor = tiered_processor.TieredArticleProcessor(self.llm_registry)
 
         # Processing configuration
         self.max_daily_articles = 100  # Maximum articles to process per day
@@ -163,11 +166,12 @@ class ScalableProcessor:
             while not success and attempts < max_retries:
                 try:
                     # Use the existing processing logic
-                    is_relevant = self.llm_client.is_relevant_article(article.get('title', ''), article.get('raw_content', ''))
+                    relevance_result = is_relevant_article(article.get('title', ''), article.get('raw_content', ''))
+                    is_relevant = relevance_result.get('is_relevant', False)
 
                     if is_relevant:
                         # Extract IOCs and TTPs
-                        iocs_result = self.llm_client.extract_iocs_and_ttps(
+                        iocs_result = extract_iocs_and_ttps(
                             article.get('title', ''),
                             article.get('raw_content', '')
                         )

@@ -1,7 +1,16 @@
 """Newsletter generation module for Tia N. List project.
 
-This module generates HTML newsletters from top articles for distribution
-via the Beehiiv API.
+NOTE: This module is NOT IMPLEMENTED for production use.
+This is a placeholder for future newsletter integration.
+
+This module is intended to generate HTML newsletters from top articles for distribution
+via the Beehiiv API or similar newsletter services.
+
+Future Integration Status:
+- Code architecture is complete but not integrated into production workflows
+- GitHub Actions workflows do not use newsletter generation
+- May not use Beehiiv as currently implemented when production-ready
+- Preserved for future development of newsletter distribution capabilities
 """
 
 import datetime

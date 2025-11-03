@@ -10,15 +10,16 @@ from typing import List, Dict, Any, Optional, Tuple
 import re
 from collections import defaultdict, Counter
 
-from .json_storage import JSONStorage
+from .storage_provider import StorageProvider
+from .storage_registry import get_default_storage_provider
 
 
 class AIContextBuilder:
     """Intelligent context builder for AI prompting and content synthesis."""
 
-    def __init__(self, storage: JSONStorage = None):
+    def __init__(self, storage: StorageProvider = None):
         """Initialize context builder with storage backend."""
-        self.storage = storage or JSONStorage()
+        self.storage = storage or get_default_storage_provider()
 
     def get_recent_articles(self, days: int = 7, status: str = "processed",
                            min_score: int = 50, limit: int = None) -> List[Dict[str, Any]]:

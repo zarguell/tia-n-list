@@ -10,22 +10,23 @@ from typing import List, Dict, Any, Optional, Tuple
 from datetime import datetime, date
 from pathlib import Path
 
-from src.json_storage import JSONStorage
-from src.llm_client_multi import MultiLLMClient
+from .storage_provider import StorageProvider
+from .storage_registry import get_default_storage_provider
+from .llm_registry import get_registry
 
 
 class TitleGenerator:
     """Generates dynamic, engaging titles for threat intelligence briefings."""
 
-    def __init__(self, storage: JSONStorage = None, llm_client: MultiLLMClient = None):
+    def __init__(self, storage: StorageProvider = None, llm_registry=None):
         """Initialize title generator.
 
         Args:
-            storage: JSON storage instance for accessing article data
-            llm_client: LLM client for title generation
+            storage: Storage provider instance for accessing article data
+            llm_registry: LLM registry for title generation
         """
-        self.storage = storage or JSONStorage()
-        self.llm_client = llm_client or MultiLLMClient()
+        self.storage = storage or get_default_storage_provider()
+        self.llm_registry = llm_registry or get_registry()
         self.title_cache_file = Path("data/title_cache.json")
         self.title_cache_file.parent.mkdir(exist_ok=True)
         self.title_cache = self._load_title_cache()
@@ -229,8 +230,8 @@ class TitleGenerator:
         Returns:
             LLM-generated title or None if LLM is unavailable
         """
-        # Check if LLM client is available
-        if not self.llm_client:
+        # Check if LLM registry is available
+        if not self.llm_registry:
             return None
         # Create concise context for title generation
         article_summaries = []
@@ -279,8 +280,8 @@ Examples of good titles:
 Generate only the title, nothing else:"""
 
         try:
-            # Use lightweight model for title generation via multi-provider client
-            response = self.llm_client._execute_with_fallback(
+            # Use lightweight model for title generation via LLM registry
+            response = self.llm_registry.execute_with_fallback(
                 "generate_text",
                 prompt=prompt,
                 max_tokens=50,
@@ -323,11 +324,11 @@ Generate only the title, nothing else:"""
         themes = self._analyze_articles_for_themes(articles)
 
         # Try LLM generation first if available
-        if self.llm_client:
+        if self.llm_registry:
             print("🤖 Attempting LLM-powered title generation...")
             llm_title = self._generate_llm_title(articles, themes, date_obj)
         else:
-            print("⚠️  LLM client not available, using template fallback...")
+            print("⚠️  LLM registry not available, using template fallback...")
             llm_title = None
 
         if llm_title and self._check_title_uniqueness(llm_title):
@@ -373,7 +374,8 @@ def generate_daily_title(articles: List[Dict[str, Any]] = None, target_date: dat
 
     if articles is None:
         # Fetch articles from storage
-        storage = JSONStorage()
+        from .storage_registry import get_default_storage_provider
+        storage = get_default_storage_provider()
         if target_date is None:
             target_date = date.today()
 

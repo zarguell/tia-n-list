@@ -1,8 +1,8 @@
-"""JSON-based feed ingestion module for Tia N. List project.
+"""Unified feed ingestion module for Tia N. List project.
 
 This module handles fetching and parsing RSS/Atom feeds from various
-threat intelligence sources, storing results in JSON format for
-better git tracking and version control.
+threat intelligence sources, using the storage provider abstraction
+to support multiple storage backends.
 """
 
 import feedparser
@@ -12,15 +12,16 @@ import time
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
-from .json_storage import JSONStorage
+from .storage_provider import StorageProvider
+from .storage_registry import get_default_storage_provider
 
 
-class JSONIngestion:
-    """JSON-based feed ingestion system."""
+class UnifiedIngestion:
+    """Unified feed ingestion system using storage provider abstraction."""
 
-    def __init__(self, storage: JSONStorage = None):
-        """Initialize ingestion with JSON storage backend."""
-        self.storage = storage or JSONStorage()
+    def __init__(self, storage: StorageProvider = None):
+        """Initialize ingestion with storage provider backend."""
+        self.storage = storage or get_default_storage_provider()
 
     def fetch_feed(self, feed_url: str, timeout: int = 30) -> Optional[Dict[str, Any]]:
         """Fetch and parse a single RSS/Atom feed.
@@ -63,7 +64,7 @@ class JSONIngestion:
 
         Args:
             feed_data: Parsed feed data from feedparser.
-            source_id: JSON storage ID of the feed source.
+            source_id: Storage ID of the feed source.
             hours_back: Only include articles published within this many hours.
             max_articles: Maximum number of articles to extract.
 
@@ -362,16 +363,53 @@ class JSONIngestion:
         """Get current ingestion statistics."""
         return self.storage.get_statistics()
 
+    def health_check(self) -> Dict[str, Any]:
+        """Check the health of the ingestion system."""
+        health = {
+            "status": "healthy",
+            "checks": {},
+            "issues": []
+        }
+
+        try:
+            # Check storage health
+            storage_health = self.storage.health_check()
+            health["checks"]["storage"] = storage_health["status"] == "healthy"
+
+            if storage_health["status"] != "healthy":
+                health["status"] = "degraded"
+                health["issues"].extend(storage_health.get("issues", []))
+
+            # Check if we can access sources
+            sources = self.storage.get_all_sources()
+            health["checks"]["source_access"] = True
+            health["source_count"] = len(sources)
+
+            # Test network connectivity (optional)
+            try:
+                response = requests.get("https://httpbin.org/get", timeout=5)
+                health["checks"]["network"] = response.status_code == 200
+            except Exception:
+                health["checks"]["network"] = False
+                health["status"] = "degraded"
+                health["issues"].append("Network connectivity check failed")
+
+        except Exception as e:
+            health["status"] = "unhealthy"
+            health["issues"].append(f"Health check failed: {e}")
+
+        return health
+
 
 # Global ingestion instance
-ingestion = JSONIngestion()
+unified_ingestion = UnifiedIngestion()
 
 
 def main():
     """Main function for standalone execution."""
-    print("Starting JSON-based feed ingestion...")
+    print("Starting unified feed ingestion...")
 
-    stats = ingestion.ingest_from_sources(
+    stats = unified_ingestion.ingest_from_sources(
         delay_between_feeds=2.0,
         hours_back=24,
         max_articles_per_feed=50

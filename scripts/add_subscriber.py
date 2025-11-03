@@ -2,8 +2,18 @@
 """
 Subscriber management script for Tia N. List project.
 
+NOTE: This script is NOT IMPLEMENTED for production use.
+This is a placeholder for future newsletter integration.
+
 This script provides a command-line interface for adding subscribers
-to the Beehiiv newsletter via the API.
+to the Beehiiv newsletter via the API or similar newsletter services.
+
+Future Integration Status:
+- Code architecture is complete but not integrated into production workflows
+- GitHub Actions workflows do not use subscriber management
+- May not use Beehiiv as currently implemented when production-ready
+- Preserved for future development of newsletter distribution capabilities
+- Contains API integration patterns that can be adapted for other newsletter services
 """
 
 import sys

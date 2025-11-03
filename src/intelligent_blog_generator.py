@@ -12,8 +12,9 @@ import re
 from pathlib import Path
 from typing import List, Dict, Any, Set
 from src import persona
-from src.json_storage import JSONStorage
-from src.llm_client_multi import MultiLLMClient
+from .storage_provider import StorageProvider
+from .storage_registry import get_default_storage_provider
+from src.llm_registry import get_registry
 
 
 class ThreatIntelligenceSynthesizer:
@@ -21,8 +22,8 @@ class ThreatIntelligenceSynthesizer:
 
     def __init__(self):
         """Initialize the synthesizer."""
-        self.llm_client = MultiLLMClient()
-        self.storage = JSONStorage()
+        self.llm_registry = get_registry()
+        self.storage = get_default_storage_provider()
         self.memory_file = Path("data/report_memory.json")
         self.memory_file.parent.mkdir(exist_ok=True)
         self.report_memory = self._load_report_memory()
@@ -723,7 +724,8 @@ Content: {article['content']}
             os.environ['LLM_PROVIDER'] = 'openrouter'
 
             try:
-                test_response = self.llm_client.extract_iocs_and_ttps(
+                from src.llm_registry import extract_iocs_and_ttps
+                test_response = extract_iocs_and_ttps(
                     "Briefly summarize cybersecurity", "test"
                 )
                 # If we get here, OpenRouter is working
@@ -898,7 +900,8 @@ Content: {article['content']}
 
 Provide a comprehensive analysis in 3-4 paragraphs. Focus on strategic insights, patterns, and actionable recommendations. Write in a professional but engaging tone."""
 
-            result = self.llm_client.is_relevant_article("Threat Intelligence Synthesis Request", analysis_prompt)
+            from src.llm_registry import is_relevant_article
+            result = is_relevant_article("Threat Intelligence Synthesis Request", analysis_prompt)
 
             # Extract the reasoning part which should contain our analysis
             if isinstance(result, dict) and 'reasoning' in result:
@@ -1139,7 +1142,7 @@ def generate_intelligent_blog_post() -> bool:
         print("Generating intelligent threat intelligence briefing...")
 
         # Get top articles
-        storage = JSONStorage()
+        storage = get_default_storage_provider()
         articles = storage.get_top_articles(12)  # Get more articles for better analysis
         if not articles:
             print("No articles found for analysis")

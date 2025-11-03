@@ -9,7 +9,8 @@ from pathlib import Path
 from typing import List, Dict, Any, Tuple
 import json
 
-from .json_storage import JSONStorage
+from .storage_provider import StorageProvider
+from .storage_registry import get_default_storage_provider
 from .context_builder import AIContextBuilder
 from .title_generator import TitleGenerator
 from .tag_generator import TagGenerator
@@ -19,11 +20,11 @@ from .prompt_loader import PromptLoader, PromptVersionManager
 class EnhancedJSONBlogGenerator:
     """Enhanced JSON-based blog generation system with dynamic titles and tags."""
 
-    def __init__(self, storage: JSONStorage = None, context_builder: AIContextBuilder = None,
+    def __init__(self, storage: StorageProvider = None, context_builder: AIContextBuilder = None,
                  title_generator: TitleGenerator = None, tag_generator: TagGenerator = None,
                  prompt_loader: PromptLoader = None, prompt_version_manager: PromptVersionManager = None):
         """Initialize enhanced blog generator with all components."""
-        self.storage = storage or JSONStorage()
+        self.storage = storage or get_default_storage_provider()
         self.context_builder = context_builder or AIContextBuilder(self.storage)
         self.title_generator = title_generator or TitleGenerator(self.storage)
         self.tag_generator = tag_generator or TagGenerator(self.storage)

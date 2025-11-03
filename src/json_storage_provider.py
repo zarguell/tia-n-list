@@ -1,8 +1,8 @@
-"""JSON-based storage module for Tia N. List project.
+"""JSON storage provider implementation for Tia N. List project.
 
-This module provides file-based storage operations using JSON format
-instead of a database, making the system more git-friendly and enabling
-better content tracking and version control.
+This module implements the StorageProvider interface using JSON files,
+providing git-friendly storage that can be easily version controlled
+and tracked.
 """
 
 import json
@@ -12,9 +12,11 @@ from pathlib import Path
 from typing import List, Dict, Any, Optional, Tuple
 import re
 
+from .storage_provider import StorageProvider
 
-class JSONStorage:
-    """JSON-based storage system for articles, sources, and analysis data."""
+
+class JSONStorageProvider(StorageProvider):
+    """JSON-based storage provider implementing the StorageProvider interface."""
 
     def __init__(self, data_dir: str = "data"):
         """Initialize JSON storage with data directory."""
@@ -25,6 +27,8 @@ class JSONStorage:
         self.processed_dir = self.data_dir / "processed"
         self.reports_dir = self.data_dir / "reports"
 
+    def initialize(self) -> None:
+        """Initialize the storage provider."""
         # Ensure directories exist
         for directory in [self.data_dir, self.sources_dir, self.articles_dir,
                          self.content_dir, self.processed_dir, self.reports_dir]:
@@ -65,7 +69,70 @@ class JSONStorage:
         """Get the directory path for processed data based on date."""
         return self.processed_dir / f"{process_date.year:04d}" / f"{process_date.month:02d}" / f"{process_date.day:02d}"
 
-    # Source Management
+    def get_statistics(self) -> Dict[str, Any]:
+        """Get comprehensive statistics about stored data."""
+        stats = {
+            "sources": {
+                "total": 0,
+                "active": 0
+            },
+            "articles": {
+                "total": 0,
+                "by_status": {},
+                "by_source": {},
+                "recent_7_days": 0
+            },
+            "iocs": {
+                "total": 0,
+                "recent_7_days": 0,
+                "by_type": {}
+            }
+        }
+
+        # Source statistics
+        sources = self.get_all_sources()
+        stats["sources"]["total"] = len(sources)
+        stats["sources"]["active"] = sum(1 for s in sources if s.get("active", True))
+
+        # Article statistics
+        for article_file in self.articles_dir.rglob("*.json"):
+            with open(article_file, 'r', encoding='utf-8') as f:
+                article = json.load(f)
+
+                stats["articles"]["total"] += 1
+
+                status = article.get("status", "unknown")
+                stats["articles"]["by_status"][status] = stats["articles"]["by_status"].get(status, 0) + 1
+
+                source_id = article["source_id"]
+                stats["articles"]["by_source"][source_id] = stats["articles"]["by_source"].get(source_id, 0) + 1
+
+                # Check if recent
+                pub_datetime = self._parse_datetime(article["published_at"])
+                if pub_datetime.timestamp() >= (datetime.utcnow().timestamp() - 7 * 24 * 3600):
+                    stats["articles"]["recent_7_days"] += 1
+
+        # IOC statistics
+        for ioc_file in self.processed_dir.rglob("iocs.json"):
+            with open(ioc_file, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                iocs = data.get("iocs", [])
+
+                stats["iocs"]["total"] += len(iocs)
+
+                for ioc in iocs:
+                    # Check if recent
+                    ext_datetime = self._parse_datetime(ioc["extracted_at"])
+                    if ext_datetime.timestamp() >= (datetime.utcnow().timestamp() - 7 * 24 * 3600):
+                        stats["iocs"]["recent_7_days"] += 1
+
+                    # Count by type
+                    ioc_type = ioc.get("type", "unknown")
+                    stats["iocs"]["by_type"][ioc_type] = stats["iocs"]["by_type"].get(ioc_type, 0) + 1
+
+        return stats
+
+    # Source Management Methods
     def add_source(self, name: str, url: str, **metadata) -> str:
         """Add a new RSS source configuration."""
         source_id = name.lower().replace(" ", "-").replace("/", "-")
@@ -120,7 +187,7 @@ class JSONStorage:
 
         return True
 
-    # Article Management
+    # Article Management Methods
     def add_article(self, source_id: str, guid: str, title: str, url: str,
                    published_at: datetime, raw_content: str = None, **metadata) -> str:
         """Add a new article to storage."""
@@ -291,7 +358,7 @@ class JSONStorage:
 
         return success
 
-    # IOC Management
+    # IOC Management Methods
     def save_iocs_for_date(self, process_date: date, article_id: str,
                           iocs: List[Dict[str, Any]]) -> bool:
         """Save IOCs for a specific date."""
@@ -360,70 +427,61 @@ class JSONStorage:
         all_iocs.sort(key=lambda x: x["extracted_at"], reverse=True)
         return all_iocs
 
-    # Statistics and Reporting
-    def get_statistics(self) -> Dict[str, Any]:
-        """Get comprehensive statistics about stored data."""
-        stats = {
-            "sources": {
-                "total": 0,
-                "active": 0
-            },
-            "articles": {
-                "total": 0,
-                "by_status": {},
-                "by_source": {},
-                "recent_7_days": 0
-            },
-            "iocs": {
-                "total": 0,
-                "recent_7_days": 0,
-                "by_type": {}
-            }
-        }
+    # Utility Methods
+    def get_unprocessed_articles(self, limit: int = None) -> List[Dict[str, Any]]:
+        """Get articles that haven't been processed yet."""
+        unprocessed = []
 
-        # Source statistics
-        sources = self.get_all_sources()
-        stats["sources"]["total"] = len(sources)
-        stats["sources"]["active"] = sum(1 for s in sources if s.get("active", True))
-
-        # Article statistics
         for article_file in self.articles_dir.rglob("*.json"):
             with open(article_file, 'r', encoding='utf-8') as f:
                 article = json.load(f)
+                if article.get("status") != "processed":
+                    unprocessed.append(article)
+                    if limit and len(unprocessed) >= limit:
+                        break
 
-                stats["articles"]["total"] += 1
+        # Sort by published date (newest first)
+        unprocessed.sort(key=lambda x: x["published_at"], reverse=True)
+        return unprocessed[:limit] if limit else unprocessed
 
-                status = article.get("status", "unknown")
-                stats["articles"]["by_status"][status] = stats["articles"]["by_status"].get(status, 0) + 1
+    def health_check(self) -> Dict[str, Any]:
+        """Check the health of the storage provider."""
+        health = {
+            "status": "healthy",
+            "checks": {},
+            "issues": []
+        }
 
-                source_id = article["source_id"]
-                stats["articles"]["by_source"][source_id] = stats["articles"]["by_source"].get(source_id, 0) + 1
+        try:
+            # Check directories exist and are accessible
+            required_dirs = [self.data_dir, self.sources_dir, self.articles_dir,
+                           self.content_dir, self.processed_dir, self.reports_dir]
 
-                # Check if recent
-                pub_datetime = self._parse_datetime(article["published_at"])
-                if pub_datetime.timestamp() >= (datetime.utcnow().timestamp() - 7 * 24 * 3600):
-                    stats["articles"]["recent_7_days"] += 1
+            for directory in required_dirs:
+                if not directory.exists():
+                    health["status"] = "unhealthy"
+                    health["issues"].append(f"Directory {directory} does not exist")
+                    health["checks"][directory.name] = False
+                elif not directory.is_dir():
+                    health["status"] = "unhealthy"
+                    health["issues"].append(f"Path {directory} is not a directory")
+                    health["checks"][directory.name] = False
+                else:
+                    health["checks"][directory.name] = True
 
-        # IOC statistics
-        for ioc_file in self.processed_dir.rglob("iocs.json"):
-            with open(ioc_file, 'r', encoding='utf-8') as f:
-                data = json.load(f)
-                iocs = data.get("iocs", [])
+            # Check if we can read/write in data directory
+            test_file = self.data_dir / ".health_check"
+            try:
+                test_file.write_text("test")
+                test_file.unlink()
+                health["checks"]["read_write"] = True
+            except Exception as e:
+                health["status"] = "unhealthy"
+                health["issues"].append(f"Read/write test failed: {e}")
+                health["checks"]["read_write"] = False
 
-                stats["iocs"]["total"] += len(iocs)
+        except Exception as e:
+            health["status"] = "unhealthy"
+            health["issues"].append(f"Health check failed: {e}")
 
-                for ioc in iocs:
-                    # Check if recent
-                    ext_datetime = self._parse_datetime(ioc["extracted_at"])
-                    if ext_datetime.timestamp() >= (datetime.utcnow().timestamp() - 7 * 24 * 3600):
-                        stats["iocs"]["recent_7_days"] += 1
-
-                    # Count by type
-                    ioc_type = ioc.get("type", "unknown")
-                    stats["iocs"]["by_type"][ioc_type] = stats["iocs"]["by_type"].get(ioc_type, 0) + 1
-
-        return stats
-
-
-# Global storage instance
-storage = JSONStorage()
+        return health

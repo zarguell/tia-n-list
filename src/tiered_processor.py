@@ -8,7 +8,8 @@ ensure the most relevant content gets processed.
 import time
 from typing import List, Dict, Any, Tuple, Optional
 from dataclasses import dataclass
-from src import database, llm_client_multi, source_quality
+from src import database, source_quality
+from .llm_registry import get_registry, is_relevant_article, extract_iocs_and_ttps
 
 
 @dataclass
@@ -22,8 +23,8 @@ class ProcessingPriority:
 class TieredArticleProcessor:
     """Multi-tier processing system for articles based on source quality and title analysis."""
 
-    def __init__(self, llm_client=None):
-        self.llm_client = llm_client or llm_client_multi.MultiLLMClient()
+    def __init__(self, llm_registry=None):
+        self.llm_registry = llm_registry or get_registry()
         self.quality_tracker = source_quality.SourceQualityTracker()
 
         # Processing thresholds
@@ -359,12 +360,13 @@ Titles to analyze:
 
         for article in articles:
             try:
-                # Use the LLM client for actual processing
-                is_relevant = self.llm_client.is_relevant_article(article.get('title', ''), article.get('raw_content', ''))
+                # Use the LLM registry for actual processing
+                relevance_result = is_relevant_article(article.get('title', ''), article.get('raw_content', ''))
+                is_relevant = relevance_result.get('is_relevant', False)
 
                 if is_relevant:
                     # Extract IOCs and TTPs
-                    iocs_result = self.llm_client.extract_iocs_and_ttps(
+                    iocs_result = extract_iocs_and_ttps(
                         article.get('title', ''),
                         article.get('raw_content', '')
                     )
