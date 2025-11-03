@@ -4,7 +4,7 @@ This module implements the enhanced JSON blog generation as a transformation
 strategy for the unified blog engine.
 """
 
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from typing import Dict, Any, Optional
 from pathlib import Path
 import json
@@ -337,7 +337,7 @@ class EnhancedTransformationStrategy(TransformationStrategy):
                 "dynamic_title": stats['dynamic_title_used'],
                 "dynamic_tags": stats['dynamic_tags_used'],
                 "intelligent_synthesis": stats['intelligent_synthesis_used'],
-                "generated_at": datetime.utcnow().isoformat() + "Z"
+                "generated_at": datetime.now(timezone.UTC).isoformat() + "Z"
             }
         }
 
@@ -508,7 +508,7 @@ summary: "Daily threat intelligence briefing"
 generation_metadata: {{
     strategy: "enhanced",
     fallback: true,
-    generated_at: "{datetime.utcnow().isoformat()}Z"
+    generated_at: "{datetime.now(timezone.UTC).isoformat()}Z"
 }}
 ---
 

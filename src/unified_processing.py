@@ -157,7 +157,7 @@ class UnifiedProcessing:
                         analysis=analysis_result.get('analysis', {}),
                         iocs=iocs,
                         processing_metadata={
-                            'processed_at': datetime.utcnow().isoformat() + 'Z',
+                            'processed_at': datetime.now(datetime.UTC).isoformat(),
                             'llm_provider': analysis_result.get('llm_provider'),
                             'model': analysis_result.get('model'),
                             'processing_time': analysis_result.get('processing_time')

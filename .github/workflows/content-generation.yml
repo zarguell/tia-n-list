@@ -41,7 +41,7 @@ jobs:
       run: |
         mkdir -p data
 
-    - name: Run JSON RSS Feed Ingestion
+    - name: Run Unified RSS Feed Ingestion
       env:
         GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
@@ -49,12 +49,13 @@ jobs:
         LLM_PROVIDER: ${{ vars.LLM_PROVIDER || 'openrouter' }}
         OPENROUTER_FILTERING_MODEL: ${{ vars.OPENROUTER_FILTERING_MODEL || 'meta-llama/llama-3.3-8b-instruct:free' }}
         OPENROUTER_ANALYSIS_MODEL: ${{ vars.OPENROUTER_ANALYSIS_MODEL || 'openai/gpt-oss-20b:free' }}
+        STORAGE_PROVIDER: ${{ vars.STORAGE_PROVIDER || 'json' }}
       run: |
-        echo "🔄 Starting JSON-based RSS feed ingestion..."
-        PYTHONPATH=. python -m src.json_ingestion
-        echo "✅ JSON RSS ingestion completed"
+        echo "🔄 Starting unified RSS feed ingestion..."
+        PYTHONPATH=. python -m src.unified_ingestion
+        echo "✅ RSS ingestion completed"
         echo "📊 System statistics:"
-        PYTHONPATH=. python -c "from src.json_storage import JSONStorage; print(JSONStorage().get_statistics())"
+        PYTHONPATH=. python -c "from src.storage_registry import get_default_storage_provider; from datetime import date; storage = get_default_storage_provider(); articles = storage.get_articles_by_date_range(start_date=date.today(), end_date=date.today()); print(f'Articles: {len(articles)}')"
 
     - name: Enhance Article Content
       env:
@@ -69,7 +70,7 @@ jobs:
         echo "🔒 Using enhanced script with per-article and overall timeouts"
         PYTHONPATH=. python scripts/enhance_content_with_timeout.py
 
-    - name: Run JSON LLM Processing
+    - name: Run Unified LLM Processing
       env:
         GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
@@ -77,11 +78,12 @@ jobs:
         LLM_PROVIDER: ${{ vars.LLM_PROVIDER || 'openrouter' }}
         OPENROUTER_FILTERING_MODEL: ${{ vars.OPENROUTER_FILTERING_MODEL || 'meta-llama/llama-3.3-8b-instruct:free' }}
         OPENROUTER_ANALYSIS_MODEL: ${{ vars.OPENROUTER_ANALYSIS_MODEL || 'openai/gpt-oss-20b:free' }}
+        STORAGE_PROVIDER: ${{ vars.STORAGE_PROVIDER || 'json' }}
       run: |
-        echo "🧠 Starting JSON-based LLM processing..."
+        echo "🧠 Starting unified LLM processing..."
         echo "Using LLM provider: ${LLM_PROVIDER:-openrouter}"
         echo "📊 Processing articles with AI analysis and IOC extraction"
-        PYTHONPATH=. python -m src.json_processing
+        PYTHONPATH=. python -m src.unified_processing
 
     - name: Generate JSON Blog Post
       env:

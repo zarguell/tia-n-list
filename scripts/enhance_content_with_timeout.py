@@ -9,8 +9,8 @@ import signal
 import threading
 import time
 from concurrent.futures import ThreadPoolExecutor, TimeoutError as FutureTimeoutError
-from src.json_storage import JSONStorage
-from src.json_processing import JSONProcessing
+from src.storage_registry import get_default_storage_provider
+from src.unified_processing import UnifiedProcessing
 
 
 class ContentEnhancementTimeout(Exception):
@@ -23,11 +23,11 @@ def timeout_handler(signum, frame):
     raise ContentEnhancementTimeout("Content enhancement timed out")
 
 
-def enhance_single_article_with_timeout(processor, article_id, timeout_seconds=60):
+def enhance_single_article_with_timeout(storage, article_id, timeout_seconds=60):
     """Enhance a single article with timeout protection.
 
     Args:
-        processor: JSONProcessing instance
+        storage: StorageProvider instance
         article_id: Article ID to enhance
         timeout_seconds: Maximum time to spend on this article
 
@@ -37,7 +37,7 @@ def enhance_single_article_with_timeout(processor, article_id, timeout_seconds=6
     def enhance_article():
         try:
             from src.content_fetcher import fetch_article_content
-            article = processor.storage.get_article(article_id)
+            article = storage.get_article(article_id)
             if not article:
                 return {'success': False, 'error': 'Article not found'}
 
@@ -48,10 +48,15 @@ def enhance_single_article_with_timeout(processor, article_id, timeout_seconds=6
 
             if result and result.get('success') and result.get('content'):
                 # Store enhanced content
-                success = processor.storage.enhance_article_content(
+                success = storage.update_article(
                     article_id=article_id,
-                    full_content=result['content'],
-                    fetch_method=result.get('method', 'unknown')
+                    updates={
+                        'content': {
+                            'full': result['content'],
+                            'enhanced_at': time.time(),
+                            'fetch_method': result.get('method', 'unknown')
+                        }
+                    }
                 )
                 if success:
                     print(f"  ✅ Enhanced {len(result['content'])} characters ({result.get('method', 'unknown')})")
@@ -103,22 +108,35 @@ def main():
     signal.alarm(OVERALL_TIMEOUT)
 
     try:
-        processor = JSONProcessing()
+        storage = get_default_storage_provider()
 
-        # Get articles needing enhancement
-        articles = processor._get_articles_for_enhancement(limit=MAX_ARTICLES)
+        # Get articles needing enhancement (articles without full content)
+        from datetime import datetime, timedelta
+        yesterday = datetime.now() - timedelta(days=1)
+        articles = storage.get_articles_by_date_range(
+            start_date=yesterday.date(),
+            end_date=yesterday.date(),
+            status='fetched'
+        )
 
-        if not articles:
+        # Filter for articles that need content enhancement
+        articles_needing_enhancement = []
+        for article in articles[:MAX_ARTICLES]:
+            content = article.get('content', {})
+            if not content.get('full') or len(content.get('full', '')) < 1000:
+                articles_needing_enhancement.append(article)
+
+        if not articles_needing_enhancement:
             print("ℹ️  No articles need content enhancement")
             return
 
-        print(f"📊 Found {len(articles)} articles to enhance")
+        print(f"📊 Found {len(articles_needing_enhancement)} articles to enhance")
         print(f"⏱️  Per-article timeout: {PER_ARTICLE_TIMEOUT}s")
         print(f"⏱️  Overall timeout: {OVERALL_TIMEOUT}s")
         print()
 
         stats = {
-            'total_articles': len(articles),
+            'total_articles': len(articles_needing_enhancement),
             'enhanced_articles': 0,
             'failed_articles': 0,
             'timeout_articles': 0,
@@ -127,21 +145,21 @@ def main():
         }
 
         # Process articles with individual timeouts
-        for i, article in enumerate(articles, 1):
+        for i, article in enumerate(articles_needing_enhancement, 1):
             elapsed = time.time() - start_time
             remaining_time = OVERALL_TIMEOUT - elapsed
 
             if remaining_time <= 0:
-                print(f"⏰ Overall timeout reached, stopping ({len(articles) - i + 1} articles remaining)")
+                print(f"⏰ Overall timeout reached, stopping ({len(articles_needing_enhancement) - i + 1} articles remaining)")
                 break
 
-            print(f"[{i}/{len(articles)}] Article {article['id']} (elapsed: {elapsed:.1f}s, remaining: {remaining_time:.1f}s)")
+            print(f"[{i}/{len(articles_needing_enhancement)}] Article {article['id']} (elapsed: {elapsed:.1f}s, remaining: {remaining_time:.1f}s)")
 
             # Adjust per-article timeout based on remaining time
             article_timeout = min(PER_ARTICLE_TIMEOUT, remaining_time - 10)  # Leave 10s buffer
 
             result = enhance_single_article_with_timeout(
-                processor,
+                storage,
                 article['id'],
                 timeout_seconds=article_timeout
             )

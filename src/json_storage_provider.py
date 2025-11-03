@@ -7,7 +7,7 @@ and tracked.
 
 import json
 import hashlib
-from datetime import datetime, date
+from datetime import datetime, date, timezone
 from pathlib import Path
 from typing import List, Dict, Any, Optional, Tuple
 import re
@@ -37,7 +37,7 @@ class JSONStorageProvider(StorageProvider):
     def _parse_datetime(self, datetime_str: str) -> datetime:
         """Parse datetime string with robust error handling."""
         if not datetime_str:
-            return datetime.utcnow()
+            return datetime.now(timezone.UTC)
 
         try:
             # Handle various datetime formats
@@ -53,7 +53,7 @@ class JSONStorageProvider(StorageProvider):
                 return datetime.fromisoformat(datetime_str)
         except (ValueError, TypeError) as e:
             print(f"Warning: Could not parse datetime '{datetime_str}': {e}")
-            return datetime.utcnow()
+            return datetime.now(timezone.UTC)
 
     def _generate_article_id(self, source_id: str, title: str, pub_date: datetime) -> str:
         """Generate unique article ID based on source, title hash, and date."""
@@ -109,7 +109,7 @@ class JSONStorageProvider(StorageProvider):
 
                 # Check if recent
                 pub_datetime = self._parse_datetime(article["published_at"])
-                if pub_datetime.timestamp() >= (datetime.utcnow().timestamp() - 7 * 24 * 3600):
+                if pub_datetime.timestamp() >= (datetime.now(timezone.UTC).timestamp() - 7 * 24 * 3600):
                     stats["articles"]["recent_7_days"] += 1
 
         # IOC statistics
@@ -123,7 +123,7 @@ class JSONStorageProvider(StorageProvider):
                 for ioc in iocs:
                     # Check if recent
                     ext_datetime = self._parse_datetime(ioc["extracted_at"])
-                    if ext_datetime.timestamp() >= (datetime.utcnow().timestamp() - 7 * 24 * 3600):
+                    if ext_datetime.timestamp() >= (datetime.now(timezone.UTC).timestamp() - 7 * 24 * 3600):
                         stats["iocs"]["recent_7_days"] += 1
 
                     # Count by type
@@ -146,7 +146,7 @@ class JSONStorageProvider(StorageProvider):
             "fetch_interval_hours": 1,
             "quality_score": 50,  # Default score
             "active": True,
-            "created_at": datetime.utcnow().isoformat() + "Z",
+            "created_at": datetime.now(timezone.UTC).isoformat() + "Z",
             "metadata": metadata
         }
 
@@ -179,7 +179,7 @@ class JSONStorageProvider(StorageProvider):
             return False
 
         source_data.update(updates)
-        source_data["updated_at"] = datetime.utcnow().isoformat() + "Z"
+        source_data["updated_at"] = datetime.now(timezone.UTC).isoformat() + "Z"
 
         source_file = self.sources_dir / f"{source_id}.json"
         with open(source_file, 'w', encoding='utf-8') as f:
@@ -204,7 +204,7 @@ class JSONStorageProvider(StorageProvider):
             "title": title,
             "url": url,
             "published_at": published_at.isoformat(),
-            "fetched_at": datetime.utcnow().isoformat() + "Z",
+            "fetched_at": datetime.now(timezone.UTC).isoformat() + "Z",
             "status": "fetched",
             "content": {
                 "raw": raw_content or "",
@@ -259,7 +259,7 @@ class JSONStorageProvider(StorageProvider):
                            limit: int = None) -> List[Dict[str, Any]]:
         """Get recent articles within the specified date range."""
         articles = []
-        cutoff_date = datetime.utcnow().timestamp() - (days * 24 * 3600)
+        cutoff_date = datetime.now(timezone.UTC).timestamp() - (days * 24 * 3600)
 
         for article_file in self.articles_dir.rglob("*.json"):
             with open(article_file, 'r', encoding='utf-8') as f:
@@ -318,7 +318,7 @@ class JSONStorageProvider(StorageProvider):
             article_data["analysis"].update(updates.pop("analysis"))
 
         article_data.update(updates)
-        article_data["updated_at"] = datetime.utcnow().isoformat() + "Z"
+        article_data["updated_at"] = datetime.now(timezone.UTC).isoformat() + "Z"
 
         with open(article_file, 'w', encoding='utf-8') as f:
             json.dump(article_data, f, indent=2, ensure_ascii=False)
@@ -351,7 +351,7 @@ class JSONStorageProvider(StorageProvider):
         if success:
             # Save IOCs separately
             self.save_iocs_for_date(
-                datetime.utcnow().date(),
+                datetime.now(timezone.UTC).date(),
                 article_id,
                 iocs
             )
@@ -377,7 +377,7 @@ class JSONStorageProvider(StorageProvider):
         for ioc in iocs:
             ioc.update({
                 "article_id": article_id,
-                "extracted_at": datetime.utcnow().isoformat() + "Z"
+                "extracted_at": datetime.now(timezone.UTC).isoformat() + "Z"
             })
             existing_iocs["iocs"].append(ioc)
 
@@ -400,9 +400,9 @@ class JSONStorageProvider(StorageProvider):
     def get_recent_iocs(self, days: int = 7) -> List[Dict[str, Any]]:
         """Get IOCs from the last N days."""
         all_iocs = []
-        current_date = date.fromordinal(datetime.utcnow().date().toordinal() - days)
+        current_date = date.fromordinal(datetime.now(timezone.UTC).date().toordinal() - days)
 
-        while current_date <= datetime.utcnow().date():
+        while current_date <= datetime.now(timezone.UTC).date():
             daily_iocs = self.get_iocs_by_date(current_date)
             all_iocs.extend(daily_iocs)
             current_date = date.fromordinal(current_date.toordinal() + 1)
@@ -415,9 +415,9 @@ class JSONStorageProvider(StorageProvider):
         """Get all IOCs for a specific article."""
         # Search through recent IOC files for the article
         all_iocs = []
-        current_date = date.fromordinal(datetime.utcnow().date().toordinal() - 30)  # Search last 30 days
+        current_date = date.fromordinal(datetime.now(timezone.UTC).date().toordinal() - 30)  # Search last 30 days
 
-        while current_date <= datetime.utcnow().date():
+        while current_date <= datetime.now(timezone.UTC).date():
             daily_iocs = self.get_iocs_by_date(current_date)
             article_iocs = [ioc for ioc in daily_iocs if ioc.get("article_id") == article_id]
             all_iocs.extend(article_iocs)

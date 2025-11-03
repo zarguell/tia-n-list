@@ -10,7 +10,7 @@ from typing import List, Dict, Any, Optional
 from datetime import datetime, timezone
 from src import tiered_processor
 from .llm_registry import get_registry, is_relevant_article, extract_iocs_and_ttps
-from .json_storage import JSONStorage
+from .storage_registry import get_default_storage_provider
 
 
 class ScalableProcessor:
@@ -18,7 +18,7 @@ class ScalableProcessor:
 
     def __init__(self):
         self.llm_registry = get_registry()
-        self.storage = JSONStorage()
+        self.storage = get_default_storage_provider()
         self.tiered_processor = tiered_processor.TieredArticleProcessor(self.llm_registry)
 
         # Processing configuration

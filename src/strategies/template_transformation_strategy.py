@@ -3,7 +3,7 @@
 This module implements a simple template-based approach for blog generation.
 """
 
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from typing import Dict, Any
 import json
 
@@ -158,7 +158,7 @@ class TemplateTransformationStrategy(TransformationStrategy):
             "summary": f"Daily threat intelligence briefing for {target_date.strftime('%B %d, %Y')}",
             "generation_metadata": {
                 "strategy": "template",
-                "generated_at": datetime.utcnow().isoformat() + "Z"
+                "generated_at": datetime.now(timezone.UTC).isoformat() + "Z"
             }
         }
 
