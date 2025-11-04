@@ -33,20 +33,25 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
+    - name: Harden the runner (Audit all outbound calls)
+      uses: step-security/harden-runner@f4a75cfd619ee5ce8d5b864b0d183aff3c69b55a # v2.13.1
+      with:
+        egress-policy: audit
+
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
       with:
         fetch-depth: 0  # Get full history for proper Hugo builds
         submodules: 'recursive'  # Checkout Hugo theme submodule
 
     - name: Setup Hugo
-      uses: peaceiris/actions-hugo@v3
+      uses: step-security/actions-hugo@0ef63c546504c9fb32b29aa7eedc73d9558f7382 # v3.0.2
       with:
         hugo-version: 'latest'
         extended: true
 
     - name: Setup Pages
-      uses: actions/configure-pages@v5
+      uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5.0.0
 
     - name: Get Site URL
       id: site-url
@@ -82,13 +87,13 @@ jobs:
         ls -la public/posts/ | head -5 || echo "   No posts directory found"
 
     - name: Upload artifact
-      uses: actions/upload-pages-artifact@v3
+      uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3.0.1
       with:
         path: ./hugo/public
 
     - name: Deploy to GitHub Pages
       id: deployment
-      uses: actions/deploy-pages@v4
+      uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4.0.5
 
     - name: Build Summary
       run: |
