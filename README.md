@@ -1,4 +1,6 @@
 # Tia N. List - Enterprise-Grade Threat Intelligence Platform
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fzarguell%2Ftia-n-list.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fzarguell%2Ftia-n-list?ref=badge_shield)
+
 
 🎯 **Milestone 6: Enterprise-Grade CTI Enhancement - COMPLETE!**
 
@@ -394,6 +396,9 @@ print('Fallback Available:', info['fallback_provider'])
 ## 📄 License
 
 MIT License - see LICENSE file for details
+
+
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fzarguell%2Ftia-n-list.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fzarguell%2Ftia-n-list?ref=badge_large)
 
 ## 🆘 Troubleshooting
 
