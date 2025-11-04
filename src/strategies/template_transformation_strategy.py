@@ -158,7 +158,7 @@ class TemplateTransformationStrategy(TransformationStrategy):
             "summary": f"Daily threat intelligence briefing for {target_date.strftime('%B %d, %Y')}",
             "generation_metadata": {
                 "strategy": "template",
-                "generated_at": datetime.now(timezone.UTC).isoformat() + "Z"
+                "generated_at": datetime.now(timezone.utc).isoformat() + "Z"
             }
         }
 

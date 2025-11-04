@@ -337,7 +337,7 @@ class EnhancedTransformationStrategy(TransformationStrategy):
                 "dynamic_title": stats['dynamic_title_used'],
                 "dynamic_tags": stats['dynamic_tags_used'],
                 "intelligent_synthesis": stats['intelligent_synthesis_used'],
-                "generated_at": datetime.now(timezone.UTC).isoformat() + "Z"
+                "generated_at": datetime.now(timezone.utc).isoformat() + "Z"
             }
         }
 
@@ -508,7 +508,7 @@ summary: "Daily threat intelligence briefing"
 generation_metadata: {{
     strategy: "enhanced",
     fallback: true,
-    generated_at: "{datetime.now(timezone.UTC).isoformat()}Z"
+    generated_at: "{datetime.now(timezone.utc).isoformat()}Z"
 }}
 ---
 
