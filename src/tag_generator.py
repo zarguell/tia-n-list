@@ -12,6 +12,7 @@ from datetime import datetime, date
 from typing import List, Dict, Any, Set, Tuple
 from collections import Counter, defaultdict
 from pathlib import Path
+import tldextract
 
 from .storage_provider import StorageProvider
 from .storage_registry import get_default_storage_provider
@@ -301,8 +302,11 @@ class TagGenerator:
 
                 # Extract domain tags
                 if ioc_type == 'domain':
-                    # Extract main domain for well-known services
-                    if 'microsoft.com' in ioc_value:
+                    # Use tldextract to get the registered_domain for comparison
+                    ext = tldextract.extract(ioc_value)
+                    registered_domain = f"{ext.domain}.{ext.suffix}".lower() if ext.suffix else ext.domain.lower()
+
+                    if registered_domain == "microsoft.com":
                         tags.append({
                             'tag': 'microsoft',
                             'category': 'vendors',
@@ -310,7 +314,7 @@ class TagGenerator:
                             'count': 1,
                             'sources': [source]
                         })
-                    elif 'google.com' in ioc_value:
+                    elif registered_domain == "google.com":
                         tags.append({
                             'tag': 'google',
                             'category': 'vendors',
@@ -318,7 +322,7 @@ class TagGenerator:
                             'count': 1,
                             'sources': [source]
                         })
-                    elif 'amazon.com' or 'amazonaws.com' in ioc_value:
+                    elif registered_domain in ("amazon.com", "amazonaws.com"):
                         tags.append({
                             'tag': 'amazon',
                             'category': 'vendors',
@@ -326,7 +330,7 @@ class TagGenerator:
                             'count': 1,
                             'sources': [source]
                         })
-                    elif 'cisco.com' in ioc_value:
+                    elif registered_domain == "cisco.com":
                         tags.append({
                             'tag': 'cisco',
                             'category': 'vendors',
