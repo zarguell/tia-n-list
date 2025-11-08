@@ -260,7 +260,7 @@ class SimpleDigestGenerator:
             elif isinstance(value, (int, float)):
                 frontmatter_lines.append(f'{key} = {value}')
             else:
-                frontmatter_lines.append(f'{key} = "{value}"')
+                frontmatter_lines.append(f'{key} = {json.dumps(value)}')
         frontmatter_lines.append("+++")
 
         frontmatter = "\n".join(frontmatter_lines)
