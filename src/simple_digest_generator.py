@@ -68,7 +68,7 @@ class SimpleDigestGenerator:
 
                     # Ensure both datetimes have timezone info for comparison
                     if published.tzinfo is None:
-                        published = published.replace(tzinfo=datetime.now().astimezone().tzinfo)
+                        published = published.replace(tzinfo=datetime.timezone.utc)
 
                     if start_time <= published < end_time:
                         # Require minimum content length (no score requirement for fetched articles)
