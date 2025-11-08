@@ -1,0 +1,211 @@
+name: Simple Daily Digest Generation
+
+on:
+  schedule:
+    # Run daily at 6:00 AM EST (11:00 AM UTC)
+    - cron: '0 11 * * *'
+  workflow_dispatch: # Allow manual triggering
+
+jobs:
+  generate-simple-digest:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+    - name: Harden the runner (Audit all outbound calls)
+      uses: step-security/harden-runner@f4a75cfd619ee5ce8d5b864b0d183aff3c69b55a # v2.13.1
+      with:
+        egress-policy: audit
+
+    - name: Checkout repository
+      uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        submodules: 'recursive'  # Initialize Hugo theme submodule
+
+    - name: Set up Python 3.13
+      uses: actions/setup-python@e797f83bcb11b83ae66e0230d6156d7c80228e7c # v6.0.0
+      with:
+        python-version: '3.13'
+
+    - name: Cache pip dependencies
+      uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Create data directory
+      run: |
+        mkdir -p data
+
+    - name: Run Simple RSS Feed Ingestion
+      env:
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        LLM_PROVIDER: ${{ vars.LLM_PROVIDER || 'openrouter' }}
+        OPENROUTER_FILTERING_MODEL: ${{ vars.OPENROUTER_FILTERING_MODEL || 'meta-llama/llama-3.3-8b-instruct:free' }}
+        OPENROUTER_ANALYSIS_MODEL: ${{ vars.OPENROUTER_ANALYSIS_MODEL || 'openai/gpt-oss-20b:free' }}
+        STORAGE_PROVIDER: ${{ vars.STORAGE_PROVIDER || 'json' }}
+      run: |
+        echo "🔄 Starting RSS feed ingestion..."
+        PYTHONPATH=. python -m src.unified_ingestion
+        echo "✅ RSS ingestion completed"
+        echo "📊 System statistics:"
+        PYTHONPATH=. python -c "from src.storage_registry import get_default_storage_provider; from datetime import date; storage = get_default_storage_provider(); articles = storage.get_articles_by_date_range(start_date=date.today(), end_date=date.today()); print(f'Articles: {len(articles)}')"
+
+    - name: Run Simple LLM Processing (Basic Filtering Only)
+      env:
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        LLM_PROVIDER: ${{ vars.LLM_PROVIDER || 'openrouter' }}
+        OPENROUTER_FILTERING_MODEL: ${{ vars.OPENROUTER_FILTERING_MODEL || 'meta-llama/llama-3.3-8b-instruct:free' }}
+        STORAGE_PROVIDER: ${{ vars.STORAGE_PROVIDER || 'json' }}
+      run: |
+        echo "🧠 Starting simple LLM processing (relevance filtering only)..."
+        echo "Using LLM provider: ${LLM_PROVIDER:-openrouter}"
+        echo "📊 Processing articles for relevance (no complex IOC extraction)"
+        PYTHONPATH=. python scripts/process_simple_articles.py
+
+    - name: Generate Simple Daily Digest
+      env:
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        LLM_PROVIDER: ${{ vars.LLM_PROVIDER || 'openrouter' }}
+        OPENROUTER_ANALYSIS_MODEL: ${{ vars.OPENROUTER_ANALYSIS_MODEL || 'openai/gpt-oss-20b:free' }}
+      run: |
+        echo "🚀 Generating simple daily digest..."
+        echo "Using LLM provider: ${LLM_PROVIDER:-openrouter}"
+        echo "📝 Simplified approach: RSS → Basic Processing → Digest Generation"
+        PYTHONPATH=. python scripts/generate_simple_digest.py
+
+    - name: Check for generated digest
+      id: check-digest
+      run: |
+        echo "🔍 Checking for generated digest..."
+
+        # Check for new digest post
+        DIGEST_CHANGES=false
+        if [ -n "$(git status --porcelain hugo/content/posts/daily-threat-intelligence-*.md)" ]; then
+          DIGEST_CHANGES=true
+          echo "✅ Found new daily digest"
+        fi
+
+        # Check JSON data
+        JSON_CHANGES=false
+        if [ -n "$(git status --porcelain data/)" ]; then
+          JSON_CHANGES=true
+          echo "✅ Found JSON data changes"
+        fi
+
+        # Set outputs
+        echo "digest-changes=$DIGEST_CHANGES" >> $GITHUB_OUTPUT
+        echo "json-changes=$JSON_CHANGES" >> $GITHUB_OUTPUT
+
+        if [ "$DIGEST_CHANGES" = "true" ] || [ "$JSON_CHANGES" = "true" ]; then
+          echo "has-changes=true" >> $GITHUB_OUTPUT
+          echo "🎉 Found new content to commit"
+        else
+          echo "has-changes=false" >> $GITHUB_OUTPUT
+          echo "ℹ️  No new content generated"
+        fi
+
+    - name: Commit and push simple digest
+      if: steps.check-digest.outputs.has-changes == 'true'
+      run: |
+        echo "📝 Committing simple digest..."
+
+        # Configure git
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+
+        # Show what we're committing
+        echo "📊 Git status:"
+        git status
+
+        echo "📋 Changes to be committed:"
+        git diff --name-only
+
+        # Stage only source content
+        git add data/
+        git add hugo/content/posts/daily-threat-intelligence-*.md
+
+        # Verify staged changes
+        echo "✅ Staged changes:"
+        git diff --staged --name-only
+
+        # Commit with simple message
+        DATE=$(date +'%Y-%m-%d')
+        TIME=$(date +'%H:%M:%S')
+
+        git commit -m "🛡️ Daily Threat Intelligence Digest - $DATE
+
+        📊 Simple Digest Generation:
+        • Digest: ${{ steps.check-digest.outputs.digest-changes }}
+        • JSON Data: ${{ steps.check-digest.outputs.json-changes }}
+        • Generated: $TIME UTC
+
+        🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+        Co-Authored-By: Claude <noreply@anthropic.com>"
+
+        echo "🚀 Pushing changes to repository..."
+        git push
+
+    - name: Simple Digest Summary
+      run: |
+        echo "## 🛡️ Simple Daily Digest Summary" >> $GITHUB_STEP_SUMMARY
+        echo "**Date:** $(date +'%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+        echo "**Status:** ${{ steps.check-digest.outputs.has-changes == 'true' && '✅ Digest Generated' || 'ℹ️ No New Content' }}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+
+        echo "### 📊 Generation Results:" >> $GITHUB_STEP_SUMMARY
+        echo "- **Daily Digest:** ${{ steps.check-digest.outputs.digest-changes == 'true' && '✅ Generated' || 'ℹ️ No digest' }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **JSON Data:** ${{ steps.check-digest.outputs.json-changes == 'true' && '✅ Updated' || 'ℹ️ No changes' }}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+
+        # Check latest digest using safe file discovery
+        # Enable nullglob to handle no matches safely
+        shopt -s nullglob
+        digest_files=(hugo/content/posts/daily-threat-intelligence-*.md)
+        shopt -u nullglob
+
+        if [ ${#digest_files[@]} -gt 0 ]; then
+          # Sort files by modification time and get the newest
+          LATEST_DIGEST=$(printf '%s\n' "${digest_files[@]}" | sort -t- -k4 -nr | head -1)
+          if [ -f "$LATEST_DIGEST" ]; then
+            WORD_COUNT=$(wc -w < "$LATEST_DIGEST" 2>/dev/null || echo "0")
+            echo "### 📝 Latest Digest:" >> $GITHUB_STEP_SUMMARY
+            echo "- **File:** $(basename $LATEST_DIGEST)" >> $GITHUB_STEP_SUMMARY
+            echo "- **Word Count:** $WORD_COUNT words" >> $GITHUB_STEP_SUMMARY
+          fi
+        fi
+
+        # System statistics
+        if [ -d "data" ]; then
+          ARTICLE_COUNT=$(find data/articles -name "*.json" -type f 2>/dev/null | wc -l)
+          PROCESSED_COUNT=$(find data/articles -name "*.json" -type f -exec grep -l '"status": "processed"' {} \; 2>/dev/null | wc -l)
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📈 System Statistics:" >> $GITHUB_STEP_SUMMARY
+          echo "- **Total Articles:** $ARTICLE_COUNT" >> $GITHUB_STEP_SUMMARY
+          echo "- **Processed Articles:** $PROCESSED_COUNT" >> $GITHUB_STEP_SUMMARY
+          if [ "$ARTICLE_COUNT" -gt 0 ]; then
+            PROCESSING_RATE=$(awk -v processed="$PROCESSED_COUNT" -v total="$ARTICLE_COUNT" 'BEGIN {printf "%.1f", (processed * 100 / total)}' 2>/dev/null || echo "N/A")
+            echo "- **Processing Rate:** ${PROCESSING_RATE}%" >> $GITHUB_STEP_SUMMARY
+          fi
+        fi
+
+        if [ "${{ steps.check-digest.outputs.has-changes }}" = "true" ]; then
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "🚀 **Next Step:** Hugo build will be triggered automatically" >> $GITHUB_STEP_SUMMARY
+        fi
