@@ -74,39 +74,7 @@ jobs:
         echo "🧠 Starting simple LLM processing (relevance filtering only)..."
         echo "Using LLM provider: ${LLM_PROVIDER:-openrouter}"
         echo "📊 Processing articles for relevance (no complex IOC extraction)"
-        PYTHONPATH=. python -c "
-from src.storage_registry import get_default_storage_provider
-from src.llm_registry import get_registry
-from datetime import date, datetime, timedelta
-
-storage = get_default_storage_provider()
-registry = get_registry()
-
-# Get today's articles
-articles = storage.get_articles_by_date_range(start_date=date.today(), end_date=date.today())
-print(f'Found {len(articles)} articles to filter')
-
-# Filter for relevance using simple approach
-relevant_articles = []
-for article in articles:
-    content = article.get('content', {}).get('raw', '') or article.get('content', {}).get('processed', '')
-    if len(content) > 200:  # Basic quality check
-        # Simple relevance check
-        is_relevant = registry.execute_with_fallback(
-            'is_relevant_article',
-            article=article
-        )
-        if is_relevant:
-            # Mark as processed
-            storage.update_article_status(
-                article.get('id') or article.get('guid'),
-                'processed',
-                {'score': 50, 'processed_at': datetime.now().isoformat()}
-            )
-            relevant_articles.append(article)
-
-print(f'✅ Processed {len(relevant_articles)} relevant articles')
-"
+        PYTHONPATH=. python scripts/process_simple_articles.py
 
     - name: Generate Simple Daily Digest
       env:
