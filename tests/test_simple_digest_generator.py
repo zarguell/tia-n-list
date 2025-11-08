@@ -6,6 +6,7 @@ Tests for SimpleDigestGenerator.
 import json
 import os
 import tempfile
+import importlib
 from datetime import date, datetime, timedelta
 from pathlib import Path
 from unittest.mock import Mock, patch, MagicMock
@@ -441,6 +442,9 @@ class TestSimpleDigestGenerator:
 
     def test_configuration_constants(self):
         """Test that configuration constants are properly set."""
+        # Import module for reloading
+        import src.simple_digest_generator as simple_digest_generator_module
+        importlib.reload(simple_digest_generator_module)
         from src.simple_digest_generator import (
             MAX_ARTICLES_FOR_PROMPT, MAX_CONTENT_LENGTH, MIN_CONTENT_LENGTH,
             MAX_REFERENCES, MEMORY_DAYS_BACK, MEMORY_CLEANUP_DAYS, MAX_TOKENS
@@ -460,7 +464,19 @@ class TestSimpleDigestGenerator:
     })
     def test_environment_override(self):
         """Test that environment variables override constants."""
-        # This test would require module reload to take effect
-        # For now, just verify the environment variables are set
+        # Import module for reloading
+        import src.simple_digest_generator as simple_digest_generator_module
+        importlib.reload(simple_digest_generator_module)
+
+        # Import constants after reload
+        from src.simple_digest_generator import (
+            MAX_ARTICLES_FOR_PROMPT, MAX_CONTENT_LENGTH
+        )
+
+        # Verify the constants have been overridden by environment variables
+        assert MAX_ARTICLES_FOR_PROMPT == 15, f"Expected 15, got {MAX_ARTICLES_FOR_PROMPT}"
+        assert MAX_CONTENT_LENGTH == 2000, f"Expected 2000, got {MAX_CONTENT_LENGTH}"
+
+        # Also verify environment variables are still set
         assert os.environ.get('SIMPLE_DIGEST_MAX_ARTICLES') == '15'
         assert os.environ.get('SIMPLE_DIGEST_MAX_CONTENT_LENGTH') == '2000'

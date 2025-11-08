@@ -13,6 +13,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from src.storage_registry import get_default_storage_provider
 from src.llm_registry import get_registry
+from src.workflow_config import get_workflow_config
 from datetime import date
 
 
@@ -28,6 +29,33 @@ def process_simple_articles():
     try:
         storage = get_default_storage_provider()
         registry = get_registry()
+        config = get_workflow_config()
+
+        # Get configuration values with sensible defaults
+        workflow_settings = config.get_workflow_settings()
+        min_content_length = workflow_settings.get('min_content_length', 200)
+        default_score = workflow_settings.get('default_article_score', 50)
+
+        # Validate configuration values
+        try:
+            min_content_length = int(min_content_length)
+            if min_content_length <= 0:
+                print(f"⚠️  Invalid min_content_length: {min_content_length}, using default 200")
+                min_content_length = 200
+        except (ValueError, TypeError):
+            print(f"⚠️  Invalid min_content_length type, using default 200")
+            min_content_length = 200
+
+        try:
+            default_score = int(default_score)
+            if default_score < 0:
+                print(f"⚠️  Invalid default_score: {default_score}, using default 50")
+                default_score = 50
+        except (ValueError, TypeError):
+            print(f"⚠️  Invalid default_score type, using default 50")
+            default_score = 50
+
+        print(f"📋 Using min_content_length={min_content_length}, default_score={default_score}")
 
         # Get today's articles
         articles = storage.get_articles_by_date_range(start_date=date.today(), end_date=date.today())
@@ -41,7 +69,7 @@ def process_simple_articles():
         relevant_articles = []
         for article in articles:
             content = article.get('content', {}).get('raw', '') or article.get('content', {}).get('processed', '')
-            if len(content) > 200:  # Basic quality check
+            if len(content) > min_content_length:  # Basic quality check
                 # Simple relevance check
                 try:
                     is_relevant = registry.execute_with_fallback(
@@ -53,7 +81,7 @@ def process_simple_articles():
                         storage.update_article_status(
                             article.get('id') or article.get('guid'),
                             'processed',
-                            {'score': 50, 'processed_at': date.today().isoformat()}
+                            {'score': default_score, 'processed_at': date.today().isoformat()}
                         )
                         relevant_articles.append(article)
                 except Exception as e:

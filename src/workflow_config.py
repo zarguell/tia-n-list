@@ -79,47 +79,118 @@ class WorkflowConfig:
 
     def apply_environment_overrides(self) -> None:
         """Apply environment variable overrides to configuration."""
+        import logging
+        logger = logging.getLogger(__name__)
+
         # LLM Provider
         if os.getenv('LLM_PROVIDER'):
             self._config['processing_settings']['llm_provider'] = os.getenv('LLM_PROVIDER')
+            logger.info(f"Override: LLM_PROVIDER={os.getenv('LLM_PROVIDER')}")
 
         # LLM Models
         if os.getenv('OPENROUTER_FILTERING_MODEL'):
             self._config['processing_settings']['filtering_model'] = os.getenv('OPENROUTER_FILTERING_MODEL')
+            logger.info(f"Override: OPENROUTER_FILTERING_MODEL={os.getenv('OPENROUTER_FILTERING_MODEL')}")
 
         if os.getenv('OPENROUTER_ANALYSIS_MODEL'):
             self._config['processing_settings']['analysis_model'] = os.getenv('OPENROUTER_ANALYSIS_MODEL')
+            logger.info(f"Override: OPENROUTER_ANALYSIS_MODEL={os.getenv('OPENROUTER_ANALYSIS_MODEL')}")
 
         # Storage Provider
         if os.getenv('STORAGE_PROVIDER'):
             self._config['processing_settings']['storage_provider'] = os.getenv('STORAGE_PROVIDER')
+            logger.info(f"Override: STORAGE_PROVIDER={os.getenv('STORAGE_PROVIDER')}")
 
         # Digest Settings
         if os.getenv('SIMPLE_DIGEST_MAX_ARTICLES'):
-            self._config['digest_settings']['max_articles_for_prompt'] = int(os.getenv('SIMPLE_DIGEST_MAX_ARTICLES'))
+            try:
+                value = int(os.getenv('SIMPLE_DIGEST_MAX_ARTICLES'))
+                if value <= 0:
+                    logger.warning(f"Invalid SIMPLE_DIGEST_MAX_ARTICLES={value}, must be positive")
+                else:
+                    self._config['digest_settings']['max_articles_for_prompt'] = value
+                    logger.info(f"Override: max_articles_for_prompt={value}")
+            except ValueError as e:
+                logger.warning(f"Invalid SIMPLE_DIGEST_MAX_ARTICLES value: {e}")
 
         if os.getenv('SIMPLE_DIGEST_MAX_CONTENT_LENGTH'):
-            self._config['digest_settings']['max_content_length'] = int(os.getenv('SIMPLE_DIGEST_MAX_CONTENT_LENGTH'))
+            try:
+                value = int(os.getenv('SIMPLE_DIGEST_MAX_CONTENT_LENGTH'))
+                if value <= 0:
+                    logger.warning(f"Invalid SIMPLE_DIGEST_MAX_CONTENT_LENGTH={value}, must be positive")
+                else:
+                    self._config['digest_settings']['max_content_length'] = value
+                    logger.info(f"Override: max_content_length={value}")
+            except ValueError as e:
+                logger.warning(f"Invalid SIMPLE_DIGEST_MAX_CONTENT_LENGTH value: {e}")
 
         if os.getenv('SIMPLE_DIGEST_MAX_REFERENCES'):
-            self._config['digest_settings']['max_references'] = int(os.getenv('SIMPLE_DIGEST_MAX_REFERENCES'))
+            try:
+                value = int(os.getenv('SIMPLE_DIGEST_MAX_REFERENCES'))
+                if value <= 0:
+                    logger.warning(f"Invalid SIMPLE_DIGEST_MAX_REFERENCES={value}, must be positive")
+                else:
+                    self._config['digest_settings']['max_references'] = value
+                    logger.info(f"Override: max_references={value}")
+            except ValueError as e:
+                logger.warning(f"Invalid SIMPLE_DIGEST_MAX_REFERENCES value: {e}")
 
         if os.getenv('SIMPLE_DIGEST_MAX_TOKENS'):
-            self._config['digest_settings']['max_tokens'] = int(os.getenv('SIMPLE_DIGEST_MAX_TOKENS'))
+            try:
+                value = int(os.getenv('SIMPLE_DIGEST_MAX_TOKENS'))
+                if value <= 0:
+                    logger.warning(f"Invalid SIMPLE_DIGEST_MAX_TOKENS={value}, must be positive")
+                else:
+                    self._config['digest_settings']['max_tokens'] = value
+                    logger.info(f"Override: max_tokens={value}")
+            except ValueError as e:
+                logger.warning(f"Invalid SIMPLE_DIGEST_MAX_TOKENS value: {e}")
 
         # Memory Settings
         if os.getenv('SIMPLE_DIGEST_MEMORY_DAYS_BACK'):
-            self._config['workflow_settings']['memory_days_back'] = int(os.getenv('SIMPLE_DIGEST_MEMORY_DAYS_BACK'))
+            try:
+                value = int(os.getenv('SIMPLE_DIGEST_MEMORY_DAYS_BACK'))
+                if value <= 0:
+                    logger.warning(f"Invalid SIMPLE_DIGEST_MEMORY_DAYS_BACK={value}, must be positive")
+                else:
+                    self._config['workflow_settings']['memory_days_back'] = value
+                    logger.info(f"Override: memory_days_back={value}")
+            except ValueError as e:
+                logger.warning(f"Invalid SIMPLE_DIGEST_MEMORY_DAYS_BACK value: {e}")
 
         if os.getenv('SIMPLE_DIGEST_MEMORY_CLEANUP_DAYS'):
-            self._config['workflow_settings']['memory_cleanup_days'] = int(os.getenv('SIMPLE_DIGEST_MEMORY_CLEANUP_DAYS'))
+            try:
+                value = int(os.getenv('SIMPLE_DIGEST_MEMORY_CLEANUP_DAYS'))
+                if value <= 0:
+                    logger.warning(f"Invalid SIMPLE_DIGEST_MEMORY_CLEANUP_DAYS={value}, must be positive")
+                else:
+                    self._config['workflow_settings']['memory_cleanup_days'] = value
+                    logger.info(f"Override: memory_cleanup_days={value}")
+            except ValueError as e:
+                logger.warning(f"Invalid SIMPLE_DIGEST_MEMORY_CLEANUP_DAYS value: {e}")
 
         # Workflow Settings
         if os.getenv('WORKFLOW_MAX_ARTICLES_PER_FEED'):
-            self._config['workflow_settings']['max_articles_per_feed'] = int(os.getenv('WORKFLOW_MAX_ARTICLES_PER_FEED'))
+            try:
+                value = int(os.getenv('WORKFLOW_MAX_ARTICLES_PER_FEED'))
+                if value <= 0:
+                    logger.warning(f"Invalid WORKFLOW_MAX_ARTICLES_PER_FEED={value}, must be positive")
+                else:
+                    self._config['workflow_settings']['max_articles_per_feed'] = value
+                    logger.info(f"Override: max_articles_per_feed={value}")
+            except ValueError as e:
+                logger.warning(f"Invalid WORKFLOW_MAX_ARTICLES_PER_FEED value: {e}")
 
         if os.getenv('WORKFLOW_MIN_CONTENT_LENGTH'):
-            self._config['workflow_settings']['min_content_length'] = int(os.getenv('WORKFLOW_MIN_CONTENT_LENGTH'))
+            try:
+                value = int(os.getenv('WORKFLOW_MIN_CONTENT_LENGTH'))
+                if value < 0:
+                    logger.warning(f"Invalid WORKFLOW_MIN_CONTENT_LENGTH={value}, must be non-negative")
+                else:
+                    self._config['workflow_settings']['min_content_length'] = value
+                    logger.info(f"Override: min_content_length={value}")
+            except ValueError as e:
+                logger.warning(f"Invalid WORKFLOW_MIN_CONTENT_LENGTH value: {e}")
 
     def __str__(self) -> str:
         """String representation of configuration."""
