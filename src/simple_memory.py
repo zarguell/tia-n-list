@@ -144,9 +144,9 @@ class SimpleMemory:
                     stats["recent_articles_7d"] += article_count
 
                 # Track date ranges
-                if stats["oldest_date"] is None or article_date < stats["oldest_date"]:
+                if stats["oldest_date"] is None or date_str < stats["oldest_date"]:
                     stats["oldest_date"] = date_str
-                if stats["newest_date"] is None or article_date > stats["newest_date"]:
+                if stats["newest_date"] is None or date_str > stats["newest_date"]:
                     stats["newest_date"] = date_str
 
             except ValueError:
