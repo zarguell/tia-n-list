@@ -174,9 +174,15 @@ jobs:
         echo "- **JSON Data:** ${{ steps.check-digest.outputs.json-changes == 'true' && '✅ Updated' || 'ℹ️ No changes' }}" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
 
-        # Check latest digest
-        if ls hugo/content/posts/daily-threat-intelligence-*.md 1> /dev/null 2>&1; then
-          LATEST_DIGEST=$(ls -t hugo/content/posts/daily-threat-intelligence-*.md | head -1)
+        # Check latest digest using safe file discovery
+        # Enable nullglob to handle no matches safely
+        shopt -s nullglob
+        digest_files=(hugo/content/posts/daily-threat-intelligence-*.md)
+        shopt -u nullglob
+
+        if [ ${#digest_files[@]} -gt 0 ]; then
+          # Sort files by modification time and get the newest
+          LATEST_DIGEST=$(printf '%s\n' "${digest_files[@]}" | sort -t- -k4 -nr | head -1)
           if [ -f "$LATEST_DIGEST" ]; then
             WORD_COUNT=$(wc -w < "$LATEST_DIGEST" 2>/dev/null || echo "0")
             echo "### 📝 Latest Digest:" >> $GITHUB_STEP_SUMMARY
