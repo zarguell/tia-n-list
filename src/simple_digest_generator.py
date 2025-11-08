@@ -217,8 +217,8 @@ class SimpleDigestGenerator:
             digest_content = response.strip()
             print(f"Generated digest content: {len(digest_content)} characters")
 
-        except Exception as e:
-            print(f"Error generating digest content: {e}")
+        except Exception:
+            logging.exception("Error generating digest content")
             return None
 
         # 6. Mark articles as used
