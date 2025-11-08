@@ -75,7 +75,8 @@ class SimpleDigestGenerator:
                         content = article.get('content', {}).get('processed', '') or article.get('content', {}).get('raw', '')
                         if len(content) > 200:
                             fresh_articles.append(article)
-                except (ValueError, AttributeError):
+                except (ValueError, AttributeError) as e:
+                    print(f"Warning: Skipping article with invalid date format. ID: {article.get('id', 'N/A')}, Error: {e}")
                     continue
 
         return fresh_articles
