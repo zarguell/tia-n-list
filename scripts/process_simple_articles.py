@@ -12,7 +12,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from src.storage_registry import get_default_storage_provider
-from src.llm_registry import get_registry
+from src.llm_registry import get_registry, is_relevant_article
 from src.workflow_config import get_workflow_config
 from datetime import date
 
@@ -112,10 +112,13 @@ def _is_article_suitable_for_processing(article, min_content_length: int) -> boo
 def _process_single_article(article, storage, registry, default_score: int) -> bool:
     """Process a single article for relevance."""
     try:
-        is_relevant = registry.execute_with_fallback(
-            'is_relevant_article',
-            article=article
+        # Use the standalone is_relevant_article function
+        relevance_result = is_relevant_article(
+            article.get('title', ''),
+            article.get('content', {}).get('raw', '')
         )
+
+        is_relevant = relevance_result.get('is_relevant', False)
 
         if is_relevant:
             storage.update_article_status(
