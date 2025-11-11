@@ -94,7 +94,7 @@ def _process_articles_for_relevance(articles, storage, registry,
 
     for article in articles:
         if _is_article_suitable_for_processing(article, min_content_length):
-            if _process_single_article(article, storage, registry, default_score):
+            if _process_single_article(article, storage, default_score):
                 relevant_count += 1
 
     return relevant_count
@@ -109,7 +109,7 @@ def _is_article_suitable_for_processing(article, min_content_length: int) -> boo
     return len(content) > min_content_length
 
 
-def _process_single_article(article, storage, registry, default_score: int) -> bool:
+def _process_single_article(article, storage, default_score: int) -> bool:
     """Process a single article for relevance."""
     try:
         # Use the standalone is_relevant_article function
@@ -121,10 +121,16 @@ def _process_single_article(article, storage, registry, default_score: int) -> b
         is_relevant = relevance_result.get('is_relevant', False)
 
         if is_relevant:
+            # Use relevance_score from LLM if available, otherwise default_score
+            score = relevance_result.get('relevance_score', default_score)
+
+            print(f"✓ Relevant article: {article.get('title', 'unknown')[:50]}... "
+                  f"(score: {relevance_result.get('relevance_score', 'N/A')})")
+
             storage.update_article_status(
                 article.get('id') or article.get('guid'),
                 'processed',
-                {'score': default_score, 'processed_at': date.today().isoformat()}
+                {'score': score, 'processed_at': date.today().isoformat()}
             )
             return True
 
