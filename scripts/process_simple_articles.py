@@ -12,7 +12,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from src.storage_registry import get_default_storage_provider
-from src.llm_registry import get_registry
+from src.llm_registry import get_registry, is_relevant_article
 from src.workflow_config import get_workflow_config
 from datetime import date
 
@@ -94,7 +94,7 @@ def _process_articles_for_relevance(articles, storage, registry,
 
     for article in articles:
         if _is_article_suitable_for_processing(article, min_content_length):
-            if _process_single_article(article, storage, registry, default_score):
+            if _process_single_article(article, storage, default_score):
                 relevant_count += 1
 
     return relevant_count
@@ -109,19 +109,28 @@ def _is_article_suitable_for_processing(article, min_content_length: int) -> boo
     return len(content) > min_content_length
 
 
-def _process_single_article(article, storage, registry, default_score: int) -> bool:
+def _process_single_article(article, storage, default_score: int) -> bool:
     """Process a single article for relevance."""
     try:
-        is_relevant = registry.execute_with_fallback(
-            'is_relevant_article',
-            article=article
+        # Use the standalone is_relevant_article function
+        relevance_result = is_relevant_article(
+            article.get('title', ''),
+            article.get('content', {}).get('raw', '')
         )
 
+        is_relevant = relevance_result.get('is_relevant', False)
+
         if is_relevant:
+            # Use relevance_score from LLM if available, otherwise default_score
+            score = relevance_result.get('relevance_score', default_score)
+
+            print(f"✓ Relevant article: {article.get('title', 'unknown')[:50]}... "
+                  f"(score: {score})")
+
             storage.update_article_status(
                 article.get('id') or article.get('guid'),
                 'processed',
-                {'score': default_score, 'processed_at': date.today().isoformat()}
+                {'score': score, 'processed_at': date.today().isoformat()}
             )
             return True
 
