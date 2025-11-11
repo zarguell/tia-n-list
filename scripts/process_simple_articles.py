@@ -125,7 +125,7 @@ def _process_single_article(article, storage, default_score: int) -> bool:
             score = relevance_result.get('relevance_score', default_score)
 
             print(f"✓ Relevant article: {article.get('title', 'unknown')[:50]}... "
-                  f"(score: {relevance_result.get('relevance_score', 'N/A')})")
+                  f"(score: {score})")
 
             storage.update_article_status(
                 article.get('id') or article.get('guid'),
