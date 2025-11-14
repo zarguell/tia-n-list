@@ -19,8 +19,109 @@ import logging
 from abc import ABC, abstractmethod
 from typing import Dict, Any, List, Optional, Union
 from dataclasses import dataclass
+from collections import defaultdict, deque
+from datetime import datetime, timedelta
 
 logger = logging.getLogger(__name__)
+
+# Rate limiting for OpenRouter free tier (20 calls/minute)
+class RateLimiter:
+    """Simple rate limiter using sliding window."""
+
+    def __init__(self, max_calls: int, time_window_seconds: int):
+        self.max_calls = max_calls
+        self.time_window_seconds = time_window_seconds
+        self.calls = deque()
+
+    def is_allowed(self) -> bool:
+        """Check if call is allowed."""
+        now = datetime.now()
+
+        # Remove old calls outside the time window
+        while self.calls and self.calls[0] < now - timedelta(seconds=self.time_window_seconds):
+            self.calls.popleft()
+
+        # Check if we're under the limit
+        if len(self.calls) < self.max_calls:
+            self.calls.append(now)
+            return True
+
+        return False
+
+    def wait_time(self) -> float:
+        """Get seconds to wait until next call is allowed."""
+        if self.is_allowed():
+            return 0.0
+
+        oldest_call = self.calls[0]
+        wait_until = oldest_call + timedelta(seconds=self.time_window_seconds)
+        return max(0, (wait_until - datetime.now()).total_seconds())
+
+# Global rate limiters for different providers
+_rate_limiters = {
+    'openrouter': RateLimiter(max_calls=20, time_window_seconds=60),
+    'openai': RateLimiter(max_calls=100, time_window_seconds=60),  # Higher limit for paid
+    'gemini': RateLimiter(max_calls=60, time_window_seconds=60),  # Reasonable limit
+}
+
+# LLM Observability tracking
+class LLMObservability:
+    """Track LLM calls for monitoring and debugging."""
+
+    def __init__(self):
+        self.stats = defaultdict(lambda: {
+            'calls': 0,
+            'successes': 0,
+            'failures': 0,
+            'input_tokens': 0,
+            'output_tokens': 0,
+            'response_time': [],
+            'last_call': None,
+            'models_used': set()
+        })
+
+    def log_call(self, provider: str, model: str, success: bool,
+                 input_tokens: int = 0, output_tokens: int = 0,
+                 response_time: float = 0.0, status_code: str = None):
+        """Log an LLM call for observability."""
+        stats = self.stats[provider]
+        stats['calls'] += 1
+        stats['models_used'].add(model)
+        stats['last_call'] = datetime.now()
+
+        if success:
+            stats['successes'] += 1
+            stats['input_tokens'] += input_tokens
+            stats['output_tokens'] += output_tokens
+            if response_time > 0:
+                stats['response_time'].append(response_time)
+        else:
+            stats['failures'] += 1
+
+        # Log detailed information
+        status = "SUCCESS" if success else "FAILED"
+        logger.info(f"LLM_CALL [{provider}] {status} | Model: {model} | "
+                   f"Tokens: {input_tokens}→{output_tokens} | "
+                   f"Time: {response_time:.2f}s | Code: {status_code}")
+
+    def get_stats(self, provider: str = None) -> Dict[str, Any]:
+        """Get observability statistics."""
+        if provider:
+            return dict(self.stats[provider])
+
+        return {p: dict(s) for p, s in self.stats.items()}
+
+# Global observability instance
+_observability = LLMObservability()
+
+# Response wrapper for token usage tracking
+@dataclass
+class LLMResponse:
+    """Wrapper for LLM responses that includes usage information."""
+    content: str
+    usage: Optional[Dict[str, Any]] = None
+    model: Optional[str] = None
+    response_time: Optional[float] = None
 
 # Import provider dependencies with graceful fallback
 GEMINI_AVAILABLE = False
@@ -328,9 +429,11 @@ class OpenAIProvider(BaseLLMProvider):
             raise LLMProviderAPIError(f"Failed to connect to OpenAI API: {e}")
 
     def generate_text(self, prompt: str, max_tokens: int = 1000, temperature: float = 0.7) -> str:
-        return self._retry_with_backoff(
+        result = self._retry_with_backoff(
             lambda: self._generate_with_model(self.config.model, prompt, max_tokens, temperature)
         )
+        # Extract just the content for compatibility
+        return result.content if hasattr(result, 'content') else result
 
     def generate_structured(self, prompt: str, schema: Dict[str, Any], max_tokens: int = 4000) -> Dict[str, Any]:
         enhanced_prompt = f"""
@@ -370,7 +473,8 @@ Only return the JSON response, no additional text.
                 responses.append("")
         return responses
 
-    def _generate_with_model(self, model: str, prompt: str, max_tokens: int, temperature: float) -> str:
+    def _generate_with_model(self, model: str, prompt: str, max_tokens: int, temperature: float) -> LLMResponse:
+        start_time = time.time()
         try:
             # Prepare completion parameters
             completion_params = {
@@ -397,9 +501,34 @@ Only return the JSON response, no additional text.
                 else:
                     raise first_error
 
-            return response.choices[0].message.content.strip()
+            response_time = time.time() - start_time
+            content = response.choices[0].message.content.strip()
+
+            # Extract usage information
+            usage = None
+            if hasattr(response, 'usage') and response.usage:
+                usage = {
+                    'prompt_tokens': getattr(response.usage, 'prompt_tokens', 0),
+                    'completion_tokens': getattr(response.usage, 'completion_tokens', 0),
+                    'total_tokens': getattr(response.usage, 'total_tokens', 0)
+                }
+
+            return LLMResponse(
+                content=content,
+                usage=usage,
+                model=model,
+                response_time=response_time
+            )
+
         except Exception as e:
-            raise LLMProviderAPIError(f"OpenAI API error: {e}")
+            response_time = time.time() - start_time
+            # Return failed response with timing info
+            return LLMResponse(
+                content="",
+                usage=None,
+                model=model,
+                response_time=response_time
+            )
 
 
 # OpenRouter Provider (consolidated from providers/openrouter_provider.py)
@@ -668,14 +797,97 @@ class LLMRegistry:
 
         last_error = None
         for provider in providers_to_try:
+            # Rate limiting check
+            provider_key = provider.name.lower()
+            if provider_key in _rate_limiters:
+                rate_limiter = _rate_limiters[provider_key]
+                if not rate_limiter.is_allowed():
+                    wait_time = rate_limiter.wait_time()
+                    if wait_time > 0:
+                        logger.warning(f"Rate limit reached for {provider.name}, waiting {wait_time:.1f}s")
+                        time.sleep(wait_time)
+
+            # Track timing and observability
+            start_time = time.time()
+            success = False
+            input_tokens = 0
+            output_tokens = 0
+            status_code = None
+            model_used = getattr(provider.config, 'model', 'unknown')
+
             try:
                 method = getattr(provider, method_name)
                 result = method(*args, **kwargs)
+
+                # Success case
+                success = True
+
+                # Handle LLMResponse object
+                if hasattr(result, 'content'):
+                    content = result.content
+                    response_time = result.response_time or (time.time() - start_time)
+                    model_used = result.model or model_used
+
+                    # Extract token usage from LLMResponse
+                    if result.usage:
+                        input_tokens = result.usage.get('prompt_tokens', 0)
+                        output_tokens = result.usage.get('completion_tokens', 0)
+                    else:
+                        input_tokens = 0
+                        output_tokens = 0
+
+                    status_code = "200"
+                else:
+                    # Legacy string response
+                    content = result
+                    response_time = time.time() - start_time
+                    input_tokens = 0
+                    output_tokens = 0
+                    status_code = "200"
+
+                # Log observability
+                _observability.log_call(
+                    provider=provider.name,
+                    model=model_used,
+                    success=success,
+                    input_tokens=input_tokens,
+                    output_tokens=output_tokens,
+                    response_time=response_time,
+                    status_code=status_code
+                )
+
                 if provider != self.primary_provider:
                     logger.info(f"Successfully used fallback provider '{provider.name}'")
-                return result
+                return content
+
             except Exception as e:
+                response_time = time.time() - start_time
                 last_error = e
+
+                # Extract status code from error if available
+                error_str = str(e)
+                if "429" in error_str:
+                    status_code = "429"
+                elif "401" in error_str:
+                    status_code = "401"
+                elif "400" in error_str:
+                    status_code = "400"
+                elif "500" in error_str:
+                    status_code = "500"
+                else:
+                    status_code = "ERROR"
+
+                # Log observability for failed call
+                _observability.log_call(
+                    provider=provider.name,
+                    model=model_used,
+                    success=success,
+                    input_tokens=input_tokens,
+                    output_tokens=output_tokens,
+                    response_time=response_time,
+                    status_code=status_code
+                )
+
                 logger.warning(f"Provider '{provider.name}' failed: {e}")
                 continue
 
@@ -694,6 +906,53 @@ class LLMRegistry:
             'fallback_count': len([p for p in self.fallback_providers if p]),
             'total_providers': len(self.providers),
             'available_providers': list(self.providers.keys())
+        }
+
+    def get_observability_stats(self) -> Dict[str, Any]:
+        """Get LLM observability statistics.
+
+        Returns:
+            Dictionary with observability metrics.
+        """
+        stats = _observability.get_stats()
+
+        # Calculate derived metrics
+        for provider, provider_stats in stats.items():
+            total_calls = provider_stats['calls']
+            if total_calls > 0:
+                provider_stats['success_rate'] = (provider_stats['successes'] / total_calls) * 100
+                provider_stats['failure_rate'] = (provider_stats['failures'] / total_calls) * 100
+
+                # Calculate average response time
+                if provider_stats['response_time']:
+                    provider_stats['avg_response_time'] = sum(provider_stats['response_time']) / len(provider_stats['response_time'])
+                else:
+                    provider_stats['avg_response_time'] = 0.0
+
+                # Calculate total tokens
+                provider_stats['total_tokens'] = provider_stats['input_tokens'] + provider_stats['output_tokens']
+                provider_stats['avg_tokens_per_call'] = provider_stats['total_tokens'] / total_calls if total_calls > 0 else 0
+            else:
+                provider_stats['success_rate'] = 0.0
+                provider_stats['failure_rate'] = 0.0
+                provider_stats['avg_response_time'] = 0.0
+                provider_stats['total_tokens'] = 0
+                provider_stats['avg_tokens_per_call'] = 0.0
+
+            # Convert sets to lists for JSON serialization
+            provider_stats['models_used'] = list(provider_stats['models_used'])
+
+        return {
+            'providers': stats,
+            'rate_limits': {
+                name: {
+                    'max_calls': limiter.max_calls,
+                    'time_window_seconds': limiter.time_window_seconds,
+                    'current_calls': len(limiter.calls),
+                    'next_available_in': limiter.wait_time()
+                }
+                for name, limiter in _rate_limiters.items()
+            }
         }
 
 
