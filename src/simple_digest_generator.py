@@ -7,6 +7,8 @@ Replaces complex enterprise blog generation with streamlined RSS→digest workfl
 import json
 import logging
 import os
+import random
+import time
 from datetime import date, datetime, timedelta
 from pathlib import Path
 from typing import List, Dict, Optional
@@ -156,21 +158,33 @@ class SimpleDigestGenerator:
     def _extract_themes(self, articles: List[Dict]) -> List[str]:
         """Extract key themes from articles."""
         theme_patterns = {
-            'Vulnerability': ['vulnerability', 'cve'],
-            'Malware': ['malware', 'ransomware'],
-            'Cyber Attack': ['attack', 'breach'],
-            'Tech Giants': ['microsoft', 'google', 'apple']
+            'Ransomware': ['ransomware', 'lockbit', 'conti', 'revil', 'cl0p', 'babuk', 'qilin', 'kraken', 'extortion'],
+            'Vulnerability': ['vulnerability', 'cve-', 'patch', 'critical', 'flaw', 'bug'],
+            'Malware': ['malware', 'trojan', 'botnet', 'spyware', 'backdoor', 'rootkit', 'rat', 'worm'],
+            'Law Enforcement': ['police', 'fbi', 'europol', 'interpol', 'authorities', 'takedown', 'arrest', 'disrupt'],
+            'Data Breach': ['breach', 'leak', 'data', 'exposed', 'stolen', 'compromised'],
+            'Critical Infrastructure': ['healthcare', 'hospital', 'energy', 'utility', 'transportation', 'government'],
+            'Tech Giants': ['microsoft', 'apple', 'google', 'amazon', 'meta', 'tesla', 'oracle', 'cisco'],
+            'Financial': ['bank', 'finance', 'payment', 'fraud', 'crypto', 'bitcoin'],
+            'Supply Chain': ['supply chain', 'software', 'vendor', 'third-party'],
+            'Phishing': ['phishing', 'email', 'credential', 'login', 'password']
         }
 
         themes = []
-        for article in articles[:5]:  # Look at top 5 articles
+        for article in articles[:10]:  # Look at top 10 articles for better coverage
             title = article.get('title', '').lower()
+            content = self._get_article_content(article).lower() if len(self._get_article_content(article)) > 100 else ''
+            combined_text = f"{title} {content}"
+
             for theme, keywords in theme_patterns.items():
-                if any(keyword in title for keyword in keywords):
+                if any(keyword in combined_text for keyword in keywords):
                     themes.append(theme)
                     break
 
-        return list(set(themes))[:3]  # Max 3 unique themes
+        # Count theme frequency and return most common
+        from collections import Counter
+        theme_counts = Counter(themes)
+        return [theme for theme, count in theme_counts.most_common(3)]
 
     def _generate_tags(self, articles: List[Dict]) -> List[str]:
         """Generate tags from articles."""
@@ -181,13 +195,138 @@ class SimpleDigestGenerator:
                 tags.append(source.lower())
         return tags[:10]  # Limit to 10 tags
 
-    def _generate_title(self, target_date: date, articles: List[Dict]) -> str:
-        """Generate title based on themes and articles."""
+    def _generate_llm_title_with_retry(self, target_date: date, articles: List[Dict]) -> Optional[str]:
+        """Generate LLM-powered title with retry logic for rate limiting."""
+        max_retries = 3
+        base_wait_time = 60  # Start with 60 seconds for rate limits
+
+        # Create concise article summary for the prompt
+        article_summaries = []
+        for i, article in enumerate(articles[:8]):  # Use top 8 articles
+            title = article.get('title', '')
+            source = article.get('source_id', '').replace('-', ' ').title()
+            article_summaries.append(f"{i+1}. {title} ({source})")
+
+        # Extract key themes
         themes = self._extract_themes(articles)
-        if themes:
-            return f"{' & '.join(themes)} Dominate Latest Threat Intelligence - {target_date.strftime('%B %d, %Y')}"
-        else:
+        themes_str = ', '.join(themes) if themes else 'General cybersecurity intelligence'
+
+        date_str = target_date.strftime('%B %d, %Y')
+
+        prompt = f"""Generate a compelling, SEO-optimized title for today's cybersecurity threat intelligence briefing.
+
+DATE: {date_str}
+
+TOP ARTICLES:
+{chr(10).join(article_summaries)}
+
+KEY THEMES: {themes_str}
+
+REQUIREMENTS:
+- Maximum 70 characters
+- Include relevant emojis (⚠️, 🔥, 🏢, 📊, 🎯, 🔍, 🚨, 🍎, 🔐)
+- Must be engaging and clickable
+- Include key themes from above
+- Avoid generic titles
+- Focus on most important development
+
+Examples of good titles:
+- "⚠️ Critical CVE-2025-24893 Exploited in Wild - November 13, 2025"
+- "🔥 LockBit Ransomware Targets Healthcare Sector - November 13, 2025"
+- "🍎 Apple Patches 161 Critical Vulnerabilities - November 13, 2025"
+
+Generate only the title, nothing else:"""
+
+        for attempt in range(max_retries):
+            try:
+                logger.info(f"LLM title generation attempt {attempt + 1}/{max_retries}")
+
+                response = self.llm_registry.execute_with_fallback(
+                    "generate_text",
+                    prompt=prompt,
+                    max_tokens=50,
+                    temperature=0.8
+                )
+
+                if response and response.strip():
+                    title = response.strip().strip('"\'').strip()
+
+                    # Validate title quality
+                    if len(title) <= 100 and any(c in title for c in '⚠️🔥🏢📊🎯🔍🚨🍎🔐'):
+                        logger.info(f"Successfully generated LLM title: {title}")
+                        return title
+                    else:
+                        logger.warning(f"Generated title failed validation: {title}")
+                else:
+                    logger.warning("LLM returned empty response")
+
+            except Exception as e:
+                error_str = str(e)
+                if "429" in error_str and attempt < max_retries - 1:
+                    # Exponential backoff with jitter for rate limits
+                    wait_time = base_wait_time * (2 ** attempt) + random.randint(1, 30)
+                    logger.warning(f"Rate limited (HTTP 429), waiting {wait_time}s before retry {attempt + 1}")
+                    time.sleep(wait_time)
+                    continue
+                else:
+                    logger.error(f"LLM title generation failed on attempt {attempt + 1}: {e}")
+                    if attempt == max_retries - 1:
+                        break
+                # Brief wait for other errors
+                if attempt < max_retries - 1:
+                    time.sleep(5 + random.randint(1, 10))
+
+        logger.error("All LLM title generation attempts failed, falling back to template")
+        return None
+
+    def _generate_title(self, target_date: date, articles: List[Dict]) -> str:
+        """Generate title with LLM first, template fallback."""
+        if not articles:
             return f"Daily Threat Intelligence Digest - {target_date.strftime('%B %d, %Y')}"
+
+        # Try LLM generation first
+        logger.info("Attempting LLM title generation...")
+        llm_title = self._generate_llm_title_with_retry(target_date, articles)
+
+        if llm_title:
+            return llm_title
+
+        # Fall back to enhanced template logic
+        logger.info("Falling back to template title generation")
+        themes = self._extract_themes(articles)
+
+        # Create specific titles based on themes and article count
+        article_count = len(articles)
+        date_str = target_date.strftime('%B %d, %Y')
+
+        if themes:
+            primary_theme = themes[0]
+
+            # Theme-specific title templates
+            if primary_theme == 'Ransomware':
+                return f"🔥 {article_count} Ransomware Incidents Strike Global Targets - {date_str}"
+            elif primary_theme == 'Vulnerability':
+                return f"⚠️ Critical Vulnerabilities Patched in Major Software - {date_str}"
+            elif primary_theme == 'Law Enforcement':
+                return f"🚨 Global Cyber Crime Takedowns Disrupt Major Operations - {date_str}"
+            elif primary_theme == 'Data Breach':
+                return f"📊 Major Data Breaches Expose Sensitive Information - {date_str}"
+            elif primary_theme == 'Critical Infrastructure':
+                return f"🏥 Critical Infrastructure Faces Rising Cyber Threats - {date_str}"
+            elif primary_theme == 'Tech Giants':
+                return f"🏢 Tech Giants Address Security Issues Across Products - {date_str}"
+            elif primary_theme == 'Malware':
+                return f"🦠 New Malware Strains Detected in Active Campaigns - {date_str}"
+            else:
+                return f"{' & '.join(themes)} Dominate Cybersecurity Landscape - {date_str}"
+        else:
+            # Fallback to more specific generic titles
+            if article_count >= 15:
+                return f"📈 {article_count} Security Developments in Latest Threat Intelligence - {date_str}"
+            elif article_count >= 10:
+                return f"🔍 Multiple Cyber Threats Emerge in Security Landscape - {date_str}"
+            else:
+                return f"🛡️ Daily Threat Intelligence Digest - {date_str}"
 
     def _generate_hugo_metadata(self, target_date: date, articles: List[Dict]) -> Dict:
         """Generate Hugo frontmatter metadata."""
