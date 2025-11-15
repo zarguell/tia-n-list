@@ -1,0 +1,26 @@
+{
+  "id": "qualys-security-blog-2025-11-15-b7bacb30",
+  "source_id": "qualys-security-blog",
+  "guid": "https://blog.qualys.com/?p=39104",
+  "title": "Unauthenticated Authentication Bypass in Fortinet FortiWeb (CVE-2025-64446) Exploited in the Wild",
+  "url": "https://blog.qualys.com/category/vulnerabilities-threat-research",
+  "published_at": "2025-11-15T00:01:08+00:00",
+  "fetched_at": "2025-11-15T11:16:48.903839+00:00Z",
+  "status": "fetched",
+  "content": {
+    "raw": "A critical authentication bypass vulnerability affecting Fortinet FortiWeb web application firewalls has been actively exploited since early October 2025. The vulnerability allows unauthenticated attackers to create admin accounts and gain complete control over vulnerable devices exposed to the internet. It is being officially tracked as CVE-2025-64446 with a CVSS v3.1 score of 9.8 (Critical). CISA has added CVE-2025-64446 to the CISA KEV catalog earlier today with a required remediation due date of November 21, 2025. Technical Analysis: The vulnerability actually involves two distinct flaws that work together to bypass authentication controls. First: Path Traversal The first stage exploits a path traversal weakness in the FortiWeb API. If a URI begins with a valid API path like /api/v2.0/cmdb/system/admin, an attacker can traverse to the underlying fwbcgi CGI executable: POST /api/v2.0/cmd/system/admin%3F/../../../../../cgi-bin/fwbcgi HTTP/1.1 Second: Impersonation Mechanism The second stage abuses how FortiWeb&#8217;s fwbcgi binary handles authentication through the cgi_auth() function. This function doesn&#8217;t actually authenticate users. Instead, it accepts user identity information from the client via a base64-encoded CGIINFO HTTP header. The function extracts four key fields from the decoded JSON: username &#8211; target username profname &#8211; profile name vdom &#8211; virtual domain loginname &#8211; login identifier Since the built-in admin account has consistent attributes across all FortiWeb devices that can&#8217;t be modified, threat actors can reliably impersonate this account by supplying the correct JSON structure: { \"username\": \"admin\", \"profname\": \"super_admin\", \"vdom\": \"root\", \"loginname\": \"admin\" } Once the cgi_auth() function processes this header, all subsequent actions execute with full administrative privileges. The attacker can then issue any command, including creating persistent admin accounts with known credentials. Affected Versions: The following Fortinet FortiWeb versions are vulnerable: FortiWeb 8.0.0 through 8.0.1 FortiWeb 7.6.0 through 7.6.4 FortiWeb 7.4.0 through 7.4.9 FortiWeb 7.2.0 through 7.2.11 FortiWeb 7.0.0 through 7.0.11 Qualys Detection Resources Qualys customers can now scan their devices with the following QID(s) to detect vulnerable assets. These QID(s) are available in VULNSIGS-2.6.468-4 and onwards. QID 733406: Fortinet FortiWeb Authentication Bypass Vulnerability (Intrusive Check) QID 733407: Fortinet FortiWeb Authentication Bypass Vulnerability (FG-IR-25-910) Mitigation Recommendations Customers should ensure that their Fortinet versions are updated to the following versions: FortiWeb 8.0.2 or above FortiWeb 7.6.5 or above FortiWeb 7.4.10 or above FortiWeb 7.2.12 or above FortiWeb 7.0.12 or above Temporary Mitigation: Immediately disable HTTP/HTTPS access on any internet-facing interfaces. This control should remain in place until the system is upgraded. Indicators of Compromise: Organizations running vulnerable versions should immediately check for: Network-based IOCs: POST requests to /api/v2.0/cmd/system/admin%3F/../../../../../cgi-bin/fwbcgi or similar path traversal patterns from unauthorized IP addresses. Requests containing base64-encoded CGIINFO headers Host-based IOCs: Unknown administrator accounts created since early October 2025 New local user accounts with prof_admin access profiles Accounts with trust host ranges set to 0.0.0.0/0 or ::/0&nbsp; Eliminating the Risk of These Vulnerabilities with the Qualys Enterprise TruRiskTM&nbsp;Platform Strengthen Your Security Posture with Qualys VMDR Qualys VMDR&nbsp;offers comprehensive coverage and visibility into vulnerabilities, empowering organizations to rapidly respond to, prioritize, and mitigate the associated risks. Leverage the power of Qualys VMDR alongside TruRiskTM&nbsp;scoring and the Qualys Query Language (QQL) to efficiently identify and prioritize vulnerable assets, effectively addressing the vulnerabilities highlighted above. Use this QQL statement: vulnerabilities.vulnerability.cveIds:CVE-2025-64446 Get Started with Qualys Solutions Today. Try Today",
+    "full": "",
+    "processed": ""
+  },
+  "analysis": {
+    "score": null,
+    "relevance_score": null,
+    "threat_category": null,
+    "summary": null,
+    "key_entities": [],
+    "ttps": []
+  },
+  "content_source": "rss",
+  "content_fetch_method": null,
+  "processing_metadata": {}
+}
