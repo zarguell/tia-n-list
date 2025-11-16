@@ -445,9 +445,12 @@ Please respond with valid JSON that matches this schema:
 Only return the JSON response, no additional text.
         """
 
-        response_text = self._retry_with_backoff(
+        response = self._retry_with_backoff(
             lambda: self._generate_with_model(self.config.analysis_model, enhanced_prompt, max_tokens, 0.1)
         )
+
+        # Extract content from LLMResponse
+        response_text = response.content if hasattr(response, 'content') else response
 
         # Parse JSON response with fallback
         try:

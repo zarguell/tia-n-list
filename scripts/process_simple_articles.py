@@ -127,10 +127,10 @@ def _process_single_article(article, storage, default_score: int) -> bool:
             print(f"✓ Relevant article: {article.get('title', 'unknown')[:50]}... "
                   f"(score: {score})")
 
-            storage.update_article_status(
+            storage.update_article(
                 article.get('id') or article.get('guid'),
-                'processed',
-                {'score': score, 'processed_at': date.today().isoformat()}
+                status='processed',
+                analysis={'score': score, 'processed_at': date.today().isoformat()}
             )
             return True
 
