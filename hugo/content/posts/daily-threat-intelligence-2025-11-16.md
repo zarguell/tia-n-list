@@ -1,5 +1,5 @@
 +++
-title = "\ud83d\udd25 1 Ransomware Incidents Strike Global Targets - November 16, 2025"
+title = "🔥 1 Ransomware Incidents Strike Global Targets - November 16, 2025"
 date = "2025-11-16"
 tags = ["threat-intelligence", "daily-digest", "cybersecurity", "security affairs securityaffairs co"]
 categories = ["Threat Intelligence"]

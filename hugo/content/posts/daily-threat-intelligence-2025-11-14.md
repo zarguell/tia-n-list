@@ -1,5 +1,5 @@
 +++
-title = "\ud83d\udd25 23 Ransomware Incidents Strike Global Targets - November 14, 2025"
+title = "🔥 23 Ransomware Incidents Strike Global Targets - November 14, 2025"
 date = "2025-11-14"
 tags = ["threat-intelligence", "daily-digest", "cybersecurity", "bellingcat bellingcat com", "cyberscoop", "security affairs securityaffairs co", "gbhackers security 1 globally trusted cyber security news platform gbhackers com"]
 categories = ["Threat Intelligence"]

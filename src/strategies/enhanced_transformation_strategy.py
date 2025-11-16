@@ -359,7 +359,7 @@ class EnhancedTransformationStrategy(TransformationStrategy):
                     else:
                         toml_lines.append(f"  {subkey}: {subvalue}")
             elif isinstance(value, list):
-                toml_lines.append(f"{key}: {json.dumps(value)}")
+                toml_lines.append(f"{key}: {json.dumps(value, ensure_ascii=False)}")
             elif isinstance(value, bool):
                 toml_lines.append(f"{key}: {str(value).lower()}")
             else:
@@ -501,7 +501,7 @@ Focus on high-priority threats with relevance scores 7+.
 title: "{title}"
 date: "{target_date.isoformat()}"
 draft: false
-tags: {json.dumps(tags)}
+tags: {json.dumps(tags, ensure_ascii=False)}
 categories: ["threat-intelligence"]
 author: "Tia N. List"
 summary: "Daily threat intelligence briefing"

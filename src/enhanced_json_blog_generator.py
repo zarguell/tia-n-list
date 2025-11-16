@@ -544,11 +544,11 @@ class EnhancedJSONBlogGenerator:
                 frontmatter_yaml += f"{key}:" + "\n"
                 for subkey, subvalue in value.items():
                     if isinstance(subvalue, (list, dict)):
-                        frontmatter_yaml += f"  {subkey}: {json.dumps(subvalue)}" + "\n"
+                        frontmatter_yaml += f"  {subkey}: {json.dumps(subvalue, ensure_ascii=False)}" + "\n"
                     else:
                         frontmatter_yaml += f"  {subkey}: {subvalue}" + "\n"
             elif isinstance(value, list):
-                frontmatter_yaml += f"{key}: {json.dumps(value)}" + "\n"
+                frontmatter_yaml += f"{key}: {json.dumps(value, ensure_ascii=False)}" + "\n"
             else:
                 frontmatter_yaml += f"{key}: {value}" + "\n"
         frontmatter_yaml += "---" + "\n" + "\n"

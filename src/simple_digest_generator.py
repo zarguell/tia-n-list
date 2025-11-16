@@ -436,13 +436,13 @@ Generate only the title, nothing else:"""
             frontmatter_lines = ["+++"]
             for key, value in metadata.items():
                 if isinstance(value, list):
-                    frontmatter_lines.append(f'{key} = {json.dumps(value)}')
+                    frontmatter_lines.append(f'{key} = {json.dumps(value, ensure_ascii=False)}')
                 elif isinstance(value, bool):
                     frontmatter_lines.append(f'{key} = {str(value).lower()}')
                 elif isinstance(value, (int, float)):
                     frontmatter_lines.append(f'{key} = {value}')
                 else:
-                    frontmatter_lines.append(f'{key} = {json.dumps(value)}')
+                    frontmatter_lines.append(f'{key} = {json.dumps(value, ensure_ascii=False)}')
             frontmatter_lines.append("+++")
 
             frontmatter = "\n".join(frontmatter_lines)

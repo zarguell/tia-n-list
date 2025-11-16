@@ -170,7 +170,7 @@ class TemplateTransformationStrategy(TransformationStrategy):
                 for subkey, subvalue in value.items():
                     yaml_lines.append(f"  {subkey}: {subvalue}")
             elif isinstance(value, list):
-                yaml_lines.append(f"{key}: {json.dumps(value)}")
+                yaml_lines.append(f"{key}: {json.dumps(value, ensure_ascii=False)}")
             elif isinstance(value, bool):
                 yaml_lines.append(f"{key}: {str(value).lower()}")
             else:
