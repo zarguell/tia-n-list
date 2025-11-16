@@ -217,7 +217,7 @@ class BaseLLMProvider(ABC):
         pass
 
     @abstractmethod
-    def generate_text(self, prompt: str, max_tokens: int = 1000, temperature: float = 0.7) -> str:
+    def generate_text(self, prompt: str, max_tokens: int = 1000, temperature: float = 0.7) -> LLMResponse:
         """Generate text response from a prompt."""
         pass
 
@@ -297,7 +297,7 @@ class GeminiProvider(BaseLLMProvider):
 
         logger.debug(f"Initialized Gemini models: {self.config.filtering_model}, {self.config.analysis_model}")
 
-    def generate_text(self, prompt: str, max_tokens: int = 1000, temperature: float = 0.7) -> str:
+    def generate_text(self, prompt: str, max_tokens: int = 1000, temperature: float = 0.7) -> LLMResponse:
         return self._retry_with_backoff(
             lambda: self._generate_with_model(self.analysis_model, prompt, max_tokens, temperature)
         )
@@ -363,7 +363,8 @@ Only return the JSON response, no additional text.
                 responses.append("")
         return responses
 
-    def _generate_with_model(self, model, prompt: str, max_tokens: int, temperature: float) -> str:
+    def _generate_with_model(self, model, prompt: str, max_tokens: int, temperature: float) -> LLMResponse:
+        start_time = time.time()
         try:
             response = model.generate_content(
                 prompt,
@@ -382,11 +383,33 @@ Only return the JSON response, no additional text.
                 elif candidate.finish_reason != 1:  # STOP
                     raise LLMProviderAPIError(f"Generation ended unexpectedly: {candidate.finish_reason}")
 
-            return response.text.strip()
+            response_time = time.time() - start_time
+            content = response.text.strip()
+
+            # Extract usage information from Gemini response
+            usage = None
+            if hasattr(response, 'usage_metadata') and response.usage_metadata:
+                usage = {
+                    'prompt_tokens': getattr(response.usage_metadata, 'prompt_token_count', 0),
+                    'completion_tokens': getattr(response.usage_metadata, 'candidates_token_count', 0),
+                    'total_tokens': getattr(response.usage_metadata, 'total_token_count', 0)
+                }
+
+            return LLMResponse(
+                content=content,
+                usage=usage,
+                model=getattr(model, 'model_name', 'gemini'),
+                response_time=response_time
+            )
         except Exception as e:
-            if isinstance(e, (LLMProviderSafetyError, LLMProviderAPIError)):
-                raise
-            raise LLMProviderAPIError(f"Gemini API error: {e}")
+            response_time = time.time() - start_time
+            # Return failed response with timing info
+            return LLMResponse(
+                content="",
+                usage=None,
+                model=getattr(model, 'model_name', 'gemini'),
+                response_time=response_time
+            )
 
 
 # OpenAI Provider (consolidated from providers/openai_provider.py)
@@ -428,12 +451,11 @@ class OpenAIProvider(BaseLLMProvider):
         except Exception as e:
             raise LLMProviderAPIError(f"Failed to connect to OpenAI API: {e}")
 
-    def generate_text(self, prompt: str, max_tokens: int = 1000, temperature: float = 0.7) -> str:
+    def generate_text(self, prompt: str, max_tokens: int = 1000, temperature: float = 0.7) -> LLMResponse:
         result = self._retry_with_backoff(
             lambda: self._generate_with_model(self.config.model, prompt, max_tokens, temperature)
         )
-        # Extract just the content for compatibility
-        return result.content if hasattr(result, 'content') else result
+        return result
 
     def generate_structured(self, prompt: str, schema: Dict[str, Any], max_tokens: int = 4000) -> Dict[str, Any]:
         enhanced_prompt = f"""
@@ -589,7 +611,7 @@ class OpenRouterProvider(OpenAIProvider):
         except Exception as e:
             raise LLMProviderAPIError(f"Failed to connect to OpenRouter: {e}")
 
-    def _generate_with_model(self, model: str, prompt: str, max_tokens: int, temperature: float) -> str:
+    def _generate_with_model(self, model: str, prompt: str, max_tokens: int, temperature: float) -> LLMResponse:
         # Proactive rate limiting for OpenRouter (20 requests/minute = 3 seconds between requests)
         current_time = time.time()
         time_since_last = current_time - self._last_request_time
