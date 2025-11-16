@@ -47,16 +47,11 @@ def enhance_single_article_with_timeout(storage, article_id, timeout_seconds=60)
             result = fetch_article_content(article['url'])
 
             if result and result.get('success') and result.get('content'):
-                # Store enhanced content
-                success = storage.update_article(
+                # Store enhanced content using the dedicated method
+                success = storage.enhance_article_content(
                     article_id=article_id,
-                    updates={
-                        'content': {
-                            'full': result['content'],
-                            'enhanced_at': time.time(),
-                            'fetch_method': result.get('method', 'unknown')
-                        }
-                    }
+                    full_content=result['content'],
+                    fetch_method=result.get('method', 'unknown')
                 )
                 if success:
                     print(f"  ✅ Enhanced {len(result['content'])} characters ({result.get('method', 'unknown')})")

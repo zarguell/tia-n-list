@@ -92,12 +92,23 @@ class UnifiedIngestion:
 
                 # Extract and parse publication date
                 published_time = None
+
+                # First try parsed date fields
                 for date_field in ['published_parsed', 'updated_parsed']:
                     if hasattr(entry, date_field) and getattr(entry, date_field):
                         # Convert time.struct_time to datetime.datetime for comparison
                         time_struct = getattr(entry, date_field)
                         published_time = datetime(*time_struct[:6], tzinfo=timezone.utc)
                         break
+
+                # If parsed fields are None, try parsing raw date strings
+                if not published_time:
+                    for date_field in ['published', 'updated']:
+                        if hasattr(entry, date_field) and getattr(entry, date_field):
+                            date_str = getattr(entry, date_field)
+                            published_time = self._parse_date_string(date_str)
+                            if published_time:
+                                break
 
                 # Skip articles older than cutoff time
                 if published_time and published_time < cutoff_time:
@@ -336,6 +347,72 @@ class UnifiedIngestion:
         except Exception:
             # If we can't parse the time, allow fetching
             return True
+
+    def _parse_date_string(self, date_str: str) -> Optional[datetime]:
+        """Parse various date string formats from RSS feeds.
+
+        Args:
+            date_str: Date string to parse.
+
+        Returns:
+            Parsed datetime or None if parsing failed.
+        """
+        if not date_str:
+            return None
+
+        import re
+
+        # Common date formats found in RSS feeds
+        formats = [
+            # RFC 2822 with timezone
+            '%a, %d %b %Y %H:%M:%S %z',
+            '%a, %d %b %Y %H:%M:%S %Z',
+            # CrowdStrike format: "Nov 13, 2025 00:00:00-0600"
+            '%b %d, %Y %H:%M:%S%z',
+            '%b %d, %Y %H:%M:%S %z',
+            # Other common formats
+            '%Y-%m-%dT%H:%M:%S%z',
+            '%Y-%m-%dT%H:%M:%SZ',
+            '%Y-%m-%d %H:%M:%S',
+            '%Y-%m-%d',
+            # Full month name formats
+            '%B %d, %Y %H:%M:%S%z',
+            '%B %d, %Y %H:%M:%S %z',
+        ]
+
+        for fmt in formats:
+            try:
+                return datetime.strptime(date_str.strip(), fmt)
+            except ValueError:
+                continue
+
+        # Try to extract date using regex for malformed dates
+        # Handle cases like "Nov 13, 2025 00:00:00-0600"
+        regex_patterns = [
+            r'(\w{3}) \d{1,2}, \d{4} \d{2}:\d{2}:\d{2}([+-]\d{4})',
+            r'(\w{3}) \d{1,2}, \d{4} \d{2}:\d{2}:\d{2} ([+-]\d{4})',
+        ]
+
+        for pattern in regex_patterns:
+            match = re.search(pattern, date_str)
+            if match:
+                try:
+                    # Extract and normalize the timezone part
+                    tz_str = match.group(2) if len(match.groups()) > 1 else ''
+                    if tz_str and ':' not in tz_str and len(tz_str) == 5:
+                        # Convert "-0600" to "-06:00" format
+                        tz_str = tz_str[:3] + ':' + tz_str[3:]
+                        normalized_date = date_str.replace(match.group(2), tz_str)
+                        for fmt in formats:
+                            try:
+                                return datetime.strptime(normalized_date.strip(), fmt)
+                            except ValueError:
+                                continue
+                except Exception:
+                    continue
+
+        print(f"Warning: Could not parse date string: {date_str}")
+        return None
 
     def _strip_html_tags(self, html_content: str) -> str:
         """Remove HTML tags from content, keeping text.
