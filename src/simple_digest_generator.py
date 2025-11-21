@@ -242,7 +242,7 @@ Generate only the title, nothing else:"""
                 logger.info(f"LLM title generation attempt {attempt + 1}/{max_retries}")
 
                 response = self.llm_registry.execute_with_fallback(
-                    "generate_text",
+                    "generate_title",
                     prompt=prompt,
                     max_tokens=50,
                     temperature=0.8

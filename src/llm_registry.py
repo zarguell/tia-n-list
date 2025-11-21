@@ -182,6 +182,7 @@ class ProviderConfig:
     model: Optional[str] = None
     filtering_model: Optional[str] = None
     analysis_model: Optional[str] = None
+    title_model: Optional[str] = None
     timeout: int = 60
     retry_config: Optional[RetryConfig] = None
     max_tokens: int = 1500
@@ -265,7 +266,8 @@ class GeminiProvider(BaseLLMProvider):
         # Set Gemini defaults if not provided
         if not config.filtering_model:
             config.filtering_model = 'gemini-2.0-flash-lite'
-        if not config.analysis_model:
+        # Only set analysis_model default if it's not already set
+        if config.analysis_model is None:
             config.analysis_model = 'gemini-2.5-flash'
 
         # Safety settings for cybersecurity content (only if Gemini is available)
@@ -426,7 +428,8 @@ class OpenAIProvider(BaseLLMProvider):
             config.model = 'gpt-4o-mini'
         if not config.filtering_model:
             config.filtering_model = config.model
-        if not config.analysis_model:
+        # Only set analysis_model default if it's not already set
+        if config.analysis_model is None:
             config.analysis_model = config.model
 
         self.client = None
@@ -561,6 +564,9 @@ class OpenRouterProvider(OpenAIProvider):
     """OpenRouter-specific provider implementation with fallback models."""
 
     def __init__(self, config: ProviderConfig):
+        # Debug logging
+        logger.info(f"DEBUG OpenRouterProvider.__init__: analysis_model before = {repr(config.analysis_model)}")
+
         # Set OpenRouter defaults
         if not config.base_url:
             config.base_url = 'https://openrouter.ai/api/v1'
@@ -568,8 +574,12 @@ class OpenRouterProvider(OpenAIProvider):
             config.model = 'openai/gpt-oss-20b:free'
         if not config.filtering_model:
             config.filtering_model = 'meta-llama/llama-3.3-8b-instruct:free'
-        if not config.analysis_model:
+        # Only set analysis_model default if it's not already set
+        if config.analysis_model is None:
             config.analysis_model = 'openai/gpt-oss-20b:free'
+            logger.info(f"DEBUG OpenRouterProvider.__init__: Set default analysis_model = {config.analysis_model}")
+        else:
+            logger.info(f"DEBUG OpenRouterProvider.__init__: Kept existing analysis_model = {config.analysis_model}")
 
         # OpenRouter fallback models
         if 'fallback_models' not in config.extra_config:
@@ -664,6 +674,14 @@ class OpenRouterProvider(OpenAIProvider):
                     logger.warning(f"Attempt {attempt + 1} failed, retrying in {delay}s: {e}")
                     time.sleep(delay)
 
+    def generate_title(self, prompt: str, max_tokens: int = 50, temperature: float = 0.8) -> LLMResponse:
+        """Generate title using the dedicated title model."""
+        title_model = self.config.title_model or self.config.analysis_model or self.config.model
+        logger.info(f"Generating title with model: {title_model}")
+        return self._retry_with_backoff(
+            lambda: self._generate_with_model(title_model, prompt, max_tokens, temperature)
+        )
+
 
 # Unified LLM Registry
 class LLMRegistry:
@@ -753,13 +771,19 @@ class LLMRegistry:
 
     def _create_openrouter_config(self) -> ProviderConfig:
         """Create OpenRouter provider configuration from environment."""
-        return ProviderConfig(
+        # Debug environment variable values
+        env_analysis_model = os.getenv('OPENROUTER_ANALYSIS_MODEL')
+        logger.info(f"DEBUG: OPENROUTER_ANALYSIS_MODEL from environment: {repr(env_analysis_model)}")
+
+        config = ProviderConfig(
             name='openrouter',
             api_key=os.getenv('OPENROUTER_API_KEY'),
             base_url='https://openrouter.ai/api/v1',
             model=os.getenv('OPENROUTER_MODEL', 'openai/gpt-oss-20b:free'),
             filtering_model=os.getenv('OPENROUTER_FILTERING_MODEL', 'meta-llama/llama-3.3-8b-instruct:free'),
-            analysis_model=os.getenv('OPENROUTER_ANALYSIS_MODEL', 'openai/gpt-oss-20b:free'),
+            analysis_model=env_analysis_model or 'openai/gpt-oss-20b:free',
+            # Add title_model for title generation
+            title_model=os.getenv('OPENROUTER_TITLE_MODEL', env_analysis_model or 'openai/gpt-oss-20b:free'),
             timeout=int(os.getenv('LLM_TIMEOUT', '60')),
             max_tokens=int(os.getenv('LLM_MAX_TOKENS', '1500')),
             max_tokens_filtering=int(os.getenv('LLM_MAX_TOKENS_FILTERING', '1000')),
