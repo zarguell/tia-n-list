@@ -73,34 +73,40 @@ class SimpleDigestGenerator:
             if published.tzinfo is None:
                 published = published.replace(tzinfo=datetime.timezone.utc)
 
-            return published
+            # Convert to system local timezone for consistent comparison
+            return published.astimezone()
         except (ValueError, AttributeError) as e:
             logging.debug(f"Failed to parse datetime for article {article.get('id', 'unknown')}: {e}")
             return None
 
     def _get_fresh_articles(self, target_date: date = None) -> List[Dict]:
-        """Get articles from the last 24 hours."""
+        """Get articles from the target date, falling back to yesterday if needed."""
         if target_date is None:
             target_date = date.today()
 
-        # Get articles from last 24 hours
-        start_time = datetime.combine(target_date, datetime.min.time()).replace(tzinfo=datetime.now().astimezone().tzinfo)
-        end_time = start_time + timedelta(days=1)
-
+        # Try to get articles from the target date first
         articles = self.storage.get_articles_by_date_range(
-            start_date=start_time.date(),
-            end_date=end_time.date(),
+            start_date=target_date,
+            end_date=target_date,
             status='fetched'
         )
 
-        # Filter to last 24 hours and ensure quality
+        # If no articles today, try yesterday
+        if not articles:
+            yesterday = target_date - timedelta(days=1)
+            logger.info(f"No articles found for {target_date}, trying {yesterday}")
+            articles = self.storage.get_articles_by_date_range(
+                start_date=yesterday,
+                end_date=yesterday,
+                status='fetched'
+            )
+
+        # Ensure content quality
         fresh_articles = []
         for article in articles:
-            published = self._normalize_article_datetime(article)
-            if published and start_time <= published < end_time:
-                content = self._get_article_content(article)
-                if len(content) >= MIN_CONTENT_LENGTH:
-                    fresh_articles.append(article)
+            content = self._get_article_content(article)
+            if len(content) >= MIN_CONTENT_LENGTH:
+                fresh_articles.append(article)
 
         return fresh_articles
 
@@ -574,15 +580,7 @@ Generate only the title, nothing else:"""
             digest_content = response.strip()
             logger.info(f"Generated digest content: {len(digest_content)} characters")
 
-            # 7. Mark articles as used
-            used_article_ids = [
-                article.get('id') or article.get('guid')
-                for article in enhanced_articles
-            ]
-            self.memory.mark_articles_used(used_article_ids, target_date)
-            logger.info(f"Marked {len(used_article_ids)} articles as used")
-
-            # 8. Create Hugo post
+            # 7. Create Hugo post
             hugo_metadata = self._generate_hugo_metadata(target_date, enhanced_articles)
             hugo_filename = f"daily-threat-intelligence-{target_date.strftime('%Y-%m-%d')}.md"
             hugo_filepath = self.hugo_content_dir / hugo_filename
@@ -594,6 +592,14 @@ Generate only the title, nothing else:"""
                 f.write(hugo_content)
 
             logger.info(f"Created Hugo post: {hugo_filepath}")
+
+            # 8. Mark articles as used ONLY after successful Hugo post creation
+            used_article_ids = [
+                article.get('id') or article.get('guid')
+                for article in enhanced_articles
+            ]
+            self.memory.mark_articles_used(used_article_ids, target_date)
+            logger.info(f"Marked {len(used_article_ids)} articles as used")
 
             # 9. Cleanup old memory entries
             self.memory.cleanup_old_entries(days_to_keep=MEMORY_CLEANUP_DAYS)
