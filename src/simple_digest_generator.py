@@ -9,6 +9,7 @@ import logging
 import os
 import random
 import time
+from concurrent.futures import ThreadPoolExecutor, TimeoutError as FutureTimeoutError
 from datetime import date, datetime, timedelta
 from pathlib import Path
 from typing import List, Dict, Optional
@@ -28,7 +29,7 @@ MEMORY_CLEANUP_DAYS = int(os.getenv('SIMPLE_DIGEST_MEMORY_CLEANUP_DAYS', '30'))
 MAX_TOKENS = int(os.getenv('SIMPLE_DIGEST_MAX_TOKENS', '3000'))
 
 # Configure logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 
@@ -104,9 +105,129 @@ class SimpleDigestGenerator:
         return fresh_articles
 
     def _get_article_content(self, article: Dict) -> str:
-        """Get article content with fallback to raw content."""
-        return (article.get('content', {}).get('processed', '') or
-                article.get('content', {}).get('raw', ''))
+        """Get article content with priority for processed/summarized content."""
+        content = article.get('content', {})
+        # Priority: summarized > processed > full > raw
+        return (content.get('summarized', '') or
+                content.get('processed', '') or
+                content.get('full', '') or
+                content.get('raw', ''))
+
+    def _enhance_article_content_with_timeout(self, article: Dict, timeout_seconds: int = 60) -> bool:
+        """Enhance a single article's content using trafilatura/beautifulsoup with timeout.
+
+        Args:
+            article: Article dictionary to enhance
+            timeout_seconds: Maximum time to spend on this article
+
+        Returns:
+            True if enhancement was successful, False otherwise
+        """
+        def enhance_article():
+            try:
+                from .content_fetcher import fetch_article_content
+                logger.debug(f"Enhancing content for: {article['title'][:50]}...")
+
+                # Fetch content with timeout
+                result = fetch_article_content(article['url'])
+
+                if result and result.get('success') and result.get('content'):
+                    # Store enhanced content using the dedicated method
+                    success = self.storage.enhance_article_content(
+                        article_id=article['id'],
+                        full_content=result['content'],
+                        fetch_method=result.get('method', 'unknown')
+                    )
+                    if success:
+                        logger.debug(f"  ✅ Enhanced {len(result['content'])} characters ({result.get('method', 'unknown')})")
+                        return True
+                    else:
+                        logger.debug(f"  ❌ Failed to store enhanced content")
+                        return False
+                else:
+                    logger.debug(f"  ❌ Failed to fetch content: {result.get('error', 'Unknown error') if result else 'No result'}")
+                    return False
+
+            except Exception as e:
+                logger.debug(f"  ❌ Error enhancing content: {str(e)[:100]}")
+                return False
+
+        # Use thread-based timeout for better cross-platform compatibility
+        with ThreadPoolExecutor(max_workers=1) as executor:
+            future = executor.submit(enhance_article)
+            try:
+                return future.result(timeout=timeout_seconds)
+            except FutureTimeoutError:
+                logger.debug(f"  ⏰ Content enhancement timeout after {timeout_seconds}s - skipping article")
+                return False
+
+    def _summarize_article_with_llm(self, article: Dict) -> Optional[str]:
+        """Summarize enhanced article content using LLM.
+
+        Args:
+            article: Article dictionary with enhanced content
+
+        Returns:
+            Summarized content or None if summarization failed
+        """
+        content = self._get_best_content_for_summarization(article)
+        if not content or len(content) < 300:
+            logger.debug(f"Content too short for summarization: {len(content) if content else 0} chars")
+            return None
+
+        title = article.get('title', 'Untitled')
+        source = article.get('source_id', 'unknown')
+
+        # Create concise summarization prompt
+        prompt = f"""Summarize this cybersecurity article for a threat intelligence briefing.
+
+TITLE: {title}
+SOURCE: {source}
+CONTENT: {content[:3000]}  # Limit content to avoid token limits
+
+Requirements:
+- Maximum 150 words
+- Focus on key threats, vulnerabilities, or incidents
+- Include specific entities (vendors, malware, threat actors) if mentioned
+- Preserve technical accuracy
+- Write in professional, concise style
+- Do not include opinions or commentary
+
+Summary:"""
+
+        try:
+            response = self.llm_registry.execute_with_fallback(
+                "generate_text",
+                prompt=prompt,
+                max_tokens=200,
+                temperature=0.3  # Lower temperature for consistent summaries
+            )
+
+            if response and response.strip():
+                summary = response.strip()
+                # Store the summary for future use
+                self.storage.update_article_content(
+                    article_id=article['id'],
+                    content_type='summarized',
+                    content=summary
+                )
+                logger.debug(f"✅ Summarized article to {len(summary)} characters")
+                return summary
+            else:
+                logger.debug("❌ LLM returned empty summary")
+                return None
+
+        except Exception as e:
+            logger.debug(f"❌ Error summarizing article: {e}")
+            return None
+
+    def _get_best_content_for_summarization(self, article: Dict) -> str:
+        """Get the best content available for summarization."""
+        content = article.get('content', {})
+        # For summarization, we prefer full content over processed/raw
+        return (content.get('full', '') or
+                content.get('processed', '') or
+                content.get('raw', ''))
 
     def _filter_unused_articles(self, articles: List[Dict]) -> List[Dict]:
         """Filter out articles that were recently used in digests."""
@@ -343,11 +464,11 @@ Generate only the title, nothing else:"""
         }
 
     def generate_daily_digest(self, target_date: date = None) -> Optional[str]:
-        """Generate a simple daily threat intelligence digest."""
+        """Generate a simple daily threat intelligence digest with content enhancement and summarization."""
         if target_date is None:
             target_date = date.today()
 
-        logger.info(f"Generating simple digest for {target_date}")
+        logger.info(f"Generating enhanced simple digest for {target_date}")
 
         try:
             # 1. Get fresh articles from last 24 hours
@@ -366,14 +487,77 @@ Generate only the title, nothing else:"""
                 logger.info("All recent articles have been used in recent digests")
                 return None
 
-            # 3. Sort by content length (since scores may not be available for fetched articles)
-            unused_articles.sort(key=lambda x: len(x.get('content', {}).get('raw', '')), reverse=True)
+            # 3. ENHANCE CONTENT: Fetch full content using trafilatura/beautifulsoup
+            logger.info("Step 1/3: Enhancing article content with web scraping...")
+            enhancement_stats = {'enhanced': 0, 'failed': 0, 'skipped': 0}
 
-            # 4. Generate articles summary for prompt
-            articles_summary = self._format_articles_for_prompt(unused_articles)
-            logger.info(f"Formatted {len(unused_articles)} articles for LLM analysis")
+            for i, article in enumerate(unused_articles):
+                content = article.get('content', {})
+                # Skip if already has good full content
+                if content.get('full') and len(content.get('full', '')) >= 1000:
+                    enhancement_stats['skipped'] += 1
+                    logger.debug(f"[{i+1}/{len(unused_articles)}] Article already enhanced - skipping")
+                    continue
 
-            # 5. Generate digest using LLM
+                logger.debug(f"[{i+1}/{len(unused_articles)}] Enhancing article: {article['title'][:50]}...")
+                success = self._enhance_article_content_with_timeout(article, timeout_seconds=45)
+                if success:
+                    enhancement_stats['enhanced'] += 1
+                else:
+                    enhancement_stats['failed'] += 1
+
+            logger.info(f"Content enhancement: {enhancement_stats['enhanced']} enhanced, "
+                       f"{enhancement_stats['skipped']} already enhanced, {enhancement_stats['failed']} failed")
+
+            # 4. SUMMARIZE CONTENT: Use LLM to create concise summaries
+            logger.info("Step 2/3: Summarizing enhanced content with LLM...")
+            summarization_stats = {'summarized': 0, 'failed': 0, 'skipped': 0}
+
+            for i, article in enumerate(unused_articles):
+                content = article.get('content', {})
+                # Skip if already summarized
+                if content.get('summarized'):
+                    summarization_stats['skipped'] += 1
+                    logger.debug(f"[{i+1}/{len(unused_articles)}] Article already summarized - skipping")
+                    continue
+
+                # Check if content is long enough to benefit from summarization
+                best_content = self._get_best_content_for_summarization(article)
+                if not best_content or len(best_content) < 500:
+                    summarization_stats['skipped'] += 1
+                    logger.debug(f"[{i+1}/{len(unused_articles)}] Content too short for summarization - skipping")
+                    continue
+
+                logger.debug(f"[{i+1}/{len(unused_articles)}] Summarizing article: {article['title'][:50]}...")
+                summary = self._summarize_article_with_llm(article)
+                if summary:
+                    summarization_stats['summarized'] += 1
+                else:
+                    summarization_stats['failed'] += 1
+
+            logger.info(f"Content summarization: {summarization_stats['summarized']} summarized, "
+                       f"{summarization_stats['skipped']} skipped, {summarization_stats['failed']} failed")
+
+            # 5. Refresh article data with enhanced/summarized content
+            enhanced_articles = []
+            for article in unused_articles:
+                # Get fresh article data to include enhanced content
+                updated_article = self.storage.get_article(article['id'])
+                if updated_article:
+                    enhanced_articles.append(updated_article)
+
+            # Sort by content quality (summarized content first, then by length)
+            enhanced_articles.sort(key=lambda x: (
+                bool(x.get('content', {}).get('summarized')),  # Prioritize summarized articles
+                len(self._get_article_content(x))  # Then by content length
+            ), reverse=True)
+
+            # 6. GENERATE DIGEST: Use high-quality enhanced content
+            logger.info("Step 3/3: Generating digest with enhanced content...")
+            articles_summary = self._format_articles_for_prompt(enhanced_articles)
+            logger.info(f"Formatted {len(enhanced_articles)} enhanced articles for LLM analysis")
+
+            # Generate digest using LLM
             prompt = self._build_prompt(articles_summary, target_date)
 
             logger.info("Generating digest content with LLM...")
@@ -390,34 +574,40 @@ Generate only the title, nothing else:"""
             digest_content = response.strip()
             logger.info(f"Generated digest content: {len(digest_content)} characters")
 
-            # 6. Mark articles as used
+            # 7. Mark articles as used
             used_article_ids = [
                 article.get('id') or article.get('guid')
-                for article in unused_articles
+                for article in enhanced_articles
             ]
             self.memory.mark_articles_used(used_article_ids, target_date)
             logger.info(f"Marked {len(used_article_ids)} articles as used")
 
-            # 7. Create Hugo post
-            hugo_metadata = self._generate_hugo_metadata(target_date, unused_articles)
+            # 8. Create Hugo post
+            hugo_metadata = self._generate_hugo_metadata(target_date, enhanced_articles)
             hugo_filename = f"daily-threat-intelligence-{target_date.strftime('%Y-%m-%d')}.md"
             hugo_filepath = self.hugo_content_dir / hugo_filename
 
             # Write Hugo post
-            hugo_content = self._format_hugo_post(hugo_metadata, digest_content, unused_articles)
+            hugo_content = self._format_hugo_post(hugo_metadata, digest_content, enhanced_articles)
 
             with open(hugo_filepath, 'w', encoding='utf-8') as f:
                 f.write(hugo_content)
 
             logger.info(f"Created Hugo post: {hugo_filepath}")
 
-            # 8. Cleanup old memory entries
+            # 9. Cleanup old memory entries
             self.memory.cleanup_old_entries(days_to_keep=MEMORY_CLEANUP_DAYS)
+
+            # Log final statistics
+            logger.info(f"Enhanced digest generation complete:")
+            logger.info(f"  - Content enhancement: {enhancement_stats['enhanced']}/{len(unused_articles)} enhanced")
+            logger.info(f"  - Content summarization: {summarization_stats['summarized']}/{len(unused_articles)} summarized")
+            logger.info(f"  - Digest length: {len(digest_content)} characters")
 
             return hugo_filename
 
         except Exception as e:
-            logger.error(f"Error generating simple digest: {e}")
+            logger.error(f"Error generating enhanced simple digest: {e}")
             return None
 
     def _format_hugo_post(self, metadata: Dict, content: str, articles: List[Dict]) -> str:
