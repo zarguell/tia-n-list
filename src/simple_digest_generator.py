@@ -101,9 +101,44 @@ class SimpleDigestGenerator:
                 status='fetched'
             )
 
-        # Ensure content quality
+        # ENHANCE CONTENT FIRST before quality filtering
+        logger.debug(f"Enhancing content for {len(articles)} articles before filtering...")
+        enhanced_articles = []
+        enhancement_stats = {'enhanced': 0, 'failed': 0, 'skipped': 0}
+
+        for i, article in enumerate(articles):
+            content = article.get('content', {})
+            # Skip if already has good full content
+            if content.get('full') and len(content.get('full', '')) >= 1000:
+                enhancement_stats['skipped'] += 1
+                logger.debug(f"[{i+1}/{len(articles)}] Article already enhanced - skipping")
+                enhanced_articles.append(article)
+                continue
+
+            # Try to enhance the article
+            logger.debug(f"[{i+1}/{len(articles)}] Enhancing article: {article['title'][:50]}...")
+            success = self._enhance_article_content_with_timeout(article, timeout_seconds=30)  # Shorter timeout for pre-filtering
+
+            if success:
+                # Get updated article data
+                updated_article = self.storage.get_article(article['id'])
+                if updated_article:
+                    enhancement_stats['enhanced'] += 1
+                    enhanced_articles.append(updated_article)
+                else:
+                    enhancement_stats['failed'] += 1
+                    logger.debug(f"  ❌ Failed to retrieve enhanced article data")
+            else:
+                enhancement_stats['failed'] += 1
+                # Still include the original article even if enhancement failed
+                enhanced_articles.append(article)
+
+        logger.debug(f"Pre-filtering enhancement: {enhancement_stats['enhanced']} enhanced, "
+                    f"{enhancement_stats['skipped']} already enhanced, {enhancement_stats['failed']} failed")
+
+        # NOW filter by content quality using enhanced content
         fresh_articles = []
-        for article in articles:
+        for article in enhanced_articles:
             content = self._get_article_content(article)
             if len(content) >= MIN_CONTENT_LENGTH:
                 fresh_articles.append(article)
@@ -493,27 +528,16 @@ Generate only the title, nothing else:"""
                 logger.info("All recent articles have been used in recent digests")
                 return None
 
-            # 3. ENHANCE CONTENT: Fetch full content using trafilatura/beautifulsoup
-            logger.info("Step 1/3: Enhancing article content with web scraping...")
-            enhancement_stats = {'enhanced': 0, 'failed': 0, 'skipped': 0}
+            # 3. Content already enhanced in _get_fresh_articles(), now refresh article data
+            logger.info("Step 1/3: Refreshing article data after enhancement...")
+            enhanced_articles = []
+            for article in unused_articles:
+                # Get fresh article data to include enhanced content
+                updated_article = self.storage.get_article(article['id'])
+                if updated_article:
+                    enhanced_articles.append(updated_article)
 
-            for i, article in enumerate(unused_articles):
-                content = article.get('content', {})
-                # Skip if already has good full content
-                if content.get('full') and len(content.get('full', '')) >= 1000:
-                    enhancement_stats['skipped'] += 1
-                    logger.debug(f"[{i+1}/{len(unused_articles)}] Article already enhanced - skipping")
-                    continue
-
-                logger.debug(f"[{i+1}/{len(unused_articles)}] Enhancing article: {article['title'][:50]}...")
-                success = self._enhance_article_content_with_timeout(article, timeout_seconds=45)
-                if success:
-                    enhancement_stats['enhanced'] += 1
-                else:
-                    enhancement_stats['failed'] += 1
-
-            logger.info(f"Content enhancement: {enhancement_stats['enhanced']} enhanced, "
-                       f"{enhancement_stats['skipped']} already enhanced, {enhancement_stats['failed']} failed")
+            logger.info(f"Refreshed data for {len(enhanced_articles)} articles")
 
             # 4. SUMMARIZE CONTENT: Use LLM to create concise summaries
             logger.info("Step 2/3: Summarizing enhanced content with LLM...")
@@ -558,7 +582,7 @@ Generate only the title, nothing else:"""
                 len(self._get_article_content(x))  # Then by content length
             ), reverse=True)
 
-            # 6. GENERATE DIGEST: Use high-quality enhanced content
+            # 5. GENERATE DIGEST: Use high-quality enhanced content
             logger.info("Step 3/3: Generating digest with enhanced content...")
             articles_summary = self._format_articles_for_prompt(enhanced_articles)
             logger.info(f"Formatted {len(enhanced_articles)} enhanced articles for LLM analysis")
@@ -606,7 +630,7 @@ Generate only the title, nothing else:"""
 
             # Log final statistics
             logger.info(f"Enhanced digest generation complete:")
-            logger.info(f"  - Content enhancement: {enhancement_stats['enhanced']}/{len(unused_articles)} enhanced")
+            logger.info(f"  - Articles processed: {len(unused_articles)}")
             logger.info(f"  - Content summarization: {summarization_stats['summarized']}/{len(unused_articles)} summarized")
             logger.info(f"  - Digest length: {len(digest_content)} characters")
 
