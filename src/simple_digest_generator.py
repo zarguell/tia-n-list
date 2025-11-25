@@ -528,8 +528,8 @@ Generate only the title, nothing else:"""
                 logger.info("All recent articles have been used in recent digests")
                 return None
 
-            # 3. Content already enhanced in _get_fresh_articles(), now refresh article data
-            logger.info("Step 1/3: Refreshing article data after enhancement...")
+            # 3. Get enhanced article data
+            logger.info("Step 1/3: Getting enhanced article data...")
             enhanced_articles = []
             for article in unused_articles:
                 # Get fresh article data to include enhanced content
@@ -537,28 +537,28 @@ Generate only the title, nothing else:"""
                 if updated_article:
                     enhanced_articles.append(updated_article)
 
-            logger.info(f"Refreshed data for {len(enhanced_articles)} articles")
+            logger.info(f"Retrieved enhanced data for {len(enhanced_articles)} articles")
 
             # 4. SUMMARIZE CONTENT: Use LLM to create concise summaries
             logger.info("Step 2/3: Summarizing enhanced content with LLM...")
             summarization_stats = {'summarized': 0, 'failed': 0, 'skipped': 0}
 
-            for i, article in enumerate(unused_articles):
+            for i, article in enumerate(enhanced_articles):
                 content = article.get('content', {})
                 # Skip if already summarized
                 if content.get('summarized'):
                     summarization_stats['skipped'] += 1
-                    logger.debug(f"[{i+1}/{len(unused_articles)}] Article already summarized - skipping")
+                    logger.debug(f"[{i+1}/{len(enhanced_articles)}] Article already summarized - skipping")
                     continue
 
                 # Check if content is long enough to benefit from summarization
                 best_content = self._get_best_content_for_summarization(article)
                 if not best_content or len(best_content) < 500:
                     summarization_stats['skipped'] += 1
-                    logger.debug(f"[{i+1}/{len(unused_articles)}] Content too short for summarization - skipping")
+                    logger.debug(f"[{i+1}/{len(enhanced_articles)}] Content too short for summarization - skipping")
                     continue
 
-                logger.debug(f"[{i+1}/{len(unused_articles)}] Summarizing article: {article['title'][:50]}...")
+                logger.debug(f"[{i+1}/{len(enhanced_articles)}] Summarizing article: {article['title'][:50]}...")
                 summary = self._summarize_article_with_llm(article)
                 if summary:
                     summarization_stats['summarized'] += 1
@@ -568,10 +568,10 @@ Generate only the title, nothing else:"""
             logger.info(f"Content summarization: {summarization_stats['summarized']} summarized, "
                        f"{summarization_stats['skipped']} skipped, {summarization_stats['failed']} failed")
 
-            # 5. Refresh article data with enhanced/summarized content
+            # Refresh data after summarization
             enhanced_articles = []
             for article in unused_articles:
-                # Get fresh article data to include enhanced content
+                # Get fresh article data to include summarized content
                 updated_article = self.storage.get_article(article['id'])
                 if updated_article:
                     enhanced_articles.append(updated_article)
@@ -584,11 +584,18 @@ Generate only the title, nothing else:"""
 
             # 5. GENERATE DIGEST: Use high-quality enhanced content
             logger.info("Step 3/3: Generating digest with enhanced content...")
-            articles_summary = self._format_articles_for_prompt(enhanced_articles)
-            logger.info(f"Formatted {len(enhanced_articles)} enhanced articles for LLM analysis")
 
-            # Generate digest using LLM
+            # Limit to MAX_ARTICLES_FOR_PROMPT to avoid prompt overload
+            articles_for_digest = enhanced_articles[:MAX_ARTICLES_FOR_PROMPT]
+            if len(enhanced_articles) > MAX_ARTICLES_FOR_PROMPT:
+                logger.info(f"Limited to {MAX_ARTICLES_FOR_PROMPT} articles (from {len(enhanced_articles)}) for LLM prompt")
+
+            articles_summary = self._format_articles_for_prompt(articles_for_digest)
+            logger.info(f"Formatted {len(articles_for_digest)} enhanced articles for LLM analysis")
+
+            # Log prompt size for debugging
             prompt = self._build_prompt(articles_summary, target_date)
+            logger.info(f"Final prompt length: {len(prompt)} characters (articles: {len(articles_for_digest)})")
 
             logger.info("Generating digest content with LLM...")
             response = self.llm_registry.execute_with_fallback(
