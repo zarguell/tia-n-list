@@ -450,9 +450,12 @@ class OpenAIProvider(BaseLLMProvider):
         # Test connection
         try:
             models = self.client.models.list()
-            logger.debug(f"Connected to OpenAI-compatible API at {self.config.base_url}")
+            base_url_display = self.config.base_url if self.config.base_url != 'https://api.openai.com/v1' else 'OpenAI'
+            logger.info(f"✅ Connected to OpenAI-compatible API at {base_url_display}")
+            if self.config.base_url != 'https://api.openai.com/v1':
+                logger.info(f"🌐 Using custom OpenAI endpoint: {self.config.base_url}")
         except Exception as e:
-            raise LLMProviderAPIError(f"Failed to connect to OpenAI API: {e}")
+            raise LLMProviderAPIError(f"Failed to connect to OpenAI API at {self.config.base_url}: {e}")
 
     def generate_text(self, prompt: str, max_tokens: int = 1000, temperature: float = 0.7) -> LLMResponse:
         result = self._retry_with_backoff(

@@ -59,15 +59,34 @@ jobs:
 
     - name: Run Simple RSS Feed Ingestion
       env:
-        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-        OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
-        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        # Core LLM Configuration
         LLM_PROVIDER: ${{ vars.LLM_PROVIDER || 'openrouter' }}
-        OPENROUTER_FILTERING_MODEL: ${{ vars.OPENROUTER_FILTERING_MODEL || 'meta-llama/llama-3.3-8b-instruct:free' }}
+        PYTHONPATH: .
+
+        # OpenAI Configuration (supports custom endpoints)
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        OPENAI_BASE_URL: ${{ secrets.OPENAI_BASE_URL }}
+        OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
+        OPENAI_ANALYSIS_MODEL: ${{ secrets.OPENAI_ANALYSIS_MODEL || secrets.OPENAI_MODEL }}
+        OPENAI_FILTERING_MODEL: ${{ secrets.OPENAI_FILTERING_MODEL || secrets.OPENAI_MODEL }}
+
+        # OpenRouter Configuration (fallback)
+        OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+        OPENROUTER_MODEL: ${{ secrets.OPENROUTER_MODEL }}
         OPENROUTER_ANALYSIS_MODEL: ${{ vars.OPENROUTER_ANALYSIS_MODEL || 'openai/gpt-oss-20b:free' }}
+        OPENROUTER_FILTERING_MODEL: ${{ vars.OPENROUTER_FILTERING_MODEL || 'meta-llama/llama-3.3-8b-instruct:free' }}
+
+        # Gemini Configuration (fallback)
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_FILTERING_MODEL: ${{ secrets.GEMINI_FILTERING_MODEL }}
+        GEMINI_ANALYSIS_MODEL: ${{ secrets.GEMINI_ANALYSIS_MODEL }}
+
+        # Storage Configuration
         STORAGE_PROVIDER: ${{ vars.STORAGE_PROVIDER || 'json' }}
       run: |
         echo "🔄 Starting RSS feed ingestion..."
+        echo "Using LLM provider: ${LLM_PROVIDER:-openrouter}"
+        echo "🔧 OpenAI Base URL: ${OPENAI_BASE_URL:-'default'}"
         PYTHONPATH=. python -m src.unified_ingestion
         echo "✅ RSS ingestion completed"
         echo "📊 System statistics:"
@@ -75,30 +94,88 @@ jobs:
 
     - name: Run Simple LLM Processing (Basic Filtering Only)
       env:
-        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-        OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
-        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        # Core LLM Configuration
         LLM_PROVIDER: ${{ vars.LLM_PROVIDER || 'openrouter' }}
+        PYTHONPATH: .
+
+        # OpenAI Configuration (supports custom endpoints)
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        OPENAI_BASE_URL: ${{ secrets.OPENAI_BASE_URL }}
+        OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
+        OPENAI_ANALYSIS_MODEL: ${{ secrets.OPENAI_ANALYSIS_MODEL || secrets.OPENAI_MODEL }}
+        OPENAI_FILTERING_MODEL: ${{ secrets.OPENAI_FILTERING_MODEL || secrets.OPENAI_MODEL }}
+
+        # OpenRouter Configuration (fallback)
+        OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+        OPENROUTER_MODEL: ${{ secrets.OPENROUTER_MODEL }}
+        OPENROUTER_ANALYSIS_MODEL: ${{ vars.OPENROUTER_ANALYSIS_MODEL || 'openai/gpt-oss-20b:free' }}
         OPENROUTER_FILTERING_MODEL: ${{ vars.OPENROUTER_FILTERING_MODEL || 'meta-llama/llama-3.3-8b-instruct:free' }}
+
+        # Gemini Configuration (fallback)
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_FILTERING_MODEL: ${{ secrets.GEMINI_FILTERING_MODEL }}
+        GEMINI_ANALYSIS_MODEL: ${{ secrets.GEMINI_ANALYSIS_MODEL }}
+
+        # Storage Configuration
         STORAGE_PROVIDER: ${{ vars.STORAGE_PROVIDER || 'json' }}
       run: |
         echo "🧠 Starting simple LLM processing (relevance filtering only)..."
         echo "Using LLM provider: ${LLM_PROVIDER:-openrouter}"
+        echo "🔧 OpenAI Base URL: ${OPENAI_BASE_URL:-'default'}"
         echo "📊 Processing articles for relevance (no complex IOC extraction)"
         PYTHONPATH=. python scripts/process_simple_articles.py
 
     - name: Generate Simple Daily Digest
       env:
-        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-        OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
-        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        # Core LLM Configuration
         LLM_PROVIDER: ${{ vars.LLM_PROVIDER || 'openrouter' }}
-        OPENROUTER_ANALYSIS_MODEL: ${{ vars.OPENROUTER_ANALYSIS_MODEL || 'openai/gpt-oss-20b:free' }}
-        OPENROUTER_TITLE_MODEL: ${{ vars.OPENROUTER_TITLE_MODEL || vars.OPENROUTER_ANALYSIS_MODEL || 'openai/gpt-oss-20b:free' }}
+        PYTHONPATH: .
+
+        # OpenAI Configuration (supports custom endpoints)
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        OPENAI_BASE_URL: ${{ secrets.OPENAI_BASE_URL }}
+        OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
+        OPENAI_ANALYSIS_MODEL: ${{ secrets.OPENAI_ANALYSIS_MODEL || secrets.OPENAI_MODEL }}
+        OPENAI_FILTERING_MODEL: ${{ secrets.OPENAI_FILTERING_MODEL || secrets.OPENAI_MODEL }}
+        OPENAI_TITLE_MODEL: ${{ secrets.OPENAI_TITLE_MODEL || secrets.OPENAI_ANALYSIS_MODEL || secrets.OPENAI_MODEL }}
+
+        # OpenRouter Configuration (fallback)
+        OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+        OPENROUTER_MODEL: ${{ secrets.OPENROUTER_MODEL }}
+        OPENROUTER_ANALYSIS_MODEL: ${{ secrets.OPENROUTER_ANALYSIS_MODEL || 'openai/gpt-oss-20b:free' }}
+        OPENROUTER_FILTERING_MODEL: ${{ secrets.OPENROUTER_FILTERING_MODEL || 'meta-llama/llama-3.3-8b-instruct:free' }}
+        OPENROUTER_TITLE_MODEL: ${{ secrets.OPENROUTER_TITLE_MODEL || vars.OPENROUTER_ANALYSIS_MODEL || 'openai/gpt-oss-20b:free' }}
+
+        # Gemini Configuration (fallback)
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_FILTERING_MODEL: ${{ secrets.GEMINI_FILTERING_MODEL }}
+        GEMINI_ANALYSIS_MODEL: ${{ secrets.GEMINI_ANALYSIS_MODEL }}
+
+        # LLM Token Configuration
+        LLM_MAX_TOKENS: ${{ secrets.LLM_MAX_TOKENS || '4000' }}
+        LLM_MAX_TOKENS_FILTERING: ${{ secrets.LLM_MAX_TOKENS_FILTERING || '1000' }}
+        LLM_MAX_TOKENS_ANALYSIS: ${{ secrets.LLM_MAX_TOKENS_ANALYSIS || '4000' }}
+        LLM_MAX_TOKENS_BLOG: ${{ secrets.LLM_MAX_TOKENS_BLOG || '4000' }}
+        LLM_TIMEOUT: ${{ secrets.LLM_TIMEOUT || '60' }}
+
+        # Simple Digest Configuration
+        USE_SIMPLE_DIGEST: true
+        SIMPLE_DIGEST_MAX_ARTICLES: ${{ secrets.SIMPLE_DIGEST_MAX_ARTICLES || '15' }}
+        SIMPLE_DIGEST_MAX_CONTENT_LENGTH: ${{ secrets.SIMPLE_DIGEST_MAX_CONTENT_LENGTH || '2000' }}
+        SIMPLE_DIGEST_MIN_CONTENT_LENGTH: ${{ secrets.SIMPLE_DIGEST_MIN_CONTENT_LENGTH || '300' }}
+        SIMPLE_DIGEST_MAX_REFERENCES: ${{ secrets.SIMPLE_DIGEST_MAX_REFERENCES || '20' }}
+        SIMPLE_DIGEST_MEMORY_DAYS_BACK: ${{ secrets.SIMPLE_DIGEST_MEMORY_DAYS_BACK || '14' }}
+        SIMPLE_DIGEST_MEMORY_CLEANUP_DAYS: ${{ secrets.SIMPLE_DIGEST_MEMORY_CLEANUP_DAYS || '60' }}
+        SIMPLE_DIGEST_MAX_TOKENS: ${{ secrets.SIMPLE_DIGEST_MAX_TOKENS || '4000' }}
+
+        # Storage Configuration
+        STORAGE_PROVIDER: ${{ vars.STORAGE_PROVIDER || 'json' }}
       run: |
         echo "🚀 Generating simple daily digest..."
         echo "Using LLM provider: ${LLM_PROVIDER:-openrouter}"
         echo "📝 Simplified approach: RSS → Basic Processing → Digest Generation"
+        echo "🔧 OpenAI Base URL: ${OPENAI_BASE_URL:-'default'}"
+        echo "🤖 OpenAI Model: ${OPENAI_MODEL:-'default'}"
         PYTHONPATH=. python scripts/generate_simple_digest.py
 
     - name: Check for generated digest
