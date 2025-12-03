@@ -1,10 +1,10 @@
 ---
-title: Daily Threat Intel Digest - December 2, 2025
+title: GitLab secrets exposure 🔐, holiday scam domains 🎄, ShinyHunters RaaS 💣, LLM jailbreaking 🤖, SaaS breaches 🔗
 date: 2025-12-02
-tags: ["threat-intel"]
+tags: ["secrets exposure","phishing","ransomware","llm vulnerabilities","data breach","threat actors","saas security","botnet activity","credential theft","ai security"]
 categories: ["Threat Intelligence"]
 author: Tia N. List
-summary: Daily cybersecurity briefing covering covering relevant articles of last 24 hours.
+summary: Thousands of exposed GitLab secrets and holiday-themed scam domains create immediate risks for organizations through credential compromise and phishing attacks. The emergence of sophisticated RaaS platforms, AI jailbreaking techniques, and interconnected SaaS breaches demonstrates evolving threats requiring enhanced monitoring and exposure management.
 ---
 
 # Daily Threat Intel Digest - 2025-11-28
