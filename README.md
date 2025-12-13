@@ -1,6 +1,6 @@
 # Tia N List - n8n Workflow Documentation
 
-The "Tia N List" workflow is an automated cybersecurity threat intelligence digest generator that collects RSS feed entries from Miniflux, analyzes them using AI, and produces daily summaries published to GitHub and sent via email.[1]
+The "Tia N List" workflow is an automated cybersecurity threat intelligence digest generator that collects RSS feed entries from Miniflux, analyzes them using AI, and produces daily summaries published to GitHub and sent via email.
 
 ## Workflow Overview
 
