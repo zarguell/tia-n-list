@@ -1,0 +1,21 @@
+---
+title: Trust Wallet crypto drains 💰, Pornhub data extortion 🎯, LangChain RCE vulnerability 🔓
+date: 2025-12-26
+tags: ["crypto theft","phishing","data breach","extortion","vulnerability","rce","supply chain attack","threat actors","browser extensions","ai security"]
+categories: ["Threat Intelligence"]
+author: Tia N. List
+summary: Cryptocurrency users face active wallet draining attacks through compromised browser extensions while 200M user records are being extorted by ShinyHunters, creating severe blackmail and spear-phishing risks. Organizations using LangChain AI frameworks must immediately patch a critical serialization vulnerability that allows attackers to steal API keys and achieve remote code execution across multiple workflows.
+---
+
+# Daily Threat Intel Digest - 2025-12-26
+
+## 🔴 Critical Threats & Active Exploitation
+
+**[NEW] Trust Wallet Chrome extension compromise drains over $6M in crypto**
+Attackers are actively draining cryptocurrency from users of the Trust Wallet Chrome extension after deploying a malicious software update. A compromised version 2.68.0, released on December 24, included code that exfiltrated sensitive wallet data, including seed phrases, to a malicious external server at `api.metrics-trustwallet[.]com`, a domain registered just days prior to the attack. Security researchers estimate losses have already exceeded $6 million [[BleepingComputer](https://www.bleepingcomputer.com/news/security/trust-wallet-chrome-extension-hack-tied-to-millions-in-losses/]). The threat actors doubled down with a parallel phishing campaign using the domain `fix-trustwallet[.]com`, which impersonated the company and lured panicked users into inputting their recovery phrases on a fake site. Trust Wallet has confirmed the incident and released a fixed version 2.69; users are advised to update immediately, disable the extension before updating, and move any funds from wallets that used the compromised version to a new wallet with a fresh seed phrase.
+
+**[NEW] ShinyHunters claim 200M Pornhub user records stolen, extort platform**
+The highly sensitive records of approximately 200 million purported Pornhub Premium users have been compromised and are now held by the extortion gang ShinyHunters. The 94GB of allegedly stolen data includes email addresses, locations, and detailed video viewing histories, creating a severe risk of targeted blackmail and spear-phishing campaigns against victims [[Panda Security via malware.news](https://malware.news/t/were-the-records-of-200-million-pornhub-users-stolen-by-hackers/102834#post_1]). While Pornhub denies its systems were directly breached, instead suggesting a third-party provider is responsible, that provider has also denied the claim. Regardless of the initial access point, the threat actors are actively extorting the platform and have shared a data sample with journalists to prove its authenticity. Users should be extremely vigilant for sophisticated phishing and blackmail attempts leveraging their personal data.
+
+**[NEW] Critical LangChain flaw (CVE-2025-68664) enables secret exfiltration, RCE**
+Organizations using the popular LangChain AI framework are at immediate risk from a critical serialization injection vulnerability that allows attackers to steal API keys and environment variables, and potentially achieve remote code execution. CVE-2025-68664, with a CVSS score of 9.3, exists in the `langchain-core` library due to improper handling of user-supplied dictionaries containing a reserved serialization marker ('lc'). Attackers can exploit this flaw across multiple workflows, including logging and message history, to instantiate arbitrary objects, steal secrets, or trigger network calls to attacker-controlled endpoints [[Cyberpress](https://cyberpress.org/critical-langchain-vulnerability-exposes-api-keys/); [GBHackers](https://gbhackers.com/critical-langchain-vulnerability/]). The LangChain team has released patches in versions 1.2.5 and 0.3.81, which include significant security hardening such as enforcing object allowlists and changing default configurations. Developers must update immediately to mitigate exposure.
