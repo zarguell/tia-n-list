@@ -1,0 +1,48 @@
+---
+title: ShinyHunters SSO attacks 🎯, Ivanti zero-days 🚨, enterprise RCE exploits 💻, macOS persistence 🐚, NTLM deprecation 🔒
+date: 2026-01-31
+tags: ["sso abuse","vishing","zero-day","remote code execution","metasploit","scada","macos persistence","ntlm","phishing","threat actors"]
+categories: ["Threat Intelligence"]
+author: Tia N. List
+summary: ShinyHunters is exploiting SSO credentials through sophisticated vishing campaigns while Ivanti EPMM zero-days accelerate mass exploitation risks, threatening enterprise cloud infrastructure. Critical RCE vulnerabilities in FreePBX, Cacti, and SmarterMail are now weaponized in Metasploit, macOS evades security notifications via shell hijacking, and Microsoft moves to phase out vulnerable NTLM authentication.
+---
+
+# Daily Threat Intel Digest - 2026-01-31
+
+## 🔴 Critical Threats & Active Exploitation
+
+**[UPDATE] ShinyHunters SSO Abuse: Advanced Vishing Infrastructure Enables Enterprise Data Theft**  
+Attackers are using sophisticated voice phishing campaigns combined with company-branded phishing sites to compromise single sign-on credentials, then enrolling their own MFA devices to maintain persistent access. Mandiant's analysis reveals threat clusters UNC6661, UNC6671, and UNC6240 (ShinyHunters) are actively exploiting this technique to access cloud applications including Salesforce, Microsoft 365, and DocuSign. Once inside SSO dashboards, attackers use PowerShell scripts to exfiltrate data and employ Google Workspace add-ons like "ToogleBox Recall" to delete security notification emails, hiding their activity [[Mandiant](https://www.bleepingcomputer.com/news/security/mandiant-details-how-shinyhunters-abuse-sso-to-steal-cloud-data/)]. Organizations should monitor for PowerShell User-Agent access to SharePoint/OneDrive, unexpected Google Workspace OAuth authorizations, and deletion of MFA modification emails.
+
+**[UPDATE] Ivanti EPMM Zero-Days: PoC Release Accelerates Exploitation Risk**  
+Public proof-of-concept exploits are now available for the critical Ivanti Endpoint Manager Mobile vulnerabilities CVE-2026-1281 and CVE-2026-1340, both allowing unauthenticated remote code execution. Ivanti has released temporary RPM patches while working toward a permanent fix in version 12.8.0.0 expected in Q1 2026. Historical EPMM vulnerabilities have been widely exploited by nation-state actors and cybercriminals, with affected versions spanning 12.5.0.0 through 12.7.0.0. The company confirmed "very limited" exploitation is already occurring [[Tenable](https://www.tenable.com/blog/cve-2026-1281-cve-2026-1340-ivanti-endpoint-manager-mobile-epmm-zero-day-vulnerabilities); [Arctic Wolf](https://arcticwolf.com/resources/blog/cve-2026-1281-and-cve-2026-1340/)]. Immediate patching is critical as mass scanning attempts are expected.
+
+**[NEW] Critical RCE Vulnerabilities in FreePBX, Cacti, SmarterMail Addressed by New Metasploit Modules**  
+Seven new Metasploit modules target critical vulnerabilities affecting widely deployed enterprise applications. Three modules chain CVE-2025-66039 (unauthenticated authentication bypass) with subsequent CVEs to achieve remote code execution in FreePBX systems. A Cacti module targets CVE-2025-24367 for unauthenticated RCE affecting versions prior to 1.2.29. The SmarterMail module exploits CVE-2025-52691 for path traversal file upload, enabling webshell deployment on Windows and persistence via cron jobs on Linux [[Rapid7 via CyberPress](https://cyberpress.org/metasploit-modules-target-freepbx-cacti-smartermail/); [GBHackers](https://gbhackers.com/metasploit-update-introduces-7-exploit-modules/)]. Organizations using these platforms should prioritize patching and review Metasploit's release notes for technical details on exploitation chains.
+
+## ⚠️ Vulnerabilities & Patches
+
+**[NEW] CVE-2025-0921: Mitsubishi Electric SCADA System Vulnerability Enables DoS Attacks**  
+A medium-severity vulnerability (CVSS 6.5) in the Mitsubishi Electric Iconics Suite could allow attackers to trigger denial-of-service conditions on critical industrial control systems. The flaw affects SCADA systems deployed across automotive, energy, and manufacturing sectors, potentially disrupting operational availability [[Unit42](https://unit42.paloaltonetworks.com/iconics-suite-cve-2025-0921/); [GBHackers](https://gbhackers.com/scada-flaw-enables-dos-condition/)]. Industrial organizations should implement network segmentation and monitor for unusual system behavior while evaluating vendor patches.
+
+**[NEW] Instagram Private Profile Photo Exposure Through Server-Side Authorization Failure**  
+Security researcher Jatin Banga discovered that private Instagram profiles were leaking links to user photos in HTML responses to unauthenticated visitors. The vulnerability affected 28% of tested private accounts, with the polaris_timeline_connection JSON object containing encoded CDN links to photos that should have been restricted to approved followers. Meta reportedly fixed the issue around October 16, 2025, after multiple reports but closed the case as "not applicable" without confirming root cause resolution [[BleepingComputer](https://www.bleepingcomputer.com/news/security/researcher-reveals-evidence-of-private-instagram-profiles-leaking-photos/)]. Users should remain vigilant as authorization bypasses in social platforms often recur with different manifestations.
+
+**[NEW] macOS Persistence via Shell Environment Hijacking Evades Security Notifications**  
+Attackers are compromising macOS systems by appending malicious commands to ~/.zshenv and ~/.zshrc files, executing malware each time a user opens a terminal. This technique avoids the "Background Items Added" notification that typically accompanies LaunchAgent persistence. Both OceanLotus and Lazarus groups have employed this method as failsafe persistence mechanisms [[malware.news](https://malware.news/t/macos-malware-persistence-2-shell-environment-hijacking-simple-c-example/103744#post_1)]. Security teams should monitor shell configuration files for unexpected modifications and implement file integrity monitoring in user home directories.
+
+## 🛡️ Defense & Detection
+
+**[NEW] Microsoft to Disable NTLM by Default in Future Windows Releases**  
+Microsoft announced a three-phase plan to disable the legacy NTLM authentication protocol by default in upcoming Windows releases due to its susceptibility to relay attacks and weak cryptography. Phase one enhances auditing in Windows 11 24H2 and Windows Server 2025, phase two introduces IAKerb and Local KDC capabilities in late 2026, and phase three will block network NTLM by default entirely. The protocol has been exploited in numerous attacks including PetitPotam, ShadowCoerce, DFSCoerce, and RemotePotato0 [[BleepingComputer](https://www.bleepingcomputer.com/news/microsoft/microsoft-to-disable-ntlm-by-default-in-future-windows-releases/)]. Organizations should use the enhanced auditing tools to identify NTLM usage and begin migration to Kerberos-based authentication.
+
+**[NEW] Google Presentations Abused in Phishing Campaigns Against Webmail Users**  
+Attackers are leveraging Google Presentations to deliver phishing emails targeting Vivaldi Webmail users. The technique uses legitimate Google services to bypass security filters and increase credibility of phishing attempts [[SANS ISC](https://malware.news/t/google-presentations-abused-for-phishing-fri-jan-30th/103732#post_1)]. Security awareness training should emphasize that attackers frequently abuse trusted platforms for social engineering, and users should verify all requests for credentials through alternative channels.
+
+## 📋 Policy & Industry News
+
+**[NEW] Global Piracy Crackdown: DOJ Seizes Bulgarian Sites, Italian Police Dismantle IPTV Networks**  
+U.S. authorities seized three major Bulgarian piracy domains (zamunda.net, arenabg.com, zelka.org) that generated significant revenue through copyrighted content distribution. Concurrently, Italian police's "Operation Switch Off" dismantled three industrial-scale illegal IPTV services serving millions of users worldwide, identifying 31 suspects across 14 countries. The operations targeted content from major platforms including Netflix, Disney+, and Amazon Prime, with special focus on protecting Winter Olympics broadcasts [[DOJ via CyberScoop](https://cyberscoop.com/doj-seizes-piracy-sites-zamunda-arenabg-zelka/); [BleepingComputer](https://www.bleepingcomputer.com/news/legal/operation-switch-off-dismantles-major-pirate-tv-streaming-services/)]. The coordinated actions demonstrate increasing international cooperation against intellectual property crime.
+
+**[NEW] Cryptocurrency Illicit Flows Reach Record $158 Billion in 2025**  
+Illicit cryptocurrency transactions surged 145% to $158 billion in 2025, reversing three years of declining volumes. The increase stems from expanded sanctions-linked crypto activity by Russia-associated networks, nation-state adoption for financial infrastructure, and improved attribution techniques. Major thefts included the $1.46 billion Bybit breach attributed to North Korean hackers, while scams accounted for $35 billion. Ransomware profits declined as more victims resisted extortion demands [[TRM Labs via BleepingComputer](https://www.bleepingcomputer.com/news/security/crypto-wallets-received-a-record-158-billion-in-illicit-funds-last-year/)]. Financial institutions should enhance blockchain analytics capabilities and monitor for mixing services.
