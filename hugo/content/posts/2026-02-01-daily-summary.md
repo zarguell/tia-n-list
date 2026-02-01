@@ -1,0 +1,56 @@
+---
+title: 0apt ransomware attacks 💣, cloud storage phishing 🎣, eScan supply chain 🔐, ShinyHunters SSO vishing ☎️, macOS persistence 🖥️
+date: 2026-02-01
+tags: ["ransomware","phishing","supply chain attacks","vishing","macos malware","credential theft","initial access brokers","critical infrastructure","logistics sector","sso security"]
+categories: ["Threat Intelligence"]
+author: Tia N. List
+summary: The 0apt ransomware group is escalating multi-sector attacks targeting critical infrastructure and logistics while widespread cloud storage phishing campaigns distribute malicious redirects through fake renewal notices. Security teams face compounded risks from eScan's supply chain compromise delivering malware, ShinyHunters' sophisticated SSO vishing operations compromising enterprise cloud environments, and macOS malware achieving persistence through shell environment hijacking techniques.
+---
+
+# Daily Threat Intel Digest - 2026-02-01
+
+## 🔴 Critical Threats & Active Exploitation
+
+**[NEW] 0apt ransomware campaign escalates with multi-sector attacks**  
+The 0apt ransomware group has conducted at least five major attacks in 72 hours across critical infrastructure, logistics, and technology sectors, exfiltrating over 450GB from Apex Logistics alone. The campaign leverages stolen credentials and initial access brokers, with attacks targeting driver licenses, truck routes, and cargo contents at Meridian Logistics [[DeXpose](https://www.dexpose.io/0apt-strikes-meridian-logistics-in-targeted-ransomware-attack/)], and SCADA logs and customer billing data at UK energy provider Solstice Energy Grid [[DeXpose](https://www.dexpose.io/0apt-ransomware-attack-on-solstice-energy-grid/)]. The group's expansion into Eastern Europe includes NeoTech Solutions in Serbia, where source code and API keys were compromised [[DeXpose](https://www.dexpose.io/0apt-ransomware-attack-on-neotech-solutions-in-serbia/)]. All affected organizations should immediately rotate credentials and check for signs of lateral movement.
+
+**[NEW] Cloud storage phishing campaign floods inboxes with fake renewals**  
+A large-scale phishing campaign is bombarding users with fake cloud storage renewal notices, using urgency tactics to trick victims into clicking malicious links that redirect to affiliate marketing pages for VPN services and security software. The emails claim payment failures and imminent data loss, with personalized subject lines including "[name], Your Cloud Account has been locked" and "Immediate Action Required. Payment Declined" [[BleepingComputer](https://www.bleepingcomputer.com/news/security/cloud-storage-payment-scam-floods-inboxes-with-fake-renewals/)]. Attackers leverage Google Cloud Storage URLs to host redirectors that ultimately collect payment information for unrelated products. Users should verify cloud storage status directly through official apps rather than email links.
+
+**[NEW] eScan antivirus compromised in supply chain attack**  
+SecurityWeek reports that eScan Antivirus delivered malware to customers through a supply chain attack, though technical details remain limited [[SecurityWeek](https://www.securityweek.com/escan-antivirus-delivers-malware-in-supply-chain-attack/)]. This incident demonstrates the continued targeting of security vendors as distribution vectors for malicious code. Organizations using eScan should immediately scan their environments with alternative security tools and review telemetry for suspicious activities originating from eScan processes.
+
+**[NEW] Instagram private profiles leaking photos via authorization bypass**  
+A security researcher discovered that certain private Instagram profiles were embedding links to private photos and captions in HTML responses to unauthenticated visitors. The vulnerability, affecting approximately 28% of tested accounts, was reportedly fixed by Meta in October 2025 but dismissed as "unreproducible" by the company [[BleepingComputer](https://www.bleepingcomputer.com/news/security/researcher-reveals-evidence-of-private-instagram-profiles-leaking-photos/)]. The exploit required specific mobile user agents and headers, allowing unauthorized access to supposedly private content. Organizations should consider implementing additional controls for employee social media accounts containing sensitive information.
+
+## 🎯 Threat Actor Activity & Campaigns
+
+**[UPDATE] Mandiant releases detailed ShinyHunters SSO vishing analysis**  
+Building on last week's coverage, Mandiant has provided comprehensive technical details on ShinyHunters' SSO credential theft operations. Threat actors impersonate IT support staff during vishing calls, directing targets to phishing sites that capture SSO credentials and MFA codes in real-time [[BleepingComputer](https://www.bleepingcomputer.com/news/security/mandiant-details-how-shinyhunters-abuse-sso-to-steal-cloud-data/)]. Once authenticated, attackers access Okta, Microsoft Entra, or Google SSO dashboards as a springboard to compromise Salesforce, Microsoft 365, SharePoint, DocuSign, and other SaaS applications. Detection recommendations include monitoring for PowerShell User-Agent access to SharePoint/OneDrive, unexpected Google Workspace OAuth authorizations for "ToogleBox Recall," and deletion of MFA modification notifications. Mandiant has released specific detection rules for Google SecOps environments.
+
+**[NEW] Additional ransomware operations targeting specific sectors**  
+Three separate ransomware groups claimed new victims: Chaos ransomware struck Anomatic Corporation, a U.S. manufacturer of anodized aluminum and metalized packaging [[DeXpose](https://www.dexpose.io/chaos-ransomware-targets-anomatic-corporation/)], while Qilin targeted UK industrial machinery company Moontown [[DeXpose](https://www.dexpose.io/qilin-ransomware-strikes-moontown-in-the-uk/)], and Devman compromised Zallc.org, exposing PII, SSNs, and financial reports [[DeXpose](https://www.dexpose.io/devman-ransomware-attack-on-zallc-org-exposes-sensitive-data/)]. These attacks highlight ransomware groups' continued sector-focused targeting and the need for industry-specific threat intelligence sharing.
+
+## ⚠️ Vulnerabilities & Patches
+
+**[NEW] macOS persistence via shell environment hijacking**  
+Researchers demonstrated how macOS malware can achieve persistence by modifying ~/.zshenv or ~/.zshrc files to execute malicious code each time a terminal opens. This "Living off the Land" technique avoids the "Background Items Added" notification triggered by LaunchAgents [[cocomelonc](https://cocomelonc.github.io/macos/2026/01/31/malware-mac-persistence-2.html)]. Threat actor OceanLotus has previously used this method as a failsafe persistence mechanism alongside LaunchAgents. Blue teams should monitor for unauthorized modifications to shell configuration files and implement file integrity monitoring on user home directories.
+
+**[NEW] GitHub Actions security hardening guide released**  
+SOCFortress published CIS-aligned technical guidance for securing GitHub Actions and CI/CD pipelines, highlighting critical controls including restricting actions to verified publishers, implementing minimum required permissions, disabling secrets for fork-based PRs, and isolating self-hosted runners [[SOCFortress](https://socfortress.medium.com/secure-use-of-github-cis-aligned-technical-guide-part-iv-8e28a1f1ba1e)]. The guidance addresses the high-risk attack surface presented by compromised workflows that can lead to cloud credential theft, infrastructure takeover, and supply-chain compromise. Organizations should immediately review their GitHub Actions configurations against these CIS benchmarks.
+
+## 🛡️ Defense & Detection
+
+**[NEW] DNS filtering solutions evaluated for 2026**  
+Security analysts have identified top DNS filtering solutions for 2026, emphasizing AI-driven threat intelligence, support for encrypted DNS protocols (DoH/DoT), and roaming clients for hybrid workforces [[CyberPress](https://cyberpress.org/best-dns-filtering-solutions/); [GBHackers](https://gbhackers.com/best-dns-filtering-solutions/)]. Control D leads with innovative traffic redirection features, while DNSFilter offers the fastest resolver in North America with real-time AI categorization. Cisco Umbrella and Zscaler remain enterprise standards for compliance-focused organizations, while Cloudflare Gateway provides exceptional value with a free tier for up to 50 users. Organizations should evaluate solutions based on latency, false positive rates, and integration capabilities with existing security stacks.
+
+## 📋 Policy & Industry News
+
+**[NEW] OpenAI begins ChatGPT ads rollout while retiring GPT-4o**  
+OpenAI is introducing a full-screen onboarding experience for ads in ChatGPT, with sponsored blocks appearing below answers while claiming not to influence content [[BleepingComputer](https://www.bleepingcomputer.com/news/artificial-intelligence/openai-says-you-can-trust-chatgpt-answers-as-it-kicks-off-ads-rollout-preparation/)]. Simultaneously, OpenAI announced the retirement of GPT-4o and several other models including GPT-5 Instant and GPT-5 Thinking, effective February 13, 2026 [[BleepingComputer](https://www.bleepingcomputer.com/news/artificial-intelligence/openai-is-retiring-famous-gpt-4o-model-says-gpt-52-is-good-enough/)]. The company states that GPT 5.2 now meets expectations, with only 0.1% of users still selecting GPT-4o daily. Enterprise users should test compatibility with GPT-5.2 before the retirement deadline.
+
+**[UPDATE] Major breach settlements finalized**  
+Comcast agreed to a $117.5 million settlement to resolve 24 class action lawsuits over the 2023 Citrix Bleed data breach that potentially impacted over 30 million customers [[DataBreaches](https://databreaches.net/2026/01/31/comcast-agrees-to-117-5-million-settlement-to-resolve-lawsuits-over-2023-citrix-bleed-data-breach/)]. Separately, RINA Accountants & Advisors established a $400K settlement fund for a 2022 data breach [[DataBreaches](https://databreaches.net/2026/01/31/rina-accountants-advisors-is-creating-400k-settlement-fund-to-settle-lawsuit-over-2022-data-breach/)]. These settlements underscore the long-term financial impact of data breaches and the importance of robust incident response planning.
+
+**[NEW] Ex-Google engineer convicted of economic espionage for China**  
+A federal jury convicted Linwei Ding on seven counts of economic espionage and seven counts of trade secret theft for stealing over 2,000 pages of AI supercomputing data from Google and sharing it with Chinese companies [[BleepingComputer](https://www.bleepingcomputer.com/news/security/us-convicts-ex-google-engineer-for-sending-ai-tech-data-to-china/)]. Ding secretly founded an AI company in China while employed at Google, with evidence showing he intended to aid Chinese government entities in developing AI supercomputing infrastructure. Organizations should implement tighter controls around AI research access and monitor for unusual data exfiltration patterns.
