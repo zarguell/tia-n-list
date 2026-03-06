@@ -23,8 +23,21 @@ gh pr list --json number --jq '.[].number' --repo [owner]/[repo] | while read pr
 done
 ```
 
-### Step 3: Handle Conflicts
-If any PRs fail to merge due to conflicts:
+### Step 3: Update Stale PR Branches
+If any PRs fail to merge due to "Base branch was modified" errors, update their branches first:
+```bash
+# Update all open PR branches to latest main
+gh pr list --json number --jq '.[].number' --repo [owner]/[repo] | while read pr; do
+  echo "Updating branch for PR #$pr..."
+  gh pr update-branch "$pr" --repo [owner]/[repo] || echo "Failed to update PR #$pr"
+done
+
+# Retry merging the updated PRs
+gh pr list --json number --jq '.[].number' --repo [owner]/[repo] | xargs -I {} gh pr merge {} --squash --repo [owner]/[repo]
+```
+
+### Step 4: Handle True Conflicts
+If any PRs still fail after branch updates (actual merge conflicts, not just stale branches):
 ```bash
 # List remaining open PRs
 gh pr list --repo [owner]/[repo]
@@ -49,9 +62,15 @@ gh pr close [pr-number] --repo [owner]/[repo] --comment "Superseded by newer mer
 ## Example for This Repository
 
 ```bash
-# Merge all open PRs
+# Attempt to merge all open PRs
 gh pr list --json number --jq '.[].number' --repo zarguell/tia-n-list | xargs -I {} gh pr merge {} --squash --repo zarguell/tia-n-list
 
-# If conflicts occur, close outdated PRs
+# If "Base branch was modified" errors occur, update PR branches and retry:
+gh pr list --json number --jq '.[].number' --repo zarguell/tia-n-list | while read pr; do
+  gh pr update-branch "$pr" --repo zarguell/tia-n-list
+done
+gh pr list --json number --jq '.[].number' --repo zarguell/tia-n-list | xargs -I {} gh pr merge {} --squash --repo zarguell/tia-n-list
+
+# If true conflicts occur, close outdated PRs
 gh pr close [pr-number] --repo zarguell/tia-n-list --comment "Superseded by newer merged PRs"
 ```
