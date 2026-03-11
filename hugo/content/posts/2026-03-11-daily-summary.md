@@ -1,0 +1,50 @@
+---
+title: Microsoft SQL 0-day 🔴, BlackSanta EDR killer 🛡️, GhostClaw npm supply chain 📦, GIBCRYPTO ransomware 🔒, APT campaign activity 🎯
+date: 2026-03-11
+tags: ["zero-day","edr bypass","supply chain attack","ransomware","apt activity","microsoft vulnerabilities","hr targeting","kernel-level attacks","malware-as-a-service","vulnerability management"]
+categories: ["Threat Intelligence"]
+author: Tia N. List
+summary: Critical vulnerabilities in Microsoft SQL Server and Fortinet FortiManager enable privilege escalation and remote code execution, while the BlackSanta EDR killer uses kernel-level driver attacks to disable security protections in HR departments. The GhostClaw npm malware steals developer secrets through compromised packages, GIBCRYPTO ransomware corrupts boot records with links to Snake Keylogger, and Chinese-aligned threat actors leverage geopolitical conflicts to deliver PlugX backdoors in Qatar.
+---
+# Daily Threat Intel Digest - 2026-03-11
+
+## 🔴 Critical Threats & Active Exploitation
+
+**[NEW] Microsoft Patch Tuesday fixes critical SQL 0-day, .NET DoS, and AI-discovered RCE**
+Microsoft's March 2026 Patch Tuesday update addresses 79 vulnerabilities, including a critical elevation of privilege flaw in SQL Server (CVE-2026-21262) that allows attackers with low privileges to gain sysadmin access over a network. Also patched is a publicly disclosed .NET vulnerability (CVE-2026-26127) enabling unauthenticated remote denial-of-service attacks, and two Microsoft Office RCE flaws (CVE-2026-26113, CVE-2026-26110) triggerable simply by viewing a malicious email in the Preview Pane. Notably, the release includes CVE-2026-21536, a critical RCE vulnerability in the Microsoft Devices Pricing Program discovered autonomously by the XBOW AI penetration testing agent, highlighting the growing role of AI in automated vulnerability research. [[Krebs on Security](https://krebsonsecurity.com/2026/03/microsoft-patch-tuesday-march-2026-edition/); [GBHackers](https://gbhackers.com/microsoft-fixes-79-vulnerabilities-in-march-2026-patch-tuesday/); [CyberPress](https://cyberpress.org/zero-day-in-microsoft-sql-server/)]
+
+**[NEW] Fortinet FortiManager RCE allows unauthorized command execution**
+A high-severity stack-based buffer overflow vulnerability (CVE-2025-54820, CVSS 7.0) in the FortiManager `fgtupdates` service could allow attackers to execute arbitrary code on the centralized management platform. Because FortiManager controls and configures multiple Fortinet security appliances, a successful exploit could allow attackers to manipulate network security policies or disrupt critical infrastructure across the enterprise. Affected versions include FortiManager 7.4 (versions 7.4.0 to 7.4.2), 7.2 (7.2.0 to 7.2.10), and all versions of 6.4. FortiManager Cloud and version 7.6 are unaffected. Administrators should upgrade immediately or disable the vulnerable `fgtupdates` service as a temporary mitigation. [[CyberPress](https://cyberpress.org/critical-fortinet-fortimanager-fgtupdates-vulnerability-allows-remote-command-execution/); [GBHackers](https://gbhackers.com/fortinet-fortimanager-fgtupdates-flaw/)]
+
+## 🎯 Threat Actor Activity & Campaigns
+
+**[NEW] BlackSanta EDR killer targets HR departments with job applicant lures**
+A sophisticated campaign is targeting Human Resources departments with malware disguised as job application documents hosted on cloud storage platforms. The attack chain delivers a new "BlackSanta" EDR killer module, which terminates security processes by using Bring Your Own Vulnerable Driver (BYODvulnerable) techniques to load the legitimate `IObitUnlocker.sys` and `RogueKiller` drivers. These drivers provide kernel-level access to kill antivirus and EDR processes, suppress Windows notifications, and weaken Defender telemetry before deploying final payloads. The threat actor has been active for over a year, using context-aware social engineering to bypass initial defenses. [[BleepingComputer](https://www.bleepingcomputer.com/news/security/new-blacksanta-edr-killer-spotted-targeting-hr-departments/); [GBHackers](https://gbhackers.com/blacksanta-edr-killer-malware/)]
+
+**[NEW] Chinese APT uses PlugX and conflict lures to target Qatar**
+Chinese-nexus APT group Camaro Dragon has ramped up cyber operations against Qatar, exploiting the recent escalation of Middle East conflict ("Operation Epic Fury") to craft timely phishing lures. Attackers sent archives disguised as news reports regarding an Iranian missile strike on a US base in Bahrain. Upon execution, the infection chain deploys the PlugX backdoor and Cobalt Strike beacons via DLL hijacking, specifically abusing the Baidu NetDisk application. This activity underscores how rapidly state-aligned actors pivot to leverage breaking geopolitical news for espionage in strategic regions. [[CyberPress](https://cyberpress.org/chinese-apt-targets-qatar/)]
+
+**[NEW] GhostClaw malware infiltrates npm supply chain to steal developer secrets**
+Security researchers uncovered a malicious npm package masquerading as the legitimate "OpenClaw Installer," which delivers a potent infostealer and RAT payload. The malware uses obfuscated post-install scripts to display a fake installer, harvest system passwords via bogus Keychain prompts, and then deploy a second-stage payload dubbed "GhostLoader." This module steals extensive sensitive data including SSH keys, AWS/Azure/GCP credentials, Kubernetes configs, crypto wallet seed phrases, and browser data. The campaign highlights the evolving risk of software supply chain attacks targeting developer environments. [[CyberPress](https://cyberpress.org/ghostclaw-targets-developers-data/)]
+
+**[NEW] GIBCRYPTO ransomware corrupts MBR and links to Snake Keylogger**
+A new destructive ransomware strain dubbed GIBCRYPTO has been detected in the wild, featuring capabilities to corrupt the Master Boot Record (MBR) and randomly overwrite essential Windows system DLLs to cause Blue Screen of Death (BSOD) crashes. Technical analysis links the ransomware to the Snake Keylogger operation, revealing shared command-and-control (C2) infrastructure and Telegram bot tokens. GIBCRYPTO uses the Salsa20 algorithm for encryption and employs AMSI bypassing techniques to evade detection, making recovery extremely difficult even if a ransom is paid. [[Malware.news](https://malware.news/t/gibcrypto-the-destructive-ransomware-with-a-snake-keylogger-connection/104790)]
+
+## ⚠️ Vulnerabilities & Patches
+
+**[NEW] Ivanti DSM vulnerability allows authentication bypass**
+Ivanti has released a security advisory for a critical authentication bypass vulnerability (CVE-2026-3483) affecting Ivanti Desktop and Server Management (DSM) version 2026.1 and prior. Successful exploitation could allow attackers to bypass authentication controls on the management platform, potentially leading to full system compromise. Administrators are urged to review the advisory and apply necessary updates immediately. [[Malware.news](https://malware.news/t/ivanti-security-advisory-av26-214/104773)]
+
+**[NEW] HPE patches critical flaws in Aruba Networking and Telco Assurance**
+HPE has released security bulletins addressing multiple vulnerabilities in HPE Aruba Networking AOS-CX and HPE Telco Intelligent Assurance. The updates include fixes for critical vulnerabilities (AOS-8 and AOS-10) affecting Mobility Conductors, Controllers, Gateways, and Access Points, which could allow improper control of code generation. Organizations utilizing affected versions should apply the patches to prevent potential exploitation. [[Malware.news](https://malware.news/t/hpe-security-advisory-av26-217/104778)]
+
+**[NEW] Adobe fixes critical flaws in Acrobat, Commerce, and Illustrator**
+Adobe has released security updates addressing over 80 vulnerabilities across multiple products, including critical and important severity flaws in Adobe Commerce, Acrobat and Acrobat Reader DC, Illustrator, and Substance 3D Painter. Exploitation of some of these vulnerabilities could result in arbitrary code execution or information disclosure. Users should update to the latest versions as outlined in advisory APSB26-26. [[Malware.news](https://malware.news/t/adobe-security-advisory-av26-215/104775)]
+
+## ⚡ Quick Hits
+
+*   **[NEW] SurxRAT integrates AI modules for automated evasion** – An advanced Android MaaS (Malware-as-a-Service) platform now integrates Large Language Models (LLMs) to conditionally download payloads and disrupt device performance during specific app usage, enabling sophisticated evasion and screen-locking ransomware capabilities [[CyberPress](https://cyberpress.org/surxrat-ai-automates-phishing/)].
+*   **[NEW] BeatBanker malware targets Brazil with Monero mining** – A new Android trojan masquerading as a Starlink app installs a Monero miner (XMRig) and the BTMOB RAT, using a clever MP3 playback loop to maintain persistent foreground services and avoid termination [[BleepingComputer](https://www.bleepingcomputer.com/news/security/new-beatbanker-android-malware-poses-as-starlink-app-to-hijack-devices/)].
+*   **[NEW] PhantomRaven supply chain attack resurfaces** – A malware campaign targeting the npm registry has re-emerged with new waves (Wave 2-4) of malicious packages designed to steal developer credentials, continuing a threat that began in late 2025 [[GBHackers](https://gbhackers.com/phantomraven-malware/)].
+*   **[NEW] Trojanized Red Alert app targets Israeli users** – Attackers are distributing a weaponized version of the Red Alert rocket warning app via SMS smishing, maintaining the app's legitimate functionality while silently exfiltrating sensitive data from victims [[GBHackers](https://gbhackers.com/trojanized-red-alert-app/)].
+*   **[NEW] Kimsuky distributes LNK malware** – The North Korean threat actor Kimsuky has been observed distributing malicious LNK files disguised as transaction statements, continuing their long-standing tradition of spear-phishing with weaponized attachments [[Malware.news](https://malware.news/t/kimsuky-1473-260101-260221-lnk/104779)].
