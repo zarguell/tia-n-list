@@ -1,0 +1,85 @@
+---
+title: "🔓 DigiCert Breach, 🐧 Dirty Frag Exploited, 📚 Canvas Extortion, 🎣 HookedWing Phishing, 🔒 GhostLock File Lock"
+date: 2026-05-11
+tags: ["digiCert","code-signing","dirty-frag","linux","privilege-escalation","canvas","shinyhunters","phishing","ghostlock","cpanel","malware","macos","openclaw","screenconnect","crimenetwork"]
+categories: ["Threat Intelligence"]
+author: Tia N. List
+summary: "DigiCert breached via social engineering — 27 EV code-signing certificates stolen and used to sign Zhong Stealer malware. Dirty Frag Linux LPE confirmed possibly exploited. Canvas LMS back online as ShinyHunters May 12 extortion deadline looms. Operation HookedWing phishing campaign hits 500+ organizations over 4 years."
+---
+
+# Tia N. List — Daily Threat Intelligence Digest
+### May 11, 2026
+
+**33 articles ingested from Miniflux Cyber feeds. External cross-referencing via Reddit r/cybersecurity and TLDR InfoSec.**
+
+*Previous 5 days reporting summary:* The May 9 digest covered Dirty Frag Linux kernel LPE with confirmed active exploitation via Microsoft Defender telemetry, ShinyHunters extending the Canvas extortion deadline to May 12 with ~9,000 schools affected, Ivanti EPMM CVE-2026-6973 CISA KEV addition with 4-day patch deadline, Polish water treatment ICS breaches attributed to APT28/APT29, ClaudeBleed Chrome extension partial-fix bypass, and PamDOORa Linux PAM backdoor. The May 8 digest introduced Dirty Frag as a new zero-day class, ShinyHunters' second Instructure breach defacing 330 Canvas portals, ClaudeBleed Chrome extension takeover, PAN-OS CVE-2026-0300 CISA KEV addition with Chinese state-sponsored hallmarks, and cPanel CVE-2026-29201/29202/29203 initial disclosure.
+
+
+## 🔴 Critical Threats & Active Exploitation
+
+**[NEW] DigiCert breached — 27 EV code-signing certificates stolen and used to sign Zhong Stealer malware [r/cybersecurity]**
+
+A threat actor compromised DigiCert's internal support environment through a social engineering attack on April 2, 2026, ultimately stealing 27 Extended Validation code-signing certificates that were used to sign Zhong Stealer malware payloads. The attacker impersonated a customer in a Salesforce-based support chat and repeatedly sent a malicious ZIP archive containing a `.scr` screensaver executable. After four blocked attempts, a support analyst executed the payload on April 2. While DigiCert's Trust Operations team contained that initial compromise within hours, a second endpoint was silently infected on April 3 — and because its CrowdStrike EDR agent was misconfigured and not reporting to the central management console, the attacker maintained undetected access for nearly two weeks. Using the compromised support account's proxy access to customer accounts, the attacker harvested initialization codes for pending EV certificate orders. Possession of an initialization code plus an approved order was sufficient to generate a valid EV certificate. In total, 60 certificates were revoked (27 directly linked to the attacker, 11 confirmed signing Zhong Stealer malware, 33 as precaution). The stolen certificates were issued in the names of legitimate companies including Lenovo and Kingston. The Zhong Stealer campaign has been linked to GoldenEyeDog (APT-Q-27), a Chinese cybercrime group involved in cryptocurrency theft, though attribution for the DigiCert intrusion itself remains unconfirmed. DigiCert has since masked initialization codes in all support workflows, tightened MFA requirements, and suspended affected analyst accounts. Organizations should audit any binaries signed with DigiCert EV certificates from April 2–17, verify EDR coverage across all endpoints with access to trust infrastructure, and implement MFA on all support portal functions that retrieve credentials or keys. [[Cyber Insider](https://cyberinsider.com/digicert-suffers-breach-stolen-certificates-used-to-sign-malware/); [Risky Bulletin](https://news.risky.biz/risky-bulletin-digicert-hacked-with-a-malicious-screensaver-file/); [Lyrie Research](https://lyrie.ai/research/research/2026-05-05-digicert-ca-social-engineering)]
+
+**[UPDATE] Dirty Frag — SecurityWeek confirms possible active exploitation as Linux vendors rush patches**
+
+SecurityWeek reports that Dirty Frag (CVE-2026-43284, CVE-2026-43500) may have been exploited in the wild, corroborating Microsoft Defender's earlier observations of limited post-compromise activity. The deterministic local privilege escalation exploit — which requires no race condition and achieves high success rates — continues to affect all major Linux distributions. Patches have now been released by Red Hat, Amazon Linux, Ubuntu, Fedora, and Alma Linux. The greatest risk remains on non-containerized Linux hosts exposed via SSH, web shells, or compromised service accounts. Post-exploitation activity observed by Microsoft includes modification of GLPI LDAP authentication files, reconnaissance of system configuration, deletion and harvesting of PHP session files — a combination of credential theft and operational disruption that leaves no disk-based forensic artifacts. CVE-2026-43500 (RxRPC vector) remains particularly dangerous as it requires only normal user privileges with no user-namespace creation. [[SecurityWeek](https://www.securityweek.com/new-dirty-frag-linux-vulnerability-possibly-exploited-in-attacks/)]
+
+**[UPDATE] ShinyHunters / Canvas — System restored as extortion deadline looms, thousands of schools disrupted during finals week**
+
+Canvas LMS is back online after Instructure took the platform offline to contain the ShinyHunters breach, which exploited the Free-For-Teacher (FFT) account program to access production data across the multi-tenant SaaS environment. The timing during finals week at thousands of universities amplified the disruption — students at the University of Maryland, University of New Mexico, and multiple UT system schools faced extended deadlines and lost coursework access. ShinyHunters claims 3.6 TB of data covering 275 million users across ~9,000 schools, including names, email addresses, student IDs, and private messages. The FFT program — which offered low-friction accounts with no institutional verification running on the same production infrastructure as paying institutions — has been permanently shut down. The extortion deadline of May 12 remains active, with ShinyHunters pressuring individual schools to negotiate directly via Tox messaging. Instructure has not confirmed whether ransom demands will be met or how individual breach notifications will be handled. [[SecurityWeek](https://www.securityweek.com/canvas-system-is-online-after-a-cyberattack-disrupted-thousands-of-schools/); [GBHackers](https://gbhackers.com/canvas-lms-free-teacher-accounts/)]
+
+
+## 🎯 Threat Actor Activity & Campaigns
+
+**[NEW] Operation HookedWing — 4+ year phishing campaign steals 2,000+ credentials from 500+ organizations**
+
+SOCRadar has documented a sustained credential-harvesting campaign dubbed Operation HookedWing, active since 2022 and still ongoing. The operation has compromised over 2,000 user credentials across 500+ organizations in aviation, energy, government, finance, and critical infrastructure sectors. The campaign operates 24 C2 servers and 100+ GitHub domains, using phishing emails impersonating HR and colleagues to lure victims to personalized Microsoft Outlook login pages hosted on GitHub repositories. The landing pages dynamically pre-fill victim organization names and capture email, password, IP address, full geolocation, source URL, and organization domain in a single record. The infrastructure has evolved significantly: from simple English-language GitHub domains in 2022 to obfuscated multilingual operations with obfuscated domain naming by 2025. Victim selection indicates geopolitical awareness and targeting of environments with access to sensitive information and high-privilege credentials, which are likely sold onward to other threat actors. [[SecurityWeek](https://www.securityweek.com/over-500-organizations-hit-in-years-long-phishing-campaign/)]
+
+**[NEW] Crimenetwork reboot shut down — 22,000-user marketplace admin arrested in Mallorca**
+
+German authorities have shut down the resurrected Crimenetwork cybercrime marketplace and arrested its 35-year-old German administrator in Mallorca, Spain. The rebooted platform launched within days of the original Crimenetwork's December 2024 takedown (which ended 12+ years of operation with 100,000+ users), quickly amassing 22,000 users and over 100 vendors generating at least €3.6 million ($4.2M) in revenue. The operator faces charges under Germany's Criminal Code Section 127 and the Narcotics Act. Police seized €194,000 in assets and extensive user and transaction data for further investigation. The original Crimenetwork administrator was sentenced to 7 years and 10 months in March 2025. [[BleepingComputer](https://www.bleepingcomputer.com/news/security/police-shut-down-reboot-of-crimenetwork-marketplace-arrest-admin/); [SecurityWeek](https://www.securityweek.com/resurrected-crimenetwork-marketplace-taken-down-administrator-arrested/); [GBHackers](https://gbhackers.com/crimenetwork-bust-reveals-22000-members/)]
+
+
+## ⚠️ Vulnerabilities & Patches
+
+**[UPDATE] cPanel CVE-2026-29201/29202/29203 — details emerge on Perl injection, arbitrary file read, and symlink DoS**
+
+Technical details are now available for the three cPanel/WHM vulnerabilities disclosed May 8. CVE-2026-29202 is the most critical — a Perl code-injection flaw in the `create_user` API call's plugin parameter that grants attackers arbitrary code execution with administrative access. CVE-2026-29201 enables arbitrary file reads via the `feature::LOADFEATUREFILE` adminbin call by passing relative paths as arguments, exposing system configurations and database credentials. CVE-2026-29203 allows local users to chmod arbitrary files via unsafe symlink handling, enabling denial-of-service and potential privilege escalation chains. These vulnerabilities land one week after mass exploitation of CVE-2026-41940 compromised over 40,000 servers with "Sorry" ransomware. Patches are available in version 11.136.0.9 and backported to versions 11.134 through 11.124, plus a legacy CentOS 6/CloudLinux 6 path. Administrators should run `/scripts/upcp --force` immediately. [[Cyber Security News](https://cyberpress.org/new-cpanel-and-whm-flaws-enable-remote-code-execution-and-dos-attacks/); [GBHackers](https://gbhackers.com/new-cpanel-and-whm-vulnerabilities/)]
+
+
+## 🛡️ Defense & Detection
+
+**[NEW] GhostLock — encryptionless file-locking attack paralyzes enterprise NAS in under 3 minutes**
+
+Security researcher Kim Dvash has published GhostLock, a proof-of-concept demonstrating how a low-privileged domain user can lock 500,000 files on an enterprise network share in under three minutes without encrypting a single byte. The technique exploits the standard Windows `CreateFileW` API with a sharing mode of 0, which grants exclusive deny-share handles that the SMB protocol enforces at the kernel level with no user-mode bypass. The attack generates zero write, rename, or delete events — rendering honeypots, canary files, behavioral AI models, write-rate anomaly detectors, and DLP tools completely blind. Endpoint detection sees only system calls identical to a user rapidly opening documents. Detection requires monitoring storage management session tables for single sessions holding 500+ exclusive handles, and incident response must coordinate directly with storage administrators to forcefully terminate the offending session — simply revoking Active Directory credentials is insufficient, as pre-authenticated SMB sessions maintain their locks. [[GBHackers](https://gbhackers.com/windows-createfilew-api-flaw/)]
+
+**[NEW] macOS malvertising via Google Ads and Claude.ai shared chats delivers infostealer**
+
+An active malvertising campaign abuses both Google Ads (sponsored results for "Claude mac download") and legitimate Claude.ai shared chat features to distribute MacSync macOS infostealer. The attack is particularly deceptive because the Google ads point to Anthropic's real `claude.ai` domain — malicious instructions are hosted inside Claude's own shared chat feature, eliminating the usual fake-domain tell. Two payload variants have been identified: one delivering a MacSync infostealer that harvests browser credentials, cookies, and Keychain contents via `customroofingcontractors[.]com`, and a second using polymorphic delivery from `bernasibutuwqu2[.]com` with geofencing (exits on CIS-region keyboards) and full in-memory execution via `osascript`. This campaign broadens the targeting beyond developers — anyone curious about AI tools is a potential victim. [[BleepingComputer](https://www.bleepingcomputer.com/news/security/hackers-abuse-google-ads-claudeai-chats-to-push-mac-malware/); [GBHackers](https://gbhackers.com/macos-malware-abuses-google-ads-and-claude-shared-chats/)]
+
+**[NEW] OpenClaw malware — sophisticated Rust-based framework targets 250 browser extensions including MetaMask, Bitwarden**
+
+Netskope Threat Labs has documented a malware campaign using a fake OpenClaw installer to deploy "Hologram," a highly modular Rust-based framework that targets 201 crypto wallet extensions, 49 password managers, and 2FA tools including MetaMask, Phantom, Bitwarden, 1Password, and Google Authenticator. The framework uses anti-VM checks (BIOS strings, hardware profiles, real mouse movement detection), hosts the .NET CLR inside a native Rust process via `clroxide` for in-memory execution, and bypasses EDR hooks via direct NT syscalls. Persistence is layered: Run keys, WinLogon Userinit hijacking, privileged scheduled tasks, and independent Telegram-based droppers that can re-establish the implant even after component removal. C2 leverages legitimate cloud services — Telegram channels, Hookdeck webhook relays (first documented crimeware use), Azure DevOps organizations, and hijacked Brazilian law-firm subdomains. The server-side manifest of 250 targeted extensions is updateable without recompilation, giving the campaign long-lived flexibility. [[GBHackers](https://gbhackers.com/openclaw-malware/)]
+
+
+## 📋 Policy & Industry News
+
+**[NEW] Weaponized JPEG drops trojanized ScreenConnect with credential provider interception**
+
+A multi-stage intrusion campaign uses a weaponized `sysupdate.jpeg` file to deliver a trojanized ConnectWise ScreenConnect client (v25.9.5.9483) on Windows systems. The fake JPEG contains obfuscated PowerShell that compiles a unique launcher per victim via `csc.exe`, achieves fileless UAC bypass via `ComputerDefaults.exe` and registry hijacking, and installs a malicious "OneDriveServers" service for persistence. The modified ScreenConnect framework exposes 46 operator capabilities including live screen viewing/recording, microphone capture, clipboard monitoring, and — critically — a Credential Provider interception server that captures usernames and passwords directly from the Windows logon screen before they reach LSASS. The malware creates hidden administrator accounts invisible on the normal logon UI and uses PBKDF2-HMAC-SHA256 key derivation for encrypted C2 communications over non-standard ports. C2 infrastructure: `legitserver[.]theworkpc[.]com` resolving to `45[.]138[.]16[.]64`. [[GBHackers](https://gbhackers.com/weaponized-jpeg-file/)]
+
+
+## ⚡ Quick Hits
+
+- **TrickMo Android banking malware evolves with device takeover capabilities** — New variant adds modular architecture targeting banking, fintech, wallet, and authenticator apps on Android, improving stealth and persistence over previous iterations. [[Malware.News](https://malware.news/t/new-trickmo-variant-device-take-over-malware-targeting-banking-fintech-wallet-auth-apps/106847#post_1)]
+
+- **JDownloader download manager hacked to spread Python RAT** — Compromised installers of the popular Java-based download manager deliver a Python-based remote access trojan targeting both Linux and Windows users. [[GBHackers](https://gbhackers.com/jdownloader-hack/)]
+
+- **Kimsuky targets Naver accounts via Instagram DM phishing** — North Korean APT Kimsuky distributes Naver credential-harvesting phishing sites through Instagram direct messages, continuing the group's focus on Korean-language social engineering. [[Malware.News](https://malware.news/t/dm-kimsuky/106841#post_1)]
+
+- **ASEC publishes April 2026 dark web threat reports** — Three reports cover threat actor trends (including Scattered Spider activity), dark web issue trends, and breach incident trends. Notable: DDoS-for-hire services and RCE exploit sales dominate the monthly landscape. [[ASEC](https://asec.ahnlab.com/en/93634/); [ASEC](https://asec.ahnlab.com/en/93633/); [ASEC](https://asec.ahnlab.com/en/93628/)]
+
+---
+
+*33 articles ingested from Miniflux Cyber feeds, supplemented by Reddit r/cybersecurity cross-referencing. Prior digest: May 9, 2026. Sources include SecurityWeek, BleepingComputer, GBHackers, Cyber Security News, Netskope, CYFIRMA, SOCRadar, Malware.News, ASEC, Cyber Insider, Risky Bulletin, and Lyrie Research.*
