@@ -1,23 +1,19 @@
 ---
-title: "🐧 Copy Fail KEV, ⚡ Megalodon 5.5K Repos, 🔴 Google Chromium Leak, 🏭 Foxconn 8TB, 🕸️ First VPN Takedown"
+title: "⚡ Megalodon 5.5K Repos, 🔴 Google Chromium Leak, 🏭 Foxconn 8TB, 🕸️ First VPN Takedown"
 date: 2026-05-22
-tags: ["Copy Fail","CVE-2026-31431","Megalodon","supply-chain","Chromium","Foxconn","Nitrogen","Kimwolf","First VPN","Trend Micro","art-template","Drupal","Cisco","Apache OFBiz","Microsoft Edge","DBIR"]
+tags: ["Megalodon","supply-chain","Chromium","Foxconn","Nitrogen","Kimwolf","First VPN","Trend Micro","art-template","Drupal","Cisco","Apache OFBiz","Microsoft Edge","DBIR"]
 categories: ["Threat Intelligence"]
 author: Tia N. List
-summary: "CISA adds Copy Fail (CVE-2026-31431) Linux LPE to KEV with active exploitation confirmed. Megalodon campaign compromises 5,500+ GitHub repos in 6 hours. Google accidentally exposes unfixed Chromium Service Worker flaw enabling silent JS RCE. Foxconn ransomware leaks 8TB of NVIDIA/Apple IP. First VPN takedown seizes 33 servers across 27 countries. Prioritize Linux kernel patching, audit GitHub Actions workflows, and restrict OAuth device-code flows."
+summary: "Megalodon campaign compromises 5,500+ GitHub repos in 6 hours. Google accidentally exposes unfixed Chromium Service Worker flaw enabling silent JS RCE. Foxconn ransomware leaks 8TB of NVIDIA/Apple IP. First VPN takedown seizes 33 servers across 27 countries. Prioritize auditing GitHub Actions workflows, restricting OAuth device-code flows, and patching Cisco/IoT devices."
 ---
 
 # Daily Threat Intelligence Digest — May 22, 2026
 
-*89 articles ingested from Miniflux Cyber feeds. External cross-referencing via TLDR InfoSec (May 20 — gap detection: Copy Fail, Edge passwords), Reddit r/cybersecurity (fresh content), and tl;dr sec #329 (May 21 — AI honeypots, GitHub Action canaries, MDASH).*
+*89 articles ingested from Miniflux Cyber feeds. External cross-referencing via Reddit r/cybersecurity (fresh content) and tl;dr sec #329 (May 21 — AI honeypots, GitHub Action canaries, MDASH).*
 
 ---
 
 ## 🔴 Critical Threats & Active Exploitation
-
-**[NEW] Copy Fail (CVE-2026-31431) — CISA Adds to KEV with Active Exploitation Confirmed; 732-Byte PoC Roots Any Linux Since 2017**
-
-CISA has added the "Copy Fail" Linux kernel privilege escalation vulnerability to its Known Exploited Vulnerabilities (KEV) catalog, confirming active in-the-wild exploitation. Tracked as CVE-2026-31431 (CVSS 7.8), the flaw resides in the Linux kernel's `algif_aead` module — a cryptographic algorithm interface. Theori researchers disclosed it alongside a "100% reliable" 732-byte Python exploit that works unmodified across every major Linux distribution shipping kernels built since 2017, including Ubuntu 24.04 LTS, Amazon Linux 2023, RHEL 10.1, and SUSE 16. The exploit writes 4 controlled bytes into the page cache of any readable file (e.g., `/usr/bin/su`) without modifying the on-disk binary, making it invisible to file-integrity monitoring. It is deterministic (no race condition), cross-container, and leaves no forensic trace on disk. Microsoft, Palo Alto Unit 42, and CERT-EU have all issued urgent advisories. The upstream fix was committed April 1, but distribution patches remain pending across several vendors. Interim mitigation: `echo "install algif_aead /bin/false" > /etc/modprobe.d/disable-algif.conf && rmmod algif_aead`. CISA orders federal agencies to patch by June 4 under BOD 22-01. [[BleepingComputer](https://www.bleepingcomputer.com/news/security/cisa-says-copy-fail-flaw-now-exploited-to-root-linux-systems/); [Microsoft Security Blog](https://www.microsoft.com/en-us/security/blog/2026/05/01/cve-2026-31431-copy-fail-vulnerability-enables-linux-root-privilege-escalation/); [CERT-EU](https://cert.europa.eu/publications/security-advisories/2026-005/pdf); [r/cybersecurity](https://old.reddit.com/r/cybersecurity/) (641↑)]
 
 **[NEW] Megalodon Automated Campaign Compromises 5,500+ GitHub Repositories in 6 Hours — CI/CD Secrets and Cloud Credentials Harvested**
 
