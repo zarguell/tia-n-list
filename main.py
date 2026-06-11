@@ -113,7 +113,7 @@ def _save_run_log(run_log):
 # Pipeline
 # ---------------------------------------------------------------------------
 
-def run_pipeline(research_engine=None, nvd_api_key=None, scan_vulnrichment=False):
+def run_pipeline(research_engine=None, nvd_api_key=None, scan_vulnrichment=False, run_qc=False):
     """Execute the full kevrichment pipeline.
 
     Parameters
@@ -322,6 +322,25 @@ def run_pipeline(research_engine=None, nvd_api_key=None, scan_vulnrichment=False
     else:
         print(f"\n  (skipping vulnrichment scan — add --scan-vulnrichment to enable)")
 
+    # ---- 3c.  Quality control (--qc) ---------------------------------------
+    if run_qc:
+        print(f"\n  ── Quality control ──")
+        from qc import run_qc_pipeline
+        qc_report, qc_records = run_qc_pipeline()
+        # Re-read updated entries from QC'd files (QC may have auto-fixed them)
+        updated_entries = []
+        for path in sorted(CVES_DIR.glob("*.json")):
+            with open(path) as f:
+                rec = json.load(f)
+            updated_entries.append(build_index_entry(rec))
+        print(f"  QC'd {qc_report['total_cves_qcd']} CVEs: "
+              f"{qc_report['errors']} errors, {qc_report['warnings']} warnings, "
+              f"{qc_report['infos']} infos, {qc_report['auto_fixed']} auto-fixed")
+        for check, stats in sorted(qc_report.get("by_check", {}).items()):
+            if stats["errors"] or stats["warnings"]:
+                print(f"    {check:35s}  e={stats['errors']}  w={stats['warnings']}  i={stats['infos']}")
+        run_log["qc_report"] = qc_report
+
     # ---- 4.  Write outputs -----------------------------------------------
     print(f"\n[4/4] Writing output artifacts …")
 
@@ -397,9 +416,32 @@ def cli_main():
              "technical_impact=total. These would require 3-day remediation "
              "under BOD 26-04 if on a publicly exposed asset.",
     )
+    parser.add_argument(
+        "--qc", action="store_true",
+        help="Run quality control checks on CVE records after research "
+             "(checks for contradictions, artifacts, missing data; auto-fixes where possible)",
+    )
+    parser.add_argument(
+        "--qc-only", action="store_true",
+        help="Skip research entirely; re-run QC on existing CVE files only",
+    )
     args = parser.parse_args()
 
     nvd_api_key = args.nvd_api_key or os.environ.get("NVD_API_KEY")
+
+    if args.qc_only:
+        # QC-only mode: skip research, run QC on existing data
+        print("╔══ kevrichment QC-only mode ══╗\n")
+        from qc import run_qc_pipeline
+        report, records = run_qc_pipeline()
+        print(f"  QC'd {report['total_cves_qcd']} CVEs: "
+              f"{report['errors']} errors, {report['warnings']} warnings, "
+              f"{report['infos']} infos, {report['auto_fixed']} auto-fixed")
+        print("\n  QC summary by check:")
+        for check, stats in sorted(report.get("by_check", {}).items()):
+            print(f"    {check:35s}  count={stats['count']:>2d}  "
+                  f"e={stats['errors']}  w={stats['warnings']}  i={stats['infos']}")
+        return
 
     if args.agent:
         try:
@@ -416,6 +458,7 @@ def cli_main():
         research_engine=engine,
         nvd_api_key=nvd_api_key,
         scan_vulnrichment=args.scan_vulnrichment,
+        run_qc=args.qc,
     )
 
 
