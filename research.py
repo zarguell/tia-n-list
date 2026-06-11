@@ -64,7 +64,7 @@ class ResearchEngine:
 
         # -- 1.  Identify the specific vulnerable component -----------------
         component = self._extract_component(
-            cve_description, product, vendor_project
+            cve_description, product, vendor_project, nvd_data=nvd_data
         )
         result["vulnerable_component"] = component
 
@@ -198,32 +198,157 @@ class ResearchEngine:
     # ------------------------------------------------------------------
 
     @staticmethod
-    def _extract_component(description, product, vendor):
-        """Extract the specific vulnerable component from the description."""
+    def _extract_component(description, product, vendor, nvd_data=None):
+        """Extract the specific vulnerable component from the description.
+
+        Multi-strategy extraction with CPE fallback. Returns the most specific
+        deployment-recognizable component name, falling back to *product* when
+        nothing better is found.
+        """
         if not description:
             return product
 
-        desc_low = description.lower()
-        patterns = [
-            # Most specific first — suffix-anchored patterns
-            r'in the ([A-Z][a-zA-Z0-9_ -]{1,45}?)(?: component| module| feature| function)\b',
-            r'in ([A-Z][a-zA-Z0-9_ -]{1,45}?)(?: component| module| feature| function)',
-            # "vulnerability in (the) X allows|could|that…" — verb-terminated
-            r'(?:a |the )?vulnerability in (?:the )?([A-Z][a-zA-Z0-9_ /-]{1,45}?)(?:\s+(?:allows|could|that|may|can|is|are|was|permit|\w+ly\b)|\s*$)',
-            # Bare "vulnerability in the X" — comma/period/verb terminated
-            r'(?:a |the )?vulnerability in the ([A-Z][a-zA-Z0-9_ -]{1,50}?)(?:[,\.;:]|\s+(?:allows|could|that|may|can|is|are|was|permit|\w+ly\b)|\s*$)',
+        candidates = []  # (component, weight) — higher weight = more specific
 
-            # "on affected X" — CVSS scope note pattern
-            r'(?:on |the )?affected ([A-Z][a-zA-Z0-9_ -]{1,40})(?: is| are| allows| was)',
-            r'the affected ([A-Z][a-zA-Z0-9_ -]{1,40})(?: is| are| component)',
+        # ── Strategy 1: named thing with type keyword ────────────────────
+        # "in the [NAME] function/module/component/control/dll/library/…"
+        patterns_keyword = [
+            # (pattern, weight_bonus)
+            (r'(?:in|within)\s+the\s+'
+             r'([A-Z][A-Za-z0-9_:\-.()/]{1,70}?)'
+             r'\s+(?:function|class|method|subroutine|api)\b',
+             2),   # very specific (function-level) — low weight
+            # Lowercase-starting function names: "in the string_vformat function"
+            (r'(?:in|within)\s+the\s+'
+             r'([a-z][A-Za-z0-9_]{2,60})'
+             r'\s+function\b',
+             2),   # function-level (lowercase) — same weight
+            (r'(?:in|within)\s+the\s+'
+             r'([A-Z][A-Za-z0-9_:\-()/ ]{1,70}?)'
+             r'\s+(?:control|driver|service|server|object|handler|plugin|addon|filter)\b',
+             6),   # deployment-recognizable component
+            (r'(?:in|within)\s+the\s+'
+             r'([A-Z][A-Za-z0-9_:\-()/ ]{1,70}?)'
+             r'\s+(?:dll|library)\b',
+             4),   # generic library/dll — lower weight to avoid overmatching
+            # "in the X component" — without requiring "of" after it
+            (r'(?:in|within)\s+the\s+'
+             r'([A-Z][A-Za-z0-9_:\-()/ ]{1,70}?)'
+             r'\s+component\b',
+             4),   # component mention
+            (r'(?:in|within)\s+the\s+'
+             r'([A-Z][A-Za-z0-9_:\-()/ ]{1,70}?)'
+             r'\s+(?:component|module|feature|engine)\s+of\b',
+             5),   # "component of" — more specific
         ]
-        for pat in patterns:
-            m = re.search(pat, description, re.IGNORECASE)
-            if m:
-                found = m.group(1).strip().rstrip(".")
-                if 3 < len(found) < 200:
-                    return found
-        return product
+        for pat, weight in patterns_keyword:
+            for m in re.finditer(pat, description):
+                # Don't use IGNORECASE — require literal [A-Z] for component name
+                raw = m.group(1).strip().rstrip(".")
+                found = raw.rstrip("()")
+                if 3 < len(found) < 200 and found.lower() != product.lower():
+                    # Reject candidates with unmatched parentheses (check raw before rstrip)
+                    if raw.count("(") != raw.count(")"):
+                        continue
+                    candidates.append((found, weight))
+
+        # ── Strategy 2: vulnerability-type keyword patterns ──────────────
+        # "Stack-based buffer overflow in [the] [NAME] allows|could|…"
+        vuln_heads = [
+            r'(?:buffer\s+overflow|heap\s+overflow|stack\s+overflow)',
+            r'(?:use-after-free|type\s+confusion|out-of-bounds\s+(?:read|write))',
+            r'(?:integer\s+overflow|memory\s+corruption|race\s+condition)',
+            r'(?:privilege\s+escalation|remote\s+code\s+execution)',
+            r'(?:improper\s+(?:input\s+)?validation|missing\s+authentication)',
+            r'(?:cross-site\s+scripting|SQL\s+injection|path\s+traversal)',
+            r'(?:vulnerability|weakness|flaw|defect)',
+        ]
+        for head in vuln_heads:
+            pat = (
+                head + r'\s+in\s+(?:the\s+)?'
+                # Greedy quantifier — avoids :: matching the terminator
+                r'([A-Z][A-Za-z0-9_:\-.()/]{1,70})'
+                r'(?:\s+(?:function|component|module|allows|could|that|may|can|is|are|was|permit|in|'
+                r'exists|triggers|results|leads|gives|grants|allowing|causing|leading|'
+                r'\w+ly\b)|[.,;)\]]|$)'
+            )
+            for m in re.finditer(pat, description):
+                # Case-sensitive: require literal [A-Z] for component name start
+                raw = m.group(1).strip().rstrip(".")
+                found = raw.rstrip("()")
+                if 3 < len(found) < 200 and found.lower() != product.lower():
+                    if raw.count("(") != raw.count(")"):
+                        continue
+                    candidates.append((found, 5))
+
+        # ── Strategy 3: "as used in the [COMPONENT]" ────────────────────
+        # Describes the deployment context: "as used in the X control"
+        m = re.search(
+            r'as used in (?:the |an |a )?'
+            r'([A-Z][A-Za-z0-9_:\-.()/ ]{1,70}?)'
+            r'(?:\s+(?:control|dll|library|module|component|object|in|for|[.,;:]|$))',
+            description
+        )
+        if m:
+            raw = m.group(1).strip().rstrip(".")
+            found = raw.rstrip("()")
+            if 3 < len(found) < 200 and found.lower() != product.lower():
+                if raw.count("(") != raw.count(")"):
+                    pass
+                else:
+                    candidates.append((found, 5))
+
+        # ── Strategy 4: "on affected [COMPONENT]" / "affected [COMPONENT]" ─
+        for m in re.finditer(
+            r'(?:the |on )?affected\s+'
+            r'([A-Z][A-Za-z0-9_:\-.()/ ]{1,50}?)'
+            r'(?:\s+(?:component|module|function|is|are|allows|was|[.,;:]|$))',
+            description
+        ):
+            raw = m.group(1).strip().rstrip(".")
+            found = raw.rstrip("()")
+            if 3 < len(found) < 200 and found.lower() != product.lower():
+                if raw.count("(") != raw.count(")"):
+                    continue
+                candidates.append((found, 4))
+
+        # ── Strategy 5: CPE fallback ────────────────────────────────────
+        if nvd_data:
+            from_software = set()
+            vulns = nvd_data.get("vulnerabilities") or []
+            if vulns:
+                for cfg in vulns[0].get("cve", {}).get("configurations", []):
+                    for node in cfg.get("nodes", []):
+                        for cpe_match in node.get("cpeMatch", []):
+                            criteria = cpe_match.get("criteria", "")
+                            if cpe_match.get("vulnerable", False):
+                                parts = criteria.split(":")
+                                if len(parts) >= 6:
+                                    cpe_vendor = parts[3]
+                                    cpe_product = parts[4]
+                                    cpe_part = parts[2]
+                                    # Only "a" (application) parts — skip OS/hardware
+                                    if cpe_part == "a" and cpe_vendor.lower() != vendor.lower():
+                                        name = cpe_product.replace("_", " ").title()
+                                        if 3 < len(name) < 200 and name.lower() != product.lower():
+                                            from_software.add(name)
+            if from_software:
+                for name in from_software:
+                    candidates.append((name, 3))
+
+        # ── Select the best candidate ───────────────────────────────────
+        if not candidates:
+            return product
+
+        # Deduplicate by name, keep highest weight
+        best = {}
+        for name, weight in candidates:
+            if name not in best or weight > best[name]:
+                best[name] = weight
+
+        # Sort by weight desc, length desc (prefer longer = more specific)
+        ranked = sorted(best.items(), key=lambda x: (-x[1], -len(x[0])))
+        return ranked[0][0]
 
     @staticmethod
     def _guess_vendor_advisory_url(cve_id, vendor):
