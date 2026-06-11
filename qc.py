@@ -63,50 +63,44 @@ def _check_precondition_contradictions(record, notes):
     ui = cvss_vals.get("UI")
 
     fixes = []
+    pre_lower = pre.lower()
 
     # -- Attack Vector contradictions --
-    if av == "N" and "Local access required (CVSS: AV:L)" in pre:
-        fixes.append(("Local access required (CVSS: AV:L); ",
-                       "CVSS says AV:N (network) but precondition says AV:L; removed"))
-    if av == "L" and "Network access to the vulnerable service" in pre:
-        fixes.append(("Network access to the vulnerable service; ",
-                       "CVSS says AV:L (local) but precondition says 'Network access'; removed"))
-    if av in ("A", "P") and "Network access to the vulnerable service" in pre:
-        fixes.append(("Network access to the vulnerable service; ",
-                       f"CVSS says AV:{av} but precondition says 'Network access'; removed"))
-
-    # "Local or authenticated access" + AV:N → misleading
-    if av == "N" and "Local or authenticated access" in pre:
-        # Keep the authenticated part if PR != N
-        if pr != "N" and "Valid credentials required" in pre:
-            fixes.append(("Local or authenticated access; ",
-                           "CVSS shows AV:N (network), dropped misleading 'Local' part"))
-        elif pr == "N":
-            fixes.append(("Local or authenticated access; ",
-                           "CVSS shows AV:N + PR:N, dropped misleading 'Local or authenticated access'"))
+    if av == "N" and "local shell" in pre_lower:
+        fixes.append((pre[pre_lower.index("local shell"):pre_lower.index("local shell") + 50].partition(";")[0] + "; ",
+                       "CVSS says AV:N (network) but precondition says 'Local shell'; removed"))
+    if av in ("L", "P", "A") and "network reachability" in pre_lower:
+        fixes.append((pre[pre_lower.index("network reachability"):pre_lower.index("network reachability") + 60].partition(";")[0] + "; ",
+                       f"CVSS says AV:{av} but precondition says 'Network reachability'; removed"))
 
     # -- Privileges contradictions --
-    if pr in ("H", "L") and "No privileges required (CVSS: PR:N)" in pre:
-        fixes.append(("No privileges required (CVSS: PR:N); ",
-                       f"CVSS says PR:{pr} (privileges needed) but precondition says PR:N; removed"))
-    if pr == "N" and "Valid credentials required" in pre:
-        # This isn't strictly a contradiction (AV:N + PR:N can still need creds in some auth models)
-        # Downgrade to info
+    if pr == "N" and "credentials required" in pre_lower:
         notes.append({
             "severity": "info",
             "check": "precondition_contradiction",
             "field": "kevrichment_research.preconditions_for_exploit",
-            "detail": "CVSS says PR:N but precondition says 'Valid credentials required' — may need auth despite no privileges",
+            "detail": "CVSS says PR:N but precondition mentions credential requirement — may need auth despite no privileges",
             "auto_fixed": False,
         })
 
     # -- User Interaction contradictions --
-    if ui == "R" and "No user interaction required (CVSS: UI:N)" in pre:
-        fixes.append(("No user interaction required (CVSS: UI:N); ",
-                       "CVSS says UI:R (interaction required) but precondition says UI:N; removed"))
-    if ui == "N" and "User interaction required" in pre and "CVSS" not in pre.split("User interaction required")[-1][:10]:
-        fixes.append(("User interaction required; ",
-                       "CVSS says UI:N (no interaction) but precondition says interaction required; removed"))
+    if ui == "R" and "no explicit interaction" in pre_lower:
+        fixes.append((pre[pre_lower.index("no explicit interaction"):pre_lower.index("no explicit interaction") + 65].partition(";")[0] + "; ",
+                       "CVSS says UI:R (interaction required) but precondition says no interaction; removed"))
+    if ui == "N" and "user must interact" in pre_lower:
+        fixes.append((pre[pre_lower.index("user must interact"):pre_lower.index("user must interact") + 60].partition(";")[0] + "; ",
+                       "CVSS says UI:N (no interaction) but precondition says user interaction required; removed"))
+
+    # -- Component/product applicability --
+    if not any(word in pre_lower for word in
+               ("run", "accessible", "vulnerable version", "affected")):
+        notes.append({
+            "severity": "info",
+            "check": "precondition_contradiction",
+            "field": "kevrichment_research.preconditions_for_exploit",
+            "detail": "Preconditions don't mention deployment applicability (component/product version)",
+            "auto_fixed": False,
+        })
 
     # Apply auto-fixes
     fixed_pre = pre

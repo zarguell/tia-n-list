@@ -267,59 +267,116 @@ class ResearchEngine:
 
     @staticmethod
     def _synthesize_preconditions(description, component, product, nvd_data):
-        """Build structured precondition summary from CVSS + description."""
+        """Build a precondition summary that answers: what must be true in
+        *your deployment* for this CVE to be exploitable?
+
+        Uses CVSS vector + product class (not description keyword matching)
+        to determine the realistic access model:
+          - Browsers/email clients → user interaction is the gate
+          - Network services/appliances → network reachability
+          - CLI/local tools → authenticated shell access
+
+        Returns a compact, deployment-actionable string.
+        """
         if not description:
             return "Insufficient information to determine preconditions."
 
-        pre = []
-        dl = description.lower()
+        product_low = product.lower()
 
-        # Network / local
-        if any(w in dl for w in ("network", "remote", "adjacent", "over http", "tcp", "http request")):
-            pre.append("Network access to the vulnerable service")
-        if any(w in dl for w in ("local", "authenticated", "physical")):
-            pre.append("Local or authenticated access")
+        # ---- Determine product class ----
+        # Browser / client-side app
+        is_browser = any(b in product_low for b in (
+            "chrome", "chromium", "firefox", "safari", "edge", "browser"
+        ))
+        is_document_viewer = any(d in product_low for d in (
+            "pdf", "reader", "viewer", "document", "office", "word", "excel"
+        ))
+        is_email_client = any(e in product_low for e in (
+            "mail", "outlook", "thunderbird", "email client"
+        ))
+        is_network_appliance = any(n in product_low for n in (
+            "switch", "router", "gateway", "firewall", "vpn",
+            "load balancer", "ips", "ids"
+        ))
 
-        # Auth
-        if "unauthenticated" in dl or "no authentication" in dl:
-            pre.append("No authentication required")
-        elif "authenticated" in dl or "authentication" in dl:
-            pre.append("Valid credentials required")
-
-        # User interaction
-        if any(w in dl for w in ("click", "user interaction", "phishing", "social engineering")):
-            pre.append("User interaction required")
-
-        # From CVSS
+        # ---- Extract CVSS fields ----
+        cvss_av = None
+        cvss_pr = None
+        cvss_ui = None
         if nvd_data:
             vulns = nvd_data.get("vulnerabilities") or []
             if vulns:
                 metrics = vulns[0].get("cve", {}).get("metrics", {})
-                cvss = (metrics.get("cvssMetricV31") or metrics.get("cvssMetricV30") or [{}])[0]
-                cd = cvss.get("cvssData", {})
-                av = cd.get("attackVector", "")
-                ac = cd.get("attackComplexity", "")
-                pr = cd.get("privilegesRequired", "")
-                ui = cd.get("userInteraction", "")
+                cvss_entry = (metrics.get("cvssMetricV31") or
+                              metrics.get("cvssMetricV30") or [{}])[0]
+                cd = cvss_entry.get("cvssData", {})
+                cvss_av = cd.get("attackVector")
+                cvss_pr = cd.get("privilegesRequired")
+                cvss_ui = cd.get("userInteraction")
 
-                if av == "NETWORK":
-                    pre.append("Network-based (CVSS: AV:N)")
-                elif av == "ADJACENT_NETWORK":
-                    pre.append("Adjacent network access required (CVSS: AV:A)")
-                elif av == "LOCAL":
-                    pre.append("Local access required (CVSS: AV:L)")
-                if ac == "HIGH":
-                    pre.append("Attack complexity is HIGH (CVSS: AC:H)")
-                if pr == "NONE":
-                    pre.append("No privileges required (CVSS: PR:N)")
-                if ui == "NONE":
-                    pre.append("No user interaction required (CVSS: UI:N)")
+        pre = []
 
-        # Deployment precondition
-        if component and component != product:
-            pre.append(f"Target must serve {product} with the {component} component accessible")
+        # ---- Build the primary precondition ----
+        if is_browser or is_document_viewer or is_email_client:
+            # Client-side: user interaction is the main gate
+            if cvss_ui == "REQUIRED" or is_browser:
+                pre.append(
+                    "User must interact with malicious content "
+                    "(click a link, visit a webpage, open an attachment)"
+                )
+            else:
+                # Rare: browser vuln with UI:N (drive-by without interaction)
+                pre.append(
+                    "User must visit a compromised or malicious webpage "
+                    "(no explicit interaction required beyond page load)"
+                )
+        elif is_network_appliance or cvss_av == "NETWORK":
+            # Server / network service
+            if cvss_pr == "NONE":
+                pre.append(
+                    "Network reachability to the affected interface or "
+                    "service — no authentication barrier"
+                )
+            elif cvss_pr == "LOW":
+                pre.append(
+                    "Network reachability to the affected interface or "
+                    "service — low-privileged credentials required"
+                )
+            else:
+                pre.append(
+                    "Network reachability to the affected interface or "
+                    "service — administrative credentials required"
+                )
+
+            # Add user interaction note if relevant
+            if cvss_ui == "REQUIRED":
+                pre.append(
+                    "User on the target system must perform an action "
+                    "(click, confirm, visit a URL) for the exploit to succeed"
+                )
+        elif cvss_av == "ADJACENT_NETWORK":
+            pre.append(
+                "Adjacent network access to the vulnerable component "
+                "(same broadcast domain, layer-2 adjacency)"
+            )
+        elif cvss_av == "LOCAL":
+            pre.append("Local shell or interactive access to the target system")
+        elif cvss_av == "PHYSICAL":
+            pre.append("Physical access to the target device or console")
         else:
-            pre.append(f"Target must be running a vulnerable version of {product}")
+            # Fallback
+            pre.append("Unknown attack vector — review vendor advisory")
+
+        # ---- Deployment precondition ----
+        if component and component != product:
+            pre.append(
+                f"Target must run {product} with the {component} "
+                f"component accessible"
+            )
+        else:
+            pre.append(
+                f"Target must run a vulnerable version of {product}"
+            )
 
         return "; ".join(pre)
 
