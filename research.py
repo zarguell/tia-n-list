@@ -60,6 +60,7 @@ class ResearchEngine:
             "vendor_advisory_url": "",
             "exploit_complexity_notes": "",
             "kevrichment_summary": "",
+            "delivery_mechanism": None,
         }
 
         # -- 1.  Identify the specific vulnerable component -----------------
@@ -111,9 +112,37 @@ class ResearchEngine:
             result, vendor_project, product
         )
 
+        # -- 7b. Delivery mechanism (for transparency) ---------------------
+        result["delivery_mechanism"] = self._extract_delivery_mechanism(
+            cve_description
+        )
+
         # -- 8.  Hunting hypothesis -----------------------------------------
+        # Extract CWE and CVSS data from NVD for compositional hypothesis
+        cwe_ids = []
+        cvss_av = None
+        cvss_ac = None
+        cvss_pr = None
+        cvss_ui = None
+        if nvd_data:
+            vulns = nvd_data.get("vulnerabilities") or []
+            if vulns:
+                cve_item = vulns[0].get("cve", {})
+                for w in cve_item.get("weaknesses", []):
+                    for d in w.get("description", []):
+                        val = d.get("value", "")
+                        if val.startswith("CWE-"):
+                            cwe_ids.append(val)
+                metrics = cve_item.get("metrics", {})
+                cvss = (metrics.get("cvssMetricV31") or metrics.get("cvssMetricV30") or [{}])[0]
+                cd = cvss.get("cvssData", {})
+                cvss_av = cd.get("attackVector")
+                cvss_ac = cd.get("attackComplexity")
+                cvss_pr = cd.get("privilegesRequired")
+                cvss_ui = cd.get("userInteraction")
         result["hunting_hypothesis"] = self._generate_hunting_hypothesis(
-            cve_id, vendor_project, product, cve_description, result
+            cve_id, vendor_project, product, cve_description,
+            cwe_ids, cvss_av, cvss_ac, cvss_pr, cvss_ui, result
         )
 
         return result
@@ -352,220 +381,223 @@ class ResearchEngine:
 
         return " | ".join(parts) if parts else "Research incomplete"
 
-    @staticmethod
-    def _generate_hunting_hypothesis(cve_id, vendor, product, description, result):
-        """Generate a concise, actionable hunting hypothesis (one sentence).
+    def _generate_hunting_hypothesis(self, cve_id, vendor, product, description,
+                                      cwe_ids, cvss_av, cvss_ac, cvss_pr,
+                                      cvss_ui, result):
+        """Generate a hunting hypothesis by composing independent data dimensions.
 
-        Describes the *specific attacker behavior or TTP to look for*,
-        not a rehash of preconditions or CVSS scores.  Examples:
-          "Monitor for phishing links serving crafted HTML pages that
-           trigger type confusion in V8."
-          "Hunt for malformed VXLAN/GRE packets targeting EOS
-           decapsulation interfaces."
+        Builds a single actionable sentence from *structured data fields* that
+        were extracted independently (CWE, CVSS, component name, delivery
+        mechanism from description), not from hardcoded keyword→template maps.
+
+        This ensures the hypothesis is genuinely *derived* from analysis for
+        each CVE rather than pattern-matched from product/vendor names.
+
+        Dimensions
+        ----------
+        1. Vulnerability class   — CWE ID → "memory corruption" / "injection" etc.
+        2. Attack vector         — CVSS AV  → "network-based" / "local" etc.
+        3. Auth requirement      — CVSS PR  → "unauthenticated" / "authenticated"
+        4. User interaction      — CVSS UI  → "user interaction required" / "none"
+        5. Delivery mechanism    — extracted from description text
+        6. Vulnerable component  — extracted from description text
         """
         comp = result.get("vulnerable_component", product)
-        desc = (description or "").lower()
-        product_low = product.lower()
-        vendor_low = vendor.lower()
 
-        # -- Ordered from most to least specific pattern --------------------
-        # Each check returns a hypothesis immediately on first match.
+        # ---- 1. Vulnerability class from CWE IDs ----
+        CWE_CLASS_MAP = {
+            "CWE-20":   ("improper input validation", "bypass input validation"),
+            "CWE-22":   ("path traversal", "traverse directories"),
+            "CWE-78":   ("OS command injection", "inject OS commands"),
+            "CWE-79":   ("cross-site scripting", "inject scripts"),
+            "CWE-89":   ("SQL injection", "inject SQL queries"),
+            "CWE-94":   ("code injection", "inject code"),
+            "CWE-116":  ("improper output encoding", "bypass output encoding"),
+            "CWE-119":  ("memory corruption", "trigger memory corruption"),
+            "CWE-122":  ("heap-based buffer overflow", "trigger heap overflow"),
+            "CWE-125":  ("out-of-bounds read", "trigger out-of-bounds reads"),
+            "CWE-269":  ("privilege escalation", "escalate privileges"),
+            "CWE-287":  ("improper authentication", "bypass authentication"),
+            "CWE-306":  ("missing authentication", "access without authentication"),
+            "CWE-352":  ("cross-site request forgery", "forge cross-site requests"),
+            "CWE-362":  ("race condition", "exploit race conditions"),
+            "CWE-416":  ("use-after-free", "trigger use-after-free"),
+            "CWE-434":  ("unrestricted file upload", "upload arbitrary files"),
+            "CWE-502":  ("deserialization of untrusted data", "trigger untrusted deserialization"),
+            "CWE-787":  ("out-of-bounds write", "trigger out-of-bounds writes"),
+            "CWE-798":  ("hardcoded credentials", "exploit hardcoded credentials"),
+            "CWE-843":  ("type confusion", "trigger type confusion"),
+            "CWE-862":  ("missing authorization", "access without authorization"),
+            "CWE-863":  ("incorrect authorization", "bypass authorization"),
+            "CWE-918":  ("server-side request forgery", "forge server-side requests"),
+            "CWE-1023": ("incomplete comparison", "exploit incomplete comparison logic"),
+        }
 
-        # Browser memory corruption (Chrome, Edge, Firefox, Safari)
-        if any(b in product_low for b in ("chrome", "chromium", "edge", "firefox", "safari")):
-            if any(w in desc for w in ("out of bounds", "type confusion",
-                                       "use after free", "use-after-free",
-                                       "buffer overflow", "heap overflow",
-                                       "memory corruption")):
-                if "html" in desc or "page" in desc or "web" in desc:
-                    return (
-                        f"Monitor for phishing links or compromised websites "
-                        f"serving crafted HTML pages that trigger memory "
-                        f"corruption in the {comp} engine."
-                    )
-                return (
-                    f"Look for untrusted content — web pages, email "
-                    f"attachments, or network inputs — that trigger memory "
-                    f"corruption in the {comp} component of {product}."
-                )
+        vuln_class = "vulnerability"
+        vuln_action = "exploit the vulnerability"
+        for cwe_id in cwe_ids:
+            if cwe_id in CWE_CLASS_MAP:
+                vuln_class = CWE_CLASS_MAP[cwe_id][0]
+                vuln_action = CWE_CLASS_MAP[cwe_id][1]
+                break
 
-        # Tunnel / decapsulation protocol vulns (Arista, Cisco, network gear)
-        if any(w in desc for w in ("tunnel", "decapsulation", "decapsulate",
-                                   "vxlan", "gre ", "geneve")):
-            proto = "tunnel protocol"
-            if "vxlan" in desc:
-                proto = "VXLAN"
-            elif "gre" in desc:
-                proto = "GRE"
-            elif "geneve" in desc:
-                proto = "GENEVE"
-            return (
-                f"Hunt for malformed {proto} packets targeting "
-                f"{product} decapsulation interfaces — the device does "
-                f"not verify the tunnel protocol type before processing."
-            )
+        # ---- 2. Attack vector from CVSS ----
+        av_desc = "remotely"
+        if cvss_av == "NETWORK":
+            av_desc = "over the network"
+        elif cvss_av == "ADJACENT_NETWORK":
+            av_desc = "from an adjacent network"
+        elif cvss_av == "LOCAL":
+            av_desc = "with local access"
+        elif cvss_av == "PHYSICAL":
+            av_desc = "with physical access"
 
-        # API / endpoint exposure — specific HTTP endpoints
-        m = re.search(r'(?:POST|GET|PUT|DELETE)\s+/[a-zA-Z0-9_/-]+', description or "")
-        if m and any(w in desc for w in ("endpoint", "request body",
-                                          "configuration", "supplied",
-                                          "preview")):
-            return (
-                f"Monitor for {m.group()} requests with crafted body "
-                f"content that exploit insufficient validation in "
-                f"the {comp} component of {product}."
-            )
+        # ---- 3. Authentication from CVSS PR ----
+        auth_desc = None
+        if cvss_pr == "NONE":
+            auth_desc = "no authentication required"
+        elif cvss_pr == "LOW":
+            auth_desc = "low-privileged access only"
+        elif cvss_pr == "HIGH":
+            auth_desc = "high-privileged access required"
 
-        # Auth bypass (certificate, IKEv1, SSO, OAuth)
-        if any(w in desc for w in ("bypass user authentication",
-                                    "bypass authentication",
-                                    "authentication bypass",
-                                    "certificate validation",
-                                    "improper authentication",
-                                    "missing authentication",
-                                    "unauthenticated")):
-            if "ike" in desc or "vpn" in desc:
-                return (
-                    f"Look for IKEv1 VPN connection attempts with crafted "
-                    f"certificates designed to bypass user authentication "
-                    f"on {product} Remote Access gateways."
-                )
-            return (
-                f"Monitor for unauthenticated access attempts to the {comp} "
-                f"component of {product} — requests without valid session "
-                f"or token headers."
-            )
+        # ---- 4. User interaction ----
+        ui_desc = None
+        if cvss_ui == "REQUIRED":
+            ui_desc = "user interaction"
+        elif cvss_ui == "NONE":
+            ui_desc = "no user interaction"
 
-        # OS command injection (CWE-78 family)
-        if any(w in desc for w in ("command injection", "os command",
-                                    "execute arbitrary command",
-                                    "arbitrary command",
-                                    "spawned the supplied command",
-                                    "command execution",
-                                    "CWE-78")):
-            return (
-                f"Look for crafted input to the {comp} component of "
-                f"{product} that injects OS commands — monitor process "
-                f"trees for spawned shells or unexpected child processes."
-            )
+        # ---- 5. Delivery mechanism from result dict (extracted in research()) ----
+        deliv = result.get("delivery_mechanism")
 
-        # Crafted file upload
-        if all(w in desc for w in ("crafted file", "upload", "cli")):
-            return (
-                f"Monitor for local users uploading crafted files via "
-                f"the {product} CLI that bypass input validation to "
-                f"execute arbitrary commands."
-            )
+        # ---- 6. Compose the hypothesis sentence ----
+        # Builds: "[Verb] for [attacker action that triggers vuln in component],
+        #          [qualifiers]."
+        # All tokens come from independently-extracted data fields (CWE, CVSS,
+        # component, delivery pattern) — no product/vendor keyword templates.
 
-        # Memory safety (general, non-browser)
-        if any(w in desc for w in ("out of bounds", "out-of-bounds",
-                                    "buffer overflow", "heap overflow",
-                                    "buffer over-read", "over-read",
-                                    "CWE-125", "CWE-787", "CWE-119",
-                                    "CWE-122", "CWE-416")):
-            return (
-                f"Hunt for oversized or malformed input payloads sent to "
-                f"the {comp} component of {product} that could trigger "
-                f"memory corruption."
-            )
+        # Action clause — the core attacker behavior
+        if deliv:
+            # Delivery mechanism from description: "crafted HTML page" etc.
+            # "designed to" avoids subject-verb agreement issues
+            action = f"{deliv} designed to {vuln_action}"
+        elif cvss_av == "NETWORK":
+            if auth_desc == "no authentication required":
+                action = f"unauthenticated network-based attempts to {vuln_action}"
+            else:
+                action = f"network-based attempts to {vuln_action}"
+        elif cvss_av == "LOCAL":
+            action = f"local attempts to {vuln_action}"
+        elif cvss_av == "PHYSICAL":
+            action = f"physically-proximate attempts to {vuln_action}"
+        else:
+            action = f"attempts to {vuln_action}"
 
-        # SQL injection
-        if any(w in desc for w in ("sql injection", "sqli",
-                                    "CWE-89")):
-            return (
-                f"Monitor {product} logs for unexpected SQL query patterns "
-                f"or error responses indicating injection attempts against "
-                f"the {comp} interface."
-            )
+        # Target component
+        if comp != product:
+            target = f"in the {comp} component of {product}"
+        else:
+            target = f"in {product}"
 
-        # Path traversal
-        if any(w in desc for w in ("path traversal", "directory traversal",
-                                    "CWE-22")):
-            return (
-                f"Look for requests containing '../' or encoded traversal "
-                f"sequences targeting the {comp} endpoint of {product}."
-            )
+        # Assemble: "Monitor for [action] [target][qualifiers]."
+        sentence = f"Monitor for {action} {target}"
 
-        # Improper input validation (generic)
-        if any(w in desc for w in ("insufficient validation",
-                                    "improper validation",
-                                    "CWE-20", "CWE-116")):
-            return (
-                f"Hunt for specially crafted requests to the {comp} "
-                f"component of {product} that bypass input validation "
-                f"and trigger unintended code paths."
-            )
+        # Trailing qualifiers
+        qualifiers = []
+        if auth_desc and auth_desc != "no authentication required":
+            qualifiers.append(auth_desc)
+        if ui_desc == "user interaction":
+            qualifiers.append("requiring user interaction")
 
-        # XSS
-        if any(w in desc for w in ("xss", "cross-site", "cross site",
-                                    "CWE-79")):
-            return (
-                f"Monitor for reflective or stored script injection "
-                f"in the {comp} component of {product}, typically "
-                f"delivered via phishing URLs."
-            )
+        if qualifiers:
+            sentence = f"{sentence} — {', '.join(q for q in qualifiers if q)}"
 
-        # Deserialization
-        if any(w in desc for w in ("deserialization", "untrusted data",
-                                    "CWE-502")):
-            return (
-                f"Monitor {product} for untrusted deserialization "
-                f"attempts — unexpected serialized objects submitted "
-                f"to the {comp} component."
-            )
+        sentence += "."
 
-        # Privilege escalation
-        if any(w in desc for w in ("privilege escalation",
-                                    "privilege elevation",
-                                    "CWE-269")):
-            return (
-                f"Hunt for users or processes gaining privileges beyond "
-                f"their authorized scope in the {comp} component — "
-                f"watch for unusual admin-level API calls from "
-                f"low-privileged sources."
-            )
+        return sentence
 
-        # SSRF
-        if any(w in desc for w in ("ssrf", "server-side request forgery",
-                                    "CWE-918")):
-            return (
-                f"Monitor {product} for outbound connections to internal "
-                f"or unexpected destinations originating from the {comp} "
-                f"component — classic SSRF indicator."
-            )
+    @staticmethod
+    def _extract_delivery_mechanism(description):
+        """Extract the delivery/trigger mechanism from the description text.
 
-        # Race condition
-        if any(w in desc for w in ("race condition", "time-of-check",
-                                    "toctou", "CWE-362")):
-            return (
-                f"Look for concurrent requests to the {comp} component "
-                f"of {product} that exploit timing windows — rapid "
-                f"sequential writes to the same resource."
-            )
+        Uses structural patterns (prepositional phrases) rather than
+        product-specific keyword matching, so the mechanism is genuinely
+        *extracted* from each CVE's description rather than hardcoded.
+        """
+        if not description:
+            return None
 
-        # -- Final fallback from preconditions -----------------------------
-        pre = result.get("preconditions_for_exploit", "").lower()
-        if "local" in pre and "auth" in pre:
-            return (
-                f"Monitor for authenticated local user activity involving "
-                f"the {comp} component of {product} — watch for "
-                f"unusual file modifications or process execution."
-            )
-        if "network" in pre and "auth" in pre:
-            return (
-                f"Monitor for authenticated network requests to the {comp} "
-                f"component of {product} that exploit the vulnerable "
-                f"operation."
-            )
-        if "network" in pre:
-            return (
-                f"Hunt for network-based exploitation attempts targeting "
-                f"the {comp} component of {product}."
-            )
-        return (
-            f"Look for exploitation activity against the {comp} "
-            f"component of {product}."
+        desc = description.strip()
+
+        # Pattern 1: "via [a|the] [something]" — most common delivery indicator
+        # Handles "via a crafted HTML page." (period directly after)
+        # Handles "via a crafted HTML page (something)" (paren after)
+        m = re.search(
+            r'(?:via|through)\s+(?:a\s+|an\s+|the\s+)?'
+            r'(crafted\s+\w[\w\s-]{2,60}?)'
+            r'(?:\s+(?:allows|could|that|which)|'
+            r'\s*[\.;:,]|\s*[\)\]]|$)',
+            desc, re.IGNORECASE | re.DOTALL
         )
+        if m:
+            mech = m.group(1).strip().rstrip(".,;")
+            if 5 < len(mech) < 120:
+                return mech
+
+        # Pattern 2: "by [supplying|providing|sending|crafting|uploading|submitting|passing] [a|an|the] [something]"
+        m = re.search(
+            r'by\s+(?:supplying|providing|sending|crafting|uploading|submitting|passing)'
+            r'\s+(?:a\s+|an\s+|the\s+)?'
+            r'(\w[\w\s-]{3,80}?)'
+            r'(?:\s+(?:to|that|which)|'
+            r'\s*[\.;:,]|\s*[\)\]]|$)',
+            desc, re.IGNORECASE | re.DOTALL
+        )
+        if m:
+            mech = m.group(1).strip().rstrip(".,;")
+            if 5 < len(mech) < 120:
+                # Ensure proper article prefix
+                if not any(mech.startswith(p) for p in ("a ", "an ", "the ", "a crafted", "an crafted")):
+                    return f"a {mech}"
+                return mech
+
+        # Pattern 3: "an attacker could [verb] [something]"
+        m = re.search(
+            r'(?:an\s+)?attacker\s+could\s+'
+            r'(?:send|submit|provide|craft|upload|inject)'
+            r'\s+(?:a\s+|an\s+|the\s+|carefully\s+crafted\s+)?'
+            r'(\w[\w\s-]{4,80}?)'
+            r'(?:\s+(?:to|that|which)|'
+            r'\s*[\.;:,]|\s*[\)\]]|$)',
+            desc, re.IGNORECASE | re.DOTALL
+        )
+        if m:
+            mech = m.group(1).strip().rstrip(".,;")
+            if 5 < len(mech) < 120:
+                return f"carefully crafted {mech}".strip()
+
+        # Pattern 4: Bare "a crafted [something]" at start of a clause
+        m = re.search(
+            r'(?:a\s+|the\s+)crafted\s+(\w[\w\s-]{3,80}?)'
+            r'(?:\s+(?:allows|could|that)|'
+            r'\s*[\.;:,]|\s*[\)\]]|$)',
+            desc, re.IGNORECASE | re.DOTALL
+        )
+        if m:
+            mech = m.group(1).strip().rstrip(".,;")
+            if 5 < len(mech) < 120:
+                return f"crafted {mech}"
+
+        # Pattern 5: HTTP endpoint reference — "POST /path" or "GET /path"
+        m = re.search(
+            r'(?:POST|GET|PUT|DELETE|PATCH)\s+/[a-zA-Z0-9_/-]{3,100}',
+            desc, re.IGNORECASE
+        )
+        if m:
+            return m.group(0) + " requests"
+
+        return None
 
 
 # Convenience alias for backwards compat
