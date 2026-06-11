@@ -354,75 +354,218 @@ class ResearchEngine:
 
     @staticmethod
     def _generate_hunting_hypothesis(cve_id, vendor, product, description, result):
-        """Generate a natural-language hunting hypothesis from research data.
+        """Generate a concise, actionable hunting hypothesis (one sentence).
 
-        Describes what a blue team should look for to detect exploitation.
-        Future enhancement: structured SIGMA query generation.
+        Describes the *specific attacker behavior or TTP to look for*,
+        not a rehash of preconditions or CVSS scores.  Examples:
+          "Monitor for phishing links serving crafted HTML pages that
+           trigger type confusion in V8."
+          "Hunt for malformed VXLAN/GRE packets targeting EOS
+           decapsulation interfaces."
         """
-        parts = []
         comp = result.get("vulnerable_component", product)
+        desc = (description or "").lower()
+        product_low = product.lower()
+        vendor_low = vendor.lower()
 
-        # Opening: what's at risk
-        parts.append(
-            f"An adversary targeting {cve_id} would exploit a vulnerability "
-            f"in the {comp} component of {vendor} {product}."
+        # -- Ordered from most to least specific pattern --------------------
+        # Each check returns a hypothesis immediately on first match.
+
+        # Browser memory corruption (Chrome, Edge, Firefox, Safari)
+        if any(b in product_low for b in ("chrome", "chromium", "edge", "firefox", "safari")):
+            if any(w in desc for w in ("out of bounds", "type confusion",
+                                       "use after free", "use-after-free",
+                                       "buffer overflow", "heap overflow",
+                                       "memory corruption")):
+                if "html" in desc or "page" in desc or "web" in desc:
+                    return (
+                        f"Monitor for phishing links or compromised websites "
+                        f"serving crafted HTML pages that trigger memory "
+                        f"corruption in the {comp} engine."
+                    )
+                return (
+                    f"Look for untrusted content — web pages, email "
+                    f"attachments, or network inputs — that trigger memory "
+                    f"corruption in the {comp} component of {product}."
+                )
+
+        # Tunnel / decapsulation protocol vulns (Arista, Cisco, network gear)
+        if any(w in desc for w in ("tunnel", "decapsulation", "decapsulate",
+                                   "vxlan", "gre ", "geneve")):
+            proto = "tunnel protocol"
+            if "vxlan" in desc:
+                proto = "VXLAN"
+            elif "gre" in desc:
+                proto = "GRE"
+            elif "geneve" in desc:
+                proto = "GENEVE"
+            return (
+                f"Hunt for malformed {proto} packets targeting "
+                f"{product} decapsulation interfaces — the device does "
+                f"not verify the tunnel protocol type before processing."
+            )
+
+        # API / endpoint exposure — specific HTTP endpoints
+        m = re.search(r'(?:POST|GET|PUT|DELETE)\s+/[a-zA-Z0-9_/-]+', description or "")
+        if m and any(w in desc for w in ("endpoint", "request body",
+                                          "configuration", "supplied",
+                                          "preview")):
+            return (
+                f"Monitor for {m.group()} requests with crafted body "
+                f"content that exploit insufficient validation in "
+                f"the {comp} component of {product}."
+            )
+
+        # Auth bypass (certificate, IKEv1, SSO, OAuth)
+        if any(w in desc for w in ("bypass user authentication",
+                                    "bypass authentication",
+                                    "authentication bypass",
+                                    "certificate validation",
+                                    "improper authentication",
+                                    "missing authentication",
+                                    "unauthenticated")):
+            if "ike" in desc or "vpn" in desc:
+                return (
+                    f"Look for IKEv1 VPN connection attempts with crafted "
+                    f"certificates designed to bypass user authentication "
+                    f"on {product} Remote Access gateways."
+                )
+            return (
+                f"Monitor for unauthenticated access attempts to the {comp} "
+                f"component of {product} — requests without valid session "
+                f"or token headers."
+            )
+
+        # OS command injection (CWE-78 family)
+        if any(w in desc for w in ("command injection", "os command",
+                                    "execute arbitrary command",
+                                    "arbitrary command",
+                                    "spawned the supplied command",
+                                    "command execution",
+                                    "CWE-78")):
+            return (
+                f"Look for crafted input to the {comp} component of "
+                f"{product} that injects OS commands — monitor process "
+                f"trees for spawned shells or unexpected child processes."
+            )
+
+        # Crafted file upload
+        if all(w in desc for w in ("crafted file", "upload", "cli")):
+            return (
+                f"Monitor for local users uploading crafted files via "
+                f"the {product} CLI that bypass input validation to "
+                f"execute arbitrary commands."
+            )
+
+        # Memory safety (general, non-browser)
+        if any(w in desc for w in ("out of bounds", "out-of-bounds",
+                                    "buffer overflow", "heap overflow",
+                                    "buffer over-read", "over-read",
+                                    "CWE-125", "CWE-787", "CWE-119",
+                                    "CWE-122", "CWE-416")):
+            return (
+                f"Hunt for oversized or malformed input payloads sent to "
+                f"the {comp} component of {product} that could trigger "
+                f"memory corruption."
+            )
+
+        # SQL injection
+        if any(w in desc for w in ("sql injection", "sqli",
+                                    "CWE-89")):
+            return (
+                f"Monitor {product} logs for unexpected SQL query patterns "
+                f"or error responses indicating injection attempts against "
+                f"the {comp} interface."
+            )
+
+        # Path traversal
+        if any(w in desc for w in ("path traversal", "directory traversal",
+                                    "CWE-22")):
+            return (
+                f"Look for requests containing '../' or encoded traversal "
+                f"sequences targeting the {comp} endpoint of {product}."
+            )
+
+        # Improper input validation (generic)
+        if any(w in desc for w in ("insufficient validation",
+                                    "improper validation",
+                                    "CWE-20", "CWE-116")):
+            return (
+                f"Hunt for specially crafted requests to the {comp} "
+                f"component of {product} that bypass input validation "
+                f"and trigger unintended code paths."
+            )
+
+        # XSS
+        if any(w in desc for w in ("xss", "cross-site", "cross site",
+                                    "CWE-79")):
+            return (
+                f"Monitor for reflective or stored script injection "
+                f"in the {comp} component of {product}, typically "
+                f"delivered via phishing URLs."
+            )
+
+        # Deserialization
+        if any(w in desc for w in ("deserialization", "untrusted data",
+                                    "CWE-502")):
+            return (
+                f"Monitor {product} for untrusted deserialization "
+                f"attempts — unexpected serialized objects submitted "
+                f"to the {comp} component."
+            )
+
+        # Privilege escalation
+        if any(w in desc for w in ("privilege escalation",
+                                    "privilege elevation",
+                                    "CWE-269")):
+            return (
+                f"Hunt for users or processes gaining privileges beyond "
+                f"their authorized scope in the {comp} component — "
+                f"watch for unusual admin-level API calls from "
+                f"low-privileged sources."
+            )
+
+        # SSRF
+        if any(w in desc for w in ("ssrf", "server-side request forgery",
+                                    "CWE-918")):
+            return (
+                f"Monitor {product} for outbound connections to internal "
+                f"or unexpected destinations originating from the {comp} "
+                f"component — classic SSRF indicator."
+            )
+
+        # Race condition
+        if any(w in desc for w in ("race condition", "time-of-check",
+                                    "toctou", "CWE-362")):
+            return (
+                f"Look for concurrent requests to the {comp} component "
+                f"of {product} that exploit timing windows — rapid "
+                f"sequential writes to the same resource."
+            )
+
+        # -- Final fallback from preconditions -----------------------------
+        pre = result.get("preconditions_for_exploit", "").lower()
+        if "local" in pre and "auth" in pre:
+            return (
+                f"Monitor for authenticated local user activity involving "
+                f"the {comp} component of {product} — watch for "
+                f"unusual file modifications or process execution."
+            )
+        if "network" in pre and "auth" in pre:
+            return (
+                f"Monitor for authenticated network requests to the {comp} "
+                f"component of {product} that exploit the vulnerable "
+                f"operation."
+            )
+        if "network" in pre:
+            return (
+                f"Hunt for network-based exploitation attempts targeting "
+                f"the {comp} component of {product}."
+            )
+        return (
+            f"Look for exploitation activity against the {comp} "
+            f"component of {product}."
         )
-
-        # Preconditions
-        pre = result.get("preconditions_for_exploit", "")
-        if pre:
-            parts.append(f"Successful exploitation requires: {pre}")
-
-        # Default enablement context
-        default = result.get("vulnerable_component_enabled_by_default", "unknown")
-        if default == "yes":
-            parts.append(
-                f"The vulnerable component is enabled by default in standard "
-                f"deployments, increasing the attack surface."
-            )
-        elif default == "no":
-            parts.append(
-                f"The vulnerable component is NOT enabled by default, limiting "
-                f"exposure to systems with explicit configuration changes."
-            )
-
-        # PoC / public exploit context
-        poc = result.get("public_poc_exists", "unknown")
-        if poc == "yes":
-            urls = result.get("public_poc_urls", [])
-            parts.append(
-                f"Public exploit code is available ({len(urls)} repo(s) identified), "
-                f"significantly lowering the barrier to exploitation."
-            )
-        elif poc == "no":
-            parts.append(
-                "No public exploit code was identified in this research cycle, "
-                "but exploitation in the wild may still occur."
-            )
-
-        # Exploitation complexity
-        complexity = result.get("exploit_complexity_notes", "")
-        if complexity:
-            parts.append(f"Exploitation context: {complexity}")
-
-        # Recommended detection approach
-        parts.append(
-            "Detection should focus on: (1) monitoring "
-            f"{vendor} {product} logs for the component's access patterns or "
-            f"error conditions, (2) network traffic analysis for exploitation "
-            f"attempts against the {comp} interface, and (3) endpoint "
-            f"detection and response (EDR) telemetry for post-exploitation "
-            f"activity such as process injection, privilege escalation, or "
-            f"unusual outbound connections."
-        )
-
-        # SIGMA note
-        parts.append(
-            "A structured SIGMA detection rule for this CVE is a future "
-            "enhancement and is not yet available in this release."
-        )
-
-        return " ".join(parts)
 
 
 # Convenience alias for backwards compat
