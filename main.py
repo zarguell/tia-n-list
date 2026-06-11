@@ -27,6 +27,7 @@ from ingest import (
     get_kev_source_date,
     fetch_vulnrichment,
     fetch_nvd,
+    scan_vulnrichment_high_priority,
 )
 from research import ResearchEngine, research_cve
 from schema import (
@@ -112,7 +113,7 @@ def _save_run_log(run_log):
 # Pipeline
 # ---------------------------------------------------------------------------
 
-def run_pipeline(research_engine=None, nvd_api_key=None):
+def run_pipeline(research_engine=None, nvd_api_key=None, scan_vulnrichment=False):
     """Execute the full kevrichment pipeline.
 
     Parameters
@@ -241,6 +242,86 @@ def run_pipeline(research_engine=None, nvd_api_key=None):
         updated_entries.append(build_index_entry(record))
         cves_processed += 1
 
+    # ---- 3b.  Optional: scan vulnrichment for non-KEV high-priority CVEs ---
+    if scan_vulnrichment:
+        print(f"\n  ── Scanning vulnrichment for non-KEV high-priority CVEs ──")
+        kev_ids = {e["cveID"] for e in latest}
+        non_kev = scan_vulnrichment_high_priority(kev_ids, max_results=5)
+
+        if non_kev:
+            print(f"  Found {len(non_kev)} high-priority CVEs not in KEV")
+        else:
+            print(f"  No qualifying non-KEV CVEs found in recent vulnrichment entries")
+
+        for item in non_kev:
+            cve_id = item["cve_id"]
+            ssvc = item["ssvc"]
+            print(f"\n  ── {cve_id} (non-KEV) ──")
+            print(f"     SSVC: auto={ssvc.get('automatable','?')} impact={ssvc.get('technical_impact','?')}")
+
+            t0 = time.time()
+
+            # NVD
+            print(f"  • NVD …", end=" ")
+            nvd = fetch_nvd(cve_id, api_key=nvd_api_key)
+            print("ok" if nvd else "failed")
+
+            desc = ""
+            if nvd:
+                for d in (nvd.get("vulnerabilities") or [{}])[0].get("cve", {}).get("descriptions", []):
+                    if d.get("lang") == "en":
+                        desc = d.get("value", "")
+                        break
+
+            # Research
+            print(f"  • Research …")
+            research_data = research_engine.research(
+                cve_id, "", "",
+                desc, nvd_data=nvd, vulnrichment_data=ssvc,
+            )
+            wall = time.time() - t0
+            print(f"    Component: {research_data['vulnerable_component'][:60]}")
+            print(f"    PoC: {research_data['public_poc_exists']:>4s}  ({wall:.1f}s)")
+
+            sources = list(research_data.get("public_poc_urls", []))
+            if research_data.get("vendor_advisory_url"):
+                sources.append(research_data["vendor_advisory_url"])
+            research_meta = {
+                "timestamp": run_id,
+                "wall_time_seconds": round(wall, 1),
+                "tokens_used": None,
+                "searches_performed": 1 + bool(research_data.get("public_poc_urls")),
+                "sources_consulted": list(set(sources)),
+            }
+
+            # Build record with in_kev=False
+            dummy_kev = {
+                "cveID": cve_id,
+                "dateAdded": "",
+                "vendorProject": "",
+                "product": "",
+                "vulnerabilityName": "Non-KEV (vulnrichment scan)",
+                "shortDescription": "",
+                "requiredAction": "",
+                "dueDate": "",
+            }
+            record = build_cve_record(
+                cve_id, dummy_kev, nvd, ssvc, research_data, research_meta,
+                in_kev=False,
+            )
+            try:
+                validate_cve_record(record)
+            except ValueError as e:
+                print(f"  ✗ Validation failed: {e}")
+                errors.append(str(e))
+                continue
+
+            _save_cve(record)
+            updated_entries.append(build_index_entry(record))
+            cves_processed += 1
+    else:
+        print(f"\n  (skipping vulnrichment scan — add --scan-vulnrichment to enable)")
+
     # ---- 4.  Write outputs -----------------------------------------------
     print(f"\n[4/4] Writing output artifacts …")
 
@@ -310,6 +391,12 @@ def cli_main():
         help="NVD API 2.0 key (also read from NVD_API_KEY env var). Without one, "
              "rate limit is 5 req/30s — fine for POC, unreliable for CI.",
     )
+    parser.add_argument(
+        "--scan-vulnrichment", action="store_true",
+        help="Also scan vulnrichment for non-KEV CVEs with automatable=yes + "
+             "technical_impact=total. These would require 3-day remediation "
+             "under BOD 26-04 if on a publicly exposed asset.",
+    )
     args = parser.parse_args()
 
     nvd_api_key = args.nvd_api_key or os.environ.get("NVD_API_KEY")
@@ -325,7 +412,11 @@ def cli_main():
     else:
         engine = None
 
-    run_pipeline(research_engine=engine, nvd_api_key=nvd_api_key)
+    run_pipeline(
+        research_engine=engine,
+        nvd_api_key=nvd_api_key,
+        scan_vulnrichment=args.scan_vulnrichment,
+    )
 
 
 if __name__ == "__main__":

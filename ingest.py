@@ -12,6 +12,7 @@ import requests
 
 KEV_URL = "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json"
 VULNRICHMENT_RAW = "https://raw.githubusercontent.com/cisagov/vulnrichment/develop"
+VULNRICHMENT_API = "https://api.github.com/repos/cisagov/vulnrichment/contents"
 NVD_API = "https://services.nvd.nist.gov/rest/json/cves/2.0"
 
 USER_AGENT = "kevrichment/1.0 (+https://github.com/zarguell/kevrichment)"
@@ -184,3 +185,97 @@ def search_github_poc(cve_id, max_results=5):
     except requests.RequestException as e:
         print(f"    [WARN] GitHub search failed for {cve_id}: {e}")
         return []
+
+
+# ---------------------------------------------------------------------------
+# Vulnrichment scan — non-KEV high-priority CVEs
+# ---------------------------------------------------------------------------
+
+def _extract_ssvc_from_dict(data):
+    """Extract SSVC values from a vulnrichment JSON dict."""
+    ssvc_options = {}
+    for adp in data.get("containers", {}).get("adp", []):
+        title = adp.get("title", "")
+        if "CISA" not in title and "ADP" not in title and "Vulnrichment" not in title:
+            continue
+        for metric in adp.get("metrics", []):
+            other = metric.get("other", {})
+            if other.get("type") != "ssvc":
+                continue
+            for opt in other.get("content", {}).get("options", []):
+                for k, v in opt.items():
+                    key = k.lower().replace(" ", "_")
+                    if key in ("automatable", "technical_impact", "technical impact", "exploitation"):
+                        ssvc_options[key] = str(v).lower()
+    return ssvc_options
+
+
+def scan_vulnrichment_high_priority(kev_cve_ids, max_results=5, max_per_dir=25):
+    """Scan vulnrichment for non-KEV CVEs with ``automatable=yes`` + ``technical_impact=total``.
+
+    These are CVEs that would require **3-day remediation** under BOD 26-04
+    if the vulnerable asset is publicly exposed — even though CISA hasn't
+    added them to the KEV catalog (yet).
+    """
+    # Auto-detect latest year
+    try:
+        resp = requests.get(VULNRICHMENT_API, headers=_headers(), timeout=10)
+        resp.raise_for_status()
+        dirs = [d["name"] for d in resp.json()
+                if d["type"] == "dir" and d["name"].isdigit()]
+        years = sorted(dirs, reverse=True)[:2]
+    except requests.RequestException:
+        years = ["2026", "2025"]
+
+    found = []
+
+    for year in years:
+        if len(found) >= max_results:
+            break
+        try:
+            resp = requests.get(f"{VULNRICHMENT_API}/{year}", headers=_headers(), timeout=10)
+            resp.raise_for_status()
+            groups = sorted(
+                [d["name"] for d in resp.json() if d["type"] == "dir"],
+                reverse=True,
+            )[:5]
+        except requests.RequestException:
+            continue
+
+        for group in groups:
+            if len(found) >= max_results:
+                break
+            try:
+                resp = requests.get(f"{VULNRICHMENT_API}/{year}/{group}", headers=_headers(), timeout=10)
+                resp.raise_for_status()
+                files = sorted(
+                    [f["name"] for f in resp.json()
+                     if f["type"] == "file" and f["name"].startswith("CVE-")],
+                    reverse=True,
+                )
+            except requests.RequestException:
+                continue
+
+            checked = 0
+            for fname in files:
+                if len(found) >= max_results or checked >= max_per_dir:
+                    break
+                cve_id = fname.replace(".json", "")
+                if cve_id in kev_cve_ids:
+                    continue
+
+                raw_url = f"{VULNRICHMENT_RAW}/{year}/{group}/{fname}"
+                try:
+                    resp2 = requests.get(raw_url, headers=_headers(), timeout=10)
+                    resp2.raise_for_status()
+                except requests.RequestException:
+                    continue
+
+                ssvc = _extract_ssvc_from_dict(resp2.json())
+                checked += 1
+
+                if ssvc.get("automatable") == "yes" and ssvc.get("technical_impact") == "total":
+                    found.append({"cve_id": cve_id, "ssvc": ssvc})
+                    print(f"    [HIGH] {cve_id} — auto=yes impact=total (non-KEV)")
+
+    return found

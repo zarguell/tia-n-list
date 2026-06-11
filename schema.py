@@ -15,7 +15,7 @@ REQUIRED_CVE_FIELDS = [
 ]
 
 
-def build_cve_record(cve_id, kev_entry, nvd_data, vulnrichment_data, research_data, research_meta):
+def build_cve_record(cve_id, kev_entry, nvd_data, vulnrichment_data, research_data, research_meta, in_kev=True):
     """Build a complete per-CVE record from all data sources."""
     nvd_desc = ""
     cwe = []
@@ -77,6 +77,11 @@ def build_cve_record(cve_id, kev_entry, nvd_data, vulnrichment_data, research_da
             "technical_impact": vulnrichment_data.get("technical_impact", "unknown"),
             "exploitation_status": vulnrichment_data.get("exploitation", "unknown"),
         },
+        "bod_26_04": compute_bod_timeline(
+            automatable=vulnrichment_data.get("automatable", "unknown"),
+            technical_impact=vulnrichment_data.get("technical_impact", "unknown"),
+            in_kev=in_kev,
+        ),
         "kevrichment_research": research_data,
         "research_meta": research_meta,
     }
@@ -86,6 +91,7 @@ def build_cve_record(cve_id, kev_entry, nvd_data, vulnrichment_data, research_da
 def build_index_entry(cve_record):
     """Build a lightweight index entry from a full CVE record."""
     research = cve_record.get("kevrichment_research", {})
+    bod = cve_record.get("bod_26_04", {})
     return {
         "cve_id": cve_record["cve_id"],
         "kev_date_added": cve_record["kev_date_added"],
@@ -94,6 +100,9 @@ def build_index_entry(cve_record):
         "automatable": cve_record["vulnrichment"]["automatable"],
         "technical_impact": cve_record["vulnrichment"]["technical_impact"],
         "exploitation_status": cve_record["vulnrichment"]["exploitation_status"],
+        "three_day_qualifying": bod.get("three_day_qualifying", False),
+        "timeline_if_publicly_exposed": bod.get("timeline_if_publicly_exposed", "unknown"),
+        "timeline_if_not_publicly_exposed": bod.get("timeline_if_not_publicly_exposed", "unknown"),
         "public_poc_exists": research.get("public_poc_exists", "unknown"),
         "last_researched": cve_record["last_researched"],
         "file": f"data/cves/{cve_record['cve_id']}.json",
@@ -125,3 +134,54 @@ def validate_cve_record(record):
     if record.get("schema_version") != SCHEMA_VERSION:
         raise ValueError(f"Unknown schema version: {record.get('schema_version')}")
     return True
+
+
+# ---------------------------------------------------------------------------
+# BOD 26-04 Remediation Timeline
+# ---------------------------------------------------------------------------
+
+def compute_bod_timeline(automatable, technical_impact, in_kev):
+    """Compute BOD 26-04 remediation timelines based on SSVC + KEV status.
+
+    Returns a dict with two timelines — one for publicly-exposed assets,
+    one for non-publicly-exposed — plus a ``three_day_qualifying`` flag.
+
+    Timeline key:
+        ``3_days_forensic_triage``
+        ``14_days``
+        ``60_days``
+        ``defer_to_next_upgrade``
+
+    Reference: BOD 26-04 Table 1 (June 10, 2026).
+    """
+    auto = str(automatable).lower() == "yes"
+    total = str(technical_impact).lower() == "total"
+
+    if in_kev:
+        # --- KEV entries ---
+        if auto and total:
+            pub = "3_days_forensic_triage"
+            non_pub = "60_days"
+        elif auto or total:
+            pub = "14_days"
+            non_pub = "60_days" if (auto or total) else "defer_to_next_upgrade"
+        else:
+            pub = "60_days"
+            non_pub = "defer_to_next_upgrade"
+    else:
+        # --- Non-KEV entries (vulnrichment-scan supplemental) ---
+        if auto and total:
+            pub = "3_days_forensic_triage"   # would be 3-day if KEV was yes
+            non_pub = "60_days"
+        elif auto or total:
+            pub = "14_days"
+            non_pub = "60_days"
+        else:
+            pub = "60_days"
+            non_pub = "defer_to_next_upgrade"
+
+    return {
+        "timeline_if_publicly_exposed": pub,
+        "timeline_if_not_publicly_exposed": non_pub,
+        "three_day_qualifying": pub == "3_days_forensic_triage",
+    }
