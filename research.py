@@ -111,6 +111,11 @@ class ResearchEngine:
             result, vendor_project, product
         )
 
+        # -- 8.  Hunting hypothesis -----------------------------------------
+        result["hunting_hypothesis"] = self._generate_hunting_hypothesis(
+            cve_id, vendor_project, product, cve_description, result
+        )
+
         return result
 
     # ------------------------------------------------------------------
@@ -346,6 +351,78 @@ class ResearchEngine:
             parts.append("Vendor advisory located")
 
         return " | ".join(parts) if parts else "Research incomplete"
+
+    @staticmethod
+    def _generate_hunting_hypothesis(cve_id, vendor, product, description, result):
+        """Generate a natural-language hunting hypothesis from research data.
+
+        Describes what a blue team should look for to detect exploitation.
+        Future enhancement: structured SIGMA query generation.
+        """
+        parts = []
+        comp = result.get("vulnerable_component", product)
+
+        # Opening: what's at risk
+        parts.append(
+            f"An adversary targeting {cve_id} would exploit a vulnerability "
+            f"in the {comp} component of {vendor} {product}."
+        )
+
+        # Preconditions
+        pre = result.get("preconditions_for_exploit", "")
+        if pre:
+            parts.append(f"Successful exploitation requires: {pre}")
+
+        # Default enablement context
+        default = result.get("vulnerable_component_enabled_by_default", "unknown")
+        if default == "yes":
+            parts.append(
+                f"The vulnerable component is enabled by default in standard "
+                f"deployments, increasing the attack surface."
+            )
+        elif default == "no":
+            parts.append(
+                f"The vulnerable component is NOT enabled by default, limiting "
+                f"exposure to systems with explicit configuration changes."
+            )
+
+        # PoC / public exploit context
+        poc = result.get("public_poc_exists", "unknown")
+        if poc == "yes":
+            urls = result.get("public_poc_urls", [])
+            parts.append(
+                f"Public exploit code is available ({len(urls)} repo(s) identified), "
+                f"significantly lowering the barrier to exploitation."
+            )
+        elif poc == "no":
+            parts.append(
+                "No public exploit code was identified in this research cycle, "
+                "but exploitation in the wild may still occur."
+            )
+
+        # Exploitation complexity
+        complexity = result.get("exploit_complexity_notes", "")
+        if complexity:
+            parts.append(f"Exploitation context: {complexity}")
+
+        # Recommended detection approach
+        parts.append(
+            "Detection should focus on: (1) monitoring "
+            f"{vendor} {product} logs for the component's access patterns or "
+            f"error conditions, (2) network traffic analysis for exploitation "
+            f"attempts against the {comp} interface, and (3) endpoint "
+            f"detection and response (EDR) telemetry for post-exploitation "
+            f"activity such as process injection, privilege escalation, or "
+            f"unusual outbound connections."
+        )
+
+        # SIGMA note
+        parts.append(
+            "A structured SIGMA detection rule for this CVE is a future "
+            "enhancement and is not yet available in this release."
+        )
+
+        return " ".join(parts)
 
 
 # Convenience alias for backwards compat

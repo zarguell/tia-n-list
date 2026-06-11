@@ -101,6 +101,8 @@ def build_index_entry(cve_record):
         "technical_impact": cve_record["vulnrichment"]["technical_impact"],
         "exploitation_status": cve_record["vulnrichment"]["exploitation_status"],
         "three_day_qualifying": bod.get("three_day_qualifying", False),
+        "requires_forensic_analysis_if_public": bod.get("requires_forensic_analysis_if_public", False),
+        "requires_forensic_analysis_if_not_public": bod.get("requires_forensic_analysis_if_not_public", False),
         "timeline_if_publicly_exposed": bod.get("timeline_if_publicly_exposed", "unknown"),
         "timeline_if_not_publicly_exposed": bod.get("timeline_if_not_publicly_exposed", "unknown"),
         "public_poc_exists": research.get("public_poc_exists", "unknown"),
@@ -143,14 +145,25 @@ def validate_cve_record(record):
 def compute_bod_timeline(automatable, technical_impact, in_kev):
     """Compute BOD 26-04 remediation timelines based on SSVC + KEV status.
 
-    Returns a dict with two timelines — one for publicly-exposed assets,
-    one for non-publicly-exposed — plus a ``three_day_qualifying`` flag.
+    Returns a dict with:
 
-    Timeline key:
-        ``3_days_forensic_triage``
-        ``14_days``
-        ``60_days``
-        ``defer_to_next_upgrade``
+    ==========================================  =============================
+    Field                                       Description
+    ==========================================  =============================
+    ``timeline_if_publicly_exposed``            ``3_days_forensic_triage`` |
+                                                ``14_days`` | ``60_days`` |
+                                                ``defer_to_next_upgrade``
+    ``timeline_if_not_publicly_exposed``        Same values for internal-
+                                                only assets
+    ``three_day_qualifying``                    ``true`` when ALL four BOD
+                                                26-04 risk factors are
+                                                present for a publicly-
+                                                exposed asset
+    ``requires_forensic_analysis_if_public``    ``true`` when the public
+                                                timeline includes forensic
+                                                triage (only 3-day bucket)
+    ``requires_forensic_analysis_if_not_public`` Same for non-public assets
+    ==========================================  =============================
 
     Reference: BOD 26-04 Table 1 (June 10, 2026).
     """
@@ -184,4 +197,6 @@ def compute_bod_timeline(automatable, technical_impact, in_kev):
         "timeline_if_publicly_exposed": pub,
         "timeline_if_not_publicly_exposed": non_pub,
         "three_day_qualifying": pub == "3_days_forensic_triage",
+        "requires_forensic_analysis_if_public": pub == "3_days_forensic_triage",
+        "requires_forensic_analysis_if_not_public": non_pub == "3_days_forensic_triage",
     }
