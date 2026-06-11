@@ -113,7 +113,9 @@ def _save_run_log(run_log):
 # Pipeline
 # ---------------------------------------------------------------------------
 
-def run_pipeline(research_engine=None, nvd_api_key=None, scan_vulnrichment=False, run_qc=False):
+def run_pipeline(research_engine=None, nvd_api_key=None,
+                 scan_vulnrichment=False, run_qc=False,
+                 llm_synthesis_fn=None):
     """Execute the full kevrichment pipeline.
 
     Parameters
@@ -162,7 +164,7 @@ def run_pipeline(research_engine=None, nvd_api_key=None, scan_vulnrichment=False
     errors = []
 
     if research_engine is None:
-        research_engine = ResearchEngine()  # standalone mode
+        research_engine = ResearchEngine(llm_synthesis_fn=llm_synthesis_fn)  # standalone mode
 
     for i, entry in enumerate(latest, 1):
         cve_id = entry["cveID"]
@@ -425,6 +427,12 @@ def cli_main():
         "--qc-only", action="store_true",
         help="Skip research entirely; re-run QC on existing CVE files only",
     )
+    parser.add_argument(
+        "--llm-synthesis", action="store_true",
+        help="Use LLM (OpenAI-compatible API) to generate preconditions and "
+             "hunting hypothesis instead of deterministic rules. Requires "
+             "KEVRICHMENT_LLM_API_KEY or OPENAI_API_KEY env var.",
+    )
     args = parser.parse_args()
 
     nvd_api_key = args.nvd_api_key or os.environ.get("NVD_API_KEY")
@@ -446,7 +454,8 @@ def cli_main():
     if args.agent:
         try:
             from hermes_tools import web_search, web_extract
-            engine = ResearchEngine(web_search=web_search, web_extract=web_extract)
+            engine = ResearchEngine(web_search=web_search, web_extract=web_extract,
+                                    llm_synthesis_fn=llm_synthesis_fn)
             print("  [agent-mode: Hermes tools loaded]\n")
         except ImportError:
             print("  [WARN] --agent specified but hermes_tools unavailable; falling back to standalone\n")
@@ -454,11 +463,22 @@ def cli_main():
     else:
         engine = None
 
+    # LLM synthesis for preconditions and hunting hypothesis
+    llm_synthesis_fn = None
+    if args.llm_synthesis:
+        try:
+            from llm_synthesis import synthesize
+            llm_synthesis_fn = synthesize
+            print("  [LLM synthesis enabled for preconditions and hunting hypothesis]\n")
+        except ImportError:
+            print("  [WARN] --llm-synthesis specified but llm_synthesis.py not found\n")
+
     run_pipeline(
         research_engine=engine,
         nvd_api_key=nvd_api_key,
         scan_vulnrichment=args.scan_vulnrichment,
         run_qc=args.qc,
+        llm_synthesis_fn=llm_synthesis_fn,
     )
 
 

@@ -31,10 +31,11 @@ class ResearchEngine:
         ``web_extract(urls) -> dict``  (Hermes agent tool).
     """
 
-    def __init__(self, web_search=None, web_extract=None):
+    def __init__(self, web_search=None, web_extract=None, llm_synthesis_fn=None):
         self._web_search = web_search
         self._web_extract = web_extract
         self._agent_mode = web_search is not None
+        self._llm_synthesis_fn = llm_synthesis_fn
 
     # ------------------------------------------------------------------ Main
 
@@ -144,6 +145,37 @@ class ResearchEngine:
             cve_id, vendor_project, product, cve_description,
             cwe_ids, cvss_av, cvss_ac, cvss_pr, cvss_ui, result
         )
+
+        # -- 9.  LLM synthesis overrides (if configured) --------------------
+        if self._llm_synthesis_fn:
+            cvss_vector = ""
+            if nvd_data:
+                vulns = nvd_data.get("vulnerabilities") or []
+                if vulns:
+                    metrics = vulns[0].get("cve", {}).get("metrics", {})
+                    cvss_entry = (metrics.get("cvssMetricV31") or
+                                  metrics.get("cvssMetricV30") or [{}])[0]
+                    cvss_vector = (cvss_entry.get("cvssData", {})
+                                   .get("vectorString", ""))
+
+            llm_data = dict(result)  # shallow copy — safe for strings/lists
+            llm_result = self._llm_synthesis_fn(
+                cve_id=cve_id,
+                vendor=vendor_project,
+                product=product,
+                description=cve_description,
+                cwe_ids=cwe_ids,
+                cvss_vector=cvss_vector,
+                vulnrichment_data=vulnrichment_data,
+                research_data=llm_data,
+            )
+            if llm_result:
+                if llm_result.get("preconditions"):
+                    result["preconditions_for_exploit"] = llm_result["preconditions"]
+                    result["preconditions_source"] = "llm"
+                if llm_result.get("hunting_hypothesis"):
+                    result["hunting_hypothesis"] = llm_result["hunting_hypothesis"]
+                    result["hunting_hypothesis_source"] = "llm"
 
         return result
 
