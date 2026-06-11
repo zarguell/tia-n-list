@@ -1,0 +1,127 @@
+"""
+Output schema builder and validator for kevrichment.
+Defines the two-level data schema (index + per-CVE records).
+"""
+
+SCHEMA_VERSION = "1.0"
+
+REQUIRED_CVE_FIELDS = [
+    "schema_version",
+    "cve_id",
+    "last_researched",
+    "kev_date_added",
+    "kev_vendor_project",
+    "kev_product",
+]
+
+
+def build_cve_record(cve_id, kev_entry, nvd_data, vulnrichment_data, research_data, research_meta):
+    """Build a complete per-CVE record from all data sources."""
+    nvd_desc = ""
+    cwe = []
+    cvss_v3_base = None
+    cvss_v3_vector = ""
+    cpe_affected = []
+
+    if nvd_data:
+        vulns = nvd_data.get("vulnerabilities", [])
+        if vulns:
+            cve_item = vulns[0].get("cve", {})
+
+            # Description
+            for d in cve_item.get("descriptions", []):
+                if d.get("lang") == "en":
+                    nvd_desc = d.get("value", "")
+                    break
+
+            # CWE
+            for w in cve_item.get("weaknesses", []):
+                for desc in w.get("description", []):
+                    val = desc.get("value", "")
+                    if val.startswith("CWE-"):
+                        cwe.append(val)
+
+            # CVSS (prefer v3.1 over v3.0)
+            metrics = cve_item.get("metrics", {})
+            cvss_v3 = (metrics.get("cvssMetricV31") or metrics.get("cvssMetricV30") or [{}])[0]
+            if cvss_v3:
+                cd = cvss_v3.get("cvssData", {})
+                cvss_v3_base = cd.get("baseScore")
+                cvss_v3_vector = cd.get("vectorString", "")
+
+            # CPE
+            for cfg in cve_item.get("configurations", []):
+                for node in cfg.get("nodes", []):
+                    for cpe in node.get("cpeMatch", []):
+                        if cpe.get("vulnerable", False):
+                            cpe_affected.append(cpe.get("criteria", ""))
+
+    record = {
+        "schema_version": SCHEMA_VERSION,
+        "cve_id": cve_id,
+        "last_researched": research_meta.get("timestamp", ""),
+        "kev_date_added": kev_entry.get("dateAdded", ""),
+        "kev_vendor_project": kev_entry.get("vendorProject", ""),
+        "kev_product": kev_entry.get("product", ""),
+        "kev_short_description": kev_entry.get("shortDescription", ""),
+        "kev_required_action": kev_entry.get("requiredAction", ""),
+        "kev_due_date": kev_entry.get("dueDate", ""),
+        "kev_vulnerability_name": kev_entry.get("vulnerabilityName", ""),
+        "nvd_description": nvd_desc,
+        "cwe": cwe,
+        "cvss_v3_base_score": cvss_v3_base,
+        "cvss_v3_vector": cvss_v3_vector,
+        "cpe_affected": cpe_affected,
+        "vulnrichment": {
+            "automatable": vulnrichment_data.get("automatable", "unknown"),
+            "technical_impact": vulnrichment_data.get("technical_impact", "unknown"),
+            "exploitation_status": vulnrichment_data.get("exploitation", "unknown"),
+        },
+        "kevrichment_research": research_data,
+        "research_meta": research_meta,
+    }
+    return record
+
+
+def build_index_entry(cve_record):
+    """Build a lightweight index entry from a full CVE record."""
+    research = cve_record.get("kevrichment_research", {})
+    return {
+        "cve_id": cve_record["cve_id"],
+        "kev_date_added": cve_record["kev_date_added"],
+        "vendor_project": cve_record["kev_vendor_project"],
+        "product": cve_record["kev_product"],
+        "automatable": cve_record["vulnrichment"]["automatable"],
+        "technical_impact": cve_record["vulnrichment"]["technical_impact"],
+        "exploitation_status": cve_record["vulnrichment"]["exploitation_status"],
+        "public_poc_exists": research.get("public_poc_exists", "unknown"),
+        "last_researched": cve_record["last_researched"],
+        "file": f"data/cves/{cve_record['cve_id']}.json",
+    }
+
+
+def build_run_log(run_id, stats):
+    """Build a per-run stats record."""
+    processed = max(stats.get("cves_processed", 0), 1)
+    return {
+        "run_id": run_id,
+        "cves_processed": stats.get("cves_processed", 0),
+        "cves_skipped": stats.get("cves_skipped", 0),
+        "skip_reason": stats.get("skip_reason", ""),
+        "total_wall_time_seconds": stats.get("total_wall_time", 0),
+        "total_tokens_used": stats.get("total_tokens", None),
+        "avg_time_per_cve_seconds": round(stats.get("total_wall_time", 0) / processed, 1),
+        "avg_tokens_per_cve": round(stats.get("total_tokens", 0) / processed)
+            if stats.get("total_tokens") else None,
+        "errors": stats.get("errors", []),
+    }
+
+
+def validate_cve_record(record):
+    """Validate that a CVE record has all required fields."""
+    missing = [f for f in REQUIRED_CVE_FIELDS if f not in record]
+    if missing:
+        raise ValueError(f"Missing required fields in {record.get('cve_id', '?')}: {missing}")
+    if record.get("schema_version") != SCHEMA_VERSION:
+        raise ValueError(f"Unknown schema version: {record.get('schema_version')}")
+    return True
