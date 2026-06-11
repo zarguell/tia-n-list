@@ -29,7 +29,7 @@ from ingest import (
     fetch_nvd,
     scan_vulnrichment_high_priority,
 )
-from research import ResearchEngine, research_cve
+from research import ResearchEngine
 from schema import (
     build_cve_record,
     build_index_entry,
@@ -115,7 +115,7 @@ def _save_run_log(run_log):
 
 def run_pipeline(research_engine=None, nvd_api_key=None,
                  scan_vulnrichment=False, run_qc=False,
-                 llm_synthesis_fn=None):
+                 cve_count=5, no_incremental=False):
     """Execute the full kevrichment pipeline.
 
     Parameters
@@ -149,9 +149,9 @@ def run_pipeline(research_engine=None, nvd_api_key=None,
     total_entries = len(kev_data.get("vulnerabilities", []))
     print(f"  Source: {kev_source_date}  |  Total entries: {total_entries}")
 
-    # ---- 2.  Select 5 most recent ----------------------------------------
-    print("\n[2/4] Top 5 most recently added KEV entries …")
-    latest = get_latest_kev_entries(kev_data, count=5)
+    # ---- 2.  Select KEV entries ---------------------------------------------
+    print(f"\n[2/4] Fetching {cve_count} most recently added KEV entries …")
+    latest = get_latest_kev_entries(kev_data, count=cve_count)
     for i, e in enumerate(latest, 1):
         print(f"  {i:>2}. {e['cveID']:20s}  {e.get('vendorProject','?'):20s}  "
               f"{e.get('product','?'):25s}  added {e.get('dateAdded','?')}")
@@ -164,7 +164,7 @@ def run_pipeline(research_engine=None, nvd_api_key=None,
     errors = []
 
     if research_engine is None:
-        research_engine = ResearchEngine(llm_synthesis_fn=llm_synthesis_fn)  # standalone mode
+        research_engine = ResearchEngine()  # standalone mode
 
     for i, entry in enumerate(latest, 1):
         cve_id = entry["cveID"]
@@ -174,7 +174,7 @@ def run_pipeline(research_engine=None, nvd_api_key=None,
         print(f"  {entry.get('vulnerabilityName','')}")
 
         # Incremental check
-        if not _cve_needs_research(cve_id, kev_date, existing_index):
+        if not no_incremental and not _cve_needs_research(cve_id, kev_date, existing_index):
             print(f"  → SKIP (no KEV update since last research)")
             for idx_entry in existing_index.get("cves", []):
                 if idx_entry["cve_id"] == cve_id:
@@ -427,12 +427,6 @@ def cli_main():
         "--qc-only", action="store_true",
         help="Skip research entirely; re-run QC on existing CVE files only",
     )
-    parser.add_argument(
-        "--llm-synthesis", action="store_true",
-        help="Use LLM (OpenAI-compatible API) to generate preconditions and "
-             "hunting hypothesis instead of deterministic rules. Requires "
-             "KEVRICHMENT_LLM_API_KEY or OPENAI_API_KEY env var.",
-    )
     args = parser.parse_args()
 
     nvd_api_key = args.nvd_api_key or os.environ.get("NVD_API_KEY")
@@ -454,8 +448,7 @@ def cli_main():
     if args.agent:
         try:
             from hermes_tools import web_search, web_extract
-            engine = ResearchEngine(web_search=web_search, web_extract=web_extract,
-                                    llm_synthesis_fn=llm_synthesis_fn)
+            engine = ResearchEngine(web_search=web_search, web_extract=web_extract)
             print("  [agent-mode: Hermes tools loaded]\n")
         except ImportError:
             print("  [WARN] --agent specified but hermes_tools unavailable; falling back to standalone\n")
@@ -463,22 +456,13 @@ def cli_main():
     else:
         engine = None
 
-    # LLM synthesis for preconditions and hunting hypothesis
-    llm_synthesis_fn = None
-    if args.llm_synthesis:
-        try:
-            from llm_synthesis import synthesize
-            llm_synthesis_fn = synthesize
-            print("  [LLM synthesis enabled for preconditions and hunting hypothesis]\n")
-        except ImportError:
-            print("  [WARN] --llm-synthesis specified but llm_synthesis.py not found\n")
-
     run_pipeline(
         research_engine=engine,
         nvd_api_key=nvd_api_key,
         scan_vulnrichment=args.scan_vulnrichment,
         run_qc=args.qc,
-        llm_synthesis_fn=llm_synthesis_fn,
+        cve_count=args.cve_count,
+        no_incremental=args.no_incremental,
     )
 
 
