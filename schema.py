@@ -102,6 +102,7 @@ def build_index_entry(cve_record):
         "cve_id": cve_record["cve_id"],
         "kev_date_added": cve_record["kev_date_added"],
         "cve_published": cve_record.get("cve_published", ""),
+        "cvss_v3_base_score": cve_record.get("cvss_v3_base_score"),
         "vendor_project": cve_record["kev_vendor_project"],
         "product": cve_record["kev_product"],
         "automatable": cve_record["vulnrichment"]["automatable"],
