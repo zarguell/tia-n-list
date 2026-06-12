@@ -143,7 +143,7 @@ PAGE_FOOT = """
 
 NAV = """<div class="header">
 <div class="header-inner">
-<a href="./index.html" class="header-title" style="text-decoration:none">
+<a href="{root}/index.html" class="header-title" style="text-decoration:none">
 kevrichment <small>CVE enrichment</small>
 </a>
 <span class="header-ts">{ts}</span>
@@ -292,7 +292,7 @@ def gen_dashboard(index_data):
     data_json = json.dumps(table_data)
 
     parts = [PAGE_HEAD.format(**T, title="Dashboard")]
-    parts.append(NAV.format(ts=fmt_ts(last_updated) if last_updated else ""))
+    parts.append(NAV.format(root='.', ts=fmt_ts(last_updated) if last_updated else ""))
 
     parts.append('<div class="container" style="padding-top:20px">')
     parts.append(SCHEMA_HEADER)
@@ -489,7 +489,7 @@ def gen_cve_detail(cve_record):
     qc = c.get("qc_notes", [])
 
     parts = [PAGE_HEAD.format(**T, title=cve_id)]
-    parts.append(NAV.format(ts=""))
+    parts.append(NAV.format(root='..', ts=""))
 
     parts.append('<div class="container" style="padding-top:20px">')
     parts.append('<a href="../index.html" class="btn btn-sm" style="margin-bottom:16px">&larr; Dashboard</a>')
@@ -662,7 +662,7 @@ def gen_schema_page():
     ]
 
     parts = [PAGE_HEAD.format(**T, title="Schema")]
-    parts.append(NAV.format(ts=""))
+    parts.append(NAV.format(root='.', ts=""))
     parts.append('<div class="container" style="padding-top:20px">')
     parts.append('<a href="./index.html" class="btn btn-sm" style="margin-bottom:16px">&larr; Dashboard</a>')
     parts.append("<h1>Schema Reference</h1>")
@@ -700,7 +700,7 @@ def gen_pipeline_page():
     """Generate the pipeline runs history page."""
     runs = load_runs()
     parts = [PAGE_HEAD.format(**T, title="Pipeline")]
-    parts.append(NAV.format(ts=""))
+    parts.append(NAV.format(root='.', ts=""))
     parts.append('<div class="container" style="padding-top:20px">')
     parts.append('<a href="./index.html" class="btn btn-sm" style="margin-bottom:16px">&larr; Dashboard</a>')
     parts.append("<h1>Pipeline Runs</h1>")
