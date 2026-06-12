@@ -66,8 +66,8 @@ th,td{{text-align:left;padding:10px 12px;border-bottom:1px solid {border};font-s
 th{{color:{text_muted};font-weight:500;cursor:pointer;user-select:none;white-space:nowrap;position:relative}}
 th:hover{{color:{text_primary}}}
 th.sorted{{color:{accent}}}
-th.sorted::after{{content:' \\u25b2';font-size:0.625rem}}
-th.sorted.desc::after{{content:' \\u25bc'}}
+th.sorted::after{{content:' ▲';font-size:0.625rem}}
+th.sorted.desc::after{{content:' ▼'}}
 td{{color:{text_secondary}}}
 tr:hover td{{background:{surface_hover}}}
 .btn{{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:{radius};font-size:0.8125rem;font-weight:500;border:none;cursor:pointer;transition:all 150ms ease;text-decoration:none;color:{text_primary};background:{surface};border:1px solid {border}}}
@@ -285,6 +285,8 @@ def gen_dashboard(index_data):
             "poc": e.get("public_poc_exists", "unknown"),
             "threeDay": e.get("three_day_qualifying", False),
             "timeline": e.get("timeline_if_publicly_exposed", ""),
+            "dateAdded": e.get("kev_date_added", ""),
+            "published": e.get("cve_published", ""),
         })
 
     data_json = json.dumps(table_data)
@@ -319,7 +321,7 @@ def gen_dashboard(index_data):
     parts.append(f'<div style="overflow-x:auto;border:1px solid {T["border"]};border-radius:{T["radius_card"]};background:{T["surface"]}">')
     parts.append('<table id="cveTable">')
     parts.append('<thead><tr>')
-    for col in ["CVE ID", "Vendor", "Product", "CVSS", "Auto", "Exploit", "PoC", "3-Day", "Timeline"]:
+    for col in ["CVE ID", "Vendor", "Product", "CVSS", "Auto", "Exploit", "PoC", "3-Day", "Timeline", "Date Added", "Published"]:
         parts.append(f'<th onclick="sortTable(\'{col}\')" data-col="{col}">{col}</th>')
     parts.append('</tr></thead>')
     parts.append('<tbody id="cveTableBody"></tbody>')
@@ -361,7 +363,7 @@ function getFilteredData() {
 }
 
 function sortTable(col) {
-  var colMap = {'CVE ID':'id','Vendor':'vendor','Product':'product','CVSS':'cvss','Auto':'auto','Exploit':'exploit','PoC':'poc','3-Day':'threeDay','Timeline':'timeline'};
+  var colMap = {'CVE ID':'id','Vendor':'vendor','Product':'product','CVSS':'cvss','Auto':'auto','Exploit':'exploit','PoC':'poc','3-Day':'threeDay','Timeline':'timeline','Date Added':'dateAdded','Published':'published'};
   var key = colMap[col];
   if (!key) return;
   if (sortCol === col) { sortAsc = !sortAsc; } else { sortCol = col; sortAsc = true; }
@@ -374,7 +376,7 @@ function sortTable(col) {
 function renderTable() {
   var data = getFilteredData();
   // Sort
-  var keyMap = {'id':'id','vendor':'vendor','product':'product','cvss':'cvss','auto':'auto','exploit':'exploit','poc':'poc','threeDay':'threeDay','timeline':'timeline'};
+  var keyMap = {'id':'id','vendor':'vendor','product':'product','cvss':'cvss','auto':'auto','exploit':'exploit','poc':'poc','threeDay':'threeDay','timeline':'timeline','dateAdded':'dateAdded','published':'published'};
   var key = keyMap[sortCol] || 'id';
   data.sort(function(a,b) {
     var av = a[key], bv = b[key];
@@ -416,22 +418,24 @@ function renderTable() {
       + '<td data-label="Exploit">' + severityBadge(r.exploit) + '</td>'
       + '<td data-label="PoC">' + pocBadge(r.poc) + '</td>'
       + '<td data-label="3-Day" style="text-align:center">' + threeD + '</td>'
-      + '<td data-label="Timeline">' + esc(r.timeline.replace(/_/g,' ')) + '</td>';
+      + '<td data-label="Timeline">' + esc(r.timeline.replace(/_/g,' ')) + '</td>'
+      + '<td data-label="Date Added">' + fmtDate(r.dateAdded) + '</td>'
+      + '<td data-label="Published">' + fmtDate(r.published) + '</td>';
     tbody.appendChild(tr);
   });
 
   // Pagination buttons
   var pg = document.getElementById('pagination');
   pg.innerHTML = '';
-  pg.appendChild(createPageBtn('\\u00ab', 1, currentPage === 1));
-  pg.appendChild(createPageBtn('\\u2039', Math.max(1, currentPage-1), currentPage === 1));
+  pg.appendChild(createPageBtn('\u00ab', 1, currentPage === 1));
+  pg.appendChild(createPageBtn('\u2039', Math.max(1, currentPage-1), currentPage === 1));
   var startP = Math.max(1, currentPage - 2);
   var endP = Math.min(totalPages, currentPage + 2);
   for (var i = startP; i <= endP; i++) {
     pg.appendChild(createPageBtn(i, i, currentPage === i));
   }
-  pg.appendChild(createPageBtn('\\u203a', Math.min(totalPages, currentPage+1), currentPage === totalPages));
-  pg.appendChild(createPageBtn('\\u00bb', totalPages, currentPage === totalPages));
+  pg.appendChild(createPageBtn('\u203a', Math.min(totalPages, currentPage+1), currentPage === totalPages));
+  pg.appendChild(createPageBtn('\u00bb', totalPages, currentPage === totalPages));
 }
 
 function createPageBtn(label, page, disabled) {
@@ -446,6 +450,10 @@ function createPageBtn(label, page, disabled) {
 }
 
 function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function fmtDate(d) {
+  if (!d) return '<span style="color:#5c6166">\u2014</span>';
+  return esc(d.substring(0,10));
+}
 function severityBadge(v) {
   if (v === 'yes') return '<span class="badge badge-sm" style="background:#f0443822;color:#f04438;border:1px solid #f0443844">yes</span>';
   if (v === 'active') return '<span class="badge badge-sm" style="background:#f0443822;color:#f04438;border:1px solid #f0443844">active</span>';

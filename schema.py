@@ -23,10 +23,15 @@ def build_cve_record(cve_id, kev_entry, nvd_data, vulnrichment_data, research_da
     cvss_v3_vector = ""
     cpe_affected = []
 
+    nvd_published = ""
+
     if nvd_data:
         vulns = nvd_data.get("vulnerabilities", [])
         if vulns:
             cve_item = vulns[0].get("cve", {})
+
+            # Published date
+            nvd_published = cve_item.get("published", "")
 
             # Description
             for d in cve_item.get("descriptions", []):
@@ -60,6 +65,7 @@ def build_cve_record(cve_id, kev_entry, nvd_data, vulnrichment_data, research_da
         "schema_version": SCHEMA_VERSION,
         "cve_id": cve_id,
         "last_researched": research_meta.get("timestamp", ""),
+        "cve_published": nvd_published,
         "kev_date_added": kev_entry.get("dateAdded", ""),
         "kev_vendor_project": kev_entry.get("vendorProject", ""),
         "kev_product": kev_entry.get("product", ""),
@@ -95,6 +101,7 @@ def build_index_entry(cve_record):
     return {
         "cve_id": cve_record["cve_id"],
         "kev_date_added": cve_record["kev_date_added"],
+        "cve_published": cve_record.get("cve_published", ""),
         "vendor_project": cve_record["kev_vendor_project"],
         "product": cve_record["kev_product"],
         "automatable": cve_record["vulnrichment"]["automatable"],
