@@ -3,7 +3,6 @@ name: Deploy static site to GitHub Pages
 on:
   push:
     branches: ["master"]
-    paths: ["site/**"]
 
 permissions:
   contents: read
@@ -15,7 +14,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  deploy:
+  build-and-deploy:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -23,6 +22,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Build static site
+        run: python build_site.py
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Upload artifact
