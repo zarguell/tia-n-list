@@ -111,7 +111,53 @@ h2{{font-size:1.125rem;font-weight:600;margin-bottom:12px;color:{text_primary}}}
 .qc-error{{border-left:3px solid {red};padding-left:12px}}
 .qc-warn{{border-left:3px solid {amber};padding-left:12px}}
 .qc-info{{border-left:3px solid {blue};padding-left:12px}}
+
+/* ── CVE Detail Page ─────────────────────────────────────────── */
+.cve-hero{{display:flex;align-items:center;flex-wrap:wrap;gap:12px;padding:16px 0 4px}}
+.cve-hero-id{{font-family:{font_mono};font-size:1.5rem;font-weight:600}}
+.cve-hero-badges{{display:flex;align-items:center;gap:6px;flex-wrap:wrap;flex:1}}
+.cve-hero-meta{{font-size:0.8125rem;color:{text_muted};padding-bottom:16px;border-bottom:1px solid {border};margin-bottom:16px}}
+.cve-hero-meta span{{display:inline-block}}
+.cve-hero-meta .sep{{color:{border_visible};margin:0 8px}}
+.cve-detail-grid{{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}}
+.cve-col{{display:flex;flex-direction:column;gap:12px}}
+
+/* Collapsible card */
+.cve-collapse{{}}
+.cve-collapse-trigger{{cursor:pointer;user-select:none;display:flex;align-items:center;gap:6px}}
+.cve-collapse-trigger:hover .cve-collapse-title{{color:{accent_hover}}}
+.cve-collapse-title{{font-size:0.875rem;font-weight:600;color:{text_primary};transition:color 150ms ease}}
+.cve-collapse-icon{{font-size:0.625rem;color:{text_muted};transition:transform 200ms ease;display:inline-flex;flex-shrink:0;width:16px;justify-content:center}}
+.cve-collapse.collapsed .cve-collapse-icon{{transform:rotate(-90deg)}}
+.cve-collapse.collapsed .cve-collapse-body{{display:none}}
+.cve-collapse-body{{padding-top:4px}}
+.cve-collapse-body .field-row:first-child{{padding-top:0}}
+.cve-collapse-body .field-row:last-child{{padding-bottom:0}}
+
+/* Hunting Hypothesis callout */
+.hh-callout{{background:{accent}11;border:1px solid {accent}33;border-left:4px solid {accent};border-radius:{radius_card};padding:16px 20px;margin-bottom:0;position:relative}}
+.hh-callout-label{{font-size:0.625rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:{accent};margin-bottom:6px;display:flex;align-items:center;gap:4px}}
+
+/* Inline detail pills */
+.detail-pill{{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:9999px;font-size:0.75rem;font-weight:500;background:{surface};border:1px solid {border};color:{text_secondary};line-height:1.4}}
+.detail-pill.key{{border-color:{accent}44;color:{accent}}}
+.detail-pill-row{{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 12px}}
+
+/* Tight field rows for compact layout */
+.field-row-compact{{display:flex;gap:8px;padding:5px 0;border-bottom:1px solid {border};font-size:0.8125rem;align-items:baseline}}
+.field-row-compact:last-child{{border-bottom:none}}
+.field-row-compact .field-label{{color:{text_muted};width:130px;flex-shrink:0;font-weight:500;font-size:0.75rem}}
+.field-row-compact .field-value{{color:{text_secondary};word-break:break-word;font-size:0.8125rem}}
+.field-row-compact .field-value a{{color:{accent}}}
+
+/* Source tags */
+.source-badge{{font-size:0.625rem;padding:1px 5px;border-radius:4px;background:{surface_hover};color:{text_muted};margin-left:6px;white-space:nowrap}}
+.source-hermes{{background:{accent}22;color:{accent}}}
+
 @media(max-width:768px){{
+  .cve-detail-grid{{grid-template-columns:1fr}}
+  .cve-hero-id{{font-size:1.25rem}}
+  .hh-callout{{padding:12px 14px}}
   .stats-bar{{flex-direction:column}}
   .filter-bar{{flex-direction:column}}
   .filter-bar .search-wrap{{width:100%}}
@@ -478,8 +524,27 @@ document.addEventListener('DOMContentLoaded', function() {
     return "\n".join(parts)
 
 
+def _collapse_card(title, body, collapsed=True):
+    """A card with collapsible body. Click title to toggle."""
+    state = " collapsed" if collapsed else ""
+    return (f'<div class="card cve-collapse{state}">'
+            f'<div class="cve-collapse-trigger card-title" onclick="this.parentElement.classList.toggle(&apos;collapsed&apos;)">'
+            f'<span class="cve-collapse-icon">&#9660;</span>'
+            f'<span class="cve-collapse-title">{esc(title)}</span>'
+            f'</div>'
+            f'<div class="cve-collapse-body">{body}</div>'
+            f'</div>')
+
+def _compact_row(label, value):
+    return f'<div class="field-row-compact"><span class="field-label">{esc(label)}</span><span class="field-value">{value}</span></div>'
+
+def _detail_pill(label, color="default"):
+    c = T["accent"] if color == "key" else T["text_secondary"]
+    bd = f'{T["accent"]}44' if color == "key" else T["border"]
+    return f'<span class="detail-pill{" key" if color == "key" else ""}">{esc(label)}</span>'
+
 def gen_cve_detail(cve_record):
-    """Generate a per-CVE detail page."""
+    """Generate a per-CVE detail page with two-column layout and collapsible sections."""
     c = cve_record
     cve_id = c["cve_id"]
     research = c.get("kevrichment_research", {})
@@ -491,106 +556,206 @@ def gen_cve_detail(cve_record):
     parts = [PAGE_HEAD.format(**T, title=cve_id)]
     parts.append(NAV.format(root='..', ts=""))
 
-    parts.append('<div class="container" style="padding-top:20px">')
-    parts.append('<a href="../index.html" class="btn btn-sm" style="margin-bottom:16px">&larr; Dashboard</a>')
+    parts.append('<div class="container" style="padding-top:12px">')
+    parts.append('<a href="../index.html" class="btn btn-sm" style="margin-bottom:8px">&larr; Dashboard</a>')
 
-    # Title row
+    # ── Hero strip ────────────────────────────────────────────────────────
     cvss = c.get("cvss_v3_base_score")
-    title_badge = cvss_badge(cvss, small=True) if cvss else ""
-    parts.append(f'<h1><code>{esc(cve_id)}</code>{title_badge}')
+    parts.append('<div class="cve-hero">')
+    parts.append(f'<span class="cve-hero-id"><code>{esc(cve_id)}</code></span>')
+    if cvss is not None:
+        parts.append(cvss_badge(cvss, small=False))
+    parts.append('<span class="cve-hero-badges">')
     if bod.get("three_day_qualifying"):
         parts.append(f'<span class="badge" style="background:{T["red"]};color:#fff">3-Day Required</span>')
     if research.get("public_poc_exists") == "yes":
         parts.append(f'<span class="badge" style="background:{T["amber"]};color:#000">PoC Available</span>')
-    parts.append('</h1>')
+    if c.get("kev_date_added"):
+        parts.append(f'<span class="badge" style="background:{T["lime"]}22;color:{T["lime"]};border:1px solid {T["lime"]}44">KEV</span>')
+    auto = vuln.get("automatable", "")
+    if auto == "yes":
+        parts.append(f'<span class="badge" style="background:{T["red"]}22;color:{T["red"]};border:1px solid {T["red"]}44">Automatable</span>')
+    expl = vuln.get("exploitation_status", "")
+    if expl == "active":
+        parts.append(f'<span class="badge" style="background:{T["red"]}22;color:{T["red"]};border:1px solid {T["red"]}44">Active Exploitation</span>')
+    parts.append('</span>')
+    parts.append('</div>')  # cve-hero
 
-    # KEV section
-    kev_rows = ""
-    kev_rows += field_row("Vendor", esc(c.get("kev_vendor_project", "")))
-    kev_rows += field_row("Product", esc(c.get("kev_product", "")))
-    kev_rows += field_row("Date Added", fmt_date(c.get("kev_date_added", "")))
-    kev_rows += field_row("Due Date", fmt_date(c.get("kev_due_date", "")))
-    kev_rows += field_row("Vulnerability Name", esc(c.get("kev_vulnerability_name", "")))
-    kev_rows += field_row("Description", esc(c.get("kev_short_description", "")))
-    kev_rows += field_row("Required Action", esc(c.get("kev_required_action", "")))
-    parts.append(card("KEV Catalog", kev_rows))
+    # Meta line
+    parts.append('<div class="cve-hero-meta">')
+    parts.append(f'<span>{esc(c.get("kev_vendor_project", ""))}</span>')
+    parts.append(f'<span class="sep">&middot;</span>')
+    parts.append(f'<span>{esc(c.get("kev_product", ""))}</span>')
+    parts.append(f'<span class="sep">&middot;</span>')
+    parts.append(f'<span>Added {fmt_date(c.get("kev_date_added", ""))}</span>')
+    pub = c.get("cve_published", "")
+    if pub:
+        parts.append(f'<span class="sep">&middot;</span>')
+        parts.append(f'<span>Published {fmt_date(pub)}</span>')
+    parts.append('</div>')
 
-    # NVD section
-    nvd_rows = ""
-    nvd_rows += field_row("Published", fmt_date(c.get("cve_published", "")))
-    nvd_rows += field_row("Description", esc(c.get("nvd_description", "")))
+    # ── Two-column grid ───────────────────────────────────────────────────
+    parts.append('<div class="cve-detail-grid">')
+
+    # ========================= LEFT COLUMN ================================
+    parts.append('<div class="cve-col">')
+
+    # --- KEV + NVD (combined, collapsed) ---
+    kn_rows = _compact_row("Vendor", esc(c.get("kev_vendor_project", "")))
+    kn_rows += _compact_row("Product", esc(c.get("kev_product", "")))
+    kn_rows += _compact_row("Vulnerability Name", esc(c.get("kev_vulnerability_name", "")))
+    kn_rows += _compact_row("Date Added", fmt_date(c.get("kev_date_added", "")))
+    kn_rows += _compact_row("Due Date", fmt_date(c.get("kev_due_date", "")))
+    kn_rows += _compact_row("Required Action", esc(c.get("kev_required_action", "")))
     cwe_list = c.get("cwe", [])
     if cwe_list:
         cwe_badges = " ".join(f'<span class="badge badge-sm" style="background:{T["blue"]}22;color:{T["blue"]};border:1px solid {T["blue"]}44">{esc(w)}</span>' for w in set(cwe_list))
     else:
         cwe_badges = '<span style="color:' + T["text_muted"] + '">none</span>'
-    nvd_rows += field_row("CWE", cwe_badges)
-    nvd_rows += field_row("CVSS Vector", f'<code>{esc(c.get("cvss_v3_vector", ""))}</code>')
-    parts.append(card("NVD", nvd_rows))
+    kn_rows += _compact_row("CWE", cwe_badges)
+    kn_rows += _compact_row("Published", fmt_date(c.get("cve_published", "")))
+    vector = c.get("cvss_v3_vector", "")
+    if vector:
+        kn_rows += _compact_row("CVSS Vector", f'<code style="font-size:0.7rem">{esc(vector[:80])}</code>')
+    # Collapsible long description
+    kev_desc = c.get("kev_short_description", "")
+    nvd_desc = c.get("nvd_description", "")
+    desc_body = ""
+    if kev_desc:
+        desc_body += _compact_row("KEV Description", esc(kev_desc))
+    if nvd_desc:
+        desc_body += _compact_row("NVD Description", esc(nvd_desc))
+    if desc_body:
+        kn_rows += f'<div class="cve-collapse collapsed" style="margin-top:2px">'
+        kn_rows += f'<div class="cve-collapse-trigger" onclick="this.parentElement.classList.toggle(\'collapsed\')" style="display:flex;align-items:center;gap:4px;padding:4px 0;cursor:pointer">'
+        kn_rows += f'<span class="cve-collapse-icon">&#9660;</span>'
+        kn_rows += f'<span class="cve-collapse-title" style="font-size:0.75rem;color:{T["text_muted"]}">Descriptions</span>'
+        kn_rows += f'</div><div class="cve-collapse-body" style="padding-top:2px">{desc_body}</div></div>'
+    parts.append(_collapse_card("Details", kn_rows, collapsed=False))
 
-    # Vulnrichment section
-    v_rows = ""
+    # --- Compliance (Vulnrichment + BOD 26-04, collapsed) ---
+    comp_rows = ""
     for k in ["automatable", "technical_impact", "exploitation_status"]:
         v = vuln.get(k, "unknown")
         color = T["red"] if v == "active" or v == "yes" or v == "total" else T["green"] if v == "no" else T["text_muted"]
-        v_rows += field_row(k.replace("_", " ").title(), severity_badge(v, color, small=True))
-    parts.append(card("Vulnrichment (SSVC)", v_rows))
+        comp_rows += _compact_row(k.replace("_", " ").title(), severity_badge(v, color, small=True))
+    comp_rows += _compact_row("3-Day Qualifying", "Yes" if bod.get("three_day_qualifying") else "No")
+    comp_rows += _compact_row("Public Timeline", esc(bod.get("timeline_if_publicly_exposed", "").replace("_", " ")))
+    comp_rows += _compact_row("Non-Public Timeline", esc(bod.get("timeline_if_not_publicly_exposed", "").replace("_", " ")))
+    comp_rows += _compact_row("Forensic (Public)", "Required" if bod.get("requires_forensic_analysis_if_public") else "Not required")
+    comp_rows += _compact_row("Forensic (Non-Public)", "Required" if bod.get("requires_forensic_analysis_if_not_public") else "Not required")
+    parts.append(_collapse_card("Compliance (SSVC + BOD 26-04)", comp_rows, collapsed=True))
 
-    # BOD 26-04 section
-    bod_rows = ""
-    bod_rows += field_row("Public Timeline", esc(bod.get("timeline_if_publicly_exposed", "").replace("_", " ")))
-    bod_rows += field_row("Non-Public Timeline", esc(bod.get("timeline_if_not_publicly_exposed", "").replace("_", " ")))
-    bod_rows += field_row("3-Day Qualifying", "Yes" if bod.get("three_day_qualifying") else "No")
-    bod_rows += field_row("Forensic Analysis (Public)", "Required" if bod.get("requires_forensic_analysis_if_public") else "Not required")
-    bod_rows += field_row("Forensic Analysis (Non-Public)", "Required" if bod.get("requires_forensic_analysis_if_not_public") else "Not required")
-    parts.append(card("BOD 26-04", bod_rows))
-
-    # kevrichment_research section
-    r_rows = ""
-    r_rows += field_row("Vulnerable Component", esc(research.get("vulnerable_component", "")))
-    r_rows += field_row("Component Enabled Default", esc(research.get("vulnerable_component_enabled_by_default", "")))
-    r_rows += field_row("Delivery Mechanism", esc(research.get("delivery_mechanism", "")) if research.get("delivery_mechanism") else '<span style="color:' + T["text_muted"] + '">not specified</span>')
-    r_rows += field_row("Preconditions", esc(research.get("preconditions_for_exploit", "")))
-    r_rows += field_row("Public PoC Exists", esc(research.get("public_poc_exists", "unknown")))
-    poc_urls = research.get("public_poc_urls", [])
-    if poc_urls:
-        url_links = "<br>".join(f'<a href="{esc(u)}" target="_blank" rel="noopener">{esc(u)}</a>' for u in poc_urls if u)
-        r_rows += field_row("PoC URLs", url_links)
-    advisory = research.get("vendor_advisory_url", "")
-    if advisory:
-        r_rows += field_row("Vendor Advisory", f'<a href="{esc(advisory)}" target="_blank" rel="noopener">{esc(advisory)}</a>')
-    r_rows += field_row("Hunting Hypothesis", esc(research.get("hunting_hypothesis", "")))
-    summary = research.get("kevrichment_summary", "")
-    if summary:
-        r_rows += field_row("Summary", esc(summary))
-    parts.append(card("kevrichment Research", r_rows))
-
-    # Research meta
+    # --- Research Metadata (collapsed) ---
     meta_rows = ""
-    meta_rows += field_row("Last Researched", fmt_ts(meta.get("timestamp", "")))
-    meta_rows += field_row("Wall Time", f'{meta.get("wall_time_seconds", 0)}s')
-    meta_rows += field_row("Searches Performed", str(meta.get("searches_performed", 0)))
+    meta_rows += _compact_row("Last Researched", fmt_ts(meta.get("timestamp", "")))
+    meta_rows += _compact_row("Wall Time", f'{meta.get("wall_time_seconds", 0)}s')
+    meta_rows += _compact_row("Searches", str(meta.get("searches_performed", 0)))
+    meta_rows += _compact_row("Component Default", esc(research.get("vulnerable_component_enabled_by_default", "unknown")))
     sources = meta.get("sources_consulted", [])
     if sources:
-        src_links = "<br>".join(f'<a href="{esc(s)}" target="_blank" rel="noopener">{esc(s)}</a>' for s in sources if s)
-        meta_rows += field_row("Sources", src_links)
-    parts.append(card("Research Metadata", meta_rows))
+        src_links = "<br>".join(f'<a href="{esc(s)}" target="_blank" rel="noopener" style="font-size:0.75rem">{esc(s)}</a>' for s in sources if s)
+        meta_rows += _compact_row("Sources", src_links)
+    parts.append(_collapse_card("Research Metadata", meta_rows, collapsed=True))
 
-    # QC notes
+    # QC notes (if any)
     if qc:
         qc_rows = ""
         for n in qc:
             sev = n.get("severity", "info")
             css_class = "qc-error" if sev == "error" else "qc-warn" if sev == "warn" else "qc-info"
-            qc_rows += f'<div class="{css_class}" style="padding:6px 0;font-size:0.8125rem;color:{T["text_secondary"]}">'
+            qc_rows += f'<div class="{css_class}" style="padding:5px 0;font-size:0.75rem;color:{T["text_secondary"]}">'
             qc_rows += f'<span class="badge badge-sm" style="background:{T["red"] if sev == "error" else T["amber"] if sev == "warn" else T["blue"]}22;color:{T["red"] if sev == "error" else T["amber"] if sev == "warn" else T["blue"]};border:1px solid {T["red"] if sev == "error" else T["amber"] if sev == "warn" else T["blue"]}44">{esc(sev)}</span> '
             qc_rows += f'<strong>{esc(n.get("check", ""))}:</strong> {esc(n.get("detail", ""))}'
             if n.get("auto_fixed"):
                 qc_rows += ' <span style="color:' + T["green"] + '">(auto-fixed)</span>'
             qc_rows += '</div>'
-        parts.append(card("QC Notes", qc_rows))
+        parts.append(f'<div class="card"><div class="card-title" style="font-size:0.875rem">QC Notes</div>{qc_rows}</div>')
 
-    parts.append('</div>')
+    parts.append('</div>')  # left col
+
+    # ========================= RIGHT COLUMN ================================
+    parts.append('<div class="cve-col">')
+
+    # --- Hunting Hypothesis (always visible, callout) ---
+    hh = research.get("hunting_hypothesis", "")
+    if hh:
+        hh_source = research.get("hunting_hypothesis_source", "")
+        source_tag = f'<span class="source-badge {"source-hermes" if hh_source == "hermes" else ""}">{esc(hh_source)}</span>' if hh_source else ''
+        parts.append('<div class="hh-callout">'
+                     f'<div class="hh-callout-label">&#127919; Hunting Hypothesis{source_tag}</div>'
+                     f'<div style="font-size:0.875rem;line-height:1.6;color:{T["text_primary"]}">{esc(hh)}</div>'
+                     '</div>')
+
+    # --- Research Details (preconditions collapsible) ---
+    rd_rows = ""
+    comp = research.get("vulnerable_component", "")
+    if comp:
+        rd_rows += _compact_row("Component", esc(comp))
+        # Source tag inline
+        comp_src = research.get("vulnerable_component_source", "")
+        if comp_src:
+            rd_rows = rd_rows.replace('</span></div>', f'</span><span class="source-badge {"source-hermes" if comp_src == "hermes" else ""}">{esc(comp_src)}</span></div>')
+
+    # Preconditions (collapsible if > 200 chars)
+    pre = research.get("preconditions_for_exploit", "")
+    if pre:
+        if len(pre) > 200:
+            pre_id = f"pre_{cve_id.replace('-','_')}"
+            rd_rows += f'<div class="field-row-compact"><span class="field-label">Preconditions</span><span class="field-value">'
+            rd_rows += f'<span id="{pre_id}short">{esc(pre[:180])}&hellip;</span>'
+            rd_rows += f'<span id="{pre_id}full" style="display:none">{esc(pre)}</span>'
+            rd_rows += f' <span class="expand-toggle" onclick="document.getElementById(\'{pre_id}full\').style.display=\'inline\';document.getElementById(\'{pre_id}short\').style.display=\'none\';this.style.display=\'none\'">show more</span>'
+            rd_rows += f'</span></div>'
+            # source
+            pre_src = research.get("preconditions_source", "")
+            if pre_src:
+                rd_rows = rd_rows.replace('</span></div>', f'</span><span class="source-badge {"source-hermes" if pre_src == "hermes" else ""}">{esc(pre_src)}</span></div>')
+        else:
+            rd_rows += _compact_row("Preconditions", esc(pre))
+            pre_src = research.get("preconditions_source", "")
+            if pre_src:
+                rd_rows = rd_rows.replace('</span></div>', f'</span><span class="source-badge {"source-hermes" if pre_src == "hermes" else ""}">{esc(pre_src)}</span></div>')
+
+    delivery = research.get("delivery_mechanism", "")
+    if delivery:
+        if len(delivery) > 200:
+            del_id = f"del_{cve_id.replace('-','_')}"
+            rd_rows += f'<div class="field-row-compact"><span class="field-label">Delivery</span><span class="field-value">'
+            rd_rows += f'<span id="{del_id}short">{esc(delivery[:180])}&hellip;</span>'
+            rd_rows += f'<span id="{del_id}full" style="display:none">{esc(delivery)}</span>'
+            rd_rows += f' <span class="expand-toggle" onclick="document.getElementById(\'{del_id}full\').style.display=\'inline\';document.getElementById(\'{del_id}short\').style.display=\'none\';this.style.display=\'none\'">show more</span>'
+            rd_rows += f'</span></div>'
+        else:
+            rd_rows += _compact_row("Delivery", esc(delivery))
+
+    poc = research.get("public_poc_exists", "unknown")
+    poc_urls = research.get("public_poc_urls", [])
+    poc_color = T["green"] if poc == "yes" else T["text_muted"] if poc == "no" else T["amber"]
+    rd_rows += _compact_row("Public PoC", severity_badge(poc, poc_color, small=True))
+    if poc_urls:
+        url_links = "<br>".join(f'<a href="{esc(u)}" target="_blank" rel="noopener" style="font-size:0.75rem">{esc(u)}</a>' for u in poc_urls if u)
+        rd_rows += _compact_row("PoC URLs", url_links)
+
+    advisory = research.get("vendor_advisory_url", "")
+    if advisory:
+        rd_rows += _compact_row("Advisory", f'<a href="{esc(advisory)}" target="_blank" rel="noopener" style="font-size:0.75rem">{esc(advisory)}</a>')
+
+    expl_notes = research.get("exploit_complexity_notes", "")
+    if expl_notes:
+        rd_rows += _compact_row("Exploit Notes", esc(expl_notes))
+
+    parts.append(_collapse_card("Research Details", rd_rows, collapsed=False))
+
+    # --- Summary (collapsed) ---
+    summary = research.get("kevrichment_summary", "")
+    if summary:
+        parts.append(_collapse_card("Summary", f'<div style="font-size:0.8125rem;line-height:1.6;color:{T["text_secondary"]};padding:4px 0">{esc(summary)}</div>', collapsed=True))
+
+    parts.append('</div>')  # right col
+    parts.append('</div>')  # cve-detail-grid
+
+    parts.append('</div>')  # container
     parts.append(PAGE_FOOT.format(now=""))
     return "\n".join(parts)
 
