@@ -514,6 +514,7 @@ def gen_cve_detail(cve_record):
 
     # NVD section
     nvd_rows = ""
+    nvd_rows += field_row("Published", fmt_date(c.get("cve_published", "")))
     nvd_rows += field_row("Description", esc(c.get("nvd_description", "")))
     cwe_list = c.get("cwe", [])
     if cwe_list:
@@ -601,6 +602,7 @@ def gen_schema_page():
         ("Top-Level", [
             ("schema_version", "string", "Schema version identifier", "kevrichment"),
             ("cve_id", "string", "CVE identifier (CVE-YYYY-NNNNN)", "KEV"),
+            ("cve_published", "ISO 8601", "When the CVE was published by NVD", "NVD"),
             ("last_researched", "ISO 8601", "When this record was last enriched", "kevrichment"),
         ]),
         ("KEV Catalog Fields", [
