@@ -366,7 +366,10 @@ function sortTable(col) {
   var colMap = {'CVE ID':'id','Vendor':'vendor','Product':'product','CVSS':'cvss','Auto':'auto','Exploit':'exploit','PoC':'poc','3-Day':'threeDay','Timeline':'timeline','Date Added':'dateAdded','Published':'published'};
   var key = colMap[col];
   if (!key) return;
-  if (sortCol === col) { sortAsc = !sortAsc; } else { sortCol = col; sortAsc = true; }
+  if (sortCol === col) { sortAsc = !sortAsc; } else {
+    sortCol = col;
+    sortAsc = (col === 'Date Added' || col === 'Published' || col === 'CVSS') ? false : true;
+  }
   document.querySelectorAll('th').forEach(function(t) { t.classList.remove('sorted','desc'); });
   var th = document.querySelector('th[data-col="'+col+'"]');
   if (th) { th.classList.add('sorted'); if (!sortAsc) th.classList.add('desc'); }
