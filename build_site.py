@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Static site generator for kevrichment — builds a searchable HTML dashboard from CVE JSON data."""
 
-import json, os, glob, html as html_mod
+import json, os, glob, sys, html as html_mod
 from datetime import datetime
 from pathlib import Path
 
@@ -303,6 +303,79 @@ def safe_load_cves(index_data, limit=None):
         if rec:
             cves.append(rec)
     return cves
+
+def validate_schema():
+    """Validate all CVE records against the expected schema. Exits with code 1 on failure."""
+    errors = []
+
+    try:
+        index = load_index()
+    except Exception as e:
+        print(f"\n❌ SCHEMA VALIDATION FAILED — cannot load index.json: {e}")
+        sys.exit(1)
+
+    entries = index.get("cves", [])
+    if not entries:
+        print("\n❌ SCHEMA VALIDATION FAILED — no 'cves' in index.json or empty")
+        sys.exit(1)
+
+    required_fields = [
+        "kev_date_added",
+        "kev_vendor_project",
+        "kev_product",
+        "kev_short_description",
+        "kev_required_action",
+    ]
+
+    for entry in entries:
+        cve_id = entry.get("cve_id")
+        if not cve_id:
+            errors.append(("INDEX", "(entry)", "Entry missing 'cve_id'"))
+            continue
+
+        cve_path = CVE_DIR / f"{cve_id}.json"
+        if not cve_path.exists():
+            errors.append(("MISSING", cve_id, "CVE JSON file not found"))
+            continue
+
+        try:
+            with open(cve_path) as f:
+                rec = json.load(f)
+        except json.JSONDecodeError as e:
+            errors.append(("PARSE", cve_id, f"Invalid JSON: {e}"))
+            continue
+        except Exception as e:
+            errors.append(("PARSE", cve_id, f"Cannot read: {e}"))
+            continue
+
+        if "cve_id" not in rec:
+            errors.append(("SCHEMA", cve_id, "Missing required 'cve_id' key"))
+            continue
+        if rec["cve_id"] != cve_id:
+            errors.append(("SCHEMA", cve_id, f"'cve_id' value mismatch: file says '{rec['cve_id']}'"))
+
+        if "schema_version" not in rec:
+            errors.append(("SCHEMA", cve_id, "Missing 'schema_version'"))
+
+        for field in required_fields:
+            if field not in rec:
+                errors.append(("SCHEMA", cve_id, f"Missing '{field}'"))
+
+        if "id" in rec and "cve_id" in rec:
+            errors.append(("LEGACY", cve_id, "Has both old 'id' and new 'cve_id' — remove 'id'"))
+
+    if errors:
+        print("\n❌ SCHEMA VALIDATION FAILED")
+        print(f"   {len(errors)} error(s) found:\n")
+        for category, cve_id, msg in errors:
+            label = f"{cve_id:25s}" if cve_id else " " * 25
+            print(f"  [{category:7s}] {label} {msg}")
+        print("\nAborting build. Fix the issues above and commit the fixes.")
+        sys.exit(1)
+
+    print(f"✓ Schema validation passed: {len(entries)} CVE records OK")
+
+
 
 
 # ── Page Generators ────────────────────────────────────────────────────────
@@ -936,6 +1009,7 @@ def gen_pipeline_page():
 
 def generate_site():
     """Main orchestrator — load data and generate all pages."""
+    validate_schema()
     print("Loading index...")
     index = load_index()
     total = index.get("total_cves_processed", 0)
@@ -991,4 +1065,7 @@ def generate_site():
 
 
 if __name__ == "__main__":
-    generate_site()
+    if "--validate" in sys.argv:
+        validate_schema()
+    else:
+        generate_site()
