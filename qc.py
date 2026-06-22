@@ -52,6 +52,13 @@ def _check_precondition_contradictions(record, notes):
     if not pre or not cvss:
         return
 
+    # preconditions_for_exploit can be a list if the enrichment produced multiple
+    # statements; flatten to string for string-level analysis.
+    if isinstance(pre, list):
+        pre = "; ".join(p.strip() for p in pre if isinstance(p, str))
+    elif not isinstance(pre, str):
+        pre = str(pre)
+
     cvss_vals = {}
     for part in cvss.split("/"):
         if ":" in part:
