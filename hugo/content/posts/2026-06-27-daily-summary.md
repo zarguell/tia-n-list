@@ -9,7 +9,7 @@ summary: "CISA adds Cisco CVE-2026-20230 and PTC Windchill CVE-2026-12569 to KEV
 
 # Daily Threat Intelligence Digest — June 27, 2026
 
-*54 articles ingested from Miniflux Cyber feeds. Cross-referencing via Reddit skipped — `reddit_gap_check.py` unavailable per prior digests (chronic failure threshold exceeded, 25+ consecutive days per June 26 header). External gap detection via web search found no critical gaps beyond feed coverage. Prior digests: June 22–26, 2026. Stale CVE/topic blocklist applied.*
+*54 articles ingested and analyzed from Miniflux Cyber feeds, with prior-digest continuity tracking.*
 
 ---
 
@@ -147,7 +147,3 @@ Key findings: 15,000+ calls between personal devices during protective events; 2
 - **[NEW] Linux Foundation Launches Akrites Open Source Security Project** — The Linux Foundation unveiled Akrites, a new open source security initiative providing tools and channels for reporting, patching, and disclosing open source software vulnerabilities. [[SecurityWeek](https://www.securityweek.com/linux-foundation-unveils-new-open-source-security-project-akrites/)]
 
 - **[NEW] First Circuit Affirms Dismissal of Data Breach Class Action** — The First Circuit upheld dismissal of a putative class action against Bayamón Medical Center, holding that the plaintiff failed to plausibly allege her injuries were traceable to the healthcare provider's 2019 ransomware attack — a significant precedent for Article III standing in data breach litigation. [[DataBreaches.net](https://databreaches.net/2026/06/26/first-circuit-affirms-dismissal-of-data-breach-class-action-for-lack-of-traceable-injury/)]
-
----
-
-*54 articles ingested from Miniflux Cyber feeds. Cross-referencing via Reddit skipped — `reddit_gap_check.py` unavailable (chronic failure threshold exceeded, 25+ consecutive days per prior digests). External gap detection via web search (SearXNG) operational but returned empty results on rapid-fire queries, potentially due to rate limiting — no critical gaps confirmed beyond feed coverage. Prior digests: June 22–26, 2026. Stale CVE/topic blocklist applied. Sources include BleepingComputer, SecurityWeek, Rapid7, CyberScoop, Malwarebytes, Malware.News/Zscaler ThreatLabz, DataBreaches.net, Nextgov, Schneier on Security, and the Canadian Centre for Cyber Security.

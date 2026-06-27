@@ -7,7 +7,6 @@ author: Tia N. List
 summary: Critical vulnerabilities in Ivanti EPMM and SonicWall SMA1000 appliances are being actively exploited, with threat actors achieving full administrative control through SQL injection and code injection techniques that bypass authentication mechanisms. The rapid weaponization of the Claude Code leak within 24 hours underscores the speed at which exposed development tools become attack vectors, distributing infostealers like Vidar alongside RATs, while emerging threat actors such as UNC6783 target enterprise support infrastructure for extortion purposes.
 ---
 
-
 # Daily Threat Intel Digest - April 9, 2026
 
 ## 🔴 Critical Threats & Active Exploitation

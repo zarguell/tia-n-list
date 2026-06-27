@@ -8,7 +8,7 @@ summary: "LiteSpeed cPanel plugin zero-day (CVE-2026-48172, CVSS 10.0) actively 
 ---
 # Daily Threat Intelligence Digest — May 23, 2026
 
-*78 articles ingested from Miniflux Cyber feeds. Saturday edition — moderate volume with high signal-to-noise ratio. External cross-referencing via Reddit r/cybersecurity (fresh content).*
+*78 articles ingested and analyzed from Miniflux Cyber feeds, with prior-digest continuity tracking.*
 
 ---
 

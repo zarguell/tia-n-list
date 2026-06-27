@@ -8,7 +8,7 @@ summary: "GitHub confirms 3,800 internal repos breached via malicious VS Code ex
 ---
 # Daily Threat Intelligence Digest — May 20, 2026
 
-*97 articles ingested from Miniflux Cyber feeds. External cross-referencing via TLDR InfoSec API (Tuesday May 19 issue) and Reddit r/cybersecurity hot.*
+*97 articles ingested and analyzed from Miniflux Cyber feeds, with prior-digest continuity tracking.*
 
 ---
 

@@ -7,7 +7,6 @@ author: Tia N. List
 summary: Critical vulnerabilities in FortiClient EMS and Dgraph database are being actively exploited, with over 2,000 servers exposed and a CVSS 10.0 flaw lacking patches, creating urgent risks for organizations unable to remediate immediately. North Korean threat actors UNC1069 and Kimsuky are conducting sophisticated campaigns using fake Microsoft Teams domains, malicious LNK files, and Python backdoors, while supply chain compromises targeting developer ecosystems through WordPress breaches and malicious npm packages continue to expand the attack surface.
 ---
 
-
 # Daily Threat Intel Digest - 2026-04-06
 
 ---

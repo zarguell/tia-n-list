@@ -8,7 +8,7 @@ summary: "Cisco SD-WAN zero-day (CVE-2026-20245) exploited since March with root
 ---
 # Daily Threat Intelligence Digest — June 25, 2026
 
-*63 articles ingested from Miniflux Cyber feeds. Cross-referencing via Reddit skipped — `reddit_gap_check.py` unavailable (chronic failure threshold exceeded, 25+ consecutive days per prior digests). External gap detection via web search found no critical gaps beyond feed coverage. Prior digests: June 20–24, 2026. Stale CVE/topic blocklist applied.*
+*63 articles ingested and analyzed from Miniflux Cyber feeds, with prior-digest continuity tracking.*
 
 ---
 

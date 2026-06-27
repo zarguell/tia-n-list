@@ -7,7 +7,6 @@ author: Tia N. List
 summary: Threat actors are increasingly weaponizing AI tools to automate attacks at scale, as demonstrated by a massive operation targeting Mexican government agencies with AI-synthesized intelligence reports, while critical vulnerabilities in Marimo notebooks and Adobe Acrobat are being exploited within hours of public disclosure. Ransomware operators are standardizing EDR killer toolkits containing nearly 90 distinct bypass techniques, and financially motivated groups like Storm-2755 are conducting sophisticated payroll fraud through adversary-in-the-middle proxy attacks that bypass traditional MFA protections.
 ---
 
-
 # Daily Threat Intel Digest - 2026-04-13
 
 ## 🔴 Critical Threats & Active Exploitation

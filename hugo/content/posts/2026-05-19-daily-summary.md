@@ -8,7 +8,7 @@ summary: "Critical: CISA contractor exposed AWS GovCloud keys + plaintext passwo
 ---
 # Daily Threat Intelligence Digest — May 19, 2026
 
-*63 articles ingested from Miniflux Cyber feeds. External cross-referencing via Reddit r/cybersecurity and TLDR InfoSec API (Monday issue — Tuesday's not yet published at 7:15 AM ET).*
+*63 articles ingested and analyzed from Miniflux Cyber feeds, with prior-digest continuity tracking.*
 
 ---
 

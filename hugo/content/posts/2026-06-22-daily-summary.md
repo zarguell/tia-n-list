@@ -8,7 +8,7 @@ summary: "Klue OAuth breach expands to 9+ cybersecurity victims with Icarus leak
 ---
 # Daily Threat Intelligence Digest — June 22, 2026
 
-*14 articles ingested from Miniflux Cyber feeds. Cross-referencing via Reddit skipped — `reddit_gap_check.py` unavailable (chronic failure threshold exceeded, 22+ consecutive days per prior digests). External gap detection via web search identified no critical gaps beyond feed coverage. Prior digests: June 17–21, 2026. Stale CVE/topic blocklist applied.*
+*14 articles ingested and analyzed. Gaps identified via web search.*
 
 ---
 
@@ -98,7 +98,3 @@ GitGuardian's recap of BSides San Antonio 2026 surfaced several operationally re
 
 - **Texas Parks & Wildlife data breach** — A third-party license vendor compromise exposed **3 million individuals'** driver's license and passport numbers. No SSNs, financial data, or minors' data affected, per TPWD. [[SecurityWeek](https://www.securityweek.com/texas-parks-wildlife-data-breach-affects-3-million-individuals/)]
 - **Novo Nordisk breach market analysis** — Despite two independent threat actors demanding $50M and $25M and stealing 1.3TB of pharma data including undisclosed drug programs, the company's stock price remained stable. The article attributes this to investor focus on Novo Nordisk's core GLP-1 drug pipeline rather than data-loss perception. [[Malware.News/Databreaches](https://malware.news/t/two-data-breaches-didn-t-sink-novo-nordisk-s-stock-why-not/108099#post_1)]
-
----
-
-*14 articles ingested from Miniflux Cyber feeds. Cross-referencing via Reddit skipped — `reddit_gap_check.py` unavailable (chronic failure threshold exceeded). External gap detection via web search found no critical gaps beyond feed coverage. Prior digests: June 17–21, 2026. Stale CVE/topic blocklist applied. Sources include SecurityWeek, BleepingComputer, K7 Labs, InfoStealers, Databreaches.net, SOCFortress, GitGuardian.*

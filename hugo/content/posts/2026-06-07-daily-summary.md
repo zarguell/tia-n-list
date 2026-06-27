@@ -8,7 +8,7 @@ summary: "Anthropic embeds engineers at NSA for Mythos offensive cyber ops while
 ---
 # Daily Threat Intelligence Digest — June 7, 2026
 
-*4 articles ingested from Miniflux Cyber feeds. External cross-referencing via Reddit skipped — old.reddit.com returned errors on both `/hot/` and `/new/` endpoints. tl;dr sec #331 (published June 4, 3 days fresh) checked — identified two material gaps: CVE-2026-31431 "Copy Fail" (CISA KEV, zero Miniflux coverage) and Google GTIG Q2 2026 AI threat report. Prior digests: June 1–6, 2026. Stale CVE/topic blocklist applied.*
+*4 articles ingested and analyzed from Miniflux Cyber feeds, with prior-digest continuity tracking.*
 
 ---
 
@@ -66,7 +66,3 @@ Google Threat Intelligence Group published its Q2 2026 AI Threat Tracker, docume
 
 - **[UPDATE] Everest Forms Pro CVE-2026-3300 — Second Attacking IP Identified** — Wordfence telemetry reveals a second primary attacking IP (209.146.60.26) alongside the previously reported 202.56.2.126 in the ongoing mass exploitation of this WordPress plugin flaw. 29,300+ total blocked attempts; patched since v1.9.13 (March 18). Administrators should block both IPs and audit for rogue accounts with username pattern `diksimarina`. [[BleepingComputer](https://www.bleepingcomputer.com/news/security/critical-everest-forms-pro-flaw-exploited-to-take-over-wordpress-sites/)]
 - **[tl;dr sec] AI Exfiltration in 60 Seconds — Claude Code Given Leaked AWS Keys Exfiltrates Data in Under a Minute** — Researcher Adan Alvarez demonstrated a six-phase kill chain (`GetCallerIdentity` → Policy Enumeration → Credential Recovery → AssumeRole → Enumeration → Exfiltration) completing in ~60 seconds. CloudTrail's 5-minute log delivery delay means traditional alerting is too slow for sub-minute AI-driven attacks. Defensive recommendation: honeytokens and honeypots to waste agent time. [[tl;dr sec #331](https://tldrsec.com/p/tldr-sec-331); [GitHub PoC](https://github.com/adanalvarez/ai-aws-incident-response-demo)]
-
----
-
-*4 articles ingested from Miniflux Cyber feeds. Cross-referencing via Reddit skipped — old.reddit.com returned errors on both `/hot/` and `/new/` endpoints. tl;dr sec #331 checked (June 4, 3 days fresh) — identified two material gaps: CVE-2026-31431 "Copy Fail" (CISA KEV, zero Miniflux coverage) and Google GTIG Q2 2026 AI threat report. Prior digests: June 1–6, 2026. Sources include SOCFortress/Medium, BleepingComputer, Bloomberg Law, Financial Times (via secondary), Google GTIG, Sysdig, Orca Security, NVD, oss-sec, tl;dr sec, and independent researchers.*

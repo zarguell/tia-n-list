@@ -14,7 +14,6 @@ summary: "Another universal Linux root zero-day (Dirty Frag) hits with no patche
 
 *Previous 5 days reporting summary:* Yesterday's digest covered PAN-OS CVE-2026-0300 exploitation timeline and CL-STA-1132 cluster details (Unit 42), Claude AI weaponized against Mexican water utility OT systems, MuddyWater false-flag ransomware campaign, UAT-8302 China-nexus APT targeting governments, OceanLotus PyPI supply-chain attacks, vm2 sandbox escape (CVE-2026-26956), DAEMON Tools supply-chain breach confirmation, and ClickFix macOS infostealer evolution. Earlier this week: Copy Fail (CVE-2026-31431) CISA KEV listing, Weaver E-cology RCE, Microsoft "code of conduct" AiTM phishing, Argo CD Kubernetes secret extraction, DarkSword iOS exploit kit, DAEMON Tools trojanized installers, Instructure Canvas breach (280M records), and the Trellix source code breach.
 
-
 ## 🔴 Critical Threats & Active Exploitation
 
 **[NEW] "Dirty Frag" — another universal Linux root zero-day, same class as Copy Fail, PoC public with no patches available**
@@ -33,7 +32,6 @@ LayerX has disclosed "ClaudeBleed," a vulnerability in the Claude extension for 
 
 CISA has added CVE-2026-0300 to its Known Exploited Vulnerabilities catalog, requiring federal agencies to apply mitigations immediately. Separately, SecurityWeek analysis confirms the CL-STA-1132 exploitation cluster bears hallmarks of Chinese state-sponsored operations — the deployment of Earthworm and ReverseSocks5 (tools predominantly used by Volt Typhoon and APT41), systematic log destruction, and Active Directory targeting are consistent with Chinese APT tradecraft. The attackers relied entirely on open-source tooling rather than proprietary malware, which minimized signature-based detection and allowed seamless environment integration over multi-week interactive sessions. Patches remain on a staggered timeline of May 13–28. [[SecurityWeek](https://www.securityweek.com/palo-alto-zero-day-exploited-in-campaign-bearing-hallmarks-of-chinese-state-hacking/); [GBHackers](https://gbhackers.com/cisa-issues-warning-over-palo-alto-pan-os-flaw/)]
 
-
 ## 🎯 Threat Actor Activity & Campaigns
 
 **[UPDATE] RansomHouse claims Trellix source code breach — forensics find no supply-chain impact**
@@ -43,7 +41,6 @@ The RansomHouse extortion group has listed Trellix on its dark web leak site, cl
 **[NEW] PCPJack worm targets Docker, Kubernetes, Redis, and MongoDB — likely former TeamPCP operator**
 
 SentinelLabs has documented PCPJack, a new credential-stealing malware framework actively spreading through exposed cloud and container infrastructure. PCPJack targets Docker, Kubernetes, Redis, MongoDB, RayML, and vulnerable web applications, with a focus on stealing cloud credentials, SSH keys, Slack tokens, OpenAI/Anthropic API keys, and financial service credentials. Exfiltration uses Telegram channels with X25519 ECDH and ChaCha20-Poly1305 encryption. Most notably, PCPJack explicitly detects and removes all TeamPCP tooling on compromised systems — eliminating processes, services, containers, files, and persistence artifacts. SentinelLabs assesses PCPJack is likely operated by a former TeamPCP member who departed after the group's high-visibility supply-chain campaigns drew significant attention. PCPJack exploits five known CVEs including Next.js middleware auth bypass (CVE-2025-29927) and the React2Shell deserialization flaw (CVE-2025-55182). [[BleepingComputer](https://www.bleepingcomputer.com/news/security/new-pcpjack-worm-steals-credentials-cleans-teampcp-infections/); [SecurityWeek](https://www.securityweek.com/pcpjack-worm-removes-teampcp-infections-steals-credentials/); [Cyber Security News](https://cyberpress.org/pcpjack-targets-cloud-infrastructure/)]
-
 
 ## ⚠️ Vulnerabilities & Patches
 
@@ -63,7 +60,6 @@ Vercel has released urgent patches (versions 15.5.16 and 16.2.5) addressing a cl
 
 SUSE Rancher has disclosed a critical vulnerability in Rancher Fleet, the GitOps tool for managing Kubernetes clusters at scale. CVE-2026-41050 breaks Fleet's core multi-tenant isolation by failing to enforce ServiceAccount impersonation across deployment pipelines. An attacker with basic git push access to a monitored repository can deploy a malicious Helm chart that extracts admin tokens from any namespace across all downstream clusters using the Helm `lookup` function — which executes with the highly privileged fleet-agent credentials rather than the restricted tenant account. A second bypass via `valuesFrom` in FleetFleet.yaml reads secrets with cluster-admin privileges. Stolen credentials (e.g., AWS IAM roles) enable lateral movement across corporate infrastructure. Affected versions: Fleet before 0.11.13, 0.12.14, 0.13.10, and 0.14.5; Rancher 2.10.11 and older. [[GBHackers](https://gbhackers.com/critical-vulnerability-in-rancher-fleet/)]
 
-
 ## 🛡️ Defense & Detection
 
 **[NEW] Claude Code OAuth tokens stealable via stealthy MCP hijacking — Anthropic dismisses as "out of scope"**
@@ -74,7 +70,6 @@ Mitiga Labs has disclosed an attack chain that steals OAuth tokens from Claude C
 
 Elastic Security Labs has documented TCLBanker, a new Brazilian banking trojan targeting 59 banking, fintech, and cryptocurrency platforms. The malware arrives via a trojanized MSI installer for Logitech AI Prompt Builder and loads through DLL side-loading within the legitimate application context. TCLBanker features worm modules for self-propagation: it hijacks WhatsApp Web sessions via Chromium IndexedDB data and Outlook via COM automation to send phishing messages from the victim's accounts. The banking module monitors browser address bars using Windows UI Automation APIs, establishing WebSocket sessions with C2 when targeted sites are visited for live screen streaming, keylogging, clipboard hijacking, and overlay-based credential theft. The malware actively hunts for analysis tools (x64dbg, IDA, dnSpy, Frida) and kills Task Manager during active sessions. Code artifacts suggest AI-assisted development. [[BleepingComputer](https://www.bleepingcomputer.com/news/security/new-tclbanker-malware-self-spreads-over-whatsapp-and-outlook/); [GBHackers](https://gbhackers.com/signed-logitech-installer-abused/)]
 
-
 ## 📋 Policy & Industry News
 
 **[NEW] Trump administration redirects cybersecurity scholarship program toward AI**
@@ -84,7 +79,6 @@ The Trump administration is redirecting the CyberCorps Scholarship For Service p
 **[NEW] Americans sentenced for running laptop farms for North Korean IT workers**
 
 Two U.S. nationals — Matthew Isaac Knoot and Erick Ntekereze Prince — were sentenced to 18 months in prison each for operating laptop farms that helped North Korean IT workers fraudulently obtain remote employment at nearly 70 American companies, generating $1.2 million for the DPRK regime. They are the seventh and eighth U.S.-based laptop farmers sentenced this year as part of a federal initiative targeting North Korea's illicit revenue generation. [[BleepingComputer](https://www.bleepingcomputer.com/news/security/americans-sentenced-for-running-laptop-farms-for-north-korea/); [CyberScoop](https://cyberscoop.com/north-korea-it-worker-scheme-laptop-farm-facilitators-sentenced/)]
-
 
 ## ⚡ Quick Hits
 
@@ -102,4 +96,4 @@ Two U.S. nationals — Matthew Isaac Knoot and Erick Ntekereze Prince — were s
 
 ---
 
-*98 articles ingested from Miniflux Cyber feeds. Prior digest: May 7, 2026. Sources include BleepingComputer, Microsoft Security Blog, SecurityWeek, Krebs on Security, GBHackers, Cyber Security News, CyberScoop, SentinelLabs, Elastic Security Labs, LayerX, and Mitiga Labs.*
+*98 articles ingested and analyzed from Miniflux Cyber feeds, with prior-digest continuity tracking.*

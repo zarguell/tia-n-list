@@ -8,7 +8,7 @@ summary: "FBI takes down $1.9B China-based phishing platform Outsider; 400+ Arch
 ---
 # Daily Threat Intelligence Digest — June 13, 2026
 
-*46 articles ingested from Miniflux Cyber feeds. External cross-referencing via Reddit skipped — Saturday light-volume handling. Prior digests: June 8–12, 2026. Stale CVE/topic blocklist applied.*
+*46 articles ingested and analyzed from Miniflux Cyber feeds, with prior-digest continuity tracking.*
 
 ---
 
@@ -103,7 +103,3 @@ Following the June 12 disclosure of fake VRChat and Discord breach filings on Ma
 - **[NEW] Google Chrome stable update (CVE-2026-11645)** — Google shipped emergency Chrome updates (Windows 149.0.7827.114, Mac 149.0.7827.115, Linux 149.0.7827.114) for out-of-bounds read/write in V8, following the June 9 patch for the same CVE exploited in the wild. [[Malware.News/Canadian Cyber Centre](https://malware.news/t/google-chrome-security-advisory-av26-593/107824#post_1)]
 - **[NEW] FreePBX advisories (AV26-596)** — Authenticated command injection in UCP interface and RCE via unsafe file inclusion in Superfecta module for FreePBX 16/17. Patches available. [[Malware.News/Canadian Cyber Centre](https://malware.news/t/freepbx-security-advisory-av26-596/107830#post_1)]
 - **[NEW] Moxa ICS advisory (CVE-2026-9266)** — Missing cryptographic step vulnerability in multiple Moxa industrial computer series (UC-1200A, UC-2200A, UC-3400A, UC-4400A, UC-8200, V1200, V3200/V3400 series). Patches available. [[Malware.News/Canadian Cyber Centre](https://malware.news/t/control-systems-moxa-security-advisory-av26-594/107826#post_1)]
-
----
-
-*46 articles ingested from Miniflux Cyber feeds. External cross-referencing via Reddit skipped — Saturday light-volume handling. Prior digests: June 8–12, 2026. Stale CVE/topic blocklist applied. Sources include BleepingComputer, CyberScoop, SecurityWeek, AP, Rapid7, Malware.News/DeXpose, Zscaler ThreatLabz, Unit 42 (Palo Alto Networks), Sonatype, IFIN/Whanos, Dataminr, DataBreaches.net, Aikido, and the Canadian Centre for Cyber Security.*

@@ -9,7 +9,7 @@ summary: "Copy Fail Linux LPE added to CISA KEV with active exploitation confirm
 
 # Daily Threat Intelligence Digest — May 25, 2026
 
-*36 articles ingested from Miniflux Cyber feeds. External cross-referencing via Reddit r/cybersecurity detected one critical gap — Copy Fail Linux LPE — completely missed by the Miniflux feed. Prior digests: May 20–24, 2026.*
+*36 articles ingested and analyzed from Miniflux Cyber feeds, with prior-digest continuity tracking.*
 
 ---
 

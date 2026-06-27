@@ -13,7 +13,6 @@ summary: "CISA confirms active exploitation of the Copy Fail Linux kernel vulner
 
 *Previous 5 days reporting summary:* Yesterday's digest covered cPanel CVE-2026-41940 reaching 40,000+ compromised servers with CISA KEV listing, Instructure breach confirmed at 275M records by ShinyHunters, DigiCert Defender false positive, Microsoft Teams phishing at 72% success rate, FEMITBOT Telegram Mini App fraud platform, FreeBSD DHCP RCE, MOVEit Automation auth bypass, and SAP npm supply chain self-replication. Earlier this week: cPanel "Sorry" ransomware, ConsentFix v3 OAuth automation, Everest ransomware targeting Symcor, cPanelSniper PoC, Copy Fail KEV listing, Cordial/Snarky Spider AiTM, AccountDumpling Facebook phishing, MacSync stealer, SHADOW-EARTH-053 ShadowPad, and the Trellix source code breach.
 
-
 ## 🔴 Critical Threats & Active Exploitation
 
 **[UPDATE] Copy Fail (CVE-2026-31431) — CISA adds to KEV with active in-the-wild exploitation as researchers warn of AI-generated PoC noise**
@@ -23,7 +22,6 @@ CISA has confirmed that threat actors are actively exploiting the Copy Fail Linu
 **[NEW] Weaver E-cology critical RCE (CVE-2026-22679) actively exploited since March via exposed debug API endpoint**
 
 A critical unauthenticated remote code execution vulnerability in Weaver E-cology, a widely-used Chinese enterprise office automation platform, has been actively exploited in the wild since mid-March — just five days after the vendor released a patch and two weeks before public disclosure. Tracked as CVE-2026-22679, the flaw stems from an exposed debug API endpoint in E-cology 10.0 that passes user-supplied parameters directly to backend RPC functionality without authentication or input validation, effectively creating a remote command execution interface. Vega threat intelligence researchers documented a multi-phase attack campaign: threat actors first validated RCE via ping commands to callback servers, then attempted PowerShell payload downloads (blocked by endpoint defenses) and a target-aware MSI installer (which failed to execute). They subsequently pivoted to fileless obfuscated PowerShell for remote script retrieval. Despite having RCE access, the attackers never established persistent sessions on targeted hosts. The vendor's fix (build 20260312) removes the debug endpoint entirely — no workarounds exist, making patching the only mitigation. [[BleepingComputer](https://www.bleepingcomputer.com/news/security/weaver-e-cology-critical-bug-exploited-in-attacks-since-march/)]
-
 
 ## 🎯 Threat Actor Activity & Campaigns
 
@@ -38,7 +36,6 @@ The Everest ransomware group has claimed responsibility for a cyberattack agains
 **[NEW] Amazon SES abuse surge — automated credential theft and authenticated phishing at scale**
 
 Threat actors are systematically exploiting exposed AWS IAM access keys to hijack Amazon Simple Email Service for large-scale phishing campaigns that bypass all email authentication checks. Kaspersky reports an uptick in attacks where bots built on the open-source TruffleHog utility automatically scan GitHub repositories, .env files, Docker images, and S3 buckets for exposed AWS credentials. After validating key permissions and email sending limits, attackers distribute convincing phishing emails — including fabricated DocuSign notifications and full BEC email thread impersonations — that pass SPF, DKIM, and DMARC validation because they originate from legitimate Amazon infrastructure. Blocking the delivery IPs is impractical as it would disrupt all SES traffic. Organizations should audit AWS IAM permissions for least-privilege access, rotate keys regularly, enable MFA, and apply IP-based restrictions to SES. [[BleepingComputer](https://www.bleepingcomputer.com/news/security/amazon-ses-increasingly-abused-in-phishing-to-evade-detection/); [Cyber Security News](https://cyberpress.org/attackers-abuse-amazon-ses/)]
-
 
 ## ⚠️ Vulnerabilities & Patches
 
@@ -58,7 +55,6 @@ Google's May 2026 Android Security Bulletin includes CVE-2026-0073, a critical z
 
 Meta has patched two medium-severity WhatsApp vulnerabilities disclosed through its bug bounty program. CVE-2026-23863 affects WhatsApp for Windows and allows attackers to create documents with embedded NUL bytes that appear as harmless files to recipients but execute as programs when opened. CVE-2026-23866 affects WhatsApp for iOS and Android, exploiting incomplete validation of AI rich response messages for Instagram Reels to trigger processing of media from arbitrary URLs, including custom URL scheme handlers (`facetime:`, `tel:`, `itms-apps:`). While neither vulnerability has evidence of in-the-wild exploitation, the URL scheme flaw could enable phishing redirection. Users should update WhatsApp to the latest version. [[SecurityWeek](https://www.securityweek.com/whatsapp-discloses-file-spoofing-arbitrary-url-scheme-vulnerabilities/)]
 
-
 ## 🛡️ Defense & Detection
 
 **[NEW] Microsoft Edge stores all saved passwords in cleartext memory at startup — by design**
@@ -68,7 +64,6 @@ Security researcher @L1v1ng0ffTh3L4N has disclosed that Microsoft Edge decrypts 
 **[UPDATE] DigiCert breach — full attack chain revealed: malicious screensaver bypassed CrowdStrike after five attempts**
 
 New technical details have emerged on the DigiCert breach first reported yesterday. The April 2026 attack began with a social engineering campaign targeting DigiCert customer support via Salesforce chat, where an attacker posing as a customer sent a ZIP file containing a malicious .scr (screensaver) executable. DigiCert's defenses blocked four delivery attempts before a support analyst executed the fifth. Critically, a malfunctioning CrowdStrike Falcon sensor on the infected endpoint prevented detection during initial analysis, allowing the attacker to move laterally into internal support systems. The attacker accessed EV code signing certificate initialization codes through the support portal's proxy feature, ultimately obtaining 60 fraudulent certificates across four CAs under the names of Lenovo, Kingston, Shuttle, and Palit. At least 27 certificates were used to sign Zhong Stealer malware. DigiCert revoked all 60 certificates within 24 hours of identifying the breach on April 17 and has since removed initialization code visibility from support tools, suspended affected accounts, disabled Okta FastPass, and restricted file types in support chat. [[Cyber Security News](https://cyberpress.org/hackers-use-malicious-screensaver-file/); [SecurityWeek](https://www.securityweek.com/digicert-revokes-certificates-after-support-portal-hack/)]
-
 
 ## 📋 Policy & Industry News
 
@@ -82,4 +77,4 @@ Deniss Zolotarjovs, 35, of Moscow, Russia, has been sentenced to 102 months (8.5
 
 ---
 
-*72 articles ingested from Miniflux Cyber feeds. Prior digest: May 4, 2026. Sources include BleepingComputer, Microsoft Security Blog, SecurityWeek, CyberScoop, GBHackers, Cyber Security News, and Malware.News/DeXpose.*
+*72 articles ingested and analyzed from Miniflux Cyber feeds, with prior-digest continuity tracking.*

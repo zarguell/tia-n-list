@@ -14,7 +14,6 @@ summary: "Microsoft confirms active Dirty Frag Linux kernel exploitation in the 
 
 *Previous 5 days reporting summary:* Yesterday's digest covered Dirty Frag Linux kernel LPE (CVE-2026-43284, CVE-2026-43500) as a new zero-day class related to Copy Fail, ShinyHunters defacing 330 Canvas login portals in a second Instructure breach, ClaudeBleed Chrome extension takeover, PAN-OS CVE-2026-0300 CISA KEV addition with Chinese state-sponsored hallmarks, PCPJack worm targeting cloud infrastructure, Microsoft Semantic Kernel AI agent RCE (two CVEs), Ivanti EPMM zero-day CVE-2026-6973, Next.js critical vulnerability cluster, Rancher Fleet multi-tenant isolation bypass, Claude Code OAuth token theft via MCP hijacking, and TCLBanker banking trojan. Earlier this week: Copy Fail CISA KEV listing, Weaver E-cology RCE, Microsoft "code of conduct" AiTM phishing, Argo CD Kubernetes secret extraction, DarkSword iOS exploit kit, DAEMON Tools supply-chain breach, Instructure Canvas breach (280M records), PAN-OS zero-day, DAEMON Tools trojanized installers, and the Trellix source code breach.
 
-
 ## 🔴 Critical Threats & Active Exploitation
 
 **[UPDATE] Dirty Frag — Microsoft confirms active exploitation, CVE-2026-43284 patched but CVE-2026-43500 remains unpatched with no fix timeline**
@@ -33,13 +32,11 @@ ShinyHunters has extended its extortion deadline from May 8 to May 12, providing
 
 Poland's Internal Security Agency (ABW) has documented security breaches at five water treatment stations across the municipalities of Jabłonna Lacka, Szczytno, Małdyty, Tolkmicko, and Sierakowo. In some cases, attackers gained ICS access with the ability to modify operational parameters of equipment, creating direct risk to public water supply. The attack vectors were weak password policies and systems directly exposed to the internet. ABW attributes primary responsibility to Russian intelligence services — specifically APT28 and APT29 — operating through hacktivist personas, alongside UNC1151 (Belarus-linked). The incidents are part of a broader escalation targeting Polish critical infrastructure including energy, wastewater, and supply chains, with attackers seeking contract data, project documentation, and authentication credentials for downstream access. [[SecurityWeek](https://www.securityweek.com/polish-security-agency-reports-ics-breaches-at-five-water-treatment-plants/)]
 
-
 ## 🎯 Threat Actor Activity & Campaigns
 
 **[UPDATE] RansomHouse claims Trellix source code breach — intrusion occurred April 17, screenshots published as proof**
 
 RansomHouse has officially listed Trellix on its dark web extortion portal, claiming the intrusion occurred on April 17 and resulted in data encryption. The group published screenshots showing access to Trellix's appliance management system. Trellix confirmed awareness of the claims and stated its investigation continues. Initial forensics found no evidence that source code release or distribution processes were affected, and no indication of active exploitation of accessed code. RansomHouse has evolved from pure data extortion to deploying advanced encryption tools including 'Mario' (dual-encryption pass) and 'MrAgent' (VMware ESXi automation). The group's recent high-profile targets include Japanese e-commerce giant Askul Corporation (740,000 customer records stolen). [[BleepingComputer](https://www.bleepingcomputer.com/news/security/trellix-source-code-breach-claimed-by-ransomhouse-hackers/); [Cyber Security News](https://cyberpress.org/ransomhouse-claims-trellix-breach/)]
-
 
 ## ⚠️ Vulnerabilities & Patches
 
@@ -51,7 +48,6 @@ LayerX researcher Aviad Gispan has published additional details on the Claude Ch
 
 cPanel has released security updates addressing three vulnerabilities tracked as CVE-2026-29201, CVE-2026-29202, and CVE-2026-29203. Details on severity and exploitation status are limited, but this comes just one week after mass exploitation of CVE-2026-41940 compromised over 40,000 servers worldwide. cPanel administrators should apply updates immediately given the active targeting of the platform. [[Malware.News](https://malware.news/t/cpanel-security-advisory-av26-437/106821#post_1)]
 
-
 ## 🛡️ Defense & Detection
 
 **[NEW] PamDOORa — new Linux PAM backdoor harvests SSH credentials, sold for $900 on Russian forums**
@@ -62,7 +58,6 @@ Group-IB's DFIR team has documented a Linux persistence technique dubbed "PamDOO
 
 NVIDIA has confirmed that GeForce NOW user information was exposed in a data breach limited to the Armenian regional partner GFN.am, which operates the cloud gaming service across Armenia, Azerbaijan, Georgia, Kazakhstan, Moldova, Ukraine, and Uzbekistan. A threat actor using the ShinyHunters nickname — believed to be an imposter — posted the stolen database for $100,000 on a hacker forum (now removed). The breach occurred between March 20 and 26 and exposed full names, email addresses, phone numbers, dates of birth, and usernames. No passwords were exposed. NVIDIA's own network was not impacted. [[BleepingComputer](https://www.bleepingcomputer.com/news/security/nvidia-confirms-geforce-now-data-breach-affecting-armenian-users/); [GBHackers](https://gbhackers.com/nvidia-confirms-geforce-data-breach/)]
 
-
 ## 📋 Policy & Industry News
 
 **[NEW] Sen. Schumer calls on DHS to coordinate AI cyber defense with state and local governments**
@@ -72,7 +67,6 @@ Senate Minority Leader Chuck Schumer has written to DHS Secretary Markwayne Mull
 **[NEW] IBM executive Tom Parker emerges as frontrunner for CISA director**
 
 Tom Parker, IBM's security services lead and founder of Hubble, has emerged as the primary candidate to lead CISA under the Trump administration, following the withdrawal of Sean Plankey. Parker's private-sector background aligns with the administration's preference for industry experience. He would succeed acting director Nick Andersen. [[SecurityWeek](https://www.securityweek.com/in-other-news-train-hacker-arrested-pamdoora-linux-backdoor-new-cisa-director-frontrunner/)]
-
 
 ## ⚡ Quick Hits
 
@@ -86,4 +80,4 @@ Tom Parker, IBM's security services lead and founder of Hubble, has emerged as t
 
 ---
 
-*48 articles ingested from Miniflux Cyber feeds. Prior digest: May 8, 2026. Sources include Microsoft Security Blog, Qualys, Tenable, BleepingComputer, CyberScoop, SecurityWeek, GBHackers, Cyber Security News, Rapid7, Group-IB, LayerX, Canadian Centre for Cyber Security, and Recon InfoSec.*
+*48 articles ingested and analyzed from Miniflux Cyber feeds, with prior-digest continuity tracking.*

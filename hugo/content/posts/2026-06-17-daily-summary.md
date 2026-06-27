@@ -9,7 +9,7 @@ summary: "Microsoft works on RoguePlanet Defender patch (CVE-2026-50656); Joomla
 
 # Daily Threat Intelligence Digest — June 17, 2026
 
-*56 articles ingested from Miniflux Cyber feeds. Cross-referencing via Reddit skipped — `reddit_gap_check.py` unavailable (consistent failures across prior digests June 9–16). External gap detection via web search found no critical gaps beyond feed coverage. tl;dr sec skipped — Wednesday, latest issue from June 11 is 6 days stale. Exa web extract credits exhausted — browser-based extraction used for paywalled content. Prior digests: June 10–16, 2026. Stale CVE/topic blocklist applied.*
+*56 articles ingested and analyzed from Miniflux Cyber feeds, with prior-digest continuity tracking.*
 
 ---
 

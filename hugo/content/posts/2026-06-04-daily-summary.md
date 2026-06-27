@@ -8,7 +8,7 @@ summary: "Cisco Unified CM critical SSRF with public PoC exploit code — patch 
 ---
 # Daily Threat Intelligence Digest — June 4, 2026
 
-*89 articles ingested from Miniflux Cyber feeds. Reddit cross-reference: skipped — Old Reddit API returned stale content; `/new/` unavailable. Prior digests: May 31–June 3, 2026. Stale items omitted: VS Code GitHub token theft (June 3), HTTP/2 Bomb (June 3), Microsoft 365 Android debug mode (June 3), Google Gemini prompt injection (June 3), Acer Wave 7 zero-days (June 3), Payouts King, Kali365 PhaaS, WeedHack, Microsoft Scout AI agent, HazyBeacon (June 2–3), CISA fuel tank gauges (June 3), CISA Android Framework CVE-2025-48595 (June 2–3), Bots overtake humans (June 3), Nobitex sanctions (June 3), Anthropic Project Glasswing (June 3), Kirki WordPress plugin CVE-2026-8206 (June 3), Coralogix funding (June 3), CISA staffing levels (June 3), Node.js compression library CVE-2026-24884 bypass (June 3).*
+*89 articles ingested and analyzed from Miniflux Cyber feeds, with prior-digest continuity tracking.*
 
 ---
 
@@ -150,7 +150,3 @@ AhnLab's weekly report highlights Qilin ransomware targeting a South Korean auto
 - **Microsoft Coreutils for Windows Released** — Native GNU Coreutils implementations for Windows. [[Malware.News](https://malware.news/t/microsofts-coreutils-for-windows-thu-jun-4th/107577#post_1)]
 - **Five Eyes Warns of Chinese Espionage via LinkedIn** — Joint bulletin on aggressive online recruitment targeting defense personnel. [[Reuters](https://au.marketscreener.com/news/five-eyes-security-alliance-warns-of-chinese-espionage-threat-ce7f5ddfd08ff026)]
 - **NoName057(16) DDoS Evolution** — Bitsight analysis shows pro-Russian hacktivist group remains active despite Operation Eastwood. [[Bitsight](https://malware.news/t/crowdsourced-chaos-the-evolution-of-noname057-16-and-why-ddos-resilience-matters/107556#post_1)]
-
----
-
-*89 articles ingested from Miniflux Cyber feeds. Cross-referencing via Reddit r/cybersecurity skipped — `/hot/` returned stale content. Prior digests: May 31–June 3, 2026. Sources include BleepingComputer, SecurityWeek, GBHackers, Cyber Security News (Cyberpress), Malware.News (Wordfence, Intezer, DataBreaches.net, Sonatype, ASEC, Bitsight), CyberScoop, Black Hills Information Security, GitGuardian, Proofpoint, Sonatype, Symantec (Broadcom), Dark Reading, Trail of Bits, Eclypsium, and independent researchers.*

@@ -9,7 +9,7 @@ summary: "Megalodon campaign compromises 5,500+ GitHub repos in 6 hours. Google 
 
 # Daily Threat Intelligence Digest — May 22, 2026
 
-*89 articles ingested from Miniflux Cyber feeds. External cross-referencing via Reddit r/cybersecurity (fresh content) and tl;dr sec #329 (May 21 — AI honeypots, GitHub Action canaries, MDASH).*
+*89 articles ingested and analyzed from Miniflux Cyber feeds, with prior-digest continuity tracking.*
 
 ---
 

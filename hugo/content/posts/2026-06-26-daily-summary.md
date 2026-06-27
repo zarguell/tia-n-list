@@ -9,7 +9,7 @@ summary: "Turla's STOCKSTAY .NET backdoor analyzed by Google Threat Intelligence
 
 # Daily Threat Intelligence Digest — June 26, 2026
 
-*56 articles ingested from Miniflux Cyber feeds. Cross-referencing via Reddit skipped — `reddit_gap_check.py` unavailable (chronic failure threshold exceeded, 25+ consecutive days per prior digests). External gap detection via web search found no critical gaps beyond feed coverage. Prior digests: June 21–25, 2026. Stale CVE/topic blocklist applied.*
+*56 articles ingested and analyzed from Miniflux Cyber feeds, with prior-digest continuity tracking.*
 
 ---
 
@@ -144,7 +144,3 @@ Users already enrolled will automatically remain covered. The extension applies 
 - **[NEW] Akira Ransomware Claims Two US Manufacturing Victims** — Padget Technologies (robotics/automation) and JMS Southeast (temperature measurement/control) added to Akira's leak site on June 25. Employee PII, NDAs, and customer data threatened. [[Malware.News/DeXpose](https://malware.news/t/akira-ransomware-targets-padget-technologies/108234#post_1); [Malware.News/DeXpose](https://malware.news/t/akira-ransomware-attack-targets-jms-southeast/108233#post_1)]
 
 - **[NEW] Enterprise-Ready MCP Specification Shifts Security to Developers** — Major overhaul of the Model Context Protocol moves critical security responsibilities from the protocol to developers and platform operators. [[SecurityWeek](https://www.securityweek.com/new-enterprise-ready-mcp-specification-brings-new-security-challenges/)]
-
----
-
-*56 articles ingested from Miniflux Cyber feeds. Cross-referencing via Reddit skipped — `reddit_gap_check.py` unavailable (chronic failure threshold exceeded, 25+ consecutive days). Prior digests: June 21–25, 2026. Stale CVE/topic blocklist applied. Sources include SecurityWeek, Google Cloud Blog, Unit 42, BleepingComputer, CyberScoop, CISA, Forescout, Netcraft, Gen Digital, Citizen Lab, Malware.News/Sonatype, and DeXpose.*

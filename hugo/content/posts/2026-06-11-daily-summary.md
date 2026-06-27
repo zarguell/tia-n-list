@@ -9,7 +9,7 @@ summary: "Ivanti Sentry CVE-2026-10520 exploited within hours of patch. Exchange
 
 # Daily Threat Intelligence Digest — June 11, 2026
 
-*79 articles ingested from Miniflux Cyber feeds. Cross-referencing via Reddit detected no critical gaps beyond feed coverage. tl;dr sec skipped — Thursday, latest issue not yet live. Prior digests: June 6–10, 2026. Stale CVE/topic blocklist applied.*
+*79 articles ingested and analyzed from Miniflux Cyber feeds, with prior-digest continuity tracking.*
 
 ---
 
@@ -131,7 +131,3 @@ Brian Krebs traced the administrator of The Gentlemen ransomware group (second m
 - **[NEW] Free Spotify Premium TikTok Scams Spread Vidar Infostealer** — ReversingLabs documents two campaigns using short-form videos to trick users into pasting PowerShell commands that deliver Vidar on Windows. [[Malwarebytes via Malware.News](https://malware.news/t/free-spotify-premium-hacks-on-social-media-are-spreading-infostealers/107746#post_1)]
 - **[NEW] Microsoft Fixes BitLocker Recovery Bug on Windows Server 2025** — KB5094125 resolves a known issue causing servers to boot into BitLocker recovery after April 2026 security updates. IT admins can also use KIR as compensating control. [[BleepingComputer](https://www.bleepingcomputer.com/news/microsoft/microsoft-fixes-bitlocker-recovery-bug-on-windows-server-2025/)]
 - **[NEW] OpenAI Detects Chinese Influence Operation Using ChatGPT to Stoke Data Center, Tariff Debates** — Two clusters of China-linked activity creating AI-generated imagery and social media comments. Rated low-impact (1-2 on Bookings breakout scale) by OpenAI's threat intel team. [[CyberScoop](https://cyberscoop.com/openai-china-influence-campaign-chatgpt/)]
-
----
-
-*79 articles ingested from Miniflux Cyber feeds. Cross-referencing via Reddit detected no critical gaps beyond feed coverage. tl;dr sec skipped — Thursday, latest issue not yet live. Prior digests: June 6–10, 2026. Sources include BleepingComputer, SecurityWeek, CyberScoop, Krebs on Security, Wordfence, Malware.News, SafeDep, Black Lotus Labs (Lumen), Flashpoint, Qualys, Tenable, VulnCheck, Shadowserver, Claroty, DataBreaches.net, Nextgov/FCW, Cyble, Malwarebytes, ReversingLabs, and independent researchers.*

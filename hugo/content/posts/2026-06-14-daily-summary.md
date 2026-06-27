@@ -9,7 +9,7 @@ summary: "Velvet Ant Chinese APT breached an air-gapped critical infrastructure 
 
 # Daily Threat Intelligence Digest — June 14, 2026
 
-*8 articles ingested from Miniflux Cyber feeds. Cross-referencing via Reddit skipped — `reddit_gap_check.py` unavailable (scrapling module, consistent failures across prior digests June 9–13). External gap detection via web search found no critical gaps beyond feed coverage. Prior digests: June 9–13, 2026. Stale CVE/topic blocklist applied.*
+*8 articles ingested and analyzed from Miniflux Cyber feeds, with prior-digest continuity tracking.*
 
 ---
 

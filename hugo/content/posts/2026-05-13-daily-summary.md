@@ -10,10 +10,9 @@ summary: "West Pharmaceutical hit by disruptive ransomware halting global operat
 # Tia N. List — Daily Threat Intelligence Digest
 ### May 13, 2026
 
-**117 articles ingested from Miniflux Cyber feeds. External cross-referencing via Reddit r/cybersecurity, TLDR InfoSec, and tl;dr sec.**
+**117 articles ingested and analyzed from Miniflux Cyber feeds, with prior-digest continuity tracking.*
 
 *Previous 5 days reporting summary:* The May 12 digest covered Google's first confirmed AI-generated zero-day exploit, the ShinyHunters/Canvas extortion deadline with House Homeland Security demanding Instructure testimony, BitUnlocker BitLocker bypass (CVE-2025-48804), TeamPCP supply chain campaign escalation (TanStack npm, MistralAI PyPI, Checkmarx Jenkins), EtherRAT/The Gentlemen ransomware via blockchain C2, cPanel CVE-2026-41940 Go-based infector details, and critical PHP SOAP extension RCE (CVE-2026-6722). The May 11 digest introduced the DigiCert breach via social engineering (60 EV code-signing certs revoked), Dirty Frag active exploitation confirmed, Operation HookedWing phishing campaign, Crimenetwork reboot takedown, and GhostLock encryptionless file-locking PoC. The May 9 digest covered Dirty Frag active exploitation via Microsoft Defender telemetry, Ivanti EPMM CVE-2026-6973 CISA KEV addition, ShinyHunters extending Canvas deadline, Polish water treatment ICS breaches, and RansomHouse claiming Trellix source code breach. The May 8 digest introduced Dirty Frag as a new zero-day class, ShinyHunters' second Instructure breach, ClaudeBleed Chrome extension takeover, PAN-OS CVE-2026-0300 CISA KEV addition, and Microsoft Semantic Kernel AI agent RCE.
-
 
 ## 🔴 Critical Threats & Active Exploitation
 
@@ -33,7 +32,6 @@ Foxconn, the world's largest contract electronics manufacturer ($258.3B 2025 rev
 
 Instructure has reached an agreement with ShinyHunters to stop the public leak and ensure stolen Canvas data is deleted. ShinyHunters removed Instructure from its data leak site and posted: "The data is nonexistent. We are not seeking your money." The gang's language strongly implies a payment was made, though Instructure has not confirmed this. Separately, the House Homeland Security Committee sent a letter to Instructure CEO Steve Daly demanding a briefing by May 21, citing "serious questions about the company's incident response capabilities" and the recurrence of intrusion within days of initial disclosure. Schools in 11 states reported disruptions during finals week. The FFT program that enabled the breach has been permanently shut down. [[BleepingComputer](https://www.bleepingcomputer.com/news/security/us-govt-seeks-instructure-testimony-on-massive-canvas-cyberattack/); [SecurityWeek](https://www.securityweek.com/deal-reached-with-hackers-to-delete-data-stolen-from-the-canvas-educational-platform/)]
 
-
 ## 🎯 Threat Actor Activity & Campaigns
 
 **[UPDATE] Mini Shai-Hulud supply chain attack escalates — hundreds of npm packages compromised with signed provenance bypass, RubyGems suspends registrations**
@@ -47,7 +45,6 @@ The threat group KongTuke has shifted from email-based phishing to directly hija
 **[NEW] Q1 2026 ransomware report — 2,122 organizations hit as top 10 groups consolidate 71% of all victims**
 
 Check Point Research reports 2,122 organizations were listed on ransomware data leak sites in Q1 2026, the second-highest Q1 total on record. The ecosystem is consolidating: the top 10 groups now account for 71% of all victims, a sharp reversal from the fragmented landscape of 2025. Qilin retained the top position for the third consecutive quarter with 338 victims. The Gentlemen climbed to third place globally within months of emergence, leveraging pre-compromised access points for rapid scaling with only 13% of victims in the U.S. — concentrated instead in APAC and Latin America. LockBit staged a comeback with 163 victims after 2024 disruptions, pivoting to geographically diversified targeting to reduce exposure to U.S. enforcement. Manufacturing, healthcare, and business services remain the most targeted industries due to operational complexity and downtime sensitivity. [[GBHackers](https://gbhackers.com/q1-2026-ransomware-attacks/); [Check Point Research](https://gbhackers.com/q1-2026-ransomware-attacks/)]
-
 
 ## ⚠️ Vulnerabilities & Patches
 
@@ -75,7 +72,6 @@ SAP's May 2026 security update addresses 15 vulnerabilities across its ecosystem
 
 Google has disclosed CVE-2026-0073, a critical authentication bypass in Android's ADB daemon (adbd) TLS certificate verification path. An adjacent attacker on the same Wi-Fi network can bypass the Wireless Debugging pairing requirement and obtain a remote shell as the Android shell user with no user interaction — provided the device has been paired with at least one device in the past. A public PoC exploit is available and has been successfully tested against Android 13-16 devices, tablets, smartwatches, and Google Chromecast TV. Google Pixel devices were not successfully exploited in testing. Patched in security level 2026-05-01. The practical risk is highest for developers, device farms, repair environments, and BYOD engineering fleets that enable Wireless Debugging. [[Mobile Hacker](https://www.mobile-hacker.com/2026/05/12/android-rce-via-wireless-debugging-from-network-access-to-shell/); [Malware.News](https://malware.news/t/android-rce-via-wireless-debugging-from-network-access-to-shell/106929#post_1)]
 
-
 ## 🛡️ Defense & Detection
 
 **[NEW] Vercel AI tools abused for mass phishing production — GenAI compresses entire phishing kit lifecycle to text prompts**
@@ -86,7 +82,6 @@ Cofense documents a surge in campaigns using Vercel's v0[.]dev GenAI tool to mas
 
 Signal has introduced in-app confirmations, warning messages, and enhanced safety tips to combat phishing and social engineering attacks targeting high-profile users. New protections include "Name not verified" and "No groups in common" labels on direct messages, confirmation prompts for new message requests with reminders that Signal never asks for registration codes, and explicit warnings about fake "Signal Support" contacts. The update responds directly to Russian state-sponsored campaigns — highlighted by the FBI, Dutch government, and German authorities — that abuse the Linked Device feature by convincing targets to scan QR codes or share verification codes, granting full account access. [[BleepingComputer](https://www.bleepingcomputer.com/news/security/signal-adds-security-warnings-for-social-engineering-phishing-attacks/)]
 
-
 ## 📋 Policy & Industry News
 
 **[NEW] G7 nations release AI SBOM guidance — international coordination on AI supply chain transparency**
@@ -96,7 +91,6 @@ Government agencies from G7 nations have released guidance defining what an AI "
 **[NEW] Google and Amnesty International launch Android Intrusion Logging for spyware detection**
 
 Google has rolled out Android Intrusion Logging, a feature providing dedicated forensic logs about sophisticated intrusions from spyware vendors. Developed in partnership with Amnesty International's Security Lab, the feature creates a verifiable audit trail that digital forensics researchers can use to investigate targeted surveillance — a significant advance in detecting mercenary spyware that previously operated with near-total impunity. [[CyberScoop](https://cyberscoop.com/google-android-intrusion-logging-amnesty-spyware-detection/)]
-
 
 ## ⚡ Quick Hits
 

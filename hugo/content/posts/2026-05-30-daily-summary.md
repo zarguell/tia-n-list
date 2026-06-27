@@ -9,7 +9,7 @@ summary: "CISA adds PAN-OS GlobalProtect auth bypass (CVE-2026-0257) to KEV with
 
 # Daily Threat Intelligence Digest — May 30, 2026
 
-*51 articles ingested from Miniflux Cyber feeds. Saturday edition — focused on genuinely new developments. Prior digests: May 25–29, 2026. Cross-referencing via Reddit r/cybersecurity detected no critical gaps beyond already-observed stories. Stale items omitted: Gogs zero-day, Charter/Carnival breaches, SideCopy, GREYVIBE, The Gentlemen ransomware (all covered May 29).*
+*51 articles ingested and analyzed from Miniflux Cyber feeds, with prior-digest continuity tracking.*
 
 ---
 
@@ -86,7 +86,3 @@ California Attorney General Rob Bonta filed a lawsuit against 23andMe (now Chrom
 - **Signal Users Targeted in Backup-Stealing Phishing Campaign:** Attackers are sending SMS messages impersonating Signal Support, instructing victims to navigate to Settings → Backups and paste their 64-character recovery key into the chat. Obtaining this key enables decryption of full message archives. The campaign appears targeted at journalists, activists, and dissidents — Signal will never request your recovery key by message. [[Malware.News via Malwarebytes](https://malware.news/t/signal-users-targeted-in-backup-stealing-phishing-attacks/107422#post_1)]
 
 - **French Health Payments Processor Breach Exposes National ID Data:** Almerys, a French healthcare payments middleman, suffered a breach of its third-party payment authorization portal, potentially exposing *numéro de sécurité sociale* (French SSN equivalent) and other PII — fueling identity theft and fraud concerns. The company processes "third-party payment" (tiers payant) transactions so patients don't pay upfront. [[Malware.News via DataBreaches.net](https://malware.news/t/french-health-payments-breach-exposed-id-data-fuels-fraud-fears/107420#post_1)]
-
----
-
-*51 articles ingested from Miniflux Cyber feeds. 7 articles selectively read for this digest. Saturday edition — focused on genuinely new stories. Stale topics omitted per prior digest analysis (May 25–29): Gogs zero-day, Charter/Carnival breaches, SideCopy XenoRAT, GREYVIBE AI campaigns, The Gentlemen ransomware, Samba CVE-2026-4480, OpenVPN macOS vuln, nginx-poolslip PoC — all covered in recent prior digests. Sources include BleepingComputer, Rapid7, Microsoft Security Blog, Wiz Research, Seqrite Labs, Malware.News, GBHackers, Cyber Security News, Canadian Centre for Cyber Security, Malwarebytes, DataBreaches.net.*

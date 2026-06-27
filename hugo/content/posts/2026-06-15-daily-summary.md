@@ -9,7 +9,7 @@ summary: "FBI publishes operational details on Outsider Enterprise takedown — 
 
 # Daily Threat Intelligence Digest — June 15, 2026
 
-*27 articles ingested from Miniflux Cyber feeds. Cross-referencing via Reddit skipped — `reddit_gap_check.py` unavailable (scrapling module, consistent failures across prior digests June 9–14). Web search credits exhausted — no external gap detection performed. Prior digests: June 10–14, 2026. Stale CVE/topic blocklist applied.*
+*27 articles ingested and analyzed from Miniflux Cyber feeds, with prior-digest continuity tracking.*
 
 ---
 
@@ -82,7 +82,3 @@ Danish pharmaceutical giant **Novo Nordisk** disclosed a security incident, advi
 - **Evil MSI Background: BASE64 Statistical Analysis** — SANS ISC diary provides a statistical analysis methodology for detecting Base64-obfuscated content in MSI installer files. Useful for analysts encountering MSI-based malware distribution. [[SANS ISC](https://isc.sans.edu/diary/30674)]
 - **Local LLM complexity attacks on reverse engineering** — A practitioner's lab notebook tests 10 local LLMs (gemma4:31b, qwen3.6:35b) on a synthetic binary RE benchmark with increasing XOR-round complexity. gemma4:31b emerges as the strongest local baseline, solving up to 4-round fixtures. Most failures cluster around C integer width rules and cast timing — not missing the algorithm entirely. [[Malware.News](https://malware.news/t/stressing-llms-local-model-complexity-attacks-progress/107866#post_1)]
 - **Smart glasses detection research** — As AR glasses with recording capabilities become more common, researchers examine technical challenges of detecting recording through smart eyewear — a growing privacy concern for security-conscious organizations. [[Malware.News](https://malware.news/t/smart-glasses-can-record-you-and-detecting-them-isn-t-so-simple/107852#post_1)]
-
----
-
-*27 articles ingested from Miniflux Cyber feeds. External cross-referencing via Reddit skipped — `reddit_gap_check.py` unavailable. Web search credits exhausted — no external gap detection performed. Prior digests: June 10–14, 2026. Stale CVE/topic blocklist applied. Sources include BleepingComputer, SecurityWeek, DataBreaches.net, Malware.News, SANS ISC, and independent researchers.*

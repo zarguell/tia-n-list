@@ -8,7 +8,7 @@ summary: "Miasma worm hits 73 Microsoft GitHub repositories in the most aggressi
 ---
 # Daily Threat Intelligence Digest — June 8, 2026
 
-*15 articles ingested from Miniflux Cyber feeds. Cross-referencing via Reddit skipped — old.reddit.com returned errors on both `/hot/` and `/new/` endpoints. External gap detection via web search identified one critical gap: the Miasma worm's June 5 attack on 73 Microsoft GitHub repositories (zero Miniflux coverage). Prior digests: June 3–7, 2026. Stale CVE/topic blocklist applied: CVE-2026-31431 Copy Fail (June 7), Anthropic NSA Mythos (June 7), Google GTIG Q2 (June 7), SolarWinds Serv-U CVE-2026-28318 (June 6), UNC3753/SRG law firm vishing (June 6), UniFi OS chain (June 6), Cisco SD-WAN CVE-2026-20245 (June 5), Comodo ComoDoS (June 5), Triple npm supply chain (June 5), DentaQuest breach (June 5), VS Code zero-day (June 3), HTTP/2 Bomb (June 3), MS 365 Android debug (June 3), Kirki CVE-2026-8206 (June 3), Instagram Meta AI exploit (June 1–2, June 6 stale check).*
+*15 articles ingested and analyzed. One critical gap.*
 
 ---
 
@@ -102,7 +102,3 @@ William Barlow, former IBM Vice President of Threat Intelligence, filed a lawsui
 - **[UPDATE] Instagram Meta AI Hack — Official Disclosure Confirms 20,225 Accounts Compromised** — Meta filed a data breach letter with the Maine Attorney General confirming the HTS AI-powered support tool bug allowed attackers to redirect password reset links to their own email addresses. High-profile victims include the Obama White House, Sephora, and Space Force Chief Master Sergeant John Bentivegna. Accounts without 2FA were exclusively affected. HTS tool disabled pending full remediation. [[BleepingComputer](https://www.bleepingcomputer.com/news/security/meta-ai-support-data-breach-affects-20-000-instagram-accounts/); [SecurityWeek](https://www.securityweek.com/meta-says-20000-instagram-accounts-hacked-via-ai-tool-abuse/)]
 
 - **[NEW] Kimsuky Targets South Korean Unification Ministry with Malicious PDF LNK** — The North Korean APT group distributed a malicious LNK file disguised as a Middle East policy briefing document (`(대외보안)통일부_중동상황관련_정책간담회_기획안.pdf.lnk`) targeting South Korea's Ministry of Unification. Likely aims to establish persistent access to inter-Korean policy discussions and diplomatic communications. [[Malware.News](https://malware.news/t/kimsuky-pdf/107628#post_1)]
-
----
-
-*15 articles ingested from Miniflux Cyber feeds. Cross-referencing via Reddit skipped — old.reddit.com returned errors on both `/hot/` and `/new/` endpoints. External gap detection via web search identified one critical gap: the Miasma worm attack on 73 Microsoft GitHub repos (zero Miniflux coverage). Prior digests: June 3–7, 2026. Sources include BleepingComputer, SecurityWeek, DataBreaches.net, Malware.News, Computing.co.uk, StepSecurity, OpenSourceMalware, The Next Web, The Hacker News, Cyberpress, Fortinet, and Resecurity.*

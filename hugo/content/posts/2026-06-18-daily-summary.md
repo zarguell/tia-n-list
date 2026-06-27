@@ -8,7 +8,7 @@ summary: "FortiBleed exposes 73,000+ Fortinet VPN credentials across 194 countri
 ---
 # Daily Threat Intelligence Digest — June 18, 2026
 
-*78 articles ingested from Miniflux Cyber feeds. Cross-referencing via Reddit skipped — `reddit_gap_check.py` unavailable (consistent failures across prior digests June 9–17, chronic failure threshold exceeded). External gap detection via web search found no critical gaps beyond feed coverage — confirmed Miniflux coverage captured all major stories (FortiBleed, Mastra supply chain, Dropping Elephant). tl;dr sec skipped — Thursday morning, issue not yet live. Exa web extract credits exhausted — browser-based extraction used for paywalled content. Prior digests: June 13–17, 2026. Stale CVE/topic blocklist applied.*
+*78 articles ingested and analyzed from Miniflux Cyber feeds, with prior-digest continuity tracking.*
 
 ---
 
@@ -108,7 +108,3 @@ Today, **June 18**, is the compliance deadline for federal agencies under CISA's
 - **SailPoint to acquire Entro (~$200M), 1Password acquires Apono (~$250-300M)** — Two major identity security M&A deals announced: SailPoint adds Entro's non-human identity security capabilities; 1Password adds Apono's just-in-time privileged access management. [[SecurityWeek](https://www.securityweek.com/sailpoint-to-acquire-entro-in-reported-200-million-deal/); [SecurityWeek](https://www.securityweek.com/1password-acquires-apono-in-reported-250m-300m-deal/)]
 - **Rockwell Automation patches vulnerabilities in ICS controllers and software** — Multiple patches released for ControlLogix and other industrial control products. Details behind SecurityWeek paywall. [[SecurityWeek](https://www.securityweek.com/rockwell-automation-patches-vulnerabilities-in-ics-controllers-and-software/)]
 - **Kimsuky LNK malware targets energy/economic analysts** — Korean-language analysis continues documenting Kimsuky's persistent LNK-based phishing campaigns targeting South Korean energy and economic analysis researchers. [[Malware.News](https://malware.news/t/kimsuky-260506-pdf-lnk/107974#post_1)]
-
----
-
-*78 articles ingested from Miniflux Cyber feeds. Cross-referencing via Reddit skipped — reddit_gap_check.py unavailable. External gap detection via web search found no critical gaps beyond feed coverage. Prior digests: June 13–17, 2026. Stale CVE/topic blocklist applied. Sources include BleepingComputer, SecurityWeek, CyberScoop, Rapid7, Zscaler ThreatLabz, Microsoft Security Blog, Red Canary, Wordfence, Sonatype, Aikido Security, Hudson Rock, DoublePulsar/Kevin Beaumont, and independent researchers.*

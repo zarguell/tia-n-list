@@ -9,7 +9,7 @@ summary: "Splunk Enterprise CVE-2026-20253 exploited in attacks — CISA adds to
 
 # Daily Threat Intelligence Digest — June 19, 2026
 
-*86 articles ingested from Miniflux Cyber feeds. Cross-referencing via Reddit skipped — `reddit_gap_check.py` unavailable (chronic failure threshold exceeded, 20+ consecutive days). External gap detection via web search found no critical gaps beyond feed coverage. tl;dr sec skipped — latest issue from June 11 is 8 days stale. Exa web extract credits exhausted — browser-based extraction used for paywalled content. Prior digests: June 14–18, 2026. Stale CVE/topic blocklist applied.*
+*86 articles ingested and analyzed from Miniflux Cyber feeds, with prior-digest continuity tracking.*
 
 ---
 
@@ -120,7 +120,3 @@ Accenture announced the acquisition of a **majority stake in Dragos** ($3.25B), 
 - **Incransom ransomware claims two new victims** — Neubrandenburger Wohnungsgesellschaft mbH (German housing association) and Horizon Family Medical Group (US healthcare). [[Malware.News](https://malware.news/t/incransom-targets-neubrandenburger-wohnungsgesellschaft-mbh-in-germany/108056#post_1)]
 - **Cisco to acquire WideField Security** — Bolstering Splunk's "Agentic SOC" capabilities with SOAR/automation technology. Terms undisclosed. [[SecurityWeek](https://www.securityweek.com/cisco-to-acquire-widefield-security-to-boost-splunks-agentic-soc/)]
 - **FIFA World Cup phishing infrastructure surge** — Silent Push identified 227 domains registered on opening day following Ghost Stadium (Chinese-speaking cybercriminal group) pattern: consistent favicons, naming convention (two/three-letter prefix + "26fifashop.site.top"). [[Silent Push via Malware.News](https://malware.news/t/fifa-world-cup-hunting-227-phishing-domains-with-the-silent-push-mcp-server/108037#post_1)]
-
----
-
-*86 articles ingested from Miniflux Cyber feeds. Cross-referencing via Reddit skipped — reddit_gap_check.py unavailable (chronic failure threshold exceeded, 20+ consecutive days). External gap detection via web search found no critical gaps beyond feed coverage. Prior digests: June 14–18, 2026. Stale CVE/topic blocklist applied. Sources include BleepingComputer, SecurityWeek, CyberScoop, Krebs on Security, Red Canary, Wordfence, ESET, Microsoft Security Blog, Calif.io, DataBreaches.net, Silent Push, and independent researchers.*

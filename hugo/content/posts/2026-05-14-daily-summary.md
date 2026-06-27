@@ -10,10 +10,9 @@ summary: "YellowKey BitLocker bypass and 18-year-old NGINX Rift RCE headline a c
 # Tia N. List — Daily Threat Intelligence Digest
 ### May 14, 2026
 
-**96 articles ingested from Miniflux Cyber feeds. External cross-referencing via Reddit r/cybersecurity and TLDR InfoSec.**
+**96 articles ingested and analyzed from Miniflux Cyber feeds, with prior-digest continuity tracking.*
 
 *Previous 5 days reporting summary:* The May 13 digest covered West Pharmaceutical ransomware attack, Cline AI assistant RCE (CVE-2026-44211, CVSS 9.3), Foxconn/Nitrogen ransomware confirmation with 8TB/11M file theft, ShinyHunters/Canvas deal reached with House testimony demanded by May 21, Mini Shai-Hulud supply chain escalation with RubyGems registration suspension, ModeloRAT via hijacked Teams accounts, Q1 2026 ransomware stats (2,122 organizations), Microsoft Patch Tuesday (137 CVEs, zero-day-free), Exim Dead Letter RCE (CVE-2026-45185), Ollama Bleeding Llama (CVE-2026-7482), Android ADB auth bypass (CVE-2026-0073), Fortinet critical RCEs, SAP critical SQL injection, Vercel AI phishing production, Signal anti-phishing protections, G7 AI SBOM guidance, and Google Android Intrusion Logging. The May 12 digest covered Google's first AI-generated zero-day exploit, BitUnlocker BitLocker bypass (CVE-2025-48804), TeamPCP TanStack supply chain campaign, The Gentlemen ransomware via EtherRAT/TukTuk, and cPanel exploitation campaign. The May 11 digest introduced the DigiCert breach (27 EV code-signing certs stolen), Dirty Frag active exploitation, and ShinyHunters extending Canvas deadline. The May 9 digest covered Dirty Frag Linux LPE, Ivanti EPMM CVE-2026-6973 CISA KEV addition, and Polish water treatment ICS breaches. The May 8 digest introduced Dirty Frag as a new zero-day class, ClaudeBleed, PAN-OS CVE-2026-0300, and PCPJack worm.
-
 
 ## 🔴 Critical Threats & Active Exploitation
 
@@ -33,7 +32,6 @@ The May 12 digest documented The Gentlemen's rapid rise to second-most-active ra
 
 The May 12 digest reported TeamPCP's supply chain campaign compromising 84 TanStack npm packages. Sysdig's Threat Research Team has now documented active exploitation of the Langflow RCE vulnerability (CVE-2026-33017, CISA KEV-listed) as a separate but related campaign. On May 5, an attacker exploited the unauthenticated flow-building endpoint to dump process environment variables and extract AWS access keys within minutes, then fanned out across Bedrock, S3, EC2, Lambda, and IAM services. The operator attempted "LLMjacking" — hijacking premium foundation models like Claude and Llama 3 to run inference workloads on the victim's cloud bill. Command-and-control uses a hardened NATS server with subject-level ACLs, coordinating a botnet called "KeyHunter" whose workers scrape CodePen, JSFiddle, StackBlitz, and CodeSandbox for leaked API keys. The infrastructure is designed for scale: systemd persistence, 65,535 file descriptor limits, multi-architecture workers with uTLS browser fingerprint spoofing. Defenders should patch Langflow immediately, monitor AI and Bedrock usage anomalies, and treat message brokers like NATS as potential C2 channels. [[GBHackers](https://gbhackers.com/langflow-cve-2026-33017-exploited/); [Malware.News](https://malware.news/t/nats-as-c2-inside-a-new-technique-attackers-are-using-to-harvest-cloud-credentials-and-ai-api-keys/106954#post_1)]
 
-
 ## 🎯 Threat Actor Activity & Campaigns
 
 **[NEW] Seedworm (MuddyWater) expands global espionage — abuses signed Fortemedia and SentinelOne binaries for DLL sideloading**
@@ -47,7 +45,6 @@ Owe Martin Andresen, 49, the alleged main administrator ("Speedstepper") of Drea
 **[NEW] BreachForums and TeamPCP gamify supply chain attacks — open competition with Shai-Hulud tooling**
 
 BreachForums and TeamPCP are promoting a "supply chain competition" encouraging threat actors to conduct the biggest supply chain attack using the open-sourced Shai-Hulud tooling. While prize money is the overt incentive, the more concerning aspect is the gamification framework: public recruitment, shared automation logic, operational benchmarking, and community-driven attack campaigns that normalize offensive activity and lower the technical barrier for participation. SOCRadar, which documented the trend, draws parallels to NoName057(16)'s voluntary botnet model where gamified mechanics (points, rankings, team-based activity) scaled participation among actors with limited technical skills. The competition framing follows the same pattern: cybercrime becomes more public, more social, and more incentive-driven — expanding the pool of potential supply chain attackers. [[Malware.News](https://malware.news/t/breachforums-teampcp-promote-supply-chain-competition-as-cybercrime-gets-gamified/106984#post_1)]
-
 
 ## ⚠️ Vulnerabilities & Patches
 
@@ -75,7 +72,6 @@ Wordfence's PRISM autonomous research platform discovered CVE-2026-8181, a criti
 
 A GitHub App installation token format change introduced a hyphen character that Composer's validation regex rejected — and instead of failing silently, Composer printed the full unredacted tokens to standard error logs. Thousands of PHP projects running Composer in GitHub Actions pipelines were affected. GitHub has temporarily rolled back the format change. Developers should update to Composer 2.9.8 or 2.2.28 LTS, audit recent GitHub Actions logs for failed Composer runs, and rotate any potentially exposed tokens. Self-hosted runner tokens remain valid up to 24 hours. [[Cyber Security News](https://cyberpress.org/github-token-leak-warning/); [GBHackers](https://gbhackers.com/github-actions-token-leak/)]
 
-
 ## 🛡️ Defense & Detection
 
 **[NEW] Microsoft Edge stores all saved passwords in cleartext in process memory — "intended behavior"**
@@ -86,7 +82,6 @@ SANS ISC handler Rob VandenBrink has confirmed research by Tom Jøran Sønstebys
 
 Red Canary has published a technique for enhancing Linux forensic investigations by repurposing cgroups — the kernel feature designed to limit system resources — into an effective form of process enrichment. The method provides new Linux telemetry that compensates for relatively limited forensic tooling compared to Windows, particularly valuable as Linux dominates cloud and containerized environments. [[Red Canary](https://redcanary.com/blog/threat-detection/linux-cgroups/)]
 
-
 ## 📋 Policy & Industry News
 
 **[NEW] AI autonomous cyber benchmarks shattered — Mythos and GPT-5.5 double capability every ~4 months**
@@ -96,7 +91,6 @@ The UK's AI Security Institute reports that Claude Mythos Preview and GPT-5.5 ha
 **[NEW] Dutch healthcare lab failed security rules before cyberattack affecting 850,000**
 
 The Dutch data protection watchdog has ruled that research agency Bevolkingsonderzoek Nederland failed data security rules before a ransomware attack by the Nova gang exposed data of 850,000 individuals — half a million women who had undergone cervical cancer screening. The lab paid the ransom, but Nova then demanded additional payment after the lab contacted police. [[Malware.News](https://malware.news/t/nl-dutch-watchdog-says-healthcare-lab-failed-data-security-rules-before-cyberattack-affecting-850-000/106950#post_1)]
-
 
 ## ⚡ Quick Hits
 

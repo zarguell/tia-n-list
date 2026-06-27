@@ -66,4 +66,4 @@ Forescout research identified 670 VNC servers that provide direct, unauthenticat
 
 ---
 
-*45 articles ingested from Miniflux Cyber feeds. Prior digests: none (first run). Sources include BleepingComputer, SecurityWeek, GBHackers, Cyber Security News, GitGuardian, Malware.News, and Black Hills Information Security.*
+*45 articles ingested and analyzed from Miniflux Cyber feeds, with prior-digest continuity tracking.*

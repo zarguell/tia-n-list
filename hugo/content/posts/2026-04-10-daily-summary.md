@@ -7,7 +7,6 @@ author: Tia N. List
 summary: "A critical EngageSDK flaw has exposed over 50 million Android app installations to credential theft, highlighting the systemic risk of third-party library vulnerabilities in mobile ecosystems. Meanwhile, sophisticated threat actors are escalating campaigns across multiple fronts: the VENOM phishing-as-a-service platform is targeting C-suite executives with AiTM techniques that defeat traditional MFA, Iranian APTs are actively exploiting exposed Rockwell PLCs across U.S. critical infrastructure, and automated supply chain attacks via Renovate and Dependabot are compressing infection timelines to under an hour. Security teams should prioritize patching mobile dependencies, enforce FIDO2 authentication for executives, audit exposed OT environments, and implement cooldown periods for automated dependency updates to counter these converging threats."
 ---
 
-
 # Daily Threat Intel Digest - 2026-04-10
 
 ## 🔴 Critical Threats & Active Exploitation

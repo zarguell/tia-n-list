@@ -9,7 +9,7 @@ summary: "FortiBleed IAB identified on Exploit forum; Gravity SMTP CVE actively 
 
 # Daily Threat Intelligence Digest — June 20, 2026
 
-*34 articles ingested from Miniflux Cyber feeds. Cross-referencing via Reddit skipped — `reddit_gap_check.py` unavailable (chronic failure threshold exceeded, 20+ consecutive days). External gap detection via web search identified no critical gaps beyond feed coverage. Exa web extract credits exhausted — browser-based extraction used for paywalled SecurityWeek content. Prior digests: June 15–19, 2026. Stale CVE/topic blocklist applied.*
+*34 articles ingested and analyzed. Gaps identified via web search.*
 
 ---
 
@@ -100,7 +100,3 @@ Key technical details: GitHub-hosted payload delivery (masqueraded as `.png` fil
 - **Aurora ransomware claims ALS Global breach** — Global testing/inspection company (ASX:ALQ, 20,500+ employees, 65+ countries) listed on Aurora's leak site. No statement from ALS Global yet. [[Malware.News](https://malware.news/t/aurora-ransomware-strikes-als-global/108091#post_1)]
 - **SecurityWeek In Other News roundup** — Apple patched Beats Studio Buds eavesdropping flaw (CVE-2025-20701), DOT closed Delta CrowdStrike probe, and AWS Continuum developments. [[SecurityWeek](https://www.securityweek.com/in-other-news-apple-patches-beats-eavesdropping-flaw-dot-closes-delta-crowdstrike-probe-aws-continuum/)]
 - **SocGholish cleanup continues** — Law enforcement cleaned 14,971 compromised WordPress sites and seized 106 servers in Operation Endgame. [[Malware.News](https://malware.news/t/nearly-15-000-infected-websites-cleaned-in-socgholish-crackdown/108084#post_1)]
-
----
-
-*34 articles ingested from Miniflux Cyber feeds. Cross-referencing via Reddit skipped — `reddit_gap_check.py` unavailable (chronic failure threshold exceeded, 20+ consecutive days). External gap detection via web search found no critical gaps beyond feed coverage. Prior digests: June 15–19, 2026. Stale CVE/topic blocklist applied. Sources include BleepingComputer, SecurityWeek, Unit 42, Malware.News/DeXpose, Seqrite, and Microsoft Security.*

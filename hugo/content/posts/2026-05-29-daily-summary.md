@@ -8,7 +8,7 @@ summary: "Two critical RCV vulnerabilities lead: Samba CVE-2026-4480 (CVSS 10.0,
 ---
 # Daily Threat Intelligence Digest — May 29, 2026
 
-*79 articles ingested from Miniflux Cyber feeds. External cross-referencing via Reddit r/cybersecurity detected no critical gaps beyond already-reported stories (YellowKey, NIST, Fragnesia). Prior digests: May 25–28, 2026.*
+*79 articles ingested and analyzed from Miniflux Cyber feeds, with prior-digest continuity tracking.*
 
 ---
 
@@ -121,7 +121,3 @@ IBM and Red Hat announced a **$5 billion commitment** to open source supply chai
 - **FBI Warns of 300+ Fake FIFA World Cup Phishing Sites — Chinese Threat Actor "Ghost Stadium" Identified:** The FBI issued a PSA warning of hundreds of fake FIFA 2026 World Cup domains. Group-IB attributed the largest operation (300+ phishing sites) to Chinese threat actor **Ghost Stadium**, targeting ticket fraud. Bitdefender observed malvertising campaigns spanning the UK, Portugal, Spain, US, Canada, Mexico, Brazil, Germany, and Australia, targeting fake merchandise, streaming services, and Panini sticker offers. [[BleepingComputer](https://www.bleepingcomputer.com/news/security/fbi-warns-of-fake-fifa-websites-running-world-cup-fraud-schemes/)]
 
 - **Gitea Vulnerability Exposed 30,000 Deployments:** A vulnerability in the Gitea self-hosted Git service (a Gogs fork) potentially exposed approximately 30,000 deployments to attacks. Details from SecurityWeek. [[SecurityWeek](https://www.securityweek.com/gitea-vulnerability-exposed-30000-deployments-to-attacks/)]
-
----
-
-*79 articles ingested from Miniflux Cyber feeds. External cross-referencing via Reddit r/cybersecurity detected no critical new gaps beyond already-reported stories (YellowKey, NIST, Fragnesia). Prior digests: May 25–28, 2026. Sources include BleepingComputer, GBHackers, Cyber Security News, CyberScoop, SecurityWeek, Rapid7, Microsoft Threat Intelligence, Tenable, WithSecure, Seqrite Labs, ESET, Sonatype, Group-IB, Bitdefender, Malware.News, and Kaspersky Securelist.*

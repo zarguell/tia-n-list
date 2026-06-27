@@ -8,7 +8,7 @@ summary: "Critical: RoguePlanet Microsoft Defender zero-day grants SYSTEM on ful
 ---
 # Daily Threat Intelligence Digest — June 10, 2026
 
-*84 articles ingested from Miniflux Cyber feeds. Cross-referencing via Reddit skipped — old.reddit.com returned errors on both `/hot/` and `/new/` endpoints. External gap detection via web search found no critical gaps beyond feed coverage. Prior digests: June 5–9, 2026. Stale CVE/topic blocklist applied.*
+*84 articles ingested and analyzed from Miniflux Cyber feeds, with prior-digest continuity tracking.*
 
 ---
 
@@ -143,7 +143,3 @@ Andersen framed the shift as a necessary acknowledgment of resource constraints:
 - **[NEW] Adobe Patches 123 Vulnerabilities Across Multiple Products** — Including fixes for Experience Manager, InDesign, InCopy, Reader, ColdFusion, Dreamweaver, and Substance 3D Sampler. Matches the record-breaking Patch Tuesday theme. [[SecurityWeek](https://www.securityweek.com/adobe-patches-123-vulnerabilities/); [BleepingComputer](https://www.bleepingcomputer.com/news/microsoft/microsoft-june-2026-patch-tuesday-fixes-3-zero-day-200-flaws/)]
 
 - **[UPDATE] CISA KEV Adds LiteLLM RCE (CVE-2026-42271) and Check Point VPN Auth Bypass (CVE-2026-50751)** — Both added June 8. LiteLLM due June 22; Check Point due June 11 (shortest federal deadline of 2026). Both were covered in detail in the June 9 digest. Apply fixes if not yet done. [[SOCPrime](https://socprime.com/blog/cve-2026-50751-check-point-vpn-authentication-bypass-exploited-in-targeted-attacks/); [SOCRadar](https://socradar.io/blog/cisa-kev-litellm-cve-2026-42271-check-point-cve-2026-50751/)]
-
----
-
-*84 articles ingested from Miniflux Cyber feeds. Cross-referencing via Reddit skipped — old.reddit.com returned errors on both `/hot/` and `/new/` endpoints. External gap detection via web search found no critical gaps beyond feed coverage. Prior digests: June 5–9, 2026. Stale CVE/topic blocklist applied. Sources include BleepingComputer, SecurityWeek, CyberScoop, Krebs on Security, Rapid7, Qualys, Unit 42 (Palo Alto Networks), CyberSecurityNews, SOCPrime, Security Affairs, GitLab, and independent researchers (Nightmare Eclipse, Varonis).*

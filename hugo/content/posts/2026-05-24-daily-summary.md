@@ -8,7 +8,7 @@ summary: "Cl0p went undetected in South Staffs Water for two years — ICO fines
 ---
 # Daily Threat Intelligence Digest — May 24, 2026
 
-*13 articles ingested from Miniflux Cyber feeds. Light Sunday edition — focused on the most actionable items. Prior digests: May 19–23, 2026.*
+*13 articles ingested and analyzed from Miniflux Cyber feeds, with prior-digest continuity tracking.*
 
 ---
 
@@ -63,7 +63,3 @@ The vendor administering Rhode Island's workers' compensation insurance disclose
 A detailed adversarial detection engineering analysis demonstrates that community-built detection rules for the GreenPlasma/MiniPlasma privilege escalation exploit contain a fundamental logic bug. Many published rules anchor on `conhost.exe` process name detection — but any standard user can copy `conhost.exe` to a writable directory and rename it (e.g., `conthehost.exe`), bypassing string-based rules while the code's embedded Microsoft signature remains intact and functional. The actual SYSTEM access is granted via registry symbolic links (`CloudFiles\BlockedApps` → `Policies\System`), not the renamed binary itself. The analysis provides a corrected rule detonating on registry artifacts rather than process names, resilient to the ADE3-01 Process Cloning bypass technique. [[Detect FYI via Malware.News](https://detect.fyi/detection-logic-bugs-developing-context-to-bypass-miniplasma-rules-903f1d7c68e8)]
 
 **Takeaway:** Detection engineers should immediately audit any MiniPlasma/GreenPlasma rules that rely on `process.name` string matching for `conhost.exe` — they will miss renamed binary execution entirely.
-
----
-
-*13 articles ingested from Miniflux Cyber feeds. Light Sunday edition. Prior digests: May 19–23, 2026. Sources include UK Cybercrime Journal, Malware.News, Hudson Rock, BleepingComputer, DataBreaches.net, Detect FYI, ICO.*

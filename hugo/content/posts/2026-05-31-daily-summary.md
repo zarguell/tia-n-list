@@ -9,7 +9,7 @@ summary: "CIFSwitch Linux kernel LPE gives root on multiple distros (PoC publish
 
 # Daily Threat Intelligence Digest — May 31, 2026
 
-*7 articles ingested from Miniflux Cyber feeds. Sunday edition — focused on genuinely new developments. Prior digests: May 26–30, 2026. Cross-referencing via Reddit r/cybersecurity detected one gap not covered in Miniflux feeds: Microsoft Edge plaintext password exposure. Stale items omitted: CVE-2026-0257 Palo Alto exploitation and severity bump (covered May 30 with full Rapid7 analysis), YellowKey BitLocker zero-day (May 26), DigiCert CA compromise (May 27), Fragnesia/Copy Fail Linux LPEs (May 27), NIST/NVD policy changes (May 27).*
+*7 articles ingested and analyzed from Miniflux Cyber feeds, with prior-digest continuity tracking.*
 
 ---
 
@@ -64,7 +64,3 @@ The security community response has been **overwhelmingly critical of Microsoft*
 - **Dustin Childs (ZDI)**: "CVD is a two-way street. The vendor has some responsibility as well."
 
 The researcher has promised a "#boneshattering" disclosure on **July 14, 2026**, raising concerns about an escalating cycle of adversarial disclosure. Downstream risk: the chill on researcher-Microsoft relations could mean fewer bugs reported privately — leaving customers exposed longer. [[TechCrunch](https://techcrunch.com/2026/05/29/microsoft-under-fire-for-threatening-security-researcher-with-criminal-investigation/); [The Register](https://www.theregister.com/security/2026/05/28/microsoft-0-day-feud-escalates-as-researcher-threatens-another-windows-exploit-dump/); [The Verge](https://www.theverge.com/tech/940416/microsoft-nightmare-eclipse-zero-day-vulnerability)]
-
----
-
-*7 articles ingested from Miniflux Cyber feeds. Cross-referencing via Reddit r/cybersecurity detected one gap: Microsoft Edge plaintext password exposure (covered above). Prior digests: May 26–30, 2026. Sources include BleepingComputer, SecurityWeek (AP), TechCrunch, The Register, The Verge, PCWorld, SANS ISC, Microsoft Edge VR blog, Rapid7, OX Security.*

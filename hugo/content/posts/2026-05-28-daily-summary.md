@@ -9,7 +9,7 @@ summary: "FortiClient EMS zero-day exploited to deliver EKZ infostealer via fake
 
 # Daily Threat Intelligence Digest — May 28, 2026
 
-*82 articles ingested from Miniflux Cyber feeds. External cross-referencing via Reddit r/cybersecurity detected 16 gaps, the most significant being Apache httpd pre-auth RCE (CVE-2026-23918) and SSD FROST browser fingerprinting. tl;dr sec: skipped — Thursday morning, latest issue not yet live. Prior digests: May 23–27, 2026.*
+*82 articles ingested and analyzed from Miniflux Cyber feeds, with prior-digest continuity tracking.*
 
 ---
 
@@ -146,7 +146,3 @@ The Russia‑linked threat group behind Glassworm infected Windows, macOS, and L
 - **UK Visa Portal Leaked Thousands of Passport Copies and Selfies — Still Unfixed** — A misconfigured UK government visa application portal exposed thousands of applicants' passport scans and biometric selfies to the open internet. The vulnerability remains unpatched. [[Malware.News](https://malware.news/t/uk-visa-portal-spilled-thousands-of-applicants-passports-and-selfies-online-and-hasn-t-fixed-the-leak/107357#post_1)]
 - **Malware Seller "Venom" Extradited to France** — A known malware seller operating under the pseudonym "Venom" has been extradited to France to face charges. [[Malware.News](https://malware.news/t/malware-seller-known-as-venom-extradited-to-france/107355#post_1)]
 - **Lithuania Investigates Theft of 600,000 State Registry Records** — A data breach at Lithuanian state registries compromised approximately 600,000 records. Investigation ongoing. [[Malware.News](https://malware.news/t/lithuania-investigates-theft-of-600-000-state-registry-records/107356#post_1)]
-
----
-
-*82 articles ingested from Miniflux Cyber feeds. External cross‑referencing via Reddit r/cybersecurity identified 16 gaps — the most significant being Apache HTTP Server CVE-2026-23918 pre‑auth RCE (confirmed via independent sources) and SSD FROST browser fingerprinting technique. tl;dr sec: skipped per Thursday‑before‑publication rule. Prior digests: May 23–27, 2026. Sources include BleepingComputer, GBHackers, Cyber Security News, CyberScoop, SecurityWeek, Unit 42, Malware.News, Trend Micro, Arctic Wolf Labs, Microsoft, Apache Software Foundation, Fox‑IT, CrowdStrike, Palo Alto Networks, Recorded Future, Flashpoint, Reddit r/cybersecurity, and independent researchers.*
