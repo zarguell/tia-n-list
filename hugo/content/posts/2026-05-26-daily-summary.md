@@ -9,7 +9,7 @@ summary: "YellowKey BitLocker zero-day bypasses Windows 11 encryption with a USB
 
 # Daily Threat Intelligence Digest — May 26, 2026
 
-*64 articles ingested from Miniflux Cyber feeds. External cross-referencing via Reddit r/cybersecurity detected one critical gap — YellowKey BitLocker zero-day — completely missed by the Miniflux feed. Prior digests: May 21–25, 2026.*
+*64 articles ingested and analyzed from Miniflux Cyber feeds, with prior-digest continuity tracking.*
 
 ---
 
@@ -88,7 +88,3 @@ PowerSchool agreed to a $17.25 million settlement related to a data tracking pro
 - **DragonForce Ransomwave Hits 7 New Victims** — DragonForce listed BusinessRecord.com, Xchange Technology Rentals, Saver NV Waste Management, Goldklang Group CPAs, Enns & Company (Canadian accounting firm), and SPH Value on their leak site, continuing a wave targeting accounting, waste management, and business services sectors. [[Malware.News](https://malware.news/t/dragonforce-targets-businessrecord-com-in-ransomware-attack/107315)]
 - **CISA ICS Advisories (AV26-506)** — Canadian Cyber Centre published ICS security advisories covering industrial control system vulnerabilities. Organizations with OT/ICS environments should review and patch accordingly. [[Malware.News](https://malware.news/t/control-systems-cisa-ics-security-advisories-av26-506/107304)]
 - **Apache CXF CVE-2026-44930 — LDAP Injection** — Apache CXF framework vulnerability exposes systems to LDAP injection attacks. Details remain limited. [[GBHackers](https://gbhackers.com/apache-cxf-flaw-exposes-systems/)]
-
----
-
-*64 articles ingested from Miniflux Cyber feeds. External cross-referencing via Reddit r/cybersecurity identified one critical gap (YellowKey BitLocker bypass) entirely missed by Miniflux. Prior digests: May 21–25, 2026. Sources: BleepingComputer, SecurityWeek, Ars Technica, GBHackers, Cyber Security News, SOC Prime, Seqrite Labs, DataBreaches.net.*

@@ -8,7 +8,7 @@ summary: "CVE-2026-41089 Windows Netlogon zero-click RCE confirmed under active 
 ---
 # Daily Threat Intelligence Digest — June 1, 2026
 
-*28 articles ingested from Miniflux Cyber feeds. Monday edition. Prior digests: May 27–31, 2026. Cross-referencing skipped — stale-CVE blocklist from prior digests applied. Stale items omitted: Signal backup phishing campaign (covered May 30 Quick Hits), TheGentlemen ransomware analysis (detailed May 29 Microsoft deep-dive), Nightmare Eclipse researcher dispute background (extensive May 31 coverage).*
+*28 articles ingested and analyzed from Miniflux Cyber feeds, with prior-digest continuity tracking.*
 
 ---
 
@@ -123,7 +123,3 @@ Microsoft announced a significant security hardening for Entra ID Self-Service P
 - **Unidentified RAT Delivering NetSupport RAT:** SANS ISC reports a campaign where an unidentified initial access RAT (delivery vector not yet confirmed) drops the well-known **NetSupport RAT** as the implant payload. NetSupport RAT is a legitimate remote administration tool frequently abused by threat actors for persistence, screen capture, keylogging, and file transfer. Defenders should monitor for NetSupport Manager process execution and outbound connections on TCP 443. [[Malware.News via SANS ISC](https://malware.news/t/unidentified-rat-pushes-netsupport-rat-mon-jun-1st/107453#post_1)]
 
 - **YARA-X 1.17.0 Released:** VirusTotal's next-generation YARA engine continues active development with release 1.17.0, adding new module capabilities and bug fixes. Defenders relying on YARA-based detection should test upgrade compatibility, particularly for custom rules using experimental modules. [[Malware.News](https://malware.news/t/yara-x-1-17-0-release-sun-may-31st/107447#post_1)]
-
----
-
-*28 articles ingested from Miniflux Cyber feeds. Cross-referencing skipped — stale-CVE blocklist from prior digests (May 27–31) applied. Prior digests: May 27–31, 2026. Sources include BleepingComputer, GBHackers, Cyber Security News, Malware.News (DeXpose, SANS ISC), LangChain AI, and Microsoft MSRC.*

@@ -9,10 +9,9 @@ summary: "Google confirms first AI-generated zero-day exploit in the wild, BitUn
 # Tia N. List — Daily Threat Intelligence Digest
 ### May 12, 2026
 
-**85 articles ingested from Miniflux Cyber feeds. External cross-referencing via Reddit r/cybersecurity, TLDR InfoSec, and tl;dr sec.**
+**85 articles ingested and analyzed from Miniflux Cyber feeds, with prior-digest continuity tracking.*
 
 *Previous 5 days reporting summary:* The May 11 digest covered DigiCert breach via social engineering (60 EV code-signing certs revoked, Zhong Stealer malware signed), Dirty Frag active exploitation confirmed by SecurityWeek, ShinyHunters/Canvas extortion deadline extended to May 12 (~9,000 schools), Operation HookedWing phishing campaign (2,000+ credentials from 500+ orgs), Crimenetwork reboot takedown in Mallorca, cPanel CVE-2026-29201/29202/29203 details emerging, GhostLock encryptionless file-locking PoC, macOS malvertising via Google Ads and Claude.ai shared chats, and OpenClaw Rust-based malware framework targeting 250 browser extensions. The May 9 digest introduced Dirty Frag active exploitation via Microsoft Defender telemetry, Ivanti EPMM CVE-2026-6973 CISA KEV addition with 4-day patch deadline, Polish water treatment ICS breaches attributed to APT28/APT29, PamDOORa Linux PAM backdoor, and RansomHouse claiming Trellix source code breach. The May 8 digest introduced Dirty Frag as a new zero-day class, ShinyHunters' second Instructure breach defacing 330 Canvas portals, ClaudeBleed Chrome extension takeover, PAN-OS CVE-2026-0300 CISA KEV addition with Chinese state-sponsored hallmarks, PCPJack worm targeting cloud infrastructure, Microsoft Semantic Kernel AI agent RCE, Ivanti EPMM zero-day, Next.js critical vulnerability cluster, and Rancher Fleet multi-tenant isolation bypass.
-
 
 ## 🔴 Critical Threats & Active Exploitation
 
@@ -28,7 +27,6 @@ Today (May 12) marks ShinyHunters' deadline for Instructure and affected schools
 
 A proof-of-concept tool called BitUnlocker demonstrates a downgrade attack that bypasses BitLocker full-disk encryption on fully patched Windows 11 machines with only physical access. The attack exploits CVE-2025-48804, chaining a boot manager downgrade with a manipulated Windows Recovery Environment (WinRE) to silently decrypt BitLocker-protected drives in under five minutes. Because Microsoft's July 2025 patch only updated `bootmgfw.efi` to the CA 2023 certificate, any older version signed under the still-trusted Microsoft Windows PCA 2011 certificate can be substituted. The attacker boots a custom WinRE image via USB or PXE, loads a pre-patch boot manager, and reaches a decrypted command prompt — no BitLocker PIN or recovery key required. TPM-only and PCR 7+11 configurations (the most common enterprise defaults) are vulnerable. Systems using TPM+PIN, the Windows UEFI CA 2023 certificate, or DBX revocation are protected. The PoC is publicly available on GitHub under MIT license, making it trivially reproducible. Organizations should enable TPM+PIN pre-boot authentication immediately and verify their boot manager certificate via `sigcheck -i`. [[Cyber Security News](https://cyberpress.org/new-bitunlocker-attack-bypasses-windows-11-disk-encryption-in-just-5-minutes/); [GBHackers](https://gbhackers.com/bitunlocker-downgrade-attack-bypasses-windows-11-disk-encryption/)]
 
-
 ## 🎯 Threat Actor Activity & Campaigns
 
 **[NEW] TeamPCP supply chain campaign escalates — 84 TanStack npm packages, MistralAI PyPI, Checkmarx Jenkins all compromised in cascading attacks**
@@ -38,7 +36,6 @@ TeamPCP's ongoing supply chain campaign has expanded to three new fronts in a si
 **[NEW] DFIR Report documents The Gentlemen ransomware — EtherRAT via blockchain C2, AI-generated TukTuk framework, SaaS-based command infrastructure**
 
 The DFIR Report has published a flash alert documenting a complete intrusion chain ending in The Gentlemen ransomware deployment. Initial access came via a malicious MSI masquerading as Sysinternals RAMMap, which deployed EtherRAT — a malware family that uses the Ethereum blockchain via EtherHiding to dynamically update its C2 configuration by querying smart contracts through 1rpc.io. The threat actor later deployed TukTuk, a newly documented malware framework believed to be AI-generated, using DLL sideloading through trojanized Greenshot, SyncTrayzor, DocFX, and Cake binaries. TukTuk's C2 infrastructure is built entirely on SaaS platforms — ClickHouse, Supabase, Ably, Dropbox, GitHub Issues — with Arweave blockchain dead-drop resolution as a fallback. The intrusion progressed through Kerberoasting, LSASS/NTDS credential dumping via comsvcs.dll, lateral movement using GoTo Resolve RMM, and data exfiltration to Wasabi cloud storage via Rclone, culminating in domain-wide ransomware deployment through a malicious Group Policy Object. The heavy use of blockchain and SaaS infrastructure makes this campaign resilient to traditional network defenses — defenders should monitor for unexpected outbound connections to Ethereum RPC endpoints, Arweave gateways, and SaaS platforms not approved in their environment. [[The DFIR Report](https://thedfirreport.com/2026/05/11/flash-alert-etherrat-and-tuktuk-c2-end-in-the-gentleman-ransomware/)]
-
 
 ## ⚠️ Vulnerabilities & Patches
 
@@ -50,7 +47,6 @@ Detailed technical analysis of the ongoing cPanel/WHM exploitation campaign reve
 
 A high-severity Use-After-Free vulnerability (CVE-2026-6722) in PHP's SOAP extension allows remote attackers to achieve code execution by exploiting improper reference counting during XML graph deduplication. The extension stores plain objects in a hash map using `id` and `href` attributes but fails to increment reference counts, allowing attackers to force premature object freeing via Apache map mechanisms, manipulate freed memory through string allocation, and achieve reliable RCE. Additional vulnerabilities include CVE-2026-7261 (UAF in SoapServer session persistence), CVE-2026-7262 (NULL pointer dereference causing DoS), and CVE-2026-7258/CVE-2026-6104 (out-of-bounds reads in PHP core). Affected versions: PHP before 8.2.31, 8.3.31, 8.4.21, and 8.5.6. Administrators running PHP applications that process untrusted XML should upgrade immediately. [[Cyber Security News](https://cyberpress.org/critical-php-soap-extension-flaw/); [GBHackers](https://gbhackers.com/php-soap-extension-flaw/)]
 
-
 ## 🛡️ Defense & Detection
 
 **[NEW] Hugging Face repository with 200K downloads distributes Windows infostealer — popularity artificially inflated**
@@ -61,7 +57,6 @@ Security researchers have identified the Hugging Face repository `Open-OSS/priva
 
 A fake website at `claude-pro[.]com` distributes a trojanized Windows installer that deploys a newly documented backdoor called Beagle through a DLL sideloading chain. The attack abuses a signed G DATA updater executable (`NOVupdate.exe`) to load a malicious `avk.dll`, which decrypts shellcode via DonutLoader. The installer also provides a working copy of Claude as camouflage. Sophos found additional 2026 samples on VirusTotal using the same XOR key, including one linked to the AdaptixC2 framework and others themed around Trellix, CrowdStrike, and SentinelOne brands — suggesting the operators are experimenting with multiple fake-brand lures. The sideloading chain initially resembled PlugX but was reworked for a different outcome. [[Cyber Security News](https://cyberpress.org/fake-claude-malware-sideloading/)]
 
-
 ## 📋 Policy & Industry News
 
 **[NEW] Cloudflare lays off 1,100 employees in AI-driven restructuring**
@@ -71,7 +66,6 @@ Cloudflare is cutting 1,100 positions as part of an "AI-driven restructuring" of
 **[NEW] Microsoft 365 Copilot prompt injection vulnerabilities disclosed — backend-patched, no customer action required**
 
 Microsoft has disclosed three information disclosure vulnerabilities (CVE-2026-26129, CVE-2026-26164, CVE-2026-33111, all CVSS 7.5) affecting Microsoft 365 Copilot and Copilot Chat in Edge. The flaws allow prompt injection attacks to bypass security boundaries and access sensitive proprietary documents, internal communications, and other data processed by the AI assistant — requiring no privileges or user interaction. Because Copilot operates as a managed cloud service, Microsoft deployed input sanitization patches directly to its global infrastructure with no customer action required. The incident demonstrates both the data-exposure risks of deeply integrated AI assistants and the security advantage of centralized cloud patching. [[Cyber Security News](https://cyberpress.org/critical-microsoft-365-copilot-vulnerabilities-expose-sensitive-information/)]
-
 
 ## ⚡ Quick Hits
 

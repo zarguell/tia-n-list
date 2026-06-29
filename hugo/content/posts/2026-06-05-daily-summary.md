@@ -9,7 +9,7 @@ summary: "Cisco's 7th SD-WAN zero-day in 2026 (CVE-2026-20245) actively exploite
 
 # Daily Threat Intelligence Digest — June 5, 2026
 
-*91 articles ingested from Miniflux Cyber feeds. Cross-referencing via Reddit r/cybersecurity skipped — both `/hot/` and `/new/` returned errors (old.reddit.com inaccessible). tl;dr sec #331 (published ~June 4) checked — identified no material gaps; Zapocalypse chain (Token Security) patched in March, covered here as defense insight. Prior digests: June 1–4, 2026. Stale CVE/topic blocklist applied: CVE-2022-0492 (cgroup container escape, covered June 4), Dashlane vault breach (covered June 2), TA4922/Atlas RAT (covered June 4), Stock Exchange espionage (covered June 4), UN WFP breach (covered June 3), Mirasvit Magento RCE (covered June 2).*
+*91 articles ingested and analyzed from Miniflux Cyber feeds, with prior-digest continuity tracking.*
 
 ---
 
@@ -166,7 +166,3 @@ Token Security researchers disclosed how five individually known security weakne
 - **WSL2 payload staging creates Sysmon blind spot** — Daniel Koifman demonstrates that WSL2's Hyper-V network stack is invisible to Windows Sysmon (no Event ID 3), and file writes via `/mnt/c/` are attributed to `DllHost.exe` with no attacker process chain. Sigma rule provided for detection via `DllHost.exe` + dangerous extensions in user-writable directories. [[Malware.News](https://malware.news/t/the-interesting-case-of-wsl-for-payload-staging/107607#post_1)]
 - **Let's Encrypt adopts Merkle Tree Certificates for post-quantum TLS** — Targeting staging by late 2026 and production rollout in 2027, following Google's MTC initiative earlier this year. [[Cyberpress](https://cyberpress.org/lets-encrypt-merkle-tree-certificates/)]
 - **AI-powered autonomous worm demonstrated in lab** — Canadian researchers published a preprint showing an LLM-driven worm that autonomously compromised 73.8% of a 33-host heterogeneous network across 15 trials, achieving up to 7 generations of self-replication and exploiting post-training-cutoff vulnerabilities (April-May 2026) by ingesting advisory text at runtime. [[Cyberpress](https://cyberpress.org/ai-powered-worm-linux-windows/); [GBHackers](https://gbhackers.com/ai-powered-worm-leverages-stolen-compute-devices/)]
-
----
-
-*91 articles ingested from Miniflux Cyber feeds. Cross-referencing via Reddit skipped — old.reddit.com inaccessible. tl;dr sec #331 checked (Friday, highest-value window). Prior digests: June 1–4, 2026. Sources include BleepingComputer, SecurityWeek, GBHackers, Cyber Security News (Cyberpress), Malware.News (JFrog, Morphisec, SentinelOne, Volexity), Palo Alto Networks, SafeBreach, Token Security, GData, Marcus Hutchins (MalwareTech), and independent researchers.*

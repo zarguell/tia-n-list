@@ -9,7 +9,7 @@ summary: "Microsoft attributes Mastra npm supply chain attack to North Korean Sa
 
 # Daily Threat Intelligence Digest — June 21, 2026
 
-*7 articles ingested from Miniflux Cyber feeds. Cross-referencing via Reddit skipped — `reddit_gap_check.py` unavailable (chronic failure threshold exceeded, 21+ consecutive days per prior digests). External gap detection via web search found no critical gaps beyond feed coverage. Prior digests: June 16–20, 2026. Stale CVE/topic blocklist applied.*
+*7 articles ingested and analyzed from Miniflux Cyber feeds, with prior-digest continuity tracking.*
 
 ---
 

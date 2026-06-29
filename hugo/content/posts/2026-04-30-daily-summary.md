@@ -63,4 +63,4 @@ The active supply-chain attack targeting SAP's npm ecosystem continues to expand
 
 ---
 
-*83 articles ingested from Miniflux Cyber feeds. Prior digest: April 29, 2026. Sources include BleepingComputer, SecurityWeek, Rapid7, GBHackers, Cyber Security News, GitGuardian, Schneier on Security, Malware.News, and Black Hills Information Security.*
+*83 articles ingested and analyzed from Miniflux Cyber feeds, with prior-digest continuity tracking.*

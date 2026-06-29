@@ -7,7 +7,6 @@ author: Tia N. List
 summary: Iranian state-sponsored threat actors are actively exploiting nearly 4,000 exposed Rockwell PLCs across U.S. critical infrastructure, demonstrating the severe risk of operational technology exposure and the escalating geopolitical dimensions of ICS attacks. Meanwhile, supply chain compromises affecting CPUID's software distribution, widespread GitHub/GitLab abuse for malware delivery, and commercial EDR killers are enabling ransomware operators to disable endpoint defenses before encryption, while AiTM session hijacking campaigns target payroll systems and ProSpy spyware campaigns pivot to targeting journalists and civil society members across the Middle East.
 ---
 
-
 # Daily Threat Intel Digest - 2026-04-11
 
 ## 🔴 Critical Threats & Active Exploitation

@@ -9,7 +9,7 @@ summary: "Atomic Arch supply-chain attack expands to 1,500+ AUR packages; FortiS
 
 # Daily Threat Intelligence Digest — June 16, 2026
 
-*72 articles ingested from Miniflux Cyber feeds. Cross-referencing via Reddit skipped — `reddit_gap_check.py` unavailable (403 from Reddit, consistent failures across prior digests June 9–15). External gap detection via web search found no critical gaps beyond feed coverage. tl;dr sec skipped — Tuesday, latest issue from June 11 is 5 days stale. Exa web extract credits exhausted — browser-based extraction used for paywalled content. Prior digests: June 11–15, 2026. Stale CVE/topic blocklist applied.*
+*72 articles ingested and analyzed from Miniflux Cyber feeds, with prior-digest continuity tracking.*
 
 ---
 

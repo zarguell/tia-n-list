@@ -9,7 +9,7 @@ summary: "Microsoft warns of two actively exploited Defender zero-days (CVE-2026
 
 # Daily Threat Intelligence Digest — May 21, 2026
 
-*93 articles ingested from Miniflux Cyber feeds. External cross-referencing via TLDR InfoSec (May 20 issue) and Reddit r/cybersecurity (fresh — content spans last 24h). tl;dr sec #328 (May 14) skipped as stale (1 week old).*
+*93 articles ingested and analyzed from Miniflux Cyber feeds, with prior-digest continuity tracking.*
 
 ---
 

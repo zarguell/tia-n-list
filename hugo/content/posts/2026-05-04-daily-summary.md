@@ -14,7 +14,6 @@ summary: "CISA adds cPanel CVE-2026-41940 to KEV as 40,000+ servers are confirme
 
 *Previous 5 days reporting summary:* Yesterday's digest covered cPanel CVE-2026-41940 escalating to mass "Sorry" ransomware deployment, ConsentFix v3 automated Azure OAuth abuse, Everest ransomware targeting Canadian financial processor Symcor, and a Maryland pharmacist indicted for insider threat. Earlier this week: cPanelSniper PoC release with 44,000 compromised IPs scanning, Copy Fail (CVE-2026-31431) added to CISA KEV, Cordial Spider and Snarky Spider weaponizing AiTM phishing, AccountDumpling Facebook phishing compromising 30,000+ accounts, MacSync stealer via fake Google Ads, Instructure Canvas LMS breach, Five Eyes agentic AI guidance, SHADOW-EARTH-053 deploying ShadowPad, and the SAP npm supply chain attack (Mini Shai-Hulud).
 
-
 ## 🔴 Critical Threats & Active Exploitation
 
 **[UPDATE] cPanel CVE-2026-41940 — CISA adds to KEV with 4-day patch deadline as 40,000+ servers confirmed compromised in government and military targeting**
@@ -29,7 +28,6 @@ Instructure has confirmed that the Canvas LMS breach exposed user names, email a
 
 Microsoft Defender caused global disruption on May 3 by incorrectly flagging two legitimate DigiCert root certificate hashes (0563B8630D62D75ABBC8AB1E4BDFB5A899B24D43 and DDFB16CD4931C973A2037D3FC83A4D775D05E4) as Trojan:Win32/Cerdigent.A!dha, removing them from the Windows trust store and breaking TLS validation. Some administrators performed unnecessary OS reinstalls believing their systems were compromised. The false positive was an overly broad detection response to a real DigiCert security incident: in early April, Chinese crime group GoldenEyeDog (APT-Q-27) phished DigiCert support staff to obtain initialization codes for EV code-signing certificates, which were then used to sign Zhong Stealer malware distributed under legitimate company names including Lenovo and Kingston. DigiCert revoked 60 certificates, but Microsoft's Defender signature update overreached from targeting the compromised code-signing certificates to flagging unrelated DigiCert root certificates. Fixed in Security Intelligence update 1.449.430.0. [[BleepingComputer](https://www.bleepingcomputer.com/news/security/microsoft-defender-wrongly-flags-digicert-certs-as-trojan-win32-cerdigentadha/); [GBHackers](https://gbhackers.com/digicert-root-certificates-incorrectly-detected-as-malware/)]
 
-
 ## 🎯 Threat Actor Activity & Campaigns
 
 **[NEW] Microsoft Teams phishing campaign achieves 72% success rate through email bombing and fake IT support impersonation**
@@ -39,7 +37,6 @@ Since early 2026, threat actors have been combining aggressive email bombing —
 **[NEW] FEMITBOT platform abuses Telegram Mini Apps for crypto scams and Android malware at scale**
 
 CTM360 researchers have uncovered FEMITBOT, a fraud platform that weaponizes Telegram's Mini App feature to run phishing pages inside Telegram's built-in WebView browser. Victims interact with bots that launch Mini Apps displaying fake cryptocurrency dashboards with countdown timers and limited-time offers. When attempting to withdraw "earnings," victims are prompted to deposit funds or complete referral tasks (classic advance-fee fraud). The platform's shared backend (identified by API responses containing "Welcome to join the FEMITBOT platform") is designed for reuse across campaigns with swappable branding, languages, and themes. Major brands impersonated include Apple, Coca-Cola, Disney, eBay, NVIDIA, and IBM. Some Mini Apps also distribute Android malware APKs impersonating BBC, NVIDIA, and CineTV. The infrastructure uses Meta and TikTok tracking pixels to measure and optimize scam conversion rates. [[BleepingComputer](https://www.bleepingcomputer.com/news/security/telegram-mini-apps-abused-for-crypto-scams-android-malware-delivery/)]
-
 
 ## ⚠️ Vulnerabilities & Patches
 
@@ -55,7 +52,6 @@ Progress Software has disclosed two critical vulnerabilities in MOVEit Automatio
 
 New reporting from Endorlabs provides additional technical detail on the April 29 compromise of four SAP npm packages (mbt, @cap-js/sqlite, @cap-js/postgres, @cap-js/db-service). The attackers used two independent methods: a stolen long-lived npm automation token for the MBT package, and a compromised developer GitHub account combined with a misconfigured OIDC trust policy for the @cap-js packages. The malware downloads the Bun runtime to bypass Node.js-based security monitoring, deploys an 11.6 MB obfuscated payload using custom encryption (ctf-scramble-v2), and operates five parallel credential collectors targeting npm tokens, GitHub tokens, AWS/GCP/Azure credentials, Kubernetes service account tokens, SSH keys, and AI coding assistant tokens (Claude, Cursor). Stolen data is exfiltrated by creating public GitHub repositories under the victim's account with the description "A Mini Shai-Hulud has Appeared." The malware self-replicates by patching victims' own projects with the same malicious script when it detects publish-capable npm tokens, and persists by modifying VS Code configuration files. Organizations must rotate all credentials, check lockfiles for affected package versions, monitor CI/CD pipelines for unexpected changes, and migrate from static npm tokens to scoped OIDC publishing. [[Cyber Security News](https://cyberpress.org/malicious-sap-packages-steal-tokens/); [GBHackers](https://gbhackers.com/attackers-hijack-sap-npm/)]
 
-
 ## 🛡️ Defense & Detection
 
 **[NEW] Qilin ransomware uses PowerShell Event ID 1149 query for stealthy RDP reconnaissance — detect via ScriptBlock logging**
@@ -65,7 +61,6 @@ Qilin ransomware operators have adopted a living-off-the-land reconnaissance tec
 **[NEW] Trellix discloses source code repository breach — no evidence of product compromise or data distribution pipeline tampering**
 
 Cybersecurity firm Trellix (endpoint security and XDR) has disclosed unauthorized access to a portion of its internal source code repository. The company states there is no evidence that production environments, the release pipeline, or customer-facing products were compromised, and no source code has been found actively exploited. External forensic experts and law enforcement are engaged. While the breach appears contained, stolen source code from a security vendor carries long-term risk if attackers analyze it to discover product vulnerabilities for future exploitation. [[Cyber Security News](https://cyberpress.org/hackers-breach-trellix-source-code-repository-in-unauthorized-access-incident/); [GBHackers](https://gbhackers.com/trellix-source-code-breach-exposes-repository/)]
-
 
 ## ⚡ Quick Hits
 
@@ -79,4 +74,4 @@ Cybersecurity firm Trellix (endpoint security and XDR) has disclosed unauthorize
 
 ---
 
-*32 articles ingested from Miniflux Cyber feeds. Prior digest: May 3, 2026. Sources include BleepingComputer, SecurityWeek, GBHackers, Cyber Security News, and CTM360.*
+*32 articles ingested and analyzed from Miniflux Cyber feeds, with prior-digest continuity tracking.*

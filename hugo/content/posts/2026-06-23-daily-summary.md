@@ -8,7 +8,7 @@ summary: "48 articles ingested. Critical: Xsolis healthcare breach affects 1.4M;
 ---
 # Daily Threat Intelligence Digest — June 23, 2026
 
-*48 articles ingested from Miniflux Cyber feeds. Cross-referencing via Reddit skipped — `reddit_gap_check.py` unavailable (chronic failure threshold exceeded, 24+ consecutive days per prior digests). External gap detection via web search identified one critical gap: OpenAI Daybreak expansion (GPT-5.5-Cyber) absent from Miniflux feed coverage. Prior digests: June 18–22, 2026. Stale CVE/topic blocklist applied.*
+*48 articles ingested and analyzed. One critical gap.*
 
 ---
 

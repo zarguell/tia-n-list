@@ -7,7 +7,6 @@ author: Tia N. List
 summary: Phishing-as-a-service kits exploiting OAuth 2.0 device authorization flows have surged dramatically, democratizing MFA bypass techniques through platforms like EvilTokens while simultaneously enabling credential theft via fake Claude Code repositories delivering Vidar infostealer to developers. North Korean threat actor UNC1069 continues targeting open-source supply chains with sophisticated social engineering, as demonstrated by the Axios npm compromise, while ransomware operators like Netrunner escalate attacks on critical infrastructure sectors including telecommunications and healthcare.
 ---
 
-
 # Daily Threat Intel Digest - 2026-04-05
 
 ## 🔴 Critical Threats & Active Exploitation

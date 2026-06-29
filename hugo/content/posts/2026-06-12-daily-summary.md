@@ -9,7 +9,7 @@ summary: "CISA adds Ivanti Sentry CVE-2026-10520 to KEV under first BOD 26-04 3-
 
 # Daily Threat Intelligence Digest — June 12, 2026
 
-*60 articles ingested from Miniflux Cyber feeds. Cross-referencing via Reddit skipped — `reddit_gap_check.py` returned errors (scrapling module unavailable). External gap detection via web search found no critical gaps beyond feed coverage. tl;dr sec #332 (June 11, 1 day fresh) checked — contributed one gap item to Defense & Detection (see Sub:jugation phantom cloud identities). Prior digests: June 7–11, 2026. Stale CVE/topic blocklist applied.*
+*60 articles ingested and analyzed from Miniflux Cyber feeds, with prior-digest continuity tracking.*
 
 ---
 
@@ -130,7 +130,3 @@ Fraudulent data breach notices were submitted to Maine's official AG breach port
 - **[NEW] OnyxC2 Stealer priced at $250/month subscription** — Enterprise-grade credential theft tool offered as a cybercrime SaaS product. [[SecurityWeek](https://www.securityweek.com/onyxc2-stealer-offers-cybercriminals-enterprise-grade-theft-for-250-a-month/)]
 - **[UPDATE] Void Blizzard (Russian state-sponsored) — Denis Obrezko charged in Boston** — Russian national arrested in Thailand, extradited to the US, charged with conspiracy for unauthorized computer access linked to espionage campaign targeting US companies. [[CyberScoop](https://cyberscoop.com/russian-national-charged-void-blizzard-cyber-espionage/)]
 - **[NEW] Anthropic disputes Fable 5 jailbreak claims** — Jailbreaker "Pliny the Liberator" claimed to have bypassed Claude Fable 5's safeguards via multi-agent prompting. Anthropic counters that conversational refusal suppression does not disable independent classifier systems or the Opus 4.8 fallback for high-risk domains. [[SecurityWeek](https://www.securityweek.com/anthropic-disputes-fable-5-ai-jailbreak/)]
-
----
-
-*60 articles ingested from Miniflux Cyber feeds. Cross-referencing via Reddit skipped — `reddit_gap_check.py` returned errors (scrapling module unavailable). External gap detection via web search found no critical gaps beyond feed coverage. tl;dr sec #332 (June 11, 1 day fresh) contributed one gap item (Sub:jugation phantom cloud identities) to Defense & Detection section. Prior digests: June 7–11, 2026. Sources include BleepingComputer, SecurityWeek, Europol, Mandiant/Google GTIG, Rapid7, Check Point Research, Howler Cell, Malware.News, CyberScoop, Astrix Security, CERT Polska, HEAL Security, Arctic Wolf, and independent researchers (Nightmare Eclipse/Chaotic Eclipse).*

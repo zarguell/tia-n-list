@@ -7,7 +7,6 @@ author: Tia N. List
 summary: New quantum computing research using qLDPC codes dramatically reduces the computational requirements to break modern encryption, collapsing timelines from millions of qubits to as few as 10,000 for ECC-256 and threatening to undermine current cryptographic standards that protect sensitive data across industries. International law enforcement operations are actively disrupting large-scale cryptocurrency fraud campaigns, with Operation Atlantic identifying over 20,000 victims and freezing $12M while highlighting the growing threat of approval phishing and pig-butchering scams targeting investors worldwide.
 ---
 
-
 # Daily Threat Intel Digest - 2026-04-12
 
 ## 🔴 Critical Threats & Active Exploitation

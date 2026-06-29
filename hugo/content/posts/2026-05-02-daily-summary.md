@@ -14,7 +14,6 @@ summary: "cPanel CVE-2026-41940 mass exploitation accelerates with 44,000 compro
 
 *Previous 5 days reporting summary:* Yesterday's digest covered China-backed SHADOW-EARTH-053 deploying ShadowPad via Exchange exploits, Cordial Spider and Snarky Spider as the next generation of Scattered Spider, the Deep#Door Python backdoor, 18 malicious AI browser extensions from Unit 42, supply-chain attacks on Hugging Face/ClawHub and GitHub Actions, the ASUSTOR ADM root RCE, and a backdoored WordPress plugin with 70,000+ installs. Earlier this week: the Copy Fail Linux kernel zero-day (CVE-2026-31431), cPanel CVE-2026-41940 exploited as a zero-day since February, ProFTPD SQL injection, SonicWall firewall vulnerabilities, and the SAP npm supply chain attack (Mini Shai-Hulud) exceeding 1,000 repositories.
 
-
 ## 🔴 Critical Threats & Active Exploitation
 
 **[UPDATE] cPanelSniper PoC released as Shadowserver confirms 44,000 compromised IPs actively scanning**
@@ -24,7 +23,6 @@ Mass exploitation of CVE-2026-41940 has escalated dramatically since yesterday's
 **[UPDATE] Copy Fail (CVE-2026-31431) added to CISA KEV as Microsoft warns of imminent broader exploitation**
 
 The Copy Fail Linux kernel privilege escalation vulnerability has been added to CISA's Known Exploited Vulnerabilities catalog, requiring federal agencies to remediate under BOD 22-01. Microsoft Defender's research team has published a detailed technical analysis confirming the vulnerability affects virtually every Linux distribution running kernels from 2017 onward, including Ubuntu 24.04 LTS, Amazon Linux 2023, RHEL 10.1, and SUSE 16. While exploitation has so far been observed primarily in proof-of-concept testing, Microsoft reports seeing preliminary activity consistent with threat actors preparing to weaponize the flaw at scale, with broader exploitation expected within days. The 732-byte Python exploit requires only standard library modules and no special privileges — not even root inside a container — making it ideal for post-exploitation after any initial access. Because the page cache is shared across containers and the host, a compromised container can escalate to root on the entire node. Metasploit has shipped a local exploit module supporting AMD64 and AARCH64 architectures. Immediate mitigation: `echo "install algif_aead /bin/false" > /etc/modprobe.d/disable-algif-aead.conf && rmmod algif_aead`. [[Microsoft Defender Research](https://www.microsoft.com/en-us/security/blog/); [Rapid7 Metasploit Wrap-Up](https://www.rapid7.com/blog/post/pt-metasploit-wrap-up-05-01-2026)]
-
 
 ## 🎯 Threat Actor Activity & Campaigns
 
@@ -40,13 +38,11 @@ Guardio Labs has uncovered a Vietnamese-linked phishing operation that has compr
 
 A widespread malvertising campaign has been observed using over 200 hijacked Google Ads accounts to distribute the MacSync credential stealer to macOS users. The ads impersonate popular software including Homebrew, 7-Zip, The Unarchiver, LibreOffice, Microsoft Office, OBS Studio, Final Cut Pro, and AppCleaner. Rather than directing victims to fake download portals, the ads redirect to publicly accessible Evernote notes containing step-by-step Terminal installation instructions — a technique that leverages Evernote's domain reputation to bypass filters. Victims are instructed to paste Base64-encoded commands that decode and execute shell scripts, which deploy MacSync v1.1.2. The malware establishes persistence, harvests browser cookies and login databases, steals data from Telegram, macOS Notes, and cryptocurrency wallets, and can display fake password prompts to capture system credentials. The campaign is part of the broader ClickFix ecosystem that has been evolving since November 2025, with CIS reporting active targeting of U.S. state and local government organizations. Users should never execute Terminal commands from web pages, and organizations should monitor for unusual `curl` piped to `bash` or `zsh` executions. [[Bitdefender](https://www.bitdefender.com/en-au/blog/hotforsecurity/criminals-use-fake-mac-homebrew-google-ads-in-new-malicious-campaign); [CIS](https://www.cisecurity.org/insights/blog/macsync-stealer-campaign-impacting-us-sltt-macos-users)]
 
-
 ## 🛡️ Defense & Detection
 
 **[NEW] Instructure (Canvas LMS) discloses cyber incident — second breach in seven months**
 
 Instructure, the company behind the widely used Canvas learning management system used by schools and universities worldwide, has disclosed a cybersecurity incident and is investigating with outside forensic experts. The company's CSO, Steve Proud, confirmed that a "criminal threat actor" was responsible. Since May 1, Canvas Data 2 and Canvas Beta services have been under maintenance, with customers warned of potential API key issues. Instructure was previously breached in September 2025 via social engineering that compromised its Salesforce instance — an incident claimed by ShinyHunters. The company has not yet disclosed whether customer or student data was affected in the current incident. Given Canvas's position as a critical education infrastructure platform used by thousands of institutions, any data exposure could have significant scope. Education technology firms remain high-value targets due to the volume of personal information they hold. [[BleepingComputer](https://www.bleepingcomputer.com/news/security/edu-tech-firm-instructure-discloses-cyber-incident-probes-impact/)]
-
 
 ## 📋 Policy & Industry News
 
@@ -66,7 +62,6 @@ Google has restructured its Vulnerability Reward Programs in response to a flood
 
 The New York State Department of Financial Services has reached a $2.25 million settlement with Delta Dental stemming from the 2023 Clop ransomware gang exploitation of the MOVEit transfer zero-day vulnerability. Delta Dental was among many organizations whose patient data was exposed when Clop exploited the vulnerability to acquire client data. The settlement reflects regulators' continued enforcement action against organizations that failed to adequately protect against or respond to the MOVEit supply-chain attack, which affected thousands of organizations globally. [[Malware.News/DataBreaches](https://databreaches.net/2026/05/01/nysdfs-secures-2-25-million-cybersecurity-settlement-with-delta-dental/)]
 
-
 ## ⚡ Quick Hits
 
 - **French 15-year-old detained for ANTS government data breach** — A minor suspected of using the alias 'breach3d' has been detained for selling data stolen from France's administrative documents agency (ANTS). The breach exposed 11.7 million accounts containing names, emails, dates of birth, and phone numbers. The suspect faces up to seven years in prison and €300,000 in fines. [[BleepingComputer](https://www.bleepingcomputer.com/news/security/15-year-old-detained-over-french-govt-agency-data-breach/)]
@@ -81,4 +76,4 @@ The New York State Department of Financial Services has reached a $2.25 million 
 
 ---
 
-*45 articles ingested from Miniflux Cyber feeds. Prior digest: May 1, 2026. Sources include BleepingComputer, SecurityWeek, GBHackers, Cyber Security News, Rapid7, Malware.News, CyberScoop, Schneier on Security, Unit 42, Bitdefender, and CIS.*
+*45 articles ingested and analyzed from Miniflux Cyber feeds, with prior-digest continuity tracking.*

@@ -9,7 +9,7 @@ summary: "Critical: VS Code zero-day leaks GitHub OAuth tokens with no patch ava
 
 # Daily Threat Intelligence Digest — June 3, 2026
 
-*95 articles ingested from Miniflux Cyber feeds. Cross-referencing via Reddit r/cybersecurity detected no critical gaps beyond already-covered stories — `/hot/` returned stale content; `/new/` surfaced CloudZ Phone Link abuse and Apache HTTP RCE CVE-2026-23918, both previously covered in earlier feed cycles. Prior digests: May 29–June 2, 2026. Stale items omitted: Red Hat npm supply chain (June 2), Oracle WebLogic CVE-2024-21182 KEV (June 2), Android June bulletin CVE-2025-48595 (June 2), HP Poly VoIP CVE-2026-0826 (June 2), Instagram Meta AI escalation (June 1–2), CIFSwitch (June 2), WordPress Steam Profile C2 (June 2), PAN-OS GlobalProtect CVE-2026-0257 (May 30–31), Cyclops ransomware (ongoing).*
+*95 articles ingested and analyzed from Miniflux Cyber feeds, with prior-digest continuity tracking.*
 
 ---
 
@@ -152,7 +152,3 @@ Claude Mythos Preview has discovered 10,000+ high/critical severity vulnerabilit
 - **Iran's Handala Brand Expands to Physical Threats:** Insikt Group attributes "Handala Popular Resistance Front" to Iran's MOIS, soliciting physical attacks against U.S./Israeli targets for financial reward. [[Malware.News](https://malware.news/t/iran-expands-handala-brand-to-physical-threats/107514#post_1)]
 - **WFP Data Breach: 600K Gaza Households Exposed:** UN World Food Programme cyberattack exposed personal information of ~600K Gaza households — potentially largest humanitarian beneficiary data breach. [[Malware.News](https://malware.news/t/data-of-600-000-gaza-households-exposed-in-world-food-programme-cyberattack/107519#post_1)]
 - **WeedHack MaaS Infects 116K+ Minecraft Systems:** Infostealer campaign distributed via YouTube malvertising and SEO poisoning targeting Minecraft mods, offering free dashboard and $5/month premium tier. [[BleepingComputer](https://www.bleepingcomputer.com/news/security/over-116-000-mincraft-systems-infected-in-weedhack-malware-campaign/)]
-
----
-
-*95 articles ingested from Miniflux Cyber feeds. Cross-referencing via Reddit r/cybersecurity detected no critical gaps — stale cache on `/hot/`; `/new/` surfaced items already covered in earlier feed cycles. Prior digests: May 29–June 2, 2026. Sources include BleepingComputer, GBHackers, Cyber Security News, SecurityWeek, CyberScoop, Qualys, Sophos, Huntress, Enclave Security, Seqrite Labs, Arctic Wolf, Insikt Group (Recorded Future), Malware.News (SANS ISC, DeXpose, DataBreaches.net), and independent researchers.*

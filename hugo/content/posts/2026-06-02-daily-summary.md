@@ -8,7 +8,7 @@ summary: "97 articles ingested. Critical: Android Framework zero-day (CVE-2025-4
 ---
 # Daily Threat Intelligence Digest — June 2, 2026
 
-*97 articles ingested from Miniflux Cyber feeds. External cross-referencing via Reddit r/cybersecurity detected one secondary gap (CVE-2026-0073 Android ADB bypass — PoC published, patched in same June bulletin). tl;dr sec: skipped — Tuesday publication makes Thursday's issue 5 days stale. Prior digests: May 28–June 1, 2026.*
+*97 articles ingested and analyzed from Miniflux Cyber feeds, with prior-digest continuity tracking.*
 
 ---
 
@@ -147,7 +147,3 @@ Gambit Security published a deep-dive on a destructive campaign attributed to Ir
 - **AsyncRAT/DCRat Surge:** ANY.RUN's weekly tracker shows AsyncRAT leading with 824 uploads (+293 WoW), with DCRat and other RAT families also spiking. [[Cyberpress](https://cyberpress.org/stealer-malware-asyncrat-dcrat/)]
 - **Spain Arrests Government Data Leaker:** Spanish National Police arrested an individual for leaking sensitive data from INCIBE, the State Attorney General's Office, National Police, and Civil Guard — posing national security risks. [[BleepingComputer](https://www.bleepingcomputer.com/news/security/spain-arrests-doxer-leaking-sensitive-data-of-govt-employees/)]
 - **RedSun Windows Defender LPE (CVE-2026-41091):** Continued coverage of the Nightmare Eclipse zero-day exploiting Windows Defender's remediation workflow for local privilege escalation — part of the broader researcher-Microsoft disclosure dispute. [[Malware.News](https://malware.news/t/redsun-exploiting-windows-defenders-remediation-workflow-for-local-privilege-escalation/107483#post_1)]
-
----
-
-*97 articles ingested from Miniflux Cyber feeds. Cross-referencing via Reddit r/cybersecurity detected one secondary gap: CVE-2026-0073 Android ADB bypass (PoC published; patched in same June bulletin — included as sub-item in Android coverage). tl;dr sec: skipped — Tuesday run makes Thursday's issue 5+ days stale. Prior digests: May 28–June 1, 2026. Sources include BleepingComputer, GBHackers, Cyber Security News, SecurityWeek, Krebs on Security, Rapid7, Elastic Security Labs, Sekoia.io, Unit 42 (Palo Alto Networks), GoDaddy, SpecterOps, SANS ISC, Cisco Talos, Malwarebytes, Malware.News, and independent researchers.*

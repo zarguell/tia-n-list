@@ -8,7 +8,7 @@ summary: "Critical: Windows kernel LPE bypasses all browser sandboxes (CVE-2026-
 ---
 # Daily Threat Intelligence Digest — May 27, 2026
 
-*77 articles ingested from Miniflux Cyber feeds. External cross-referencing via Reddit r/cybersecurity detected 9 gaps entirely missed by the Miniflux feed — the most significant being DigiCert CA compromise, NIST/NVD policy shift, and Fragnesia Linux LPE. tl;dr sec skip: Wednesday — latest issue (last Thursday) is 6 days stale. Prior digests: May 22–26, 2026.*
+*77 articles ingested and analyzed from Miniflux Cyber feeds, with prior-digest continuity tracking.*
 
 ---
 
@@ -130,7 +130,3 @@ Of 1,752 high- or critical-rated findings independently reviewed, **over 90% wer
 - **Red Canary: ClearFake #1 threat for May, ACR Stealer debuts, GraphRunner device-code abuse surge** — ClearFake (JavaScript drive-by, fake CAPTCHA ClickFix) takes the top spot delivering ACR Stealer (Amatera) via fake Claude Code GitLab pages. GraphRunner abuse of OAuth device code flow for MFA bypass continues rising as the Kali365/EvilTokens PhaaS ecosystem commoditizes the technique. [[Red Canary](https://redcanary.com/blog/threat-intelligence/intelligence-insights-may-2026/)]
 - **Glassworm developer-targeting botnet takedown** — CrowdStrike, Google, and Shadowserver simultaneously severed all four C2 channels (Solana blockchain, BitTorrent DHT, Google Calendar, traditional VPS). Over 300 GitHub repos poisoned; sinkhole at 164.92.88.210. [[Cyber Security News](https://cyberpress.org/glassworm-targets-developer-platforms/)]
 - **CloudZ Malware abuses Microsoft Phone Link to intercept SMS/OTPs** — New "Pheno" plugin for CloudZ RAT reads SMS and OTPs from Windows Phone Link's local SQLite database — no phone compromise needed. Active since January 2026. [[BleepingComputer](https://www.bleepingcomputer.com/news/security/cloudz-malware-abuses-microsoft-phone-link-to-steal-sms-and-otps/)]
-
----
-
-*77 articles ingested from Miniflux Cyber feeds. External cross-referencing via Reddit r/cybersecurity identified 9 gaps entirely missed by Miniflux feeds — the most significant being the DigiCert CA compromise, NIST/NVD policy shift, Fragnesia Linux LPE, Instructure/Canvas breach, and CloudZ malware. Cross-referenced items tagged with [GAP]. Prior digests: May 22–26, 2026. Sources include: BleepingComputer, SecurityWeek, CyberScoop, Cyber Security News, GBHackers, Red Canary, NIST, Mandiant, Mozilla Bugzilla, Check Point Research, V12 Security, TLCTC, DigiCert, Microsoft Security Response Center, CrowdStrike, Anthropic, and Forenser.*

@@ -10,10 +10,9 @@ summary: "DigiCert breached via social engineering — 27 EV code-signing certif
 # Tia N. List — Daily Threat Intelligence Digest
 ### May 11, 2026
 
-**33 articles ingested from Miniflux Cyber feeds. External cross-referencing via Reddit r/cybersecurity and TLDR InfoSec.**
+**33 articles ingested and analyzed from Miniflux Cyber feeds, with prior-digest continuity tracking.*
 
 *Previous 5 days reporting summary:* The May 9 digest covered Dirty Frag Linux kernel LPE with confirmed active exploitation via Microsoft Defender telemetry, ShinyHunters extending the Canvas extortion deadline to May 12 with ~9,000 schools affected, Ivanti EPMM CVE-2026-6973 CISA KEV addition with 4-day patch deadline, Polish water treatment ICS breaches attributed to APT28/APT29, ClaudeBleed Chrome extension partial-fix bypass, and PamDOORa Linux PAM backdoor. The May 8 digest introduced Dirty Frag as a new zero-day class, ShinyHunters' second Instructure breach defacing 330 Canvas portals, ClaudeBleed Chrome extension takeover, PAN-OS CVE-2026-0300 CISA KEV addition with Chinese state-sponsored hallmarks, and cPanel CVE-2026-29201/29202/29203 initial disclosure.
-
 
 ## 🔴 Critical Threats & Active Exploitation
 
@@ -29,7 +28,6 @@ SecurityWeek reports that Dirty Frag (CVE-2026-43284, CVE-2026-43500) may have b
 
 Canvas LMS is back online after Instructure took the platform offline to contain the ShinyHunters breach, which exploited the Free-For-Teacher (FFT) account program to access production data across the multi-tenant SaaS environment. The timing during finals week at thousands of universities amplified the disruption — students at the University of Maryland, University of New Mexico, and multiple UT system schools faced extended deadlines and lost coursework access. ShinyHunters claims 3.6 TB of data covering 275 million users across ~9,000 schools, including names, email addresses, student IDs, and private messages. The FFT program — which offered low-friction accounts with no institutional verification running on the same production infrastructure as paying institutions — has been permanently shut down. The extortion deadline of May 12 remains active, with ShinyHunters pressuring individual schools to negotiate directly via Tox messaging. Instructure has not confirmed whether ransom demands will be met or how individual breach notifications will be handled. [[SecurityWeek](https://www.securityweek.com/canvas-system-is-online-after-a-cyberattack-disrupted-thousands-of-schools/); [GBHackers](https://gbhackers.com/canvas-lms-free-teacher-accounts/)]
 
-
 ## 🎯 Threat Actor Activity & Campaigns
 
 **[NEW] Operation HookedWing — 4+ year phishing campaign steals 2,000+ credentials from 500+ organizations**
@@ -40,13 +38,11 @@ SOCRadar has documented a sustained credential-harvesting campaign dubbed Operat
 
 German authorities have shut down the resurrected Crimenetwork cybercrime marketplace and arrested its 35-year-old German administrator in Mallorca, Spain. The rebooted platform launched within days of the original Crimenetwork's December 2024 takedown (which ended 12+ years of operation with 100,000+ users), quickly amassing 22,000 users and over 100 vendors generating at least €3.6 million ($4.2M) in revenue. The operator faces charges under Germany's Criminal Code Section 127 and the Narcotics Act. Police seized €194,000 in assets and extensive user and transaction data for further investigation. The original Crimenetwork administrator was sentenced to 7 years and 10 months in March 2025. [[BleepingComputer](https://www.bleepingcomputer.com/news/security/police-shut-down-reboot-of-crimenetwork-marketplace-arrest-admin/); [SecurityWeek](https://www.securityweek.com/resurrected-crimenetwork-marketplace-taken-down-administrator-arrested/); [GBHackers](https://gbhackers.com/crimenetwork-bust-reveals-22000-members/)]
 
-
 ## ⚠️ Vulnerabilities & Patches
 
 **[UPDATE] cPanel CVE-2026-29201/29202/29203 — details emerge on Perl injection, arbitrary file read, and symlink DoS**
 
 Technical details are now available for the three cPanel/WHM vulnerabilities disclosed May 8. CVE-2026-29202 is the most critical — a Perl code-injection flaw in the `create_user` API call's plugin parameter that grants attackers arbitrary code execution with administrative access. CVE-2026-29201 enables arbitrary file reads via the `feature::LOADFEATUREFILE` adminbin call by passing relative paths as arguments, exposing system configurations and database credentials. CVE-2026-29203 allows local users to chmod arbitrary files via unsafe symlink handling, enabling denial-of-service and potential privilege escalation chains. These vulnerabilities land one week after mass exploitation of CVE-2026-41940 compromised over 40,000 servers with "Sorry" ransomware. Patches are available in version 11.136.0.9 and backported to versions 11.134 through 11.124, plus a legacy CentOS 6/CloudLinux 6 path. Administrators should run `/scripts/upcp --force` immediately. [[Cyber Security News](https://cyberpress.org/new-cpanel-and-whm-flaws-enable-remote-code-execution-and-dos-attacks/); [GBHackers](https://gbhackers.com/new-cpanel-and-whm-vulnerabilities/)]
-
 
 ## 🛡️ Defense & Detection
 
@@ -62,13 +58,11 @@ An active malvertising campaign abuses both Google Ads (sponsored results for "C
 
 Netskope Threat Labs has documented a malware campaign using a fake OpenClaw installer to deploy "Hologram," a highly modular Rust-based framework that targets 201 crypto wallet extensions, 49 password managers, and 2FA tools including MetaMask, Phantom, Bitwarden, 1Password, and Google Authenticator. The framework uses anti-VM checks (BIOS strings, hardware profiles, real mouse movement detection), hosts the .NET CLR inside a native Rust process via `clroxide` for in-memory execution, and bypasses EDR hooks via direct NT syscalls. Persistence is layered: Run keys, WinLogon Userinit hijacking, privileged scheduled tasks, and independent Telegram-based droppers that can re-establish the implant even after component removal. C2 leverages legitimate cloud services — Telegram channels, Hookdeck webhook relays (first documented crimeware use), Azure DevOps organizations, and hijacked Brazilian law-firm subdomains. The server-side manifest of 250 targeted extensions is updateable without recompilation, giving the campaign long-lived flexibility. [[GBHackers](https://gbhackers.com/openclaw-malware/)]
 
-
 ## 📋 Policy & Industry News
 
 **[NEW] Weaponized JPEG drops trojanized ScreenConnect with credential provider interception**
 
 A multi-stage intrusion campaign uses a weaponized `sysupdate.jpeg` file to deliver a trojanized ConnectWise ScreenConnect client (v25.9.5.9483) on Windows systems. The fake JPEG contains obfuscated PowerShell that compiles a unique launcher per victim via `csc.exe`, achieves fileless UAC bypass via `ComputerDefaults.exe` and registry hijacking, and installs a malicious "OneDriveServers" service for persistence. The modified ScreenConnect framework exposes 46 operator capabilities including live screen viewing/recording, microphone capture, clipboard monitoring, and — critically — a Credential Provider interception server that captures usernames and passwords directly from the Windows logon screen before they reach LSASS. The malware creates hidden administrator accounts invisible on the normal logon UI and uses PBKDF2-HMAC-SHA256 key derivation for encrypted C2 communications over non-standard ports. C2 infrastructure: `legitserver[.]theworkpc[.]com` resolving to `45[.]138[.]16[.]64`. [[GBHackers](https://gbhackers.com/weaponized-jpeg-file/)]
-
 
 ## ⚡ Quick Hits
 

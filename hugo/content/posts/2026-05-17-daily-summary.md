@@ -8,7 +8,7 @@ summary: "Microsoft silently patched a critical Azure Backup for AKS privilege e
 ---
 # Daily Threat Intelligence Digest — May 17, 2026
 
-*12 articles ingested from Miniflux Cyber feeds. External cross-referencing via Reddit r/cybersecurity and TLDR InfoSec API.*
+*12 articles ingested and analyzed from Miniflux Cyber feeds, with prior-digest continuity tracking.*
 
 ---
 

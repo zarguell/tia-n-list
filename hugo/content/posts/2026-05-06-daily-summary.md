@@ -14,7 +14,6 @@ summary: "Palo Alto Networks PAN-OS zero-day (CVE-2026-0300) under active exploi
 
 *Previous 5 days reporting summary:* Yesterday's digest covered Copy Fail (CVE-2026-31431) reaching CISA KEV with active exploitation, Weaver E-cology RCE (CVE-2026-22679) exploited since March, Microsoft's "code of conduct" AiTM phishing campaign (35,000 users across 13,000 orgs), Everest ransomware claiming TSYS attack, Amazon SES abuse for authenticated phishing, PyTorch Lightning backdoored on PyPI (ShaiWorm), Apache HTTP Server critical RCE (CVE-2026-23918), Android zero-click RCE (CVE-2026-0073), WhatsApp file spoofing and URL scheme flaws, Edge plaintext password storage, DigiCert breach full chain (malicious screensaver → 60 fraudulent certs → Zhong Stealer), and a Medicare portal SSN exposure. Earlier this week: cPanel CVE-2026-41940 at 40,000+ compromised servers, cPanel "Sorry" ransomware, ConsentFix v3 OAuth automation, Everest ransomware targeting Symcor and TSYS, cPanelSniper PoC, Cordial/Snarky Spider AiTM, AccountDumpling Facebook phishing, MacSync stealer, SHADOW-EARTH-053 ShadowPad, and the Trellix source code breach.
 
-
 ## 🔴 Critical Threats & Active Exploitation
 
 **[NEW] Palo Alto Networks PAN-OS zero-day (CVE-2026-0300) — unauthenticated RCE with root on firewalls, actively exploited, no patch for 7+ days**
@@ -32,7 +31,6 @@ Two malicious versions of axios — the JavaScript HTTP client with over 100 mil
 **[NEW] DarkSword iOS exploit kit chains six zero-days to fully compromise iPhones — now leaked to broader abuse**
 
 Google Threat Intelligence Group (GTIG) has disclosed DarkSword, a full-chain iOS exploit kit that leverages six zero-day vulnerabilities to compromise devices running iOS 18.4 through 18.7. Three distinct malware families have been deployed: GHOSTBLADE, GHOSTKNIFE, and GHOSTSABER. Since November 2025, multiple commercial surveillance vendors and suspected state-sponsored actors have used DarkSword against targets in Saudi Arabia, Turkey, Malaysia, and Ukraine. Notably, UNC6353 — a suspected Russian espionage group previously linked to the Coruna iOS exploit kit — has incorporated DarkSword into watering-hole attacks. A week after initial identification, a version of the exploit leaked online, significantly expanding the pool of potential abusers. The proliferation pattern — from government/commercial surveillance to leaked public tooling — mirrors prior iOS exploit kits like Coruna and highlights the limited shelf-life of zero-day exclusivity. All affected iOS versions have since been patched; devices running current iOS releases are not at risk. [[Schneier on Security](https://www.schneier.com/blog/archives/2026/05/darksword-malware.html)]
-
 
 ## 🎯 Threat Actor Activity & Campaigns
 
@@ -56,7 +54,6 @@ The China-aligned Silver Fox APT group has been running a campaign since late 20
 
 The ShinyHunters extortion group has published a detailed list of 8,809 colleges, school districts, and online education platforms affected by their breach of Instructure's Canvas learning management system, claiming a total of 280 million stolen records. Record counts per institution range from tens of thousands to several million. This significantly expands the scope of the breach beyond the 275 million figure reported last week. The attacker claims data was harvested using Canvas data export features including DAP queries, provisioning reports, and user APIs. Multiple universities including University of Colorado Boulder, Rutgers, and Tilburg University have issued advisories. ShinyHunters also leaked 106GB of data stolen from Vimeo through a separate Anodot supply-chain breach, exposing the email addresses and names of 119,200 people. [[BleepingComputer](https://www.bleepingcomputer.com/news/security/instructure-hacker-claims-data-theft-from-8-800-schools-universities/)]
 
-
 ## ⚠️ Vulnerabilities & Patches
 
 **[NEW] Argo CD critical auth bypass (CVE-2026-42880) exposes Kubernetes Secrets from etcd — CVSS 9.6**
@@ -75,7 +72,6 @@ Cyera researchers have disclosed a critical heap out-of-bounds read vulnerabilit
 
 A prototype pollution vulnerability in the xml2js XML parsing library has been chained into unauthenticated remote code execution in n8n, the open-source workflow automation platform. The vulnerability stems from a CoffeeScript-to-JavaScript compilation semantic difference that allows XML tags matching inherited Object.prototype properties to inject values into parsed objects. An attacker sending a crafted XML payload to any configured webhook endpoint can achieve prototype pollution, which is then escalated to RCE through the n8n Git node's handling of the `GIT_SSH_COMMAND` environment variable. The exploit requires no authentication and no custom plugins — only the default Git node. Self-hosted n8n instances with publicly accessible webhook endpoints are at immediate risk. Organizations using n8n should apply the patched version immediately and restrict webhook endpoint exposure. [[Malware.News/DeXpose](https://malware.news/t/n8n-from-parsing-bug-to-remote-code-execution-aka-cve-2026-42231/106681#post_1)]
 
-
 ## 🛡️ Defense & Detection
 
 **[UPDATE] Azure AD Conditional Access bypass — phantom device registration, PRT theft, and Intune compliance spoofing detailed**
@@ -89,7 +85,6 @@ Gen Digital researchers have documented Remus, a 64-bit information-stealing mal
 **[NEW] CloudZ RAT's Pheno plugin hijacks Microsoft Phone Link to intercept SMS and OTPs without compromising mobile devices**
 
 Cisco Talos has discovered a new plugin called Pheno for the CloudZ remote access tool that abuses Microsoft Phone Link's local SQLite database to steal SMS messages and one-time passwords directly from the Windows host. The malware does not need to compromise the mobile device — it monitors for active Phone Link sessions and reads the synchronized message database on the PC. The infection begins with a fake ScreenConnect update that drops a Rust-based loader, followed by a .NET loader with anti-analysis checks (sandbox detection, VM checks, Wireshark/Fiddler/Procmon/Sysmon hunting). CloudZ rotates between three hardcoded user-agent strings and includes anti-caching headers to prevent proxy/CDN caching of C2 details. The intrusion was active since at least January 2026. Organizations should phase out SMS-based OTP in favor of phishing-resistant authenticators and hardware security keys. [[BleepingComputer](https://www.bleepingcomputer.com/news/security/cloudz-malware-abuses-microsoft-phone-link-to-steal-sms-and-otps/)]
-
 
 ## ⚡ Quick Hits
 

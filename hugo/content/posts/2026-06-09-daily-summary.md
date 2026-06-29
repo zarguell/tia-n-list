@@ -8,7 +8,7 @@ summary: "CISA orders emergency Check Point VPN patching as Qilin ransomware exp
 ---
 # Daily Threat Intelligence Digest — June 9, 2026
 
-*68 articles ingested from Miniflux Cyber feeds. Cross-referencing via Reddit skipped — old.reddit.com returned errors on both `/hot/` and `/new/` endpoints. External gap detection via web search identified one critical gap: LiteLLM RCE chain (CVSS 10.0) being actively exploited — zero Miniflux coverage. tl;dr sec #331 (June 4) skipped — 5 days stale. Prior digests: June 4–8, 2026. Stale CVE/topic blocklist applied.*
+*68 articles ingested and analyzed. One critical gap.*
 
 ---
 
@@ -154,7 +154,3 @@ The main drivers: **voice cloning, deepfake images/videos, and AI-generated scri
 - **[NEW] Handala claims Israeli radar disruption — SOCRadar analysis finds evidence unsubstantiated** — The Iranian-linked group's Telegram claims of disrupting Israeli radar systems coincide with missile exchanges but lack supporting evidence. Shared screenshots show municipal phone system access, not military radar. [[Malware.News/SOCRadar](https://malware.news/t/handala-claims-it-disrupted-israeli-radar-systems-here-s-what-we-actually-know/107644#post_1)]
 - **[NEW] Cybersecurity M&A Roundup: 26 deals in May 2026** — SecurityWeek's monthly tally. [[SecurityWeek](https://www.securityweek.com/cybersecurity-ma-roundup-26-deals-announced-in-may-2026/)]
 - **[NEW] Hokkaido hospitals data leak may hit 510,000 — HDDs sold online blamed** [[Malware.News](https://malware.news/t/jp-hokkaido-hospitals-data-leak-may-hit-510k-hdds-sold-online-blamed/107665#post_1)]
-
----
-
-*68 articles ingested from Miniflux Cyber feeds. Cross-referencing via Reddit skipped — old.reddit.com returned errors on both `/hot/` and `/new/` endpoints. External gap detection via web search identified one critical gap: LiteLLM RCE chain (CVE-2026-42271 + CVE-2026-48710) actively exploited, zero Miniflux coverage. Prior digests: June 4–8, 2026. Sources include BleepingComputer, Rapid7, CyberSecurityNews, SecurityWeek, CyberScoop, Unit 42, Microsoft Security Blog, Schneier on Security, SANS ISC, Malware.News/DataBreaches.net, SOCRadar, Malwarebytes/FBI, and independent researchers.*
