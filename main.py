@@ -37,6 +37,11 @@ from schema import (
     validate_cve_record,
 )
 
+
+class KevrichmentError(Exception):
+    """Raised on fatal, non-recoverable pipeline errors."""
+
+
 BASE_DIR = Path(__file__).parent.resolve()
 DATA_DIR = BASE_DIR / "data"
 CVES_DIR = DATA_DIR / "cves"
@@ -143,7 +148,7 @@ def run_pipeline(research_engine=None, nvd_api_key=None,
         print(f"  ✗ Fatal: KEV fetch failed — {e}")
         run_log["errors"].append(f"KEV fetch: {e}")
         _save_run_log(run_log)
-        sys.exit(1)
+        raise KevrichmentError(f"KEV fetch failed: {e}") from e
 
     kev_source_date = get_kev_source_date(kev_data)
     total_entries = len(kev_data.get("vulnerabilities", []))
@@ -456,14 +461,21 @@ def cli_main():
     else:
         engine = None
 
-    run_pipeline(
-        research_engine=engine,
-        nvd_api_key=nvd_api_key,
-        scan_vulnrichment=args.scan_vulnrichment,
-        run_qc=args.qc,
-        cve_count=args.cve_count,
-        no_incremental=args.no_incremental,
-    )
+    try:
+        run_log = run_pipeline(
+            research_engine=engine,
+            nvd_api_key=nvd_api_key,
+            scan_vulnrichment=args.scan_vulnrichment,
+            run_qc=args.qc,
+            cve_count=args.cve_count,
+            no_incremental=args.no_incremental,
+        )
+    except KevrichmentError as e:
+        print(f"\n✗ Pipeline aborted: {e}", file=sys.stderr)
+        sys.exit(1)
+
+    if run_log.get("errors"):
+        sys.exit(1)
 
 
 if __name__ == "__main__":
