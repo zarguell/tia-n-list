@@ -60,3 +60,11 @@ def test_text_muted_meets_wcag_aa_on_bg():
 
 def test_accent_hover_meets_wcag_aa_on_bg():
     assert _contrast_ratio(build_site.T["accent_hover"], build_site.T["bg"]) >= 4.5
+
+
+def test_dashboard_renders_cve_id_as_keyboard_focusable_anchor():
+    html = build_site.gen_dashboard(
+        {"last_updated": "", "total_cves_processed": 0, "cves": []}
+    )
+    # The CVE-ID cell must build an <a href="cves/{id}.html"> so Tab+Enter works.
+    assert 'href="cves/\' + r.id + \'.html"' in html

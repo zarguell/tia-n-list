@@ -48,6 +48,8 @@ body{{background:{bg};color:{text_primary};font-family:{font};line-height:1.5;-w
 a{{color:{accent};text-decoration:none;transition:color 150ms ease}}
 a:hover{{color:{accent_hover}}}
 code,.cve-id{{font-family:{font_mono};font-size:0.875em}}
+a.cve-id-link{{color:inherit;text-decoration:none}}
+a.cve-id-link:focus-visible{{outline:2px solid {accent};outline-offset:2px;border-radius:2px}}
 ::selection{{background:{accent};color:#fff}}
 .container{{max-width:1280px;margin:0 auto;padding:0 16px}}
 .header{{position:sticky;top:0;z-index:100;background:{bg};border-bottom:1px solid {border};backdrop-filter:blur(12px);padding:12px 0}}
@@ -553,7 +555,7 @@ function renderTable() {
     var tr = document.createElement('tr');
     tr.style.cursor = 'pointer';
     tr.addEventListener('click', function() { window.location.href = 'cves/' + r.id + '.html'; });
-    tr.innerHTML = '<td data-label="CVE ID"><code class="cve-id">' + r.id + '</code></td>'
+    tr.innerHTML = '<td data-label="CVE ID"><a href="cves/' + r.id + '.html" class="cve-id-link"><code class="cve-id">' + esc(r.id) + '</code></a></td>'
       + '<td data-label="Vendor">' + esc(r.vendor) + '</td>'
       + '<td data-label="Product">' + esc(r.product) + '</td>'
       + '<td data-label="CVSS"><span style="display:inline-flex;align-items:center;gap:6px"><span style="display:inline-block;width:28px;height:28px;border-radius:50%;background:' + cvssColor + ';color:#fff;text-align:center;line-height:28px;font-size:0.6875rem;font-weight:600;font-family:JetBrains Mono,monospace">' + cvssDisp + '</span></span></td>'
