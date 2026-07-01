@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 """Static site generator for kevrichment — builds a searchable HTML dashboard from CVE JSON data."""
 
-import json, os, glob, sys, html as html_mod
+import glob
+import html as html_mod
+import json
+import sys
 from datetime import datetime
-from urllib.parse import urlparse
 from pathlib import Path
+from urllib.parse import urlparse
 
 # ── Design Tokens ──────────────────────────────────────────────────────────
 # Dark dashboard: Linear.app surface model + Sentry severity colors
@@ -451,11 +454,11 @@ def gen_dashboard(index_data):
     # Filter bar
     parts.append('<div class="filter-bar">')
     parts.append('<div class="search-wrap"><input type="text" id="searchInput" class="search-input" placeholder="Search CVE ID, vendor, product\u2026"></div>')
-    parts.append(f'<button class="chip active" data-filter="auto" data-value="all" onclick="toggleFilter(this,\'auto\')">All</button>')
-    parts.append(f'<button class="chip" data-filter="auto" data-value="yes" onclick="toggleFilter(this,\'auto\')">Automatable</button>')
-    parts.append(f'<button class="chip" data-filter="exploit" data-value="active" onclick="toggleFilter(this,\'exploit\')">Active Exploit</button>')
-    parts.append(f'<button class="chip" data-filter="threeDay" data-value="true" onclick="toggleFilter(this,\'threeDay\')">3-Day</button>')
-    parts.append(f'<button class="chip" data-filter="poc" data-value="yes" onclick="toggleFilter(this,\'poc\')">Has PoC</button>')
+    parts.append('<button class="chip active" data-filter="auto" data-value="all" onclick="toggleFilter(this,\'auto\')">All</button>')
+    parts.append('<button class="chip" data-filter="auto" data-value="yes" onclick="toggleFilter(this,\'auto\')">Automatable</button>')
+    parts.append('<button class="chip" data-filter="exploit" data-value="active" onclick="toggleFilter(this,\'exploit\')">Active Exploit</button>')
+    parts.append('<button class="chip" data-filter="threeDay" data-value="true" onclick="toggleFilter(this,\'threeDay\')">3-Day</button>')
+    parts.append('<button class="chip" data-filter="poc" data-value="yes" onclick="toggleFilter(this,\'poc\')">Has PoC</button>')
     parts.append(f'<span id="filterCount" style="font-size:0.75rem;color:{T["text_muted"]};margin-left:auto"></span>')
     parts.append('</div>')
 
@@ -635,8 +638,6 @@ def _compact_row(label, value):
     return f'<div class="field-row-compact"><span class="field-label">{esc(label)}</span><span class="field-value">{value}</span></div>'
 
 def _detail_pill(label, color="default"):
-    c = T["accent"] if color == "key" else T["text_secondary"]
-    bd = f'{T["accent"]}44' if color == "key" else T["border"]
     return f'<span class="detail-pill{" key" if color == "key" else ""}">{esc(label)}</span>'
 
 def gen_cve_detail(cve_record):
@@ -680,13 +681,13 @@ def gen_cve_detail(cve_record):
     # Meta line
     parts.append('<div class="cve-hero-meta">')
     parts.append(f'<span>{esc(c.get("kev_vendor_project", ""))}</span>')
-    parts.append(f'<span class="sep">&middot;</span>')
+    parts.append('<span class="sep">&middot;</span>')
     parts.append(f'<span>{esc(c.get("kev_product", ""))}</span>')
-    parts.append(f'<span class="sep">&middot;</span>')
+    parts.append('<span class="sep">&middot;</span>')
     parts.append(f'<span>Added {fmt_date(c.get("kev_date_added", ""))}</span>')
     pub = c.get("cve_published", "")
     if pub:
-        parts.append(f'<span class="sep">&middot;</span>')
+        parts.append('<span class="sep">&middot;</span>')
         parts.append(f'<span>Published {fmt_date(pub)}</span>')
     parts.append('</div>')
 
@@ -722,9 +723,9 @@ def gen_cve_detail(cve_record):
     if nvd_desc:
         desc_body += _compact_row("NVD Description", esc(nvd_desc))
     if desc_body:
-        kn_rows += f'<div class="cve-collapse collapsed" style="margin-top:2px">'
-        kn_rows += f'<div class="cve-collapse-trigger" onclick="this.parentElement.classList.toggle(\'collapsed\')" style="display:flex;align-items:center;gap:4px;padding:4px 0;cursor:pointer">'
-        kn_rows += f'<span class="cve-collapse-icon">&#9660;</span>'
+        kn_rows += '<div class="cve-collapse collapsed" style="margin-top:2px">'
+        kn_rows += '<div class="cve-collapse-trigger" onclick="this.parentElement.classList.toggle(\'collapsed\')" style="display:flex;align-items:center;gap:4px;padding:4px 0;cursor:pointer">'
+        kn_rows += '<span class="cve-collapse-icon">&#9660;</span>'
         kn_rows += f'<span class="cve-collapse-title" style="font-size:0.75rem;color:{T["text_muted"]}">Descriptions</span>'
         kn_rows += f'</div><div class="cve-collapse-body" style="padding-top:2px">{desc_body}</div></div>'
     parts.append(_collapse_card("Details", kn_rows, collapsed=False))
@@ -798,11 +799,11 @@ def gen_cve_detail(cve_record):
     if pre:
         if len(pre) > 200:
             pre_id = f"pre_{cve_id.replace('-','_')}"
-            rd_rows += f'<div class="field-row-compact"><span class="field-label">Preconditions</span><span class="field-value">'
+            rd_rows += '<div class="field-row-compact"><span class="field-label">Preconditions</span><span class="field-value">'
             rd_rows += f'<span id="{pre_id}short">{esc(pre[:180])}&hellip;</span>'
             rd_rows += f'<span id="{pre_id}full" style="display:none">{esc(pre)}</span>'
             rd_rows += f' <span class="expand-toggle" onclick="document.getElementById(\'{pre_id}full\').style.display=\'inline\';document.getElementById(\'{pre_id}short\').style.display=\'none\';this.style.display=\'none\'">show more</span>'
-            rd_rows += f'</span></div>'
+            rd_rows += '</span></div>'
             # source
             pre_src = research.get("preconditions_source", "")
             if pre_src:
@@ -817,11 +818,11 @@ def gen_cve_detail(cve_record):
     if delivery:
         if len(delivery) > 200:
             del_id = f"del_{cve_id.replace('-','_')}"
-            rd_rows += f'<div class="field-row-compact"><span class="field-label">Delivery</span><span class="field-value">'
+            rd_rows += '<div class="field-row-compact"><span class="field-label">Delivery</span><span class="field-value">'
             rd_rows += f'<span id="{del_id}short">{esc(delivery[:180])}&hellip;</span>'
             rd_rows += f'<span id="{del_id}full" style="display:none">{esc(delivery)}</span>'
             rd_rows += f' <span class="expand-toggle" onclick="document.getElementById(\'{del_id}full\').style.display=\'inline\';document.getElementById(\'{del_id}short\').style.display=\'none\';this.style.display=\'none\'">show more</span>'
-            rd_rows += f'</span></div>'
+            rd_rows += '</span></div>'
         else:
             rd_rows += _compact_row("Delivery", esc(delivery))
 
@@ -940,7 +941,7 @@ def gen_schema_page():
             rows += "</tr>"
 
         parts.append(f'<div class="card"><div class="card-title">{esc(section_name)}</div>')
-        parts.append(f'<table style="width:100%"><thead><tr>')
+        parts.append('<table style="width:100%"><thead><tr>')
         parts.append(f'<th style="color:{T["text_muted"]};font-weight:500;font-size:0.75rem;text-transform:uppercase;padding:8px 12px">Field</th>')
         parts.append(f'<th style="color:{T["text_muted"]};font-weight:500;font-size:0.75rem;text-transform:uppercase;padding:8px 12px">Type</th>')
         parts.append(f'<th style="color:{T["text_muted"]};font-weight:500;font-size:0.75rem;text-transform:uppercase;padding:8px 12px">Description</th>')
@@ -970,7 +971,7 @@ def gen_pipeline_page():
     if runs:
         parts.append(f'<div style="overflow-x:auto;border:1px solid {T["border"]};border-radius:{T["radius_card"]};background:{T["surface"]}">')
         parts.append('<table>')
-        parts.append(f'<thead><tr>')
+        parts.append('<thead><tr>')
         for h in ["Run ID", "CVEs Proc.", "Time", "Avg/CVE", "Tokens", "Errors", "Health"]:
             parts.append(f'<th style="padding:10px 12px;font-size:0.75rem;text-transform:uppercase">{h}</th>')
         parts.append('</tr></thead><tbody>')
@@ -1016,7 +1017,7 @@ def gen_pipeline_page():
         total_qc["auto_fixed"] += qc.get("auto_fixed", 0) if isinstance(qc.get("auto_fixed"), int) else 0
 
     if any(total_qc.values()):
-        parts.append(f'<div class="stats-bar">')
+        parts.append('<div class="stats-bar">')
         parts.append(f'<div class="stat-card"><div class="stat-value" style="color:{T["red"]}">{total_qc["errors"]}</div><div class="stat-label">Errors</div></div>')
         parts.append(f'<div class="stat-card"><div class="stat-value" style="color:{T["amber"]}">{total_qc["warnings"]}</div><div class="stat-label">Warnings</div></div>')
         parts.append(f'<div class="stat-card"><div class="stat-value" style="color:{T["blue"]}">{total_qc["infos"]}</div><div class="stat-label">Infos</div></div>')

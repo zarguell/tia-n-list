@@ -4,9 +4,7 @@ Ingest CISA KEV catalog, CISA Vulnrichment (SSVC), and NVD API data.
 
 import json
 import os
-import re
 import time
-from datetime import datetime
 
 import requests
 

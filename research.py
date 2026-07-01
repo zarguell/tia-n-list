@@ -10,9 +10,6 @@ Two modes:
 """
 
 import re
-import time
-from datetime import datetime
-
 
 # ---------------------------------------------------------------------------
 # Research engine
@@ -46,7 +43,6 @@ class ResearchEngine:
         dict
             ``kevrichment_research`` block ready to insert into the CVE record.
         """
-        start = time.time()
         searches = 0
         sources = []
 
@@ -614,25 +610,13 @@ class ResearchEngine:
             "CWE-1023": ("incomplete comparison", "exploit incomplete comparison logic"),
         }
 
-        vuln_class = "vulnerability"
         vuln_action = "exploit the vulnerability"
         for cwe_id in cwe_ids:
             if cwe_id in CWE_CLASS_MAP:
-                vuln_class = CWE_CLASS_MAP[cwe_id][0]
                 vuln_action = CWE_CLASS_MAP[cwe_id][1]
                 break
 
         # ---- 2. Attack vector from CVSS ----
-        av_desc = "remotely"
-        if cvss_av == "NETWORK":
-            av_desc = "over the network"
-        elif cvss_av == "ADJACENT_NETWORK":
-            av_desc = "from an adjacent network"
-        elif cvss_av == "LOCAL":
-            av_desc = "with local access"
-        elif cvss_av == "PHYSICAL":
-            av_desc = "with physical access"
-
         # ---- 3. Authentication from CVSS PR ----
         auth_desc = None
         if cvss_pr == "NONE":

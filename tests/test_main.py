@@ -1,6 +1,6 @@
 """Tests for main.py orchestration error handling."""
-import sys
 import pytest
+
 import main
 
 

@@ -4,16 +4,15 @@ Batch agentic research for kevrichment.
 Reads 10 CVEs without Hermes analysis, runs web research, updates files.
 """
 import json
-import re
-import time
 import sys
-from hermes_tools import web_search, write_file, terminal
-
+import time
 from pathlib import Path
+
+from hermes_tools import terminal, web_search, write_file
 
 BASE = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(BASE))
-from research import ResearchEngine
+from research import ResearchEngine  # noqa: E402 — sys.path modified above
 
 CVES_DIR = BASE / "data" / "cves"
 
@@ -110,39 +109,19 @@ def extract_poc_from_search(cve_id):
         print(f"  [WARN] PoC search failed: {e}")
     return poc_urls
 
-def extract_component_from_advisory(cve_id, vendor, product, description):
-    """Try harder to extract the vulnerable component using web search."""
-    if not description:
-        return product
-    
-    # First try the existing deterministic extraction from NVD description
-    patterns = [
-        r'in the ([A-Z][a-zA-Z0-9_ -]{1,45}?)(?: component| module| feature| function)\b',
-        r'in ([A-Z][a-zA-Z0-9_ -]{1,45}?)(?: component| module| feature| function)',
-        r'(?:a |the )?vulnerability in (?:the )?([A-Z][a-zA-Z0-9_ /-]{1,45}?)(?:\s+(?:allows|could|that|may|can|is|are|was|permit|\w+ly\b)|\s*$)',
-        r'the affected ([A-Z][a-zA-Z0-9_ -]{1,40})(?: is| are| component)',
-    ]
-    for pat in patterns:
-        m = re.search(pat, description, re.IGNORECASE)
-        if m:
-            found = m.group(1).strip().rstrip(".")
-            if 3 < len(found) < 200:
-                return found
-    return product
-
 def process_cve(cve_id):
     """Research a single CVE with Hermes agent tools."""
     print(f"\n  ── {cve_id} ──")
     record = read_cve(cve_id)
     research = record.get("kevrichment_research", {})
     meta = record.get("research_meta", {})
-    
+
     vendor = record.get("kev_vendor_project", "")
     product = record.get("kev_product", "")
     description = record.get("nvd_description", "")
-    
+
     all_sources = list(meta.get("sources_consulted", []))
-    
+
     # 1. Try harder to extract component
     engine = ResearchEngine()
     component = engine._extract_component(description, product, vendor)
@@ -150,7 +129,7 @@ def process_cve(cve_id):
         print(f"    Component: {component}")
     else:
         print(f"    Component: {product} (generic)")
-    
+
     # 2. Search for vendor advisory URL
     current_url = research.get("vendor_advisory_url", "")
     if not current_url or "nvd.nist.gov" in current_url:
@@ -160,10 +139,10 @@ def process_cve(cve_id):
             all_sources.extend(adv_sources)
             print(f"    Advisory: {advisory_url}")
         else:
-            print(f"    Advisory: (no new)")
+            print("    Advisory: (no new)")
     else:
         print(f"    Advisory: {current_url[:60]}…")
-    
+
     # 3. Search for PoC
     current_poc = research.get("public_poc_exists", "unknown")
     if current_poc != "yes":
@@ -177,27 +156,27 @@ def process_cve(cve_id):
             research["public_poc_exists"] = "yes"
             print(f"    PoC found: {len(poc_urls)} new")
         else:
-            print(f"    PoC: none")
+            print("    PoC: none")
     else:
         print(f"    PoC: already yes ({len(research.get('public_poc_urls', []))} urls)")
-    
+
     # 4. Component info search (for sources)
     if component:
         comp_sources = search_component_info(cve_id, vendor, product, component)
         all_sources.extend(comp_sources)
-    
+
     # 5. Default enablement search (if still unknown)
     default_status = research.get("vulnerable_component_enabled_by_default", "unknown")
     if default_status == "unknown":
         def_sources = search_default_enablement(cve_id, vendor, product, component)
         all_sources.extend(def_sources)
-    
+
     # 6. Mark as hermes-analyzed
     research["preconditions_source"] = "hermes"
     research["hunting_hypothesis_source"] = "hermes"
     if component and component != product:
         research["vulnerable_component"] = component
-    
+
     # 7. Update meta
     original_source_count = len(meta.get("sources_consulted", []))
     deduped = list(dict.fromkeys(all_sources))
@@ -205,9 +184,9 @@ def process_cve(cve_id):
     meta["searches_performed"] = len(deduped) - original_source_count
     record["kevrichment_research"] = research
     record["research_meta"] = meta
-    
+
     write_cve(cve_id, record)
-    print(f"  ✓ Saved")
+    print("  ✓ Saved")
     return {
         "cve_id": cve_id,
         "advisory": research.get("vendor_advisory_url", ""),
@@ -221,15 +200,15 @@ def main():
     if not cve_ids:
         print("No CVEs need analysis — all have Hermes research.")
         return
-    
+
     print(f"Found {len(cve_ids)} CVEs needing analysis:")
     for cid in cve_ids:
         print(f"  {cid}")
-    
+
     results = []
     errors = []
     start = time.time()
-    
+
     for cve_id in cve_ids:
         try:
             result = process_cve(cve_id)
@@ -238,25 +217,25 @@ def main():
             errors.append(f"{cve_id}: {e}")
             import traceback
             traceback.print_exc()
-    
+
     elapsed = time.time() - start
-    
+
     # Summary
     advisories_found = sum(1 for r in results if r.get("advisory") and "nvd.nist.gov" not in r["advisory"])
     components_improved = sum(1 for r in results if r.get("component_improved"))
-    
-    print(f"\n╔══ Batch Summary ══╗")
+
+    print("\n╔══ Batch Summary ══╗")
     print(f"  Processed: {len(results)}/{len(cve_ids)}")
     print(f"  Errors:    {len(errors)}")
     print(f"  Wall time: {elapsed:.1f}s")
     print(f"  Vendor advisories resolved: {advisories_found}")
     print(f"  Components improved: {components_improved}")
-    
+
     if errors:
-        print(f"\n  Errors:")
+        print("\n  Errors:")
         for e in errors:
             print(f"    ✗ {e}")
-    
+
     # Note: commit separately with terminal tool — execute_code sandbox lacks git config
     print(f"\n  → git commit with: cd {BASE} && git add data/cves/ && git commit -m \"kevrichment: agent research batch\" && git push")
 

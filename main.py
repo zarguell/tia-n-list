@@ -23,17 +23,16 @@ from pathlib import Path
 
 from ingest import (
     fetch_kev,
-    get_latest_kev_entries,
-    get_kev_source_date,
-    fetch_vulnrichment,
     fetch_nvd,
+    fetch_vulnrichment,
+    get_kev_source_date,
+    get_latest_kev_entries,
     scan_vulnrichment_high_priority,
 )
 from research import ResearchEngine
 from schema import (
     build_cve_record,
     build_index_entry,
-    build_run_log,
     validate_cve_record,
 )
 
@@ -111,7 +110,7 @@ def _save_run_log(run_log):
     with open(LATEST_PATH, "w") as f:
         json.dump(run_log, f, indent=2)
     print(f"  ✓ Run log: {path}")
-    print(f"  ✓ latest.json updated")
+    print("  ✓ latest.json updated")
 
 
 # ---------------------------------------------------------------------------
@@ -180,7 +179,7 @@ def run_pipeline(research_engine=None, nvd_api_key=None,
 
         # Incremental check
         if not no_incremental and not _cve_needs_research(cve_id, kev_date, existing_index):
-            print(f"  → SKIP (no KEV update since last research)")
+            print("  → SKIP (no KEV update since last research)")
             for idx_entry in existing_index.get("cves", []):
                 if idx_entry["cve_id"] == cve_id:
                     updated_entries.append(idx_entry)
@@ -191,7 +190,7 @@ def run_pipeline(research_engine=None, nvd_api_key=None,
         t0 = time.time()
 
         # Vulnrichment
-        print(f"  • Vulnrichment …", end=" ")
+        print("  • Vulnrichment …", end=" ")
         vuln = fetch_vulnrichment(cve_id)
         if vuln:
             print(f"auto={vuln.get('automatable','?')}  impact={vuln.get('technical_impact','?')}  "
@@ -200,7 +199,7 @@ def run_pipeline(research_engine=None, nvd_api_key=None,
             print("(none)")
 
         # NVD
-        print(f"  • NVD …", end=" ")
+        print("  • NVD …", end=" ")
         nvd = fetch_nvd(cve_id, api_key=nvd_api_key)
         print("ok" if nvd else "failed")
 
@@ -213,7 +212,7 @@ def run_pipeline(research_engine=None, nvd_api_key=None,
                     break
 
         # Research
-        print(f"  • Research …")
+        print("  • Research …")
         research_data = research_engine.research(
             cve_id, entry.get("vendorProject", ""), entry.get("product", ""),
             desc, nvd_data=nvd, vulnrichment_data=vuln,
@@ -251,14 +250,14 @@ def run_pipeline(research_engine=None, nvd_api_key=None,
 
     # ---- 3b.  Optional: scan vulnrichment for non-KEV high-priority CVEs ---
     if scan_vulnrichment:
-        print(f"\n  ── Scanning vulnrichment for non-KEV high-priority CVEs ──")
+        print("\n  ── Scanning vulnrichment for non-KEV high-priority CVEs ──")
         kev_ids = {e["cveID"] for e in latest}
         non_kev = scan_vulnrichment_high_priority(kev_ids, max_results=5)
 
         if non_kev:
             print(f"  Found {len(non_kev)} high-priority CVEs not in KEV")
         else:
-            print(f"  No qualifying non-KEV CVEs found in recent vulnrichment entries")
+            print("  No qualifying non-KEV CVEs found in recent vulnrichment entries")
 
         for item in non_kev:
             cve_id = item["cve_id"]
@@ -269,7 +268,7 @@ def run_pipeline(research_engine=None, nvd_api_key=None,
             t0 = time.time()
 
             # NVD
-            print(f"  • NVD …", end=" ")
+            print("  • NVD …", end=" ")
             nvd = fetch_nvd(cve_id, api_key=nvd_api_key)
             print("ok" if nvd else "failed")
 
@@ -281,7 +280,7 @@ def run_pipeline(research_engine=None, nvd_api_key=None,
                         break
 
             # Research
-            print(f"  • Research …")
+            print("  • Research …")
             research_data = research_engine.research(
                 cve_id, "", "",
                 desc, nvd_data=nvd, vulnrichment_data=ssvc,
@@ -327,11 +326,11 @@ def run_pipeline(research_engine=None, nvd_api_key=None,
             updated_entries.append(build_index_entry(record))
             cves_processed += 1
     else:
-        print(f"\n  (skipping vulnrichment scan — add --scan-vulnrichment to enable)")
+        print("\n  (skipping vulnrichment scan — add --scan-vulnrichment to enable)")
 
     # ---- 3c.  Quality control (--qc) ---------------------------------------
     if run_qc:
-        print(f"\n  ── Quality control ──")
+        print("\n  ── Quality control ──")
         from qc import run_qc_pipeline
         qc_report, qc_records = run_qc_pipeline()
         # Re-read updated entries from QC'd files (QC may have auto-fixed them)
@@ -349,7 +348,7 @@ def run_pipeline(research_engine=None, nvd_api_key=None,
         run_log["qc_report"] = qc_report
 
     # ---- 4.  Write outputs -----------------------------------------------
-    print(f"\n[4/4] Writing output artifacts …")
+    print("\n[4/4] Writing output artifacts …")
 
     # Merge new entries into the existing index (replace old entries for same CVE)
     existing_cves = existing_index.get("cves", [])
@@ -378,7 +377,7 @@ def run_pipeline(research_engine=None, nvd_api_key=None,
     })
     _save_run_log(run_log)
 
-    print(f"\n╔══ Summary ══╗")
+    print("\n╔══ Summary ══╗")
     print(f"  Processed:  {cves_processed}")
     print(f"  Skipped:    {cves_skipped}")
     print(f"  Errors:     {len(errors)}")
@@ -452,7 +451,7 @@ def cli_main():
 
     if args.agent:
         try:
-            from hermes_tools import web_search, web_extract
+            from hermes_tools import web_extract, web_search
             engine = ResearchEngine(web_search=web_search, web_extract=web_extract)
             print("  [agent-mode: Hermes tools loaded]\n")
         except ImportError:
