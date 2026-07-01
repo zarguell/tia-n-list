@@ -7,14 +7,15 @@ import json
 import re
 import time
 import sys
-from hermes_tools import web_search, web_extract, read_file, write_file, terminal
+from hermes_tools import web_search, write_file, terminal
 
-import sys
-sys.path.insert(0, "/opt/data/home/repos/kevrichment")
+from pathlib import Path
+
+BASE = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(BASE))
 from research import ResearchEngine
 
-BASE = "/opt/data/home/repos/kevrichment"
-CVES_DIR = f"{BASE}/data/cves"
+CVES_DIR = BASE / "data" / "cves"
 
 def find_cves_needing_analysis(count=10):
     """Find CVE IDs without Hermes research."""
@@ -31,7 +32,7 @@ for f in files:
             break
 print('\\\\n'.join(needing))
 " """)
-    ids = [l.strip() for l in result.get("output", "").strip().split("\n") if l.strip()]
+    ids = [line.strip() for line in result.get("output", "").strip().split("\n") if line.strip()]
     return ids
 
 def read_cve(cve_id):
@@ -115,7 +116,6 @@ def extract_component_from_advisory(cve_id, vendor, product, description):
         return product
     
     # First try the existing deterministic extraction from NVD description
-    desc_low = description.lower()
     patterns = [
         r'in the ([A-Z][a-zA-Z0-9_ -]{1,45}?)(?: component| module| feature| function)\b',
         r'in ([A-Z][a-zA-Z0-9_ -]{1,45}?)(?: component| module| feature| function)',
