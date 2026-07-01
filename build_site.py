@@ -196,7 +196,7 @@ def gen_dashboard(index_data):
     parts.append(f'<script>var CVE_DATA = {data_json};</script>')
     parts.append("""
 <script>
-var currentPage = 1, pageSize = 50, sortCol = 'published', sortAsc = false;
+var currentPage = 1, pageSize = 50, sortCol = 'dateAdded', sortAsc = false;
 var filters = { auto: 'all', exploit: 'all', threeDay: 'all', poc: 'all' };
 
 function toggleFilter(btn, filter) {

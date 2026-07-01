@@ -90,7 +90,7 @@ def test_dashboard_sort_uses_data_keys_not_display_names():
         {"last_updated": "", "total_cves_processed": 0, "cves": []}
     )
     # Initial sortCol must be a data key, not a display name
-    assert "sortCol = 'published'" in html
+    assert "sortCol = 'dateAdded'" in html
     assert "sortCol = 'Published'" not in html
     # The broken keyMap lookup must be gone
     assert "keyMap[sortCol]" not in html
