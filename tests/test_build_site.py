@@ -32,3 +32,31 @@ def test_safe_url_handles_empty():
 
 def test_safe_url_html_escapes_quotes_in_safe_urls():
     assert build_site.safe_url('https://example.com/?a="b"') == 'https://example.com/?a=&quot;b&quot;'
+
+
+def _relative_luminance(hex_color):
+    h = hex_color.lstrip("#")
+    r, g, b = (int(h[i:i + 2], 16) / 255 for i in (0, 2, 4))
+
+    def channel(c):
+        return c / 12.92 if c <= 0.03928 else ((c + 0.055) / 1.055) ** 2.4
+
+    return 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b)
+
+
+def _contrast_ratio(fg, bg):
+    l1, l2 = _relative_luminance(fg), _relative_luminance(bg)
+    hi, lo = max(l1, l2), min(l1, l2)
+    return (hi + 0.05) / (lo + 0.05)
+
+
+def test_accent_meets_wcag_aa_on_bg():
+    assert _contrast_ratio(build_site.T["accent"], build_site.T["bg"]) >= 4.5
+
+
+def test_text_muted_meets_wcag_aa_on_bg():
+    assert _contrast_ratio(build_site.T["text_muted"], build_site.T["bg"]) >= 4.5
+
+
+def test_accent_hover_meets_wcag_aa_on_bg():
+    assert _contrast_ratio(build_site.T["accent_hover"], build_site.T["bg"]) >= 4.5

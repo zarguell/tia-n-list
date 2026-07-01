@@ -17,9 +17,9 @@ T = {
     "border_visible": "rgba(255,255,255,0.10)",
     "text_primary": "#f0f1f3",
     "text_secondary": "#9ba1a6",
-    "text_muted": "#5c6166",
-    "accent": "#6a5fc1",
-    "accent_hover": "#7d72d4",
+    "text_muted": "#7a8087",
+    "accent": "#8b80e0",
+    "accent_hover": "#9d94e8",
     "red": "#f04438",
     "amber": "#f79009",
     "green": "#17b26a",
@@ -539,7 +539,7 @@ function renderTable() {
   var tbody = document.getElementById('cveTableBody');
   tbody.innerHTML = '';
   page.forEach(function(r) {
-    var cvssColor = '#5c6166';
+    var cvssColor = '#7a8087';
     var cvssDisp = 'N/A';
     if (r.cvss !== null && r.cvss !== undefined) {
       var s = parseFloat(r.cvss);
@@ -549,7 +549,7 @@ function renderTable() {
       else if (s >= 4.0) cvssColor = '#53b1fd';
       else cvssColor = '#17b26a';
     }
-    var threeD = r.threeDay ? '<span style="color:#f04438;font-weight:600">YES</span>' : '<span style="color:#5c6166">no</span>';
+    var threeD = r.threeDay ? '<span style="color:#f04438;font-weight:600">YES</span>' : '<span style="color:#7a8087">no</span>';
     var tr = document.createElement('tr');
     tr.style.cursor = 'pointer';
     tr.addEventListener('click', function() { window.location.href = 'cves/' + r.id + '.html'; });
@@ -594,18 +594,18 @@ function createPageBtn(label, page, disabled) {
 
 function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function fmtDate(d) {
-  if (!d) return '<span style="color:#5c6166">\u2014</span>';
+  if (!d) return '<span style="color:#7a8087">\u2014</span>';
   return esc(d.substring(0,10));
 }
 function severityBadge(v) {
   if (v === 'yes') return '<span class="badge badge-sm" style="background:#f0443822;color:#f04438;border:1px solid #f0443844">yes</span>';
   if (v === 'active') return '<span class="badge badge-sm" style="background:#f0443822;color:#f04438;border:1px solid #f0443844">active</span>';
-  return '<span class="badge badge-sm" style="background:#5c616622;color:#9ba1a6;border:1px solid #5c616644">'+v+'</span>';
+  return '<span class="badge badge-sm" style="background:#7a808722;color:#9ba1a6;border:1px solid #7a808744">'+v+'</span>';
 }
 function pocBadge(v) {
   if (v === 'yes') return '<span class="badge badge-sm" style="background:#f7900922;color:#f79009;border:1px solid #f7900944">yes</span>';
   if (v === 'no') return '<span class="badge badge-sm" style="background:#17b26a22;color:#17b26a;border:1px solid #17b26a44">no</span>';
-  return '<span class="badge badge-sm" style="background:#5c616622;color:#9ba1a6;border:1px solid #5c616644">'+v+'</span>';
+  return '<span class="badge badge-sm" style="background:#7a808722;color:#9ba1a6;border:1px solid #7a808744">'+v+'</span>';
 }
 document.addEventListener('DOMContentLoaded', function() {
   renderTable();
