@@ -3,6 +3,7 @@
 
 import json, os, glob, sys, html as html_mod
 from datetime import datetime
+from urllib.parse import urlparse
 from pathlib import Path
 
 # ── Design Tokens ──────────────────────────────────────────────────────────
@@ -207,6 +208,26 @@ SCHEMA_HEADER = """<div style="display:flex;gap:12px;align-items:center;margin-b
 
 def esc(s):
     return html_mod.escape(str(s or ""))
+
+
+def safe_url(s):
+    """Escape a URL for safe use in href= attributes.
+
+    Returns '#' for any URL whose scheme is not http/https. This prevents
+    javascript:, data:, file:, and other executable schemes from reaching the
+    rendered page (XSS defense for URLs sourced from upstream data).
+    """
+    s = str(s or "")
+    if not s.strip():
+        return "#"
+    try:
+        scheme = urlparse(s).scheme.lower()
+    except Exception:
+        return "#"
+    if scheme not in ("http", "https"):
+        return "#"
+    return html_mod.escape(s, quote=True)
+
 
 def fmt_date(iso_str):
     if not iso_str:
@@ -727,7 +748,7 @@ def gen_cve_detail(cve_record):
     meta_rows += _compact_row("Component Default", esc(research.get("vulnerable_component_enabled_by_default", "unknown")))
     sources = meta.get("sources_consulted", [])
     if sources:
-        src_links = "<br>".join(f'<a href="{esc(s)}" target="_blank" rel="noopener" style="font-size:0.75rem">{esc(s)}</a>' for s in sources if s)
+        src_links = "<br>".join(f'<a href="{safe_url(s)}" target="_blank" rel="noopener" style="font-size:0.75rem">{esc(s)}</a>' for s in sources if s)
         meta_rows += _compact_row("Sources", src_links)
     parts.append(_collapse_card("Research Metadata", meta_rows, collapsed=True))
 
@@ -807,12 +828,12 @@ def gen_cve_detail(cve_record):
     poc_color = T["green"] if poc == "yes" else T["text_muted"] if poc == "no" else T["amber"]
     rd_rows += _compact_row("Public PoC", severity_badge(poc, poc_color, small=True))
     if poc_urls:
-        url_links = "<br>".join(f'<a href="{esc(u)}" target="_blank" rel="noopener" style="font-size:0.75rem">{esc(u)}</a>' for u in poc_urls if u)
+        url_links = "<br>".join(f'<a href="{safe_url(u)}" target="_blank" rel="noopener" style="font-size:0.75rem">{esc(u)}</a>' for u in poc_urls if u)
         rd_rows += _compact_row("PoC URLs", url_links)
 
     advisory = research.get("vendor_advisory_url", "")
     if advisory:
-        rd_rows += _compact_row("Advisory", f'<a href="{esc(advisory)}" target="_blank" rel="noopener" style="font-size:0.75rem">{esc(advisory)}</a>')
+        rd_rows += _compact_row("Advisory", f'<a href="{safe_url(advisory)}" target="_blank" rel="noopener" style="font-size:0.75rem">{esc(advisory)}</a>')
 
     expl_notes = research.get("exploit_complexity_notes", "")
     if expl_notes:
