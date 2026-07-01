@@ -196,7 +196,7 @@ def gen_dashboard(index_data):
     parts.append(f'<script>var CVE_DATA = {data_json};</script>')
     parts.append("""
 <script>
-var currentPage = 1, pageSize = 50, sortCol = 'Published', sortAsc = false;
+var currentPage = 1, pageSize = 50, sortCol = 'published', sortAsc = false;
 var filters = { auto: 'all', exploit: 'all', threeDay: 'all', poc: 'all' };
 
 function toggleFilter(btn, filter) {
@@ -227,9 +227,9 @@ function sortTable(col) {
   var colMap = {'CVE ID':'id','Vendor':'vendor','Product':'product','CVSS':'cvss','Auto':'auto','Exploit':'exploit','PoC':'poc','3-Day':'threeDay','Timeline':'timeline','Date Added':'dateAdded','Published':'published'};
   var key = colMap[col];
   if (!key) return;
-  if (sortCol === col) { sortAsc = !sortAsc; } else {
-    sortCol = col;
-    sortAsc = (col === 'Date Added' || col === 'Published' || col === 'CVSS') ? false : true;
+  if (sortCol === key) { sortAsc = !sortAsc; } else {
+    sortCol = key;
+    sortAsc = (key === 'dateAdded' || key === 'published' || key === 'cvss') ? false : true;
   }
   document.querySelectorAll('th').forEach(function(t) { t.classList.remove('sorted','desc'); });
   var th = document.querySelector('th[data-col="'+col+'"]');
@@ -240,11 +240,20 @@ function sortTable(col) {
 function renderTable() {
   var data = getFilteredData();
   // Sort
-  var keyMap = {'id':'id','vendor':'vendor','product':'product','cvss':'cvss','auto':'auto','exploit':'exploit','poc':'poc','threeDay':'threeDay','timeline':'timeline','dateAdded':'dateAdded','published':'published'};
-  var key = keyMap[sortCol] || 'id';
+  var key = sortCol || 'id';
   data.sort(function(a,b) {
     var av = a[key], bv = b[key];
     if (key === 'cvss') { av = av || 0; bv = bv || 0; }
+    if (key === 'id') {
+      var am = av.match(/CVE-(\\d{4})-(\\d+)/);
+      var bm = bv.match(/CVE-(\\d{4})-(\\d+)/);
+      if (am && bm) {
+        var ay = parseInt(am[1]), by = parseInt(bm[1]);
+        if (ay !== by) return sortAsc ? (ay - by) : (by - ay);
+        var an = parseInt(am[2]), bn = parseInt(bm[2]);
+        return sortAsc ? (an - bn) : (bn - an);
+      }
+    }
     if (typeof av === 'string') av = av.toLowerCase();
     if (typeof bv === 'string') bv = bv.toLowerCase();
     if (av < bv) return sortAsc ? -1 : 1;
