@@ -187,8 +187,8 @@ class ResearchEngine:
             if result["vendor_advisory_url"] and self._web_extract:
                 try:
                     self._web_extract([result["vendor_advisory_url"]])
-                except Exception:
-                    pass
+                except Exception as e:
+                    print(f"    [WARN] web_extract failed: {e}")
 
         except Exception as e:
             print(f"    [WARN] Agent research failed: {e}")

@@ -68,3 +68,12 @@ def test_dashboard_renders_cve_id_as_keyboard_focusable_anchor():
     )
     # The CVE-ID cell must build an <a href="cves/{id}.html"> so Tab+Enter works.
     assert 'href="cves/\' + r.id + \'.html"' in html
+
+
+def test_safe_url_handles_none_input():
+    """safe_url must return safe fallback for None (missing JSON field).
+
+    Callers pass r.get('field') which returns None when the key is absent.
+    urlparse(None) raises AttributeError — the narrowed except must catch it.
+    """
+    assert build_site.safe_url(None) == "#"

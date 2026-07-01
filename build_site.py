@@ -224,7 +224,7 @@ def safe_url(s):
         return "#"
     try:
         scheme = urlparse(s).scheme.lower()
-    except Exception:
+    except (ValueError, TypeError, AttributeError):
         return "#"
     if scheme not in ("http", "https"):
         return "#"
