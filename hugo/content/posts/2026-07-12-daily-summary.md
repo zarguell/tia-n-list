@@ -1,5 +1,5 @@
 ---
-title: "Daily Threat Intelligence Digest — 2026-07-12"
+title: "🌏 ACSC CMS 18 CVEs, 🕵️ GitHub Ghost Recon, 📋 Joomla KEV Additions"
 date: 2026-07-12T07:00:00-04:00
 tags: ["threat-intelligence", "cms-exploitation", "cisa-kev", "github-recon", "wordpress", "joomla", "acsc"]
 categories: ["Threat Intelligence", "Daily Digest"]

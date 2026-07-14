@@ -1,5 +1,5 @@
 ---
-title: "Daily Threat Intel Digest - 2026-07-14"
+title: "🚕 Nihon Kotsu Shutdown, 📦 Jscrambler Supply Chain, 🇪🇺 EU-UK Russia Sanctions, 🍎 CrashStealer macOS, 🐰 RabbitMQ OAuth Leak"
 date: 2026-07-14T06:00:00Z
 tags: ["threat-intel", "rabbitmq", "jscrambler", "supply-chain", "fsb", "turla", "sanctions", "malware", "apt", "lumma-stealer", "crashstealer", "nihon-kotsu", "lidl", "cmmc", "entra-id"]
 categories: ["Threat Intelligence"]
