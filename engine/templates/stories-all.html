@@ -18,6 +18,12 @@
       {% for m in months %}<option value="{{ m[0] }}">{{ m[1] }}</option>{% endfor %}
     </select>
   </label>
+  <label>Sort
+    <select id="f-sort">
+      <option value="latest" selected>Latest first</option>
+      <option value="hot">Hot first</option>
+    </select>
+  </label>
   <label class="f-search">Search
     <input id="f-q" type="search" placeholder="Title, story, source" autocomplete="off">
   </label>
@@ -42,6 +48,7 @@
   var fYear = document.getElementById('f-year');
   var fMonth = document.getElementById('f-month');
   var fQ = document.getElementById('f-q');
+  var fSort = document.getElementById('f-sort');
   var count = document.getElementById('f-count');
   var noResults = document.getElementById('no-results');
   var pager = document.getElementById('pager');
@@ -63,6 +70,7 @@
     if (fYear.value) params.set('year', fYear.value);
     if (fMonth.value) params.set('month', fMonth.value);
     if (fQ.value) params.set('q', fQ.value.trim());
+    if (fSort.value === 'hot') params.set('sort', 'hot');
     if (page > 1) params.set('page', page);
     history.replaceState(null, '', params.toString() ? '?' + params.toString() : location.pathname);
   }
@@ -93,13 +101,28 @@
     pager.innerHTML = html;
   }
 
+  function sortedCards() {
+    var arr = cards.slice();
+    if (fSort.value === 'latest') {
+      arr.sort(function (a, b) { return b.dataset.lastseen.localeCompare(a.dataset.lastseen); });
+    } else {
+      arr.sort(function (a, b) { return parseFloat(b.dataset.score) - parseFloat(a.dataset.score); });
+    }
+    return arr;
+  }
+
   function apply() {
-    var visible = cards.filter(matches);
+    var sorted = sortedCards();
+    var visible = sorted.filter(matches);
     var pages = Math.max(1, Math.ceil(visible.length / PAGE_SIZE));
     if (page > pages) page = pages;
-    var slice = visible.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
-    cards.forEach(function (c) {
-      c.style.display = slice.indexOf(c) === -1 ? 'none' : '';
+    var startIdx = (page - 1) * PAGE_SIZE;
+    var slice = visible.slice(startIdx, startIdx + PAGE_SIZE);
+    cards.forEach(function (c) { c.style.display = 'none'; });
+    slice.forEach(function (c, i) {
+      c.style.display = '';
+      var r = c.querySelector('.rank');
+      if (r) r.textContent = startIdx + i + 1;
     });
     count.textContent = visible.length + ' of ' + cards.length;
     noResults.hidden = visible.length !== 0;
@@ -107,7 +130,7 @@
     setUrl();
   }
 
-  [fYear, fMonth, fQ].forEach(function (el) {
+  [fYear, fMonth, fQ, fSort].forEach(function (el) {
     el.addEventListener(el.tagName === 'INPUT' ? 'input' : 'change', function () {
       page = 1;
       apply();
@@ -126,6 +149,7 @@
   if (sp.get('year')) fYear.value = sp.get('year');
   if (sp.get('month')) fMonth.value = sp.get('month');
   if (sp.get('q')) fQ.value = sp.get('q');
+  if (sp.get('sort') === 'hot') fSort.value = 'hot';
   page = parseInt(sp.get('page') || '1', 10) || 1;
   apply();
 })();
