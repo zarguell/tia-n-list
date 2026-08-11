@@ -1,0 +1,5 @@
+The Canadian Centre for Cyber Security (CCCS) advisory AV26-800 flags AMD EPYC Series and EPYC Embedded Series processors as affected by vulnerabilities as of August 10, 2026. The advisory points to AMD research on extracting VM secrets through power side channels on AMD SEV-ES and SEV-SNP. No CVEs are listed and CCCS asks administrators to review the linked advisories and apply updates as they become available.
+
+The SEV focus matters. SEV-ES and SEV-SNP are the confidentiality and integrity features that let cloud providers and multi-tenant hosts run encrypted guest memory that the hypervisor cannot read. A power side channel that leaks VM secrets undermines that trust boundary at the hardware level, which no guest or hypervisor software patch can fully mask. AMD EPYC powers a large share of public cloud and on-prem virtualization, so the exposure is broad even before a concrete exploit exists.
+
+Watch for AMD's own security bulletin with CVE identifiers and fixed firmware or microcode revisions. Until then, treat this as a reason to track EPYC firmware updates closely, especially in environments where SEV-SNP is relied on to isolate tenant workloads.
