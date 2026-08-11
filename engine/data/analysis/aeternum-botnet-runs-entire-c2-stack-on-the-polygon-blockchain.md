@@ -1,0 +1,5 @@
+Unit 42 analyzed Aeternum, a C++ botnet loader that moves command-and-control entirely onto the public Polygon blockchain. Operators write encrypted and plaintext instructions directly into smart contracts, and infected devices query them through public RPC endpoints. There are no centralized servers or domains to seize, which makes conventional infrastructure takedown impractical. The design is an evolution of the EtherHiding-style blockchain C2 pattern.
+
+Aeternum also runs VM detection and antivirus scanning checks to evade analysis, a sign the operators expect both automated sandboxes and manual reverse engineering. Blockchain C2 is not new, but running the entire stack, not just a dead-drop resolver, on a public chain lowers operational cost and raises the bar for disruption.
+
+Detection shifts to the endpoint: watch for processes making regular RPC calls to public blockchain endpoints, unusual network destinations on standard JSON-RPC ports, and loader behavior that is not explainable by normal application traffic. Expect more malware families to copy the pattern now that the implementation is public.

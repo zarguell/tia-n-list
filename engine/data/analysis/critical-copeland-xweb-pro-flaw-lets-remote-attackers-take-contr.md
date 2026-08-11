@@ -1,0 +1,5 @@
+Claroty Team82 disclosed 23 vulnerabilities in the Copeland XWEB Pro family of commercial refrigeration supervisory controllers, including an authentication bypass and predictable credential generation that let unauthenticated remote attackers achieve root-level code execution. The affected products include the XWEB300D PRO and XWEB500D PRO, and Copeland has released firmware version 1.13 to address the issues.
+
+XWEB Pro devices sit between enterprise networks and distributed field controllers in commercial refrigeration environments, handling remote alarm monitoring, temperature records, and equipment management. That role makes them a pivot point: root access on the supervisor gives an attacker visibility and control over the refrigeration fleet, plus a foothold inside the facility network.
+
+Patch to firmware 1.13, and do not stop there. Segment refrigeration management networks away from corporate IT, restrict remote access to the controllers, and audit for any internet-facing XWEB devices. Refrigeration downtime is a food-safety and business-continuity issue, not just an IT problem.

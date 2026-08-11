@@ -1,0 +1,5 @@
+CISA and international law enforcement partners issued a joint StopRansomware advisory on Gunra ransomware, warning that affiliates are breaching enterprise networks through exposed edge infrastructure: VPN gateways, firewall appliances, and RDP-accessible systems. The advisory tracks specific CVEs including CVE-2024-55591 and CVE-2025-24472, both Fortinet VPN flaws that have been exploited in the wild previously.
+
+Gunra operates as an increasingly organized ransomware-as-a-service outfit using a conventional double-extortion model: exfiltrate sensitive data, encrypt quickly, then threaten to publish or sell the material through a Tor-hosted leak site. Its victim base spans healthcare and other sectors. The combination of known edge-device CVEs with data theft means defenders get little warning before impact.
+
+Patch exposed VPN and firewall appliances immediately, disable RDP where it is not essential, and segment networks so a breached edge device does not become a direct path to the domain. The advisory is a signal that Gunra affiliates are working through the same exposed-asset playbook that has produced most of the recent VPN-based intrusions.

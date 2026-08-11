@@ -1,0 +1,5 @@
+The water utility cyberattack campaign keeps widening. New Jersey systems in Cape May and Woodbine were hit on July 27, and Alabama utilities now report similar activity. The FBI says water and wastewater utilities in at least seven states have reported incidents since July 27, with some activity degrading water operations. Attribution points to Iranian hackers targeting internet-exposed programmable logic controllers, including Rockwell Automation devices.
+
+The New Jersey impact appears limited to phone-system disruption, but the steady geographic spread is the signal. Every internet-facing ICS controller is a potential beachhead, and the attackers are working down an exposed-asset list rather than picking specific high-value targets.
+
+Utilities should treat this as an active campaign: inventory internet-reachable PLCs and HMIs, enforce segmentation between OT and IT, and check for known Rockwell and other controller exposure. Watch for additional states being disclosed, and for the campaign to move from disruption to operational impact on water treatment or distribution.
