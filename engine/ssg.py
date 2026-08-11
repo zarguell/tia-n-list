@@ -446,7 +446,8 @@ def main():
     years = sorted({c["first_seen"][:4] for c in cards}, reverse=True)
     months = [(i, __import__("calendar").month_name[i]) for i in range(1, 13)]
     write("stories/index.html", render("stories-all.html", active="all",
-                                       cards=cards, total=len(cards),
+                                       cards=sorted(cards, key=lambda c: c["last_seen"], reverse=True),
+                                       total=len(cards),
                                        years=years, months=months))
 
     build_today = datetime.now(LOCAL_TZ).strftime("%Y-%m-%d")
