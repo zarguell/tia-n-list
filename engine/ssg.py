@@ -154,6 +154,48 @@ def load_events():
     return events
 
 
+SENT_SPLIT = re.compile(r"(?<=[.!?])\s+")
+
+
+def _toks(s):
+    return {w for w in re.findall(r"[a-z0-9]{3,}", s.lower())}
+
+
+def delta_body(events):
+    """The story's ORIGINAL event renders in full; every other event renders only
+    the sentences not already covered (accumulated across the original + prior
+    deltas). An event whose delta is empty renders as a bare mention."""
+    order = [e for e in events if e["kind"] == "original"] + \
+            [e for e in events if e["kind"] != "original"]
+    acc = set()
+    out = {}
+    for pos, e in enumerate(order):
+        body = e["content_md"]
+        if pos == 0:
+            delta = body
+            acc.update(_toks(body))
+        else:
+            sents = []
+            for sent in SENT_SPLIT.split(body):
+                st = _toks(sent)
+                if not st:
+                    continue
+                if len(st) < 5:
+                    if not st <= acc:
+                        sents.append(sent)
+                    continue
+                if len(st & acc) / len(st) < 0.7:
+                    sents.append(sent)
+                    acc.update(st)
+            delta = " ".join(sents)
+        is_mention = pos > 0 and len(delta.split()) < 10
+        out[e["id"]] = {
+            "body_html": sanitize(md_to_html(delta, output_format="html5")) if not is_mention else "",
+            "is_mention": is_mention,
+        }
+    return out
+
+
 def load_stories(events):
     cards = []
     max_score = 1
@@ -166,8 +208,11 @@ def load_stories(events):
         evs = [events[e["event_id"]] for e in st["events"] if e["event_id"] in events]
         if not evs:
             continue
-        original = next((e for e in evs if e["kind"] == "original"), evs[0])
+        evs_sorted = sorted(evs, key=lambda e: e["published_at"])
+        deltas = delta_body(evs_sorted)
+        original = next((e for e in evs_sorted if e["kind"] == "original"), evs_sorted[0])
         hc, hl, hv = heat(st.get("score", 0))
+        src_domains = [display_domain(s) for s in st.get("sources", [])]
         src_domains = [display_domain(s) for s in st.get("sources", [])]
         cards.append({
             "id": st["id"],
@@ -183,10 +228,10 @@ def load_stories(events):
             "heat_pct": min(100, int(st.get("score", 0) / max_score * 100)),
             "reddit": st.get("reddit_signal", {}).get("best_score") or None,
             "n_sources": st.get("n_sources", len(st.get("sources", []))),
-            "first_seen": st.get("first_seen", evs[0]["published_at"]),
-            "last_seen": st.get("last_seen", evs[-1]["published_at"]),
-            "first_seen_human": reltime(st.get("first_seen", evs[0]["published_at"])),
-            "last_seen_human": reltime(st.get("last_seen", evs[-1]["published_at"])),
+            "first_seen": st.get("first_seen", evs_sorted[0]["published_at"]),
+            "last_seen": st.get("last_seen", evs_sorted[-1]["published_at"]),
+            "first_seen_human": reltime(st.get("first_seen", evs_sorted[0]["published_at"])),
+            "last_seen_human": reltime(st.get("last_seen", evs_sorted[-1]["published_at"])),
             "events": [{
                 "kind": e["kind"],
                 "title": e.get("title", st["title"]),
@@ -197,8 +242,10 @@ def load_stories(events):
                 "published_at": e["published_at"],
                 "pub_date": rfc2822(e["published_at"]),
                 "snippet": md_snippet(e["content_md"], 400),
-                "html": e["html"],
-            } for e in evs],
+                "body_html": deltas[e["id"]]["body_html"],
+                "is_mention": deltas[e["id"]]["is_mention"],
+            } for e in sorted(evs_sorted,
+                              key=lambda e: (e["kind"] != "original", e["published_at"]))],
         })
     return sorted(cards, key=lambda c: c["score"], reverse=True)
 
