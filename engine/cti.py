@@ -47,7 +47,8 @@ def validate_records(records):
             if t.get("id") not in tech:
                 errs.append(f"cti {sid}: unknown technique {t.get('id')}")
         for key in ("story_id", "title", "actors", "malware", "campaigns", "cves",
-                    "victim_sectors", "geography", "attack", "references", "detections"):
+                    "victim_sectors", "geography", "attack", "references", "detections",
+                    "updated_at"):
             if key not in r:
                 errs.append(f"cti {sid}: missing key {key}")
     return errs
