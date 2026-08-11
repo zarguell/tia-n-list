@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}IOC feeds — Tia N. List{% endblock %}
+{% block content %}
+<p class="eyebrow">CTI · indicators of compromise</p>
+<h1 class="page-title">IOC feeds</h1>
+<p class="lead">Observables extracted from our own curated coverage — never a mirror of third-party feeds. <strong>Corroborated</strong> means the observable appears in two or more independent stories; <strong>reported</strong> means a single source. Status is maintained by age and takedown signals.</p>
+
+<div class="ioc-downloads">
+  <a class="chip covered" href="cti/iocs/iocs.json">JSON</a>
+  <a class="chip covered" href="cti/iocs/iocs.csv">CSV</a>
+  <a class="chip covered" href="cti/iocs/iocs.txt">TXT</a>
+  <a class="chip covered" href="cti/iocs/iocs-stix.json">STIX 2.1</a>
+  <span class="ioc-note">{{ iocs|length }} observables · generated {{ generated }}</span>
+</div>
+
+<h2 class="eyebrow" style="margin: 30px 0 12px;">Corroborated ({{ corroborated|length }})</h2>
+{% if corroborated %}
+<table class="cti-table">
+  <thead><tr><th>Observable</th><th>Type</th><th>First seen</th><th>Last seen</th><th>Status</th><th>Sources</th></tr></thead>
+  <tbody>
+  {% for i in corroborated %}
+    <tr>
+      <td class="mono">{{ i.value }}</td>
+      <td>{{ i.type }}</td>
+      <td class="mono">{{ i.first_seen }}</td>
+      <td class="mono">{{ i.last_seen }}</td>
+      <td><span class="chip status {{ i.status }}">{{ i.status }}</span></td>
+      <td>{{ i.n_sources }} <span class="reltime">stories</span></td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}<p class="no-results">No corroborated observables yet.</p>{% endif %}
+
+<h2 class="eyebrow" style="margin: 30px 0 12px;">Reported ({{ reported|length }})</h2>
+{% if reported %}
+<table class="cti-table">
+  <thead><tr><th>Observable</th><th>Type</th><th>First seen</th><th>Last seen</th><th>Status</th><th>Sources</th></tr></thead>
+  <tbody>
+  {% for i in reported %}
+    <tr>
+      <td class="mono">{{ i.value }}</td>
+      <td>{{ i.type }}</td>
+      <td class="mono">{{ i.first_seen }}</td>
+      <td class="mono">{{ i.last_seen }}</td>
+      <td><span class="chip status {{ i.status }}">{{ i.status }}</span></td>
+      <td>{{ i.n_sources }} <span class="reltime">story</span></td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}<p class="no-results">No reported observables yet.</p>{% endif %}
+
+<h2 class="eyebrow" style="margin: 30px 0 12px;">Raw feeds</h2>
+<p class="lead">For the raw, uncurated feeds defenders should also pull from directly:</p>
+<p class="ioc-raw">
+  <a href="https://bazaar.abuse.ch/">MalwareBazaar</a> ·
+  <a href="https://otx.alienvault.com/">AlienVault OTX</a> ·
+  <a href="https://urlhaus.abuse.ch/">URLhaus</a>
+</p>
+{% endblock %}

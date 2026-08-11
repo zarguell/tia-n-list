@@ -240,6 +240,7 @@ def load_stories(events):
             "last_seen_human": reltime(st.get("last_seen", evs_sorted[-1]["published_at"])),
             "events": [{
                 "kind": e["kind"],
+                "event_id": e["id"],
                 "title": e.get("title", st["title"]),
                 "source": display_domain(e["source"]),
                 "url": e["url"],
@@ -449,6 +450,19 @@ def main():
         r = {**r, "confidence": cti_mod.confidence(r, card),
              "updated_at": r.get("updated_at", r.get("_generated", today))}
         write(f"cti/{sid}/index.html", render("cti_case.html", active=None, rec=r))
+
+    # IOC feeds (deterministic extraction -> JSON/CSV/TXT/STIX + readable page)
+    import ioc as ioc_mod
+    iocs = ioc_mod.build_index(cards, events)
+    corroborated = [i for i in iocs if i["confidence"] == "corroborated"]
+    reported = [i for i in iocs if i["confidence"] != "corroborated"]
+    write("cti/iocs/index.html", render("iocs.html", active="cti",
+                                        iocs=iocs, corroborated=corroborated,
+                                        reported=reported, generated=today))
+    write("cti/iocs/iocs.json", json.dumps(iocs, indent=1))
+    write("cti/iocs/iocs.csv", ioc_mod.to_csv(iocs))
+    write("cti/iocs/iocs.txt", ioc_mod.to_txt(iocs))
+    write("cti/iocs/iocs-stix.json", ioc_mod.to_stix(iocs, BASE_URL + "/"))
     write("style.css", open(os.path.join(TMPL_DIR, "style.css")).read())
     write("robots.txt", open(os.path.join(TMPL_DIR, "robots.txt")).read())
 
