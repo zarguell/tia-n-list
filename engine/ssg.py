@@ -51,7 +51,7 @@ def site_url(path):
     """Join a base-relative path (e.g. 'stories/x/' or '/daily/') to the site URL."""
     return BASE_URL + "/" + path.lstrip("/")
 HOT_THRESHOLD = 2.0
-DIGEST_TOP_N = 5
+DIGEST_TOP_N = 10      # not a hard limit — how many stories the digest page lists
 
 env = Environment(
     loader=FileSystemLoader(TMPL_DIR),
@@ -404,9 +404,25 @@ def main():
     cards_by_id = {c["id"]: c for c in cards}
 
     def day_cards(date):
-        slugs = manifest.get("stories_per_day", {}).get(date, [])
-        return sorted((cards_by_id[s] for s in slugs if s in cards_by_id),
-                      key=lambda c: -c["score"])[:DIGEST_TOP_N]
+        """The stories the digest's narrative actually covered: the digest's explicit
+        'stories' field (analyst-authored) if present, else the manifest stories with a
+        backport event dated that day. Live engine events never inflate a digest's list."""
+        meta = digest_meta.get(date, {})
+        if meta.get("stories"):
+            slugs = [s for s in meta["stories"] if s in cards_by_id]
+        else:
+            slugs = []
+            for slug in manifest.get("stories_per_day", {}).get(date, []):
+                sp = os.path.join(STORIES_DIR, slug + ".json")
+                if not os.path.exists(sp):
+                    continue
+                stj = json.load(open(sp))
+                if any(events.get(ref["event_id"]) and
+                       events[ref["event_id"]]["id"].startswith("e-") and
+                       events[ref["event_id"]]["published_at"][:10] == date
+                       for ref in stj.get("events", [])):
+                    slugs.append(slug)
+        return sorted((cards_by_id[s] for s in slugs), key=lambda c: -c["score"])[:DIGEST_TOP_N]
 
     digest_meta = {}
     for d in digest_dates:
@@ -434,11 +450,11 @@ def main():
                              "summary": meta.get("summary", "")})
     write("daily/index.html", render("daily-index.html", active="daily", digests=digests_meta))
     # old-scheme redirects: posts/YYYY-MM-DD-daily-summary/ -> daily/YYYY-MM-DD/
-    # targets are base-relative (the <base href> resolves them from any depth)
+    # targets are ABSOLUTE (relative meta-refresh URLs resolve against the page
+    # path, not the base, in some browsers — verified broken)
     for d in digest_dates:
-        target = f"daily/{d}/"
         write(f"posts/{d}-daily-summary/index.html",
-              render("redirect.html", target=target, target_abs=site_url(f"daily/{d}/")))
+              render("redirect.html", target_abs=site_url(f"daily/{d}/")))
     digest_date = digest_dates[-1] if digest_dates else build_today
 
     write("sitemap.xml", render("sitemap.xml", stories=cards))

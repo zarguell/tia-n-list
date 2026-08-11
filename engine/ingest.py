@@ -34,6 +34,21 @@ CVE_RE = re.compile(r"CVE-\d{4}-\d{4,7}", re.IGNORECASE)
 LOOKBACK_H = 48
 REDDIT_WINDOW = 500
 
+SCRIPT_RANGES = [("ko", re.compile(r"[\uAC00-\uD7AF]")), ("ja", re.compile(r"[\u3040-\u30FF]")),
+                 ("zh", re.compile(r"[\u4E00-\u9FFF]")), ("ru", re.compile(r"[\u0400-\u04FF]")),
+                 ("ar", re.compile(r"[\u0600-\u06FF]")), ("he", re.compile(r"[\u0590-\u05FF]")),
+                 ("el", re.compile(r"[\u0370-\u03FF]")), ("hi", re.compile(r"[\u0900-\u097F]"))]
+
+
+def detect_lang(text):
+    """Dominant non-Latin script -> language code; 'en' for Latin content."""
+    counts = {name: len(rx.findall(text)) for name, rx in SCRIPT_RANGES}
+    total = sum(counts.values())
+    if total == 0:
+        return "en"
+    best = max(counts, key=counts.get)
+    return best if counts[best] / max(1, len(text)) > 0.08 else "en"
+
 
 def norm_dt(s):
     dt = datetime.fromisoformat(s.replace("Z", "+00:00"))
@@ -89,7 +104,7 @@ def ingest_miniflux(st, hours):
         meta = {"id": eid, "title": title, "kind": "pending",
                 "source": domain_of(url), "url": url,
                 "published_at": norm_dt(e.get("published_at") or datetime.now(timezone.utc).isoformat()),
-                "cves": cves}
+                "cves": cves, "lang": detect_lang(title + " " + body)}
         with open(os.path.join(EVENTS, eid + ".md"), "w") as f:
             f.write(body + "\n")
         json.dump(meta, open(os.path.join(EVENTS, eid + ".json"), "w"), indent=1)
