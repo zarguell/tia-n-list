@@ -435,6 +435,20 @@ def main():
     write("404.html", render("404.html", active=None))
     write("feeds/index.html", render("feeds.html", active="feeds"))
     write("methodology/index.html", render("methodology.html", active=None))
+
+    # CTI & detection tier: matrix + case pages
+    import cti as cti_mod
+    cti_records = cti_mod.load_records()
+    cards_by_id_cti = {c["id"]: c for c in cards}
+    cti_matrix = cti_mod.build_matrix(cti_records, cards_by_id_cti)
+    cti_covered = cti_mod.all_covered(cti_matrix)
+    write("cti/index.html", render("cti.html", active="cti",
+                                   matrix=cti_matrix, covered=cti_covered))
+    for sid, r in cti_records.items():
+        card = cards_by_id_cti.get(sid)
+        r = {**r, "confidence": cti_mod.confidence(r, card),
+             "updated_at": r.get("updated_at", r.get("_generated", today))}
+        write(f"cti/{sid}/index.html", render("cti_case.html", active=None, rec=r))
     write("style.css", open(os.path.join(TMPL_DIR, "style.css")).read())
     write("robots.txt", open(os.path.join(TMPL_DIR, "robots.txt")).read())
 
@@ -552,10 +566,14 @@ def main():
     backlink_errs = lint_backlinks(cards)
     for e in backlink_errs:
         print(f"BACKLINK FAIL {e}", file=sys.stderr)
-    if LINT_HITS or bad_links or bad_chips or backlink_errs:
+    import cti as cti_mod
+    cti_errs = cti_mod.validate_records(cti_mod.load_records())
+    for e in cti_errs:
+        print(f"CTI FAIL {e}", file=sys.stderr)
+    if LINT_HITS or bad_links or bad_chips or backlink_errs or cti_errs:
         print(f"LINT FAIL: {len(LINT_HITS)} path-absolute + {len(bad_links)} unresolvable"
               f" internal URL(s) + {len(bad_chips)} URL-in-chip + {len(backlink_errs)}"
-              " backlink errors in generated HTML — fix before publishing.",
+              f" backlink errors + {len(cti_errs)} CTI errors — fix before publishing.",
               file=sys.stderr)
         sys.exit(1)
 

@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Detection coverage — Tia N. List{% endblock %}
+{% block content %}
+<p class="eyebrow">CTI · detection coverage</p>
+<h1 class="page-title">ATT&amp;CK coverage</h1>
+<p class="lead">Every technique our cases report, joined with the detections we publish. Amber means the technique appears in our coverage but no detection is published yet — that is the gap. Green means a detection exists.</p>
+
+<div class="matrix">
+  <div class="matrix-row">
+  {% for tactic in matrix %}
+    <div class="matrix-col">
+      <h3 class="matrix-tactic">{{ tactic.tactic_name }} <span class="m-count">{{ tactic.n_covered }}/{{ tactic.techniques|length }}</span></h3>
+      {% for t in tactic.techniques %}
+        {% if t.state == 'none' %}
+        <div class="m-cell none" title="{{ t.name }}"><span>{{ t.id }}</span></div>
+        {% else %}
+        <div class="m-cell {{ t.state }}" title="{{ t.name }}"><a href="#{{ t.id }}">{{ t.id }}</a>{% if t.n_cases %}<em>{{ t.n_cases }}</em>{% endif %}</div>
+        {% endif %}
+      {% endfor %}
+    </div>
+  {% endfor %}
+  </div>
+</div>
+
+<h2 class="eyebrow" style="margin: 40px 0 12px;">Covered techniques</h2>
+{% if covered %}
+<table class="cti-table">
+  <thead><tr><th>Technique</th><th>Name</th><th>Tactic</th><th>Cases</th></tr></thead>
+  <tbody>
+  {% for t in covered %}
+    <tr id="{{ t.id }}">
+      <td class="mono">{{ t.id }}</td>
+      <td>{{ t.name }}</td>
+      <td class="mono">{{ t.tactic_name }}</td>
+      <td>
+        {% for c in t.cases %}<a class="chip covered" href="cti/{{ c.story_id }}/">{{ c.title }}</a>{% endfor %}
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="no-results">No techniques covered yet. The daily CTI pass grows this matrix.</p>
+{% endif %}
+{% endblock %}
