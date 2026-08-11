@@ -42,6 +42,7 @@ TMPL_DIR = os.path.join(ENGINE, "templates")
 EVENTS_DIR = os.path.join(ENGINE, "data", "events")
 STORIES_DIR = os.path.join(ENGINE, "data", "stories")
 DIGESTS_DIR = os.path.join(ENGINE, "data", "digests")
+CTI_DIR = os.path.join(ENGINE, "data", "cti")
 LOCAL_TZ = ZoneInfo("America/New_York")          # pipeline convention; digest runs 11:15 UTC = 07:15 EDT
 DIGEST_RUN_UTC = "11:15:00Z"                      # stable pubDate anchor for the daily feed
 BASE_URL = "https://zarguell.github.io/tia-n-list"
@@ -439,17 +440,44 @@ def main():
 
     # CTI & detection tier: matrix + case pages
     import cti as cti_mod
+    import sigma as sigma_mod
     cti_records = cti_mod.load_records()
     cards_by_id_cti = {c["id"]: c for c in cards}
-    cti_matrix = cti_mod.build_matrix(cti_records, cards_by_id_cti)
+    has_detection = lambda sid: os.path.exists(os.path.join(CTI_DIR, sid + ".sigma")) or \
+                                os.path.exists(os.path.join(CTI_DIR, sid + ".yara"))
+    cti_matrix = cti_mod.build_matrix(cti_records, cards_by_id_cti, has_detection)
     cti_covered = cti_mod.all_covered(cti_matrix)
     write("cti/index.html", render("cti.html", active="cti",
                                    matrix=cti_matrix, covered=cti_covered))
     for sid, r in cti_records.items():
         card = cards_by_id_cti.get(sid)
+        texts = {}
+        for suffix in (".sigma", ".splunk", ".kql"):
+            p = os.path.join(CTI_DIR, sid + suffix)
+            texts[suffix.lstrip(".") + "_text"] = open(p).read() if os.path.exists(p) else ""
         r = {**r, "confidence": cti_mod.confidence(r, card),
-             "updated_at": r.get("updated_at", r.get("_generated", today))}
+             "updated_at": r.get("updated_at", r.get("_generated", today)),
+             **texts}
         write(f"cti/{sid}/index.html", render("cti_case.html", active=None, rec=r))
+
+    # Derive Splunk/KQL variants from the authored Sigma rules (deterministic —
+    # never hand-written, so they cannot drift). Overwrites stale variants;
+    # committed variants survive when sigma-cli is absent (e.g. CI fallback).
+    for f in sorted(glob.glob(os.path.join(CTI_DIR, "*.sigma"))):
+        slug = os.path.splitext(os.path.basename(f))[0]
+        splunk, kql = sigma_mod.convert_variants(f)
+        # raw rule + derived variants in the source store (committed)
+        sigma_text = open(f).read()
+        with open(os.path.join(CTI_DIR, slug + ".splunk"), "w") as out:
+            out.write(f"# {slug} — Splunk SPL variant (derived from {slug}.sigma via sigma convert)\n{splunk}\n")
+        with open(os.path.join(CTI_DIR, slug + ".kql"), "w") as out:
+            out.write(f"# {slug} — KQL variant (derived from {slug}.sigma via sigma convert)\n{kql}\n")
+        # and in the published site so the raw links resolve
+        write(f"cti/{slug}.sigma", sigma_text)
+        write(f"cti/{slug}.splunk",
+              f"# {slug} — Splunk SPL variant (derived from {slug}.sigma via sigma convert)\n{splunk}\n")
+        write(f"cti/{slug}.kql",
+              f"# {slug} — KQL variant (derived from {slug}.sigma via sigma convert)\n{kql}\n")
 
     # IOC feeds (deterministic extraction -> JSON/CSV/TXT/STIX + readable page)
     import ioc as ioc_mod
@@ -591,10 +619,26 @@ def main():
     cti_errs = cti_mod.validate_records(cti_mod.load_records())
     for e in cti_errs:
         print(f"CTI FAIL {e}", file=sys.stderr)
-    if LINT_HITS or bad_links or bad_chips or backlink_errs or cti_errs:
+    import sigma as sigma_mod
+    sigma_errs = []
+    for f in sorted(glob.glob(os.path.join(CTI_DIR, "*.sigma"))):
+        cli_errs, missing = sigma_mod.check_with_cli(f)
+        if cli_errs is None and missing:
+            # sigma-cli not installed — structural check only
+            cli_errs = sigma_mod.validate_sigma(f)
+        for e in cli_errs:
+            sigma_errs.append(f"{os.path.basename(f)}: {e}")
+    for f in sorted(glob.glob(os.path.join(CTI_DIR, "*.splunk"))):
+        sigma_errs += [f"{os.path.basename(f)}: {e}" for e in sigma_mod.validate_variant(f, "splunk")]
+    for f in sorted(glob.glob(os.path.join(CTI_DIR, "*.kql"))):
+        sigma_errs += [f"{os.path.basename(f)}: {e}" for e in sigma_mod.validate_variant(f, "kql")]
+    for e in sigma_errs:
+        print(f"SIGMA FAIL {e}", file=sys.stderr)
+    if LINT_HITS or bad_links or bad_chips or backlink_errs or cti_errs or sigma_errs:
         print(f"LINT FAIL: {len(LINT_HITS)} path-absolute + {len(bad_links)} unresolvable"
               f" internal URL(s) + {len(bad_chips)} URL-in-chip + {len(backlink_errs)}"
-              f" backlink errors + {len(cti_errs)} CTI errors — fix before publishing.",
+              f" backlink errors + {len(cti_errs)} CTI errors + {len(sigma_errs)}"
+              f" Sigma errors — fix before publishing.",
               file=sys.stderr)
         sys.exit(1)
 

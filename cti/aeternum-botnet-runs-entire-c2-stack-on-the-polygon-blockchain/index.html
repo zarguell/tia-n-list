@@ -79,6 +79,61 @@
 </ul>
 
 
+<h2 class="eyebrow" style="margin: 28px 0 12px;">Detections</h2>
+
+<p class="lead" style="margin-bottom: 12px;">Detection content derived from this case analysis. Status: experimental — not validated against live telemetry.</p>
+
+<h3 class="eyebrow" style="margin: 20px 0 8px;">Sigma <a class="raw-link" href="cti/aeternum-botnet-runs-entire-c2-stack-on-the-polygon-blockchain.sigma">raw</a></h3>
+<pre class="code-block"><code>title: Aeternum Botnet Blockchain RPC Communication
+id: 6f39590d-65e5-4372-a28d-1db2f0e7b41a
+status: experimental
+description: &gt;
+    Detects processes communicating with public Polygon blockchain RPC
+    endpoints, the command-and-control channel of the Aeternum botnet
+    loader (Unit 42, 2026): infected devices query attacker-controlled
+    smart contracts through public RPC endpoints instead of a central
+    C2 server.
+references:
+    - https://unit42.paloaltonetworks.com/aeternum-blockchain-c2-analysis/
+author: Tia N. List
+date: 2026/08/11
+tags:
+    - attack.t1071
+logsource:
+    category: network_connection
+    product: windows
+detection:
+    selection_domain:
+        DestinationHostname|endswith:
+            - &#39;polygon-rpc.com&#39;
+            - &#39;rpc-mainnet.matic.network&#39;
+            - &#39;rpc-mainnet.maticvigil.com&#39;
+            - &#39;polygon.llamarpc.com&#39;
+    selection_port:
+        DestinationPort:
+            - 8545
+            - 8546
+    condition: selection_domain or selection_port
+falsepositives:
+    - Legitimate wallets and DeFi applications using public RPC endpoints
+    - Local development nodes bound to 8545/8546
+level: medium
+</code></pre>
+
+
+<h3 class="eyebrow" style="margin: 20px 0 8px;">Splunk SPL <a class="raw-link" href="cti/aeternum-botnet-runs-entire-c2-stack-on-the-polygon-blockchain.splunk">raw</a></h3>
+<pre class="code-block"><code># aeternum-botnet-runs-entire-c2-stack-on-the-polygon-blockchain — Splunk SPL variant (derived from aeternum-botnet-runs-entire-c2-stack-on-the-polygon-blockchain.sigma via sigma convert)
+DestinationHostname IN (&#34;*polygon-rpc.com&#34;, &#34;*rpc-mainnet.matic.network&#34;, &#34;*rpc-mainnet.maticvigil.com&#34;, &#34;*polygon.llamarpc.com&#34;) OR DestinationPort IN (8545, 8546)
+</code></pre>
+
+
+<h3 class="eyebrow" style="margin: 20px 0 8px;">KQL (Sentinel / Defender) <a class="raw-link" href="cti/aeternum-botnet-runs-entire-c2-stack-on-the-polygon-blockchain.kql">raw</a></h3>
+<pre class="code-block"><code># aeternum-botnet-runs-entire-c2-stack-on-the-polygon-blockchain — KQL variant (derived from aeternum-botnet-runs-entire-c2-stack-on-the-polygon-blockchain.sigma via sigma convert)
+(DestinationHostname endswith &#34;polygon-rpc.com&#34; or DestinationHostname endswith &#34;rpc-mainnet.matic.network&#34; or DestinationHostname endswith &#34;rpc-mainnet.maticvigil.com&#34; or DestinationHostname endswith &#34;polygon.llamarpc.com&#34;) or (DestinationPort in~ (&#34;8545&#34;, &#34;8546&#34;))
+</code></pre>
+
+
+
 <h2 class="eyebrow" style="margin: 28px 0 12px;">References</h2>
 <ul class="digest-stories">
   

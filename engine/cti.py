@@ -64,8 +64,10 @@ def confidence(record, card):
     return "reported"
 
 
-def build_matrix(records, cards_by_id):
-    """Tactic-ordered matrix: each technique with state + the cases covering it."""
+def build_matrix(records, cards_by_id, has_detection=None):
+    """Tactic-ordered matrix: each technique with state + the cases covering it.
+    A technique is 'detection' (green) when ANY covering case has a published
+    detection (Sigma/YARA file); 'case' (amber) when covered but undetected."""
     tech = load_techniques()
     technique_cases = {}
     for sid, r in records.items():
@@ -73,6 +75,7 @@ def build_matrix(records, cards_by_id):
             technique_cases.setdefault(t["id"], []).append({
                 "story_id": sid,
                 "title": r.get("title", sid),
+                "detection": bool(has_detection and has_detection(sid)),
             })
     matrix = []
     for tactic in TACTIC_ORDER:
@@ -82,9 +85,7 @@ def build_matrix(records, cards_by_id):
         rows = []
         for t in cols:
             cases = technique_cases.get(t["id"], [])
-            detection = any(r.get("detections", {}).get("sigma") or
-                            r.get("detections", {}).get("yara")
-                            for r in (records.get(c["story_id"], {}) for c in cases))
+            detection = any(c["detection"] for c in cases)
             state = "detection" if detection else ("case" if cases else "none")
             rows.append({"id": t["id"], "name": t["name"], "state": state,
                          "n_cases": len(cases), "cases": cases})
@@ -96,12 +97,16 @@ def build_matrix(records, cards_by_id):
 
 
 def all_covered(matrix):
-    """Flat list of covered techniques (id, name, tactic, cases) for the detail section."""
+    """Flat list of covered techniques (id, name, tactic, cases + which have
+    published detections) for the detail section."""
     order = {tac: i for i, tac in enumerate(TACTIC_ORDER)}
     out = []
     for tactic in matrix:
         for t in tactic["techniques"]:
             if t["state"] != "none":
-                out.append({**t, "tactic_name": tactic["tactic_name"]})
+                out.append({
+                    **t, "tactic_name": tactic["tactic_name"],
+                    "n_detections": sum(1 for c in t["cases"] if c["detection"]),
+                })
     out.sort(key=lambda t: (order.get(t["tactic_name"].lower(), 99), t["id"]))
     return out

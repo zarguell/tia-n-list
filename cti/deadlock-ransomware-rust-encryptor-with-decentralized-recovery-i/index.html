@@ -89,6 +89,76 @@
 </ul>
 
 
+<h2 class="eyebrow" style="margin: 28px 0 12px;">Detections</h2>
+
+<p class="lead" style="margin-bottom: 12px;">Detection content derived from this case analysis. Status: experimental — not validated against live telemetry.</p>
+
+<h3 class="eyebrow" style="margin: 20px 0 8px;">Sigma <a class="raw-link" href="cti/deadlock-ransomware-rust-encryptor-with-decentralized-recovery-i.sigma">raw</a></h3>
+<pre class="code-block"><code>title: DeadLock Ransomware Pre-Encryption Tripwires
+id: 3b72e539-2be3-4d9b-bc47-96f5028acb22
+status: experimental
+description: &gt;
+    Detects the pre-encryption tripwires documented for the DeadLock
+    ransomware operation (Microsoft Threat Intelligence, 2026-08-10):
+    Windows Defender tampering, backup deletion and event log clearing
+    that fire before encryption begins.
+references:
+    - https://www.microsoft.com/en-us/security/blog/2026/08/10/deadlock-ransomware-breaking-down-a-rust-based-encryptor-with-decentralized-recovery-infrastructure/
+author: Tia N. List
+date: 2026/08/11
+tags:
+    - attack.t1486
+    - attack.t1490
+    - attack.t1562
+    - attack.t1070
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_vss:
+        Image|endswith: &#39;\vssadmin.exe&#39;
+        CommandLine|contains|all:
+            - &#39;delete&#39;
+            - &#39;shadows&#39;
+    selection_wbadmin:
+        Image|endswith: &#39;\wbadmin.exe&#39;
+        CommandLine|contains|all:
+            - &#39;delete&#39;
+            - &#39;backup&#39;
+    selection_logs:
+        Image|endswith:
+            - &#39;\wevtutil.exe&#39;
+        CommandLine|contains:
+            - &#39;cl &#39;
+            - &#39;clear-log&#39;
+            - &#39;clear log&#39;
+    selection_defender:
+        Image|endswith:
+            - &#39;\sc.exe&#39;
+        CommandLine|contains|all:
+            - &#39;stop&#39;
+            - &#39;WinDefend&#39;
+    condition: 1 of selection_*
+falsepositives:
+    - Legitimate scheduled backup and log maintenance
+    - Administer shadow-copy cleanup on busy storage servers
+level: high
+</code></pre>
+
+
+<h3 class="eyebrow" style="margin: 20px 0 8px;">Splunk SPL <a class="raw-link" href="cti/deadlock-ransomware-rust-encryptor-with-decentralized-recovery-i.splunk">raw</a></h3>
+<pre class="code-block"><code># deadlock-ransomware-rust-encryptor-with-decentralized-recovery-i — Splunk SPL variant (derived from deadlock-ransomware-rust-encryptor-with-decentralized-recovery-i.sigma via sigma convert)
+(Image=&#34;*\\vssadmin.exe&#34; CommandLine=&#34;*delete*&#34; CommandLine=&#34;*shadows*&#34;) OR (Image=&#34;*\\wbadmin.exe&#34; CommandLine=&#34;*delete*&#34; CommandLine=&#34;*backup*&#34;) OR (Image=&#34;*\\wevtutil.exe&#34; CommandLine IN (&#34;*cl *&#34;, &#34;*clear-log*&#34;, &#34;*clear log*&#34;)) OR (Image=&#34;*\\sc.exe&#34; CommandLine=&#34;*stop*&#34; CommandLine=&#34;*WinDefend*&#34;)
+</code></pre>
+
+
+<h3 class="eyebrow" style="margin: 20px 0 8px;">KQL (Sentinel / Defender) <a class="raw-link" href="cti/deadlock-ransomware-rust-encryptor-with-decentralized-recovery-i.kql">raw</a></h3>
+<pre class="code-block"><code># deadlock-ransomware-rust-encryptor-with-decentralized-recovery-i — KQL variant (derived from deadlock-ransomware-rust-encryptor-with-decentralized-recovery-i.sigma via sigma convert)
+(Image endswith &#34;\\vssadmin.exe&#34; and (CommandLine contains &#34;delete&#34; and CommandLine contains &#34;shadows&#34;)) or (Image endswith &#34;\\wbadmin.exe&#34; and (CommandLine contains &#34;delete&#34; and CommandLine contains &#34;backup&#34;)) or (Image endswith &#34;\\wevtutil.exe&#34; and (CommandLine contains &#34;cl &#34; or CommandLine contains &#34;clear-log&#34; or CommandLine contains &#34;clear log&#34;)) or (Image endswith &#34;\\sc.exe&#34; and (CommandLine contains &#34;stop&#34; and CommandLine contains &#34;WinDefend&#34;))
+</code></pre>
+
+
+
 <h2 class="eyebrow" style="margin: 28px 0 12px;">References</h2>
 <ul class="digest-stories">
   
