@@ -454,6 +454,13 @@ def main():
     # IOC feeds (deterministic extraction -> JSON/CSV/TXT/STIX + readable page)
     import ioc as ioc_mod
     iocs = ioc_mod.build_index(cards, events)
+    curated_path = os.path.join(ENGINE, "data", "iocs-curated.json")
+    if os.path.exists(curated_path):
+        curated = {c["value"]: c for c in json.load(open(curated_path))}
+        kept = [i for i in iocs if i["value"] in curated]
+        for i in kept:
+            i["reason"] = curated[i["value"]]["reason"]
+        iocs = kept
     corroborated = [i for i in iocs if i["confidence"] == "corroborated"]
     reported = [i for i in iocs if i["confidence"] != "corroborated"]
     write("cti/iocs/index.html", render("iocs.html", active="cti",

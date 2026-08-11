@@ -23,6 +23,30 @@ IP_RE = re.compile(r"\b(?:\d{1,3}\.){3}\d{1,3}\b")
 DOMAIN_RE = re.compile(r"\b(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}\b", re.I)
 SHA256_RE = re.compile(r"\b[0-9a-fA-F]{64}\b")
 
+# file extensions that masquerade as TLDs in prose ("claude.json", "cmd.exe")
+FILE_EXT_TLDS = {"json", "xml", "png", "jpg", "jpeg", "gif", "webp", "svg", "yaml", "yml",
+                 "html", "htm", "css", "java", "cpp", "hpp", "conf", "log", "txt", "doc",
+                 "docx", "pdf", "ppt", "pptx", "xls", "xlsx", "sqlite", "sql", "pyc", "pyo",
+                 "exe", "sys", "cpl", "efi", "msi", "bat", "cmd", "ps1", "vbs", "cfg", "dat",
+                 "bin", "img", "iso", "tar", "gz", "bz2", "xz", "zip", "rar", "7z", "jar",
+                 "war", "class", "crt", "pem", "key", "pfx", "csr", "p12", "so", "ini",
+                 "dll", "gyp", "spnego", "deb", "rpm", "apk", "app", "pkg", "x64", "x86"}
+# product / vendor / reference domains that appear constantly in tech prose, never IOCs
+ECOSYSTEM_DOMAINS = {"7-zip.org", "nodejs.org", "python.org", "pypi.org", "npmjs.com",
+                     "crates.io", "docker.io", "kubernetes.io", "tensorflow.org",
+                     "pytorch.org", "huggingface.co", "anthropic.com", "openai.com",
+                     "claude.ai", "context.ai", "cloudflare.com", "aws.amazon.com",
+                     "azure.microsoft.com", "google.com", "microsoft.com", "github.com",
+                     "gitlab.com", "bitbucket.org", "nvd.nist.gov", "nist.gov",
+                     "mitre.org", "cisa.gov", "cert.pl", "archive.org", "wikipedia.org",
+                     "stackoverflow.com", "reddit.com", "x.com", "twitter.com",
+                     "linkedin.com", "youtube.com", "arcticwolf.com", "any.run",
+                     "virustotal.com", "otx.alienvault.com", "urlhaus.abuse.ch",
+                     "bazaar.abuse.ch", "bleepingstatic.com", "securityaffairs.com",
+                     "cybersecuritynews.com", "databreaches.net", "access.redhat.com",
+                     "alliedtelesis.com", "brainhunter.com", "baccarat.com",
+                     "anmed.org", "coldcardcompliance.com", "cryptohox.com",
+                     "clinicaavellaneda.com.ar", "bitwardennewsletter.com"}
 # reserved/placeholder domains that are never IOCs
 RESERVED_TLDS = {"example", "test", "invalid", "local", "localhost", "internal",
                  "onion", "lan", "home"}
@@ -60,7 +84,12 @@ def _is_private_ip(s):
 def _is_placeholder_domain(d):
     low = d.lower()
     tld = low.rsplit(".", 1)[-1]
-    return tld in RESERVED_TLDS or low in PLACEHOLDER_DOMAINS or low in OUTLET_DOMAINS
+    if tld in RESERVED_TLDS or tld in FILE_EXT_TLDS:
+        return True
+    for blocked in (*PLACEHOLDER_DOMAINS, *OUTLET_DOMAINS, *ECOSYSTEM_DOMAINS):
+        if low == blocked or low.endswith("." + blocked):
+            return True
+    return False
 
 
 def extract_from_text(text):
@@ -68,13 +97,24 @@ def extract_from_text(text):
     out = {}
     if not text:
         return out
+    # URL hosts are the article's own links, not IOCs — strip them first
+    text = re.sub(r"\bhttps?://[^\s]+", " ", text)
     for m in IP_RE.finditer(text):
         ip = m.group(0)
         if not _is_private_ip(ip):
             out[ip] = "ipv4"
     for m in DOMAIN_RE.finditer(text):
         d = m.group(0).rstrip(".").lower()
-        if not _is_placeholder_domain(d) and len(d) > 3:
+        d = re.sub(r"^www\.", "", d)
+        labels = d.split(".")
+        tld = labels[-1]
+        # 2-char TLDs are file extensions and product names ("node.js", "claude.ai")
+        if len(tld) < 3:
+            continue
+        # at least one real label beyond the TLD
+        if not any(len(l) >= 3 for l in labels[:-1]):
+            continue
+        if not _is_placeholder_domain(d):
             out[d] = "domain"
     for m in SHA256_RE.finditer(text):
         h = m.group(0).lower()
