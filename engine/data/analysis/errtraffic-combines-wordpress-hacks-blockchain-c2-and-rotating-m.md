@@ -1,0 +1,5 @@
+ErrTraffic is an active malware-as-a-service campaign that chains compromised WordPress sites, ClickFix lures, Polygon blockchain smart contracts, and rapidly rotating payload domains into a single delivery network. It distributes a broad set of Windows malware and is marketed as a MaaS framework by a forum user going by LenAI.
+
+The core is a traffic distribution system: victims are routed through the WordPress compromises and ClickFix social engineering to payloads hosted on domains that rotate quickly, while blockchain contracts handle command-and-control coordination. The architecture deliberately mixes commodity web compromise with infrastructure that is hard to sinkhole.
+
+Defenders should treat ClickFix-style lures as the main user-facing vector and block at the browser and email layers rather than relying on domain reputation, which will always trail rotating payload hosts. Expect the campaign to keep iterating on lure brands and C2 mechanics; monitor for Polygon RPC traffic and recently compromised WordPress sites in the same hosting ranges.

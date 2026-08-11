@@ -1,0 +1,5 @@
+Claroty's Team82 found 23 vulnerabilities in Copeland XWEB Pro commercial refrigeration controllers, 21 of them high severity. The flaws chain authentication weaknesses, predictable administrator credentials, and command injection into unauthenticated root-level remote code execution, giving an attacker control of connected cooling equipment.
+
+XWEB Pro controllers sit in supermarkets, cold chains, and industrial refrigeration, exactly the kind of overlooked OT that rarely gets patched and often ships with weak or default credentials. Root access here is not just data theft: an attacker can manipulate temperature controls, which is a physical-safety and business-continuity problem, not only an IT one.
+
+Organizations running these controllers should inventory them, put them behind network segmentation, change default credentials, and check with Copeland for firmware updates. The finding is a reminder that the OT attack surface keeps expanding through commercial building systems, not just ICS vendors.

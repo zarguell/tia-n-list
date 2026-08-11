@@ -1,0 +1,5 @@
+Young adults are the heaviest AI users and the most exposed to AI-driven abuse. Seven in ten 18-to-22-year-olds have encountered an AI-related scam in the past year, versus roughly half of the general population, and nearly all of them worry AI will be used against them.
+
+The mechanism is not recklessness. The platforms young people live on, social feeds, marketplaces, messaging apps, and AI tools themselves, now double as attack surfaces: manipulated content sits beside real content, fake storefronts and reviews are everywhere, and AI makes false information feel authentic. Scams are more personalized and more convincing precisely because the same tools users rely on are available to attackers.
+
+This is a fraud-ecosystem signal more than a technical one. Expect phishing and scam campaigns to keep targeting this demographic through platforms they trust, and expect pressure on platform companies to verify content and sellers. Defenders should treat AI-enabled impersonation as the default threat model for consumer-facing services.

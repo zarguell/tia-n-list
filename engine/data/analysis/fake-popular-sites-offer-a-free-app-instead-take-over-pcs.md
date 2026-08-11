@@ -1,0 +1,5 @@
+A campaign of lookalike websites is impersonating CNN, Stremio, and Avast to push fake app installers at Windows users. Victims who download the "new CNN app" or the counterfeit installers do not get the expected software: they get O&O Syspectr, a genuine, digitally signed remote administration tool already linked to the attacker's account.
+
+That is why antivirus products have no reason to flag it. The payload is legitimate software doing exactly what it was designed to do, remote control, just under attacker ownership. A separate lookalike site uses a fake crypto-mining browser game to deliver the same tool from a different Syspectr account, confirming a small cluster of operators rather than a single page.
+
+Defenders should block known lookalike domains, watch for unexpected Syspectr installs in software inventory, and treat any signed remote-management tool appearing without a change ticket as a compromise indicator. For users, the cheap check remains simple: download software only from the vendor's real domain and verify the certificate owner.

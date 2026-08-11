@@ -1,0 +1,5 @@
+New empirical research on AI in military targeting tested a high-fidelity replica of a real AI decision-support system with 2,015 Israeli military personnel. Contrary to the widespread automation-bias fear, the study found strong algorithmic aversion, especially in high-collateral-damage scenarios: operators overrode the system's recommendations rather than blindly following them.
+
+The second finding is the actionable one: adding explainable AI features reduced that aversion and produced more thoughtful evaluation of the recommendations. Trust in military AI turned out to be dynamic, shifting with individual disposition, perceived stakes, and interface design rather than being a fixed property of the technology.
+
+For anyone building AI into high-stakes decisions, defense or otherwise, the lesson is that interface transparency is a control, not a nicety. Explainability changes how operators weigh machine recommendations, and that is measurable. Expect this line of research to feed directly into military AI acquisition and targeting-policy debates.
