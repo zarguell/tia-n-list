@@ -418,7 +418,7 @@ def main():
                     continue
                 stj = json.load(open(sp))
                 if any(events.get(ref["event_id"]) and
-                       events[ref["event_id"]]["id"].startswith("e-") and
+                       ":" not in events[ref["event_id"]]["id"] and
                        events[ref["event_id"]]["published_at"][:10] == date
                        for ref in stj.get("events", [])):
                     slugs.append(slug)
