@@ -24,11 +24,9 @@ MIN_SOURCES = 2
 
 
 def load_events():
-    events = {}
-    for f in glob.glob(os.path.join(EVENTS, "*.json")):
-        e = json.load(open(f))
-        events[e["id"]] = e
-    return events
+    """Merged events (meta + content_md) so IOC extraction sees article text."""
+    from store import load_events as _load
+    return _load()
 
 
 def load_story_cards(events):
@@ -46,11 +44,13 @@ def main():
     cards = load_story_cards(events)
 
     # 1. new IOC candidates (diff against the curated set)
+    from datetime import datetime, timezone
     curated_path = os.path.join(DATA, "iocs-curated.json")
     curated_values = {c["value"] for c in json.load(open(curated_path))} if os.path.exists(curated_path) else set()
     all_iocs = ioc_mod.build_index(cards, events)
     new = [i for i in all_iocs if i["value"] not in curated_values]
-    json.dump({"generated": "2026-08-12", "candidates": [{
+    json.dump({"generated": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
+               "candidates": [{
         "value": i["value"], "type": i["type"], "stories": i["stories"]} for i in new]},
         open(os.path.join(DATA, "iocs-candidates.json"), "w"), indent=1)
 

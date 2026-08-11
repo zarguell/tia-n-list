@@ -43,11 +43,10 @@ def load_stories():
 
 
 def load_events():
-    out = {}
-    for f in glob.glob(os.path.join(EVENTS, "*.json")):
-        e = json.load(open(f))
-        out[e["id"]] = e
-    return out
+    """Merged events (meta + content_md from the .md sidecar) so hot_score's
+    content signals actually see article text. See engine/store.py."""
+    from store import load_events as _load
+    return _load()
 
 
 def story_event_urls(story):

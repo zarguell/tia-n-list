@@ -6,4 +6,5 @@ cd "$(dirname "$0")"
 PY=~/.local/venvs/tia-engine/bin/python
 $PY ingest.py "$@"
 $PY merge.py
+$PY test_sanitize.py
 $PY ssg.py

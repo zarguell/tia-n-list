@@ -15,12 +15,24 @@ import hashlib
 import json
 import os
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
+
+TTL_DAYS = 30
 
 
 def _day(date_str):
     """Date-level ISO timestamp (deterministic within a day)."""
     return date_str + "T00:00:00Z"
+
+
+def _valid_until(i, date_str):
+    """STIX valid_until: last_seen + TTL for active IOCs (matching the status
+    model), last_seen for expired/revoked (self-expired at observation end)."""
+    last = i["last_seen"] or date_str
+    if i["status"] == "active":
+        d = datetime.fromisoformat(last + "T00:00:00Z") + timedelta(days=TTL_DAYS)
+        return d.strftime("%Y-%m-%d") + "T00:00:00Z"
+    return _day(last)
 
 
 def _stix_id(kind, seed):
@@ -53,7 +65,7 @@ def build_bundle(iocs, records, base_url, date_str):
             "name": f"{i['value']} ({i['type']})",
             "pattern": pattern,
             "valid_from": _day(i["first_seen"] or date_str),
-            "valid_until": _day(i["last_seen"] or date_str),
+            "valid_until": _valid_until(i, date_str),
             "labels": ["malicious-activity"],
             "confidence": 70 if i["confidence"] == "corroborated" else 40,
             "x_tia_status": i["status"],
@@ -122,10 +134,11 @@ def write_snapshot(iocs, records, base_url, out_dir, date_str):
         with open(os.path.join(out_dir, name), "w") as f:
             f.write(text)
         manifest["files"][name] = {"bytes": len(text), "sha256": _sha256(text)}
+    manifest_text = json.dumps(manifest, indent=1)
+    manifest["files"]["manifest.json"] = {
+        "bytes": len(manifest_text), "sha256": _sha256(manifest_text)}
     with open(os.path.join(out_dir, "manifest.json"), "w") as f:
         json.dump(manifest, f, indent=1)
-    manifest["files"]["manifest.json"] = {
-        "bytes": len(json.dumps(manifest)), "sha256": _sha256(json.dumps(manifest))}
     return manifest
 
 

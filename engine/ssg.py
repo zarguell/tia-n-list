@@ -35,6 +35,7 @@ from zoneinfo import ZoneInfo
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from markdown import markdown as md_to_html
+import bleach
 
 ENGINE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(ENGINE)                       # repo root = Pages root
@@ -43,6 +44,22 @@ EVENTS_DIR = os.path.join(ENGINE, "data", "events")
 STORIES_DIR = os.path.join(ENGINE, "data", "stories")
 DIGESTS_DIR = os.path.join(ENGINE, "data", "digests")
 CTI_DIR = os.path.join(ENGINE, "data", "cti")
+
+# bleach allowlist for article/analysis/digest bodies (the ONLY |safe renders).
+# Tags/attrs/protocols here are the complete set that survives sanitize().
+ALLOWED_TAGS = ["p", "br", "a", "strong", "em", "b", "i", "u", "s", "code", "pre",
+                "blockquote", "ul", "ol", "li", "h1", "h2", "h3", "h4", "h5", "h6",
+                "hr", "table", "thead", "tbody", "tr", "th", "td", "span", "div",
+                "sup", "sub", "img", "figure", "figcaption"]
+ALLOWED_ATTRS = {
+    "a": ["href", "title"],
+    "td": ["colspan", "rowspan"],
+    "th": ["colspan", "rowspan"],
+    "img": ["src", "alt", "title"],
+    "code": ["class"],
+    "pre": ["class"],
+}
+ALLOWED_PROTOCOLS = {"http", "https", "mailto"}
 LOCAL_TZ = ZoneInfo("America/New_York")          # pipeline convention; digest runs 11:15 UTC = 07:15 EDT
 DIGEST_RUN_UTC = "11:15:00Z"                      # stable pubDate anchor for the daily feed
 BASE_URL = "https://zarguell.github.io/tia-n-list"
@@ -106,26 +123,24 @@ def md_snippet(text, max_chars=600):
 
 
 def sanitize(html_text):
-    """Strip active-content tags, event handlers, and dangerous URL schemes.
+    """Parse-based HTML sanitizer (bleach / html5lib): allowlist tags,
+    attributes and protocols; everything else is stripped with content kept.
 
-    Covers the audit-verified bypasses: script/style/iframe/object/embed blocks
-    (incl. whitespace before the end-tag '>' and self-closing forms),
-    case-insensitive on* attributes in any position, and javascript:/vbscript:/data:
-    hrefs quoted or unquoted in any attribute position.
+    This replaced the regex sanitizer after the 2026-08-11 audit proved it
+    bypassable in real browsers: <svg/onload=…> and <img … /onerror=…>
+    (slash-prefixed handlers), entity-encoded schemes (jav&#x61;script:),
+    and non-href active attributes (action, xlink:href) all survived regex
+    filtering. bleach tokenizes per the HTML spec, decodes character
+    references BEFORE protocol checks, and drops any attribute not in the
+    allowlist — the bypass classes above cannot survive.
     """
-    html_text = re.sub(r"<(script|style|iframe|object|embed)\b[^>]*>.*?</\s*\1\s*>",
-                       "", html_text, flags=re.S | re.I)
-    html_text = re.sub(r"<(script|style|iframe|object|embed)\b[^>]*/\s*>",
-                       "", html_text, flags=re.I)
-    # void elements (embed) and unclosed active tags: drop the opening tag so any
-    # trailing "content" is inert text, not an active context
-    html_text = re.sub(r"<(script|style|iframe|object|embed)\b[^>]*>",
-                       "", html_text, flags=re.I)
-    html_text = re.sub(r"\son\w+\s*=\s*(\"[^\"]*\"|'[^']*'|[^\s>]+)",
-                       "", html_text, flags=re.I)
-    html_text = re.sub(r"(href\s*=\s*)([\"']?)(?:javascript|vbscript|data):[^\"'>\s]*",
-                       r"\1\2#", html_text, flags=re.I)
-    return html_text
+    return bleach.clean(
+        html_text,
+        tags=ALLOWED_TAGS,
+        attributes=ALLOWED_ATTRS,
+        protocols=ALLOWED_PROTOCOLS,
+        strip=True,
+    )
 
 
 def heat(score, last_seen=None):
@@ -146,17 +161,12 @@ def heat(score, last_seen=None):
 # ---------- store loading ----------
 
 def load_events():
-    events = {}
-    for path in sorted(glob.glob(os.path.join(EVENTS_DIR, "*.json"))):
-        eid = os.path.splitext(os.path.basename(path))[0]
-        meta = json.load(open(path))
-        md_path = os.path.join(EVENTS_DIR, eid + ".md")
-        md_text = open(md_path).read() if os.path.exists(md_path) else ""
-        events[eid] = {
-            **meta,
-            "content_md": md_text,
-            "html": sanitize(md_to_html(md_text, output_format="html5")),
-        }
+    from store import load_events as _load
+    global store_safe_url
+    from store import safe_url as store_safe_url
+    events = _load()
+    for e in events.values():
+        e["html"] = sanitize(md_to_html(e["content_md"], output_format="html5"))
     return events
 
 
@@ -325,6 +335,10 @@ def lint_links():
             content = open(os.path.join(root, fn)).read()
             for m in re.finditer(r'(?:href|src)="([^"]+)"', content):
                 url = m.group(1)
+                # JS-generated hrefs (string concatenation in inline scripts)
+                # are built at runtime from location.pathname — not lintable
+                if "'" in url or "+" in url:
+                    continue
                 if url.startswith(("http://", "https://", "mailto:", "tel:", "#", "data:")):
                     continue
                 target = url.split("#")[0].split("?")[0]
@@ -429,14 +443,18 @@ def main():
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     rfc_now = format_datetime(datetime.now(timezone.utc))
 
-    print(f"rendering {len(cards)} stories, {len(hot_cards)} hot, feeds...")
+    # home = hot only, capped at 30 (a wall of 97 near-identical cards was
+    # visual noise; "All stories" is one click away)
+    home_cards = hot_cards[:30]
+    print(f"rendering {len(cards)} stories, {len(hot_cards)} hot, {len(home_cards)} on home...")
 
-    write("index.html", render("index.html", active="index",
+    write("index.html", render("index.html", active="index", og_url=site_url(""),
                                hero=home_cards[0] if home_cards else None,
-                               cards=home_cards[1:]))
+                               cards=home_cards[1:],
+                               total_hot=len(hot_cards)))
     write("404.html", render("404.html", active=None))
-    write("feeds/index.html", render("feeds.html", active="feeds"))
-    write("methodology/index.html", render("methodology.html", active=None))
+    write("feeds/index.html", render("feeds.html", active="feeds", og_url=site_url("feeds/")))
+    write("methodology/index.html", render("methodology.html", active=None, og_url=site_url("methodology/")))
 
     # CTI & detection tier: matrix + case pages
     import cti as cti_mod
@@ -447,7 +465,7 @@ def main():
                                 os.path.exists(os.path.join(CTI_DIR, sid + ".yara"))
     cti_matrix = cti_mod.build_matrix(cti_records, cards_by_id_cti, has_detection)
     cti_covered = cti_mod.all_covered(cti_matrix)
-    write("cti/index.html", render("cti.html", active="cti",
+    write("cti/index.html", render("cti.html", active="cti", og_url=site_url("cti/"),
                                    matrix=cti_matrix, covered=cti_covered))
     # curated IOC set (built once, used by case sidecars, feeds and snapshots)
     import ioc as ioc_mod
@@ -467,10 +485,16 @@ def main():
             texts[suffix.lstrip(".") + "_text"] = open(p).read() if os.path.exists(p) else ""
         rec_iocs = [i for i in iocs if sid in i["stories"]]
         write(f"cti/{sid}.ioc.json", json.dumps(rec_iocs, indent=1))
+        tech_by_id = cti_mod.load_techniques()
         r = {**r, "confidence": cti_mod.confidence(r, card),
              "updated_at": r.get("updated_at", r.get("_generated", today)),
+             "references": [u for u in r.get("references", [])
+                            if store_safe_url(u)],   # LLM-authored refs: http/https only
+             "attack": [{**t, "tactic_name": tech_by_id.get(t["id"], {}).get("tactic_name", "")}
+                        for t in r.get("attack", [])],
              "iocs": rec_iocs, **texts}
-        write(f"cti/{sid}/index.html", render("cti_case.html", active=None, rec=r))
+        write(f"cti/{sid}/index.html", render("cti_case.html", active=None, rec=r,
+                                      og_url=site_url(f"cti/{sid}/")))
 
     # Derive Splunk/KQL variants from the authored Sigma rules (deterministic —
     # never hand-written, so they cannot drift). Overwrites stale variants;
@@ -480,21 +504,24 @@ def main():
         splunk, kql = sigma_mod.convert_variants(f)
         # raw rule + derived variants in the source store (committed)
         sigma_text = open(f).read()
-        with open(os.path.join(CTI_DIR, slug + ".splunk"), "w") as out:
-            out.write(f"# {slug} — Splunk SPL variant (derived from {slug}.sigma via sigma convert)\n{splunk}\n")
-        with open(os.path.join(CTI_DIR, slug + ".kql"), "w") as out:
-            out.write(f"# {slug} — KQL variant (derived from {slug}.sigma via sigma convert)\n{kql}\n")
-        # and in the published site so the raw links resolve
         write(f"cti/{slug}.sigma", sigma_text)
-        write(f"cti/{slug}.splunk",
-              f"# {slug} — Splunk SPL variant (derived from {slug}.sigma via sigma convert)\n{splunk}\n")
-        write(f"cti/{slug}.kql",
-              f"# {slug} — KQL variant (derived from {slug}.sigma via sigma convert)\n{kql}\n")
+        # Never overwrite a variant with 'None' when sigma-cli is absent or a
+        # conversion fails — keep the existing committed/published variant.
+        if splunk is not None:
+            variant = f"# {slug} — Splunk SPL variant (derived from {slug}.sigma via sigma convert)\n{splunk}\n"
+            with open(os.path.join(CTI_DIR, slug + ".splunk"), "w") as out:
+                out.write(variant)
+            write(f"cti/{slug}.splunk", variant)
+        if kql is not None:
+            variant = f"# {slug} — KQL variant (derived from {slug}.sigma via sigma convert)\n{kql}\n"
+            with open(os.path.join(CTI_DIR, slug + ".kql"), "w") as out:
+                out.write(variant)
+            write(f"cti/{slug}.kql", variant)
 
     # IOC feeds (curated set -> JSON/CSV/TXT/STIX + readable page)
     corroborated = [i for i in iocs if i["confidence"] == "corroborated"]
     reported = [i for i in iocs if i["confidence"] != "corroborated"]
-    write("cti/iocs/index.html", render("iocs.html", active="cti",
+    write("cti/iocs/index.html", render("iocs.html", active="cti", og_url=site_url("cti/iocs/"),
                                         iocs=iocs, corroborated=corroborated,
                                         reported=reported, generated=today))
     write("cti/iocs/iocs.json", json.dumps(iocs, indent=1))
@@ -510,10 +537,11 @@ def main():
     write("cti/snapshots/latest.json", json.dumps(latest, indent=1))
     snap_manifest = json.load(open(os.path.join(snap_dir, "manifest.json")))
     write("cti/snapshots/" + today + "/index.html",
-          render("snapshot_day.html", active="cti", snap=snap_manifest))
+          render("snapshot_day.html", active="cti", snap=snap_manifest,
+                          og_url=site_url(f"cti/snapshots/{today}/")))
     snap_index = [{"date": d, "m": m}
                   for d, m in snap_mod.list_snapshots(os.path.join(ROOT, "cti", "snapshots"))]
-    write("cti/snapshots/index.html", render("snapshots.html", active="cti",
+    write("cti/snapshots/index.html", render("snapshots.html", active="cti", og_url=site_url("cti/snapshots/"),
                                              snapshots=snap_index,
                                              latest=snap_manifest))
     write("style.css", open(os.path.join(TMPL_DIR, "style.css")).read())
@@ -536,10 +564,11 @@ def main():
     write("stories.json", json.dumps(derived, indent=1))
 
     for c in cards:
-        write(f"stories/{c['id']}/index.html", render("story.html", active=None, story=c))
+        write(f"stories/{c['id']}/index.html", render("story.html", active=None, story=c,
+                                       og_url=site_url(f"stories/{c['id']}/")))
     years = sorted({c["first_seen"][:4] for c in cards}, reverse=True)
     months = [(i, __import__("calendar").month_name[i]) for i in range(1, 13)]
-    write("stories/index.html", render("stories-all.html", active="all",
+    write("stories/index.html", render("stories-all.html", active="all", og_url=site_url("stories/"),
                                        cards=sorted(cards, key=lambda c: c["last_seen"], reverse=True),
                                        total=len(cards),
                                        years=years, months=months))
@@ -578,7 +607,8 @@ def main():
         md_content = open(os.path.join(DIGESTS_DIR, d + ".md")).read()
         analysis_html = sanitize(md_to_html(md_content, output_format="html5"))
         meta = digest_meta.get(d, {})
-        write(f"daily/{d}/index.html", render("daily.html", active="daily", digest={
+        write(f"daily/{d}/index.html", render("daily.html", active="daily",
+                                              og_url=site_url(f"daily/{d}/"), digest={
             "date": d,
             "headline": meta.get("headline") or f"Daily threat landscape — {d}",
             "summary": meta.get("summary", ""),
@@ -592,7 +622,7 @@ def main():
         digests_meta.append({"date": d, "url": f"daily/{d}/",
                              "headline": meta.get("headline") or f"Daily threat landscape — {d}",
                              "summary": meta.get("summary", "")})
-    write("daily/index.html", render("daily-index.html", active="daily", digests=digests_meta))
+    write("daily/index.html", render("daily-index.html", active="daily", og_url=site_url("daily/"), digests=digests_meta))
     # old-scheme redirects: posts/YYYY-MM-DD-daily-summary/ -> daily/YYYY-MM-DD/
     # targets are ABSOLUTE (relative meta-refresh URLs resolve against the page
     # path, not the base, in some browsers — verified broken)

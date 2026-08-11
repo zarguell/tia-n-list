@@ -15,7 +15,7 @@ import json
 import os
 import re
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 TTL_DAYS = 30
 
@@ -210,17 +210,24 @@ def to_stix(iocs, base_url):
             pattern = f"[domain-name:value = '{i['value']}']"
         else:
             pattern = f"[file:hashes.SHA-256 = '{i['value']}']"
-        valid_until = (datetime.fromisoformat((i["last_seen"] or "2000-01-01") + "T00:00:00Z")
-                       .astimezone(timezone.utc)).isoformat().replace("+00:00", "Z")
+        valid_from = (i["first_seen"] or now.strftime("%Y-%m-%d")) + "T00:00:00Z"
+        last = (i["last_seen"] or now.strftime("%Y-%m-%d"))
+        if i["status"] == "active":
+            # STIX valid_until = last_seen + TTL, matching the status model
+            # (an active IOC is not self-expired at last_seen)
+            valid_until = (datetime.fromisoformat(last + "T00:00:00Z")
+                           + timedelta(days=TTL_DAYS)).isoformat().replace("+00:00", "Z")
+        else:
+            valid_until = last + "T00:00:00Z"
         objects.append({
             "type": "indicator", "spec_version": "2.1",
             "id": "indicator--" + str(uuid.uuid5(uuid.NAMESPACE_URL,
                                                  "https://tia-n-list/" + i["value"])),
-            "created": i["first_seen"] + "T00:00:00Z",
-            "modified": now,
+            "created": valid_from,
+            "modified": valid_until,
             "name": f"{i['value']} ({i['type']})",
             "pattern": pattern,
-            "valid_from": i["first_seen"] + "T00:00:00Z",
+            "valid_from": valid_from,
             "valid_until": valid_until,
             "labels": ["malicious-activity"],
             "confidence": 70 if i["confidence"] == "corroborated" else 40,
