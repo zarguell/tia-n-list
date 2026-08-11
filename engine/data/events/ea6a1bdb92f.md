@@ -1,0 +1,3 @@
+CISA's KEV catalog entry for CVE-2026-8037 (CVSS 9.6), the unauthenticated command injection in Progress Kemp LoadMaster rooted in unsanitized API inputs across multiple command endpoints, carries a BOD 26-04 remediation deadline of today for US federal agencies — and Shadowserver counts nearly 300 internet-exposed LoadMaster appliances. Progress patched the flaw in June (GA v7.2.63.1 or newer, LTSF v7.2.54.17 or newer), and confirmed all MOVEit WAF versions before GA v7.2.63.2 are also affected. The ADC is embedded in critical infrastructure — Progress says 80% of the Fortune 500 and more than 100,000 organizations run it — so every internet-facing appliance should be treated as a priority patch and audited for post-exploitation artifacts.
+
+---

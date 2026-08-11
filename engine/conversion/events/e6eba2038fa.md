@@ -1,0 +1,3 @@
+F5 released out-of-band security updates for multiple NGINX products addressing two critical unauthenticated flaws: **CVE-2026-42530** (ngx_http_v3_module, HTTP/3) and **CVE-2026-42055** (ngx_http_proxy_v2_module/ngx_http_grpc_module) — both enabling DoS or code execution on systems with non-default configurations and ASLR bypassable conditions. Also patches two high-severity NGINX Gateway Fabric flaws (CVE-2026-11311, CVE-2026-50107) allowing authenticated config injection. No in-the-wild exploitation reported, but F5 vulnerabilities have been repeatedly targeted by cybercrime and state groups. Mitigations available for those who can't patch immediately.
+
+---

@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Hot stories — Tia N. List{% endblock %}
+{% block content %}
+<h1 class="page-title">Hot stories</h1>
+<p class="lead">Cybersecurity stories from our curated feeds, ranked by recency, source coverage, and outlet weight.</p>
+
+{% if hero %}
+<article class="hero">
+  <span class="rank-flag">#1 · score {{ "%.1f"|format(hero.score) }}</span>
+  <h2><a href="{{ hero.url }}">{{ hero.title }}</a></h2>
+  <p class="snippet">{{ hero.snippet }}</p>
+  <div class="meta">
+    <span class="chip heat {{ hero.heat_class }}">{{ hero.heat_label }}</span>
+    {% for s in hero.sources %}<span class="chip">{{ s }}</span>{% endfor %}
+    {% for c in hero.cves %}<span class="chip cve">{{ c }}</span>{% endfor %}
+    {% if hero.reddit %}<span class="chip reddit">▲ {{ hero.reddit }}</span>{% endif %}
+    <span class="reltime">updated {{ hero.last_seen_human }}</span>
+  </div>
+</article>
+{% endif %}
+
+{% set offset = 1 if hero else 0 %}
+<div class="story-grid">
+{% for s in cards %}
+  {% set rank = loop.index + offset %}
+  {% include "_story_card.html" %}
+{% endfor %}
+</div>
+{% endblock %}

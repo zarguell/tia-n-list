@@ -1,0 +1,3 @@
+Researcher Lam Jun Rong (Calif.io) discovered a heap buffer overread in Squid Proxy's FTP directory listing parser, affecting **every version in its default configuration** — a bug that survived 29 years, thousands of commits, and multiple rewrites. Discovered with AI assistance (Claude Mythos Preview analyzed the code and immediately spotted the null-terminator edge case in a `strchr` call). The vulnerability leaks internal memory — including other users' HTTP requests containing passwords and API keys — through crafted FTP directory listings. The fix is a one-line patch. Mitigation: disable FTP support in Squid (Chrome dropped FTP years ago; most orgs get zero legitimate FTP traffic). Patched in Squid v7.6 (June 8). CVE-2026-47729.
+
+---

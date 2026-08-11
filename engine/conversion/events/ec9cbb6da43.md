@@ -1,0 +1,3 @@
+CloudSEK's analysis of the LiteLLM AI supply-chain compromise — orchestrated by Team PCP in March 2026 by pushing a malicious package to the popular LLM gateway — reconstructs exposure across more than 2,500 organizations and roughly 434,000 CI/CD pipelines worldwide. The short-lived malicious package created standing risks to cloud credentials, source-code repositories, Kubernetes environments, package registries, and AI services downstream of build and deploy chains. Organizations using LiteLLM or its dependents should rotate cloud credentials, audit pipeline secrets, and review Kubernetes access as if the dependency chain was compromised.
+
+---

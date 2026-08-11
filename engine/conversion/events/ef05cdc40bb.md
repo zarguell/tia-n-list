@@ -1,0 +1,9 @@
+Arctic Wolf Labs has observed active exploitation of a critical improper access control vulnerability in **FortiClient Endpoint Management Server (EMS)**, tracked as CVE-2026-35616, allowing unauthenticated attackers to bypass API authentication and issue privileged administrative requests — effectively turning the management server into a remote code execution platform for every managed endpoint.
+
+Attackers send specially crafted HTTP requests to exposed EMS instances (port 8013). Despite missing valid certificates or credentials, the server processes them as legitimate administrative actions — producing a consistent EMS log entry: *"Certificate not found in request header"* followed within seconds by a fabricated Fortinet fabric device identity. Threat actors then modify Remote Access Profile configurations and endpoint policies, inserting a malicious script that executes automatically via FortiClient's `on_connect` VPN tunnel behavior.
+
+Within seconds of an endpoint establishing an IPsec tunnel, `fortitray.exe` launches a `.cmd` script executing base64-encoded PowerShell that downloads **FortiEndpoint_Patch.exe** from `83.138.53[.]110` — a previously unreported infostealer Arctic Wolf named **EKZ**. The malware harvests Chromium and Firefox browser credentials (passwords, cookies, autofill data including credit cards) by leveraging Chromium's `IElevator::DecryptData` interface and dynamically loading Firefox NSS libraries. Collected data is stored in a local SQLite database and exfiltrated via HTTP POST.
+
+Multiple samples of trojanized installers were also recovered from the same server, indicating active tooling development. Organisations should immediately upgrade FortiClient EMS, restrict port 8013 to trusted IPs, and hunt for Tor-sourced logins, anomalous EMS log entries, and outbound HTTP to 83.138.53[.]110.
+
+---

@@ -1,0 +1,3 @@
+Red Canary documents the accelerating abuse of legitimate **remote monitoring and management (RMM)** tools — **ScreenConnect, NetSupport Manager, SimpleHelp, PDQ Connect, iDrive RemotePC, Syncro, Atera, ITarian, and QuickAssist** — by ransomware groups and financially motivated attackers. Key findings: adversaries often use one free-trial RMM to deploy a second, more permanent RMM; multiple RMMs on a single host are common (observed: 4 concurrent tools); attackers use cracked license keys, renamed binaries in non-standard paths, and MSIExec side-loading to evade EDR. The core detection shift: from "is this binary malicious?" to "is this RMM behavior authorized?"
+
+---

@@ -1,0 +1,5 @@
+A coordinated supply-chain attack on the Arch User Repository has compromised **400+ packages** via spoofed maintainer accounts, distributing a malicious npm package called **`atomic-lockfile`** through tampered PKGBUILD scripts. The malware includes an ELF payload with **credential-stealing and optional eBPF rootkit capabilities** — the rootkit can hide processes, files, and network interfaces from the kernel.
+
+**Targeted data:** GitHub credentials, SSH keys, HashiCorp Vault tokens, browser cookie databases, Slack/Discord/Teams/Telegram data, Docker/Podman credentials, VPN material, shell histories — replicating the credential-harvesting pattern seen in the Shai-Hulud/Miasma campaigns but at the Linux distribution level. Both IFIN (Independent Federated Intelligence Network) and Sonatype independently documented the campaign. AUR maintainers are working to identify and remove malicious commits and ban the accounts pushing them. **Action:** Review the affected packages list from IFIN/Whanos, run the detection script for atomic-lockfile, and consider reinstalling from scratch if a rootkit is found — standard malware removal may not be sufficient.
+
+---

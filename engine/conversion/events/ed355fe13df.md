@@ -1,0 +1,5 @@
+Anthropic's Mythos AI model identified vulnerabilities in classified US government computer systems within hours during a testing exercise conducted with US intelligence agencies, a senior US official told the Associated Press. The testing was conducted under **Project Glasswing**, an Anthropic initiative aimed at securing critical software from the "severe" fallout the Mythos model could pose to public safety and national security.
+
+The disclosure confirms Sen. Mark Warner's June 11 statement that "this tool broke into almost all of our classified systems, not in weeks but in hours," attributed to NSA/Cyber Command chief Gen. Joshua Rudd. The development comes amid growing tensions between Anthropic and the Trump administration: the White House recently restricted foreign national access to Mythos 5 and Fable 5, prompting Anthropic to disable the models for all customers. More than 100 cybersecurity executives — from Adobe, Nvidia, and others — urged the administration to ease restrictions, arguing Mythos is "quite good" at finding flaws but "not uniquely good," and that removing the best cyber defense capabilities helps adversaries more than it hurts.
+
+---

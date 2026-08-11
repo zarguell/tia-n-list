@@ -1,0 +1,3 @@
+Palo Alto Unit 42 documented a new Gremlin stealer variant using XOR-encrypted payloads hidden in .NET resource sections, protected by commercial packing with instruction virtualization. The malware targets browser credentials, session tokens, cryptocurrency wallets, clipboard data, and VPN/FTP credentials. New features include Discord token extraction, clipboard hijacking (crypto clipper), and WebSocket-based session hijacking. The XOR-obfuscated C2 endpoint at `194.87.92[.]109` showed zero detections on VirusTotal at discovery. The shift toward encrypted resource execution and staged loading marks Gremlin's evolution toward evasion-as-a-feature.
+
+---

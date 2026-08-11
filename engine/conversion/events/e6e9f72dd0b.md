@@ -1,0 +1,5 @@
+U.S. telecommunications giant Charter Communications (Spectrum brand, tens of millions of customers) confirmed a data breach after ShinyHunters listed the company on its leak site. The extortion group claims to have stolen **40 million records** — customer names, email addresses, phone numbers, plan information, and CPNI data — via a **vishing (voice phishing) attack on April 1** that compromised an employee's Microsoft Entra account, then exported data from Salesforce.
+
+Charter's official statement claims "no sensitive personal information or CPNI" was exfiltrated — directly contradicting the threat actor's claims. This follows the same ShinyHunters playbook used against **7-Eleven** (185K records, covered May 26) and **Instructure/Canvas** (275M+ records) — the "Salesforce Aura" campaign systematically targeting SaaS-connected SSO accounts via social engineering. Organizations should treat Entra SAW (privileged access workstation) deployment and vishing-specific user training as urgent operational priorities.
+
+---

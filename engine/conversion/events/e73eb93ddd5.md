@@ -1,0 +1,3 @@
+Dashlane confirmed that attackers successfully brute-forced **numeric 2FA codes** to register unauthorized devices on fewer than 20 personal plan accounts, downloading encrypted vaults. The attack began May 31 and triggered automated account lockouts. Dashlane's Master Password encryption remains intact — the attacker would still need to phish the master password to decrypt vault contents. The incident underscores that numeric TOTP/SMS 2FA codes are susceptible to brute-force in automated attacks. Organizations and users should migrate to passkeys or hardware security keys where available.
+
+---

@@ -1,0 +1,5 @@
+Palo Alto Networks Unit 42 published a comprehensive deep-dive on how attackers abuse cloud logging services for defense evasion and continuous visibility. The report details **7 specific techniques** targeting AWS CloudTrail and Google Cloud Logging, with detection logic for each.
+
+**Key techniques:** Stop logging (disable trails/sinks), delete log storage destination (S3 bucket/log bucket), delete log router (trail/sink), impair logging via attacker-controlled KMS encryption key, log poisoning (directly modify JSON log files in S3), configure new log routing to attacker-controlled destination, and log redirection (change existing destination). The most impactful finding: log poisoning via direct S3 object manipulation breaks chain of custody — AWS's CloudTrail log file integrity validation (enabled by default in Console but NOT via API/CLI) is the only defense. **Action:** Restrict `update-trail`/`sinks.update` permissions to highly privileged users; enable CloudTrail integrity validation; lock Google Cloud log buckets.
+
+---

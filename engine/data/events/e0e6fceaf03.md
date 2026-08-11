@@ -1,0 +1,5 @@
+**Operation XENOFISCAL:** Seqrite Labs documented a Pakistan-linked SideCopy APT campaign targeting the **Ministry of Finance, Afghanistan**, using a Pashto-language spear-phishing lure ("List of Employees Who Were Introduced to the Intellectual and Psychological Warfare Seminar"). The infection chain uses LNK → mshta.exe → obfuscated JavaScript → .NET deserialization → shellcode → **XenoRAT 1.8.7**, with delivery infrastructure hosted inside Afghanistan's sovereign IP blocks (AS58469, Afghan Ministry of Communication) and C2 on Bulgarian hosting (HZ Hosting, AS59711). The decoy document is a legitimate Afghan MoF provincial staff directory spanning all 34 provinces — suggesting prior intelligence-gathering.
+
+**DragonForce** claimed a ransomware attack against **Profundo**, a Dutch research organization (May 27), while **Incransom** threatened to release 100GB of data stolen from **Lawants**, a Spanish law firm (May 28). These follow DragonForce's 7-victim wave reported on May 26 and continue the trend of ransomware groups targeting research organizations and legal practices.
+
+---

@@ -1,0 +1,5 @@
+GitGuardian's research on n8n (the workflow-automation platform whose exposed install base was already a target in the Aug 1 autonomous-attack report) maps the path from a leaked API key to full credential compromise. **N8N_ENCRYPTION_KEY** is the root of trust: it decrypts every stored credential in `~/.n8n/database.sqlite` and also contributes to the JWT signing secret and instance ID. Researchers found **three weaknesses in key derivation and session authentication**, showed weak keys are **recoverable offline from public artifacts**, and identified **129 internet-accessible instances using known weak keys**. They reproduced an attack using **CVE-2026-25053** that escalates a privileged API key into the encryption key and all encrypted credentials; n8n has received 48 CVEs since January 2026, several enabling escape from the workflow execution environment to host code execution/filesystem access.
+
+**Action:** Generate a strong, unique N8N_ENCRYPTION_KEY; never expose API keys; treat the encryption key as equivalent to the credential database itself and rotate it if compromise is suspected.
+
+---

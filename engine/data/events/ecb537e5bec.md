@@ -1,0 +1,7 @@
+Microsoft Threat Intelligence published a deep-dive analysis of 33 malicious npm packages published under three accounts (`mr.4nd3r50n`, `ce-rwb`, `t-in-one`) across nine organizational scopes targeting enterprise developer environments. The packages impersonate internal services (SVP BaaS, SberPay payment widget, Capibar Chat UI kit, credential/auth modules) using inflated version numbers (100.100.100) to win dependency resolution over real internal packages.
+
+The execution chain: `npm install` triggers a `postinstall` hook running heavily obfuscated JavaScript that downloads platform-specific payloads from `https://oob.moika[.]tech/payload/<platform>`. Currently in **reconnaissance-only mode** (flag `RECON_ONLY=1`) — collecting environment variables, hostnames, and installed packages — but the architecture supports a server-side toggle to full exploitation (credential theft, data exfiltration, backdooring).
+
+**Single-operator attribution:** All three accounts share the identical hardcoded HTTP header `X-Secret: l95HdDaz3kQx1Zsg3WxH6HvKANf51RY1`, same C2 server, identical package template generator, and temporally correlated publishing bursts (12-minute gap between mr.4nd3r50n and ce-rwb batches on May 28). The `mr.4nd3r50n` account started as a legitimate bug bounty researcher (April 2024) probing npm dependency confusion, then pivoted to malicious publishing ~2 years later.
+
+---

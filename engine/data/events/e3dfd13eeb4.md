@@ -1,0 +1,9 @@
+CISA added CVE-2026-0257 to its Known Exploited Vulnerabilities catalog on May 29, confirming active in-the-wild exploitation of an authentication bypass in Palo Alto Networks PAN-OS and Prisma Access. The flaw allows a remote unauthenticated attacker to forge authentication override cookies and establish unauthorized VPN connections through the GlobalProtect gateway — critical for any organization running internet-facing GlobalProtect appliances.
+
+Rapid7 MDR documented two distinct exploitation waves. The first, on May 17, originated from **Vultr** hosting (IP: 104.207.144.154, machine name: `GP-CLIENT`, spoofed MAC: `aa:bb:cc:dd:ee:ff`) targeting local admin accounts via cookie authentication. The second wave on May 21 originated from **Dromatics Systems** (IPs: 146.19.216.119/120/125, machine name: `DESKTOP-GP01`) using SAML authentication profiles — with some victims receiving full VPN IP assignments granting internal network access. The consistent spoofed MAC across both waves strongly suggests a single threat actor.
+
+**The vulnerability mechanics:** The GlobalProtect service (`/usr/local/bin/gpsvc`) decrypts authentication override cookies using the certificate's private key but performs **zero signature verification** on the decrypted content. When the certificate used for cookie encryption is shared with another feature (e.g., the HTTPS service), an attacker can retrieve the public key from the TLS certificate, forge valid cookies with arbitrary usernames, and bypass authentication entirely. The auth override feature is not enabled by default, but once enabled with certificate reuse, exploitation is trivial.
+
+Rapid7 released a public Python PoC script that iterates through the certificate chain and tests each public key. Affected: PAN-OS 10.2.x–12.1.x and Prisma Access. Patches available; 8 of 10 impacted Rapid7 MDR customers experienced authentication probes rather than full VPN establishment.
+
+---

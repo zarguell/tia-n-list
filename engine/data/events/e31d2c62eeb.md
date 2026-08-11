@@ -1,0 +1,3 @@
+Awesome Motive's CDN was breached in a supply-chain attack affecting **OptinMonster (1.2M sites)**, TrustPulse, and PushEngage. Attackers exploited a known UpdraftPlus vulnerability to access a marketing server containing CDN credentials, then modified JS files served from the CDN to collect admin authentication tokens and create **rogue administrator accounts**. The backdoor plugin (disguised as "Content Delivery Helper" or "Database Optimizer") included a web shell and arbitrary PHP execution, granting full site control. The attack window was short (OptinMonster: 25 minutes; PushEngage: ~21 hours), but compromised sites remain backdoored unless manually cleaned.
+
+---

@@ -1,0 +1,3 @@
+Zimperium discovered **Rokarolla**, a new Android banking trojan distributed via malicious websites posing as Google Chrome or TikTok download pages. The malware uses 137 commands for near-complete device takeover, including fake login overlays targeting 217 financial applications, keylogging, SMS interception, contact harvesting, call blocking (to prevent fraud alerts), and continuous screenshot capture. During installation, Rokarolla impersonates Google Play Protect to trick users into granting Accessibility service permissions, then hides its icon and disables Google Play Protect. Not found on Google Play — distributed exclusively through sideloaded APKs.
+
+---

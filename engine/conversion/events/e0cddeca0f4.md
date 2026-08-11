@@ -1,0 +1,3 @@
+A new analysis documents **APT37** (ScarCruft, Group 123, Reaper) deploying a new remote access trojan called **NarwhalRAT** through spear-phishing emails disguised as Microsoft account team communications and cybersecurity advisories. Initial access leverages malicious **LNK files** that trigger installation of a compiled Python-based RAT with comprehensive info-stealing capabilities: keylogging, screen capture, USB data exfiltration, and remote command execution. The C2 architecture uses a **dual structure** — a Korean-based relay server paired with the **pCloud API** as a dead-drop resolver, making infrastructure takedown harder than traditional C2 domains. EDR policies should be reviewed for detection of LNK → PowerShell → Python chained execution patterns.
+
+---

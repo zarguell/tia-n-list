@@ -1,0 +1,5 @@
+Tata Electronics, a key Apple iPhone manufacturer and one of India's largest tech manufacturing companies, confirmed a cyberattack that impacted parts of its IT infrastructure "a few weeks ago." The WorldLeaks extortion group — a rebrand of the former Hunters International ransomware operation — leaked data allegedly stolen from Tata, including directories and documents containing Apple product manufacturing data: internal component schematics, PCB designs, material specifications, and SDK files.
+
+WorldLeaks operates purely as a data extortion group (no encryptor), previously claiming victims including Dell (July 2025) and Nike (January 2026). Tata says operations were unaffected. Apple has not commented on whether proprietary data was exposed. For a company producing iPhone components, the leaked schematics and specs represent significant intellectual property theft — though the actual threat to supply chain integrity depends on whether manufacturing process data was also exfiltrated.
+
+---

@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% block title %}All stories — Tia N. List{% endblock %}
+{% block content %}
+<p class="eyebrow">{{ total }} stories</p>
+<h1 class="page-title">All stories</h1>
+<p class="lead">Every story we track, hot or not. The heat badge shows where each one sits.</p>
+
+<div class="filters" role="search" aria-label="Filter stories">
+  <label>Year
+    <select id="f-year">
+      <option value="">All years</option>
+      {% for y in years %}<option value="{{ y }}">{{ y }}</option>{% endfor %}
+    </select>
+  </label>
+  <label>Month
+    <select id="f-month">
+      <option value="">All months</option>
+      {% for m in months %}<option value="{{ m[0] }}">{{ m[1] }}</option>{% endfor %}
+    </select>
+  </label>
+  <label class="f-search">Search
+    <input id="f-q" type="search" placeholder="Title, story, source" autocomplete="off">
+  </label>
+  <span class="f-count" id="f-count"></span>
+</div>
+
+<div class="story-grid" id="story-grid">
+{% for s in cards %}
+  {% set rank = loop.index %}
+  {% include "_story_card.html" %}
+{% endfor %}
+</div>
+
+<p class="no-results" id="no-results" hidden>No stories match.</p>
+
+<nav class="pager" id="pager" aria-label="Pagination"></nav>
+
+<script>
+(function () {
+  var grid = document.getElementById('story-grid');
+  var cards = Array.prototype.slice.call(grid.querySelectorAll('.story-card'));
+  var fYear = document.getElementById('f-year');
+  var fMonth = document.getElementById('f-month');
+  var fQ = document.getElementById('f-q');
+  var count = document.getElementById('f-count');
+  var noResults = document.getElementById('no-results');
+  var pager = document.getElementById('pager');
+  var PAGE_SIZE = 12;
+  var page = 1;
+
+  cards.forEach(function (c) {
+    c.dataset.search = (c.textContent || '').toLowerCase();
+  });
+
+  function matches(c) {
+    return (!fYear.value || c.dataset.year === fYear.value) &&
+           (!fMonth.value || c.dataset.month === fMonth.value) &&
+           (!fQ.value || c.dataset.search.indexOf(fQ.value.toLowerCase().trim()) !== -1);
+  }
+
+  function setUrl() {
+    var params = new URLSearchParams();
+    if (fYear.value) params.set('year', fYear.value);
+    if (fMonth.value) params.set('month', fMonth.value);
+    if (fQ.value) params.set('q', fQ.value.trim());
+    if (page > 1) params.set('page', page);
+    history.replaceState(null, '', params.toString() ? '?' + params.toString() : location.pathname);
+  }
+
+  function renderPager(pages) {
+    if (pages <= 1) { pager.innerHTML = ''; return; }
+    function link(label, p, cls) {
+      if (cls.indexOf('disabled') !== -1) {
+        return '<span class="page ' + cls + '">' + label + '</span>';
+      }
+      return '<a class="page ' + cls + '" href="?page=' + p + '" data-page="' + p + '">' + label + '</a>';
+    }
+    var html = link('Prev', page - 1, page <= 1 ? 'disabled' : '');
+    var start = Math.max(1, page - 2);
+    var end = Math.min(pages, page + 2);
+    if (start > 1) {
+      html += link(1, 1, page === 1 ? 'current' : '');
+      if (start > 2) html += '<span class="page gap">…</span>';
+    }
+    for (var p = start; p <= end; p++) {
+      html += link(p, p, p === page ? 'current' : '');
+    }
+    if (end < pages) {
+      if (end < pages - 1) html += '<span class="page gap">…</span>';
+      html += link(pages, pages, page === pages ? 'current' : '');
+    }
+    html += link('Next', page + 1, page >= pages ? 'disabled' : '');
+    pager.innerHTML = html;
+  }
+
+  function apply() {
+    var visible = cards.filter(matches);
+    var pages = Math.max(1, Math.ceil(visible.length / PAGE_SIZE));
+    if (page > pages) page = pages;
+    var slice = visible.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+    cards.forEach(function (c) {
+      c.style.display = slice.indexOf(c) === -1 ? 'none' : '';
+    });
+    count.textContent = visible.length + ' of ' + cards.length;
+    noResults.hidden = visible.length !== 0;
+    renderPager(pages);
+    setUrl();
+  }
+
+  [fYear, fMonth, fQ].forEach(function (el) {
+    el.addEventListener(el.tagName === 'INPUT' ? 'input' : 'change', function () {
+      page = 1;
+      apply();
+    });
+  });
+  pager.addEventListener('click', function (ev) {
+    var a = ev.target.closest('a[data-page]');
+    if (!a) return;
+    ev.preventDefault();
+    page = parseInt(a.getAttribute('data-page'), 10);
+    apply();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  var sp = new URLSearchParams(location.search);
+  if (sp.get('year')) fYear.value = sp.get('year');
+  if (sp.get('month')) fMonth.value = sp.get('month');
+  if (sp.get('q')) fQ.value = sp.get('q');
+  page = parseInt(sp.get('page') || '1', 10) || 1;
+  apply();
+})();
+</script>
+{% endblock %}

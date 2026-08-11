@@ -1,0 +1,5 @@
+The Iran-linked threat actor **Handala** (also tracked as Storm-0842, Void Manticore, Homeland Justice) claimed responsibility for hacking **California Water Service's Chico District**, dumping **5 GB of stolen data** including customer billing records, RTKBase GNSS platform credentials, and network enumeration data.
+
+**Attack chain per Dataminr:** Initial access likely via Cal Water's **RTKBase platform** (GNSS base station, ~783 continuous hours of operation), with lateral movement to the customer billing database. **Critical concern:** Handala's deployed toolkit includes custom wipers (`win.handala`, `Handala Wiper`, `Hamsa Wiper`) and MBR-overwriting capabilities. Dataminr assesses: *"Security teams should treat the current disclosure as a possible precursor to a destructive follow-on."* Cal Water has not publicly acknowledged the intrusion. Handala framed the attack as retaliation for US actions in Iran and claimed they had the ability to disrupt water access (though unconfirmed). This follows similar Handala targeting of US infrastructure (LA Metro, US troops in Bahrain).
+
+---

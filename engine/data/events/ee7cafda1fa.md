@@ -1,0 +1,3 @@
+DragonForce ransomware affiliates claimed **seven UK-based organizations** in May 2026, posting them on the group's Tor data leak site — including **Practicus** (executive search), **WSM** (tax advisory), **Helix International** (MSP serving Fortune 500 clients across healthcare/finance), and **Cult Wines** (luxury retail/finance). DragonForce affiliates are opportunistic, exploiting edge devices (Ivanti Connect Secure, Fortinet FortiOS, SonicWall SSL-VPN) and abusing BYOVD tactics to bypass EDR. The group made headlines in June 2025 when Scattered Spider-linked affiliates hit UK retailers M&S, Co-op, and Harrods. *Previously covered June 16: DragonForce using Microsoft Teams TURN relays for stealth C2.*
+
+---

@@ -1,0 +1,3 @@
+A vulnerability in Apple's "Hide My Email" feature allows almost anyone to discover the real email address behind a generated alias, completely defeating the privacy protection the service is designed to provide. Security researcher Alex Murphey reported the flaw to Apple in June 2025. Apple claimed to have fixed the issue in March 2026, but independent testing by 404 Media and multiple other outlets confirmed the vulnerability remains exploitable as of July 1. The exact technical details are being withheld to prevent trivial abuse. Hide My Email is widely used by privacy-conscious users across Apple's ecosystem to compartmentalize identities and prevent tracking.
+
+---

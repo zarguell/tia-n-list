@@ -1,0 +1,3 @@
+Defused reported active exploitation of three critical pre-auth RCE vulnerabilities in Fortinet's FortiSandbox threat detection platform starting June 15. Patched April 14, the flaws enable **unauthenticated command injection** with no user interaction — attackers can escalate privileges and execute arbitrary code remotely. Defused notes CVE-2026-39813 (no prior recorded exploitation), CVE-2026-39808, and CVE-2026-25089 (listed as "vibecoded, likely faulty exploit"). CISA tracks **26 Fortinet vulnerabilities** as exploited in attacks, 13 abused by ransomware gangs. Admins must upgrade affected deployments immediately.
+
+---

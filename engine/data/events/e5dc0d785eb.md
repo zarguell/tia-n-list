@@ -1,0 +1,1 @@
+The Dutch data protection watchdog has ruled that research agency Bevolkingsonderzoek Nederland failed data security rules before a ransomware attack by the Nova gang exposed data of 850,000 individuals — half a million women who had undergone cervical cancer screening. The lab paid the ransom, but Nova then demanded additional payment after the lab contacted police.

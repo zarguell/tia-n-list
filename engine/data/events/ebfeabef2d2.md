@@ -1,0 +1,1 @@
+Tom Parker, IBM's security services lead and founder of Hubble, has emerged as the primary candidate to lead CISA under the Trump administration, following the withdrawal of Sean Plankey. Parker's private-sector background aligns with the administration's preference for industry experience. He would succeed acting director Nick Andersen.

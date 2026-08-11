@@ -1,0 +1,5 @@
+A maximum-severity vulnerability in Samba's printing subsystem allows unauthenticated remote attackers to execute arbitrary commands on affected print servers. Tracked as **CVE-2026-4480** with a perfect CVSS 10.0 score, the flaw lives in how Samba processes the `%J` substitution character within its `print command` configuration setting — an attacker-可控 job description string is passed directly to the shell without sanitization, enabling remote code execution with zero authentication and zero user interaction.
+
+**Scope and mitigations:** Not all deployments are vulnerable. Servers are only at risk when `print command` includes `%J`. Deployments using `printing = cups` or `printing = iprint` are **not** affected. Wrapping `%J` in single quotes (`'%J'`) reduces but does not eliminate risk. The Samba team has released patched versions 4.22.10, 4.23.8, and 4.24.3. Enterprise mixed-OS networks using Samba as a Windows-compatible print server should treat this as an emergency patching priority. The CVSS 3.1 vector (AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H) reflects a worst-case remote-code-execution scenario with full cross-confidentiality impact.
+
+---

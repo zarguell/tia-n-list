@@ -1,0 +1,5 @@
+Symantec's threat-hunting team (Broadcom) documented a tightly focused espionage operation targeting a senior executive at a major global stock exchange. The attacker accessed the victim's Outlook mailbox from **October 2025 to March 2026** (150-day dwell time), exfiltrating the complete mailbox in incremental archives using Dropbox and OneDrive.
+
+**Key tradecraft:** The attacker used a custom infostealer built on Aspose (a legitimate .NET library for parsing Outlook OST/PST files), wrapped in a standalone executable renamed with innocuous temp-file extensions and hidden in Windows temp subfolders (`...\temp\skin\licenses\`). Eight OST-extraction runs occurred at 2–4 week intervals, each adjoining the previous date window. The Aspose-based stealer converted OST to PST with a password flag (`-p`) and date-range window (`-t`). Persistence was maintained through scheduled tasks disguised as Adobe, Lenovo, and OneDrive system services. The initial access vector was not determined, but two implants with system privileges (mimicking Adobe and OneDrive) were already running when first detected. No attribution has been made for the threat actor.
+
+---

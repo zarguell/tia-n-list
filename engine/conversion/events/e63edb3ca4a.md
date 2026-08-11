@@ -1,0 +1,5 @@
+Microsoft has confirmed it is working on a security patch for the **RoguePlanet** Microsoft Defender race condition zero-day, now tracked as **CVE-2026-50656**, one week after researcher Nightmare Eclipse publicly released an exploit granting SYSTEM privileges on fully patched Windows 10 and Windows 11. Microsoft's advisory acknowledges the vulnerability in the Microsoft Malware Protection Engine but does not credit the researcher — part of an ongoing dispute over Microsoft's bug bounty practices. The exploit triggers a race condition in Defender's internal processing to spawn a SYSTEM-level command prompt regardless of whether real-time protection is enabled. Nightmare Eclipse previously leaked BlueHammer, RedSun, GreenPlasma, MiniPlasma, YellowKey, and UnDefend exploits, with Microsoft fixing GreenPlasma, MiniPlasma, and YellowKey in the June Patch Tuesday.
+
+**Hunting hypothesis:** Monitor for unexpected `cmd.exe` or `powershell.exe` child processes spawned from `MsMpEng.exe` — the Defender engine process should never launch interactive shells.
+
+---

@@ -1,0 +1,3 @@
+Google filed a lawsuit against "Outsider Enterprise," a Chinese cybercrime network operating via Telegram that offered phishing-as-a-service and used Google's Gemini AI to create scam website templates. The group reportedly offered nearly 300 scam templates imitating Google, YouTube, government agencies (including NY E-ZPass), and more. Google worked with AT&T, Verizon, and T-Mobile to block malicious text messages. Google notes its on-device AI scam detection in Google Messages blocks approximately 10 billion scam texts per month. Bruce Schneier, while supporting the effort, expressed skepticism about the lawsuit's deterrent effect.
+
+---

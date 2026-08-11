@@ -1,0 +1,1 @@
+Trump Mobile confirmed it exposed customers' names, email addresses, mailing addresses, cell numbers, and order identifiers to the open internet. The company is investigating but has not clarified whether it will notify affected customers.

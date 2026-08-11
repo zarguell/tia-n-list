@@ -1,0 +1,1 @@
+Silent Push's **Danglegeddon** study quantifies the risk of dangling DNS records — domains whose DNS points to deprovisioned infrastructure, ripe for takeover. The research is a reminder that expired cloud IPs, abandoned subdomains, and stale CNAMEs are a standing hijack vector: audit DNS for dangling records and claim or remove them before someone else does.

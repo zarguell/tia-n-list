@@ -1,0 +1,3 @@
+Karen Serobovich Vardanyan, 34, an Armenian national extradited from Ukraine to the U.S., pleaded guilty to computer fraud and conspiracy for deploying Ryuk ransomware against multiple U.S. organizations between November 2019 and April 2020. Victims included a Michigan company that paid 200 BTC (~$1.1M), an Oregon technology company, and a Texas school. Vardanyan's co-conspirators received approximately 1,160 bitcoins (~$15M at the time) in ransom payments. He faces up to 15 years in prison and has agreed to pay $1.2M in restitution. Ryuk operated from 2018-2020, extorting an estimated $150M, with many members transitioning to Conti after Ryuk's shutdown.
+
+---

@@ -1,0 +1,1 @@
+CERT Polska has disclosed two vulnerabilities in Ollama, the popular open-source local LLM runtime. Details are limited at this time but organizations running self-hosted LLM infrastructure should monitor for patches and advisories.

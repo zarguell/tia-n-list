@@ -1,0 +1,3 @@
+California Attorney General Rob Bonta filed a lawsuit against 23andMe (now Chrome Holding Co.) over the October 2023 credential-stuffing breach that exposed sensitive genetic and health data of **nearly 7 million customers**, including 855,541 Californians. The suit alleges the company failed to implement reasonable safeguards against credential-stuffing, missed multiple opportunities to detect the intrusion, and made misleading public statements — claiming high security standards before the incident and blaming customers for password reuse afterward. Violations span the California Genetic Information Privacy Act, the California Reasonable Data Security Law, the CCPA, and False Advertising Law. Penalties of $1,000–$7,500 per violation are sought via injunction.
+
+---

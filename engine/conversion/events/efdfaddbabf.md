@@ -1,0 +1,3 @@
+CISA added **CVE-2026-54420** (the LiteSpeed cPanel user-end plugin symlink-following vulnerability) to its Known Exploited Vulnerabilities catalog, ordering federal agencies to patch within **three days** under the new BOD 26-04 risk-based directive — making it the **first vulnerability subject to the new expedited timeline**. The flaw allows attackers with FTP or web shell access to escalate privileges to **root on shared hosting servers running CloudLinux/CageFS**. CISA also previously warned agencies about related CVE-2026-48172. A detection command is available to check logs for exploitation attempts.
+
+---

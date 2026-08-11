@@ -1,0 +1,3 @@
+FBI Deputy Assistant Director **Todd Hemmen** stated that AI models like Anthropic's Mythos, which can find vulnerabilities in ubiquitous open-source code, "present future challenges for law enforcement." Speaking at a Digital Government Institute event, Hemmen noted Mythos found vulnerabilities "in some of the open-source code that is so ubiquitous — it's in the vast majority of our most foundational code for things like operating systems, security, web infrastructure, encryption."
+
+The administration had **imposed export controls** on Mythos 5 in June before lifting them after Anthropic worked with government partners on guardrails.

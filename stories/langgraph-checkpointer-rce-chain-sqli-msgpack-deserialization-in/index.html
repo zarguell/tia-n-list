@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LangGraph Checkpointer RCE Chain — SQLi → MsgPack Deserialization in AI Agent Persistence Layer (CVE-2025-67644, CVE-2026-28277, CVE-2026-27022) — Tia N. List</title>
+
+<meta name="description" content="Check Point Research disclosed a chained vulnerability in LangGraph&#39;s checkpointers — the persistence layer for stateful AI agents in the LangChain ecosystem (50M+ monthly PyPI downloads). Three CVEs enable unauthenticated remote code execution on self-hosted LangGraph deployments that expose getstatehistory() with a user-controlled filter parameter. Attack chain: 1. CVE-2025-67644 — SQL injection in SQLite checkpointer&#39;s metadatapredicate() function; user-controlled dictionary keys interpolated directly into SQL WHERE clause 2. CVE-2026-28277 — Unsafe msgpack deserialization via ormsgpack.unp">
+<meta property="og:site_name" content="Tia N. List">
+<meta property="og:type" content="article">
+<meta property="og:title" content="LangGraph Checkpointer RCE Chain — SQLi → MsgPack Deserialization in AI Agent Persistence Layer (CVE-2025-67644, CVE-2026-28277, CVE-2026-27022)">
+<meta property="og:description" content="Check Point Research disclosed a chained vulnerability in LangGraph&#39;s checkpointers — the persistence layer for stateful AI agents in the LangChain ecosystem (50M+ monthly PyPI downloads). Three CVEs enable unauthenticated remote code execution on self-hosted LangGraph deployments that expose getstatehistory() with a user-controlled filter parameter. Attack chain: 1. CVE-2025-67644 — SQL injection in SQLite checkpointer&#39;s metadatapredicate() function; user-controlled dictionary keys interpolated directly into SQL WHERE clause 2. CVE-2026-28277 — Unsafe msgpack deserialization via ormsgpack.unp">
+<meta property="og:url" content="https://zarguell.github.io/tia-n-list/stories/langgraph-checkpointer-rce-chain-sqli-msgpack-deserialization-in/">
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23141413'/%3E%3Ccircle cx='16' cy='16' r='7' fill='%23D97757'/%3E%3Ccircle cx='16' cy='16' r='3' fill='%23FAF9F5'/%3E%3C/svg%3E">
+<base href="https://zarguell.github.io/tia-n-list/">
+<script>
+(function () {
+  var root = document.documentElement;
+  var saved = null;
+  try { saved = localStorage.getItem('ts-theme'); } catch (e) {}
+  root.setAttribute('data-theme', saved === 'dark' ? 'dark' : 'light');
+})();
+</script>
+<link rel="stylesheet" href="style.css">
+<link rel="alternate" type="application/rss+xml" title="Tia N. List — Hot stories" href="feeds/feed-hot.xml">
+<link rel="alternate" type="application/rss+xml" title="Tia N. List — All articles" href="feeds/feed-all.xml">
+<link rel="alternate" type="application/rss+xml" title="Tia N. List — Daily digest" href="feeds/feed-daily.xml">
+</head>
+<body>
+<header class="masthead">
+  <div class="masthead-inner">
+    <a class="wordmark" href="./">Tia N.<span>List</span></a>
+    <nav class="mainnav" aria-label="Primary">
+      <a href="./" >Hot</a>
+      <a href="stories/" >All</a>
+      <a href="daily/" >Daily</a>
+      <a href="feeds/" >Feeds</a>
+    </nav>
+    <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle color theme" title="Toggle light / dark">
+      <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 13.5A8.5 8.5 0 0 1 10.5 4 8.5 8.5 0 1 0 20 13.5Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+    </button>
+  </div>
+</header>
+<main class="page">
+
+<p class="eyebrow">Story · langgraph-checkpointer-rce-chain-sqli-msgpack-deserialization-in · 1 source</p>
+
+<div class="story-head">
+  <h1 class="story-title">LangGraph Checkpointer RCE Chain — SQLi → MsgPack Deserialization in AI Agent Persistence Layer (CVE-2025-67644, CVE-2026-28277, CVE-2026-27022)</h1>
+  <div class="hotmeter" aria-label="Hot score 0.5">
+    <div class="lbl"><span>hot</span><span>0.5</span></div>
+    <div class="bar"><div class="fill" style="width: 8%; background: var(--gray-500);"></div></div>
+  </div>
+  <div class="meta">
+    <span class="chip">malware.news</span>
+    <span class="chip cve">CVE-2025-67644</span><span class="chip cve">CVE-2026-27022</span><span class="chip cve">CVE-2026-28277</span>
+    
+    <span class="reltime">first seen 60d ago</span>
+  </div>
+</div>
+
+
+
+<h2 class="eyebrow" style="margin-bottom: 14px;">Timeline</h2>
+<ol class="timeline">
+
+  <li class="tl-item original">
+    <span class="tl-dot" aria-hidden="true"></span>
+    <p class="tl-kind">original reporting</p>
+    <h3 class="tl-title"><a href="https://malware.news/t/from-sqli-to-rce-exploiting-langgraph-s-checkpointer/107789#post_1">LangGraph Checkpointer RCE Chain — SQLi → MsgPack Deserialization in AI Agent Persistence Layer (CVE-2025-67644, CVE-2026-28277, CVE-2026-27022)</a></h3>
+    <p class="tl-source">malware.news · 60d ago · June 12th, 2026</p>
+    <div class="tl-body"><p>Check Point Research disclosed a chained vulnerability in LangGraph's checkpointers — the persistence layer for stateful AI agents in the LangChain ecosystem (50M+ monthly PyPI downloads). Three CVEs enable unauthenticated remote code execution on self-hosted LangGraph deployments that expose <code>get_state_history()</code> with a user-controlled <code>filter</code> parameter.</p>
+<p><strong>Attack chain:</strong></p>
+<ol>
+<li>
+<p><strong>CVE-2025-67644</strong> — SQL injection in SQLite checkpointer's <code>_metadata_predicate()</code> function; user-controlled dictionary keys interpolated directly into SQL WHERE clause</p>
+</li>
+<li>
+<p><strong>CVE-2026-28277</strong> — Unsafe msgpack deserialization via <code>ormsgpack.unpackb()</code> — allows calling <code>os.system()</code> with attacker-controlled commands using <code>EXT_CONSTRUCTOR_SINGLE_ARG</code> extension type</p>
+</li>
+<li>
+<p><strong>CVE-2026-27022</strong> — Same SQL injection class affecting the Redis checkpointer</p>
+</li>
+</ol>
+<p><strong>Who's at risk:</strong> Teams self-hosting LangGraph with SQLite or Redis checkpointers where the application passes user input to <code>get_state_history()</code>. LangChain's managed cloud (LangSmith) runs PostgreSQL and is unaffected. <strong>Patched in:</strong> <code>langgraph-checkpoint-sqlite 3.0.1+</code>, <code>langgraph 1.0.10+</code>, <code>langgraph-checkpoint-redis 1.0.2+</code>.</p>
+<hr></div>
+  </li>
+
+</ol>
+
+
+<div class="covered-in">
+  <h2 class="eyebrow" style="margin: 30px 0 10px;">Covered in</h2>
+  <p class="covered-list">
+    <a class="chip covered" href="daily/2026-06-12/">digest 2026-06-12</a>
+  </p>
+</div>
+
+
+</main>
+<footer class="footer">
+  <div class="footer-inner">
+    <p class="footnote">Tia N. List. Daily cybersecurity intelligence, story by story.</p>
+    <nav class="feedlinks" aria-label="RSS feeds">
+      <a href="feeds/feed-daily.xml">Daily digest <span class="rss">RSS</span></a>
+      <a href="feeds/feed-hot.xml">Hot stories <span class="rss">RSS</span></a>
+      <a href="feeds/feed-all.xml">Every article <span class="rss">RSS</span></a>
+    </nav>
+  </div>
+</footer>
+<script>
+(function () {
+  var root = document.documentElement;
+  window.tsSetTheme = function (t) {
+    root.setAttribute('data-theme', t);
+    try { localStorage.setItem('ts-theme', t); } catch (e) {}
+  };
+  var btn = document.getElementById('themeToggle');
+  if (btn) btn.addEventListener('click', function () {
+    tsSetTheme(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+  });
+})();
+</script>
+</body>
+</html>

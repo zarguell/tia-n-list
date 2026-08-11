@@ -1,0 +1,3 @@
+Unit 42 documented Screening Serpens (UNC1549 / Smoke Sandstorm) deploying six new RAT variants between mid-February and April 2026 — two families (MiniUpdate and MiniJunk V2) — across coordinated campaigns targeting the U.S., Israel, UAE, and Middle East entities. The technical evolution: **AppDomainManager hijacking** places a malicious .NET configuration file that substitutes a custom AppDomainManager implementation, disabling ETW and bypassing strong-name validation before the host application fully launches — making it invisible to EDR tools that rely on post-initialization telemetry. 19+ Azure-hosted C2 domains and OnlyOffice document-sharing platforms used for payload delivery.
+
+---

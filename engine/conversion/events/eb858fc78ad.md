@@ -1,0 +1,3 @@
+Attackers exploited SharePoint vulnerabilities fixed in the July Patch Tuesday updates — either CVE-2026-56164 (actively exploited privilege escalation) or CVE-2026-50522 (critical RCE later used to steal machine keys) — to breach Switzerland's federal SharePoint platform, compromising login credentials for roughly 200 accounts before detection on July 28. The Federal Office for IT (BIT) blocked external access, patched, reset passwords, and is reinstalling servers; no data theft beyond credentials has been found and no group has claimed the attack. Patch SharePoint immediately and audit for machine-key theft, the persistence mechanism that kept attackers in post-patch.
+
+---

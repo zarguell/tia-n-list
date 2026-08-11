@@ -1,0 +1,3 @@
+Socket researchers discovered obfuscated JavaScript appended to `tailwind.js` in the dev branch of the legitimate Laravel package `roberts/leads`. The loader uses a **blockchain dead-drop design**: queries TRON account transactions for a pointer, falls back to Aptos, then retrieves encrypted content from a BNB Smart Chain transaction. Decrypts and executes first-stage payload in-process, with optional hidden Node.js child process for second-stage payloads. Infra and XOR patterns match prior DPRK-linked campaigns (DEV#POPPER, OmniStealer, BeaverTail). The malicious version was removed by Packagist's security team.
+
+---

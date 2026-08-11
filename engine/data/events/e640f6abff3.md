@@ -1,0 +1,9 @@
+*Minnesota water attacks covered Jul 28–31. New today: the president's Friday remarks and industry pushback, plus Censys exposure data attached to CISA's PLC alert.*
+
+The political and technical fallout from the July 26–27 attacks on **30+ Minnesota community water systems** continued Friday. President Trump told reporters the state was "behind it" and "grossly incompetent," disputing the Iran attribution — drawing immediate pushback from across the cyber community: Chris Wysopal ("Victim blaming in cyber is so 2000 and late"), Jake Williams ("His own intelligence services are attributing this to Iran"), and WaterISAC's Tom Dobbins, who said the sector is "confident in our government partners' assessment" tying the activity to CISA/FBI advisory **AA26-097A** (Iranian-affiliated actors exploiting PLCs). Gov. Tim Walz blamed DOGE cuts to CISA for leaving the U.S. exposed. Attribution experts (Bryson Bort, ex-FBI's Cynthia Kaiser) uniformly backed the Iran assessment, calling the attacks "a target of opportunity," not state-level negligence.
+
+Separately, **Censys quantified the attack surface** behind CISA's urgent alert on internet-exposed PLCs: **4,100+ Rockwell Automation/Allen-Bradley hosts, 4,100 Siemens hosts, and 2,000+ Schneider Electric hosts** reachable over the public internet — many MicroLogix 1400 units running end-of-sale firmware, and **nearly half of exposed Rockwell devices reachable via cellular networks** (Verizon, AT&T, T-Mobile, Comcast, Charter, Starlink), matching the undocumented-cellular-modem vector CISA flagged in Minnesota.
+
+**Action:** Remove internet-exposed PLCs/OT now; if unavoidable, route through VPN/gateway with IP allowlists and changed default passwords. Audit for undocumented cellular modems — they are the likely initial-access vector. WaterISAC's confidence in Iran attribution underscores that this is an active, ongoing targeting campaign, not a one-off.
+
+---

@@ -1,0 +1,3 @@
+CISA has formally added CVE-2026-48172 to its Known Exploited Vulnerabilities catalog, confirming active in-the-wild exploitation. First reported as a zero-day on May 23 (covered in prior digest), the flaw allows any authenticated cPanel user to execute arbitrary scripts as root via the `lsws.redisAble` JSON-API endpoint — no race condition, no authentication bypass needed. CISA's Binding Operational Directive 22-01 mandates remediation by **May 29, 2026** (tomorrow) for federal agencies. The attack surface remains massive: cPanel powers millions of shared-hosting servers globally. Detection: `grep -rE "cpanel_jsonapi_func=redisAble" /var/cpanel/logs /usr/local/cpanel/logs/` — any output means the host is compromised.
+
+---

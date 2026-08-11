@@ -1,0 +1,5 @@
+The FBI issued a formal public service announcement (May 27, 2026) detailing the **Silent Ransom Group (SRG)** — a Russia-based extortion operation emerging from the Conti disbandment in 2022 — which has claimed 100+ attacks with a surge in recent months. The group's TTP is unique in the cybercrime ecosystem: they impersonate internal IT support via phone and phishing, and if remote access fails, **physically send associates to victims' locations** to attach storage devices directly to workstations.
+
+Law firms are the primary target — 134 ransomware incidents against the legal sector in Q1 2026 alone (Halcyon), making it the fourth-most targeted industry. SRG does not deploy encryption; instead, stolen sensitive legal data creates privilege and reputational leverage for extortion. Experts at Recorded Future and Flashpoint note the group likely uses unwitting gig-economy workers for physical visits, similar to delivery-service contractors. Mitigations: enforce FIDO2 hardware MFA, implement help-desk caller verification, and conduct vishing-specific user training.
+
+---

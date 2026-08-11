@@ -1,0 +1,3 @@
+Deep Specter Research submitted two formal vulnerability reports to GitHub's HackerOne disclosure channel identifying design flaws in the GitHub platform that they say are enabling variants of the **Shai-Hulud/Miasma** supply-chain worm. GitHub closed both reports without action. The researchers now say those same flaws are being actively exploited to compromise packages and developer accounts globally. This echoes a pattern where platform-level vulnerabilities in code hosting and CI/CD infrastructure are enabling the next generation of software supply chain attacks faster than the industry patches for them.
+
+---
