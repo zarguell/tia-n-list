@@ -227,6 +227,7 @@ def load_stories(events):
             "heat_var": hv,
             "heat_pct": min(100, int(st.get("score", 0) / max_score * 100)),
             "reddit": st.get("reddit_signal", {}).get("best_score") or None,
+            "score_breakdown": st.get("score_breakdown", {}),
             "n_sources": st.get("n_sources", len(st.get("sources", []))),
             "first_seen": st.get("first_seen", evs_sorted[0]["published_at"]),
             "last_seen": st.get("last_seen", evs_sorted[-1]["published_at"]),
@@ -420,6 +421,7 @@ def main():
                                cards=home_cards[1:]))
     write("404.html", render("404.html", active=None))
     write("feeds/index.html", render("feeds.html", active="feeds"))
+    write("methodology/index.html", render("methodology.html", active=None))
     write("style.css", open(os.path.join(TMPL_DIR, "style.css")).read())
     write("robots.txt", open(os.path.join(TMPL_DIR, "robots.txt")).read())
 

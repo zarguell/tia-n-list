@@ -17,6 +17,21 @@
     <div class="lbl"><span>hot</span><span>{{ "%.1f"|format(story.score) }}</span></div>
     <div class="bar"><div class="fill" style="width: {{ story.heat_pct }}%; background: var(--{{ story.heat_var }});"></div></div>
   </div>
+  {% if story.score_breakdown %}
+  <details class="scorebreakdown">
+    <summary>Why this score</summary>
+    <dl class="scorefactors">
+      <div><dt>Breadth</dt><dd>{{ "%.2f"|format(story.score_breakdown.breadth) }} <span>/ 3.0 · {{ story.score_breakdown.n_sources }} source{{ 's' if story.score_breakdown.n_sources != 1 }}</span></dd></div>
+      <div><dt>Authority</dt><dd>{{ "%.2f"|format(story.score_breakdown.authority) }} <span>/ 2.0 · best outlet weight</span></dd></div>
+      <div><dt>Severity</dt><dd>{{ "%.2f"|format(story.score_breakdown.severity) }} <span>/ 3.0 · CVSS + {{ 'KEV' if story.score_breakdown.kev else 'content' }} signals</span></dd></div>
+      <div><dt>Velocity</dt><dd>{{ "%.2f"|format(story.score_breakdown.velocity) }} <span>/ 2.0 · updates in 48h</span></dd></div>
+      <div><dt>Pickup speed</dt><dd>{{ "%.2f"|format(story.score_breakdown.pickup) }} <span>/ 0.8 · time to second source</span></dd></div>
+      <div><dt>Recency</dt><dd>× {{ "%.2f"|format(story.score_breakdown.recency) }} <span>temporal multiplier</span></dd></div>
+      <div><dt>Community</dt><dd>+ {{ "%.2f"|format(story.score_breakdown.reddit) }} <span>/ 1.5 · reddit signal</span></dd></div>
+      <div class="tot"><dt>Score</dt><dd>{{ "%.1f"|format(story.score) }} <span>/ 6.0 = base × recency + community</span></dd></div>
+    </dl>
+  </details>
+  {% endif %}
   <div class="meta">
     {% for s in story.sources %}<span class="chip">{{ s }}</span>{% endfor %}
     {% for c in story.cves %}<span class="chip cve">{{ c }}</span>{% endfor %}

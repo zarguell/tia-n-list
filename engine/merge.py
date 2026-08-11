@@ -15,7 +15,8 @@ import os
 import re
 from datetime import datetime, timezone
 
-from build_registry import QUALITY, DEFAULT_QUALITY, clean_title, tokens, domain_of, provisional_score
+from build_registry import clean_title, tokens, domain_of
+from score import hot_score
 
 ENGINE = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(ENGINE, "data")
@@ -132,45 +133,9 @@ def match_story(ev, stories):
 
 
 def real_score(s):
-    """Recency x breadth x quality x 2 + velocity + reddit + cve (cap 6)."""
-    last = datetime.fromisoformat(s["last_seen"].replace("Z", "+00:00"))
-    hours = max(0, (datetime.now(timezone.utc) - last).total_seconds() / 3600)
-    recency = 2.718 ** (-hours / 36)
-    breadth = min(3.0, 1 + 0.5 * (s.get("n_sources", 1) - 1))
-    q = max((QUALITY.get(d, DEFAULT_QUALITY) for d in s.get("sources", [])), default=DEFAULT_QUALITY)
-    n48 = 0
-    for ref in s.get("events", []):
-        e = events.get(ref["event_id"])
-        if e:
-            dt = datetime.fromisoformat(e["published_at"].replace("Z", "+00:00"))
-            if (datetime.now(timezone.utc) - dt).total_seconds() < 172800:
-                n48 += 1
-    velocity = min(2.0, 0.6 * n48)
-    # reddit signal: prefer the persisted match (stable across runs), refresh it
-    sig = s.get("reddit_signal") or {}
-    matched_at = sig.get("matched_at", "")
-    fresh_signal = (datetime.fromisoformat(matched_at.replace("Z", "+00:00"))
-                    if matched_at else datetime.min.replace(tzinfo=timezone.utc))
-    rmatch = 0.0
-    if (datetime.now(timezone.utc) - fresh_signal).total_seconds() < 7 * 86400:
-        rmatch = 0.4
-    else:
-        ev_urls = {e["url"].lower() for ref in s.get("events", [])
-                   if (e := events.get(ref["event_id"])) and e["url"]}
-        rt = tokens(s["title"])
-        for r in reddit_posts:
-            if r.get("article_url") and r["article_url"].lower() in ev_urls:
-                rmatch = 0.4
-                break
-            rr = tokens(r.get("title", ""))
-            if len(rt) >= 2 and len(rr) >= 2 and len(rt & rr) / len(rt | rr) >= 0.5:
-                rmatch = 0.3
-                break
-        if rmatch:
-            s["reddit_signal"] = {"posts": 1, "best_score": 0,
-                                  "matched_at": datetime.now(timezone.utc).isoformat()}
-    cve = 0.5 if s.get("cves") else 0.0
-    return round(min(6.0, recency * breadth * q * 2 + velocity + rmatch + cve), 1)
+    """CVSS-inspired hot score (see score.py) — real CVSS severity, KEV status,
+    content signals, pickup speed, velocity, breadth, authority, recency, reddit."""
+    return hot_score(s, events, reddit_posts)
 
 
 def emit_needs(stories):
@@ -249,7 +214,9 @@ def main():
             manifest["stories_per_day"][day].append(target_slug)
 
     for s in stories.values():
-        s["score"] = real_score(s)
+        sc = real_score(s)
+        s["score"] = sc["score"]
+        s["score_breakdown"] = {k: v for k, v in sc.items() if k != "score"}
         json.dump(s, open(os.path.join(STORIES, s["id"] + ".json"), "w"), indent=1)
 
     json.dump(manifest, open(MANIFEST, "w"), indent=1)
