@@ -127,14 +127,19 @@ def sanitize(html_text):
     return html_text
 
 
-def heat(score):
+def heat(score, last_seen=None):
     if score >= 4.5:
         return "h3", "hottest", "heat-3"
     if score >= 3.0:
         return "h2", "hot", "heat-2"
     if score >= HOT_THRESHOLD:
         return "h1", "warm", "heat-1"
-    return "none", "new", "gray-500"
+    if last_seen:
+        dt = parse_utc(last_seen)
+        age_days = (datetime.now(timezone.utc) - dt).total_seconds() / 86400
+        if age_days <= 7:
+            return "none", "new", "gray-500"
+    return "", "", ""    # old and cold: no badge
 
 
 # ---------- store loading ----------
@@ -211,7 +216,7 @@ def load_stories(events):
         evs_sorted = sorted(evs, key=lambda e: e["published_at"])
         deltas = delta_body(evs_sorted)
         original = next((e for e in evs_sorted if e["kind"] == "original"), evs_sorted[0])
-        hc, hl, hv = heat(st.get("score", 0))
+        hc, hl, hv = heat(st.get("score", 0), st.get("last_seen"))
         src_domains = [display_domain(s) for s in st.get("sources", [])]
         src_domains = [display_domain(s) for s in st.get("sources", [])]
         cards.append({
@@ -349,20 +354,23 @@ def lint_chips():
 
 
 def lint_backlinks(cards):
-    """Completeness: every story must have >=1 digest backlink, and every digest
-    analysis link must resolve to an existing story."""
+    """Integrity: every digest narrative link and every explicit digest 'stories'
+    entry must resolve to an existing story. (Stories with zero featured digests
+    are legitimate — backlinks only exist for featured coverage.)"""
     errs = []
     story_ids = {c["id"] for c in cards}
-    for c in cards:
-        if not c.get("digests"):
-            errs.append(f"story {c['id']}: zero digest backlinks")
     for d in os.listdir(DIGESTS_DIR):
-        if not d.endswith(".md"):
-            continue
-        body = open(os.path.join(DIGESTS_DIR, d)).read()
-        for s in re.findall(r"\]\(stories/([^/]+)/\)", body):
-            if s not in story_ids:
-                errs.append(f"digest {d}: link to unknown story {s}")
+        base = os.path.splitext(d)[0]
+        if d.endswith(".md"):
+            body = open(os.path.join(DIGESTS_DIR, d)).read()
+            for s in re.findall(r"\]\(stories/([^/]+)/\)", body):
+                if s not in story_ids:
+                    errs.append(f"digest {d}: link to unknown story {s}")
+        if d.endswith(".json"):
+            meta = json.load(open(os.path.join(DIGESTS_DIR, d)))
+            for s in meta.get("stories", []):
+                if s not in story_ids:
+                    errs.append(f"digest {base}: stories list references unknown story {s}")
     return errs
 
 
@@ -395,14 +403,19 @@ def main():
         if f.endswith(".md") and re.fullmatch(r"\d{4}-\d{2}-\d{2}\.md", f)
     )
     story_days = {}
-    for d, slugs in manifest.get("stories_per_day", {}).items():
-        for s in slugs:
-            story_days.setdefault(s, []).append(d)
-    # union: any digest whose ANALYSIS explicitly links a story also backlinks it
+    # backlinks = FEATURED coverage only: a story is "covered in" a digest when the
+    # digest's narrative links it OR its metadata lists it. The manifest day-assignment
+    # (which the live engine extends with every ingested article) is NOT featured
+    # coverage — it would backlink articles the digest never wrote about.
     for d in digest_dates:
         body = open(os.path.join(DIGESTS_DIR, d + ".md")).read()
         for s in re.findall(r"\]\(stories/([^/]+)/\)", body):
             story_days.setdefault(s, []).append(d)
+        jp = os.path.join(DIGESTS_DIR, d + ".json")
+        if os.path.exists(jp):
+            meta = json.load(open(jp))
+            for s in meta.get("stories", []):
+                story_days.setdefault(s, []).append(d)
     for c in cards:
         days = sorted({x for x in story_days.get(c["id"], [])}, reverse=True)
         c["digests"] = [{"date": x, "url": f"daily/{x}/"} for x in days]

@@ -63,6 +63,41 @@ def strip_html(content, max_chars=1500):
     return text[:max_chars]
 
 
+MARKETING_BLOCKS = [
+    # malware.news affiliate block ("Introduction to Malware Binary Triage (IMBT)
+    # Course ... no extra cost to you.")
+    re.compile(r"(?:Key Points\s+)?Introduction to Malware Binary Triage \(IMBT\)"
+               r" Course.*?no extra cost to you\.?\s*", re.S | re.I),
+    re.compile(r"\b(?:Get|Save)\s+\d+%\s+off using coupon code[^\n]*", re.I),
+    re.compile(r"\bcoupon code:?\s+[A-Z0-9]+\b[^\n]*", re.I),
+    re.compile(r"\bMWNEWS\d+\b[^\n]*", re.I),
+    re.compile(r"\baffiliate link[^\n]*", re.I),
+    re.compile(r"^\s*Key Points\s+", re.I),
+    # SecurityWeek nav + newsletter block
+    re.compile(r"SECURITYWEEK NETWORK:.*?what are you looking for\??\s*", re.S | re.I),
+    re.compile(r"SecurityWeek Daily Briefing Newsletter.*?Unsubscribe at any time\.?\s*(Close\s*)?", re.S | re.I),
+    re.compile(r"SecurityWeek Email Briefing.*?Unsubscribe at any time\.?\s*(Close\s*)?", re.S | re.I),
+    # generic newsletter/read-more boilerplate across outlets
+    re.compile(r"\bSubscribe to the \w+(?: Email)? Briefing\b[^\n]*", re.I),
+    re.compile(r"\b(?:Sign up|Subscribe) to our (?:free |daily )?newsletter\b[^\n]*", re.I),
+    re.compile(r"\bAdvertisement\.? Scroll to continue reading\.?\s*", re.I),
+    re.compile(r"^\s*(?:Advertisement|Advertisement\.)\s*$", re.I),
+    re.compile(r"\bUnsubscribe at any time\.?\s*(Close\s*)?", re.I),
+    re.compile(r"^\s*Close\s*$", re.I),
+]
+
+
+def strip_marketing(text):
+    """Deterministically remove known marketing/affiliate boilerplate from article
+    bodies (e.g. the malware.news course promo appended to every post)."""
+    if not text:
+        return text
+    for rx in MARKETING_BLOCKS:
+        text = rx.sub("", text)
+    text = re.sub(r"\n{3,}", "\n\n", text).strip()
+    return text
+
+
 def load_state():
     if os.path.exists(STATE):
         return json.load(open(STATE))
@@ -99,7 +134,7 @@ def ingest_miniflux(st, hours):
         eid = f"mf:{e['id']}"
         title = clean_title(e.get("title") or "")
         url = e.get("url") or ""
-        body = strip_html(e.get("content"))
+        body = strip_marketing(strip_html(e.get("content")))
         cves = sorted({c.upper() for c in CVE_RE.findall(title + " " + body)})
         meta = {"id": eid, "title": title, "kind": "pending",
                 "source": domain_of(url), "url": url,
