@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Snapshot {{ snap.date }} — Tia N. List{% endblock %}
+{% block content %}
+<p class="eyebrow">CTI · snapshot · {{ snap.date }}</p>
+<h1 class="page-title">STIX snapshot — {{ snap.date }}</h1>
+<p class="lead">Immutable daily bundle. Every file below is content-addressed in <a href="cti/snapshots/{{ snap.date }}/manifest.json">manifest.json</a> — pin the sha256, not the URL. <a href="cti/snapshots/">All snapshots</a></p>
+
+<h2 class="eyebrow" style="margin: 28px 0 12px;">State</h2>
+<ul class="digest-stories">
+  <li><span class="mono">{{ snap.counts.iocs }} IOCs</span> ({% for t, n in snap.counts.by_type.items() %}{{ t }} {{ n }}{% if not loop.last %}, {% endif %}{% endfor %}) · {{ snap.counts.stix_objects }} STIX objects · {{ snap.counts.cti_records }} CTI records</li>
+</ul>
+
+<h2 class="eyebrow" style="margin: 28px 0 12px;">Files</h2>
+<table class="cti-table">
+  <thead><tr><th>File</th><th>Bytes</th><th>sha256</th></tr></thead>
+  <tbody>
+  {% for name, meta in snap.files.items() %}
+    <tr>
+      <td><a href="cti/snapshots/{{ snap.date }}/{{ name }}">{{ name }}</a></td>
+      <td class="mono">{{ meta.bytes }}</td>
+      <td class="mono">{{ meta.sha256 }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

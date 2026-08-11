@@ -449,15 +449,27 @@ def main():
     cti_covered = cti_mod.all_covered(cti_matrix)
     write("cti/index.html", render("cti.html", active="cti",
                                    matrix=cti_matrix, covered=cti_covered))
+    # curated IOC set (built once, used by case sidecars, feeds and snapshots)
+    import ioc as ioc_mod
+    iocs = ioc_mod.build_index(cards, events)
+    curated_path = os.path.join(ENGINE, "data", "iocs-curated.json")
+    if os.path.exists(curated_path):
+        curated = {c["value"]: c for c in json.load(open(curated_path))}
+        kept = [i for i in iocs if i["value"] in curated]
+        for i in kept:
+            i["reason"] = curated[i["value"]]["reason"]
+        iocs = kept
     for sid, r in cti_records.items():
         card = cards_by_id_cti.get(sid)
         texts = {}
         for suffix in (".sigma", ".splunk", ".kql"):
             p = os.path.join(CTI_DIR, sid + suffix)
             texts[suffix.lstrip(".") + "_text"] = open(p).read() if os.path.exists(p) else ""
+        rec_iocs = [i for i in iocs if sid in i["stories"]]
+        write(f"cti/{sid}.ioc.json", json.dumps(rec_iocs, indent=1))
         r = {**r, "confidence": cti_mod.confidence(r, card),
              "updated_at": r.get("updated_at", r.get("_generated", today)),
-             **texts}
+             "iocs": rec_iocs, **texts}
         write(f"cti/{sid}/index.html", render("cti_case.html", active=None, rec=r))
 
     # Derive Splunk/KQL variants from the authored Sigma rules (deterministic —
@@ -479,16 +491,7 @@ def main():
         write(f"cti/{slug}.kql",
               f"# {slug} — KQL variant (derived from {slug}.sigma via sigma convert)\n{kql}\n")
 
-    # IOC feeds (deterministic extraction -> JSON/CSV/TXT/STIX + readable page)
-    import ioc as ioc_mod
-    iocs = ioc_mod.build_index(cards, events)
-    curated_path = os.path.join(ENGINE, "data", "iocs-curated.json")
-    if os.path.exists(curated_path):
-        curated = {c["value"]: c for c in json.load(open(curated_path))}
-        kept = [i for i in iocs if i["value"] in curated]
-        for i in kept:
-            i["reason"] = curated[i["value"]]["reason"]
-        iocs = kept
+    # IOC feeds (curated set -> JSON/CSV/TXT/STIX + readable page)
     corroborated = [i for i in iocs if i["confidence"] == "corroborated"]
     reported = [i for i in iocs if i["confidence"] != "corroborated"]
     write("cti/iocs/index.html", render("iocs.html", active="cti",
@@ -498,6 +501,21 @@ def main():
     write("cti/iocs/iocs.csv", ioc_mod.to_csv(iocs))
     write("cti/iocs/iocs.txt", ioc_mod.to_txt(iocs))
     write("cti/iocs/iocs-stix.json", ioc_mod.to_stix(iocs, BASE_URL + "/"))
+
+    # Tier 4: immutable daily STIX snapshots + latest pointer + index page
+    import snapshots as snap_mod
+    snap_dir = os.path.join(ROOT, "cti", "snapshots", today)
+    snap_mod.write_snapshot(iocs, cti_records, BASE_URL + "/", snap_dir, today)
+    latest = {"date": today, "url": site_url("cti/snapshots/" + today + "/")}
+    write("cti/snapshots/latest.json", json.dumps(latest, indent=1))
+    snap_manifest = json.load(open(os.path.join(snap_dir, "manifest.json")))
+    write("cti/snapshots/" + today + "/index.html",
+          render("snapshot_day.html", active="cti", snap=snap_manifest))
+    snap_index = [{"date": d, "m": m}
+                  for d, m in snap_mod.list_snapshots(os.path.join(ROOT, "cti", "snapshots"))]
+    write("cti/snapshots/index.html", render("snapshots.html", active="cti",
+                                             snapshots=snap_index,
+                                             latest=snap_manifest))
     write("style.css", open(os.path.join(TMPL_DIR, "style.css")).read())
     write("robots.txt", open(os.path.join(TMPL_DIR, "robots.txt")).read())
 
