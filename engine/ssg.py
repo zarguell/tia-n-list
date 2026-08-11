@@ -68,7 +68,7 @@ BASE_URL = "https://zarguell.github.io/tia-n-list"
 def site_url(path):
     """Join a base-relative path (e.g. 'stories/x/' or '/daily/') to the site URL."""
     return BASE_URL + "/" + path.lstrip("/")
-HOT_THRESHOLD = 2.0
+HOT_THRESHOLD = 3.0      # display "hot" = the heat() h2 band; merge.py keeps its own 2.0 analysis-queue gate
 DIGEST_TOP_N = 10      # not a hard limit — how many stories the digest page lists
 
 env = Environment(
@@ -144,11 +144,13 @@ def sanitize(html_text):
 
 
 def heat(score, last_seen=None):
+    # bands are fixed tiers (warm >= 2.0, hot >= 3.0, hottest >= 4.5) —
+    # independent of HOT_THRESHOLD, which gates hot_cards/feed-hot/home
     if score >= 4.5:
         return "h3", "hottest", "heat-3"
     if score >= 3.0:
         return "h2", "hot", "heat-2"
-    if score >= HOT_THRESHOLD:
+    if score >= 2.0:
         return "h1", "warm", "heat-1"
     if last_seen:
         dt = parse_utc(last_seen)
@@ -480,7 +482,7 @@ def main():
     for sid, r in cti_records.items():
         card = cards_by_id_cti.get(sid)
         texts = {}
-        for suffix in (".sigma", ".splunk", ".kql"):
+        for suffix in (".sigma", ".splunk", ".kql", ".yara"):
             p = os.path.join(CTI_DIR, sid + suffix)
             texts[suffix.lstrip(".") + "_text"] = open(p).read() if os.path.exists(p) else ""
         rec_iocs = [i for i in iocs if sid in i["stories"]]
@@ -517,6 +519,11 @@ def main():
             with open(os.path.join(CTI_DIR, slug + ".kql"), "w") as out:
                 out.write(variant)
             write(f"cti/{slug}.kql", variant)
+
+    # author-authored YARA rules: publish raw for defenders
+    for f in sorted(glob.glob(os.path.join(CTI_DIR, "*.yara"))):
+        slug = os.path.splitext(os.path.basename(f))[0]
+        write(f"cti/{slug}.yara", open(f).read())
 
     # IOC feeds (curated set -> JSON/CSV/TXT/STIX + readable page)
     corroborated = [i for i in iocs if i["confidence"] == "corroborated"]
@@ -562,6 +569,16 @@ def main():
         } for c in cards],
     }
     write("stories.json", json.dumps(derived, indent=1))
+
+    # compact index for the all-stories page (JS-windowed render): card fields
+    # only, snippet trimmed, no events arrays — ~300KB vs 1.46MB of DOM nodes
+    write("stories-index.json", json.dumps([{
+        "id": c["id"], "title": c["title"], "url": c["url"],
+        "score": c["score"], "first_seen": c["first_seen"], "last_seen": c["last_seen"],
+        "heat_label": c.get("heat_label", ""), "heat_class": c.get("heat_class", ""),
+        "reddit": c.get("reddit") or 0, "last_seen_human": c.get("last_seen_human", ""),
+        "snippet": c["snippet"][:220], "sources": c["sources"], "cves": c["cves"],
+    } for c in cards]))
 
     for c in cards:
         write(f"stories/{c['id']}/index.html", render("story.html", active=None, story=c,
@@ -680,13 +697,17 @@ def main():
         sigma_errs += [f"{os.path.basename(f)}: {e}" for e in sigma_mod.validate_variant(f, "splunk")]
     for f in sorted(glob.glob(os.path.join(CTI_DIR, "*.kql"))):
         sigma_errs += [f"{os.path.basename(f)}: {e}" for e in sigma_mod.validate_variant(f, "kql")]
-    for e in sigma_errs:
-        print(f"SIGMA FAIL {e}", file=sys.stderr)
-    if LINT_HITS or bad_links or bad_chips or backlink_errs or cti_errs or sigma_errs:
+    import yara as yara_mod
+    yara_errs = []
+    for f in sorted(glob.glob(os.path.join(CTI_DIR, "*.yara"))):
+        yara_errs += yara_mod.validate_yara(f)
+    for e in yara_errs:
+        print(f"YARA FAIL {e}", file=sys.stderr)
+    if LINT_HITS or bad_links or bad_chips or backlink_errs or cti_errs or sigma_errs or yara_errs:
         print(f"LINT FAIL: {len(LINT_HITS)} path-absolute + {len(bad_links)} unresolvable"
               f" internal URL(s) + {len(bad_chips)} URL-in-chip + {len(backlink_errs)}"
               f" backlink errors + {len(cti_errs)} CTI errors + {len(sigma_errs)}"
-              f" Sigma errors — fix before publishing.",
+              f" Sigma errors + {len(yara_errs)} YARA errors — fix before publishing.",
               file=sys.stderr)
         sys.exit(1)
 

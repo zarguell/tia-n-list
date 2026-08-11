@@ -31,10 +31,7 @@
 </div>
 
 <div class="story-grid" id="story-grid">
-{% for s in cards %}
-  {% set rank = loop.index %}
-  {% include "_story_card.html" %}
-{% endfor %}
+  <p class="no-results" id="loading">Loading stories…</p>
 </div>
 
 <p class="no-results" id="no-results" hidden>No stories match.</p>
@@ -44,25 +41,98 @@
 <script>
 (function () {
   var grid = document.getElementById('story-grid');
-  var cards = Array.prototype.slice.call(grid.querySelectorAll('.story-card'));
   var fYear = document.getElementById('f-year');
   var fMonth = document.getElementById('f-month');
   var fQ = document.getElementById('f-q');
   var fSort = document.getElementById('f-sort');
   var count = document.getElementById('f-count');
   var noResults = document.getElementById('no-results');
+  var loading = document.getElementById('loading');
   var pager = document.getElementById('pager');
   var PAGE_SIZE = 12;
   var page = 1;
+  var all = [];        // compact story index (fetched), with search text precomputed
 
-  cards.forEach(function (c) {
-    c.dataset.search = (c.textContent || '').toLowerCase();
-  });
+  // initial filters from the URL (shared/bookmarked links)
+  (function () {
+    var p = new URLSearchParams(location.search);
+    if (p.get('year')) fYear.value = p.get('year');
+    if (p.get('month')) fMonth.value = p.get('month');
+    if (p.get('sort') === 'hot') fSort.value = 'hot';
+    if (p.get('q')) fQ.value = p.get('q');
+    if (p.get('page')) page = parseInt(p.get('page'), 10) || 1;
+  })();
 
-  function matches(c) {
-    return (!fYear.value || c.dataset.year === fYear.value) &&
-           (!fMonth.value || c.dataset.month === fMonth.value) &&
-           (!fQ.value || c.dataset.search.indexOf(fQ.value.toLowerCase().trim()) !== -1);
+  // Builds one story card from the compact index. All data lands via
+  // textContent (never innerHTML interpolation) so titles/snippets/sources
+  // from articles cannot inject markup.
+  function cardEl(s, rank) {
+    var art = document.createElement('article');
+    art.className = 'story-card';
+    art.dataset.year = s.first_seen.slice(0, 4);
+    art.dataset.month = String(parseInt(s.first_seen.slice(5, 7), 10));
+    art.dataset.score = s.score;
+    art.dataset.lastseen = s.last_seen;
+    art.dataset.search = (s.title + ' ' + s.snippet + ' ' + s.sources.join(' ')).toLowerCase();
+
+    var top = document.createElement('div');
+    top.className = 'topline';
+    var r = document.createElement('span');
+    r.className = 'rank';
+    r.textContent = rank;
+    top.appendChild(r);
+    if (s.heat_label) {
+      var h = document.createElement('span');
+      h.className = 'heat ' + s.heat_class;
+      h.textContent = s.heat_label;
+      top.appendChild(h);
+    }
+    art.appendChild(top);
+
+    var h3 = document.createElement('h3');
+    var a = document.createElement('a');
+    a.href = s.url;
+    a.textContent = s.title;
+    h3.appendChild(a);
+    art.appendChild(h3);
+
+    var sn = document.createElement('p');
+    sn.className = 'snippet';
+    sn.textContent = s.snippet;
+    art.appendChild(sn);
+
+    var meta = document.createElement('div');
+    meta.className = 'meta';
+    s.sources.forEach(function (src) {
+      var c = document.createElement('span');
+      c.className = 'chip';
+      c.textContent = src;
+      meta.appendChild(c);
+    });
+    s.cves.forEach(function (cve) {
+      var c = document.createElement('span');
+      c.className = 'chip cve';
+      c.textContent = cve;
+      meta.appendChild(c);
+    });
+    if (s.reddit) {
+      var c = document.createElement('span');
+      c.className = 'chip reddit';
+      c.textContent = '▲ ' + s.reddit;
+      meta.appendChild(c);
+    }
+    var rt = document.createElement('span');
+    rt.className = 'reltime';
+    rt.textContent = s.last_seen_human;
+    meta.appendChild(rt);
+    art.appendChild(meta);
+    return art;
+  }
+
+  function matches(s) {
+    return (!fYear.value || s.dataset.year === fYear.value) &&
+           (!fMonth.value || s.dataset.month === fMonth.value) &&
+           (!fQ.value || s.dataset.search.indexOf(fQ.value.toLowerCase().trim()) !== -1);
   }
 
   function setUrl() {
@@ -72,8 +142,7 @@
     if (fQ.value) params.set('q', fQ.value.trim());
     if (fSort.value === 'hot') params.set('sort', 'hot');
     if (page > 1) params.set('page', page);
-    // location.pathname is origin-absolute: immune to the <base> tag, so the
-    // address bar and shared links stay on /stories/ (not the home page)
+    // location.pathname is origin-absolute: immune to the <base> tag
     var qs = params.toString();
     history.replaceState(null, '', location.pathname + (qs ? '?' + qs : ''));
   }
@@ -115,34 +184,35 @@
     pager.innerHTML = html;
   }
 
-  function sortedCards() {
-    var arr = cards.slice();
-    if (fSort.value === 'latest') {
-      arr.sort(function (a, b) { return b.dataset.lastseen.localeCompare(a.dataset.lastseen); });
-    } else {
-      arr.sort(function (a, b) { return parseFloat(b.dataset.score) - parseFloat(a.dataset.score); });
-    }
-    return arr;
-  }
-
   function apply() {
-    var sorted = sortedCards();
+    var sorted = all.slice();
+    if (fSort.value === 'latest') {
+      sorted.sort(function (a, b) { return b.last_seen.localeCompare(a.last_seen); });
+    } else {
+      sorted.sort(function (a, b) { return b.score - a.score; });
+    }
     var visible = sorted.filter(matches);
     var pages = Math.max(1, Math.ceil(visible.length / PAGE_SIZE));
     if (page > pages) page = pages;
     var startIdx = (page - 1) * PAGE_SIZE;
     var slice = visible.slice(startIdx, startIdx + PAGE_SIZE);
-    cards.forEach(function (c) { c.style.display = 'none'; });
-    slice.forEach(function (c, i) {
-      c.style.display = '';
-      var r = c.querySelector('.rank');
-      if (r) r.textContent = startIdx + i + 1;
+    grid.innerHTML = '';
+    slice.forEach(function (s, i) {
+      grid.appendChild(cardEl(s, startIdx + i + 1));
     });
-    count.textContent = visible.length + ' of ' + cards.length;
+    count.textContent = visible.length + ' of ' + all.length;
     noResults.hidden = visible.length !== 0;
     renderPager(pages);
     setUrl();
   }
+
+  fetch('stories-index.json').then(function (r) { return r.json(); }).then(function (data) {
+    all = data;
+    loading.hidden = true;
+    apply();
+  }).catch(function () {
+    loading.textContent = 'Could not load the story index.';
+  });
 
   [fYear, fMonth, fQ, fSort].forEach(function (el) {
     el.addEventListener(el.tagName === 'INPUT' ? 'input' : 'change', function () {
@@ -158,14 +228,6 @@
     apply();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });
-
-  var sp = new URLSearchParams(location.search);
-  if (sp.get('year')) fYear.value = sp.get('year');
-  if (sp.get('month')) fMonth.value = sp.get('month');
-  if (sp.get('q')) fQ.value = sp.get('q');
-  if (sp.get('sort') === 'hot') fSort.value = 'hot';
-  page = parseInt(sp.get('page') || '1', 10) || 1;
-  apply();
 })();
 </script>
 {% endblock %}
