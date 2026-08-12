@@ -210,4 +210,44 @@ for f in glob.glob(os.path.join(DATA, "cti", "*.json")):
 check("coverage", True,
       f"{n_records} records, {len(covered)} techniques, {n_sigma} sigma, {n_yara} yara")
 
+# 8. story fragmentation: one story split into several (the Patch Tuesday
+# class). Signal: the same "patch tuesday"-family month group having more than
+# one LIVE story. (CVE-overlap is NOT used — bulletin roundups list many CVEs,
+# so shared CVEs produce false positives; this detector is deliberately
+# precise, and the LLM quality sample catches anything subtler.)
+import re as _re
+month_group = {}
+for f in glob.glob(os.path.join(DATA, "stories", "*.json")):
+    try:
+        s = json.load(open(f))
+    except Exception:
+        continue
+    if s.get("merged_into"):
+        continue
+    t = (s.get("title") or "").lower()
+    if "patch tuesday" not in t:
+        continue
+    if any(x in t for x in ("ics", "siemens", "schneider", "phoenix contact")):
+        fam = "ics"
+    elif "microsoft" in t:
+        fam = "microsoft"
+    else:
+        fam = "microsoft"      # generic "Patch Tuesday" roundups are Microsoft's
+    # month from the first event's publish date (title may omit it)
+    refs = s.get("events", [])
+    month = "?"
+    if refs:
+        try:
+            ev = json.load(open(os.path.join(DATA, "events", refs[0]["event_id"] + ".json")))
+            month = (ev.get("published_at") or "")[:7]
+        except Exception:
+            pass
+    key = f"{fam}/{month}"
+    month_group.setdefault(key, []).append(s["id"])
+fragments = []
+for key, sids in sorted(month_group.items()):
+    if len(sids) > 1:
+        fragments.append(f"{key} patch-tuesday: {len(sids)} live stories ({', '.join(s[:36] for s in sids)})")
+check("fragmentation", not fragments, "; ".join(fragments[:8]) or "no duplicate-story fragments")
+
 print(json.dumps({"date": TODAY, "checks": checks}, indent=1))
