@@ -1,31 +1,45 @@
-# AGENTS.md — kevrichment daily run
+# AGENTS.md — kevrichment daily run (merged into Tia N. List)
 
 Operational runbook for the kevrichment pipeline: enrich CISA KEV entries with
-web research, publish structured JSON, deploy the static dashboard.
+web research, publish structured JSON, and publish the /kev/ site section.
 
-This file is the authoritative procedure for the daily run. It lives in a
-**public repository** — do not add personal data, credentials, or internal
-infrastructure details to any file here.
+This file is the authoritative procedure for the daily run. It lives in the
+**public** zarguell/tia-n-list repository — do not add personal data,
+credentials, or internal infrastructure details to any file here.
 
-## What this repo is
+## What this is (merged layout)
 
-- **Data**: `data/cves/CVE-*.json` (per-CVE enriched records), `data/index.json`
-  (lightweight filter manifest), `data/runs/*.json` (per-run stats), `latest.json`
-  (last run, gitignored).
-- **Schema**: see `README.md` for the full field reference. Key research fields
-  live in `kevrichment_research`; provenance in `research_meta`.
-- **Site**: `build_site.py` generates `site/` (gitignored; GitHub Actions builds
-  and deploys it to Pages on push to `master`). The site reads **only from
-  `data/index.json`** — never from individual CVE files.
+The kevrichment pipeline now lives in the **Tia N. List repo** (default branch
+`main`) under `kevrichment/`. The old standalone repo is retired; its static
+site generator (`build_site.py`) was replaced by the Tia engine: `engine/kev.py`
+renders the `/kev/` section (dashboard, per-CVE pages, pipeline, schema) and
+`feeds/feed-kev.xml` in the Tia design system. CI builds the whole site from
+committed data on every push to `main`.
+
+- **Data**: `kevrichment/data/cves/CVE-*.json` (per-CVE enriched records),
+  `kevrichment/data/index.json` (lightweight filter manifest),
+  `kevrichment/data/runs/*.json` (per-run stats). `latest.json` is gitignored
+  (dead feature, dropped).
+- **Schema**: see `README.md` (root) + `kev/schema.html` on the site. Key
+  research fields live in `kevrichment_research`; provenance in `research_meta`.
+- **Site**: built by `python engine/ssg.py` (full) or `engine/ssg.py --kev`
+  (kev section only). The dashboard reads only `data/index.json`; detail pages
+  read individual records. CI (site-deploy.yml) rebuilds + deploys on push.
+- **This worktree is SHARED** with the hourly engine and the other Tia
+  automations. Only touch `kevrichment/` paths. Never stage or commit anything
+  outside `kevrichment/`. If `engine/data` or other paths have uncommitted
+  changes from another run, leave them untouched.
 
 ## Daily run — four phases
 
-Run from the repo root. Deliver a summary report at the end (counts, research
-done, errors, whether the site will update).
+Run from `kevrichment/` in the repo checkout (`/home/coder/workspace/tia-n-list`).
+Deliver a summary report at the end (counts, research done, errors, whether the
+site will update).
 
 ### Phase 1 — Deterministic pipeline
 
 ```bash
+cd /home/coder/workspace/tia-n-list/kevrichment
 python main.py --cve-count 2000 --qc 2>&1
 ```
 
@@ -37,9 +51,9 @@ python main.py --cve-count 2000 --qc 2>&1
 ### Phase 2 — Agent research on newly processed CVEs
 
 For **each newly processed CVE** (usually a handful), read
-`data/cves/<CVE_ID>.json` and enrich the `kevrichment_research` block with
-live web research. Use `web_search`; fall back to `web_extract`, `read` on
-direct URLs, or the GitHub API when search is flaky.
+`kevrichment/data/cves/<CVE_ID>.json` and enrich the `kevrichment_research`
+block with live web research. Use `web_search`; fall back to `web_extract`,
+`read` on direct URLs, or the GitHub API when search is flaky.
 
 For each CVE:
 
@@ -57,16 +71,17 @@ For each CVE:
 5. **Sources** — merge all new URLs into `research_meta.sources_consulted`
    (deduplicated; target ≥4 sources). Set `research.preconditions_source`
    and `research.hunting_hypothesis_source` to `"hermes"`.
-6. Save the full record back to `data/cves/<CVE_ID>.json` (write the whole
-   file with `json.dumps(record, indent=2)` — never chain field-level patches;
-   they corrupt JSON).
+6. Save the full record back to `kevrichment/data/cves/<CVE_ID>.json` (write
+   the whole file with `json.dumps(record, indent=2)` — never chain
+   field-level patches; they corrupt JSON).
 
-### Phase 3 — Rebuild index, build site, commit, push
+### Phase 3 — Rebuild index, verify with the engine, commit, rebase, push
 
-1. **Rebuild `data/index.json`** — required whenever CVE files changed. The
-   site generator only sees the index:
+1. **Rebuild `kevrichment/data/index.json`** — required whenever CVE files
+   changed. The dashboard only sees the index:
 
 ```bash
+cd /home/coder/workspace/tia-n-list/kevrichment
 python3 -c "
 import json, sys
 from pathlib import Path
@@ -88,23 +103,38 @@ print(f'Index: {len(entries)} entries' + (f'; skipped: {skipped}' if skipped els
 "
 ```
 
-2. **Stage precisely** — check `git status` first. Stage **only your batch
+2. **Verify with the engine before pushing (mandatory)** — the site is built
+   from this data by the Tia engine; catch lint failures here, not in CI:
+
+```bash
+cd /home/coder/workspace/tia-n-list
+~/.local/venvs/tia-engine/bin/python engine/ssg.py --kev
+```
+
+   This builds the kev section (plus the shared assets) and runs the scoped
+   fail-closed lints (link resolution, chips, path-absolute). **Any KEV LINT
+   FAIL message = fix before pushing** (a non-zero exit means CI would reject
+   the deploy). If the venv is missing: `pip install jinja2 markdown bleach
+   yara-x PyYAML` first.
+
+3. **Stage precisely** — check `git status` first. Stage **only your batch
    files by explicit path**, plus the rebuilt index and run log:
 
 ```bash
+cd /home/coder/workspace/tia-n-list
 git status                      # look for orphaned pre-existing modifications
-git add data/cves/CVE-XXXX-XXXX.json data/cves/CVE-YYYY-YYYY.json data/index.json
+git add kevrichment/data/cves/CVE-XXXX-XXXX.json kevrichment/data/cves/CVE-YYYY-YYYY.json kevrichment/data/index.json
 git diff --cached --stat        # file count should match your batch + index + run log
 ```
 
-   Never `git add data/` wholesale — it sweeps in unrelated QC-scanner changes
-   and orphaned files from a previous failed commit. If pre-existing
-   modifications exist, either include them (flag in the commit message) or
-   `git stash push -- <paths>` them aside.
+   Never `git add kevrichment/data/` wholesale — it sweeps in unrelated
+   QC-scanner changes and orphaned files from a previous failed commit. If
+   pre-existing modifications exist (other automations share this worktree),
+   leave them alone — only your paths go in this commit.
 
-3. **Verify record quality before commit** — for every batch CVE:
+4. **Verify record quality before commit** — for every batch CVE:
 
-   - JSON valid: `python3 -m json.tool data/cves/<CVE_ID>.json > /dev/null`
+   - JSON valid: `python3 -m json.tool kevrichment/data/cves/<CVE_ID>.json > /dev/null`
    - `hunting_hypothesis`: 130–200 chars, single sentence, starts with
      `Monitor for` / `Hunt for` / `Look for`, **never contains `designed to`**
      (always boilerplate), no CVSS/PoC/precondition rehash, names the specific
@@ -124,19 +154,26 @@ git diff --cached --stat        # file count should match your batch + index + r
    - `public_poc_exists` consistent with `public_poc_urls`.
 
    Clean up any temp helper scripts (`verify_*.py`, `update_*.py`, `_*.py`)
-   from the repo root and `data/cves/` — never commit them.
+   from the repo root and `kevrichment/data/cves/` — never commit them.
 
-4. **Commit and push**:
+5. **Commit, rebase, push (branch `main`)**:
 
 ```bash
+cd /home/coder/workspace/tia-n-list
 git commit -m "daily update $(date -u +%Y-%m-%d)"
-git push origin master
+git pull --rebase origin main    # the repo has five pushers; rebase is mandatory
+git push origin main
 ```
+
+   If `git pull --rebase` aborts on local changes, STOP and report — do not
+   force. Confirm the push succeeded and `git status` is clean before Phase 4.
 
 ### Phase 4 — Report
 
 Summary: CVEs processed, which got agent research, new advisories/PoCs found,
-any errors, whether the site will update (push → GH Actions deploy).
+any errors, whether the site will update (push → CI rebuilds and deploys the
+/kev/ section + feeds). If nothing was processed and nothing changed, respond
+with exactly `[SILENT]` and skip the notification.
 
 ## Tool failure fallbacks (condensed)
 
@@ -154,10 +191,12 @@ any errors, whether the site will update (push → GH Actions deploy).
 
 ## Known pitfalls (learned)
 
-- **`build_site.py` reads only `data/index.json`** — skipping the index
-  rebuild in Phase 3 silently ships a stale site with a green Actions run.
-- **Whole-directory `git add data/`** sweeps in QC-scanner noise and orphaned
-  enrichments from failed prior commits. Stage explicit paths.
+- **The dashboard reads only `data/index.json`** — skipping the index rebuild
+  in Phase 3 silently ships a stale /kev/ section with a green CI run.
+- **Whole-directory `git add kevrichment/data/`** sweeps in QC-scanner noise
+  and orphaned enrichments from failed prior commits. Stage explicit paths.
+- **Shared worktree** — never `git add -A` from the repo root (other
+  automations' changes live there); stage only `kevrichment/` paths.
 - **Field-level `patch()` on JSON** strips commas and corrupts files — always
   rewrite the whole record.
 - **`vendor`/`product` root fields** are often left empty by research —
@@ -165,7 +204,11 @@ any errors, whether the site will update (push → GH Actions deploy).
 - **Non-KEV entries** (from `--scan-vulnrichment`) have
   `kev_vulnerability_name: "Non-KEV (vulnrichment scan)"` and empty
   `kev_date_added` — they are valid data but not KEV catalog entries; don't
-  confuse them when reporting counts.
+  confuse them when reporting counts. They are excluded from the KEV feed.
 - **Hypotheses starting `Monitor for crafted` / `Monitor for local attempts`**
   trigger template detectors; prefer `Hunt for` / `Look for` openings with the
   same specific content.
+- **Source fields can carry URL blobs** in older records
+  (`hunting_hypothesis_source` etc.). The site renders a short tag only
+  (hermes/deterministic); keep `*_source` set to exactly `"hermes"` for new
+  research.
