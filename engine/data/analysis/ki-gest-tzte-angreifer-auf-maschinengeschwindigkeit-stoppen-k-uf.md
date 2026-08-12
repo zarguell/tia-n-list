@@ -1,0 +1,3 @@
+Arctic Wolf published a German-language buyer's guide on AI-assisted managed detection and response (MDR). The material argues that AI-driven MDR detects attacks at machine speed, reduces risk, and strengthens security operations, and it is aimed at organizations evaluating MDR vendors.
+
+This is vendor marketing rather than a threat report, but it reflects a real shift in the market: MDR platforms now advertise machine-speed detection as the default, and buyers are being told to expect AI-assisted analysis as table stakes. For defenders the practical question is verification, not adoption. Claims about detection speed and coverage should be checked against the vendor's documented detection methodology, response SLAs, and evidence from real incident engagements.

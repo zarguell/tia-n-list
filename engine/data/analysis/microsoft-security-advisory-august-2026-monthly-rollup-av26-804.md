@@ -1,0 +1,3 @@
+The Canadian Centre for Cyber Security issued advisory AV26-804 covering Microsoft's August 2026 monthly rollup. The affected product list is broad: .NET 8, 9, and 10 on all platforms, App Installer, Azure Active Directory, Azure Kubernetes Service, Azure SQL, Application Insights Profiler, Microsoft 365 Apps, Access, and multiple .NET Framework builds, among others.
+
+The advisory is the standard monthly patch notice, but the scope signals that this was a large release touching identity, cloud infrastructure, and office software at once. Organizations should treat the rollup as a priority patch cycle, especially where .NET and Azure components are exposed to untrusted input, and reconcile the advisory's product list against their own asset inventory before deployment.

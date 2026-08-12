@@ -1,0 +1,3 @@
+The Canadian Centre for Cyber Security advisory AV26-805 flags vulnerabilities in Ivanti Endpoint Manager, affecting versions prior to or equal to the 2024 SU6 update. Endpoint management products hold privileged positions in the network because their agents run with elevated rights on every managed device, which is why Ivanti patches have historically drawn rapid exploitation attempts.
+
+Administrators should update Endpoint Manager to the latest service update and treat unpatched versions as an urgent exposure. Given the product's history, organizations should also check for signs of prior compromise on their management servers before and after patching, not only apply the fix.
