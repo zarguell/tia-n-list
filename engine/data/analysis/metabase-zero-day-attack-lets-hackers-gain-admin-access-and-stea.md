@@ -1,0 +1,5 @@
+Metabase is the subject of a maximum-severity unauthenticated SQL injection zero-day, first tracked as GHSA-vwf4-m7j8-wcjf with a CVSS 10.0 rating, that has been actively exploited since around August 3, 2026. The flaw sits in the unauthenticated POST /api/session/reset_password endpoint and lets attackers seize administrator privileges and steal credentials for every database connected to compromised instances. Both self-hosted deployments and Metabase Cloud running version 1.58 were targeted.
+
+CISA has since added the issue to its Known Exploited Vulnerabilities catalog under CVE-2026-72898, giving defenders a tracked identifier for detection and patching. The gap between initial disclosure, when no CVE had been assigned, and the KEV listing matters: organizations scanning only NVD would have missed the early exploitation window.
+
+The reset_password path is pre-auth, so any internet-facing Metabase instance is in scope. Check versions against 1.58, review session and admin account activity covering the August 3 window, and rotate credentials for connected data sources. The KEV binding should drive immediate upgrades rather than waiting on a patch cycle.

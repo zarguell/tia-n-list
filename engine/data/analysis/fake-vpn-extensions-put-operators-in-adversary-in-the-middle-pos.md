@@ -1,0 +1,5 @@
+Socket's Threat Research Team documented a Chrome Web Store operation of 737 fake VPN and proxy extensions linked to at least 40 developer accounts, with 274 of them impersonating 66 well-known VPN and privacy brands including Proton VPN, NordVPN, Surfshark, ExpressVPN, Cloudflare 1.1.1.1, AmneziaVPN, and AntiZapret. The listings had accumulated 75,486 displayed installs, and 516 extensions remained live with 58,318 installs at collection time.
+
+The extensions route browser traffic through a separate SOCKS5 proxy network, giving the operators an adversary-in-the-middle position over all browser traffic, including credentials and session data. The operation mainly targets Russian-speaking users trying to reach blocked services such as Instagram and ChatGPT.
+
+For defenders, the delivery channel is the lesson: users seeking to bypass restrictions are prime targets for fake tooling. Check installed extensions against the impersonated brand list and treat free VPN extensions as a distribution vector. Store-side cleanup is likely ongoing, but re-publication under fresh developer accounts is the pattern to watch.

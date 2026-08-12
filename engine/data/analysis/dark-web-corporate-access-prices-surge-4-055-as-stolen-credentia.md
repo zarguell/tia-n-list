@@ -1,0 +1,5 @@
+Reporting on the identity threat economy entering 2026 describes a two-sided market: stolen credentials are so abundant that basic logins are nearly disposable, while verified footholds into large enterprises are marketed as premium assets for ransomware operators. Headline figures put the surge in corporate access prices at 4,055 percent, with billions of compromised credentials flooding cybercrime markets.
+
+The implication for defenders is that access brokers now sit between credential theft and ransomware deployment, pricing enterprise footholds like commodities. When premium access becomes more expensive, ransomware crews have more incentive to monetize it quickly, and the access itself becomes a tracked asset on broker markets.
+
+This is a pricing-trend story rather than a single incident. The useful follow-ups are sector-level threat reporting and access-broker takedowns, and defenders should treat verified enterprise credentials as materially higher-value than the volume of leaked passwords suggests.
