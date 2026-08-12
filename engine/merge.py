@@ -208,7 +208,7 @@ def main():
             created += 1
         json.dump(ev, open(os.path.join(EVENTS, eid + ".json"), "w"), indent=1)
         manifest.setdefault("stories_per_day", {}).setdefault(day, [])
-        target_slug = target or (next(s for s in stories.values() if s["events"][-1]["event_id"] == eid)["id"])
+        target_slug = target or (next(s for s in stories.values() if s["events"] and s["events"][-1]["event_id"] == eid)["id"])
         if target_slug not in manifest["stories_per_day"][day]:
             manifest["stories_per_day"][day].append(target_slug)
 

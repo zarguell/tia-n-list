@@ -1,0 +1,3 @@
+A commentary piece argues that cybersecurity is entering a machine-speed era while much of the industry still operates at human speed. AI and automation are changing both sides: attackers can move faster, and defenders have new options to detect, decide, and respond at machine speed. The author cites a CISO who, within six months, became comfortable automating response across more than 70 percent of systems.
+
+The piece reflects a measurable shift in operator sentiment toward automated response, which has historically been treated with caution. The practical question for security teams is not whether automation is coming, but which response actions are safe to automate first, and how to validate them so a bad decision does not scale as fast as a good one.
