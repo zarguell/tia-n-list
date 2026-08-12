@@ -153,23 +153,30 @@ def validate_cve_record(record):
 def compute_bod_timeline(automatable, technical_impact, in_kev):
     """Compute BOD 26-04 remediation timelines based on SSVC + KEV status.
 
+    Implements BOD 26-04 Table 1 (June 10, 2026) exactly — 16 rows keyed on
+    (publicly exposed?, in KEV?, automatable?, technical impact?).  Unknown
+    SSVC values are treated as ``"no"``, landing in the slowest bucket for
+    that KEV/non-KEV combination (conservative).
+
     Returns a dict with:
 
     ==========================================  =============================
     Field                                       Description
     ==========================================  =============================
     ``timeline_if_publicly_exposed``            ``3_days_forensic_triage`` |
-                                                ``14_days`` | ``60_days`` |
+                                                ``3_days`` | ``14_days`` |
+                                                ``60_days`` |
                                                 ``defer_to_next_upgrade``
     ``timeline_if_not_publicly_exposed``        Same values for internal-
                                                 only assets
-    ``three_day_qualifying``                    ``true`` when ALL four BOD
-                                                26-04 risk factors are
-                                                present for a publicly-
-                                                exposed asset
+    ``three_day_qualifying``                    ``true`` when the public
+                                                timeline is a 3-day bucket
+                                                (``3_days`` or
+                                                ``3_days_forensic_triage``)
     ``requires_forensic_analysis_if_public``    ``true`` when the public
-                                                timeline includes forensic
-                                                triage (only 3-day bucket)
+                                                timeline is
+                                                ``3_days_forensic_triage``
+                                                (total-control rows only)
     ``requires_forensic_analysis_if_not_public`` Same for non-public assets
     ==========================================  =============================
 
@@ -179,32 +186,43 @@ def compute_bod_timeline(automatable, technical_impact, in_kev):
     total = str(technical_impact).lower() == "total"
 
     if in_kev:
-        # --- KEV entries ---
-        if auto and total:
+        # Rows 1-4 (public) / 9-12 (non-public).
+        if total:
+            # Rows 1/3/9: KEV + total control -> 3 days + forensic triage
+            # (row 9 = non-public, same 3-day bucket per table).
             pub = "3_days_forensic_triage"
-            non_pub = "60_days"
-        elif auto or total:
-            pub = "14_days"
-            non_pub = "60_days" if (auto or total) else "defer_to_next_upgrade"
+            non_pub = "3_days_forensic_triage" if auto else "14_days"
+        elif auto:
+            # Rows 2/10: KEV + automatable + partial -> 3 days public, 14 internal.
+            pub = "3_days"
+            non_pub = "14_days"
         else:
-            pub = "60_days"
-            non_pub = "defer_to_next_upgrade"
+            # Rows 4/12: KEV + not automatable + partial -> 14 days both.
+            pub = "14_days"
+            non_pub = "14_days"
     else:
-        # --- Non-KEV entries (vulnrichment-scan supplemental) ---
+        # Rows 5-8 (public) / 13-16 (non-public).
         if auto and total:
-            pub = "3_days_forensic_triage"   # would be 3-day if KEV was yes
+            # Rows 5/13: 3 days public (no forensic), 60 days internal.
+            pub = "3_days"
             non_pub = "60_days"
-        elif auto or total:
+        elif auto:
+            # Rows 6/14: 14 days public, 60 days internal.
             pub = "14_days"
             non_pub = "60_days"
+        elif total:
+            # Rows 7/15: 14 days public, fix on system upgrade internal.
+            pub = "14_days"
+            non_pub = "defer_to_next_upgrade"
         else:
+            # Rows 8/16: 60 days public, fix on system upgrade internal.
             pub = "60_days"
             non_pub = "defer_to_next_upgrade"
 
     return {
         "timeline_if_publicly_exposed": pub,
         "timeline_if_not_publicly_exposed": non_pub,
-        "three_day_qualifying": pub == "3_days_forensic_triage",
+        "three_day_qualifying": pub in ("3_days", "3_days_forensic_triage"),
         "requires_forensic_analysis_if_public": pub == "3_days_forensic_triage",
         "requires_forensic_analysis_if_not_public": non_pub == "3_days_forensic_triage",
     }
