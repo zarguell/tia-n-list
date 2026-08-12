@@ -583,6 +583,14 @@ def main():
     for c in cards:
         write(f"stories/{c['id']}/index.html", render("story.html", active=None, story=c,
                                        og_url=site_url(f"stories/{c['id']}/")))
+
+    # stories merged away by the LLM triage gate keep their URL working as a
+    # redirect to the canonical story (digest links + old URLs must resolve)
+    for path in sorted(glob.glob(os.path.join(STORIES_DIR, "*.json"))):
+        st = json.load(open(path))
+        if st.get("merged_into"):
+            write(f"stories/{st['id']}/index.html",
+                  render("redirect.html", target_abs=site_url(f"stories/{st['merged_into']}/")))
     years = sorted({c["first_seen"][:4] for c in cards}, reverse=True)
     months = [(i, __import__("calendar").month_name[i]) for i in range(1, 13)]
     write("stories/index.html", render("stories-all.html", active="all", og_url=site_url("stories/"),
