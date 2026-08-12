@@ -1,0 +1,76 @@
+title: CaptiveCrunch CornFlake Process and ChocoShell CDP Artifacts
+id: 67bb4c56-96fc-4828-997d-1f9b671587b4
+status: experimental
+description: >
+    Detects process-level artifacts documented for the CaptiveCrunch
+    campaign (Storm-2945 / Midnight Blizzard, active since May 2026):
+    the CornFlake Go RAT running as svchost32.exe from a user-writable
+    AppData path, and ChocoShell relaunching browsers with a remote
+    debugging port to exfiltrate cookies over the Chrome DevTools
+    Protocol, bypassing App-Bound Encryption.
+references:
+    - https://www.microsoft.com/en-us/security/blog/2026/07/31/captivecrunch-midnight-blizzard-targets-travelers-worldwide-for-malware-delivery-and-credential-theft/
+    - https://malware.news/t/captivecrunch-midnight-blizzard-weaponizes-hotel-wi-fi-captive-portals-to-steal-microsoft-365-credentials/124711#post_1
+author: Tia N. List
+date: 2026/08/12
+tags:
+    - attack.t1669
+    - attack.t1659
+    - attack.t1557
+    - attack.t1621
+    - attack.t1548
+    - attack.t1185
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_svchost32:
+        Image|endswith: '\svchost32.exe'
+        Image|contains: '\AppData\'
+    selection_remote_debugging:
+        Image|endswith:
+            - '\chrome.exe'
+            - '\msedge.exe'
+            - '\firefox.exe'
+        CommandLine|contains: '--remote-debugging-port'
+    condition: 1 of selection_*
+falsepositives:
+    - Legitimate browser automation (Selenium, Playwright) uses --remote-debugging-port
+    - Application support binaries that borrow Windows service names; corroborate with network telemetry
+level: high
+---
+title: CaptiveCrunch ChocoShell and CornFlake C2 Beaconing
+id: 4ac775bb-cafe-42e3-8f7f-92d454dbdc11
+status: experimental
+description: >
+    Detects network connections to infrastructure documented for the
+    CaptiveCrunch campaign (Storm-2945 / Midnight Blizzard): the
+    ChocoShell infostealer C2 address 213.145.86.112 and the CornFlake
+    beacon domains ms365-device.com and ms365-live.com used to
+    masquerade as Microsoft 365 endpoints.
+references:
+    - https://www.microsoft.com/en-us/security/blog/2026/07/31/captivecrunch-midnight-blizzard-targets-travelers-worldwide-for-malware-delivery-and-credential-theft/
+    - https://malware.news/t/captivecrunch-midnight-blizzard-weaponizes-hotel-wi-fi-captive-portals-to-steal-microsoft-365-credentials/124711#post_1
+author: Tia N. List
+date: 2026/08/12
+tags:
+    - attack.t1669
+    - attack.t1659
+    - attack.t1557
+    - attack.t1621
+    - attack.t1548
+    - attack.t1185
+logsource:
+    category: network_connection
+    product: windows
+detection:
+    selection_c2_ip:
+        DestinationIp: '213.145.86.112'
+    selection_c2_domain:
+        DestinationHostname|endswith:
+            - 'ms365-device.com'
+            - 'ms365-live.com'
+    condition: 1 of selection_*
+falsepositives:
+    - None known; the IP and lookalike domains are unique to the campaign and are not legitimate Microsoft infrastructure
+level: high
