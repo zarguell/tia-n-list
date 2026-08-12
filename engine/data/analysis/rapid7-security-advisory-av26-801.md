@@ -1,0 +1,5 @@
+The Canadian Centre for Cyber Security published advisory AV26-801 covering a vulnerability in Rapid7 Velociraptor, the open-source endpoint visibility and incident response platform. Tracked as CVE-2026-18972, the flaw affects Velociraptor prior to version 0.77.2 and is described as an authenticated identity-spoofing issue.
+
+Velociraptor deployments are centralized by design: a server collects and controls agents across an enterprise, and the platform's power comes from its ability to run arbitrary queries and collection hunts on endpoints. An identity-spoofing weakness in that architecture is more dangerous than the same class of bug in an ordinary application, because a client or user that can impersonate another identity may be able to read artifacts, trigger hunts, or move laterally through the trust model.
+
+The advisory provides no evidence of active exploitation. Operators should upgrade Velociraptor to 0.77.2 or newer, and given the platform's forensic role, authentication and audit logs from older versions are worth reviewing for signs of spoofed identities.

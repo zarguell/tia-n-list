@@ -1,0 +1,5 @@
+Picus Security analyzed more than 338 million attack simulations and found that defensive prevention has improved, but major gaps remain once an attacker gets past the perimeter. The headline number: defenses block only 37 percent of post-compromise attacker actions. The largest shortfalls are in post-compromise defense, ransomware protection, and data-loss prevention.
+
+The volume of simulations makes the finding statistically strong, and the direction is consistent with other industry research showing that initial access prevention is comparatively mature while detection and response after foothold remains weak. Attackers know this asymmetry, which is why post-exploitation tooling, lateral movement, and data staging dominate modern campaigns.
+
+For defenders, the implication is to shift validation effort from prevention checks toward simulating and testing the post-compromise phase: credential theft, privilege escalation, lateral movement, and exfiltration paths. If a defense stack only gets measured on what it blocks at the door, the 63 percent failure rate behind the door is invisible until a real incident.
