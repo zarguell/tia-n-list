@@ -1,0 +1,5 @@
+The story is an Arctic Wolf reflection on Black Hat 2026, framed around the conference arriving weeks after the Five Eyes cybersecurity agencies (CISA, the UK's NCSC, Australia's ACSC, Canada's CCCS, and New Zealand's NCSC-NZ) issued a joint statement to boards and executives. That statement carried the message that AI is rewriting the rules of cyber risk and that the window between vulnerability and exploitation is shrinking.
+
+Why it matters: the piece signals that the conference's central themes were speed of exploitation and resilience, and that the official Five Eyes posture now pushes AI risk directly to boards and executives rather than security teams alone. It is an opinion and conference-recap piece rather than a report of a specific vulnerability or incident.
+
+Watch for follow-on actions from the Five Eyes joint statement, including new guidance to boards on AI risk management, and for whether the shrinking exploitation window shows up in faster patch adoption expectations from regulators.
