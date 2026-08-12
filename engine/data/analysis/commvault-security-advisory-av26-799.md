@@ -1,0 +1,3 @@
+Canada's Cyber Centre issued advisory AV26-799 covering multiple vulnerabilities in Commvault Cloud. Affected versions: 11.36.0 before 11.36.114, 11.40.0 before 11.40.63, 11.44.0 before 11.44.11, and 11.46.0 before 11.46.10.
+
+Commvault Cloud is backup infrastructure, so a compromise can hand attackers the stored backups themselves, often the last intact copy of an environment. The advisory references internal identifiers CV_2026_07_5, CV_2026_07_8, and CV_2026_07_9. Upgrade to the fixed builds and audit any internet-facing management interfaces, since those are the usual entry point into backup products.

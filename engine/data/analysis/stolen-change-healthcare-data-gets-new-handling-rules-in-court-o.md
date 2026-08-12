@@ -1,0 +1,3 @@
+A federal judge in Minnesota approved strict rules for how data stolen in the 2024 Change Healthcare breach may be handled during the consolidated lawsuit against UnitedHealth Group. Magistrate Judge Dulce J. Foster signed off on the plan on August 7.
+
+The order sets boundaries on access, use, and disclosure of the stolen records in litigation. For plaintiffs, the limits reduce the risk that the breach is compounded by careless handling during discovery. For incident responders and breach victims generally, the case keeps building precedent on how to treat stolen data that remains sensitive years after the event.

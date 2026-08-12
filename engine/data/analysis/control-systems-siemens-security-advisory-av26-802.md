@@ -1,0 +1,3 @@
+Canada's Cyber Centre published AV26-802 for Siemens products on August 11, 2026. Affected: Desigo building automation controllers (DXR2, PXC3, PXC4, PXC5, PXC7), LOGO! Soft Comfort, Parasolid, SIMATIC IoT2050 Advanced, Siemens License Server, and Simcenter Femap and Nastran.
+
+The mix of building automation and engineering simulation software matters because those systems often sit on OT networks with limited patching windows. Building controllers in particular can be exposed through facility networks that connect back to IT. Review the Siemens advisories for the exact versions in use and schedule updates, prioritizing anything reachable from IT or the internet.
