@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+{% block title %}KEV catalog — Tia N. List{% endblock %}
+{% block content %}
+<p class="eyebrow">{{ total }} CVEs in the CISA KEV catalog</p>
+<h1 class="page-title">KEV catalog</h1>
+<p class="lead">Enriched Known Exploited Vulnerabilities: PoC availability, exploitation preconditions, BOD 26-04 remediation timelines, hunting hypotheses. Updated {{ generated or 'recently' }}.</p>
+
+<div class="kev-stats">
+  <div class="kev-stat"><span class="kev-stat-value">{{ total }}</span><span class="kev-stat-label">Total CVEs</span></div>
+  <div class="kev-stat"><span class="kev-stat-value sev-crit">{{ active_exploit }}</span><span class="kev-stat-label">Active exploitation</span></div>
+  <div class="kev-stat"><span class="kev-stat-value sev-high">{{ three_day }}</span><span class="kev-stat-label">3-day qualifying</span></div>
+  <div class="kev-stat"><span class="kev-stat-value">{{ automatable }}</span><span class="kev-stat-label">Automatable</span></div>
+</div>
+
+<div class="filters" role="search" aria-label="Filter KEV entries">
+  <label class="f-search">Search
+    <input id="f-q" type="search" placeholder="CVE ID, vendor, product" autocomplete="off">
+  </label>
+  <button class="chip active" data-filter="auto" data-value="all" type="button">All</button>
+  <button class="chip" data-filter="auto" data-value="yes" type="button">Automatable</button>
+  <button class="chip" data-filter="exploit" data-value="active" type="button">Active exploit</button>
+  <button class="chip" data-filter="threeDay" data-value="true" type="button">3-Day</button>
+  <button class="chip" data-filter="poc" data-value="yes" type="button">Has PoC</button>
+  <span class="f-count" id="f-count"></span>
+</div>
+
+<div class="table-scroll">
+  <table class="kev-table" id="kev-table">
+    <thead>
+      <tr>
+        <th data-key="id" scope="col">CVE ID</th>
+        <th data-key="vendor" scope="col">Vendor</th>
+        <th data-key="product" scope="col">Product</th>
+        <th data-key="cvss" scope="col">CVSS</th>
+        <th data-key="auto" scope="col">Auto</th>
+        <th data-key="exploit" scope="col">Exploit</th>
+        <th data-key="poc" scope="col">PoC</th>
+        <th data-key="threeDay" scope="col">3-Day</th>
+        <th data-key="timeline" scope="col">Timeline</th>
+        <th data-key="dateAdded" scope="col">Added</th>
+      </tr>
+    </thead>
+    <tbody id="kev-tbody"></tbody>
+  </table>
+</div>
+
+<p class="no-results" id="no-results" hidden>No KEV entries match.</p>
+<nav class="pager" id="pager" aria-label="Pagination"></nav>
+
+<script>
+(function () {
+  var ROWS = [];
+  var currentPage = 1, pageSize = 50, sortCol = 'dateAdded', sortAsc = false;
+  var filters = { auto: 'all', exploit: 'all', threeDay: 'all', poc: 'all' };
+  var q = document.getElementById('f-q');
+  var tbody = document.getElementById('kev-tbody');
+  var count = document.getElementById('f-count');
+  var pager = document.getElementById('pager');
+  var noResults = document.getElementById('no-results');
+
+  function el(tag, text) {
+    var e = document.createElement(tag);
+    if (text != null) e.textContent = text;
+    return e;
+  }
+
+  function safeLabel(v) {
+    if (v === 'yes' || v === 'active') return v;
+    if (v === 'no') return v;
+    return 'unknown';
+  }
+
+  function matches(r) {
+    if (filters.auto !== 'all' && r.auto !== filters.auto) return false;
+    if (filters.exploit !== 'all' && r.exploit !== filters.exploit) return false;
+    if (filters.threeDay !== 'all' && !r.threeDay) return false;
+    if (filters.poc !== 'all' && r.poc !== filters.poc) return false;
+    var query = q.value.toLowerCase().trim();
+    if (query && r.id.toLowerCase().indexOf(query) === -1 &&
+        r.vendor.toLowerCase().indexOf(query) === -1 &&
+        r.product.toLowerCase().indexOf(query) === -1) return false;
+    return true;
+  }
+
+  function sortVal(r, key) {
+    if (key === 'id') {
+      var m = /^CVE-(\d{4})-(\d+)$/.exec(r.id);
+      return m ? [parseInt(m[1], 10), parseInt(m[2], 10)] : [0, 0];
+    }
+    if (key === 'cvss') return r.cvss == null ? -1 : Number(r.cvss);
+    return r[key] == null ? '' : String(r[key]).toLowerCase();
+  }
+
+  function cmp(a, b) {
+    if (Array.isArray(a)) return (a[0] - b[0]) || (a[1] - b[1]);
+    if (typeof a === 'number') return a - b;
+    return a < b ? -1 : a > b ? 1 : 0;
+  }
+
+  function render() {
+    var data = ROWS.filter(matches);
+    count.textContent = data.length + ' of ' + ROWS.length + ' shown';
+    data.sort(function (a, b) { return sortAsc ? cmp(sortVal(a, sortCol), sortVal(b, sortCol)) : cmp(sortVal(b, sortCol), sortVal(a, sortCol)); });
+    var totalPages = Math.max(1, Math.ceil(data.length / pageSize));
+    if (currentPage > totalPages) currentPage = totalPages;
+    var start = (currentPage - 1) * pageSize;
+    var page = data.slice(start, start + pageSize);
+    noResults.hidden = data.length !== 0;
+    while (tbody.firstChild) tbody.removeChild(tbody.firstChild);
+    page.forEach(function (r) {
+      var tr = document.createElement('tr');
+      var idTd = el('td');
+      var a = el('a', r.id);
+      a.href = 'kev/cves/' + r.id + '/';
+      idTd.appendChild(a);
+      tr.appendChild(idTd);
+      tr.appendChild(el('td', r.vendor));
+      tr.appendChild(el('td', r.product));
+      tr.appendChild(el('td', r.cvss == null ? 'N/A' : Number(r.cvss).toFixed(1)));
+      tr.appendChild(el('td', safeLabel(r.auto)));
+      tr.appendChild(el('td', safeLabel(r.exploit)));
+      tr.appendChild(el('td', safeLabel(r.poc)));
+      tr.appendChild(el('td', r.threeDay ? 'YES' : 'no'));
+      tr.appendChild(el('td', r.timeline));
+      tr.appendChild(el('td', r.dateAdded));
+      tbody.appendChild(tr);
+    });
+    while (pager.firstChild) pager.removeChild(pager.firstChild);
+    function pageBtn(label, page, disabled, isCurrent) {
+      var b = el('button', label);
+      b.type = 'button';
+      b.className = 'page' + (isCurrent ? ' current' : '') + (disabled ? ' disabled' : '');
+      if (!disabled) b.addEventListener('click', function () { currentPage = page; render(); });
+      return b;
+    }
+    pager.appendChild(pageBtn('\u00ab', 1, currentPage === 1, currentPage === 1));
+    pager.appendChild(pageBtn('\u2039', Math.max(1, currentPage - 1), currentPage === 1, false));
+    var s = Math.max(1, currentPage - 2), e = Math.min(totalPages, currentPage + 2);
+    for (var i = s; i <= e; i++) pager.appendChild(pageBtn(String(i), i, false, i === currentPage));
+    pager.appendChild(pageBtn('\u203a', Math.min(totalPages, currentPage + 1), currentPage === totalPages, false));
+    pager.appendChild(pageBtn('\u00bb', totalPages, currentPage === totalPages, currentPage === totalPages));
+  }
+
+  document.querySelectorAll('[data-filter]').forEach(function (c) {
+    c.addEventListener('click', function () {
+      var f = c.getAttribute('data-filter'), v = c.getAttribute('data-value');
+      if (filters[f] === v) return;
+      filters[f] = v;
+      document.querySelectorAll('[data-filter="' + f + '"]').forEach(function (x) { x.classList.remove('active'); });
+      c.classList.add('active');
+      currentPage = 1;
+      render();
+    });
+  });
+  q.addEventListener('input', function () { currentPage = 1; render(); });
+  document.querySelectorAll('#kev-table th').forEach(function (th) {
+    th.addEventListener('click', function () {
+      var key = th.getAttribute('data-key');
+      if (sortCol === key) { sortAsc = !sortAsc; } else { sortCol = key; sortAsc = (key === 'dateAdded' || key === 'cvss'); }
+      document.querySelectorAll('#kev-table th').forEach(function (x) { x.classList.remove('sorted'); x.classList.remove('desc'); });
+      th.classList.add('sorted');
+      if (!sortAsc) th.classList.add('desc');
+      render();
+    });
+  });
+  fetch('kev/kev-index.json').then(function (r) { return r.json(); }).then(function (data) {
+    ROWS = data;
+    render();
+  }).catch(function () {
+    noResults.hidden = false;
+    noResults.textContent = 'Could not load the KEV index.';
+  });
+})();
+</script>
+{% endblock %}

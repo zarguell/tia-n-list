@@ -23,11 +23,22 @@ jobs:
         with:
           python-version: '3.12'
       - name: Install generator deps
-        run: pip install jinja2 markdown bleach sigma-cli pysigma-backend-splunk pysigma-backend-kusto yara-x
+        run: pip install jinja2 markdown bleach sigma-cli pysigma-backend-splunk pysigma-backend-kusto yara-x pytest requests
       - name: Sanitizer regression suite
         run: python engine/test_sanitize.py
+      - name: kev schema/pipeline tests
+        run: python -m pytest kevrichment/tests/test_schema.py kevrichment/tests/test_main.py kevrichment/tests/test_kev_site.py -q
       - name: Build the static site
         run: python engine/ssg.py
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install jsdom (scratch dir, outside the Pages artifact)
+        run: npm install --prefix "$RUNNER_TEMP/jsdom" jsdom
+      - name: Verify all-stories client render (jsdom)
+        run: NODE_PATH="$RUNNER_TEMP/jsdom/node_modules" node engine/tests/verify-stories-all.js
+      - name: Verify kev dashboard client render (jsdom)
+        run: NODE_PATH="$RUNNER_TEMP/jsdom/node_modules" node engine/tests/verify-kev.js
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:

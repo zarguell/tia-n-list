@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}KEV pipeline — Tia N. List{% endblock %}
+{% block content %}
+<p class="eyebrow">kevrichment pipeline</p>
+<h1 class="page-title">Pipeline runs</h1>
+<p class="lead">{{ runs|length }} recorded daily runs. Each run fetches KEV + NVD + Vulnrichment, processes new entries, and runs QC.</p>
+
+{% if runs %}
+<div class="table-scroll">
+  <table class="kev-table">
+    <thead>
+      <tr>
+        <th scope="col">Run ID</th>
+        <th scope="col">Processed</th>
+        <th scope="col">Skipped</th>
+        <th scope="col">Time</th>
+        <th scope="col">Avg/CVE</th>
+        <th scope="col">Errors</th>
+        <th scope="col">QC</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in runs %}
+      <tr>
+        <td class="mono">{{ r.run_id }}</td>
+        <td>{{ r.processed }}</td>
+        <td>{{ r.skipped }}</td>
+        <td>{{ r.wall_time }}s</td>
+        <td>{{ r.avg_time if r.avg_time is not none else '-' }}s</td>
+        <td class="{{ 'sev-crit' if r.errors else '' }}">{{ r.errors }}</td>
+        <td>{{ r.qc.errors }}E / {{ r.qc.warnings }}W / {{ r.qc.infos }}I</td>
+      </tr>
+      {% if r.qc.by_check %}
+      <tr class="kev-qc-row">
+        <td colspan="7" class="kev-qc-cell">
+          {% for c in r.qc.by_check %}<span class="chip">{{ c.name }} (E:{{ c.errors }} W:{{ c.warnings }} I:{{ c.infos }})</span> {% endfor %}
+        </td>
+      </tr>
+      {% endif %}
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<p class="no-results">No pipeline runs recorded.</p>
+{% endif %}
+{% endblock %}

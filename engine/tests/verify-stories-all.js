@@ -3,9 +3,13 @@
 // page-context fetch blocking prevented. fetch is stubbed to the real data.
 const { JSDOM } = require('jsdom');
 const fs = require('fs');
+const path = require('path');
 
-const html = fs.readFileSync('/home/coder/workspace/tia-n-list/stories/index.html', 'utf8');
-const index = JSON.parse(fs.readFileSync('/home/coder/workspace/tia-n-list/stories-index.json', 'utf8'));
+// Repo root = engine/tests/.. -> repo root (__dirname-relative so CI works)
+const ROOT = path.resolve(__dirname, '..', '..');
+
+const html = fs.readFileSync(path.join(ROOT, 'stories', 'index.html'), 'utf8');
+const index = JSON.parse(fs.readFileSync(path.join(ROOT, 'stories-index.json'), 'utf8'));
 
 const dom = new JSDOM(html, {
   url: 'https://zarguell.github.io/tia-n-list/stories/',

@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% block title %}{{ rec.cve_id }} — Tia N. List{% endblock %}
+{% block meta %}
+<meta name="description" content="KEV enrichment for {{ rec.cve_id }}: PoC availability, exploitation preconditions, BOD 26-04 remediation timeline, hunting hypothesis.">
+<meta property="og:site_name" content="Tia N. List">
+<meta property="og:type" content="article">
+<meta property="og:title" content="{{ rec.cve_id }}">
+<meta property="og:url" content="{{ site_url('kev/cves/' + rec.cve_id + '/') }}">
+{% endblock %}
+{% block content %}
+<p class="eyebrow">KEV catalog · CISA Known Exploited Vulnerabilities</p>
+
+<div class="kev-hero">
+  <div class="kev-hero-id"><code>{{ rec.cve_id }}</code>
+    {% if rec.cvss is not none %}<span class="cvss-badge {{ cvss_color(rec.cvss) }}">{{ "%.1f"|format(rec.cvss) }}</span>{% endif %}
+  </div>
+  <div class="kev-hero-meta">
+    <span>{{ rec.vendor }}</span> · <span>{{ rec.product }}</span>
+    {% if rec.date_added %} · <span>Added {{ rec.date_added }}</span>{% endif %}
+    {% if rec.published %} · <span>Published {{ rec.published }}</span>{% endif %}
+  </div>
+  <div class="kev-hero-badges">
+    {% if rec.three_day %}<span class="chip kev-status three">3-Day Required</span>{% endif %}
+    {% if rec.poc == 'yes' %}<span class="chip kev-status poc">PoC Available</span>{% endif %}
+    <span class="chip kev-status kev">KEV</span>
+    {% if rec.automatable == 'yes' %}<span class="chip kev-status">Automatable</span>{% endif %}
+    {% if rec.exploitation == 'active' %}<span class="chip kev-status">Active Exploitation</span>{% endif %}
+  </div>
+</div>
+
+<div class="kev-detail-grid">
+  <div class="kev-col">
+    <section class="kev-panel">
+      <h2 class="kev-panel-title">Details</h2>
+      {% if rec.vuln_name %}<div class="kev-row"><span class="kev-label">Vulnerability</span><span class="kev-value">{{ rec.vuln_name }}</span></div>{% endif %}
+      <div class="kev-row"><span class="kev-label">Vendor</span><span class="kev-value">{{ rec.vendor }}</span></div>
+      <div class="kev-row"><span class="kev-label">Product</span><span class="kev-value">{{ rec.product }}</span></div>
+      {% if rec.date_added %}<div class="kev-row"><span class="kev-label">Date added</span><span class="kev-value">{{ rec.date_added }}</span></div>{% endif %}
+      {% if rec.due_date %}<div class="kev-row"><span class="kev-label">Due date</span><span class="kev-value">{{ rec.due_date }}</span></div>{% endif %}
+      {% if rec.required_action %}<div class="kev-row"><span class="kev-label">Required action</span><span class="kev-value">{{ rec.required_action }}</span></div>{% endif %}
+      {% if rec.cwes %}<div class="kev-row"><span class="kev-label">CWE</span><span class="kev-value">{% for w in rec.cwes %}<span class="chip">{{ w }}</span> {% endfor %}</span></div>{% endif %}
+      {% if rec.cvss_vector %}<div class="kev-row"><span class="kev-label">CVSS vector</span><span class="kev-value mono">{{ rec.cvss_vector }}</span></div>{% endif %}
+      {% if rec.kev_desc or rec.nvd_desc %}
+      <details class="kev-collapse" {% if rec.kev_desc %}open{% endif %}>
+        <summary>Descriptions</summary>
+        {% if rec.kev_desc %}<p class="kev-desc"><strong>KEV:</strong> {{ rec.kev_desc }}</p>{% endif %}
+        {% if rec.nvd_desc %}<p class="kev-desc"><strong>NVD:</strong> {{ rec.nvd_desc }}</p>{% endif %}
+      </details>
+      {% endif %}
+    </section>
+
+    <section class="kev-panel">
+      <h2 class="kev-panel-title">Compliance <span class="kev-panel-sub">SSVC + BOD 26-04</span></h2>
+      <div class="kev-row"><span class="kev-label">Automatable</span><span class="kev-value">{{ rec.automatable }}</span></div>
+      <div class="kev-row"><span class="kev-label">Technical impact</span><span class="kev-value">{{ rec.tech_impact }}</span></div>
+      <div class="kev-row"><span class="kev-label">Exploitation status</span><span class="kev-value">{{ rec.exploitation }}</span></div>
+      <div class="kev-row"><span class="kev-label">3-day qualifying</span><span class="kev-value">{{ 'Yes' if rec.three_day else 'No' }}</span></div>
+      <div class="kev-row"><span class="kev-label">Public timeline</span><span class="kev-value">{{ rec.timeline_public or 'unknown' }}</span></div>
+      <div class="kev-row"><span class="kev-label">Non-public timeline</span><span class="kev-value">{{ rec.timeline_nonpublic or 'unknown' }}</span></div>
+      <div class="kev-row"><span class="kev-label">Forensic (public)</span><span class="kev-value">{{ 'Required' if rec.forensic_public else 'Not required' }}</span></div>
+      <div class="kev-row"><span class="kev-label">Forensic (non-public)</span><span class="kev-value">{{ 'Required' if rec.forensic_nonpublic else 'Not required' }}</span></div>
+    </section>
+
+    <section class="kev-panel">
+      <h2 class="kev-panel-title">Research metadata</h2>
+      {% if rec.last_researched %}<div class="kev-row"><span class="kev-label">Last researched</span><span class="kev-value">{{ rec.last_researched }}</span></div>{% endif %}
+      {% if rec.wall_time %}<div class="kev-row"><span class="kev-label">Wall time</span><span class="kev-value">{{ rec.wall_time }}s</span></div>{% endif %}
+      {% if rec.searches %}<div class="kev-row"><span class="kev-label">Searches</span><span class="kev-value">{{ rec.searches }}</span></div>{% endif %}
+      <div class="kev-row"><span class="kev-label">Component default</span><span class="kev-value">{{ rec.component_default }}</span></div>
+      {% if rec.sources %}
+      <div class="kev-row"><span class="kev-label">Sources</span><span class="kev-value kev-sources">
+        {% for u in rec.sources %}<a href="{{ u }}" target="_blank" rel="noopener noreferrer">{{ u }}</a>{% if not loop.last %}<br>{% endif %}{% endfor %}
+      </span></div>
+      {% endif %}
+    </section>
+
+    {% if rec.qc %}
+    <section class="kev-panel">
+      <h2 class="kev-panel-title">QC notes</h2>
+      {% for n in rec.qc %}
+      <div class="kev-qc kev-qc-{{ n.severity }}">
+        <span class="chip kev-status">{{ n.severity }}</span> <strong>{{ n.check }}:</strong> {{ n.detail }}{% if n.auto_fixed %} <em>(auto-fixed)</em>{% endif %}
+      </div>
+      {% endfor %}
+    </section>
+    {% endif %}
+  </div>
+
+  <div class="kev-col">
+    {% if rec.hunting %}
+    <section class="kev-callout">
+      <h2 class="kev-callout-label">Hunting hypothesis{% if rec.hunting_source %} <span class="chip kev-status src">{{ rec.hunting_source }}</span>{% endif %}</h2>
+      <p>{{ rec.hunting }}</p>
+    </section>
+    {% endif %}
+
+    <section class="kev-panel">
+      <h2 class="kev-panel-title">Research details</h2>
+      {% if rec.component %}<div class="kev-row"><span class="kev-label">Component</span><span class="kev-value">{{ rec.component }}{% if rec.component_source %} <span class="chip kev-status src">{{ rec.component_source }}</span>{% endif %}</span></div>{% endif %}
+      {% if rec.preconditions %}
+      <div class="kev-row"><span class="kev-label">Preconditions</span><span class="kev-value">{{ rec.preconditions }}{% if rec.preconditions_source %} <span class="chip kev-status src">{{ rec.preconditions_source }}</span>{% endif %}</span></div>
+      {% endif %}
+      {% if rec.delivery %}<div class="kev-row"><span class="kev-label">Delivery</span><span class="kev-value">{{ rec.delivery }}</span></div>{% endif %}
+      <div class="kev-row"><span class="kev-label">Public PoC</span><span class="kev-value">{{ rec.poc }}</span></div>
+      {% if rec.poc_urls %}
+      <div class="kev-row"><span class="kev-label">PoC URLs</span><span class="kev-value kev-sources">
+        {% for u in rec.poc_urls %}<a href="{{ u }}" target="_blank" rel="noopener noreferrer">{{ u }}</a>{% if not loop.last %}<br>{% endif %}{% endfor %}
+        <span class="kev-disclaimer">Third-party repos; verify before use.</span>
+      </span></div>
+      {% endif %}
+      {% if rec.advisory %}<div class="kev-row"><span class="kev-label">Advisory</span><span class="kev-value"><a href="{{ rec.advisory }}" target="_blank" rel="noopener noreferrer">{{ rec.advisory }}</a></span></div>{% endif %}
+      {% if rec.exploit_notes %}<div class="kev-row"><span class="kev-label">Exploit notes</span><span class="kev-value">{{ rec.exploit_notes }}</span></div>{% endif %}
+      {% if rec.summary %}<div class="kev-row"><span class="kev-label">Summary</span><span class="kev-value">{{ rec.summary }}</span></div>{% endif %}
+    </section>
+
+    {% if rec.mentioned %}
+    <section class="kev-panel">
+      <h2 class="kev-panel-title">Mentioned in</h2>
+      <p class="covered-list">
+        {% for s in rec.mentioned %}<a class="chip covered" href="{{ s.url }}">{{ s.id }}</a>{% endfor %}
+      </p>
+    </section>
+    {% endif %}
+
+    <p class="kev-footnote">Record schema v{{ rec.schema_version }}. Enrichment is research-grade, not a substitute for analyst review.</p>
+  </div>
+</div>
+{% endblock %}
