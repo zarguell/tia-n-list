@@ -596,13 +596,23 @@ def main():
         rec_iocs = [i for i in iocs if sid in i["stories"]]
         write(f"cti/{sid}.ioc.json", json.dumps(rec_iocs, indent=1))
         tech_by_id = cti_mod.load_techniques()
+        # Story link: only when the story actually renders (live card, or
+        # merged-away -> redirect page). Orphaned stories (all events dropped
+        # by triage, no merged_into) render no page - the link would 404.
+        story_url = ""
+        if sid in cards_by_id_cti:
+            story_url = f"stories/{sid}/"
+        else:
+            sp = os.path.join(STORIES_DIR, sid + ".json")
+            if os.path.exists(sp) and json.load(open(sp)).get("merged_into"):
+                story_url = f"stories/{sid}/"
         r = {**r, "confidence": cti_mod.confidence(r, card),
              "updated_at": r.get("updated_at", r.get("_generated", today)),
              "references": [u for u in r.get("references", [])
                             if store_safe_url(u)],   # LLM-authored refs: http/https only
              "attack": [{**t, "tactic_name": tech_by_id.get(t["id"], {}).get("tactic_name", "")}
                         for t in r.get("attack", [])],
-             "iocs": rec_iocs, **texts}
+             "iocs": rec_iocs, "story_url": story_url, **texts}
         write(f"cti/{sid}/index.html", render("cti_case.html", active=None, rec=r,
                                       og_url=site_url(f"cti/{sid}/")))
 
