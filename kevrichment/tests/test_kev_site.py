@@ -99,8 +99,8 @@ def test_fmt_ts_parses_and_fails_clean():
 
 
 def test_src_tag_normalizes_blobs():
-    assert kev.src_tag("hermes") == "hermes"
-    assert kev.src_tag("HERMES agent analysis") == "hermes"
+    assert kev.src_tag("hermes") == "agent"
+    assert kev.src_tag("HERMES agent analysis") == "agent"
     assert kev.src_tag("deterministic fallback") == "deterministic"
     # older records carry URL blobs in the source field - never render as chips
     assert kev.src_tag("Check Point Research (https://research.checkpoint.com/2020/x)") == ""

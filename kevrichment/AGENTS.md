@@ -70,7 +70,7 @@ For each CVE:
    `'"<component>" "enabled by default"'`.
 5. **Sources** — merge all new URLs into `research_meta.sources_consulted`
    (deduplicated; target ≥4 sources). Set `research.preconditions_source`
-   and `research.hunting_hypothesis_source` to `"hermes"`.
+   and `research.hunting_hypothesis_source` to `"agent"`.
 6. Save the full record back to `kevrichment/data/cves/<CVE_ID>.json` (write
    the whole file with `json.dumps(record, indent=2)` — never chain
    field-level patches; they corrupt JSON).
@@ -147,7 +147,7 @@ git diff --cached --stat        # file count should match your batch + index + r
    - `kevrichment_summary`: 2–4 sentences (type, component, impact, status).
    - `last_researched` (top-level) == `research_meta.timestamp`.
    - `cwe` deduplicated; `research_meta.sources_consulted` ≥ 4; both
-     `*_source` fields == `"hermes"`.
+     `*_source` fields == `"agent"`.
    - Stale `qc_notes` cleared when enrichment resolved the flagged issue
      (checks `component_extraction`, `advisory_fallback`,
      `precondition_contradiction` are stale once fields are fixed).
@@ -210,5 +210,5 @@ with exactly `[SILENT]` and skip the notification.
   same specific content.
 - **Source fields can carry URL blobs** in older records
   (`hunting_hypothesis_source` etc.). The site renders a short tag only
-  (hermes/deterministic); keep `*_source` set to exactly `"hermes"` for new
+  (agent/deterministic); keep `*_source` set to exactly `"agent"` for new
   research.

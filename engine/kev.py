@@ -240,15 +240,18 @@ def site_url(path):
 # ---------------------------------------------------------------------------
 
 def src_tag(value):
-    """Normalize a provenance source field to a short tag: 'hermes' when the
-    value references agent analysis, 'deterministic' when it references the
-    fallback, '' for anything else (older records carry URL blobs here - never
-    render those as chips)."""
+    """Normalize a provenance source field to a short tag: 'agent' for
+    agent-produced research (incl. legacy 'hermes'/'hermes-agent' values),
+    'deterministic' for the fallback, '' for anything else (older records
+    carry URL blobs here - never render those as chips)."""
     if not isinstance(value, str):
         return ""
-    v = value.lower()
-    if "hermes" in v:
-        return "hermes"
+    v = value.strip().lower()
+    if v in ("hermes", "hermes-agent", "agent", "agent-web-research",
+             "automated enrichment (agent)", "research", "web_search"):
+        return "agent"
+    if "hermes" in v or "agent" in v:
+        return "agent"
     if "deterministic" in v or "heuristic" in v:
         return "deterministic"
     return ""

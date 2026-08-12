@@ -3,7 +3,7 @@ Agentic research workflow per CVE.
 
 Two modes:
   **Agent mode** – receives ``web_search`` / ``web_extract`` callables from the
-  Hermes agent context for rich multi-source web research.
+  agent context for rich multi-source web research.
 
   **Standalone mode** – falls back to the GitHub API, NVD data analysis, and
   direct advisory-URL construction.  No search-engine API key required.
@@ -30,10 +30,10 @@ class ResearchEngine:
     Parameters
     ----------
     web_search : callable or None
-        ``web_search(query, limit=5) -> dict``  (Hermes agent tool).
+        ``web_search(query, limit=5) -> dict``  (agent tool).
         When ``None`` the engine operates in standalone mode.
     web_extract : callable or None
-        ``web_extract(urls) -> dict``  (Hermes agent tool).
+        ``web_extract(urls) -> dict``  (agent tool).
     """
 
     def __init__(self, web_search=None, web_extract=None):
@@ -156,7 +156,7 @@ class ResearchEngine:
     # ------------------------------------------------------------------
 
     def _agent_research(self, cve_id, vendor, product, component, result, sources):
-        """Perform web searches via Hermes agent tools."""
+        """Perform web searches via agent tools."""
         try:
             # Component research
             q1 = f"{vendor} {product} {cve_id} vulnerable component {component}"

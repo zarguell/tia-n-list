@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Batch agentic research for kevrichment.
-Reads 10 CVEs without Hermes analysis, runs web research, updates files.
+Reads 10 CVEs without agent analysis, runs web research, updates files.
 """
 import json
 import sys
@@ -17,7 +17,7 @@ from research import ResearchEngine  # noqa: E402 — sys.path modified above
 CVES_DIR = BASE / "data" / "cves"
 
 def find_cves_needing_analysis(count=10):
-    """Find CVE IDs without Hermes research."""
+    """Find CVE IDs without agent research."""
     result = terminal(f"""cd {BASE} && python3 -c "
 import json, glob
 files = sorted(glob.glob('data/cves/*.json'))
@@ -25,7 +25,7 @@ needing = []
 for f in files:
     d = json.load(open(f))
     r = d.get('kevrichment_research', {{}})
-    if r.get('preconditions_source') != 'hermes':
+    if r.get('preconditions_source') != 'agent':
         needing.append(d['cve_id'])
         if len(needing) >= {count}:
             break
@@ -110,7 +110,7 @@ def extract_poc_from_search(cve_id):
     return poc_urls
 
 def process_cve(cve_id):
-    """Research a single CVE with Hermes agent tools."""
+    """Research a single CVE with agent tools."""
     print(f"\n  ── {cve_id} ──")
     record = read_cve(cve_id)
     research = record.get("kevrichment_research", {})
@@ -171,9 +171,9 @@ def process_cve(cve_id):
         def_sources = search_default_enablement(cve_id, vendor, product, component)
         all_sources.extend(def_sources)
 
-    # 6. Mark as hermes-analyzed
-    research["preconditions_source"] = "hermes"
-    research["hunting_hypothesis_source"] = "hermes"
+    # 6. Mark as agent-analyzed
+    research["preconditions_source"] = "agent"
+    research["hunting_hypothesis_source"] = "agent"
     if component and component != product:
         research["vulnerable_component"] = component
 
@@ -198,7 +198,7 @@ def process_cve(cve_id):
 def main():
     cve_ids = find_cves_needing_analysis(10)
     if not cve_ids:
-        print("No CVEs need analysis — all have Hermes research.")
+        print("No CVEs need analysis — all have agent research.")
         return
 
     print(f"Found {len(cve_ids)} CVEs needing analysis:")

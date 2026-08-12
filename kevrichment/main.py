@@ -9,7 +9,7 @@ Usage
     python main.py                          # standalone mode (requests-based)
     python main.py --agent                  # agent mode (requires hermes_tools)
 
-In agent mode the research engine uses Hermes ``web_search`` / ``web_extract``
+In agent mode the research engine uses ``web_search`` / ``web_extract``
 tools for richer web research.  In standalone mode it falls back to the GitHub
 API and direct URL heuristics.
 """
@@ -125,7 +125,7 @@ def run_pipeline(research_engine=None, nvd_api_key=None,
     Parameters
     ----------
     research_engine : ResearchEngine or None
-        Pass a pre-configured engine (with Hermes tools) for agent mode.
+        Pass a pre-configured engine (with agent tools) for agent mode.
         ``None`` uses a default standalone engine.
     nvd_api_key : str or None
         NVD API 2.0 key.  Falls back to ``NVD_API_KEY`` env var in
@@ -401,7 +401,7 @@ def cli_main():
     )
     parser.add_argument(
         "--agent", action="store_true",
-        help="Enable Hermes-agent web-search tools (requires hermes_tools package)",
+        help="Enable agent web-search tools (requires hermes_tools package)",
     )
     parser.add_argument(
         "--cve-count", type=int, default=5,
@@ -453,7 +453,7 @@ def cli_main():
         try:
             from hermes_tools import web_extract, web_search
             engine = ResearchEngine(web_search=web_search, web_extract=web_extract)
-            print("  [agent-mode: Hermes tools loaded]\n")
+            print("  [agent-mode: tools loaded]\n")
         except ImportError:
             print("  [WARN] --agent specified but hermes_tools unavailable; falling back to standalone\n")
             engine = None

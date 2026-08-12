@@ -87,20 +87,20 @@ The full record includes KEV fields, NVD data (description, CWE, CVSS, CPE), Vul
 | `vulnerable_component_enabled_by_default` | `yes` / `no` / `unknown` | Whether the vulnerable component ships enabled in a default installation |
 | `delivery_mechanism` | string or null | How an attacker delivers the exploit — extracted from the NVD description (e.g. "crafted HTML page", "POST /api/endpoint requests") |
 | `preconditions_for_exploit` | string | What must be true in your deployment for this CVE to be exploitable (product-class-aware, optionally AI-analyzed) |
-| `preconditions_source` | `"hermes"` or absent | Set to `"hermes"` when AI-generated; absent when using the deterministic fallback |
+| `preconditions_source` | `"agent"` or absent | Set to `"agent"` when AI-generated; absent when using the deterministic fallback |
 | `public_poc_exists` | `yes` / `no` / `unknown` | Whether public exploit code or a PoC repo was found |
 | `public_poc_urls` | string[] | URLs to identified PoC repositories |
 | `vendor_advisory_url` | string | Link to vendor security advisory or patch notes |
 | `exploit_complexity_notes` | string | Notes on exploitation difficulty, PoC availability, CVSS attack complexity |
 | `kevrichment_summary` | string | One-line summary combining all findings |
-| `hunting_hypothesis` | string | Specific attacker behavior or TTP to monitor for (AI-generated via Hermes agent, or deterministic fallback) |
-| `hunting_hypothesis_source` | `"hermes"` or absent | Set to `"hermes"` when AI-generated; absent when deterministic |
+| `hunting_hypothesis` | string | Specific attacker behavior or TTP to monitor for (AI-generated via agent, or deterministic fallback) |
+| `hunting_hypothesis_source` | `"agent"` or absent | Set to `"agent"` when AI-generated; absent when deterministic |
 
 ### Output sourcing
 
 The `preconditions_for_exploit` and `hunting_hypothesis` fields have two production paths:
 
-- **Hermes analysis** (recommended): The Hermes agent reads each CVE's collected data (NVD, CWE, CVSS, Vulnrichment, PoC findings, component extraction) and generates genuine analyst-quality output. The `*_source` field is set to `"hermes"`.
+- **Agent analysis** (recommended): The agent reads each CVE's collected data (NVD, CWE, CVSS, Vulnrichment, PoC findings, component extraction) and generates genuine analyst-quality output. The `*_source` field is set to `"agent"`.
 - **Deterministic fallback**: When the agent hasn't analyzed a CVE yet, the pipeline uses product-class-aware heuristics (CWE → vulnerability class mapping, CVSS → attack surface, prepositional delivery pattern extraction). The `*_source` field is absent.
 
 Downstream consumers can use the `*_source` fields to distinguish analyst-reviewed content from best-effort heuristics.
@@ -124,20 +124,20 @@ python main.py --no-incremental                                    # re-research
 python main.py --scan-vulnrichment                                 # also find non-KEV 3-day CVEs
 python main.py --qc                                                # run quality control checks
 python main.py --qc-only                                           # QC on existing data only (no research)
-python main.py --agent                                             # Hermes-agent web search mode
+python main.py --agent                                             # agent web-search mode
 python main.py --cve-count 2000 --scan-vulnrichment --qc --agent   # full pipeline
 ```
 
 ## Daily automation
 
-A Hermes cron job runs the deterministic pipeline daily at **07:00 UTC**:
+A scheduled agent job runs the deterministic pipeline daily:
 
 1. Fetch fresh KEV + NVD + Vulnrichment data
 2. Run QC checks
 3. Git commit and push any data changes
-4. Report new CVEs needing AI analysis (those without `source: "hermes"`)
+4. Report new CVEs needing AI analysis (those without `source: "agent"`)
 
-To trigger AI analysis on new CVEs, tell the Hermes agent: *"analyze new CVEs"*.
+To trigger AI analysis on new CVEs, tell the agent: *"analyze new CVEs"*.
 
 ## Static file API (GitHub Pages)
 
