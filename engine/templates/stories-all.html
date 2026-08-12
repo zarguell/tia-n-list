@@ -130,9 +130,9 @@
   }
 
   function matches(s) {
-    return (!fYear.value || s.dataset.year === fYear.value) &&
-           (!fMonth.value || s.dataset.month === fMonth.value) &&
-           (!fQ.value || s.dataset.search.indexOf(fQ.value.toLowerCase().trim()) !== -1);
+    return (!fYear.value || s.first_seen.slice(0, 4) === fYear.value) &&
+           (!fMonth.value || String(parseInt(s.first_seen.slice(5, 7), 10)) === fMonth.value) &&
+           (!fQ.value || s._search.indexOf(fQ.value.toLowerCase().trim()) !== -1);
   }
 
   function setUrl() {
@@ -207,6 +207,9 @@
   }
 
   fetch('stories-index.json').then(function (r) { return r.json(); }).then(function (data) {
+    data.forEach(function (s) {
+      s._search = (s.title + ' ' + s.snippet + ' ' + s.sources.join(' ')).toLowerCase();
+    });
     all = data;
     loading.hidden = true;
     apply();
