@@ -225,7 +225,17 @@ for f in glob.glob(os.path.join(DATA, "stories", "*.json")):
     if s.get("merged_into"):
         continue
     t = (s.get("title") or "").lower()
-    if "patch tuesday" not in t:
+    # roundup class: the monthly vendor batch. Literal "patch tuesday", OR a
+    # numbered Windows-flaws roundup ("Microsoft Patches 398 Windows Flaws..."
+    # is the same story and lacks "patch tuesday" — this is why the August
+    # fragment was missed). The NUMBER requirement keeps meta-stories out
+    # ("Expects More Security Updates From AI-Discovered Flaws" is not a
+    # roundup even though it mentions windows flaws).
+    is_roundup = ("patch tuesday" in t) or (
+        "windows" in t
+        and _re.search(r"\d+\s*(cves?|vulnerabilit\w+|flaws?)", t)
+    )
+    if not is_roundup:
         continue
     if any(x in t for x in ("ics", "siemens", "schneider", "phoenix contact")):
         fam = "ics"
