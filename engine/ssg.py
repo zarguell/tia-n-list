@@ -373,10 +373,16 @@ def lint_chips():
 
 def lint_backlinks(cards):
     """Integrity: every digest narrative link and every explicit digest 'stories'
-    entry must resolve to an existing story. (Stories with zero featured digests
-    are legitimate — backlinks only exist for featured coverage.)"""
+    entry must resolve to an existing story — INCLUDING merged-away stories
+    (they render as redirect pages, so their URLs still work). (Stories with
+    zero featured digests are legitimate — backlinks only exist for featured
+    coverage.)"""
     errs = []
     story_ids = {c["id"] for c in cards}
+    for p in sorted(glob.glob(os.path.join(STORIES_DIR, "*.json"))):
+        st = json.load(open(p))
+        if st.get("merged_into"):
+            story_ids.add(st["id"])
     for d in os.listdir(DIGESTS_DIR):
         base = os.path.splitext(d)[0]
         if d.endswith(".md"):
