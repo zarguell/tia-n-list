@@ -1,0 +1,5 @@
+Microsoft's August 2026 Patch Tuesday covers 421 vulnerabilities, 236 of them in Windows. The volume is below July's record release but still among the largest ever, and Microsoft reports one bug already exploited in the wild plus public disclosure for two others. Microsoft has published no desktop browser security patches so far this month, which is unusual.
+
+The headline is the coordinated disclosure of CVE-2026-63520, a SharePoint RCE discovered by Rapid7's Stephen Fewer. It is the second bug in a chain that, combined with last month's CVE-2026-55040, gives unauthenticated remote code execution on vulnerable SharePoint servers. Patches cover SharePoint Server Subscription Edition, 2019, and 2016, and Rapid7 has released full technical analysis and a proof of concept for the first stage.
+
+Organizations should prioritize the SharePoint chain and the actively exploited elevation of privilege vulnerability in this release. The missing browser patches do not reduce the workload in Windows, SharePoint, and server components, and the published Rapid7 proof of concept means exploit attempts against the SharePoint chain are likely to follow quickly.

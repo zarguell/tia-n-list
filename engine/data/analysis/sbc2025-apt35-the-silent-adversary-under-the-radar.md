@@ -1,0 +1,5 @@
+Security researchers presented a technical deep dive on APT35 at Security Bootcamp 2025 in Hue City, Vietnam, and the material is now published. The talk covered the group's infection chain, malware architecture, and notable techniques, aimed at understanding how the Iran-linked threat actor operates rather than only how its malware executes.
+
+APT35, also tracked as Charming Kitten, has a long history of targeting journalists, activists, academics, and government and military personnel, primarily in the Middle East and increasingly beyond. Its operations blend credential phishing, custom backdoors, and social engineering, and it has repeatedly adapted its tooling after exposure.
+
+For defenders, the value is in the technique detail: the infection chain and architecture give blue teams concrete behavioral patterns to hunt for. Teams tracking Iran-linked activity should review the published material for overlap with their own detections and watch for updates that reflect APT35's current toolset.
