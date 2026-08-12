@@ -1,0 +1,5 @@
+The Canadian Centre for Cyber Security issued advisory AV26-812 on August 12, 2026 covering Fortinet products: FortiClientWindows prior to or equal to 7.2.11 and 7.4.3, FortiManager prior to or equal to 7.61, 7.4.5 and 7.2.9, and FortiManager Cloud on the same 7.61, 7.4.5 and 7.2.9 lines. No CVE identifier is published in the advisory text; the Cyber Centre points administrators to Fortinet PSIRT and FortiGuard Labs advisories for specifics.
+
+The affected products matter beyond the endpoint client. FortiManager is the central management plane for Fortinet environments, so a vulnerability there gives an attacker a high-value target for pushing configs or credentials across many devices at once. The advisory carries no exploitation detail, only the affected version list and a patch recommendation.
+
+Watch for the underlying PSIRT advisory to attach a CVE and severity. The version spread is wide, covering multiple release branches, which means a meaningful patch cycle for operators. Whether this turns out to be a disclosed research finding or an in-the-wild issue will determine urgency.
