@@ -242,7 +242,7 @@ for f in glob.glob(os.path.join(DATA, "stories", "*.json")):
     elif "microsoft" in t:
         fam = "microsoft"
     else:
-        fam = "microsoft"      # generic "Patch Tuesday" roundups are Microsoft's
+        fam = "other"      # e.g. "Chipmaker Patch Tuesday: Intel, AMD..." — NOT Microsoft
     # month from the first event's publish date (title may omit it)
     refs = s.get("events", [])
     month = "?"

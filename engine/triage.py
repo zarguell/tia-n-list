@@ -91,7 +91,7 @@ def collect():
     recent, older = [], []
     for e in new:
         (recent if (e.get("published_at", "") >= cutoff) else older).append(e)
-    recent = recent[:60]                       # cap the per-run LLM batch
+    recent = recent[:30]                       # cap the per-run LLM batch (30-min window)
     for e in older:
         processed.add(e["id"])
     _save_state({"processed": sorted(processed)})
