@@ -1,0 +1,5 @@
+Cloudflare reports mitigating more than 800 network-layer DDoS attacks above 1 Tbps in the second quarter of 2026, a more than fivefold increase from the 130 recorded in the first quarter. The quarter also included a record-breaking attack that peaked at 31.4 Tbps and 200 million requests per second.
+
+The trend matters because terabit-scale attacks were once exceptional and are now routine at the top end of the distribution. Cloudflare's position, sitting between botnets and roughly a fifth of the web, gives it a broad view, and the increase suggests either larger botnet capacity or new amplification techniques being deployed at scale. Network-layer attacks of this size can take out any organization relying on commodity DDoS protection.
+
+Watch whether the surge continues into the third quarter and whether the source infrastructure behind the record 31.4 Tbps attack is identified. Organizations with public-facing services should reassess their DDoS posture, since an attack that was survivable last year may not be this year.

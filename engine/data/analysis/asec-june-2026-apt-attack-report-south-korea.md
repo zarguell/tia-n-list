@@ -1,0 +1,5 @@
+AhnLab ASEC's June 2026 APT report for South Korea shows LNK file phishing as the dominant initial access vector, with work-related document filenames and email lures. Payload delivery has split into four tracked types: AutoIt-based malware, HTA downloaders pulling via curl.exe, XenoRAT and infostealers, and Python-script backdoors. GitHub and Google Drive are the main payload hosting platforms.
+
+The pattern is consistent pressure on Korean organizations through a vector that depends on user behavior rather than unpatched systems. The mix of downloader types and cloud hosting means blocking one payload format or one domain does not stop the campaign. The story references CVE-2024-55591 and CVE-2025-24472, both known exploited gateway vulnerabilities, as part of the associated activity.
+
+Watch for continued LNK-based phishing against Korean targets and for the payload hosting to migrate as GitHub and Drive get flagged. Organizations should treat email attachments, especially LNK and archive files, as the primary filter point and should monitor for curl.exe and AutoIt execution as early indicators.

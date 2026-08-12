@@ -1,0 +1,5 @@
+OpenAI unveiled GPT-5.6-Cyber, a cybersecurity model built on GPT-5.6 Sol and purpose-trained for authorized vulnerability research, exploit validation, and security testing. Access is restricted to a vetted list of companies rather than general availability, which is the same gating model applied to its Daybreak Red tier.
+
+The design decision is the explicit separation of defensive and offensive capability surfaces. General frontier models are offered to approved defenders, while the exploit-capable model is gated behind vetting. That puts OpenAI in the position of arbitrating who gets offensive AI assistance, a role that invites scrutiny from both researchers who want access and defenders worried about the asymmetry.
+
+Watch whether the vetting list and key management hold up in practice, since model access control is only as strong as redistribution controls around it. Also watch whether GPT-5.6-Cyber shifts zero-day economics, because several firms with access also run bug bounty and exploit broker ecosystems that decide what gets disclosed and what gets sold.

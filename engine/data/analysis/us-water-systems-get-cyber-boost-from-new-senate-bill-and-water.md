@@ -1,0 +1,5 @@
+A new Senate bill and a proposed Water Watch Center aim to strengthen cybersecurity for US water systems. The legislation responds to the series of water sector incidents over the past year, which have moved from isolated events to a recognized campaign pattern across multiple states.
+
+Water utilities are a distinct problem set: they are often small, underfunded, and run aging industrial control systems with limited staff to patch or monitor them. Centralized support in the form of a watch center could close part of that gap by giving small utilities threat visibility they cannot build themselves. The bill's practical effect depends on whether it comes with funding and whether the center has authority to require anything beyond voluntary reporting.
+
+Watch for the bill's progress through committee and the specifics of the Water Watch Center's mandate, including whether participation is mandatory and whether it feeds CISA. Utilities should treat this as a signal that the federal baseline for water cyber requirements is likely to tighten.

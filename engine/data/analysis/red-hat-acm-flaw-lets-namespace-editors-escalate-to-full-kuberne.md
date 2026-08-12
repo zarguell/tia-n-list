@@ -1,0 +1,5 @@
+CVE-2026-10090 is a critical privilege escalation in Red Hat Advanced Cluster Management for Kubernetes, rated CVSS 9.9 and made public August 5, 2026. The flaw sits in the Application Subscription controller, multicluster-operators-subscription, and lets a user with limited namespace-level editing permissions obtain full cluster-admin access across the cluster.
+
+This breaks a core Kubernetes authorization boundary, the separation between namespace-scoped and cluster-scoped permissions. Any deployment that grants namespace edit rights to multiple teams or service accounts is exposed, because the boundary those grants rely on does not hold. The Important severity from Red Hat reflects the narrow preconditions, but the impact when triggered is complete cluster compromise.
+
+Patch ACM immediately and audit for unexpected cluster-admin grants, especially in environments that had namespace editors assigned recently. Treat any sign of a namespace user holding elevated permissions as a potential indicator of exploitation.

@@ -1,0 +1,5 @@
+GBHackers frames the March 2026 LiteLLM compromise as a strategic supply chain attack rather than a routine malicious PyPI upload. The malicious packages were live for roughly 40 minutes before quarantine, and LiteLLM sits between applications and the LLM providers they call, making it a high-value position for credential theft, cloud intrusion, and downstream software supply chain abuse.
+
+The position is the risk. LiteLLM is a widely used LLM gateway proxy, so a tampered release runs in environments that hold API keys for OpenAI, Anthropic, and other providers plus the infrastructure those keys reach. A 40-minute window is short, but any organization that auto-installed the affected versions in that window would have executed the payload with the privileges of the deployment.
+
+Watch for the full disclosure of what the malicious packages did and whether the scope is broader than initially reported. Users of LiteLLM should verify which version they pinned and audit for unexpected outbound calls or modified credentials, and the incident reinforces the case for pinning and checksum-verifying AI gateway dependencies.

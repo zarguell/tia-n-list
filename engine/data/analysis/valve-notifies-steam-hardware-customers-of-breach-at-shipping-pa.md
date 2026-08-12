@@ -1,0 +1,5 @@
+Valve is notifying European Steam hardware customers that attackers who breached its shipping partner CEVA Logistics between July 29 and August 1 accessed information needed to ship hardware orders. CEVA, a CMA CGM subsidiary operating around 1,000 warehouses, is one of the world's largest logistics providers. The exposed data centers on shipping details for Steam hardware purchases rather than payment information.
+
+The risk is downstream phishing. Attackers holding order and shipping details can craft highly convincing shipping-themed lures referencing real orders, which is a classic post-breach pattern. This is a supply chain disclosure in the literal sense: the compromise happened at the logistics vendor, and the notification only covers what Valve knows.
+
+Watch for the phishing campaigns that typically follow this kind of data release, particularly fake delivery or rescheduling messages in the coming weeks. Affected customers should treat unsolicited shipping notifications with a direct link to the carrier as suspicious.
