@@ -26,7 +26,7 @@ QUEUE = os.path.join(DATA, "new-events.json")
 MANIFEST = os.path.join(DATA, "manifest.json")
 ANALYSIS_DIR = os.path.join(DATA, "analysis")
 NEEDS = os.path.join(DATA, "needs-analysis.json")
-HOT_THRESHOLD = 2.0
+HOT_THRESHOLD = 3.3      # analysis-queue gate on the 0-10 scale (was 2.0 on 0-6); deliberately below the display 5.0 for coverage
 CVE_RE = re.compile(r"CVE-\d{4}-\d{4,7}", re.IGNORECASE)
 
 

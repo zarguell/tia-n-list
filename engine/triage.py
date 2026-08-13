@@ -49,7 +49,7 @@ TRIAGE = os.path.join(DATA, "triage")
 STATE = os.path.join(TRIAGE, "state.json")
 NEEDS = os.path.join(DATA, "needs-analysis.json")
 ANALYSIS = os.path.join(DATA, "analysis")
-HOT_THRESHOLD = 2.0
+HOT_THRESHOLD = 3.3      # 0-10 scale (was 2.0 on 0-6); same analysis-queue bar as merge.py
 
 NOW = datetime.now(timezone.utc)
 TODAY = NOW.strftime("%Y-%m-%d")

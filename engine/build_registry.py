@@ -81,16 +81,16 @@ DEFAULT_QUALITY = 0.75
 
 
 def provisional_score(first_seen, last_seen, sources, cves):
-    """Deterministic placeholder score scaled to the site's 0-6 display range
-    (M1 will replace with real miniflux/reddit signals). Recency half-life 72h,
-    breadth, outlet quality, CVE bonus."""
+    """Deterministic placeholder score scaled to the site's 0-10 display range
+    (legacy backlog-conversion scorer; M1's score.py is the live formula). Recency
+    half-life 72h, breadth, outlet quality, CVE bonus."""
     last = datetime.fromisoformat(last_seen.replace("Z", "+00:00"))
     hours = (datetime.now(timezone.utc) - last).total_seconds() / 3600
     recency = 2.718 ** (-max(0, hours) / 72)
     breadth = 1 + 0.6 * (len(set(sources)) - 1)
     q = max((QUALITY.get(d, DEFAULT_QUALITY) for d in sources), default=DEFAULT_QUALITY)
     bonus = 1.0 if cves else 0.0
-    return round(min(6.0, recency * breadth * q * 2 + bonus), 1)
+    return round(min(10.0, recency * breadth * q * 2 + bonus), 1)
 
 
 def tokens(title):

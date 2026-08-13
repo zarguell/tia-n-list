@@ -68,7 +68,7 @@ BASE_URL = "https://zarguell.github.io/tia-n-list"
 def site_url(path):
     """Join a base-relative path (e.g. 'stories/x/' or '/daily/') to the site URL."""
     return BASE_URL + "/" + path.lstrip("/")
-HOT_THRESHOLD = 3.0      # display "hot" = the heat() h2 band; merge.py keeps its own 2.0 analysis-queue gate
+HOT_THRESHOLD = 5.0      # display "hot" = the heat() h2 band; merge.py keeps its own 3.3 analysis-queue gate
 DIGEST_TOP_N = 10      # not a hard limit — how many stories the digest page lists
 
 def pl(n, word):
@@ -156,13 +156,13 @@ def sanitize(html_text):
 
 
 def heat(score, last_seen=None):
-    # bands are fixed tiers (warm >= 2.0, hot >= 3.0, hottest >= 4.5) —
+    # bands are fixed tiers on the 0-10 scale (warm >= 3.3, hot >= 5.0, hottest >= 7.5) —
     # independent of HOT_THRESHOLD, which gates hot_cards/feed-hot/home
-    if score >= 4.5:
+    if score >= 7.5:
         return "h3", "hottest", "heat-3"
-    if score >= 3.0:
+    if score >= 5.0:
         return "h2", "hot", "heat-2"
-    if score >= 2.0:
+    if score >= 3.3:
         return "h1", "warm", "heat-1"
     if last_seen:
         dt = parse_utc(last_seen)

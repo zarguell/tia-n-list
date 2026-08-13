@@ -35,7 +35,7 @@ EVENTS_DIR = os.path.join(DATA, "events")
 DIGESTS_DIR = os.path.join(DATA, "digests")
 OUT_JSON = os.path.join(DATA, "digest-candidates.json")
 
-ANALYSIS_GATE = 2.0  # merge.py's analysis-queue threshold; the digest's coverage bar
+ANALYSIS_GATE = 3.3  # merge.py's analysis-queue threshold on the 0-10 scale (was 2.0); the digest's coverage bar
 COVERAGE_WINDOW = 3  # a story covered within the last N digests counts as covered
 
 STORY_LINK_RE = re.compile(r"stories/([a-z0-9][a-z0-9-]*)/?")

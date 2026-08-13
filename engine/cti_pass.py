@@ -19,7 +19,7 @@ DATA = os.path.join(ENGINE, "data")
 EVENTS = os.path.join(DATA, "events")
 STORIES = os.path.join(DATA, "stories")
 CTI = os.path.join(DATA, "cti")
-MIN_SCORE = 1.0
+MIN_SCORE = 1.7  # 0-10 scale (was 1.0 on 0-6); low coverage bar, multi-source is the real gate
 MIN_SOURCES = 2
 
 

@@ -3,16 +3,20 @@
 
 Each factor is explicit with a defined range; the base is multiplied by a
 recency temporal factor and community signal is added, then capped to the
-site's 0-6 display scale. Bands (aligned to the heat classes in ssg.py):
-0-1.9 new | 2.0-2.9 warm | 3.0-4.4 hot | 4.5+ hottest.
+site's 0-10 display scale. Bands (aligned to the heat classes in ssg.py):
+0-3.2 new | 3.3-4.9 warm | 5.0-7.4 hot | 7.5+ hottest.
+
+Severity is the dominant axis: a story gets hot on how bad it is, not on
+how many outlets mention it (2026-08-13 rebalance — traction-only stories
+used to cross the hot line at severity's 0.5 floor).
 
 Factors:
-  breadth   0.5-3.0  distinct sources
+  breadth   0.5-2.0  distinct sources (capped low; repetition != significance)
   authority 1.0-2.0  best outlet weight (reuters > securityweek/thn/bleeping ...)
-  severity  0.5-3.0  real CVSS base score (kevrichment NVD store), KEV status,
+  severity  0.5-5.0  real CVSS base score (kevrichment NVD store), KEV status,
                      content signals (zero-day, ransomware, OT/ICS, APT, breach scale)
   velocity  0-2.0    events in the last 48h
-  pickup    0-0.8    how fast the second source arrived (exp decay on hours)
+  pickup    0-0.6    how fast the second source arrived (exp decay on hours)
   recency   temporal multiplier (half-life 36h)
   reddit    community, added post-multiplier (0.3/0.4, cap 1.5)
 """
@@ -73,16 +77,16 @@ def _cvss_severity(cves):
             best = max(best, info.get("cvss") or 0.0)
             kev = kev or info.get("kev")
     if best >= 9.0:
-        s = 2.5
+        s = 4.5
     elif best >= 7.0:
-        s = 2.0
+        s = 3.5
     elif best >= 4.0:
-        s = 1.5
+        s = 2.5
     elif best > 0:
-        s = 1.0
+        s = 1.5
     else:
-        s = 0.7            # CVE present but not in the local store
-    return min(3.0, s + (0.5 if kev else 0.0)), kev
+        s = 1.0            # CVE present but not in the local store
+    return s, kev
 
 
 def hot_score(story, events, reddit_posts, now=None):
@@ -92,21 +96,21 @@ def hot_score(story, events, reddit_posts, now=None):
         now = datetime.now(timezone.utc)
     parse = lambda iso: datetime.fromisoformat(iso.replace("Z", "+00:00")).astimezone(timezone.utc)
 
-    # breadth
-    breadth = 0.5 + 0.5 * min(5, max(0, story.get("n_sources", 0) - 1))
+    # breadth (repetition is weak evidence — cap low)
+    breadth = 0.5 + 0.5 * min(3, max(0, story.get("n_sources", 0) - 1))
 
     # authority
     authority = max((AUTHORITY.get(d, DEFAULT_AUTHORITY) for d in story.get("sources", [])),
                     default=DEFAULT_AUTHORITY)
 
-    # severity (real CVSS + KEV + content signals)
+    # severity (real CVSS + KEV + content signals) — the dominant axis
     cves = story.get("cves", [])
     sev, kev = _cvss_severity(cves)
     title = (story.get("title") or "").lower()
     body_text = " ".join(events.get(r["event_id"], {}).get("content_md", "") for r in story.get("events", []))[:4000].lower()
     text = title + " " + body_text
     signals = sum(w for rx, w in SIGNALS if rx.search(text))
-    severity = min(3.0, sev + min(SIGNAL_CAP, signals))
+    severity = min(5.0, sev + (0.5 if kev else 0.0) + min(SIGNAL_CAP, signals))
 
     # velocity (events in last 48h)
     n48 = 0
@@ -116,7 +120,7 @@ def hot_score(story, events, reddit_posts, now=None):
             dt = parse(e["published_at"])
             if (now - dt).total_seconds() < 172800:
                 n48 += 1
-    velocity = min(2.0, 0.6 * n48)
+    velocity = min(2.0, 0.5 * n48)
 
     # pickup speed: hours between the first and second event
     pickup = 0.0
@@ -124,7 +128,7 @@ def hot_score(story, events, reddit_posts, now=None):
                 for ref in story.get("events", []) if ref["event_id"] in events)
     if len(ts) >= 2:
         gap_h = max(0.0, (ts[1] - ts[0]).total_seconds() / 3600)
-        pickup = 0.8 * (2.718 ** (-gap_h / 24))
+        pickup = 0.6 * (2.718 ** (-gap_h / 24))
 
     base = breadth + authority + severity + velocity + pickup
 
@@ -153,7 +157,7 @@ def hot_score(story, events, reddit_posts, now=None):
                 break
     reddit = min(1.5, rmatch)
 
-    score = round(min(6.0, base * recency + reddit), 1)
+    score = round(min(10.0, base * recency + reddit), 1)
     return {
         "score": score,
         "base": round(base, 2),
