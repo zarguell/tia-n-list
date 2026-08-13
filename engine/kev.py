@@ -23,6 +23,7 @@ import glob
 import json
 import os
 import re
+import shutil
 from datetime import datetime, timezone
 
 try:
@@ -329,9 +330,9 @@ def cve_view(rec, mentioned, tia_timeline=None):
 
 def candidate_view(row):
     """Shape a cve_timeline row for cve_timeline.html (safe scalars only)."""
-    primary = row["stories"][0] if row["stories"] else {}
     return {
         "cve": row["cve"],
+        "name": row.get("name", ""),
         "exploit_status": row["exploit_status"],
         "on_kev": row["on_kev"],
         "disclose": row["disclose"] or "",
@@ -351,8 +352,8 @@ def candidate_view(row):
         "gap_exploit_kev": row.get("exploit_to_kev_days"),
         "n_stories": row["n_stories"],
         "n_exploit_events": row["n_exploit_events"],
-        "primary_title": primary.get("title", ""),
-        "stories": [{"id": s["id"], "url": f"stories/{s['id']}/",
+        "stories": [{"id": s["id"], "title": s.get("title", ""),
+                     "url": f"stories/{s['id']}/",
                      "has_analysis": s["has_analysis"]} for s in row["stories"]],
         "exploit_events": [{
             "date": e["date"], "source": e["source"],
@@ -466,7 +467,20 @@ def render_site(env, write, cards):
         v = candidate_view(r)
         write(f"kev/candidates/{r['cve']}/index.html",
               env.get_template("cve_timeline.html").render(
-                  active="kev", rec=v, og_url=site_url(f"kev/candidates/{r['cve']}/")))
+                  active="kev", kev_section="candidates", rec=v,
+                  og_url=site_url(f"kev/candidates/{r['cve']}/")))
+
+    # Prune stale candidate timeline pages: CVEs flagged in earlier builds but
+    # no longer candidates (gate drops, attribution fixes, KEV crossings) leave
+    # orphaned pages with outdated content. Keep the dashboard files; only the
+    # per-CVE dirs are candidates for removal. Deterministic and idempotent —
+    # a dir is removed iff its CVE is not in the current rendered set.
+    cand_ids = {r["cve"] for r in cands}
+    cand_out = os.path.join(ROOT, "kev", "candidates")
+    for d in glob.glob(os.path.join(cand_out, "CVE-*")):
+        if os.path.isdir(d) and os.path.basename(d) not in cand_ids:
+            shutil.rmtree(d, ignore_errors=True)
+            print(f"  kev/candidates/{os.path.basename(d)}/ (stale, removed)")
 
     return total
 

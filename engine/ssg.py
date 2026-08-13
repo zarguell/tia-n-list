@@ -71,11 +71,23 @@ def site_url(path):
 HOT_THRESHOLD = 3.0      # display "hot" = the heat() h2 band; merge.py keeps its own 2.0 analysis-queue gate
 DIGEST_TOP_N = 10      # not a hard limit — how many stories the digest page lists
 
+def pl(n, word):
+    """'1 day' / '3 days' for template gap strings; None -> empty."""
+    if n is None:
+        return ""
+    try:
+        n = int(n)
+    except (TypeError, ValueError):
+        return f"{n} {word}s"
+    return f"{n} {word}" if n == 1 else f"{n} {word}s"
+
+
 env = Environment(
     loader=FileSystemLoader(TMPL_DIR),
     autoescape=select_autoescape(["html", "xml"]),
 )
 env.globals["site_url"] = site_url
+env.globals["pl"] = pl
 
 MD_STRIP = re.compile(r"(!\[[^\]]*\]\([^)]*\)|\[([^\]]*)\]\([^)]*\)|^#{1,6}\s*|^\s*[-*+]\s+|^\s*>\s+|[*_`~]+)", re.M)
 

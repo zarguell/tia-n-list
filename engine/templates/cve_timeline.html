@@ -9,18 +9,20 @@
 {% endblock %}
 {% block content %}
 <p class="eyebrow">KEV candidates · per-CVE timeline</p>
+{% include "_kev_nav.html" %}
 
 <div class="kev-hero">
   <div class="kev-hero-id"><code>{{ rec.cve }}</code>
     {% if rec.nvd_cvss.get('score') is not none %}<span class="cvss-badge {{ cvss_color(rec.nvd_cvss.score) }}">{{ "%.1f"|format(rec.nvd_cvss.get('score')) }}</span>{% endif %}
   </div>
   <div class="kev-hero-meta">
-    {% if rec.primary_title %}<span>{{ rec.primary_title }}</span>{% endif %}
+    {% if rec.name %}<span>{{ rec.name }}</span>{% endif %}
     {% if rec.disclose %} · <span>Disclosed {{ rec.disclose }}</span>{% endif %}
   </div>
   <div class="kev-hero-badges">
     {% if rec.exploit_status == 'exploited' %}<span class="chip kev-status poc">Exploitation reported</span>{% endif %}
     {% if rec.exploit_status == 'suspected' %}<span class="chip kev-status">Exploitation suspected</span>{% endif %}
+    {% if rec.nvd_ssvc.get('automatable') == 'yes' %}<span class="chip kev-status">Automatable</span>{% endif %}
     <span class="chip kev-status kev">{{ 'On KEV' if rec.on_kev else 'KEV candidate' }}</span>
   </div>
 </div>
@@ -33,17 +35,17 @@
       <span class="tl-dot" aria-hidden="true"></span>
       <p class="tl-kind">disclosed</p>
       <h3 class="tl-title">{{ rec.disclose }}</h3>
-      <p class="tl-source">CVE published by the CNA / NVD.{% if rec.gap_disclose_report is not none %} {{ rec.gap_disclose_report }} days before Tia's first report.{% endif %}</p>
+      <p class="tl-source">CVE published by the CNA / NVD.{% if rec.gap_disclose_report is not none %} {{ pl(rec.gap_disclose_report, 'day') }} before Tia's first report.{% endif %}</p>
     </li>
     {% endif %}
     <li class="tl-item">
       <span class="tl-dot" aria-hidden="true"></span>
       <p class="tl-kind">first reported</p>
       <h3 class="tl-title">{{ rec.first_reported[:10] or '—' }}</h3>
-      <p class="tl-source">{{ rec.n_stories }} {{ 'story' if rec.n_stories == 1 else 'stories' }}:{% if rec.gap_report_exploit is not none %} first exploitation report {{ rec.gap_report_exploit }} days later.{% endif %}</p>
+      <p class="tl-source">{{ rec.n_stories }} {{ 'story' if rec.n_stories == 1 else 'stories' }}:{% if rec.gap_report_exploit is not none %} first exploitation report {{ pl(rec.gap_report_exploit, 'day') }} later.{% endif %}</p>
       <p class="covered-list">
         {% for s in rec.stories %}
-        <a class="chip covered" href="{{ s.url }}">{{ s.id }}{% if s.has_analysis %} · analyzed{% endif %}</a>
+        <a class="chip covered" href="{{ s.url }}">{{ s.title or s.id }}{% if s.has_analysis %} · analyzed{% endif %}</a>
         {% endfor %}
       </p>
     </li>
@@ -52,7 +54,7 @@
       <p class="tl-kind">first exploitation report</p>
       <h3 class="tl-title">{{ rec.first_exploit_report[:10] or 'not reported' }}</h3>
       {% if rec.exploit_events %}
-      <p class="tl-source">{{ rec.n_exploit_events }} flagged {{ 'event' if rec.n_exploit_events == 1 else 'events' }}:{% if rec.gap_exploit_kev is not none %} {% if rec.gap_exploit_kev >= 0 %}{{ rec.gap_exploit_kev }} days before the KEV listing{% else %}{{ -rec.gap_exploit_kev }} days after the KEV listing{% endif %}.{% endif %}</p>
+      <p class="tl-source">{{ rec.n_exploit_events }} flagged {{ 'event' if rec.n_exploit_events == 1 else 'events' }}:{% if rec.gap_exploit_kev is not none %} {% if rec.gap_exploit_kev >= 0 %}{{ pl(rec.gap_exploit_kev, 'day') }} before the KEV listing{% else %}{{ pl(-rec.gap_exploit_kev, 'day') }} after the KEV listing{% endif %}.{% endif %}</p>
       <p class="covered-list">
         {% for e in rec.exploit_events %}
         <a class="chip covered" href="{{ e.url }}" target="_blank" rel="noopener noreferrer">{{ e.date[:10] }} · {{ e.source }}{% if e.status == 'suspected' %} · suspected{% endif %}</a>
@@ -67,74 +69,67 @@
       <p class="tl-kind">KEV added</p>
       <h3 class="tl-title">{{ rec.kev_date_added or 'not yet' }}</h3>
       <p class="tl-source">
-        {% if rec.on_kev %}CISA listed this CVE on the Known Exploited Vulnerabilities catalog.{% if rec.gap_exploit_kev is not none %} {% if rec.gap_exploit_kev >= 0 %}{{ rec.gap_exploit_kev }} days after the first exploitation report{% else %}{{ -rec.gap_exploit_kev }} days before the first exploitation report{% endif %}.{% endif %}{% else %}Not on the CISA KEV catalog yet — this is a live candidate.{% endif %}
+        {% if rec.on_kev %}CISA listed this CVE on the Known Exploited Vulnerabilities catalog.{% if rec.gap_exploit_kev is not none %} {% if rec.gap_exploit_kev >= 0 %}{{ pl(rec.gap_exploit_kev, 'day') }} after the first exploitation report{% else %}{{ pl(-rec.gap_exploit_kev, 'day') }} before the first exploitation report{% endif %}.{% endif %}{% else %}Not on the CISA KEV catalog yet — this is a live candidate.{% endif %}
       </p>
     </li>
   </ol>
 </section>
 
-{% if rec.exploit_events %}
-<section class="kev-panel">
-  <h2 class="kev-panel-title">Exploitation reports</h2>
-  <p class="kev-panel-sub">Events in the store flagged with an exploitation claim for this CVE (source: triage or deterministic backfill).</p>
-  {% for e in rec.exploit_events %}
-  <details class="kev-collapse" {% if loop.first %}open{% endif %}>
-    <summary><strong>{{ e.date[:10] }}</strong> · {{ e.source }}{% if e.status == 'suspected' %} · suspected{% endif %}{% if e.url %} · <a href="{{ e.url }}" target="_blank" rel="noopener noreferrer">source</a>{% endif %}</summary>
-    <p class="kev-desc">{{ e.evidence }}</p>
-  </details>
-  {% endfor %}
-</section>
-{% endif %}
+<div class="kev-detail-grid">
+  <div class="kev-col">
+    <section class="kev-panel">
+      <h2 class="kev-panel-title">Details</h2>
+      {% if rec.name %}<div class="kev-row"><span class="kev-label">Vulnerability</span><span class="kev-value">{{ rec.name }}</span></div>{% endif %}
+      {% if rec.disclose %}<div class="kev-row"><span class="kev-label">Published</span><span class="kev-value">{{ rec.disclose }}</span></div>{% endif %}
+      {% if rec.nvd_last_modified %}<div class="kev-row"><span class="kev-label">Modified</span><span class="kev-value">{{ rec.nvd_last_modified }}</span></div>{% endif %}
+      {% if rec.nvd_cwes %}
+      <div class="kev-row"><span class="kev-label">CWE</span><span class="kev-value">{% for w in rec.nvd_cwes %}<span class="chip">{{ w }}</span> {% endfor %}</span></div>
+      {% endif %}
+      {% if rec.nvd_cvss.get('score') is not none %}
+      <div class="kev-row"><span class="kev-label">CVSS v3.1</span><span class="kev-value">{{ "%.1f"|format(rec.nvd_cvss.get('score')) }} {{ rec.nvd_cvss.severity }}{% if rec.nvd_cvss.vector %} · <span class="mono">{{ rec.nvd_cvss.get('vector') }}</span>{% endif %}</span></div>
+      {% endif %}
+    </section>
 
-{% if rec.nvd_desc or rec.nvd_cvss or rec.nvd_ssvc or rec.nvd_references %}
-<section class="kev-panel">
-  <h2 class="kev-panel-title">NVD record</h2>
-  <div class="kev-row"><span class="kev-label">Published</span><span class="kev-value">{{ rec.disclose or '—' }}</span></div>
-  {% if rec.nvd_last_modified %}<div class="kev-row"><span class="kev-label">Modified</span><span class="kev-value">{{ rec.nvd_last_modified }}</span></div>{% endif %}
-  {% if rec.nvd_desc %}<p class="kev-desc">{{ rec.nvd_desc }}</p>{% endif %}
-
-  {% if rec.nvd_cvss.get('score') is not none %}
-  <div class="kev-row"><span class="kev-label">CVSS v3.1</span><span class="kev-value">{{ "%.1f"|format(rec.nvd_cvss.get('score')) }} {{ rec.nvd_cvss.severity }}{% if rec.nvd_cvss.vector %} · <span class="mono">{{ rec.nvd_cvss.get('vector') }}</span>{% endif %}</span></div>
-  {% endif %}
-
-  {% if rec.nvd_ssvc %}
-  <h3 class="kev-panel-sub">SSVC decision <span class="kev-panel-sub">CISA Coordinator, v2.0</span></h3>
-  <div class="table-scroll">
-    <table class="kev-table">
-      <thead>
-        <tr>
-          <th scope="col">Exploitation</th>
-          <th scope="col">Automatable</th>
-          <th scope="col">Technical impact</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>{{ rec.nvd_ssvc.get('exploitation') or '—' }}</td>
-          <td>{{ rec.nvd_ssvc.get('automatable') or '—' }}</td>
-          <td>{{ rec.nvd_ssvc.get('technical_impact') or '—' }}</td>
-        </tr>
-      </tbody>
-    </table>
+    <section class="kev-panel">
+      <h2 class="kev-panel-title">Compliance <span class="kev-panel-sub">SSVC + BOD 26-04</span></h2>
+      <div class="kev-row"><span class="kev-label">Automatable</span><span class="kev-value">{{ rec.nvd_ssvc.get('automatable') or '—' }}</span></div>
+      <div class="kev-row"><span class="kev-label">Technical impact</span><span class="kev-value">{{ rec.nvd_ssvc.get('technical_impact') or '—' }}</span></div>
+      <div class="kev-row"><span class="kev-label">SSVC exploitation</span><span class="kev-value">{{ rec.nvd_ssvc.get('exploitation') or '—' }}</span></div>
+      {% if rec.bod %}
+      <h3 class="kev-panel-sub">If this were a KEV today — BOD 26-04 remediation</h3>
+      <div class="kev-row"><span class="kev-label">Publicly exposed</span><span class="kev-value">{{ timeline_label(rec.bod.get('timeline_if_publicly_exposed')) }}{% if rec.bod.get('due_if_public') %} · due {{ rec.bod.due_if_public }}{% endif %}</span></div>
+      <div class="kev-row"><span class="kev-label">Internal only</span><span class="kev-value">{{ timeline_label(rec.bod.get('timeline_if_not_publicly_exposed')) }}{% if rec.bod.get('due_if_not_public') %} · due {{ rec.bod.due_if_not_public }}{% endif %}</span></div>
+      <p class="kev-desc">Hypothetical: CISA's SSVC decision applied through BOD 26-04 Table 1 as if the CVE were listed today.</p>
+      {% endif %}
+    </section>
   </div>
-  {% endif %}
 
-  {% if rec.bod %}
-  <h3 class="kev-panel-sub">If this were a KEV today — BOD 26-04 remediation</h3>
-  <div class="kev-row"><span class="kev-label">Publicly exposed</span><span class="kev-value">{{ timeline_label(rec.bod.get('timeline_if_publicly_exposed')) }}{% if rec.bod.get('due_if_public') %} · due {{ rec.bod.due_if_public }}{% endif %}</span></div>
-  <div class="kev-row"><span class="kev-label">Internal only</span><span class="kev-value">{{ timeline_label(rec.bod.get('timeline_if_not_publicly_exposed')) }}{% if rec.bod.get('due_if_not_public') %} · due {{ rec.bod.due_if_not_public }}{% endif %}</span></div>
-  <p class="kev-desc">Hypothetical: CISA's SSVC decision applied through BOD 26-04 Table 1 as if the CVE were listed today.</p>
-  {% endif %}
+  <div class="kev-col">
+    {% if rec.exploit_events %}
+    <section class="kev-panel">
+      <h2 class="kev-panel-title">Exploitation reports</h2>
+      <p class="kev-panel-sub">Events in the store flagged with an exploitation claim for this CVE (source: triage or deterministic backfill).</p>
+      {% for e in rec.exploit_events %}
+      <details class="kev-collapse" {% if loop.first %}open{% endif %}>
+        <summary><strong>{{ e.date[:10] }}</strong> · {{ e.source }}{% if e.status == 'suspected' %} · suspected{% endif %}{% if e.url %} · <a href="{{ e.url }}" target="_blank" rel="noopener noreferrer">source</a>{% endif %}</summary>
+        <p class="kev-desc">{{ e.evidence }}</p>
+      </details>
+      {% endfor %}
+    </section>
+    {% endif %}
 
-  {% if rec.nvd_cwes %}
-  <div class="kev-row"><span class="kev-label">CWE</span><span class="kev-value">{% for w in rec.nvd_cwes %}<span class="chip">{{ w }}</span> {% endfor %}</span></div>
-  {% endif %}
-  {% if rec.nvd_references %}
-  <div class="kev-row"><span class="kev-label">References</span><span class="kev-value">{% for u in rec.nvd_references %}<a href="{{ u }}" target="_blank" rel="noopener noreferrer">{{ u }}</a>{% if not loop.last %}<br>{% endif %}{% endfor %}</span></div>
-  {% endif %}
-  <p class="kev-desc"><a href="https://nvd.nist.gov/vuln/detail/{{ rec.cve }}" target="_blank" rel="noopener noreferrer">NVD detail page</a></p>
-</section>
-{% endif %}
+    {% if rec.nvd_desc or rec.nvd_cvss or rec.nvd_ssvc or rec.nvd_references %}
+    <section class="kev-panel">
+      <h2 class="kev-panel-title">NVD record</h2>
+      {% if rec.nvd_desc %}<p class="kev-desc">{{ rec.nvd_desc }}</p>{% endif %}
+      {% if rec.nvd_references %}
+      <div class="kev-row"><span class="kev-label">References</span><span class="kev-value">{% for u in rec.nvd_references %}<a href="{{ u }}" target="_blank" rel="noopener noreferrer">{{ u }}</a>{% if not loop.last %}<br>{% endif %}{% endfor %}</span></div>
+      {% endif %}
+      <p class="kev-desc"><a href="https://nvd.nist.gov/vuln/detail/{{ rec.cve }}" target="_blank" rel="noopener noreferrer">NVD detail page</a></p>
+    </section>
+    {% endif %}
 
-<p class="kev-footnote">"First exploitation report" is a reporting date, not the true first exploitation. KEV deltas use CISA's catalog date (dateAdded). Exploitation flags come from the deterministic backfill (source "backfill") or the hourly triage gate (source "triage"); the SSVC exploitation field is CISA's own assessment and can differ from Tia's reporting.</p>
+    <p class="kev-footnote">"First exploitation report" is a reporting date, not the true first exploitation. KEV deltas use CISA's catalog date (dateAdded). Exploitation flags come from the deterministic backfill (source "backfill") or the hourly triage gate (source "triage"); the SSVC exploitation field is CISA's own assessment and can differ from Tia's reporting.</p>
+  </div>
+</div>
 {% endblock %}
