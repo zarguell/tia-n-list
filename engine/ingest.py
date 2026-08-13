@@ -18,9 +18,6 @@ import urllib.request
 import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
 
-sys.path.insert(0, "/home/coder/.local/opt/miniflux")
-from miniflux import MinifluxClient  # noqa: E402
-
 from build_registry import clean_title, domain_of  # noqa: E402
 
 ENGINE = os.path.dirname(os.path.abspath(__file__))
@@ -120,6 +117,10 @@ def save_state(st):
 
 
 def ingest_miniflux(st, hours):
+    # imported here so engine modules that only need strip_html (tests, ssg
+    # lint paths) don't require the local miniflux client on import
+    sys.path.insert(0, "/home/coder/.local/opt/miniflux")
+    from miniflux import MinifluxClient  # noqa: E402
     client = MinifluxClient()
     now = int(time.time())
     max_id = st.get("last_miniflux_id", 0)
