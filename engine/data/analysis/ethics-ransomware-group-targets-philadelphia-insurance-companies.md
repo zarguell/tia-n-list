@@ -1,0 +1,5 @@
+The ransomware group Ethics claimed a compromise of Philadelphia Insurance Companies (phly.com), a US commercial insurance provider, on August 12, 2026, per malware.news. The leak site statement reads "Philadelphia Insurance Companies has been compromised. Data will be leaked if no communication is established." No exfiltration volume, access method, proof sample or deadline is disclosed, and the insurer has not publicly confirmed the claim.
+
+An insurer is a high value target for extortion because policyholder and claims data is sensitive and regulated; a verified breach could trigger state insurance and data breach notification duties. But the posting is a bare assertion with no proof of compromise, so it may be opportunistic. This is the only Ethics posting in the current feed window.
+
+Watch for Philadelphia Insurance to confirm or deny, and for any sample data posted on the Ethics leak site that would verify the claim. Confirmation matters before treating this as a breach rather than a claim.
