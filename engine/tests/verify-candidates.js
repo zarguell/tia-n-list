@@ -50,7 +50,11 @@ const dom = new JSDOM(html, {
   runScripts: 'dangerously',
   pretendToBeVisual: true,
   beforeParse(window) {
-    window.fetch = () => Promise.resolve({ json: () => Promise.resolve(rows) });
+    window.__fetchUrls = [];
+    window.fetch = url => {
+      window.__fetchUrls.push(url);
+      return Promise.resolve({ json: () => Promise.resolve(rows) });
+    };
   },
 });
 const { window } = dom;
@@ -112,6 +116,9 @@ const later = ms => new Promise(r => setTimeout(r, ms));
   // S3(c): no data interpolation via innerHTML in the inline script
   const script = html.split('<script>')[1] || '';
   out.scriptUsesInnerHTMLWithData = /innerHTML\s*=\s*[^;]*(\+|`)/.test(script) || null;
+  // the fetch target must be base-relative to the actual file (2026-08-13:
+  // 'kev-candidates-index.json' resolved to the repo root -> live 404)
+  out.fetchUrl = (window.__fetchUrls || [])[0] || null;
   console.log(JSON.stringify(out, null, 1));
   const candRowCount = rows.filter(r => !r.onKev).length;
   const ok =
@@ -134,6 +141,7 @@ const later = ms => new Promise(r => setTimeout(r, ms));
     out.exploitRows === candExploited &&
     out.searchCount === '1 of ' + rows.length + ' shown' &&
     out.searchRows === 1 &&
+    out.fetchUrl === 'kev/candidates/kev-candidates-index.json' &&
     !out.scriptUsesInnerHTMLWithData;
   process.exit(ok ? 0 : 1);
 })().catch(e => { console.error('FATAL', e); process.exit(1); });

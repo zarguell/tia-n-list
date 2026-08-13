@@ -342,8 +342,15 @@ def lint_links():
                 continue
             rel = os.path.relpath(os.path.join(root, fn), ROOT)
             content = open(os.path.join(root, fn)).read()
-            for m in re.finditer(r'(?:href|src)="([^"]+)"', content):
-                url = m.group(1)
+            # href/src attributes AND inline-script fetch() targets: both must
+            # resolve (against the base) to an existing output file. fetch URLs
+            # used to escape the href/src check (2026-08-13: the candidates
+            # dashboard fetched 'kev-candidates-index.json', resolving to the
+            # repo root -> live 404; the kev dashboard's 'kev/kev-index.json'
+            # was the correct base-relative form).
+            for m in re.finditer(
+                    r'(?:href|src)="([^"]+)"|fetch\(([\'"])([^\'"]+)\2\)', content):
+                url = m.group(1) or m.group(3)
                 # JS-generated hrefs (string concatenation in inline scripts)
                 # are built at runtime from location.pathname — not lintable
                 if "'" in url or "+" in url:
@@ -403,8 +410,10 @@ def lint_kev_links(cards):
                 continue
             rel = os.path.relpath(os.path.join(root, fn), ROOT)
             content = open(os.path.join(root, fn)).read()
-            for m in re.finditer(r'(?:href|src)="([^"]+)"', content):
-                url = m.group(1)
+            # href/src + inline-script fetch() targets (mirrors lint_links)
+            for m in re.finditer(
+                    r'(?:href|src)="([^"]+)"|fetch\(([\'"])([^\'"]+)\2\)', content):
+                url = m.group(1) or m.group(3)
                 if "'" in url or "+" in url:
                     continue
                 if url.startswith(("http://", "https://", "mailto:", "tel:", "#", "data:")):
