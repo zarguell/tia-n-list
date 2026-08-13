@@ -1,0 +1,3 @@
+Adobe released APSB26-90 on August 11, 2026, covering 17 vulnerabilities in ColdFusion 2025 and ColdFusion 2023. The fixes address arbitrary code execution, privilege escalation, security feature bypass, denial of service, and memory exposure, and Adobe rated the update Priority 1. ColdFusion has a poor patch-to-exploit record this year: CVE-2026-48282, a max-severity ColdFusion RCE, was exploited within two hours of disclosure in July.
+
+Priority 1 from Adobe plus a fast-moving threat history makes this an immediate patching item. Organizations running ColdFusion should treat internet-exposed instances as the critical surface and apply the update before scanning activity catches up.
