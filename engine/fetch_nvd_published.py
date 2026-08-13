@@ -1,16 +1,17 @@
 #!/usr/bin/env python3
-"""Tia N. List — NVD publish-date cache for CVEs in the story store.
+"""Tia N. List — NVD info cache for CVEs in the story store.
 
-The "first disclose" anchor of the per-CVE timeline is the NVD ``published``
-timestamp (the CNA/CVE disclosure date). On-KEV CVEs already carry
-``cve_published`` in the kevrichment index; this script fills the gap for every
-CVE in the story store (candidates included) into a small committed cache:
+Per-CVE NVD data used by the KEV-tracking pages:
+    engine/data/nvd-info.json   {"CVE-YYYY-NNNN": {"published": "YYYY-MM-DD",
+                                                   "description": "<en text>"}, ...}
 
-    engine/data/nvd-published.json   {"CVE-YYYY-NNNN": "YYYY-MM-DD", ...}
+- ``published`` is the "first disclose" anchor of the per-CVE timeline.
+- ``description`` is the NVD English description — the vulnerability-name
+  source for candidate rows (never article headlines).
 
-Deterministic, idempotent, resumable: cached CVEs are skipped, failed fetches
-are retried on the next run. NVD_API_KEY is honored (50 req/30s with key,
-5 req/30s without — the delay is set accordingly).
+Deterministic, idempotent, resumable: cached entries with both fields are
+skipped, failed fetches are retried on the next run. NVD_API_KEY is honored
+(50 req/30s with key, 5 req/30s without — the delay is set accordingly).
 """
 import glob
 import json
@@ -22,7 +23,7 @@ import urllib.request
 
 ENGINE = os.path.dirname(os.path.abspath(__file__))
 STORIES = os.path.join(ENGINE, "data", "stories")
-CACHE = os.path.join(ENGINE, "data", "nvd-published.json")
+CACHE = os.path.join(ENGINE, "data", "nvd-info.json")
 NVD_API = "https://services.nvd.nist.gov/rest/json/cves/2.0"
 CVE_RE = re.compile(r"^CVE-\d{4}-\d{4,7}$")
 
@@ -39,7 +40,8 @@ def story_cves():
     return sorted(cves)
 
 
-def fetch_published(cve_id, api_key):
+def fetch_info(cve_id, api_key):
+    """(published, description) from the NVD API, or (None, None)."""
     url = f"{NVD_API}?cveId={cve_id}"
     req = urllib.request.Request(url)
     if api_key:
@@ -48,9 +50,16 @@ def fetch_published(cve_id, api_key):
         data = json.load(resp)
     for v in data.get("vulnerabilities", []):
         cve = v.get("cve", {})
-        if cve.get("id") == cve_id and cve.get("published"):
-            return cve["published"][:10]
-    return None
+        if cve.get("id") != cve_id:
+            continue
+        published = (cve.get("published") or "")[:10] or None
+        description = None
+        for d in cve.get("descriptions", []):
+            if d.get("lang") == "en":
+                description = re.sub(r"\s+", " ", d.get("value", "")).strip()
+                break
+        return published, description
+    return None, None
 
 
 def main():
@@ -60,20 +69,20 @@ def main():
     cache = {}
     if os.path.exists(CACHE):
         cache = json.load(open(CACHE))
-    todo = [c for c in cves if c not in cache]
-    print(f"nvd-published: {len(cves)} store CVEs, {len(cache)} cached, "
+    todo = [c for c in cves if c not in cache or not cache[c].get("description")]
+    print(f"nvd-info: {len(cves)} store CVEs, {len(cache)} cached, "
           f"{len(todo)} to fetch (delay {delay}s)", flush=True)
     ok = fail = 0
     for i, c in enumerate(todo):
         try:
-            d = fetch_published(c, api_key)
-        except Exception as e:  # noqa: BLE001 — network/parse failure: retry next run
+            pub, desc = fetch_info(c, api_key)
+        except Exception as e:  # noqa: BLE001 — network failure: retry next run
             print(f"  [WARN] {c}: {e}", flush=True)
             fail += 1
             time.sleep(delay)
             continue
-        if d:
-            cache[c] = d
+        if pub:
+            cache[c] = {"published": pub, "description": desc or ""}
             ok += 1
             if ok % 25 == 0:
                 json.dump(cache, open(CACHE + ".tmp", "w"), indent=1)
@@ -84,8 +93,9 @@ def main():
     json.dump(cache, open(CACHE, "w"), indent=1, sort_keys=True)
     if os.path.exists(CACHE + ".tmp"):
         os.remove(CACHE + ".tmp")
-    print(f"nvd-published: done — {ok} added, {fail} failed, "
-          f"{len(cache)}/{len(cves)} total")
+    with_desc = sum(1 for v in cache.values() if v.get("description"))
+    print(f"nvd-info: done — {ok} added, {fail} failed, "
+          f"{len(cache)}/{len(cves)} total, {with_desc} with descriptions")
 
 
 if __name__ == "__main__":

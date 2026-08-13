@@ -119,10 +119,12 @@ def _rows():
         tl.STORIES = os.path.join(tmp, "stories")
         tl.EVENTS = os.path.join(tmp, "events")
         tl.ANALYSIS = os.path.join(tmp, "analysis")
-        tl.NVD_CACHE = os.path.join(tmp, "nvd-published.json")
+        tl.NVD_CACHE = os.path.join(tmp, "nvd-info.json")
         tl.KEV_INDEX = os.path.join(tmp, "kev-index.json")
         try:
-            yield tl.build(nvd={"CVE-2026-59310": "2026-07-30"})
+            yield tl.build(nvd={"CVE-2026-59310": {
+                "published": "2026-07-30",
+                "description": "VMware vCenter Syslog server directory traversal RCE vulnerability"}})
         finally:
             (tl.STORIES, tl.EVENTS, tl.ANALYSIS,
              tl.NVD_CACHE, tl.KEV_INDEX) = old
@@ -141,8 +143,9 @@ def test_build_min_aggregation_and_merged_exclusion():
         assert r["on_kev"] is False
         assert r["kev_delta_days"] is None
         assert r["gap_disclose_report"] == 0
-        # candidate name = exploit-report title (the dedicated coverage)
-        assert r["name"] == "exploit report"
+        # candidate name = NVD description (never an article headline)
+        assert r["name"] == "VMware vCenter Syslog server directory traversal RCE vulnerability"
+        assert r["nvd_desc"].startswith("VMware vCenter Syslog")
 
 
 def test_index_rows_include_on_kev_with_name():
@@ -156,7 +159,7 @@ def test_index_rows_include_on_kev_with_name():
         assert ix["CVE-2026-59310"]["onKev"] is True
         assert ix["CVE-2026-59310"]["kevAdded"] == "2026-08-09"
         assert ix["CVE-2026-59310"]["exploitToKev"] == -3
-        assert ix["CVE-2026-59310"]["name"] == "exploit report"
+        assert ix["CVE-2026-59310"]["name"] == "VMware vCenter Syslog server directory traversal RCE vulnerability"
 
 
 def test_build_kev_crossing_delta_signed():
@@ -212,6 +215,30 @@ def test_suspected_only_is_excluded():
         assert r not in tl.flagged(rows)
         ix = {x["id"]: x for x in tl.index_rows(rows)}
         assert "CVE-2026-59310" not in ix
+
+
+def test_two_cve_article_credits_only_the_exploited_one():
+    """The Adobe case (2026-08-13): an article claiming exploitation of one
+    CVE while listing another among patched issues must credit only the
+    exploited CVE."""
+    title = "Hackers exploit critical Adobe Commerce flaw to hijack customer accounts"
+    body = ("Attempts to exploit CVE-2026-71362 have been detected, with a WAF "
+            "blocking exploitation attempts. CVE-2026-48414 is one of seven "
+            "issues Adobe addressed in the update.")
+    flags = bf.classify_event(title, body)
+    assert set(flags) == {"CVE-2026-71362"}
+    assert flags["CVE-2026-71362"]["status"] == "exploited"
+
+
+def test_title_claim_with_cve_in_body_is_credited():
+    """Title-level claims ('flaw exploited to crash devices') with the CVE in
+    the body are credited for focused (<=2 CVE) articles."""
+    flags = bf.classify_event(
+        "Cisco warns of ASA and FTD VPN flaw exploited to crash devices",
+        "The CVE-2026-20349 vulnerability lets an unauthenticated attacker "
+        "crash the device via the remote-access VPN service.")
+    assert set(flags) == {"CVE-2026-20349"}
+    assert flags["CVE-2026-20349"]["status"] == "exploited"
 
 
 def test_determinism():

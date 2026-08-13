@@ -81,7 +81,7 @@ const later = ms => new Promise(r => setTimeout(r, ms));
     xssFired: window.__xss || null,
     hostileIsText: firstTr ? (firstTr.querySelector('img,svg') === null) : null,
     hostileHref: (function () { const a = d.querySelector('#cand-tbody tr a'); return a ? a.getAttribute('href') : null; })(),
-    topIsNewestExploit: (function () { const a = d.querySelector('#cand-tbody tr a'); return a ? a.getAttribute('href') === 'candidates/' + topId + '/' : false; })(),
+    topIsNewestExploit: (function () { const a = d.querySelector('#cand-tbody tr a'); return a ? a.getAttribute('href') === 'kev/candidates/' + topId + '/' : false; })(),
     count: d.getElementById('f-count').textContent,
     viewCount: d.getElementById('view-count').textContent,
     kevHref: kevTr ? kevTr.children[0].querySelector('a').getAttribute('href') : null,
@@ -126,7 +126,7 @@ const later = ms => new Promise(r => setTimeout(r, ms));
     out.imgCount === 0 &&
     !out.xssFired &&
     out.hostileIsText === true &&
-    out.hostileHref === 'candidates/CVE-2026-9999/' &&
+    out.hostileHref === 'kev/candidates/CVE-2026-9999/' &&
     out.topIsNewestExploit === true &&
     out.count === rows.length + ' of ' + rows.length + ' shown' &&
     out.viewCount === 'All ' + rows.length &&

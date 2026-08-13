@@ -37,7 +37,7 @@ DATA = os.path.join(ENGINE, "data")
 STORIES = os.path.join(DATA, "stories")
 EVENTS = os.path.join(DATA, "events")
 ANALYSIS = os.path.join(DATA, "analysis")
-NVD_CACHE = os.path.join(DATA, "nvd-published.json")
+NVD_CACHE = os.path.join(DATA, "nvd-info.json")
 KEV_INDEX = os.path.normpath(os.path.join(ENGINE, "..", "kevrichment", "data", "index.json"))
 KEV_REC_DIR = os.path.normpath(os.path.join(ENGINE, "..", "kevrichment", "data", "cves"))
 
@@ -74,7 +74,8 @@ def _load_kev_index():
     return json.load(open(KEV_INDEX))
 
 
-def load_nvd_published():
+def load_nvd_info():
+    """{cve: {"published": "YYYY-MM-DD", "description": "<en text>"}}."""
     if os.path.exists(NVD_CACHE):
         return json.load(open(NVD_CACHE))
     return {}
@@ -100,7 +101,7 @@ def build(events=None, stories=None, kev_index=None, nvd=None):
     stories = stories if stories is not None else _load_stories()
     events = events if events is not None else _load_events()
     kev_index = kev_index if kev_index is not None else _load_kev_index()
-    nvd = nvd if nvd is not None else load_nvd_published()
+    nvd = nvd if nvd is not None else load_nvd_info()
     kev_by_id = {gate_cve(e.get("cve_id")): e for e in kev_index.get("cves", [])
                  if gate_cve(e.get("cve_id"))}
 
@@ -141,9 +142,14 @@ def build(events=None, stories=None, kev_index=None, nvd=None):
     kev_rec_cache = {}
 
     def _candidate_name(c, refs, ex_refs):
-        """Best identifier for a candidate: the earliest story whose title
-        names the CVE, else the earliest EXPLOITED report title (dedicated
-        coverage), else the earliest flagged event, else the earliest story."""
+        """Best identifier for a candidate: the NVD description (a proper
+        vulnerability name, never an article headline), else the earliest
+        story whose title names the CVE, else the earliest EXPLOITED report
+        title, else the earliest story."""
+        nv = nvd.get(c) or {}
+        desc = (nv.get("description") or "").strip()
+        if desc:
+            return desc[:180]
         cid = c.lower()
         for r in refs:
             if cid in (r["title"] or "").lower():
@@ -181,7 +187,8 @@ def build(events=None, stories=None, kev_index=None, nvd=None):
             exploit_status = "exploited"
         elif ex_refs:
             exploit_status = "suspected"
-        disclose = nvd.get(c) or (krec or {}).get("cve_published") or ""
+        disclose = ((nvd.get(c) or {}).get("published") or ""
+                    or (krec or {}).get("cve_published") or "")
         rows[c] = {
             "cve": c,
             "first_reported": first_reported or "",
@@ -197,6 +204,7 @@ def build(events=None, stories=None, kev_index=None, nvd=None):
             "exploit_status": exploit_status,
             "name": (_kev_name(c) if on_kev else
                      _candidate_name(c, refs, ev_refs.get(c, []))),
+            "nvd_desc": (nvd.get(c) or {}).get("description") or "",
             "stories": refs,
             "n_stories": len(refs),
             "n_exploit_events": len(ex_refs),

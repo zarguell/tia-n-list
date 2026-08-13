@@ -335,6 +335,7 @@ def candidate_view(row):
         "exploit_status": row["exploit_status"],
         "on_kev": row["on_kev"],
         "disclose": row["disclose"] or "",
+        "nvd_desc": row.get("nvd_desc", ""),
         "first_reported": row["first_reported"],
         "first_exploit_report": row["first_exploit_report"],
         "kev_date_added": row["kev_date_added"],
