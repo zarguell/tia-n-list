@@ -1,0 +1,5 @@
+The Canadian Centre for Cyber Security published advisory AV26-815 on August 13, 2026 for a privilege escalation vulnerability in WebPros Plesk, the web hosting control panel. CVE-2026-64639 is a privilege escalation via database cloning affecting Plesk on Windows and Linux prior to versions 18.0.79.6 and 18.0.80.2. The Cyber Centre encourages administrators to review the linked advisory and apply updates as they become available.
+
+Plesk is widely deployed across managed hosting providers, so a privilege escalation path in it is worth treating seriously even without public exploitation reports. The advisory names no in-the-wild activity, so this is a patch-and-verify item rather than an active incident.
+
+Watch for the WebPros patch release and for whether researchers publish technical detail on the database cloning mechanism. Hosting operators should prioritize upgrading Plesk to 18.0.79.6 or 18.0.80.2 depending on their branch, and audit for unexpected database-level changes on shared hosting environments.
