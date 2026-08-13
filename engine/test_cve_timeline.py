@@ -25,6 +25,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import backfill_exploitation as bf  # noqa: E402
 import cve_timeline as tl  # noqa: E402
+import kev  # noqa: E402
 
 
 # ---------------------------------------------------------------------------
@@ -263,6 +264,25 @@ def test_determinism():
     a = [json.dumps(v, sort_keys=True) for v in _rows()]
     b = [json.dumps(v, sort_keys=True) for v in _rows()]
     assert a == b
+
+
+def test_candidate_feed_covers_flagged_candidates():
+    """The candidates RSS feed contract: exactly the flagged non-KEV set,
+    newest exploitation report first, page links, intel-date pubDate, and
+    plain-text descriptions that keep coverage distinct from exploitation."""
+    for rows in _rows():
+        items = kev.candidate_feed_items(rows=rows)
+        assert [i["link"].rsplit("/", 2)[-2] for i in items] == ["CVE-2026-59310"]
+        it = items[0]
+        assert it["title"].startswith("CVE-2026-59310: VMware")
+        assert it["link"] == ("https://zarguell.github.io/tia-n-list/"
+                              "kev/candidates/CVE-2026-59310/")
+        assert "12 Aug 2026" in it["pub_date"]     # first exploit report date
+        assert "First reported 2026-07-30" in it["description"]
+        assert "CVSS 9.8 CRITICAL" in it["description"]
+        assert "Automatable" in it["description"]
+        # suspected-only flags (fixture e1) never feed the list
+        assert len(items) == 1
 
 
 if __name__ == "__main__":

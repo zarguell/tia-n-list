@@ -821,6 +821,9 @@ def main():
         ("feeds/feed-kev.xml", "Tia N. List — KEV catalog",
          "New CISA KEV entries with kevrichment enrichment (90-day window).", "/feeds/feed-kev.xml",
          kev_mod.feed_items(kev_mod.load_index()), rfc_now),
+        ("feeds/feed-kev-candidates.xml", "Tia N. List — KEV candidates",
+         "Exploited CVEs Tia's reporting is tracking that CISA has not listed on the KEV catalog yet (the live candidate set).", "/feeds/feed-kev-candidates.xml",
+         kev_mod.candidate_feed_items(), rfc_now),
     ]
     for rel, title, desc, self_url, items, built in feeds:
         write(rel, render("feed.xml", feed={

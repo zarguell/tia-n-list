@@ -232,6 +232,57 @@ def rfc2822(iso):
     return format_datetime(datetime.fromisoformat(iso.replace("Z", "+00:00")))
 
 
+def candidate_feed_items(rows=None, cap=200):
+    """RSS items for the KEV-candidates feed: every CVE currently flagged as
+    exploited that is not yet on the CISA KEV catalog, newest exploitation
+    report first. Mirrors the /kev/candidates/ page — the LIVE candidate set,
+    so an item drops out when CISA lists the CVE (page and feed entry vanish
+    together). Title = CVE + vulnerability name; pub_date = the first
+    exploitation report (the intel date); description is plain text (feed.xml
+    autoescapes) and keeps coverage (first reported) distinct from the
+    exploitation date."""
+    import cve_timeline as tl_mod
+    if rows is None:
+        rows = tl_mod.build(today=datetime.now(timezone.utc).date())
+    items = []
+    for r in rows.values():
+        if r["on_kev"] or r["exploit_status"] != "exploited":
+            continue
+        expl = (r["first_exploit_report"] or r["first_reported"] or "").strip()
+        if not expl:
+            continue
+        name = (r.get("name") or "").strip()
+        cvss = r.get("nvd_cvss") or {}
+        score = cvss.get("score")
+        severity = (cvss.get("severity") or "").strip()
+        auto = "yes" == str((r.get("nvd_ssvc") or {}).get("automatable", "")).lower()
+        bits = []
+        if r.get("first_reported"):
+            bits.append(f"First reported {r['first_reported'][:10]}")
+        if r.get("disclose"):
+            bits.append(f"Disclosed {r['disclose'][:10]}")
+        if score is not None:
+            try:
+                score_s = f"{score:.1f}"
+            except (TypeError, ValueError):
+                score_s = str(score)
+            bits.append(f"CVSS {score_s}" + (f" {severity}" if severity else ""))
+        if auto:
+            bits.append("Automatable")
+        iso = f"{expl[:10]}T00:00:00Z"
+        items.append({
+            "title": f"{r['cve']}: {name[:100]}" if name else r["cve"],
+            "link": site_url(f"kev/candidates/{r['cve']}/"),
+            "pub_date": rfc2822(iso),
+            "iso": iso,
+            "description": " · ".join(bits),
+        })
+    items.sort(key=lambda i: i["iso"], reverse=True)
+    for it in items:
+        del it["iso"]
+    return items[:cap]
+
+
 def site_url(path):
     return "https://zarguell.github.io/tia-n-list/" + path.lstrip("/")
 
@@ -392,7 +443,7 @@ def render_site(env, write, cards):
     write("kev/kev-index.json", json.dumps(rows, ensure_ascii=True))
 
     write("kev/index.html", env.get_template("kev_index.html").render(
-        active="kev", og_url=site_url("kev/"),
+        active="kev", kev_section="catalog", og_url=site_url("kev/"),
         total=total, active_exploit=active, three_day=three_day,
         automatable=automatable, generated=generated))
 
@@ -409,7 +460,8 @@ def render_site(env, write, cards):
         v = cve_view(rec, mentioned, tl_rows.get(r["id"]))
         write(f"kev/cves/{r['id']}/index.html",
               env.get_template("kev_cve.html").render(
-                  active=None, rec=v, og_url=site_url(f"kev/cves/{r['id']}/")))
+                  active="kev", kev_section="catalog", rec=v,
+                  og_url=site_url(f"kev/cves/{r['id']}/")))
 
     runs = load_runs()
     run_view = []
@@ -432,11 +484,11 @@ def render_site(env, write, cards):
                         for k, v in by_check.items()), key=lambda x: x["name"])},
         })
     write("kev/pipeline.html", env.get_template("kev_pipeline.html").render(
-        active="kev", og_url=site_url("kev/pipeline.html"), runs=run_view))
+        active="kev", kev_section="pipeline", og_url=site_url("kev/pipeline.html"), runs=run_view))
 
     sample = load_cve("CVE-2023-4863") or {}
     write("kev/schema.html", env.get_template("kev_schema.html").render(
-        active="kev", og_url=site_url("kev/schema.html"),
+        active="kev", kev_section="schema", og_url=site_url("kev/schema.html"),
         schema_version=sample.get("schema_version", "1.0"),
         sample_json=json.dumps(sample, indent=2, ensure_ascii=True)))
 
