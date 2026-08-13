@@ -178,9 +178,10 @@ def test_build_kev_crossing_delta_signed():
 
 def test_coverage_without_exploitation_is_not_lead_time():
     """The user contract (2026-08-13): coverage timing must never be presented
-    as exploitation lead time. A CVE we reported but never flagged exploited
-    has kev_delta_days (a coverage fact) but exploit_to_kev_days = None — the
-    only lead-time metric, and it must be absent."""
+    as exploitation lead time, and CVEs without an exploitation flag are
+    EXCLUDED from the tracking page entirely (patch-record mentions are
+    clutter). kev_delta_days stays a coverage fact; exploit_to_kev_days = None;
+    index_rows drops the row."""
     for rows in _rows():
         r = rows["CVE-2026-59310"]
         r["on_kev"] = True
@@ -192,8 +193,9 @@ def test_coverage_without_exploitation_is_not_lead_time():
         r["exploit_to_kev_days"] = None
         assert r["kev_delta_days"] == 10
         assert r["exploit_to_kev_days"] is None
+        assert r not in tl.flagged(rows)
         ix = {x["id"]: x for x in tl.index_rows(rows)}
-        assert ix["CVE-2026-59310"]["exploitToKev"] is None
+        assert "CVE-2026-59310" not in ix
 
 
 def test_determinism():

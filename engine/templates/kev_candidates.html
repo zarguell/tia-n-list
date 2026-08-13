@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 {% block title %}KEV candidates — Tia N. List{% endblock %}
 {% block content %}
-<p class="eyebrow">KEV tracking · every CVE in Tia's reporting, against the CISA KEV catalog</p>
+<p class="eyebrow">KEV tracking · exploitation reports in Tia's coverage, against the CISA KEV catalog</p>
 <h1 class="page-title">KEV tracking</h1>
-<p class="lead">Every CVE in Tia's reporting compared against the CISA Known Exploited Vulnerabilities catalog: when we first reported it, when a report first claimed exploitation, when CISA added it (if it has), and the gap between our coverage and the KEV. Deterministic: a join of the story store, the exploitation flags, the NVD publish dates, and the kevrichment KEV index.</p>
+<p class="lead">Every CVE that Tia's reporting has claimed is being exploited — when we first reported it, when the exploitation report landed, and when CISA added it to the KEV (if it has). CVEs merely mentioned in patch records are excluded. Deterministic: a join of the story store, the exploitation flags, the NVD publish dates, and the kevrichment KEV index.</p>
 {% include "_kev_nav.html" %}
 
 <div class="kev-stats">
-  <div class="kev-stat"><span class="kev-stat-value">{{ total_n }}</span><span class="kev-stat-label">CVEs we track</span></div>
+  <div class="kev-stat"><span class="kev-stat-value">{{ total_n }}</span><span class="kev-stat-label">Exploitation reports</span></div>
   <div class="kev-stat"><span class="kev-stat-value sev-crit">{{ exploited_n }}</span><span class="kev-stat-label">Exploited candidates</span></div>
   <div class="kev-stat"><span class="kev-stat-value sev-high">{{ on_kev_n }}</span><span class="kev-stat-label">On KEV now</span></div>
   <div class="kev-stat"><span class="kev-stat-value">{{ crossings_n }}</span><span class="kev-stat-label">Crossed to KEV (30d)</span></div>
@@ -25,42 +25,8 @@
   <button class="chip active" data-filter="status" data-value="all" type="button">All statuses</button>
   <button class="chip" data-filter="status" data-value="exploited" type="button">Exploited</button>
   <button class="chip" data-filter="status" data-value="suspected" type="button">Suspected</button>
-  <button class="chip" data-filter="status" data-value="" type="button">Unflagged</button>
   <span class="f-count" id="f-count"></span>
 </div>
-
-{% if crossings %}
-<section class="kev-panel">
-  <h2 class="kev-panel-title">Recently added to the KEV that we reported</h2>
-  <p class="kev-panel-sub">The "time to KEV" tracker: signed days from our first exploitation report to CISA's catalog date. Negative = CISA listed it before our exploitation reporting. Rows without exploitation intel show "—" — we covered the CVE but never reported it as exploited, so there is no lead time to claim.</p>
-  <div class="table-scroll">
-    <table class="kev-table">
-      <thead>
-        <tr>
-          <th scope="col">CVE ID</th>
-          <th scope="col">Vulnerability</th>
-          <th scope="col">First reported</th>
-          <th scope="col">First exploit report</th>
-          <th scope="col">KEV added</th>
-          <th scope="col">Exploit → KEV</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for r in crossings %}
-        <tr>
-          <td><a class="chip" href="kev/cves/{{ r.cve }}/">{{ r.cve }}</a></td>
-          <td><span class="cand-name" title="{{ r.name }}">{{ r.name or '—' }}</span></td>
-          <td>{{ r.first_reported[:10] or '—' }}</td>
-          <td>{{ r.first_exploit_report[:10] or '—' }}</td>
-          <td>{{ r.kev_date_added }}</td>
-          <td>{% if r.exploit_to_kev_days is not none %}{{ r.exploit_to_kev_days }}d{% else %}—{% endif %}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-</section>
-{% endif %}
 
 <div class="table-scroll">
   <table class="kev-table" id="cand-table">
@@ -83,7 +49,7 @@
 <p class="no-results" id="no-results" hidden>No CVEs match.</p>
 <nav class="pager" id="pager" aria-label="Pagination"></nav>
 
-<p class="kev-footnote">"All" shows every CVE in Tia's reporting, on the KEV or not. "Pure candidates" = not on the KEV catalog yet. "First exploit report" = the earliest event claiming observed exploitation; it is a reporting date, not the true first exploitation. KEV added + deltas use CISA's catalog date (dateAdded). Disclosed = NVD published date. Exploitation flags come from the deterministic backfill (source "backfill") or the hourly triage gate (source "triage").</p>
+<p class="kev-footnote">"All" shows every CVE with an exploitation report from Tia's coverage, on the KEV or not. "Pure candidates" = not on the KEV catalog yet. "First exploit report" = the earliest event claiming observed exploitation; it is a reporting date, not the true first exploitation. "Exploit → KEV" and the crossings stat are measured from CISA's catalog date (dateAdded); "—" means CISA listed it before our exploitation reporting (negative = days after our report). Disclosed = NVD published date. Exploitation flags come from the deterministic backfill (source "backfill") or the hourly triage gate (source "triage").</p>
 <script>
 (function () {
   var ROWS = [];

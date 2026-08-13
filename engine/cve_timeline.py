@@ -238,12 +238,19 @@ def crossings(rows, days=30, today=None):
     return out
 
 
+def flagged(rows):
+    """Rows with an exploitation flag (exploited or suspected) — the page's
+    inclusion gate: CVEs merely mentioned in patch records are excluded."""
+    return [r for r in rows.values() if r["exploit_status"]]
+
+
 def index_rows(rows):
     """Compact rows for kev/kev-candidates-index.json (client-side table).
-    ALL story CVEs (candidates + on-KEV) — the view toggle filters client-side.
+    ONLY CVEs with an exploitation flag — the page tracks exploitation intel,
+    not patch-record mentions. on-KEV + candidate rows, view toggled client-side.
     Every field is a safe scalar."""
     out = []
-    for r in rows.values():
+    for r in flagged(rows):
         out.append({
             "id": r["cve"],
             "name": r["name"],

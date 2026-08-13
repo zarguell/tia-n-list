@@ -434,26 +434,25 @@ def render_site(env, write, cards):
     # timeline join: story store + exploitation flags + NVD + KEV index.
     # Candidates = CVEs we reported that the kevrichment KEV index lacks;
     # crossings = recent KEV additions we reported (the time-to-KEV tracker).
-    cands = tl_mod.candidates(tl_rows)
+    # KEV tracking section (/kev/candidates/) — deterministic per-CVE
+    # timeline join: story store + exploitation flags + NVD + KEV index.
+    # The page tracks EXPLOITATION intel only: rows without an exploitation
+    # flag (patch-record mentions) are excluded. Candidates = flagged CVEs
+    # the kevrichment KEV index lacks; crossings = flagged KEV additions we
+    # reported within 30 days (the time-to-KEV tracker, sortable in-table).
+    cands = tl_mod.candidates(tl_rows, exploit_only=True)
+    flagged_rows = tl_mod.flagged(tl_rows)
     crossings = tl_mod.crossings(tl_rows)
     exploited_n = sum(1 for r in cands if r["exploit_status"] == "exploited")
     suspected_n = sum(1 for r in cands if r["exploit_status"] == "suspected")
-    on_kev_n = sum(1 for r in tl_rows.values() if r["on_kev"])
-    crossing_view = [{
-        "cve": r["cve"], "name": r["name"],
-        "first_reported": r["first_reported"][:10],
-        "first_exploit_report": r["first_exploit_report"][:10],
-        "kev_date_added": r["kev_date_added"],
-        "exploit_to_kev_days": r["exploit_to_kev_days"],
-    } for r in crossings]
+    on_kev_n = sum(1 for r in flagged_rows if r["on_kev"])
     write("kev/candidates/kev-candidates-index.json",
           json.dumps(tl_mod.index_rows(tl_rows), ensure_ascii=True))
     write("kev/candidates/index.html",
           env.get_template("kev_candidates.html").render(
               active="kev", kev_section="candidates", og_url=site_url("kev/candidates/"),
               exploited_n=exploited_n, suspected_n=suspected_n,
-              total_n=len(tl_rows), on_kev_n=on_kev_n, crossings_n=len(crossings),
-              crossings=crossing_view,
+              total_n=len(flagged_rows), on_kev_n=on_kev_n, crossings_n=len(crossings),
               generated=datetime.now(timezone.utc).date().isoformat()))
     for r in cands:
         v = candidate_view(r)
