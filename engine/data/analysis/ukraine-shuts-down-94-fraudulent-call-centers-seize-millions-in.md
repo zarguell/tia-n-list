@@ -1,0 +1,5 @@
+Ukrainian authorities shut down 94 fraudulent call centers this week in an operation run with the National Police, the Security Service of Ukraine, the Prosecutor General's Office, and German police. Investigators ran 411 searches. The call centers lured victims onto fake investment platforms and into schemes where operators posed as bankers, brokers, or law enforcement to gain access to bank accounts, sometimes persuading victims to take out loans or install remote access tools on their phones and computers.
+
+The raids seized 1,794 fully equipped workstations, 3,336 pieces of computer equipment, and 1,346 phones, and the operation reportedly netted millions in cash. The scale of seized infrastructure, plus the German police involvement, points to a coordinated cross-border investigation rather than a single jurisdiction cleanup.
+
+Watch for follow-on reporting on arrests, victim counts, and whether the seized infrastructure is linked to specific known call-center operations. The main takeaway is enforcement pressure on the fake-investment and bank-fraud economy, which feeds a large share of everyday consumer fraud.
