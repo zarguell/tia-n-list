@@ -149,7 +149,10 @@ def build(events=None, stories=None, kev_index=None, nvd=None):
         nv = nvd.get(c) or {}
         desc = (nv.get("description") or "").strip()
         if desc:
-            return desc[:180]
+            # first sentence = the vulnerability-title essence (wraps to 1-3
+            # lines in the table); the full description stays on the timeline
+            first = re.split(r"(?<=[.!?])\s+", desc, maxsplit=1)[0].strip()
+            return first[:160]
         cid = c.lower()
         for r in refs:
             if cid in (r["title"] or "").lower():
