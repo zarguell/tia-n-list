@@ -1,7 +1,8 @@
-// Behavioral verification of the SHIPPED KEV-candidates dashboard (extracted
+// Behavioral verification of the SHIPPED KEV-tracking dashboard (extracted
 // from the generated page): hostile rows must render as text only (no img/svg
-// elements, no handlers fire), status-filter/search behavior, default sort
-// (first exploit report, newest first), CVE link hrefs (base-relative), and
+// elements, no handlers fire), view toggle (All vs pure candidates), status
+// filter + search, default sort (first exploit report, newest first), and
+// base-relative links (candidates -> candidates/<id>/, on-KEV -> kev/cves/<id>/).
 // S3(c): the inline script must not interpolate data via innerHTML.
 // Runs in CI (site-deploy.yml) after the build step, same recipe as
 // verify-kev.js.
@@ -16,15 +17,33 @@ const realRows = JSON.parse(
 
 const hostile = {
   id: 'CVE-2026-9999',
-  firstReported: '<img src=x onerror=window.__xss=1>',
+  name: '<img src=x onerror=window.__xss=1>',
+  firstReported: '<b>bold</b>',
   firstExploit: '2999-01-01',
   disclose: '<svg/onload=window.__xss=2>',
+  onKev: false,
+  kevAdded: '',
+  exploitToKev: null,
   status: '<script>window.__xss=3</script>',
   stories: 7,
   score: 9.9,
   analysis: false,
 };
-const rows = [hostile, ...realRows.slice(0, 3)];
+const hostileKev = {
+  id: 'CVE-2026-8888',
+  name: 'On KEV entry <img src=x onerror=window.__xss=4>',
+  firstReported: '2026-06-01',
+  firstExploit: '2026-07-01',
+  disclose: '2026-06-01',
+  onKev: true,
+  kevAdded: '2026-08-01',
+  exploitToKev: -3,
+  status: 'exploited',
+  stories: 2,
+  score: 5.0,
+  analysis: true,
+};
+const rows = [hostile, hostileKev, ...realRows.slice(0, 3)];
 
 const dom = new JSDOM(html, {
   url: 'https://zarguell.github.io/tia-n-list/kev/candidates/',
@@ -41,36 +60,48 @@ const later = ms => new Promise(r => setTimeout(r, ms));
 
 (async () => {
   await later(300);
-  const hostileTr = d.querySelector('#cand-tbody tr');
-  const exploitedRows = rows.filter(r => r.status === 'exploited');
-  const topId = rows.slice().sort((a, b) => String(b.firstExploit || '').localeCompare(String(a.firstExploit || '')))[0].id;
+  const firstTr = d.querySelector('#cand-tbody tr');
+  const byId = id => {
+    const trs = d.querySelectorAll('#cand-tbody tr');
+    for (const tr of trs) {
+      if (tr.children[0].textContent === id) return tr;
+    }
+    return null;
+  };
+  const kevTr = byId('CVE-2026-8888');
+  const topId = rows.slice().sort(
+    (a, b) => String(b.firstExploit || '').localeCompare(String(a.firstExploit || '')))[0].id;
   const out = {
     rowsRendered: d.querySelectorAll('#cand-tbody tr').length,
     imgCount: d.querySelectorAll('#cand-tbody img, #cand-tbody svg').length,
     xssFired: window.__xss || null,
-    hostileIsText: hostileTr ? (hostileTr.querySelector('img,svg') === null) : null,
-    hostileHref: (function () {
-      const a = d.querySelector('#cand-tbody tr a');
-      return a ? a.getAttribute('href') : null;
-    })(),
-    topHref: (function () {
-      const a = d.querySelector('#cand-tbody tr a');
-      return a ? a.getAttribute('href') : null;
-    })(),
+    hostileIsText: firstTr ? (firstTr.querySelector('img,svg') === null) : null,
+    hostileHref: (function () { const a = d.querySelector('#cand-tbody tr a'); return a ? a.getAttribute('href') : null; })(),
+    topIsNewestExploit: (function () { const a = d.querySelector('#cand-tbody tr a'); return a ? a.getAttribute('href') === 'candidates/' + topId + '/' : false; })(),
     count: d.getElementById('f-count').textContent,
-    statusCell: hostileTr ? hostileTr.children[4].textContent : null,
+    viewCount: d.getElementById('view-count').textContent,
+    kevHref: kevTr ? kevTr.children[0].querySelector('a').getAttribute('href') : null,
+    kevNameText: kevTr ? kevTr.children[1].textContent.trim() : null,
+    kevDeltaText: kevTr ? kevTr.children[5].textContent : null,
+    kevStatusText: kevTr ? kevTr.children[6].textContent.trim() : null,
   };
-  // default sort: first exploit report newest first
-  out.topIsNewestExploit = out.topHref === 'candidates/' + topId + '/';
-  // status filter
+  // view toggle: pure candidates hides on-KEV rows
+  const candView = d.querySelector('[data-view="candidates"]');
+  candView.click();
+  await later(60);
+  out.candRows = d.querySelectorAll('#cand-tbody tr').length;
+  out.candCount = d.getElementById('f-count').textContent;
+  out.candViewCount = d.getElementById('view-count').textContent;
+  // status filter (within candidates view): exploited only
   const chip = d.querySelector('[data-filter="status"][data-value="exploited"]');
   chip.click();
   await later(60);
+  const candExploited = rows.filter(r => !r.onKev && r.status === 'exploited').length;
   out.exploitCount = d.getElementById('f-count').textContent;
   out.exploitRows = d.querySelectorAll('#cand-tbody tr').length;
-  // search (after resetting the status filter)
-  const all = d.querySelector('[data-filter="status"][data-value="all"]');
-  all.click();
+  // search (reset view + filter first)
+  d.querySelector('[data-view="all"]').click();
+  d.querySelector('[data-filter="status"][data-value="all"]').click();
   await later(60);
   const q = d.getElementById('f-q');
   q.value = '9999';
@@ -82,17 +113,26 @@ const later = ms => new Promise(r => setTimeout(r, ms));
   const script = html.split('<script>')[1] || '';
   out.scriptUsesInnerHTMLWithData = /innerHTML\s*=\s*[^;]*(\+|`)/.test(script) || null;
   console.log(JSON.stringify(out, null, 1));
+  const candRowCount = rows.filter(r => !r.onKev).length;
   const ok =
     out.rowsRendered === rows.length &&
     out.imgCount === 0 &&
     !out.xssFired &&
     out.hostileIsText === true &&
-    out.statusCell === '' &&
     out.hostileHref === 'candidates/CVE-2026-9999/' &&
     out.topIsNewestExploit === true &&
-    out.exploitCount === exploitedRows.length + ' of ' + rows.length + ' shown' &&
-    out.exploitRows === exploitedRows.length &&
-    out.searchCount === '1 of 4 shown' &&
+    out.count === rows.length + ' of ' + rows.length + ' shown' &&
+    out.viewCount === 'All ' + rows.length &&
+    out.kevHref === 'kev/cves/CVE-2026-8888/' &&
+    out.kevNameText === 'On KEV entry <img src=x onerror=window.__xss=4>' &&
+    out.kevDeltaText === '-3d' &&
+    out.kevStatusText === 'On KEVExploited' &&
+    out.candRows === candRowCount &&
+    out.candCount === candRowCount + ' of ' + candRowCount + ' shown' &&
+    out.candViewCount === candRowCount + ' not on KEV' &&
+    out.exploitCount === candExploited + ' of ' + candRowCount + ' shown' &&
+    out.exploitRows === candExploited &&
+    out.searchCount === '1 of ' + rows.length + ' shown' &&
     out.searchRows === 1 &&
     !out.scriptUsesInnerHTMLWithData;
   process.exit(ok ? 0 : 1);

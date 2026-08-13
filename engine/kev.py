@@ -439,6 +439,7 @@ def render_site(env, write, cards):
     crossings = tl_mod.crossings(tl_rows)
     exploited_n = sum(1 for r in cands if r["exploit_status"] == "exploited")
     suspected_n = sum(1 for r in cands if r["exploit_status"] == "suspected")
+    on_kev_n = sum(1 for r in tl_rows.values() if r["on_kev"])
     crossing_view = [{
         "cve": r["cve"],
         "first_reported": r["first_reported"][:10],
@@ -453,7 +454,7 @@ def render_site(env, write, cards):
           env.get_template("kev_candidates.html").render(
               active="kev", kev_section="candidates", og_url=site_url("kev/candidates/"),
               exploited_n=exploited_n, suspected_n=suspected_n,
-              total_n=len(cands), crossings_n=len(crossings),
+              total_n=len(tl_rows), on_kev_n=on_kev_n, crossings_n=len(crossings),
               crossings=crossing_view,
               generated=datetime.now(timezone.utc).date().isoformat()))
     for r in cands:

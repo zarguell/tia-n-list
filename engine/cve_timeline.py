@@ -37,6 +37,7 @@ EVENTS = os.path.join(DATA, "events")
 ANALYSIS = os.path.join(DATA, "analysis")
 NVD_CACHE = os.path.join(DATA, "nvd-published.json")
 KEV_INDEX = os.path.normpath(os.path.join(ENGINE, "..", "kevrichment", "data", "index.json"))
+KEV_REC_DIR = os.path.normpath(os.path.join(ENGINE, "..", "kevrichment", "data", "cves"))
 
 CVE_RE = re.compile(r"^CVE-\d{4}-\d{4,7}$")
 STATUSES = ("exploited", "suspected")
@@ -134,6 +135,36 @@ def build(events=None, stories=None, kev_index=None, nvd=None):
     for refs in ev_refs.values():
         refs.sort(key=lambda r: (r["date"], r["id"]))
 
+    # kev per-CVE records (for the vulnerability-name column on on-KEV rows)
+    kev_rec_cache = {}
+
+    def _candidate_name(c, refs, ex_refs):
+        """Best identifier for a candidate: the earliest story whose title
+        names the CVE, else the earliest EXPLOITED report title (dedicated
+        coverage), else the earliest flagged event, else the earliest story."""
+        cid = c.lower()
+        for r in refs:
+            if cid in (r["title"] or "").lower():
+                return r["title"]
+        if ex_refs:
+            for r in ex_refs:
+                if r["status"] == "exploited":
+                    return r["title"] or ""
+            return ex_refs[0]["title"] or ""
+        return refs[0]["title"] if refs else ""
+
+    def _kev_name(c):
+        if c not in kev_rec_cache:
+            p = os.path.join(KEV_REC_DIR, c + ".json")
+            kev_rec_cache[c] = json.load(open(p)) if os.path.exists(p) else {}
+        rec = kev_rec_cache[c]
+        name = (rec.get("kev_vulnerability_name") or "").strip()
+        if name:
+            return name
+        vendor = ((krec or {}).get("vendor_project") or "").strip()
+        product = ((krec or {}).get("product") or "").strip()
+        return (vendor + " " + product).strip()
+
     rows = {}
     for c, refs in story_refs.items():
         krec = kev_by_id.get(c)
@@ -162,6 +193,8 @@ def build(events=None, stories=None, kev_index=None, nvd=None):
             "gap_report_exploit": _days_between(first_reported, first_exploit),
             "status": "on-kev" if on_kev else "candidate",
             "exploit_status": exploit_status,
+            "name": (_kev_name(c) if on_kev else
+                     _candidate_name(c, refs, ev_refs.get(c, []))),
             "stories": refs,
             "n_stories": len(refs),
             "n_exploit_events": len(ex_refs),
@@ -205,17 +238,27 @@ def crossings(rows, days=30, today=None):
 
 def index_rows(rows):
     """Compact rows for kev/kev-candidates-index.json (client-side table).
-    Candidates only; every field is a safe scalar."""
-    return [{
-        "id": r["cve"],
-        "firstReported": r["first_reported"],
-        "firstExploit": r["first_exploit_report"],
-        "disclose": r["disclose"],
-        "status": r["exploit_status"] or "",
-        "stories": r["n_stories"],
-        "score": round(r["max_score"], 1),
-        "analysis": r["has_analysis"],
-    } for r in candidates(rows)]
+    ALL story CVEs (candidates + on-KEV) — the view toggle filters client-side.
+    Every field is a safe scalar."""
+    out = []
+    for r in rows.values():
+        out.append({
+            "id": r["cve"],
+            "name": r["name"],
+            "firstReported": r["first_reported"],
+            "firstExploit": r["first_exploit_report"],
+            "disclose": r["disclose"],
+            "onKev": r["on_kev"],
+            "kevAdded": r["kev_date_added"],
+            "exploitToKev": r["exploit_to_kev_days"],
+            "status": r["exploit_status"] or "",
+            "stories": r["n_stories"],
+            "score": round(r["max_score"], 1),
+            "analysis": r["has_analysis"],
+        })
+    out.sort(key=lambda r: (r["firstExploit"] or "", r["firstReported"] or ""),
+             reverse=True)
+    return out
 
 
 if __name__ == "__main__":

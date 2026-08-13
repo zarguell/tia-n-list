@@ -141,6 +141,22 @@ def test_build_min_aggregation_and_merged_exclusion():
         assert r["on_kev"] is False
         assert r["kev_delta_days"] is None
         assert r["gap_disclose_report"] == 0
+        # candidate name = exploit-report title (the dedicated coverage)
+        assert r["name"] == "exploit report"
+
+
+def test_index_rows_include_on_kev_with_name():
+    for rows in _rows():
+        # simulate a crossing: on-KEV row keeps its kev record name
+        rows["CVE-2026-59310"]["on_kev"] = True
+        rows["CVE-2026-59310"]["kev_date_added"] = "2026-08-09"
+        rows["CVE-2026-59310"]["exploit_to_kev_days"] = -3
+        ix = {r["id"]: r for r in tl.index_rows(rows)}
+        assert set(ix) == {"CVE-2026-59310"}
+        assert ix["CVE-2026-59310"]["onKev"] is True
+        assert ix["CVE-2026-59310"]["kevAdded"] == "2026-08-09"
+        assert ix["CVE-2026-59310"]["exploitToKev"] == -3
+        assert ix["CVE-2026-59310"]["name"] == "exploit report"
 
 
 def test_build_kev_crossing_delta_signed():
