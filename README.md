@@ -20,6 +20,8 @@ page when a record exists.
   dark toggle)
 - `engine/data/events/<id>.md` + `<id>.json` — hybrid store: markdown content + JSON metadata
 - `engine/data/stories/<id>.json` — story metadata + ordered event refs
+- `engine/digest_candidates.py` — coverage-delta brief for the daily digest (yesterday's
+  coverage ∪ evolved stories ∪ hot-uncovered), consumed by the digest automation
 - `engine/kev.py` — /kev/ section generator (reads `kevrichment/data/`)
 - `kevrichment/` — kevrichment pipeline (see its AGENTS.md): deterministic KEV+NVD+
   Vulnrichment enrichment, committed `data/` (index.json + per-CVE records), daily
