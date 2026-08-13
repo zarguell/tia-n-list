@@ -8,6 +8,7 @@ NOT the tracker — the watermark is the source of truth.
 
 Usage: python3 ingest.py [--hours N]
 """
+import html
 import json
 import os
 import re
@@ -56,7 +57,17 @@ def norm_dt(s):
 
 
 def strip_html(content, max_chars=1500):
-    text = re.sub(r"<br\s*/?>", "\n", content or "")
+    # Some feeds (e.g. CCyber advisories via malware.news) deliver their body
+    # ENTITY-ENCODED — literal "&lt;div&gt;" text, not tags, sometimes double-
+    # encoded ("&amp;nbsp;") — so unescape until stable BEFORE the tag regexes,
+    # or the junk lands in content_md and shows up in card snippets.
+    text = content or ""
+    while True:
+        nxt = html.unescape(text)
+        if nxt == text:
+            break
+        text = nxt
+    text = re.sub(r"<br\s*/?>", "\n", text)
     text = re.sub(r"</?(p|div|li|h[1-6]|tr|blockquote)\b[^>]*>", "\n", text)
     text = re.sub(r"<[^>]+>", " ", text)
     text = re.sub(r"\s+", " ", text).strip()

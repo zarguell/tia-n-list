@@ -8,4 +8,5 @@ $PY ingest.py "$@"
 $PY merge.py
 $PY test_sanitize.py
 $PY test_cve_timeline.py
+$PY test_ingest.py
 $PY ssg.py
