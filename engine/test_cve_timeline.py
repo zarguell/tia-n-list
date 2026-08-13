@@ -19,6 +19,7 @@ import json
 import os
 import sys
 import tempfile
+from datetime import date
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
@@ -124,7 +125,15 @@ def _rows():
         try:
             yield tl.build(nvd={"CVE-2026-59310": {
                 "published": "2026-07-30",
-                "description": "VMware vCenter Syslog server directory traversal RCE vulnerability"}})
+                "last_modified": "2026-08-13",
+                "description": "VMware vCenter Syslog server directory traversal RCE vulnerability",
+                "cvss": {"score": 9.8, "severity": "CRITICAL",
+                         "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H"},
+                "ssvc": {"exploitation": "none", "automatable": "yes",
+                         "technical_impact": "total"},
+                "cwes": ["CWE-22"],
+                "references": ["https://support.broadcom.com/advisory"]}},
+                today=date(2026, 8, 13))
         finally:
             (tl.STORIES, tl.EVENTS, tl.ANALYSIS,
              tl.NVD_CACHE, tl.KEV_INDEX) = old
@@ -146,6 +155,15 @@ def test_build_min_aggregation_and_merged_exclusion():
         # candidate name = NVD description (never an article headline)
         assert r["name"] == "VMware vCenter Syslog server directory traversal RCE vulnerability"
         assert r["nvd_desc"].startswith("VMware vCenter Syslog")
+        assert r["nvd_last_modified"] == "2026-08-13"
+        assert r["nvd_cvss"]["score"] == 9.8
+        assert r["nvd_cwes"] == ["CWE-22"]
+        # BOD 26-04 hypothetical for a non-KEV CVE (automatable+total):
+        # 3 days public / 60 days internal, due dates from the build date
+        assert r["bod"]["timeline_if_publicly_exposed"] == "3_days"
+        assert r["bod"]["timeline_if_not_publicly_exposed"] == "60_days"
+        assert r["bod"]["due_if_public"] == "2026-08-16"
+        assert r["bod"]["due_if_not_public"] == "2026-10-12"
 
 
 def test_index_rows_include_on_kev_with_name():

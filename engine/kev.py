@@ -336,6 +336,13 @@ def candidate_view(row):
         "on_kev": row["on_kev"],
         "disclose": row["disclose"] or "",
         "nvd_desc": row.get("nvd_desc", ""),
+        "nvd_last_modified": row.get("nvd_last_modified", ""),
+        "nvd_cvss": row.get("nvd_cvss") or {},
+        "nvd_ssvc": row.get("nvd_ssvc") or {},
+        "nvd_cwes": row.get("nvd_cwes") or [],
+        "nvd_references": [u for u in row.get("nvd_references") or []
+                           if safe_url(u)],
+        "bod": row.get("bod"),
         "first_reported": row["first_reported"],
         "first_exploit_report": row["first_exploit_report"],
         "kev_date_added": row["kev_date_added"],
@@ -363,6 +370,7 @@ def render_site(env, write, cards):
     """Render /kev/ pages + kev-index.json. `cards` = the story cards (for the
     Mentioned-in reverse join, computed identically to the full build)."""
     env.globals.setdefault("cvss_color", cvss_color)
+    env.globals.setdefault("timeline_label", timeline_label)
     index = load_index()
     rows = index_rows(index)
     total = len(rows)
@@ -390,7 +398,7 @@ def render_site(env, write, cards):
     # Per-CVE detail pages (the record is loaded from disk per entry; rows
     # already passed the shape gate, so the id is safe for path construction)
     import cve_timeline as tl_mod
-    tl_rows = tl_mod.build()   # per-CVE timeline join for the Tia-coverage panel
+    tl_rows = tl_mod.build(today=datetime.now(timezone.utc).date())   # per-CVE timeline join for the Tia-coverage panel
     for r in rows:
         rec = load_cve(r["id"]) or {}
         if not rec:

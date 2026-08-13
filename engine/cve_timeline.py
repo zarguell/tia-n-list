@@ -96,7 +96,40 @@ def _min_iso(*vals):
     return min(vals) if vals else None
 
 
-def build(events=None, stories=None, kev_index=None, nvd=None):
+def _bod_for_candidate(ssvc):
+    """BOD 26-04 Table 1 (June 10, 2026) for a NOT-in-KEV CVE (rows 5-8 /
+    13-16), mirroring kevrichment/schema.compute_bod_timeline(in_kev=False).
+    Returns the timeline dict or None when SSVC is unavailable. The user
+    question this answers: 'if CISA listed this today, what would the
+    remediation due date be?'."""
+    if not ssvc:
+        return None
+    auto = str(ssvc.get("automatable", "")).lower() == "yes"
+    total = str(ssvc.get("technical_impact", "")).lower() == "total"
+    if auto and total:
+        pub, non_pub = "3_days", "60_days"
+    elif auto:
+        pub, non_pub = "14_days", "60_days"
+    elif total:
+        pub, non_pub = "14_days", "defer_to_next_upgrade"
+    else:
+        pub, non_pub = "60_days", "defer_to_next_upgrade"
+    return {"timeline_if_publicly_exposed": pub,
+            "timeline_if_not_publicly_exposed": non_pub,
+            "three_day_qualifying": pub == "3_days"}
+
+
+def _due_date(timeline_key, today):
+    """Due date (YYYY-MM-DD) for a timeline bucket, or '' for defer/unknown."""
+    days = {"3_days": 3, "14_days": 14, "60_days": 60,
+            "3_days_forensic_triage": 3}
+    n = days.get(timeline_key)
+    if not n:
+        return ""
+    return (today + timedelta(days=n)).isoformat()
+
+
+def build(events=None, stories=None, kev_index=None, nvd=None, today=None):
     """Aggregate per-CVE timeline rows. All inputs optional (disk-loaded)."""
     stories = stories if stories is not None else _load_stories()
     events = events if events is not None else _load_events()
@@ -192,6 +225,16 @@ def build(events=None, stories=None, kev_index=None, nvd=None):
             exploit_status = "suspected"
         disclose = ((nvd.get(c) or {}).get("published") or ""
                     or (krec or {}).get("cve_published") or "")
+        nv = nvd.get(c) or {}
+        bod = None
+        if not on_kev:
+            bod = _bod_for_candidate(nv.get("ssvc") or {})
+            if bod and today:
+                bod = {**bod,
+                       "due_if_public": _due_date(
+                           bod["timeline_if_publicly_exposed"], today),
+                       "due_if_not_public": _due_date(
+                           bod["timeline_if_not_publicly_exposed"], today)}
         rows[c] = {
             "cve": c,
             "first_reported": first_reported or "",
@@ -207,7 +250,13 @@ def build(events=None, stories=None, kev_index=None, nvd=None):
             "exploit_status": exploit_status,
             "name": (_kev_name(c) if on_kev else
                      _candidate_name(c, refs, ev_refs.get(c, []))),
-            "nvd_desc": (nvd.get(c) or {}).get("description") or "",
+            "nvd_desc": (nv.get("description") or ""),
+            "nvd_last_modified": (nv.get("last_modified") or ""),
+            "nvd_cvss": nv.get("cvss") or {},
+            "nvd_ssvc": nv.get("ssvc") or {},
+            "nvd_cwes": nv.get("cwes") or [],
+            "nvd_references": nv.get("references") or [],
+            "bod": bod,
             "stories": refs,
             "n_stories": len(refs),
             "n_exploit_events": len(ex_refs),
