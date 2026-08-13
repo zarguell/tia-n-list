@@ -1,0 +1,70 @@
+title: DeadLock Ransomware Encrypted File and Ransom Note Artifacts
+id: 0ad67621-8d62-4f84-9824-fdfabea69c2a
+status: experimental
+description: >
+    Detects file artifacts documented for DeadLock ransomware (Microsoft
+    Threat Intelligence, Aug 2026): files renamed with the .dlock extension,
+    text ransom notes named HOW_RECOVER.<UID>.txt dropped per encrypted
+    directory, and the self-contained HTML recovery chat
+    RECOVERY_CHAT.<UID>.html dropped to drive roots and Desktop folders.
+references:
+    - https://www.microsoft.com/en-us/security/blog/2026/08/10/deadlock-ransomware-breaking-down-a-rust-based-encryptor-with-decentralized-recovery-infrastructure/
+    - https://www.bleepingcomputer.com/news/security/deadlock-ransomware-uses-blockchain-to-resist-infrastructure-takedown/
+author: Tia N. List
+date: 2026/08/13
+tags:
+    - attack.t1486
+    - attack.t1490
+    - attack.t1070
+logsource:
+    category: file_event
+    product: windows
+detection:
+    selection_dlock:
+        TargetFilename|endswith: '.dlock'
+    selection_note:
+        TargetFilename|endswith:
+            - 'HOW_RECOVER.txt'
+            - 'HOW_RECOVER.00000000.txt'
+            - 'RECOVERY_CHAT.html'
+            - 'RECOVERY_CHAT.00000000.html'
+        TargetFilename|contains: 'HOW_RECOVER.'
+    condition: selection_dlock or selection_note
+falsepositives:
+    - Files legitimately using a .dlock extension outside this campaign (rare); corroborate with encryption behavior and ransom notes
+    - Development or decoy files named HOW_RECOVER/RECOVERY_CHAT; validate against adjacent encryption activity
+level: high
+---
+title: DeadLock Ransomware Leak Site Network Connections
+id: a52e6fef-dffc-4807-a0f6-251ae44a95a4
+status: experimental
+description: >
+    Detects network connections to DeadLock ransomware leak-site domains
+    published as indicators of compromise by Microsoft Threat Intelligence:
+    deadlock.liveblog365.com, dlock.liveblog365.com,
+    deadlockblog.great-site.net and deadlockblog.medianewsonline.com,
+    plus the .onion mirror deadblogdbdu5wprek7wa2o4ce7rnt6u6ntqeud3hzjjcveosgpsqqqd.
+references:
+    - https://www.microsoft.com/en-us/security/blog/2026/08/10/deadlock-ransomware-breaking-down-a-rust-based-encryptor-with-decentralized-recovery-infrastructure/
+    - https://www.bleepingcomputer.com/news/security/deadlock-ransomware-uses-blockchain-to-resist-infrastructure-takedown/
+author: Tia N. List
+date: 2026/08/13
+tags:
+    - attack.t1486
+    - attack.t1562
+    - attack.t1070
+logsource:
+    category: network_connection
+    product: windows
+detection:
+    selection:
+        DestinationHostname|endswith:
+            - 'deadlock.liveblog365.com'
+            - 'dlock.liveblog365.com'
+            - 'deadlockblog.great-site.net'
+            - 'deadlockblog.medianewsonline.com'
+        DestinationHostname|contains: 'deadblogdbdu5wprek7wa2o4ce7rnt6u6ntqeud3hzjjcveosgpsqqqd'
+    condition: selection
+falsepositives:
+    - None known; these domains are unique to the DeadLock leak-site infrastructure and are not legitimate services
+level: high

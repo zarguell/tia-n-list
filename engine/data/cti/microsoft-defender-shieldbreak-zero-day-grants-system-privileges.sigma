@@ -1,0 +1,72 @@
+title: ShieldBreak Defender LPE conhost.exe Spawned by wer.dll
+id: c497a56c-4ef8-48b3-b3e0-00e2a6892b4b
+status: experimental
+description: >
+    Detects the terminal process-creation step of the ShieldBreak
+    local privilege escalation chain (Nightmare Eclipse, Aug 2026),
+    which abuses Microsoft Defender's cloud-hydration scan: a hydrated
+    phoneinfo.dll is loaded by wer.dll (Windows Error Reporting), which
+    then spawns conhost.exe running as SYSTEM on fully patched
+    Windows 11 25H2 and Windows Server 2025. This is a patch bypass
+    for CVE-2026-50656 (RoguePlanet) in mpengine.dll.
+references:
+    - https://www.bleepingcomputer.com/news/security/new-microsoft-defender-shieldbreak-zero-day-grants-system-privileges/
+    - https://cyberpress.org/shieldbreak-windows-defender-zero-day-bypasses/
+    - https://gbhackers.com/shieldbreak-windows-defender-0-day/
+author: Tia N. List
+date: 2026/08/13
+tags:
+    - attack.t1068
+    - attack.t1574
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_parent:
+        ParentImage|endswith: '\wer.dll'
+    selection_child:
+        Image|endswith: '\conhost.exe'
+        IntegrityLevel: 'System'
+    condition: selection_parent and selection_child
+falsepositives:
+    - Legitimate Windows Error Reporting flows where wer.dll-hosted WER infrastructure spawns conhost.exe as SYSTEM; corroborate with cfapi cloud-sync-provider registration and QueueReporting scheduled task creation
+level: high
+---
+title: ShieldBreak Defender LPE QueueReporting Scheduled Task
+id: 16f76ba4-1931-4840-8915-3c8d4870e033
+status: experimental
+description: >
+    Detects creation of the QueueReporting scheduled task used by the
+    ShieldBreak Microsoft Defender local privilege escalation exploit
+    (Nightmare Eclipse, Aug 2026; patch bypass for CVE-2026-50656 /
+    RoguePlanet). The exploit registers a temporary directory as a Cloud
+    Sync provider, plants an EICAR file, steers a Defender cloud-hydration
+    scan at System32, and abuses CLFS-based identity file swapping; the
+    QueueReporting scheduled task is one of the observable artifacts
+    documented for the chain.
+references:
+    - https://www.bleepingcomputer.com/news/security/new-microsoft-defender-shieldbreak-zero-day-grants-system-privileges/
+    - https://www.securityweek.com/nightmare-eclipse-drops-windows-zero-day-exploit-shieldbreak/
+author: Tia N. List
+date: 2026/08/13
+tags:
+    - attack.t1068
+    - attack.t1053
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_schtasks:
+        Image|endswith: '\schtasks.exe'
+        CommandLine|contains: 'QueueReporting'
+    selection_powershell:
+        Image|endswith:
+            - '\powershell.exe'
+            - '\pwsh.exe'
+        CommandLine|contains|all:
+            - 'Register-ScheduledTask'
+            - 'QueueReporting'
+    condition: selection_schtasks or selection_powershell
+falsepositives:
+    - Internal tooling that reuses the QueueReporting task name; verify against Defender cloud-sync registration and wer.dll process trees
+level: high
