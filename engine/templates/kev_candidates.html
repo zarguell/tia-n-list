@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+{% block title %}KEV candidates — Tia N. List{% endblock %}
+{% block content %}
+<p class="eyebrow">KEV candidates · CVEs we reported that CISA has not yet added</p>
+<h1 class="page-title">KEV candidates</h1>
+<p class="lead">Every CVE in Tia's reporting that is not yet on the CISA Known Exploited Vulnerabilities catalog — with when we first reported it, when a report first claimed exploitation, and a living tracker of the gap to the KEV. Deterministic: the data is a join of the story store, the exploitation flags, and the kevrichment KEV index.</p>
+{% include "_kev_nav.html" %}
+
+<div class="kev-stats">
+  <div class="kev-stat"><span class="kev-stat-value sev-crit">{{ exploited_n }}</span><span class="kev-stat-label">Exploited candidates</span></div>
+  <div class="kev-stat"><span class="kev-stat-value">{{ suspected_n }}</span><span class="kev-stat-label">Suspected</span></div>
+  <div class="kev-stat"><span class="kev-stat-value">{{ total_n }}</span><span class="kev-stat-label">Reported, not on KEV</span></div>
+  <div class="kev-stat"><span class="kev-stat-value sev-high">{{ crossings_n }}</span><span class="kev-stat-label">Crossed to KEV (30d)</span></div>
+</div>
+
+{% if crossings %}
+<section class="kev-panel">
+  <h2 class="kev-panel-title">Recently added to the KEV that we reported</h2>
+  <p class="kev-panel-sub">The "time to KEV" tracker: signed days from our first report / first exploitation report to the CISA KEV addition. Negative = CISA listed it before our coverage.</p>
+  <div class="table-scroll">
+    <table class="kev-table">
+      <thead>
+        <tr>
+          <th scope="col">CVE ID</th>
+          <th scope="col">First reported</th>
+          <th scope="col">First exploit report</th>
+          <th scope="col">KEV added</th>
+          <th scope="col">Report → KEV</th>
+          <th scope="col">Exploit → KEV</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in crossings %}
+        <tr>
+          <td><a class="chip" href="kev/cves/{{ r.cve }}/">{{ r.cve }}</a></td>
+          <td>{{ r.first_reported[:10] or '—' }}</td>
+          <td>{{ r.first_exploit_report[:10] or '—' }}</td>
+          <td>{{ r.kev_date_added }}</td>
+          <td>{% if r.kev_delta_days is not none %}{{ r.kev_delta_days }}d{% else %}—{% endif %}</td>
+          <td>{% if r.exploit_to_kev_days is not none %}{{ r.exploit_to_kev_days }}d{% else %}—{% endif %}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endif %}
+
+<div class="filters" role="search" aria-label="Filter KEV candidates">
+  <label class="f-search">Search
+    <input id="f-q" type="search" placeholder="CVE ID" autocomplete="off">
+  </label>
+  <button class="chip active" data-filter="status" data-value="all" type="button">All</button>
+  <button class="chip" data-filter="status" data-value="exploited" type="button">Exploited</button>
+  <button class="chip" data-filter="status" data-value="suspected" type="button">Suspected</button>
+  <button class="chip" data-filter="status" data-value="" type="button">Unflagged</button>
+  <span class="f-count" id="f-count"></span>
+</div>
+
+<div class="table-scroll">
+  <table class="kev-table" id="cand-table">
+    <thead>
+      <tr>
+        <th data-key="id" scope="col">CVE ID</th>
+        <th data-key="firstExploit" scope="col">First exploit report</th>
+        <th data-key="firstReported" scope="col">First reported</th>
+        <th data-key="disclose" scope="col">Disclosed</th>
+        <th data-key="status" scope="col">Status</th>
+        <th data-key="stories" scope="col">Stories</th>
+        <th data-key="score" scope="col">Score</th>
+        <th data-key="analysis" scope="col">Analysis</th>
+      </tr>
+    </thead>
+    <tbody id="cand-tbody"></tbody>
+  </table>
+</div>
+
+<p class="no-results" id="no-results" hidden>No candidates match.</p>
+<nav class="pager" id="pager" aria-label="Pagination"></nav>
+
+<p class="kev-footnote">Exploitation flags come from the deterministic backfill (source "backfill") and the hourly triage gate (source "triage"). "First exploit report" = the earliest event claiming observed exploitation; it is a reporting date, not the true first exploitation. Disclosed = NVD published date. Crossed-over CVEs live in the <a href="kev/">KEV catalog</a>.</p>
+<script>
+(function () {
+  var ROWS = [];
+  var currentPage = 1, pageSize = 50, sortCol = 'firstExploit', sortAsc = false;
+  var filters = { status: 'all' };
+  var q = document.getElementById('f-q');
+  var tbody = document.getElementById('cand-tbody');
+  var count = document.getElementById('f-count');
+  var pager = document.getElementById('pager');
+  var noResults = document.getElementById('no-results');
+
+  function el(tag, text) {
+    var e = document.createElement(tag);
+    if (text != null) e.textContent = text;
+    return e;
+  }
+
+  function matches(r) {
+    if (filters.status !== 'all' && r.status !== filters.status) return false;
+    var query = q.value.toLowerCase().trim();
+    if (query && r.id.toLowerCase().indexOf(query) === -1) return false;
+    return true;
+  }
+
+  function sortVal(r, key) {
+    if (key === 'id') {
+      var m = /^CVE-(\d{4})-(\d+)$/.exec(r.id);
+      return m ? [parseInt(m[1], 10), parseInt(m[2], 10)] : [0, 0];
+    }
+    if (key === 'stories' || key === 'score') return Number(r[key]);
+    if (key === 'analysis') return r[key] ? 1 : 0;
+    return r[key] == null || r[key] === '' ? '\uffff' : String(r[key]);
+  }
+
+  function cmp(a, b) {
+    if (Array.isArray(a)) return (a[0] - b[0]) || (a[1] - b[1]);
+    if (typeof a === 'number') return a - b;
+    return a < b ? -1 : a > b ? 1 : 0;
+  }
+
+  function render() {
+    var data = ROWS.filter(matches);
+    count.textContent = data.length + ' of ' + ROWS.length + ' shown';
+    data.sort(function (a, b) { return sortAsc ? cmp(sortVal(a, sortCol), sortVal(b, sortCol)) : cmp(sortVal(b, sortCol), sortVal(a, sortCol)); });
+    var totalPages = Math.max(1, Math.ceil(data.length / pageSize));
+    if (currentPage > totalPages) currentPage = totalPages;
+    var start = (currentPage - 1) * pageSize;
+    var page = data.slice(start, start + pageSize);
+    noResults.hidden = data.length !== 0;
+    while (tbody.firstChild) tbody.removeChild(tbody.firstChild);
+    page.forEach(function (r) {
+      var tr = document.createElement('tr');
+      var idTd = el('td');
+      var a = el('a', r.id);
+      a.href = 'candidates/' + r.id + '/';
+      idTd.appendChild(a);
+      tr.appendChild(idTd);
+      tr.appendChild(el('td', r.firstExploit ? r.firstExploit.slice(0, 10) : '—'));
+      tr.appendChild(el('td', r.firstReported ? r.firstReported.slice(0, 10) : '—'));
+      tr.appendChild(el('td', r.disclose ? r.disclose.slice(0, 10) : '—'));
+      var st = el('td');
+      st.appendChild(el('span', r.status === 'exploited' ? 'Exploited' : r.status === 'suspected' ? 'Suspected' : ''));
+      if (r.status) st.firstChild.className = 'chip ' + (r.status === 'exploited' ? 'kev-status poc' : 'kev-status');
+      tr.appendChild(st);
+      tr.appendChild(el('td', String(r.stories)));
+      tr.appendChild(el('td', String(r.score)));
+      tr.appendChild(el('td', r.analysis ? 'yes' : ''));
+      tbody.appendChild(tr);
+    });
+    while (pager.firstChild) pager.removeChild(pager.firstChild);
+    function pageBtn(label, page, disabled, isCurrent) {
+      var b = el('button', label);
+      b.type = 'button';
+      b.className = 'page' + (isCurrent ? ' current' : '') + (disabled ? ' disabled' : '');
+      if (!disabled) b.addEventListener('click', function () { currentPage = page; render(); });
+      return b;
+    }
+    pager.appendChild(pageBtn('\u00ab', 1, currentPage === 1, currentPage === 1));
+    pager.appendChild(pageBtn('\u2039', Math.max(1, currentPage - 1), currentPage === 1, false));
+    var s = Math.max(1, currentPage - 2), e = Math.min(totalPages, currentPage + 2);
+    for (var i = s; i <= e; i++) pager.appendChild(pageBtn(String(i), i, false, i === currentPage));
+    pager.appendChild(pageBtn('\u203a', Math.min(totalPages, currentPage + 1), currentPage === totalPages, false));
+    pager.appendChild(pageBtn('\u00bb', totalPages, currentPage === totalPages, currentPage === totalPages));
+  }
+
+  document.querySelectorAll('[data-filter]').forEach(function (c) {
+    c.addEventListener('click', function () {
+      var f = c.getAttribute('data-filter'), v = c.getAttribute('data-value');
+      if (filters[f] === v) return;
+      filters[f] = v;
+      document.querySelectorAll('[data-filter="' + f + '"]').forEach(function (x) { x.classList.remove('active'); });
+      c.classList.add('active');
+      currentPage = 1;
+      render();
+    });
+  });
+  q.addEventListener('input', function () { currentPage = 1; render(); });
+  document.querySelectorAll('#cand-table th').forEach(function (th) {
+    th.addEventListener('click', function () {
+      var key = th.getAttribute('data-key');
+      if (sortCol === key) { sortAsc = !sortAsc; } else { sortCol = key; sortAsc = (key === 'stories' || key === 'score'); }
+      document.querySelectorAll('#cand-table th').forEach(function (x) { x.classList.remove('sorted'); x.classList.remove('desc'); });
+      th.classList.add('sorted');
+      if (!sortAsc) th.classList.add('desc');
+      render();
+    });
+  });
+  fetch('kev-candidates-index.json').then(function (r) { return r.json(); }).then(function (data) {
+    ROWS = data;
+    render();
+  }).catch(function () {
+    noResults.hidden = false;
+    noResults.textContent = 'Could not load the candidates index.';
+  });
+})();
+</script>
+{% endblock %}

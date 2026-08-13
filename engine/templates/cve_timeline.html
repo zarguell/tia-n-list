@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block title %}{{ rec.cve }} — KEV candidate timeline · Tia N. List{% endblock %}
+{% block meta %}
+<meta name="description" content="Timeline for {{ rec.cve }}: when it was disclosed, when Tia first reported it, when a report first claimed exploitation, and its KEV status.">
+<meta property="og:site_name" content="Tia N. List">
+<meta property="og:type" content="article">
+<meta property="og:title" content="{{ rec.cve }}">
+<meta property="og:url" content="{{ site_url('kev/candidates/' + rec.cve + '/') }}">
+{% endblock %}
+{% block content %}
+<p class="eyebrow">KEV candidates · per-CVE timeline</p>
+
+<div class="kev-hero">
+  <div class="kev-hero-id"><code>{{ rec.cve }}</code></div>
+  <div class="kev-hero-meta">
+    {% if rec.primary_title %}<span>{{ rec.primary_title }}</span>{% endif %}
+    {% if rec.disclose %} · <span>Disclosed {{ rec.disclose }}</span>{% endif %}
+  </div>
+  <div class="kev-hero-badges">
+    {% if rec.exploit_status == 'exploited' %}<span class="chip kev-status poc">Exploitation reported</span>{% endif %}
+    {% if rec.exploit_status == 'suspected' %}<span class="chip kev-status">Exploitation suspected</span>{% endif %}
+    <span class="chip kev-status kev">{{ 'On KEV' if rec.on_kev else 'KEV candidate' }}</span>
+  </div>
+</div>
+
+<section class="kev-panel">
+  <h2 class="kev-panel-title">Timeline</h2>
+  <ol class="timeline">
+    {% if rec.disclose %}
+    <li class="tl-item">
+      <span class="tl-dot" aria-hidden="true"></span>
+      <p class="tl-kind">disclosed</p>
+      <h3 class="tl-title">{{ rec.disclose }}</h3>
+      <p class="tl-source">CVE published by the CNA / NVD.{% if rec.gap_disclose_report is not none %} {{ rec.gap_disclose_report }} days before Tia's first report.{% endif %}</p>
+    </li>
+    {% endif %}
+    <li class="tl-item">
+      <span class="tl-dot" aria-hidden="true"></span>
+      <p class="tl-kind">first reported</p>
+      <h3 class="tl-title">{{ rec.first_reported[:10] or '—' }}</h3>
+      <p class="tl-source">Earliest Tia coverage — {{ rec.n_stories }} {{ 'story' if rec.n_stories == 1 else 'stories' }}.{% if rec.gap_report_exploit is not none %} {{ rec.gap_report_exploit }} days before the first exploitation report.{% endif %}</p>
+    </li>
+    <li class="tl-item">
+      <span class="tl-dot" aria-hidden="true"></span>
+      <p class="tl-kind">first exploitation report</p>
+      <h3 class="tl-title">{{ rec.first_exploit_report[:10] or 'not reported' }}</h3>
+      {% if rec.exploit_events %}
+      <p class="tl-source">Earliest event claiming observed exploitation — {{ rec.n_exploit_events }} flagged event{{ 's' if rec.n_exploit_events != 1 else '' }}, detailed below.{% if rec.gap_exploit_kev is not none %} {{ rec.gap_exploit_kev }} days before the KEV listing.{% endif %}</p>
+      {% else %}
+      <p class="tl-source">No report in Tia's store claims observed exploitation of this CVE yet.</p>
+      {% endif %}
+    </li>
+    <li class="tl-item">
+      <span class="tl-dot" aria-hidden="true"></span>
+      <p class="tl-kind">KEV added</p>
+      <h3 class="tl-title">{{ rec.kev_date_added or 'not yet' }}</h3>
+      <p class="tl-source">
+        {% if rec.on_kev %}CISA listed this CVE on the Known Exploited Vulnerabilities catalog.{% if rec.gap_report_kev is not none %} {{ rec.gap_report_kev }} days after Tia's first report.{% endif %}{% else %}Not on the CISA KEV catalog yet — this is a live candidate.{% endif %}
+      </p>
+    </li>
+  </ol>
+</section>
+
+{% if rec.exploit_events %}
+<section class="kev-panel">
+  <h2 class="kev-panel-title">Exploitation reports</h2>
+  <p class="kev-panel-sub">Events in the store flagged with an exploitation claim for this CVE (source: triage or deterministic backfill).</p>
+  {% for e in rec.exploit_events %}
+  <details class="kev-collapse" {% if loop.first %}open{% endif %}>
+    <summary><strong>{{ e.date[:10] }}</strong> · {{ e.source }}{% if e.status == 'suspected' %} · suspected{% endif %}{% if e.url %} · <a href="{{ e.url }}" target="_blank" rel="noopener noreferrer">source</a>{% endif %}</summary>
+    <p class="kev-desc">{{ e.evidence }}</p>
+  </details>
+  {% endfor %}
+</section>
+{% endif %}
+
+<section class="kev-panel">
+  <h2 class="kev-panel-title">Mentioned in</h2>
+  <p class="covered-list">
+    {% for s in rec.stories %}
+    <a class="chip covered" href="{{ s.url }}">{{ s.id }}{% if s.has_analysis %} · analyzed{% endif %}</a>
+    {% endfor %}
+  </p>
+</section>
+
+<p class="kev-footnote">"First exploitation report" is a reporting date, not the true first exploitation. Disclosed = NVD published date ({{ rec.disclose or 'unavailable' }}). Candidates move to the KEV catalog automatically when the kevrichment ingest picks up the CISA listing.</p>
+{% endblock %}

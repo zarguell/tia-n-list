@@ -257,9 +257,10 @@ def src_tag(value):
     return ""
 
 
-def cve_view(rec, mentioned):
+def cve_view(rec, mentioned, tia_timeline=None):
     """Precompute the detail-page context from a record. All strings here are
-    plain values; escaping happens in the template (autoescape)."""
+    plain values; escaping happens in the template (autoescape).
+    ``tia_timeline`` = cve_timeline row for the Tia-coverage panel, or None."""
     research = rec.get("kevrichment_research") or {}
     bod = rec.get("bod_26_04") or {}
     vuln = rec.get("vulnrichment") or {}
@@ -318,6 +319,39 @@ def cve_view(rec, mentioned):
         "summary": research.get("kevrichment_summary", ""),
         "qc": qc,
         "mentioned": mentioned,
+        "tia_timeline": tia_timeline,
+    }
+
+
+# ---------------------------------------------------------------------------
+# KEV candidates section (per-CVE timeline pages)
+# ---------------------------------------------------------------------------
+
+def candidate_view(row):
+    """Shape a cve_timeline row for cve_timeline.html (safe scalars only)."""
+    primary = row["stories"][0] if row["stories"] else {}
+    return {
+        "cve": row["cve"],
+        "exploit_status": row["exploit_status"],
+        "on_kev": row["on_kev"],
+        "disclose": row["disclose"] or "",
+        "first_reported": row["first_reported"],
+        "first_exploit_report": row["first_exploit_report"],
+        "kev_date_added": row["kev_date_added"],
+        "gap_disclose_report": row.get("gap_disclose_report"),
+        "gap_report_exploit": row.get("gap_report_exploit"),
+        "gap_exploit_kev": row.get("exploit_to_kev_days"),
+        "gap_report_kev": row.get("kev_delta_days"),
+        "n_stories": row["n_stories"],
+        "n_exploit_events": row["n_exploit_events"],
+        "primary_title": primary.get("title", ""),
+        "stories": [{"id": s["id"], "url": f"stories/{s['id']}/",
+                     "has_analysis": s["has_analysis"]} for s in row["stories"]],
+        "exploit_events": [{
+            "date": e["date"], "source": e["source"],
+            "url": e["url"] if safe_url(e["url"]) else "",
+            "status": e["status"], "evidence": e["evidence"],
+        } for e in row["exploit_events"]],
     }
 
 
@@ -355,13 +389,15 @@ def render_site(env, write, cards):
 
     # Per-CVE detail pages (the record is loaded from disk per entry; rows
     # already passed the shape gate, so the id is safe for path construction)
+    import cve_timeline as tl_mod
+    tl_rows = tl_mod.build()   # per-CVE timeline join for the Tia-coverage panel
     for r in rows:
         rec = load_cve(r["id"]) or {}
         if not rec:
             continue
         mentioned = [{"id": sid, "url": f"stories/{sid}/"}
                      for sid in sorted(cve_stories.get(r["id"], []))]
-        v = cve_view(rec, mentioned)
+        v = cve_view(rec, mentioned, tl_rows.get(r["id"]))
         write(f"kev/cves/{r['id']}/index.html",
               env.get_template("kev_cve.html").render(
                   active=None, rec=v, og_url=site_url(f"kev/cves/{r['id']}/")))
@@ -395,16 +431,49 @@ def render_site(env, write, cards):
         schema_version=sample.get("schema_version", "1.0"),
         sample_json=json.dumps(sample, indent=2, ensure_ascii=True)))
 
+    # KEV candidates section (/kev/candidates/) — deterministic per-CVE
+    # timeline join: story store + exploitation flags + NVD + KEV index.
+    # Candidates = CVEs we reported that the kevrichment KEV index lacks;
+    # crossings = recent KEV additions we reported (the time-to-KEV tracker).
+    cands = tl_mod.candidates(tl_rows)
+    crossings = tl_mod.crossings(tl_rows)
+    exploited_n = sum(1 for r in cands if r["exploit_status"] == "exploited")
+    suspected_n = sum(1 for r in cands if r["exploit_status"] == "suspected")
+    crossing_view = [{
+        "cve": r["cve"],
+        "first_reported": r["first_reported"][:10],
+        "first_exploit_report": r["first_exploit_report"][:10],
+        "kev_date_added": r["kev_date_added"],
+        "kev_delta_days": r["kev_delta_days"],
+        "exploit_to_kev_days": r["exploit_to_kev_days"],
+    } for r in crossings]
+    write("kev/candidates/kev-candidates-index.json",
+          json.dumps(tl_mod.index_rows(tl_rows), ensure_ascii=True))
+    write("kev/candidates/index.html",
+          env.get_template("kev_candidates.html").render(
+              active="kev", kev_section="candidates", og_url=site_url("kev/candidates/"),
+              exploited_n=exploited_n, suspected_n=suspected_n,
+              total_n=len(cands), crossings_n=len(crossings),
+              crossings=crossing_view,
+              generated=datetime.now(timezone.utc).date().isoformat()))
+    for r in cands:
+        v = candidate_view(r)
+        write(f"kev/candidates/{r['cve']}/index.html",
+              env.get_template("cve_timeline.html").render(
+                  active="kev", rec=v, og_url=site_url(f"kev/candidates/{r['cve']}/")))
+
     return total
 
 
 def kev_sitemap_entries(index, days=90):
     """(path, lastmod) pairs for the sitemap: section pages + CVE pages with
-    kev_date_added within the last `days` (bounded)."""
+    kev_date_added within the last `days` (bounded), plus the KEV-candidates
+    section and recently-flagged candidate timeline pages (bounded)."""
     from datetime import timedelta
     today = datetime.now(timezone.utc).date()
     cutoff = today - timedelta(days=days)
-    entries = [("kev/", ""), ("kev/pipeline.html", ""), ("kev/schema.html", "")]
+    entries = [("kev/", ""), ("kev/candidates/", ""),
+               ("kev/pipeline.html", ""), ("kev/schema.html", "")]
     for e in index.get("cves", []):
         c = gate_cve(e.get("cve_id"))
         added = fmt_date(e.get("kev_date_added"))
@@ -416,4 +485,18 @@ def kev_sitemap_entries(index, days=90):
             continue
         if d >= cutoff:
             entries.append((f"kev/cves/{c}/", added))
+    try:
+        import cve_timeline as tl_mod
+        for r in tl_mod.build().values():
+            if r["on_kev"] or not r["first_exploit_report"]:
+                continue
+            try:
+                d = datetime.fromisoformat(r["first_exploit_report"][:10]).date()
+            except ValueError:
+                continue
+            if d >= cutoff:
+                entries.append((f"kev/candidates/{r['cve']}/",
+                                r["first_exploit_report"][:10]))
+    except Exception:  # noqa: BLE001 — sitemap must never break the build
+        pass
     return entries

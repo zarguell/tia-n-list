@@ -7,4 +7,5 @@ PY=~/.local/venvs/tia-engine/bin/python
 $PY ingest.py "$@"
 $PY merge.py
 $PY test_sanitize.py
+$PY test_cve_timeline.py
 $PY ssg.py

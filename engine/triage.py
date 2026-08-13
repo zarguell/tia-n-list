@@ -15,9 +15,20 @@ judgment layer AT INGEST TIME:
 Decision format (data/triage/decisions-<date>.json):
   {"decisions": [
      {"event_id": "mf:159824", "action": "keep", "story": "<existing-slug>|NEW",
-      "story_title": "only when NEW", "reason": "optional"},
+      "story_title": "only when NEW", "reason": "optional",
+      "exploitation": {"CVE-2026-59310": {"status": "exploited|suspected",
+                                          "evidence": "1-2 sentence quote"}}},
      {"event_id": "mf:159825", "action": "drop", "reason": "press release, no substance"}],
    "merges": [{"from": "<slug>", "into": "<slug>"}]}
+
+  ``exploitation`` is OPTIONAL, only for events that name CVEs. Statuses:
+  exploited — the event reports OBSERVED in-the-wild exploitation (implants,
+  victim counts, campaigns, CISA KEV confirmation); suspected — public exploit
+  code/PoC or likely-but-unconfirmed exploitation. Attribute only the CVEs you
+  can actually tie to the claim (a bulletin's blanket "actively exploited"
+  does NOT flag all 200 CVEs). Omit the field entirely when the event makes no
+  exploitation claim. apply() persists it to the event json with
+  source="triage" (the deterministic backfill uses source="backfill").
 
 Merged-away stories keep their json with "merged_into" and empty events so old
 URLs and digest links resolve (ssg renders them as redirects); they are
@@ -116,10 +127,17 @@ def collect():
             "story id if it belongs there (this FIXES mechanical clustering — e.g. "
             "different outlets' Patch Tuesday roundups are ONE story), or NEW with a "
             "clean story_title. (3) merges: list candidate stories that are really "
-            "the same story (from = fragment, into = the most complete one)."),
+            "the same story (from = fragment, into = the most complete one). "
+            "(4) For every kept event that names CVEs, optionally assess exploitation: "
+            "exploited = the event reports OBSERVED in-the-wild exploitation (implants, "
+            "victim counts, campaigns, CISA KEV confirmation); suspected = public exploit "
+            "code/PoC or likely-but-unconfirmed. Attribute ONLY the CVEs you can tie to "
+            "the claim — a bulletin's blanket 'actively exploited' does NOT flag all its "
+            "CVEs. Omit the exploitation field when the event makes no claim."),
         "new_events": [{
             "id": e["id"], "title": e.get("title", ""),
             "source": e.get("source", ""), "published_at": e.get("published_at", ""),
+            "cves": e.get("cves", []),
             "snippet": (e.get("content_md") or "")[:220].replace("\n", " "),
         } for e in recent],
         "candidate_stories": [{
@@ -198,6 +216,22 @@ def apply(decisions_path):
         if d.get("action") != "keep":
             continue
         ev["excluded"] = False
+        # exploitation assessment (optional): per-CVE map, CVE_RE-gated,
+        # statuses whitelisted, source stamped so the backfill never overrides
+        ex = d.get("exploitation") or {}
+        assessed = {}
+        for c, f in ex.items():
+            if not re.fullmatch(r"CVE-\d{4}-\d{4,7}", c):
+                continue
+            if f.get("status") not in ("exploited", "suspected"):
+                continue
+            assessed[c] = {"status": f["status"],
+                           "evidence": str(f.get("evidence", ""))[:400],
+                           "source": "triage"}
+        if assessed:
+            ev["exploitation"] = assessed
+        elif "exploitation" in ev:
+            del ev["exploitation"]
         target = d.get("story")
         if not target or target == "NEW":
             title = d.get("story_title") or ev.get("title", "")

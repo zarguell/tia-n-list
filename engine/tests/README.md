@@ -1,6 +1,10 @@
 # Runtime verification tests
 
 - `test_sanitize.py` — sanitizer regression suite (runs in CI: `python engine/test_sanitize.py`).
+- `test_cve_timeline.py` — determinism tests for the KEV-candidates pipeline: the
+  exploitation backfill classifier (negation, roundup attribution, status tiers) and the
+  per-CVE timeline aggregation (min aggregation, merged-shell exclusion, signed KEV
+  deltas, build determinism). Runs in CI and run_engine.sh.
 - `verify-stories-all.js` — runs the SHIPPED all-stories inline script (extracted from the
   generated page) against a DOM with the real index data, stubbing fetch. Runs in CI
   (site-deploy.yml: setup-node + scratch-dir jsdom, after the build step) and locally:
@@ -12,3 +16,7 @@
   (fetches kev/kev-index.json, asserts hostile rows render as text only — no img/svg
   elements, no handlers fire, no data interpolation in the inline script). Same CI + local
   recipe as verify-stories-all.js. Re-run after editing the kev dashboard template.
+- `verify-candidates.js` — same contract as verify-kev.js for the KEV-candidates dashboard
+  (kev/candidates/): hostile-row text-only render, status-filter/search behavior, default
+  sort (first exploit report newest first), base-relative candidate links. Re-run after
+  editing kev_candidates.html.
