@@ -198,6 +198,22 @@ def test_coverage_without_exploitation_is_not_lead_time():
         assert "CVE-2026-59310" not in ix
 
 
+def test_suspected_only_is_excluded():
+    """Suspected (public PoC/exploit code) is NOT observed exploitation —
+    suspected-only CVEs are excluded from flagged() and the index (user
+    contract 2026-08-13: no first exploit report -> not on the page)."""
+    for rows in _rows():
+        r = rows["CVE-2026-59310"]
+        r["exploit_events"] = [e for e in r["exploit_events"]
+                               if e["status"] == "suspected"]
+        r["first_exploit_report"] = ""
+        r["exploit_status"] = "suspected"
+        r["exploit_to_kev_days"] = None
+        assert r not in tl.flagged(rows)
+        ix = {x["id"]: x for x in tl.index_rows(rows)}
+        assert "CVE-2026-59310" not in ix
+
+
 def test_determinism():
     a = [json.dumps(v, sort_keys=True) for v in _rows()]
     b = [json.dumps(v, sort_keys=True) for v in _rows()]

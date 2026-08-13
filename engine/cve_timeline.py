@@ -239,9 +239,11 @@ def crossings(rows, days=30, today=None):
 
 
 def flagged(rows):
-    """Rows with an exploitation flag (exploited or suspected) — the page's
-    inclusion gate: CVEs merely mentioned in patch records are excluded."""
-    return [r for r in rows.values() if r["exploit_status"]]
+    """Rows with an OBSERVED-exploitation flag — the page's inclusion gate.
+    "suspected" (public PoC/exploit code) is not exploitation: CVEs with no
+    first exploit report are excluded (patch-record mentions and suspected-only
+    rows are clutter)."""
+    return [r for r in rows.values() if r["exploit_status"] == "exploited"]
 
 
 def index_rows(rows):
