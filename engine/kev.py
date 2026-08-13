@@ -341,7 +341,6 @@ def candidate_view(row):
         "gap_disclose_report": row.get("gap_disclose_report"),
         "gap_report_exploit": row.get("gap_report_exploit"),
         "gap_exploit_kev": row.get("exploit_to_kev_days"),
-        "gap_report_kev": row.get("kev_delta_days"),
         "n_stories": row["n_stories"],
         "n_exploit_events": row["n_exploit_events"],
         "primary_title": primary.get("title", ""),
@@ -441,11 +440,10 @@ def render_site(env, write, cards):
     suspected_n = sum(1 for r in cands if r["exploit_status"] == "suspected")
     on_kev_n = sum(1 for r in tl_rows.values() if r["on_kev"])
     crossing_view = [{
-        "cve": r["cve"],
+        "cve": r["cve"], "name": r["name"],
         "first_reported": r["first_reported"][:10],
         "first_exploit_report": r["first_exploit_report"][:10],
         "kev_date_added": r["kev_date_added"],
-        "kev_delta_days": r["kev_delta_days"],
         "exploit_to_kev_days": r["exploit_to_kev_days"],
     } for r in crossings]
     write("kev/candidates/kev-candidates-index.json",

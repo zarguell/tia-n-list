@@ -176,6 +176,26 @@ def test_build_kev_crossing_delta_signed():
                                                 today="2026-08-13")] == ["CVE-2026-59310"]
 
 
+def test_coverage_without_exploitation_is_not_lead_time():
+    """The user contract (2026-08-13): coverage timing must never be presented
+    as exploitation lead time. A CVE we reported but never flagged exploited
+    has kev_delta_days (a coverage fact) but exploit_to_kev_days = None — the
+    only lead-time metric, and it must be absent."""
+    for rows in _rows():
+        r = rows["CVE-2026-59310"]
+        r["on_kev"] = True
+        r["kev_date_added"] = "2026-08-09"
+        r["kev_delta_days"] = tl._days_between("2026-07-30T00:00:00Z", "2026-08-09")
+        r["exploit_events"] = []          # strip the exploitation flags
+        r["first_exploit_report"] = ""
+        r["exploit_status"] = None
+        r["exploit_to_kev_days"] = None
+        assert r["kev_delta_days"] == 10
+        assert r["exploit_to_kev_days"] is None
+        ix = {x["id"]: x for x in tl.index_rows(rows)}
+        assert ix["CVE-2026-59310"]["exploitToKev"] is None
+
+
 def test_determinism():
     a = [json.dumps(v, sort_keys=True) for v in _rows()]
     b = [json.dumps(v, sort_keys=True) for v in _rows()]

@@ -45,7 +45,7 @@
       <p class="tl-kind">first exploitation report</p>
       <h3 class="tl-title">{{ rec.first_exploit_report[:10] or 'not reported' }}</h3>
       {% if rec.exploit_events %}
-      <p class="tl-source">Earliest event claiming observed exploitation — {{ rec.n_exploit_events }} flagged event{{ 's' if rec.n_exploit_events != 1 else '' }}, detailed below.{% if rec.gap_exploit_kev is not none %} {{ rec.gap_exploit_kev }} days before the KEV listing.{% endif %}</p>
+      <p class="tl-source">Earliest event claiming observed exploitation — {{ rec.n_exploit_events }} flagged event{{ '' if rec.n_exploit_events == 1 else 's' }}, detailed below.{% if rec.gap_exploit_kev is not none %} {% if rec.gap_exploit_kev >= 0 %}{{ rec.gap_exploit_kev }} days before the KEV listing{% else %}{{ -rec.gap_exploit_kev }} days after the KEV listing{% endif %}.{% endif %}</p>
       {% else %}
       <p class="tl-source">No report in Tia's store claims observed exploitation of this CVE yet.</p>
       {% endif %}
@@ -55,7 +55,7 @@
       <p class="tl-kind">KEV added</p>
       <h3 class="tl-title">{{ rec.kev_date_added or 'not yet' }}</h3>
       <p class="tl-source">
-        {% if rec.on_kev %}CISA listed this CVE on the Known Exploited Vulnerabilities catalog.{% if rec.gap_report_kev is not none %} {{ rec.gap_report_kev }} days after Tia's first report.{% endif %}{% else %}Not on the CISA KEV catalog yet — this is a live candidate.{% endif %}
+        {% if rec.on_kev %}CISA listed this CVE on the Known Exploited Vulnerabilities catalog.{% if rec.gap_exploit_kev is not none %} {% if rec.gap_exploit_kev >= 0 %}{{ rec.gap_exploit_kev }} days after the first exploitation report{% else %}{{ -rec.gap_exploit_kev }} days before the first exploitation report{% endif %}.{% elif rec.first_reported %} Tia had covered it (first reported {{ rec.first_reported[:10] }}) but had no exploitation reporting — no lead time to claim.{% endif %}{% else %}Not on the CISA KEV catalog yet — this is a live candidate.{% endif %}
       </p>
     </li>
   </ol>

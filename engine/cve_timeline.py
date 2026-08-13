@@ -12,7 +12,9 @@ one row per CVE that appears in the story store:
     disclose            NVD published date (or kevrichment cve_published)
     on_kev              bool — present in the kevrichment KEV index
     kev_date_added      YYYY-MM-DD when on KEV
-    kev_delta_days      signed days (KEV added - first_reported)
+    kev_delta_days      signed days (KEV added - first_reported); COVERAGE
+                        timing only — never presented as exploitation lead
+                        time (see exploit_to_kev_days)
     exploit_to_kev_days signed days (KEV added - first exploit report)
     status              "on-kev" | "candidate"
     exploit_status      "exploited" | "suspected" | None (flag presence)
