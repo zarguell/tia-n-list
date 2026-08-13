@@ -22,14 +22,13 @@ logsource:
 detection:
     selection_dlock:
         TargetFilename|endswith: '.dlock'
-    selection_note:
-        TargetFilename|endswith:
-            - 'HOW_RECOVER.txt'
-            - 'HOW_RECOVER.00000000.txt'
-            - 'RECOVERY_CHAT.html'
-            - 'RECOVERY_CHAT.00000000.html'
+    selection_note_txt:
         TargetFilename|contains: 'HOW_RECOVER.'
-    condition: selection_dlock or selection_note
+        TargetFilename|endswith: '.txt'
+    selection_note_html:
+        TargetFilename|contains: 'RECOVERY_CHAT.'
+        TargetFilename|endswith: '.html'
+    condition: selection_dlock or selection_note_txt or selection_note_html
 falsepositives:
     - Files legitimately using a .dlock extension outside this campaign (rare); corroborate with encryption behavior and ransom notes
     - Development or decoy files named HOW_RECOVER/RECOVERY_CHAT; validate against adjacent encryption activity
@@ -57,14 +56,15 @@ logsource:
     category: network_connection
     product: windows
 detection:
-    selection:
+    selection_domains:
         DestinationHostname|endswith:
             - 'deadlock.liveblog365.com'
             - 'dlock.liveblog365.com'
             - 'deadlockblog.great-site.net'
             - 'deadlockblog.medianewsonline.com'
+    selection_onion:
         DestinationHostname|contains: 'deadblogdbdu5wprek7wa2o4ce7rnt6u6ntqeud3hzjjcveosgpsqqqd'
-    condition: selection
+    condition: 1 of selection_*
 falsepositives:
     - None known; these domains are unique to the DeadLock leak-site infrastructure and are not legitimate services
 level: high
