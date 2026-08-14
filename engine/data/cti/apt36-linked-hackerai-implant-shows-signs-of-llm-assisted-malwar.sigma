@@ -1,0 +1,28 @@
+title: APT36 HACKERAI Campaign Delivery Executable
+id: f8365f53-ac9b-43e5-bbed-8bc617847c3c
+status: experimental
+description: >
+    Detects execution of TMS_AfghanTelecom.exe, the malicious Inno Setup
+    package used by the APT36-linked PATCHCORD/SHEETCORD/HACKERAI campaign
+    against Afghan telecom providers (Aug 2026). The installer was distributed
+    inside a ZIP archive masquerading as Afghan Telecom telecom-management
+    software and leads to implant execution and C2 beaconing.
+references:
+    - https://cyberpress.org/apt36-hackerai-llm-assisted-implant/
+    - https://gbhackers.com/patchcord-infrastructure-hosts-supershell/
+author: Tia N. List
+date: 2026/08/14
+tags:
+    - attack.t1204
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_installer:
+        Image|endswith: '\TMS_AfghanTelecom.exe'
+    condition: selection_installer
+falsepositives:
+    - Legitimate Afghan Telecom-branded management software using the same
+      installer name is not known; verify the binary origin and Inno Setup
+      payload behavior before escalating
+level: high
