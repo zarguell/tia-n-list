@@ -268,8 +268,11 @@ def apply(decisions_path):
                 changed = _absorb(stories[target], ev, "update")
                 if changed:
                     ev["kind"] = "update"
-                    _write_event(ev)
                     moved += 1
+                # Always persist: exploitation assessments and the excluded
+                # flag must survive even when the event was already placed in
+                # the target story (e.g. by the mechanical merge).
+                _write_event(ev)
 
     # story merges: move all events from -> into, mark from as merged_into
     for m in dec.get("merges", []):
