@@ -49,6 +49,25 @@ const later = ms => new Promise(r => setTimeout(r, ms));
   out.hotFirst = d.querySelector('.story-card h3 a')?.textContent.slice(0, 45);
   out.hotScore = d.querySelector('.story-card')?.dataset.score;
   out.hotUrl = window.location.pathname + window.location.search;
+  // chip trim: the rendered first card's chip count must match the data
+  // contract — 2 sources + 2 CVEs max, "+N more" chips, KEV badge, reddit
+  out.chipTrimOK = false;
+  const fc = d.querySelector('.story-card');
+  if (fc) {
+    const fe = index.find(e => e.score === Number(fc.dataset.score) &&
+                              e.last_seen === fc.dataset.lastseen);
+    if (fe) {
+      const chips = [...fc.querySelectorAll('.meta .chip')];
+      const moreChips = chips.filter(c => /^\+\d+ more$/.test(c.textContent));
+      const expChips = Math.min(2, fe.sources.length) + Math.min(2, fe.cves.length)
+        + (fe.sources.length > 2 ? 1 : 0) + (fe.cves.length > 2 ? 1 : 0)
+        + ((fe.kev_cves && fe.kev_cves.length) ? 1 : 0) + (fe.reddit ? 1 : 0);
+      const expMore = (fe.sources.length > 2 ? 1 : 0) + (fe.cves.length > 2 ? 1 : 0);
+      out.chipCount = chips.length;
+      out.chipCountExpected = expChips;
+      out.chipTrimOK = chips.length === expChips && moreChips.length === expMore;
+    }
+  }
   // pager page 2
   const p2 = d.querySelector('#pager a[data-page="2"]');
   out.hasPager = !!p2;

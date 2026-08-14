@@ -103,13 +103,26 @@
 
     var meta = document.createElement('div');
     meta.className = 'meta';
-    s.sources.forEach(function (src) {
+    (s.card_sources || s.sources || []).slice(0, 2).forEach(function (src) {
       var c = document.createElement('span');
       c.className = 'chip';
       c.textContent = src;
       meta.appendChild(c);
     });
-    s.cves.forEach(function (cve) {
+    var sm = (s.sources || []).length - 2;
+    if (sm > 0) {
+      var mc = document.createElement('span');
+      mc.className = 'chip more';
+      mc.textContent = '+' + sm + ' more';
+      mc.title = sm + ' more outlets';
+      meta.appendChild(mc);
+    }
+    var kevFirst = (s.cves || []).slice().sort(function (a, b) {
+      var ka = s.kev_cves && s.kev_cves.indexOf(a) !== -1 ? 0 : 1;
+      var kb = s.kev_cves && s.kev_cves.indexOf(b) !== -1 ? 0 : 1;
+      return ka - kb;
+    });
+    (s.card_cves || kevFirst).slice(0, 2).forEach(function (cve) {
       var linked = s.kev_cves && s.kev_cves.indexOf(cve) !== -1;
       var c = document.createElement(linked ? 'a' : 'span');
       c.className = linked ? 'chip cve linked' : 'chip cve';
@@ -117,6 +130,14 @@
       if (linked) c.href = 'kev/cves/' + cve + '/';
       meta.appendChild(c);
     });
+    var cm = (s.cves || []).length - 2;
+    if (cm > 0) {
+      var cc = document.createElement('span');
+      cc.className = 'chip more';
+      cc.textContent = '+' + cm + ' more';
+      cc.title = cm + ' more CVEs';
+      meta.appendChild(cc);
+    }
     if (s.kev_cves && s.kev_cves.length) {
       var kb = document.createElement('span');
       kb.className = 'chip kev';

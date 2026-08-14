@@ -313,6 +313,15 @@ def load_stories(events):
     kev_ids = kev_mod.kev_id_set()
     for c in cards:
         c["kev_cves"] = [x for x in c["cves"] if kev_mod.gate_cve(x) in kev_ids]
+        # card chip rows are trimmed for the grid: 2 outlets + "+N more";
+        # KEV CVEs first, 2 shown + "+N more". Full lists stay on c["sources"]
+        # / c["cves"] (story page + all-stories search keep everything).
+        c["card_sources"] = c["sources"][:2]
+        c["sources_more"] = max(0, len(c["sources"]) - 2)
+        kev_first = [x for x in c["cves"] if x in c["kev_cves"]] + \
+                    [x for x in c["cves"] if x not in c["kev_cves"]]
+        c["card_cves"] = kev_first[:2]
+        c["cves_more"] = max(0, len(c["cves"]) - 2)
     return sorted(cards, key=lambda c: c["score"], reverse=True)
 
 
@@ -753,6 +762,8 @@ def main():
         "reddit": c.get("reddit") or 0, "last_seen_human": c.get("last_seen_human", ""),
         "snippet": c["snippet"][:220], "sources": c["sources"], "cves": c["cves"],
         "kev_cves": c.get("kev_cves", []),
+        "card_sources": c["card_sources"], "sources_more": c["sources_more"],
+        "card_cves": c["card_cves"], "cves_more": c["cves_more"],
     } for c in cards]))
 
     for c in cards:

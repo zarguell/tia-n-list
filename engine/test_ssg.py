@@ -51,9 +51,9 @@ def main():
         ssg.STORIES_DIR = stories_dir
         ssg.ANALYSIS_DIR = analysis_dir
 
-        def story(sid):
-            st = {"id": sid, "title": sid.replace("-", " "), "sources": ["example.com"],
-                  "cves": [], "score": 6.0, "last_seen": "2026-08-14T12:00:00Z",
+        def story(sid, sources=("example.com",), cves=()):
+            st = {"id": sid, "title": sid.replace("-", " "), "sources": list(sources),
+                  "cves": list(cves), "score": 6.0, "last_seen": "2026-08-14T12:00:00Z",
                   "events": [{"event_id": f"e-{sid}"}]}
             with open(os.path.join(stories_dir, sid + ".json"), "w") as f:
                 json.dump(st, f)
@@ -112,6 +112,45 @@ def main():
         ok &= check("all-stories index snippet is the analysis text",
                     c["snippet"][:220].startswith("Sentence 0"), True,
                     f"head={c['snippet'][:60]!r}")
+
+        # 5. chip rows trimmed for the grid: 2 outlets + "+N more"; KEV CVEs
+        # first, 2 shown + "+N more"; the KEV badge reflects the FULL kev set
+        import kev as kev_mod
+        kev_dir = os.path.join(tmp, "kev")
+        os.makedirs(kev_dir)
+        with open(os.path.join(kev_dir, "index.json"), "w") as f:
+            json.dump({"cves": [{"cve_id": "CVE-2026-68820"}]}, f)
+        saved_kev_dir = kev_mod.KEV_DIR
+        kev_mod.KEV_DIR = kev_dir
+        try:
+            story("chip-trim",
+                  sources=("tenable.com", "securityweek.com", "malware.news",
+                           "bleepingcomputer.com", "krebsonsecurity.com"),
+                  cves=("CVE-2026-55040", "CVE-2026-68820",
+                        "CVE-2026-70329", "CVE-2026-63520"))
+            events["e-chip-trim"] = ev("e-chip-trim", text="Event body.")
+            c = card("chip-trim", events)
+            ok &= check("sources capped at 2", c["card_sources"],
+                        ["tenable.com", "securityweek.com"])
+            ok &= check("sources_more count", c["sources_more"], 3)
+            ok &= check("KEV CVE first in card_cves", c["card_cves"],
+                        ["CVE-2026-68820", "CVE-2026-55040"])
+            ok &= check("cves_more count", c["cves_more"], 2)
+            ok &= check("KEV badge uses full kev set", c["kev_cves"],
+                        ["CVE-2026-68820"])
+            # edge: exactly 2 sources / 1 CVE -> no more-chips
+            story("chip-edge", sources=("a.com", "b.com"),
+                  cves=("CVE-2026-00001",))
+            events["e-chip-edge"] = ev("e-chip-edge", text="Event body.")
+            c = card("chip-edge", events)
+            ok &= check("2 sources no more-chip",
+                        (c["card_sources"], c["sources_more"]),
+                        (["a.com", "b.com"], 0))
+            ok &= check("1 cve no more-chip",
+                        (c["card_cves"], c["cves_more"]),
+                        (["CVE-2026-00001"], 0))
+        finally:
+            kev_mod.KEV_DIR = saved_kev_dir
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
 
