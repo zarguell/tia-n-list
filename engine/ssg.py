@@ -44,6 +44,7 @@ EVENTS_DIR = os.path.join(ENGINE, "data", "events")
 STORIES_DIR = os.path.join(ENGINE, "data", "stories")
 DIGESTS_DIR = os.path.join(ENGINE, "data", "digests")
 CTI_DIR = os.path.join(ENGINE, "data", "cti")
+ANALYSIS_DIR = os.path.join(ENGINE, "data", "analysis")
 
 # bleach allowlist for article/analysis/digest bodies (the ONLY |safe renders).
 # Tags/attrs/protocols here are the complete set that survives sanitize().
@@ -226,6 +227,32 @@ def delta_body(events):
     return out
 
 
+def _card_snippet(st, original):
+    """Story-card snippet, analysis-preferred.
+
+    The card on / (hot) and /stories/ (all) used to show the FIRST ORIGINAL
+    EVENT's auto-extracted body. Sites that strip article bodies (e.g. the
+    GeoServer zero-day story's original event is a bare "\\n") rendered
+    literally nothing even when an analyst-written analysis existed — and when
+    we DID write an analysis it is a better summary than any extracted body.
+    So: analysis file exists and has text -> snippet from it (trimmed at a
+    sentence boundary, never mid-sentence); otherwise the old event fallback.
+    """
+    ap = os.path.join(ANALYSIS_DIR, st["id"] + ".md")
+    if os.path.exists(ap):
+        plain = md_text(open(ap).read())
+        if plain:
+            if len(plain) <= 600:
+                return plain
+            out = ""
+            for sent in SENT_SPLIT.split(plain):
+                if out and len(out) + len(sent) + 1 > 600:
+                    break
+                out = f"{out} {sent}".strip()
+            return out or plain[:600]
+    return md_snippet(original["content_md"])
+
+
 def load_stories(events):
     cards = []
     max_score = 1
@@ -248,7 +275,7 @@ def load_stories(events):
             "id": st["id"],
             "title": st["title"],
             "url": f"stories/{st['id']}/",
-            "snippet": md_snippet(original["content_md"]),
+            "snippet": _card_snippet(st, original),
             "sources": src_domains,
             "cves": st.get("cves", []),
             "score": st.get("score", 0),
