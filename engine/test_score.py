@@ -78,13 +78,13 @@ def main():
                   evs_max, iso(0.1))
 
     # --- contracts ----------------------------------------------------
-    r1 = score.hot_score(s_traction, {e["event_id"]: e for e in evs_traction}, [])
+    r1 = score.hot_score(s_traction, {e["event_id"]: e for e in evs_traction}, [], now=base)
     ok &= check("traction-only is NOT hot (< 5.0)",
                 r1["score"] < 5.0, True)
     ok &= check("traction-only severity sits at the 0.5 floor",
                 r1["severity"], 0.5)
 
-    r2 = score.hot_score(s_severe, {e["event_id"]: e for e in evs_severe}, [])
+    r2 = score.hot_score(s_severe, {e["event_id"]: e for e in evs_severe}, [], now=base)
     ok &= check("same traction + severe CVE IS hot (>= 5.0)",
                 r2["score"] >= 5.0, True)
     ok &= check("severity factor caps at 5.0",
@@ -93,7 +93,7 @@ def main():
                 r2["breadth"] <= 2.0, True)
 
     # maxed story breaks the old 6.0 cap and respects the new 10.0 one
-    r3 = score.hot_score(s_max, {e["event_id"]: e for e in evs_max}, [])
+    r3 = score.hot_score(s_max, {e["event_id"]: e for e in evs_max}, [], now=base)
     ok &= check("maxed story exceeds the old 6.0 cap",
                 r3["score"] > 6.0, True)
     ok &= check("10.0 cap holds",
