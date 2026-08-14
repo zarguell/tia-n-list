@@ -6,10 +6,31 @@ is a coverage-delta brief, not a "today's articles" dump:
 
 - YESTERDAY'S COVERAGE — the stories the last digest actually discussed
   (baseline for one-line [UPDATE] deltas).
-- EVOLVED — live stories with new events or a fresh analysis since the last
-  digest, ranked by score.
+- EVOLVED — live stories with a genuine development since the last digest,
+  ranked by score.
 - UNCOVERED — hot stories (score >= ANALYSIS_GATE) not covered in the last
   COVERAGE_WINDOW digests (never covered, or not since).
+
+WHAT COUNTS AS A DEVELOPMENT (the "is this actually new?" check):
+
+A story evolves only when something *happened* since the last digest boundary:
+a new event that is a genuine development, or a CISA KEV add. Two freshness
+traps are handled deterministically:
+
+1. RECAP ARTICLES: outlets re-report older developments for days. An event is
+   a recap — not a development — when the story is KEV-anchored, the event
+   explicitly mentions the KEV catalog, and it was published >= RECAP_DAYS
+   after the CVE's `dateAdded`. Its development date collapses to the KEV add
+   date, so a recap can never re-evolve a story or extend its freshness.
+2. ANALYSIS MARKERS: `analysis.updated_at` churns whenever the hourly engine
+   touches a story (including recap-driven rewrites), so it is NOT a
+   development signal. It stays visible as substance, but does not evolve a
+   story.
+
+Per story the brief emits `dev=` (newest genuine development date) and a
+CATCH-UP flag: hot stories whose newest development is >= CATCHUP_DAYS old
+have nothing new for today and must not be headlined as if they do (e.g. a
+"winsock added to the KEV" headline three days after CISA listed it).
 
 Coverage history is read from data/digests/*.json `stories` arrays (new-format
 digests starting 2026-08-12) UNION `stories/<slug>/` links in the .md
@@ -19,65 +40,93 @@ resolve to their canonical story so a digest never links a redirect.
 Output: the brief on stdout (what the digest agent reads), machine-readable
 JSON at data/digest-candidates.json (gitignored).
 
-Usage: python3 digest_candidates.py [--date YYYY-MM-DD]
+Usage: python3 digest_candidates.py [--date YYYY-MM-DD] [--kev-data DIR]
 """
 import argparse
 import glob
 import json
 import os
 import re
-from datetime import datetime, timezone
+from datetime import datetime, time, timezone
 
 ENGINE = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(ENGINE, "data")
 STORIES_DIR = os.path.join(DATA, "stories")
 EVENTS_DIR = os.path.join(DATA, "events")
 DIGESTS_DIR = os.path.join(DATA, "digests")
+KEV_DATA_DIR = os.path.normpath(os.path.join(ENGINE, "..", "kevrichment", "data"))
 OUT_JSON = os.path.join(DATA, "digest-candidates.json")
 
 ANALYSIS_GATE = 3.3  # merge.py's analysis-queue threshold on the 0-10 scale (was 2.0); the digest's coverage bar
 COVERAGE_WINDOW = 3  # a story covered within the last N digests counts as covered
+RECAP_DAYS = 2       # an event about a KEV add published >= N days after the add is a recap, not a development
+CATCHUP_DAYS = 2     # newest genuine development >= N days before the digest date -> CATCH-UP (nothing new)
 
 STORY_LINK_RE = re.compile(r"stories/([a-z0-9][a-z0-9-]*)/?")
+CVE_RE = re.compile(r"^CVE-\d{4}-\d{4,7}$")
+KEV_RE = re.compile(r"\bKEV\b|Known Exploited Vulnerabilit", re.IGNORECASE)
 
 
 def parse_utc(iso):
     return datetime.fromisoformat(iso.replace("Z", "+00:00")).astimezone(timezone.utc)
 
 
-def load_stories():
+def load_stories(stories_dir=STORIES_DIR):
     out = {}
-    for f in glob.glob(os.path.join(STORIES_DIR, "*.json")):
+    for f in glob.glob(os.path.join(stories_dir, "*.json")):
         s = json.load(open(f))
         out[s["id"]] = s
     return out
 
 
-def load_events():
+def load_events(events_dir=EVENTS_DIR):
     """Event meta keyed by event_id (file basename == the id, e.g. mf:160047)."""
     out = {}
-    for f in glob.glob(os.path.join(EVENTS_DIR, "*.json")):
+    for f in glob.glob(os.path.join(events_dir, "*.json")):
         eid = os.path.splitext(os.path.basename(f))[0]
         out[eid] = json.load(open(f))
     return out
 
 
-def digest_dates():
+def digest_dates(digests_dir=DIGESTS_DIR):
     return sorted(os.path.splitext(os.path.basename(f))[0]
-                  for f in glob.glob(os.path.join(DIGESTS_DIR, "*.json")))
+                  for f in glob.glob(os.path.join(digests_dir, "*.json")))
 
 
-def load_coverage(stories, canonical):
+def kev_date_map(kev_data_dir):
+    """cve_id -> kev_date_added (date) for KEV-listed CVEs, from the kevrichment
+    index (the same source kev.py renders). Missing dir/index -> {}."""
+    out = {}
+    path = os.path.join(kev_data_dir, "index.json")
+    if not os.path.exists(path):
+        return out
+    try:
+        idx = json.load(open(path))
+    except (OSError, ValueError):
+        return out
+    for e in idx.get("cves", []):
+        cid = e.get("cve_id")
+        added = e.get("kev_date_added")
+        if (isinstance(cid, str) and CVE_RE.match(cid)
+                and isinstance(added, str) and added):
+            try:
+                out[cid] = datetime.fromisoformat(added).date()
+            except ValueError:
+                pass
+    return out
+
+
+def load_coverage(stories, canonical, digests_dir=DIGESTS_DIR):
     """slug -> last digest date that covered it (json stories array ∪ .md links).
 
     Every covered slug resolves through `canonical` so a digest that linked a
     pre-merge shell still credits the live story it merged into (coverage
     tracking survives triage merges)."""
-    dates = digest_dates()
+    dates = digest_dates(digests_dir)
     covered = {}  # slug -> date
     for d in dates:
-        jpath = os.path.join(DIGESTS_DIR, d + ".json")
-        mpath = os.path.join(DIGESTS_DIR, d + ".md")
+        jpath = os.path.join(digests_dir, d + ".json")
+        mpath = os.path.join(digests_dir, d + ".md")
         slugs = set()
         try:
             slugs.update(json.load(open(jpath)).get("stories", []))
@@ -90,9 +139,99 @@ def load_coverage(stories, canonical):
     return covered
 
 
+def _is_kev_recap(event, kev_added):
+    """True when the event is an outlet re-report of an older KEV add: the story
+    is KEV-anchored, the event text mentions the KEV catalog, and it was
+    published >= RECAP_DAYS after the add. Recaps are not developments."""
+    if kev_added is None:
+        return False
+    try:
+        pub = parse_utc(event["published_at"]).date()
+    except (KeyError, ValueError):
+        return False
+    if (pub - kev_added).days < RECAP_DAYS:
+        return False
+    text = (event.get("title") or "") + " " + (event.get("content_md") or "")
+    return bool(KEV_RE.search(text))
+
+
+def build_rows(stories, events, kev_map, coverage, canonical, since, recent_cutoff, today, last_digest):
+    """Per-story rows with the freshness check. `today` = digest date (str)."""
+    today_d = parse_utc(today + "T00:00:00Z").date()
+    rows = []
+    for slug, s in stories.items():
+        if s.get("merged_into"):
+            continue  # redirect shells are never digest candidates
+        cves = [c for c in s.get("cves", []) if isinstance(c, str)]
+        kev_added = max((kev_map[c] for c in cves if c in kev_map), default=None)
+        kev_dt = (datetime.combine(kev_added, time.min, tzinfo=timezone.utc)
+                  if kev_added is not None else None)
+
+        ev_dates = []   # raw article publish dates (display)
+        dev_dates = []  # genuine development dates (recaps collapsed to the KEV add)
+        for ref in s.get("events", []):
+            e = events.get(ref["event_id"])
+            if not e or not e.get("published_at"):
+                continue
+            try:
+                pub = parse_utc(e["published_at"])
+            except ValueError:
+                continue
+            ev_dates.append(pub)
+            if _is_kev_recap(e, kev_added):
+                dev_dates.append(kev_dt)
+            else:
+                dev_dates.append(pub)
+        if kev_dt is not None:
+            dev_dates.append(kev_dt)  # the KEV add itself is a development
+
+        new_events = sum(1 for dt in dev_dates if dt > since)
+        an = s.get("analysis") or {}
+        an_at = parse_utc(an["updated_at"]) if an.get("updated_at") else None
+        evolved = new_events > 0  # developments only; article dates + analysis churn don't evolve
+
+        newest_dev = max(dev_dates) if dev_dates else None
+        stale_days = (today_d - newest_dev.date()).days if newest_dev is not None else None
+        catchup = stale_days is not None and stale_days >= CATCHUP_DAYS
+
+        last_covered = coverage.get(slug)
+        covered_recently = last_covered is not None and last_covered >= recent_cutoff
+        if last_covered is None:
+            tag = "NEW"
+        elif last_covered == last_digest:
+            tag = "UPDATE"
+        elif covered_recently:
+            tag = "REVISIT"
+        else:
+            tag = "REVISIT"
+        rows.append({
+            "slug": slug,
+            "title": s.get("title", ""),
+            "score": s.get("score", 0.0),
+            "hot": s.get("score", 0.0) >= ANALYSIS_GATE,
+            "n_events": len(ev_dates),
+            "new_events_since": new_events,
+            "newest_event_at": max(ev_dates).strftime("%Y-%m-%d") if ev_dates else None,
+            "newest_development_at": newest_dev.strftime("%Y-%m-%d") if newest_dev else None,
+            "stale_days": stale_days,
+            "catchup": catchup,
+            "kev_added": kev_added.isoformat() if kev_added else None,
+            "has_analysis": an_at is not None,
+            "analysis_at": an_at.strftime("%Y-%m-%d") if an_at else None,
+            "last_covered": last_covered,
+            "covered_recently": covered_recently,
+            "tag": tag,
+            "evolved": evolved,
+            "n_sources": s.get("n_sources", 0),
+            "cves": cves,
+        })
+    return rows
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--date", default=None, help="digest date (default: today UTC)")
+    ap.add_argument("--kev-data", default=KEV_DATA_DIR, help="kevrichment data dir (index.json)")
     args = ap.parse_args()
     today = args.date or datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
@@ -107,6 +246,7 @@ def main():
 
     stories = load_stories()
     events = load_events()
+    kev_map = kev_date_map(args.kev_data)
 
     # canonical resolution: shell -> story it merged into
     def canonical(slug, seen=None):
@@ -122,56 +262,23 @@ def main():
     # yesterday's coverage = canonical slugs whose last covered date is the last digest
     yesterday = {slug for slug, d in coverage.items() if d == last_digest}
 
-    # per-story signals
-    rows = []
-    for slug, s in stories.items():
-        if s.get("merged_into"):
-            continue  # redirect shells are never digest candidates
-        ev_dates = []
-        for ref in s.get("events", []):
-            e = events.get(ref["event_id"])
-            if e and e.get("published_at"):
-                try:
-                    ev_dates.append(parse_utc(e["published_at"]))
-                except ValueError:
-                    pass
-        new_events = sum(1 for dt in ev_dates if dt > since)
-        an = s.get("analysis") or {}
-        an_at = parse_utc(an["updated_at"]) if an.get("updated_at") else None
-        evolved = new_events > 0 or (an_at is not None and an_at > since)
-        last_covered = coverage.get(slug)
-        covered_recently = last_covered is not None and last_covered >= recent_cutoff
-        if last_covered is None:
-            tag = "NEW"
-        elif last_covered == last_digest:
-            tag = "UPDATE"
-        elif covered_recently:
-            tag = "REVISIT"  # covered inside the window but not yesterday
-        else:
-            tag = "REVISIT"  # covered before, not since
-        rows.append({
-            "slug": slug,
-            "title": s.get("title", ""),
-            "score": s.get("score", 0.0),
-            "hot": s.get("score", 0.0) >= ANALYSIS_GATE,
-            "n_events": len(ev_dates),
-            "new_events_since": new_events,
-            "newest_event_at": max(ev_dates).strftime("%Y-%m-%d") if ev_dates else None,
-            "has_analysis": an_at is not None,
-            "analysis_at": an_at.strftime("%Y-%m-%d") if an_at else None,
-            "last_covered": last_covered,
-            "covered_recently": covered_recently,
-            "tag": tag,
-            "evolved": evolved,
-            "n_sources": s.get("n_sources", 0),
-            "cves": s.get("cves", []),
-        })
-
+    rows = build_rows(stories, events, kev_map, coverage, canonical,
+                      since, recent_cutoff, today, last_digest)
     by_score = sorted(rows, key=lambda r: -r["score"])
     evolved = [r for r in by_score if r["evolved"]]
     uncovered = [r for r in by_score if r["hot"] and not r["covered_recently"]]
     yesterday_rows = sorted(
         (r for r in rows if r["slug"] in yesterday), key=lambda r: -r["score"])
+
+    def flag(r):
+        parts = []
+        if r["catchup"]:
+            parts.append("CATCH-UP")
+        if r["stale_days"] is not None and r["stale_days"] >= 1:
+            parts.append(f"dev={r['newest_development_at']} ({r['stale_days']}d old)")
+        elif r["newest_development_at"]:
+            parts.append(f"dev={r['newest_development_at']}")
+        return (" " + " ".join(parts)).rstrip()
 
     def fmt(r):
         ev = f"+{r['new_events_since']}ev" if r["new_events_since"] else "   "
@@ -183,29 +290,33 @@ def main():
     print(f"Tia N. List — daily digest coverage brief")
     print(f"Date: {today} | Last digest: {last_digest} "
           f"({len(yesterday)} stories) | Delta boundary: after {since:%Y-%m-%d}T00:00Z")
-    print(f"Coverage window: stories not covered since {recent_cutoff} count as uncovered\n")
+    print(f"Coverage window: stories not covered since {recent_cutoff} count as uncovered")
+    print(f"Freshness: dev= newest genuine development (recap articles about older KEV adds "
+          f"don't count); CATCH-UP = newest development >= {CATCHUP_DAYS} days old — nothing new today\n")
 
     print(f"YESTERDAY'S COVERAGE ({len(yesterday_rows)}) — baseline for [UPDATE] deltas")
     for r in yesterday_rows:
         mark = "EVOLVED" if r["evolved"] else "static "
         print(f" {mark} {r['score']:4.1f} +{r['new_events_since']}ev "
-              f"{r['slug']} — {r['title'][:80]}")
+              f"{r['slug']}{flag(r)} — {r['title'][:80]}")
     print()
 
-    print(f"EVOLVED SINCE LAST DIGEST ({len(evolved)}) — new events or fresh analysis, score desc")
+    print(f"EVOLVED SINCE LAST DIGEST ({len(evolved)}) — genuine developments (new events or KEV adds), score desc")
     for r in evolved:
-        print(" " + fmt(r) + f" — {r['title'][:70]}")
+        print(" " + fmt(r) + flag(r) + f" — {r['title'][:70]}")
     print()
 
     print(f"HOT & UNCOVERED ({len(uncovered)}) — score >= {ANALYSIS_GATE}, not covered since {recent_cutoff}")
     for r in uncovered:
-        print(" " + fmt(r) + f" — {r['title'][:70]}")
+        print(" " + fmt(r) + flag(r) + f" — {r['title'][:70]}")
 
     payload = {
         "date": today,
         "last_digest": last_digest,
         "delta_boundary": since.isoformat(),
         "coverage_window": COVERAGE_WINDOW,
+        "recap_days": RECAP_DAYS,
+        "catchup_days": CATCHUP_DAYS,
         "yesterday": yesterday_rows,
         "evolved": evolved,
         "uncovered": uncovered,
