@@ -575,7 +575,6 @@ def main():
         return
 
     hot_cards = [c for c in cards if c["score"] >= HOT_THRESHOLD]
-    home_cards = hot_cards if len(hot_cards) >= 2 else cards[:30]
 
     manifest = {}
     manifest_path = os.path.join(ENGINE, "data", "manifest.json")
@@ -611,13 +610,18 @@ def main():
     rfc_now = format_datetime(datetime.now(timezone.utc))
 
     # home = hot only, capped at 30 (a wall of 97 near-identical cards was
-    # visual noise; "All stories" is one click away)
-    home_cards = hot_cards[:30]
+    # visual noise; "All stories" is one click away); when fewer than 2
+    # stories clear the hot bar (quiet weekend), fall back to the top-30 so
+    # the page is never empty — the quiet banner explains the state
+    home_cards = (hot_cards if len(hot_cards) >= 2 else cards)[:30]
+    quiet = len(hot_cards) < 2
     print(f"rendering {len(cards)} stories, {len(hot_cards)} hot, {len(home_cards)} on home...")
 
     write("index.html", render("index.html", active="index", og_url=site_url(""),
                                hero=home_cards[0] if home_cards else None,
                                cards=home_cards[1:],
+                               quiet=quiet,
+                               hot_threshold=HOT_THRESHOLD,
                                total_hot=len(hot_cards)))
     write("404.html", render("404.html", active=None))
     write("feeds/index.html", render("feeds.html", active="feeds", og_url=site_url("feeds/")))

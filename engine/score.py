@@ -13,8 +13,10 @@ used to cross the hot line at severity's 0.5 floor).
 Factors:
   breadth   0.5-2.0  distinct sources (capped low; repetition != significance)
   authority 1.0-2.0  best outlet weight (reuters > securityweek/thn/bleeping ...)
-  severity  0.5-5.0  real CVSS base score (kevrichment NVD store), KEV status,
-                     content signals (zero-day, ransomware, OT/ICS, APT, breach scale)
+  severity  0.5-5.0  real CVSS base score (kevrichment NVD store, falling back
+                     to the engine NVD cache), KEV status, content signals
+                     (zero-day, ransomware, OT/ICS, APT, actively exploited,
+                     supply chain, security-control bypass, breach scale)
   velocity  0-2.0    events in the last 48h
   pickup    0-0.6    how fast the second source arrived (exp decay on hours)
   recency   temporal multiplier (half-life 36h)
@@ -42,7 +44,14 @@ SIGNALS = [
     (re.compile(r"\b(critical infrastructure|industrial control|scada|power plant|utility|ot network|water system)\b", re.I), 0.3),
     (re.compile(r"\b(apt\d+|state-sponsored|threat actor|hacking group)\b", re.I), 0.2),
     (re.compile(r"\bactively exploited\b", re.I), 0.3),
-    (re.compile(r"\b\d[\d,.]*\s*(million|billion|thousand)\s+(records?|accounts?|users?)\b", re.I), 0.2),
+    (re.compile(r"\bsupply[- ]chain\b", re.I), 0.3),
+    # security-control bypass research (VBS/HVCI/EDR/Defender...): defense
+    # evasion is significance, but only when a control term follows within
+    # 60 chars — "2FA bypass"/"captcha bypass"/"patch bypasses" never fire
+    (re.compile(r"\bbypass(?:es|ing|ed)?\b.{0,60}\b(hvci|vbs|defender|edr|endpoint|antivirus|smart ?screen|uac|applocker|secure boot|bitlocker|sandbox|code integrity|integrity)\b", re.I), 0.3),
+    # breach scale: optional magnitude + "+" so "2,500+ organizations" and
+    # "2,488 Organizations" count (2026-08-15: LiteLLM blast radius missed)
+    (re.compile(r"\b\d[\d,.]*\+?\s*(million|billion|thousand)?\s*(records?|accounts?|users?|organizations?|companies?)\b", re.I), 0.2),
 ]
 SIGNAL_CAP = 1.5
 
@@ -50,7 +59,10 @@ _cve_store = None
 
 
 def _load_cve_store():
-    """CVSS base score + KEV status per CVE from kevrichment's local NVD store."""
+    """CVSS base score + KEV status per CVE from kevrichment's local NVD store,
+    falling back to engine/data/nvd-info.json (CVSS for store CVEs not yet
+    enriched by kevrichment — e.g. fresh research CVEs). KEV status is
+    kevrichment-only; the fallback never asserts kev."""
     global _cve_store
     if _cve_store is not None:
         return _cve_store
@@ -61,6 +73,14 @@ def _load_cve_store():
             d = json.load(open(f))
             store[cve] = {"cvss": d.get("cvss_v3_base_score"),
                           "kev": bool(d.get("kev_date_added"))}
+    nvd_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                            "data", "nvd-info.json")
+    if os.path.exists(nvd_path):
+        nvd = json.load(open(nvd_path))
+        for cve, info in nvd.items():
+            cvss = (info.get("cvss") or {}).get("score")
+            if cve.upper() not in store and cvss:
+                store[cve.upper()] = {"cvss": cvss, "kev": False}
     _cve_store = store
     return store
 

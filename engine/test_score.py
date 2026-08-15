@@ -106,6 +106,60 @@ def main():
     ok &= check("recency decay drops a hot story",
                 r4["score"] < r2["score"], True)
 
+    # --- weekend severity signals (2026-08-15) --------------------------
+    # scale: "+" forms and org/company units (LiteLLM "2,500+ Organizations")
+    evs_scale1 = [ev("x1", iso(1))]
+    s_scale1 = story("scale1", ["example.com"], [],
+                     "Breach Exposes 2,500+ Organizations and 434,000 CI/CD Pipelines",
+                     evs_scale1, iso(1))
+    r5 = score.hot_score(s_scale1, {e["event_id"]: e for e in evs_scale1}, [], now=base)
+    ok &= check("scale signal fires on 'N+ organizations'",
+                r5["severity"] >= 0.7, True)
+    ok &= check("scale signal fires on bare 'N organizations'",
+                score.hot_score(story("scale2", ["example.com"], [],
+                                      "2,488 Organizations Exposed in Cloud Config Leak",
+                                      [ev("x2", iso(1))], iso(1)),
+                                {"x2": ev("x2", iso(1))}, [], now=base)["severity"] >= 0.7, True)
+    # supply chain (LiteLLM blast radius)
+    ok &= check("supply-chain signal fires",
+                score.hot_score(story("sc1", ["example.com"], [],
+                                      "LiteLLM Supply-Chain Breach Blast Radius",
+                                      [ev("x3", iso(1))], iso(1)),
+                                {"x3": ev("x3", iso(1))}, [], now=base)["severity"] >= 0.8, True)
+    # security-control bypass — the VBS/HVCI research-drop body (verbatim)
+    vbs_text = ("A newly disclosed Windows attack technique, dubbed \"Download More RAM,\" "
+                "can undermine Virtualization-Based Security (VBS), bypass "
+                "Hypervisor-Protected Code Integrity (HVCI), and disable endpoint "
+                "protections including Microsoft Defender and third-party EDR products.")
+    ok &= check("bypass signal fires on VBS/HVCI body",
+                score.hot_score(story("bp1", ["example.com"], [],
+                                      "Download More RAM Attack Bypasses Windows VBS",
+                                      [ev("x4", iso(1), vbs_text)], iso(1)),
+                                {"x4": ev("x4", iso(1), vbs_text)}, [], now=base)["severity"] >= 0.8, True)
+    # bypass negatives — common non-control "bypass" uses never fire
+    for neg_title, neg_text in [
+        ("Two-Factor Authentication Bypass Phishing Kit Steals OTPs", ""),
+        ("Vendor patch bypasses the workaround in the latest release", ""),
+        ("Captcha bypass service advertises on Telegram", ""),
+        ("MFA bypass phishing kit targets banking customers", ""),
+    ]:
+        neg = score.hot_score(story("neg", ["example.com"], [], neg_title,
+                                    [ev("n1", iso(1), neg_text)], iso(1)),
+                              {"n1": ev("n1", iso(1), neg_text)}, [], now=base)
+        ok &= check(f"bypass does not fire: {neg_title[:40]}",
+                    neg["severity"], 0.5)
+
+    # --- A4: engine NVD cache merges into the CVE store (kev stays kev-only)
+    saved_store = score._cve_store
+    score._cve_store = None
+    merged = score._load_cve_store()
+    vbs_info = merged.get("CVE-2026-23670")
+    ok &= check("nvd-cache fallback supplies CVSS for fresh CVEs",
+                vbs_info is not None and bool(vbs_info.get("cvss")), True)
+    ok &= check("nvd-cache fallback never asserts kev",
+                vbs_info is None or vbs_info.get("kev"), False)
+    score._cve_store = saved_store
+
     print("PASS" if ok else "FAIL")
     return 0 if ok else 1
 

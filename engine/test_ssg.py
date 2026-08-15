@@ -151,6 +151,24 @@ def main():
                         (["CVE-2026-00001"], 0))
         finally:
             kev_mod.KEV_DIR = saved_kev_dir
+
+        # 6. quiet-state honesty (2026-08-15): <2 hot -> banner on the home
+        # page, count-accurate for 0 and 1; >=2 hot -> no banner
+        def render_index(quiet, total_hot):
+            return ssg.render("index.html", active="index", og_url=ssg.site_url(""),
+                              hero=None, cards=[], quiet=quiet,
+                              hot_threshold=5.0, total_hot=total_hot)
+
+        html_quiet0 = render_index(True, 0)
+        ok &= check("quiet banner renders at 0 hot", "quiet-banner" in html_quiet0, True)
+        ok &= check("0-hot banner says 'No stories cleared'",
+                    "No stories cleared" in html_quiet0, True)
+        ok &= check("0-hot banner links to all stories", "Browse all stories" in html_quiet0, True)
+        html_quiet1 = render_index(True, 1)
+        ok &= check("1-hot banner says 'Only 1 story'",
+                    "Only 1 story cleared" in html_quiet1, True)
+        html_hot = render_index(False, 6)
+        ok &= check("no banner at 6 hot", "quiet-banner" not in html_hot, True)
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
 
