@@ -1,0 +1,31 @@
+title: DCRat Delivery via Brotli-Named DLL Sideloading
+id: 9e620900-68f4-4ded-aa3b-3ba948509f28
+status: experimental
+description: Detects creation of libbrotlidec.dll or libbrotlienc.dll in non-standard directories, consistent with the DCRat (DarkCrystal RAT) delivery chain documented by Trellix that HTML-smuggles a password-protected 7z archive through an SVG attachment and sideloads attacker-controlled Brotli-named DLLs next to a decoy executable.
+references:
+    - https://gbhackers.com/malicious-svg-reconstructs-dcrat-archive-entirely-inside-victims-browser/
+    - https://cyberpress.org/dcrat-hides-inside-windows/
+author: Tia N. List
+date: 2026/08/15
+tags:
+    - attack.t1027
+    - attack.t1574
+logsource:
+    category: file_event
+    product: windows
+detection:
+    selection:
+        TargetFilename|endswith:
+            - '\libbrotlidec.dll'
+            - '\libbrotlienc.dll'
+    filter_standard:
+        TargetFilename|startswith:
+            - 'C:\Program Files\'
+            - 'C:\Program Files (x86)\'
+            - 'C:\Windows\'
+            - 'C:\ProgramData\'
+    condition: selection and not filter_standard
+falsepositives:
+    - Applications that legitimately bundle Brotli libraries and install them to user-writable or app-local directories
+    - Software updaters staging Brotli DLLs during installation
+level: high
