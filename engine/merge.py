@@ -80,7 +80,30 @@ GENERIC = {"cisa", "urges", "immediate", "patching", "patch", "patches", "added"
 DATE_STOP = {"january", "february", "march", "april", "may", "june", "july", "august",
              "september", "october", "november", "december", "monday", "tuesday",
              "wednesday", "thursday", "friday", "saturday", "sunday"}
-SERIES_RE = re.compile(r"\b[A-Za-z]+[0-9]*-\d{2,6}\b")   # AV26-797, CVE-2026-1234
+SERIES_RE = re.compile(r"\b[A-Za-z]+[0-9]*-\d{2,6}\b")   # AV26-797, CVE-2026-1234, Storm-0324
+
+# Threat actors that anchor "same actor, many victims" claim series. A title
+# token matches after stripping a leading "the" ("TheGentlemen" == "The
+# Gentlemen" == "Gentlemen"). Tokens <4 chars never survive tokens() (e.g. INC
+# Ransom's "inc") and common words ("play", "storm", "hive") are safe because
+# _is_claim() must pass on BOTH titles before the actor path fires. Add new
+# actors here (token form, lowercase); the claim gate keeps the list honest.
+ACTOR_TOKENS = frozenset("""
+    gentlemen clop storm shinyhunters deadlock aeternum qilin lockbit blackbasta
+    akira ransomhub hunters blackcat alphv lynx medusa 8base play noescape funksec
+    killsec darkvault mosey bashe handala gunra intelbroker rhysida ciphbit
+    karakurt monti spacecobra hive vice cuba abyss ransomhouse majinahanashi
+    threeam wazawaza
+""".split())
+# "this is a ransomware/breach claim" signal (order-independent, either side)
+RANSOM_SIGNAL_RE = re.compile(
+    r"\b(ransomware|ransom|extortion|locker|data\s+breach|breach|leak|exfiltrat|"
+    r"stolen\s+data|brick)\b", re.I)
+CLAIM_VERB_RE = re.compile(
+    r"\b(attack(s|ed)?|target(s|ed)?|hit(s)?|strike(s|n)?|claim(s|ed)?|"
+    r"compromise(s|d)?|victim(s)?|leak(s|ed)?|encrypt(s|ed)?|demand(s)?|"
+    r"hack(s|ed|ing)?|breach(es|ed)?|disrupt(s|ed)?|extort(s|ed)?)\b", re.I)
+ACTOR_WINDOW_DAYS = 14      # merge same-actor claims only into an ACTIVE series
 
 
 def _norm_tokens(title):
@@ -97,6 +120,44 @@ def _series_codes(title):
     return {m.group(0).upper() for m in SERIES_RE.finditer(title)}
 
 
+def _actor_norm(tokens_set):
+    """Normalize actor tokens across title forms: 'thegentlemen' == 'gentlemen'.
+    (bare 'the' never survives tokens(), so only a leading-'the' strip is needed)"""
+    return {(t[3:] if t.startswith("the") and len(t) > 4 else t) for t in tokens_set}
+
+
+def _is_claim(title):
+    """Victim-claim phrasing (ransomware/extortion/breach signal + a claim verb),
+    order-independent — both halves must be present for a series merge."""
+    t = title or ""
+    return bool(RANSOM_SIGNAL_RE.search(t) and CLAIM_VERB_RE.search(t))
+
+
+def _actor_series_score(ev, story, ev_disc, st_disc):
+    """Same threat actor + both titles are victim claims + temporally near ->
+    one series story (45.0, decaying with the gap so the freshest series wins).
+    Never into a redirect shell; distinct advisory/vuln series codes still block."""
+    if story.get("merged_into"):
+        return 0.0
+    actor = _actor_norm(ev_disc) & _actor_norm(st_disc) & ACTOR_TOKENS
+    if not actor:
+        return 0.0
+    if not (_is_claim(ev["title"]) and _is_claim(story.get("title", ""))):
+        return 0.0
+    ev_codes = _series_codes(ev["title"])
+    st_codes = _series_codes(story.get("title", ""))
+    if ev_codes and st_codes and not (ev_codes & st_codes):
+        return 0.0
+    try:
+        gap = max(0, (parse_utc(ev["published_at"]) -
+                      parse_utc(story.get("last_seen", ev["published_at"]))).days)
+    except Exception:
+        return 0.0
+    if gap > ACTOR_WINDOW_DAYS:
+        return 0.0
+    return 45.0 - gap
+
+
 def match_scores(ev, story):
     """Score how strongly this event belongs to this story (0 = no match)."""
     if ev["url"] and ev["url"].lower() in story_url_cache.get(story["id"], set()):
@@ -106,28 +167,34 @@ def match_scores(ev, story):
         if ev_title_cves & set(story["cves"]):
             return 50.0
     ev_disc = _norm_tokens(ev["title"]) - GENERIC - DATE_STOP
-    st_disc = _norm_tokens(story["title"]) - GENERIC - DATE_STOP
+    st_disc = _norm_tokens(story.get("title", "")) - GENERIC - DATE_STOP
     if len(ev_disc) >= 2 and len(st_disc) >= 2:
         shared = ev_disc & st_disc
         if len(shared) >= 2:                      # need >= 2 real discriminators
             # distinct advisory/vuln series codes (AV26-797 vs AV26-791) block merging
             ev_codes = _series_codes(ev["title"])
-            st_codes = _series_codes(story["title"])
+            st_codes = _series_codes(story.get("title", ""))
             if ev_codes and st_codes and not (ev_codes & st_codes):
                 return 0.0
             j = len(shared) / len(ev_disc | st_disc)
             if j >= 0.4:
                 return j * 10.0
-    return 0.0
+    return _actor_series_score(ev, story, ev_disc, st_disc)
 
 
 def match_story(ev, stories):
-    """Best-match across ALL stories (not first-match-wins); None if no real match."""
-    best, best_score = None, 0.0
+    """Best-match across ALL stories (not first-match-wins); None if no real match.
+    Ties break toward the newer / more complete story so actor-series events
+    converge on one canonical story deterministically."""
+    best, best_score, best_key = None, 0.0, None
     for sid in list(stories.keys()):
         sc = match_scores(ev, stories[sid])
-        if sc > best_score:
-            best, best_score = sid, sc
+        if sc <= 0:
+            continue
+        s = stories[sid]
+        key = (s.get("last_seen", ""), len(s.get("events", [])))
+        if sc > best_score or (sc == best_score and key > best_key):
+            best, best_score, best_key = sid, sc, key
     return best
 
 
