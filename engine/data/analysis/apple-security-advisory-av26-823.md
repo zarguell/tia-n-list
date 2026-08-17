@@ -1,0 +1,5 @@
+Apple released security updates for macOS Tahoe (26.6.1), Sequoia (15.7.9), and Sonoma (14.8.9) on August 17, addressing vulnerabilities disclosed in Canadian Centre for Cyber Security advisory AV26-823. The advisory flags CVE-2026-65400 as being exploited in the wild, though no further details on the exploitation campaign or affected user base are provided.
+
+The three macOS versions being patched indicate this is a cross-generation issue, not confined to a single release branch. Organizations running mixed macOS fleets should prioritize deployment across all three version tracks. The lack of detail on the exploitation vector is notable; open-source reporting confirms in-the-wild use but Apple's own security notes do not elaborate on scope or attribution.
+
+Watch for additional CVEs in the same advisory cycle once Apple publishes full security content notes. If CVE-2026-65400 turns out to be a zero-day used in targeted attacks, expect follow-on coverage from security researchers once the patches are reverse-engineered.
