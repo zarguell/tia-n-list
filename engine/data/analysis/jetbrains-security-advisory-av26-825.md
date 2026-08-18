@@ -1,0 +1,5 @@
+JetBrains issued advisory AV26-825 on August 18 covering vulnerabilities across four products. IntelliJ IDEA needs updating to 2026.1.5 or 2026.2.1, Ktor to 3.4.1, PyCharm to 2026.2.1, and YouTrack across multiple version branches (2025.3, 2026.1, 2026.2). The advisory came through the Canadian Centre for Cyber Security.
+
+This matters because JetBrains tools are among the most widely deployed IDEs and project trackers in enterprise development environments. Vulnerabilities in IDEs can expose source code, credentials, and build pipelines. YouTrack instances exposed on the internet are particularly high-value targets. The breadth across four products suggests a shared underlying component or coordinated disclosure cycle.
+
+Watch for details on what the fixed security issues actually are. The advisory itself is light on specifics. If any of these involve remote code execution or credential leakage, the blast radius extends well beyond the IDE into CI/CD and version control systems. Organizations running self-hosted YouTrack should prioritize patching.

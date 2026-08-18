@@ -1,0 +1,5 @@
+Bitsight TRACE published research on the Aisuru botnet, documenting its DDoS operations, C2 infrastructure, exploitation of Android Debug Bridge (ADB), and evolution toward a proxyware network. The research maps the botnet's technical infrastructure and operational patterns.
+
+Aisuru represents the ongoing convergence of DDoS botnets and residential proxy networks. The shift toward proxyware (renting out compromised devices as residential proxies) gives botnet operators a recurring revenue stream beyond one-off DDoS-for-hire attacks. ADB exploitation targets Android devices with debug interfaces exposed, a misconfiguration that remains common in IoT and consumer hardware.
+
+Watch for the C2 infrastructure details and whether the proxyware component has started appearing in credential-stuffing or web scraping campaigns. Botnets that monetize through proxy services tend to be more persistent than pure DDoS operations because the revenue model rewards maintaining access rather than burning it.
