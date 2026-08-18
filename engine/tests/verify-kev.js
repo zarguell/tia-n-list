@@ -21,7 +21,7 @@ const hostile = {
   poc: 'yes',
   threeDay: true,
   timeline: '<b>bold</b>',
-  dateAdded: '2026-08-12',
+  dateAdded: '2099-01-01',
 };
 const rows = [hostile, ...realRows.slice(0, 3)];
 
@@ -40,15 +40,21 @@ const later = ms => new Promise(r => setTimeout(r, ms));
 
 (async () => {
   await later(300); // inline script fetch + render
-  const hostileTr = d.querySelector('#kev-tbody tr');
+  // Locate hostile row by its ID (not position — sorting may reorder)
+  const allTrs = d.querySelectorAll('#kev-tbody tr');
+  let hostileTr = null;
+  for (let i = 0; i < allTrs.length; i++) {
+    const link = allTrs[i].querySelector('a');
+    if (link && link.textContent === 'CVE-2026-9999') { hostileTr = allTrs[i]; break; }
+  }
   const out = {
-    rowsRendered: d.querySelectorAll('#kev-tbody tr').length,
+    rowsRendered: allTrs.length,
     imgCount: d.querySelectorAll('#kev-tbody img, #kev-tbody svg').length,
     xssFired: window.__xss || null,
     hostileCell: hostileTr ? hostileTr.textContent.slice(0, 60) : null,
     hostileIsText: hostileTr ? (hostileTr.querySelector('img,svg') === null) : null,
     hostileHref: (function () {
-      const a = d.querySelector('#kev-tbody tr a');
+      const a = hostileTr ? hostileTr.querySelector('a') : null;
       return a ? a.getAttribute('href') : null;
     })(),
     count: d.getElementById('f-count').textContent,
