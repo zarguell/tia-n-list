@@ -1,0 +1,44 @@
+title: Cursor IDE Binary Planting via Workspace Git Executable
+id: a7c3e1d4-8b2f-4a9e-b6c5-d0f1e2a3b4c5
+status: experimental
+description: >
+    Detects execution of git.exe or hatch.exe from outside standard
+    Git installation directories, consistent with the Cursor IDE
+    binary-planting vulnerability CVE-2026-63093 (Mindgard, 2026).
+    On affected Windows configurations, Cursor resolves Git-related
+    executables during workspace initialization and executes a
+    malicious binary planted in the repository root before the
+    legitimate system binary is found.
+references:
+    - https://cyberpress.org/cursor-0-day-allows-arbitrary-code-execution/
+    - https://gbhackers.com/cursor-0-day-lets-attackers-execute-malicious-code/
+author: Tia N. List
+date: 2026/08/19
+tags:
+    - attack.t1034
+    - attack.t1204
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_git:
+        Image|endswith:
+            - '\git.exe'
+    selection_hatch:
+        Image|endswith:
+            - '\hatch.exe'
+    filter_standard_git:
+        Image|startswith:
+            - 'C:\Program Files\Git'
+            - 'C:\Program Files (x86)\Git'
+    filter_standard_hatch:
+        Image|startswith:
+            - 'C:\Users\*\AppData\Local\pipx'
+            - 'C:\Users\*\AppData\Roaming\Python'
+    condition:
+        (selection_git and not filter_standard_git) or
+        (selection_hatch and not filter_standard_hatch)
+falsepositives:
+    - Portable or self-contained Git installations outside Program Files
+    - Developer tools that bundle git.exe in non-standard paths
+level: high
