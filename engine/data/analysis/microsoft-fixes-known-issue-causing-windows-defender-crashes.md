@@ -1,0 +1,5 @@
+Microsoft has fixed a bug that caused Windows Defender to crash with 0xc0000005 access violation errors following a recent security update. Users on Windows 10 and Windows 11 began seeing "Threat service has stopped. Restart it now" error messages starting Tuesday afternoon, with scans failing and the Defender service entering a crash loop. Some affected users resorted to reinstalling the operating system before a fix was available.
+
+The issue affected quick and full scans, with the Defender service crashing intermittently during scan operations. Microsoft acknowledged the problem on its support site and released a resolution. The bug was introduced by a prior security update, not by malware or a vulnerability in Defender itself.
+
+This is an operational disruption, not a security vulnerability. Organizations running Microsoft Defender should verify their endpoints are scanning properly after the fix. The incident highlights the risk of security updates breaking core defensive tooling, leaving endpoints temporarily unprotected during the window between the bad update and the fix.
