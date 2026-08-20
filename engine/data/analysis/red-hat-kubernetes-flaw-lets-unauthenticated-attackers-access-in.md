@@ -1,0 +1,5 @@
+Red Hat has disclosed CVE-2026-66794, a critical SSRF vulnerability in the cluster-proxy-addon component of Multicluster Engine for Kubernetes. The flaw carries a CVSS v3.1 score of 9.3 and allows unauthenticated remote attackers to access services that should remain isolated inside connected managed clusters. The vulnerability stems from insufficient authentication and authorization controls on a user-facing cluster-proxy route.
+
+The vulnerable component relays traffic between external-facing endpoints and services within managed Kubernetes clusters. An attacker who can reach the exposed route can bypass cluster boundaries and interact with services across the entire managed cluster federation. This is CWE-918 (Server-Side Request Forgery) with direct cross-cluster impact.
+
+What to watch: the CVSS 9.3 score and unauthenticated access make this a critical patching priority for organizations using Red Hat's Multicluster Engine. The cross-cluster reach is the real danger, as it breaks the fundamental isolation guarantee of multi-cluster Kubernetes deployments. Check for exposed cluster-proxy routes and verify the patch has been applied to all managed clusters.

@@ -1,0 +1,5 @@
+Citrix has issued patches for two vulnerabilities affecting NetScaler Gateway and ADC appliances. The more severe flaw, CVE-2026-19490, allows unauthenticated remote attackers to bypass authentication when the appliance is configured as an AAA virtual server or Gateway (SSL VPN, ICA Proxy, CVPN, RDP Proxy). The bypass depends on firmware version and SAML Action configuration. CVE-2026-19489 addresses a separate issue in the same advisory.
+
+Admins can check vulnerability to CVE-2026-19490 by inspecting for SAML action configuration strings and Auth/VPN vserver settings. The authentication bypass is particularly dangerous as it grants access to protected services without credentials. NetScaler appliances are widely deployed as reverse proxies and VPN gateways in enterprise environments.
+
+What to watch: any organization running NetScaler Gateway or ADC should verify patch status immediately. The SAML-dependent nature of CVE-2026-19490 means not all deployments are equally exposed, but those using SAML-based authentication face the highest risk. Prioritize internet-facing VPN and gateway appliances.
