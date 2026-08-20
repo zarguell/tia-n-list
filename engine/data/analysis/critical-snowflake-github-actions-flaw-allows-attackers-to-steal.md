@@ -1,0 +1,5 @@
+Wiz Red Agent, an autonomous AI security research tool, discovered a critical GitHub Actions injection vulnerability in Snowflake's public snowflake-connector-net repository. The flaw was in jira_issue.yml, a workflow designed to automatically create Jira tickets when users opened GitHub issues. An unauthenticated attacker could execute arbitrary commands on the GitHub Actions runner and exfiltrate credentials for Snowflake's internal Jira environment.
+
+The vulnerable workflow was deployed and the flaw discovered just five days later. Pull request #1218, merged into the repository, exposed how the workflow processed attacker-controlled issue or pull request content without proper sanitization. A small CI/CD coding error thus led to a major credential-exposure incident affecting an internal system.
+
+Snowflake patched the vulnerability after Wiz's disclosure. The incident highlights the risks of GitHub Actions workflows that process untrusted input, particularly when those workflows have access to internal credentials. Two sources covered this story: GBHackers and Cyberpress, both reporting on the Wiz Red Agent discovery.
