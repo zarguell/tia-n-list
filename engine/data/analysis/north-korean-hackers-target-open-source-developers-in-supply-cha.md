@@ -1,0 +1,5 @@
+North Korean threat actors continue to target open source developers through social engineering campaigns aimed at compromising development environments. The attackers use established DPRK patterns: approaching developers with plausible pretexts, gaining access to their systems, then injecting malicious code into downstream software supply chains.
+
+SecurityWeek's August 21 report ties this to a specific Rust supply chain attack, extending the known pattern beyond JavaScript and Python ecosystems. The campaign leverages developer trust relationships to poison package repositories, with compromised code propagating to users who install affected dependencies.
+
+The shift to Rust targets a growing ecosystem where developer tooling and package management are still maturing. Organizations using Rust should verify dependency integrity through lockfiles and reproducible builds, and monitor for unexpected changes in crates they depend on. The broader pattern of NK actors targeting developer workstations remains the more concerning vector, as it bypasses traditional software composition analysis.
