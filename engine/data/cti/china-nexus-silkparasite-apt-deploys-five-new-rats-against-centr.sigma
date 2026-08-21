@@ -1,0 +1,33 @@
+title: SilkParasite APT Google Drive C2 Channel
+id: ec1006fe-acb1-4c4b-b71b-7f29d118817b
+status: experimental
+description: >
+    Detects anomalous Google Drive API traffic that may indicate SilkParasite
+    APT C2 communication. SilkParasite (medium-confidence China-nexus, Aug 2026)
+    tunnels RAT traffic through Google Drive, blending C2 into trusted cloud
+    activity. Monitor for unusual Google Drive upload/download patterns from
+    government or economic-policy organizations in Central Asia.
+references:
+    - https://cyberpress.org/china-nexus-silkparasite-apt-deploys-five-new-rats/
+    - https://gbhackers.com/silkparasite-uses-google-drive-as-c2/
+author: Tia N. List
+date: 2026/08/21
+tags:
+    - attack.t1102
+logsource:
+    category: network_connection
+    product: windows
+detection:
+    selection_drive:
+        DestinationHostname|endswith:
+            - 'drive.google.com'
+            - 'www.googleapis.com'
+    selection_api:
+        DestinationHostname|contains: 'googleapis.com'
+        DestinationPort:
+            - 443
+    condition: selection_drive and selection_api
+falsepositives:
+    - Legitimate Google Drive同步 and API usage
+    - Google Workspace applications performing routine file operations
+level: medium

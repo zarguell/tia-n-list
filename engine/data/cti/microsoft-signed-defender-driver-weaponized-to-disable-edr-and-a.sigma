@@ -1,0 +1,34 @@
+title: Microsoft Defender BTR.sys Driver Abuse for EDR Bypass
+id: c9e5a3f6-0d4b-4e8f-b7a2-3f9c6d0e4b8a
+status: experimental
+description: >
+    Detects suspicious deployment of BTR.sys, the Microsoft Defender Boot-Time
+    Removal driver, outside normal Defender remediation flows. Check Point Research
+    and Jiri Vinopal (Aug 2026) disclosed how this legitimate Microsoft-signed
+    driver can be weaponized to perform kernel-level file and registry operations
+    before EDR products initialize, enabling arbitrary file deletion and defense
+    evasion.
+references:
+    - https://cyberpress.org/microsoft-signed-defender-driver-weaponized/
+    - https://gbhackers.com/windows-defender-driver-abuse-enables-edr-bypass/
+author: Tia N. List
+date: 2026/08/21
+tags:
+    - attack.t1089
+    - attack.t1562
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_driver:
+        Image|endswith:
+            - '\BTR.sys'
+            - '\btr.sys'
+    selection_resource:
+        Image|endswith: '\MpEngine.dll'
+        CommandLine|contains: 'BOOTTIMETOOL'
+    condition: selection_driver or selection_resource
+falsepositives:
+    - Legitimate Microsoft Defender remediation deploying BTR.sys during scheduled scans
+    - Defender maintenance operations extracting the BOOTTIMETOOL resource
+level: high

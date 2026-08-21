@@ -1,0 +1,33 @@
+title: TrueConf Server Compromised Client Installer
+id: 622b7f29-c3b4-4b61-85d3-cefe8520d1c0
+status: experimental
+description: >
+    Detects execution of a trojanized TrueConf client installer. Head Mare APT
+    (Aug 2026) compromised TrueConf Server and replaced the Windows x64 client
+    distribution with a backdoored installer containing the PhantomCore backdoor.
+    Conference participants downloading the client from compromised servers receive
+    the malicious version.
+references:
+    - https://cyberpress.org/trueconf-security-advisory-av26-835/
+    - https://gbhackers.com/trueconf-vulnerabilities-cisa-kev/
+author: Tia N. List
+date: 2026/08/21
+tags:
+    - attack.t1204
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_installer:
+        Image|endswith:
+            - '\TrueConf-Setup.exe'
+            - '\TrueConfServer-Client.exe'
+        CommandLine|contains: '/D='
+    selection_unsigned:
+        Image|contains: 'TrueConf'
+        Signed: 'false'
+    condition: selection_installer or selection_unsigned
+falsepositives:
+    - Legitimate TrueConf client installations from trusted sources
+    - TrueConf Server updating its own bundled client
+level: high
