@@ -1,0 +1,5 @@
+SecurityWeek published a roundup of three active banking trojan families: Manic, Grandoreiro, and ToxicPanda 2.0. The article groups these as ongoing threats in the Android banking malware space. No CVEs are named, and full article content was not available at ingest time. The families represent distinct toolchains targeting financial institutions across multiple regions.
+
+Grandoreiro has been active since at least 2019, targeting Latin American and European banks through overlay attacks and credential theft. ToxicPanda 2.0 is a successor to the original ToxicPanda lineage, known for targeting banking and cryptocurrency apps on Android. Manic is a newer entrant combining banking fraud with spyware capabilities, targeting a broad set of financial apps.
+
+This is a consolidating article rather than a new disclosure. The value is in the comparative coverage of these three families, which are often reported individually. Without the full article body, the specific technical details (new evasion techniques, victim counts, C2 infrastructure) could not be verified.
