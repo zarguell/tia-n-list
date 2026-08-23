@@ -119,7 +119,7 @@ def save_state(st):
 def ingest_miniflux(st, hours):
     # imported here so engine modules that only need strip_html (tests, ssg
     # lint paths) don't require the local miniflux client on import
-    sys.path.insert(0, "/home/coder/.local/opt/miniflux")
+    sys.path.insert(0, "/usr/local/bin")
     from miniflux import MinifluxClient  # noqa: E402
     client = MinifluxClient()
     now = int(time.time())
