@@ -1,0 +1,5 @@
+Oracle patched CVE-2026-21962 in its January 2026 Critical Patch Update, but the story gained real teeth this week: CISA added the vulnerability to its Known Exploited Vulnerabilities list on August 24. That addition means federal agencies face a binding remediation deadline, and it signals the vulnerability is no longer theoretical.
+
+The flaw lives in Oracle HTTP Server and the Oracle WebLogic Server Proxy Plug-in (Fusion Middleware stack). A remote attacker can leverage it for unauthorized access. Public exploit code was available since January 21, just one day after the patch dropped, giving attackers a nine-month window between PoC release and CISA KEV listing.
+
+Any organization running Oracle HTTP Server or WebLogic proxy plug-ins should treat this as urgent. The combination of public PoC and confirmed exploitation means unpatched instances are at active risk. The KEV listing also sets a concrete remediation timeline for organizations bound by BOD 22-01.
