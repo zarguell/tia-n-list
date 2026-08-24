@@ -120,6 +120,36 @@ def _series_codes(title):
     return {m.group(0).upper() for m in SERIES_RE.finditer(title)}
 
 
+# Title-verb filler that inflates similarity between unrelated headlines
+# ("X Lets Attackers Gain..." vs "Y Lets Hackers Gain..."). Not story signal.
+# Shared by merge-adjacent consumers (repair_dedupe, audit duplicate suspects).
+FILLER = {"lets", "let", "gain", "gains", "using", "use", "used", "new", "via",
+          "could", "can", "from", "into", "your", "you", "their", "its", "how",
+          "why", "what", "before", "after", "amid"}
+
+
+def title_discriminators(title):
+    """Meaningful title tokens: [REDACTED], generic/boilerplate/filler-stripped."""
+    return _norm_tokens(title) - GENERIC - DATE_STOP - FILLER
+
+
+def title_jaccard(a, b):
+    """Discriminator-token Jaccard similarity of two titles (0..1)."""
+    A = title_discriminators(a or "")
+    B = title_discriminators(b or "")
+    if not A or not B:
+        return 0.0
+    return len(A & B) / len(A | B)
+
+
+def distinct_series_codes(a, b):
+    """Both titles carry advisory/vuln series codes (AV26-815, CVE-2026-19598)
+    and none are shared -> different advisories, never merge (guards dedup
+    suspects and repair merges against truncated-slug collisions)."""
+    ca, cb = _series_codes(a or ""), _series_codes(b or "")
+    return bool(ca and cb and not (ca & cb))
+
+
 def _actor_norm(tokens_set):
     """Normalize actor tokens across title forms: 'thegentlemen' == 'gentlemen'.
     (bare 'the' never survives tokens(), so only a leading-'the' strip is needed)"""

@@ -26,7 +26,9 @@ import re
 import sys
 from datetime import datetime, timezone
 
-from merge import GENERIC, DATE_STOP, _norm_tokens, _series_codes
+from merge import (GENERIC, DATE_STOP, _norm_tokens, _series_codes,
+                   title_jaccard as jac, distinct_series_codes,
+                   title_discriminators)
 from store import load_events
 
 ENGINE = os.path.dirname(os.path.abspath(__file__))
@@ -46,31 +48,9 @@ def load_stories():
     return out
 
 
-# Title-verb filler that inflates similarity between unrelated headlines
-# ("X Lets Attackers Gain..." vs "Y Lets Hackers Gain..."). Not story signal.
-FILLER = {"lets", "let", "gain", "gains", "using", "use", "used", "new", "via",
-          "could", "can", "from", "into", "your", "you", "their", "its", "how",
-          "why", "what", "before", "after", "amid", "warns", "warn"}
-
-
-def disc(title):
-    return _norm_tokens(title) - GENERIC - DATE_STOP - FILLER
-
-
-def jac(a, b):
-    A = disc(a or "")
-    B = disc(b or "")
-    if not A or not B:
-        return 0.0
-    return len(A & B) / len(A | B)
-
-
-def distinct_codes(a, b):
-    """Both titles carry advisory/vuln series codes (AV26-815, CVE-2026-19598)
-    and none are shared -> different advisories, never merge (same rule as
-    merge.py's clustering)."""
-    ca, cb = _series_codes(a or ""), _series_codes(b or "")
-    return bool(ca and cb and not (ca & cb))
+# Title-verb filler moved to merge.FILLER (shared with audit's duplicate
+# suspects); jac/distinct_codes re-exported from merge for compatibility.
+distinct_codes = distinct_series_codes
 
 
 def canon(group):
@@ -222,7 +202,7 @@ def main():
             ta, tb = stories[a]["title"], stories[b]["title"]
             # >= 2 shared discriminators (not filler verbs) + similarity floor:
             # a shared roundup event alone is NOT evidence of same story
-            if len(disc(ta) & disc(tb)) >= 2 and jac(ta, tb) >= 0.30 \
+            if len(title_discriminators(ta) & title_discriminators(tb)) >= 2 and jac(ta, tb) >= 0.30 \
                     and not distinct_codes(ta, tb):
                 c = canon([stories[a], stories[b]])
                 other = b if c["id"] == a else a
