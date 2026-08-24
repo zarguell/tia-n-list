@@ -1,0 +1,43 @@
+title: Metabase Unauthenticated Password Reset SQL Injection
+id: 7a3e1b2c-4d5f-6a7b-8c9d-0e1f2a3b4c5d
+status: experimental
+description: >
+    Detects exploitation attempts against CVE-2026-72898, a critical
+    SQL injection vulnerability in Metabase's unauthenticated password
+    reset endpoint (POST /api/session/reset_password). Attackers send
+    crafted input to inject arbitrary SQL into Metabase's application
+    database, gaining full administrator access and harvesting
+    credentials for all connected data sources.
+references:
+    - https://cyberpress.org/metabase-zero-day-attack-lets-hackers-gain-admin-access-and-steal-database-credentials/
+    - https://gbhackers.com/cisa-warns-critical-metabase-sql-injection-flaw-lets-unauthenticated-attackers-gain-admin-access/
+author: Tia N. List
+date: 2026/08/24
+tags:
+    - attack.t1190
+    - attack.t1212
+    - attack.t1003
+logsource:
+    category: webserver
+    product: web
+detection:
+    selection_reset:
+        cs-method: 'POST'
+        cs-uri|endswith: '/api/session/reset_password'
+    selection_sql_patterns:
+        cs-uri|contains:
+            - 'OR'
+            - 'UNION'
+            - 'SELECT'
+            - 'INSERT'
+            - 'UPDATE'
+            - 'DELETE'
+            - 'DROP'
+            - 'EXEC'
+            - '--'
+            - ';'
+    condition: selection_reset and selection_sql_patterns
+falsepositives:
+    - Legitimate password reset requests with unusual URI parameters
+    - Penetration testing against Metabase instances
+level: high
