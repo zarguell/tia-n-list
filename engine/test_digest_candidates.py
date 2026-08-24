@@ -55,15 +55,18 @@ class Fixture:
             write_json(os.path.join(self.kev, "index.json"),
                        {"cves": [{"cve_id": KEV_CVE, "kev_date_added": kev_added}]})
 
-    def event(self, eid, published, title, content=""):
-        write_json(os.path.join(self.events, eid + ".json"),
-                   {"id": eid, "published_at": published, "title": title,
-                    "content_md": content, "kind": "update", "source": "example.com"})
+    def event(self, eid, published, title, content="", translated_from=None):
+        ev = {"id": eid, "published_at": published, "title": title,
+              "content_md": content, "kind": "update", "source": "example.com"}
+        if translated_from:
+            ev["translated_from"] = translated_from
+        write_json(os.path.join(self.events, eid + ".json"), ev)
         return {"event_id": eid, "label": "update"}
 
-    def story(self, slug, evs, cves=None, score=5.5, analysis_at=None, merged_into=None):
+    def story(self, slug, evs, cves=None, score=5.5, analysis_at=None, merged_into=None,
+              n_sources=3):
         s = {"id": slug, "title": slug.replace("-", " ").title(), "cves": cves or [],
-             "n_sources": 3, "score": score, "events": evs}
+             "n_sources": n_sources, "score": score, "events": evs}
         if analysis_at:
             s["analysis"] = {"updated_at": analysis_at, "score": score}
         if merged_into:
@@ -234,6 +237,47 @@ def test_merged_shells_excluded_and_coverage_resolves():
     assert "old-shell" not in rows, "redirect shells are never digest candidates"
     assert coverage["canonical"] == "2026-08-13", \
         "coverage of a shell must credit the canonical story"
+    fx.close()
+
+
+def test_bench_flags_and_slate_exclusion():
+    """Editorial-agency bench (2026-08-24): stories outside the slate carry
+    deterministic weirdness flags; slate members never appear on the bench."""
+    fx = Fixture()
+    fx.digest("2026-08-13", [])
+    # burst: many outlets, no development since the boundary, never covered
+    burst = fx.story("burst-story", [fx.event("e1", "2026-08-10T10:00:00Z", "Burst")],
+                     score=2.0, n_sources=6)
+    # regional: translated (non-English origin) event
+    regional = fx.story("regional-story",
+                        [fx.event("e2", "2026-08-10T11:00:00Z", "Regional",
+                                  translated_from="de")], score=1.5, n_sources=2)
+    # cve-rich + near-gate
+    fx.story("cve-rich", [fx.event("e3", "2026-08-10T12:00:00Z", "Cluster")],
+             cves=["CVE-2026-10001", "CVE-2026-10002", "CVE-2026-10003"], score=2.5)
+    # slate member (evolved) must NOT bench; sub-floor noise must not bench;
+    # emptied ghost stories (drops landed) must not bench
+    fx.story("evolved-story", [fx.event("e4", "2026-08-14T09:00:00Z", "Fresh")], score=4.0)
+    fx.story("noise", [fx.event("e5", "2026-08-10T10:00:00Z", "Noise")], score=0.5)
+    fx.story("ghost", [], score=2.5)
+
+    rows_list, _ = fx.compute()
+    rows_list = list(rows_list.values())
+    stories = dc.load_stories(fx.stories)
+    events = dc.load_events(fx.events)
+    slate = {r["slug"] for r in rows_list if r["evolved"] or
+             (r["hot"] and not r["covered_recently"])}
+    bench = dc.build_bench(rows_list, slate, stories, events)
+    byslug = {b["slug"]: b for b in bench}
+    assert "burst-story" in byslug and "burst" in byslug["burst-story"]["flags"]
+    assert "regional-story" in byslug and "regional" in byslug["regional-story"]["flags"]
+    assert "cve-rich" in byslug and "cve-rich" in byslug["cve-rich"]["flags"] \
+        and "near-gate" in byslug["cve-rich"]["flags"]
+    assert "evolved-story" not in byslug, "slate members never bench"
+    assert "noise" not in byslug, "sub-floor stories never bench"
+    assert "ghost" not in byslug, "eventless ghost stories never bench"
+    # flag count then score ordering
+    assert bench == sorted(bench, key=lambda b: (-len(b["flags"]), -b["score"]))
     fx.close()
 
 

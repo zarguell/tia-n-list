@@ -61,6 +61,9 @@ ANALYSIS_GATE = 3.3  # merge.py's analysis-queue threshold on the 0-10 scale (wa
 COVERAGE_WINDOW = 3  # a story covered within the last N digests counts as covered
 RECAP_DAYS = 2       # an event about a KEV add published >= N days after the add is a recap, not a development
 CATCHUP_DAYS = 2     # newest genuine development >= N days before the digest date -> CATCH-UP (nothing new)
+BENCH_MAX = 12         # wildcard discovery slate cap
+BENCH_SCORE_FLOOR = 1.0  # below this a non-slate story is noise, not a near-miss
+NEAR_GATE = 0.7         # fraction of ANALYSIS_GATE that counts as a near-miss on the bench
 
 STORY_LINK_RE = re.compile(r"stories/([a-z0-9][a-z0-9-]*)/?")
 CVE_RE = re.compile(r"^CVE-\d{4}-\d{4,7}$")
@@ -228,6 +231,36 @@ def build_rows(stories, events, kev_map, coverage, canonical, since, recent_cuto
     return rows
 
 
+def build_bench(rows, slate, stories, events):
+    """Wildcard discovery bench: live stories OUTSIDE the deterministic slate
+    (not evolved, not hot-uncovered, not in yesterday's coverage) that carry
+    at least one weirdness flag. Slate scores are advisory priors; the bench
+    is where the digest agent looks for stories the proxy score under-ranks:
+    multi-outlet bursts, CVE clusters, regional (translated) scoops, near-gate
+    scores. Ranked by flag count then score, capped at BENCH_MAX."""
+    out = []
+    for r in rows:
+        if r["slug"] in slate or r["score"] < BENCH_SCORE_FLOOR or not r["n_events"]:
+            continue  # slate members, sub-floor noise, and emptied ghosts never bench
+        flags = []
+        if r["n_sources"] >= 5:
+            flags.append("burst")
+        if len(r["cves"]) >= 3:
+            flags.append("cve-rich")
+        if r["score"] >= ANALYSIS_GATE * NEAR_GATE and not r["hot"]:
+            flags.append("near-gate")
+        s = stories.get(r["slug"], {})
+        if any(events.get(ref.get("event_id"), {}).get("translated_from")
+               for ref in s.get("events", [])):
+            flags.append("regional")
+        if flags:
+            out.append({"slug": r["slug"], "title": r["title"], "score": r["score"],
+                        "n_sources": r["n_sources"], "flags": flags,
+                        "last_covered": r["last_covered"]})
+    out.sort(key=lambda b: (-len(b["flags"]), -b["score"]))
+    return out[:BENCH_MAX]
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--date", default=None, help="digest date (default: today UTC)")
@@ -269,6 +302,8 @@ def main():
     uncovered = [r for r in by_score if r["hot"] and not r["covered_recently"]]
     yesterday_rows = sorted(
         (r for r in rows if r["slug"] in yesterday), key=lambda r: -r["score"])
+    slate = ({r["slug"] for r in evolved} | {r["slug"] for r in uncovered} | yesterday)
+    bench = build_bench(rows, slate, stories, events)
 
     def flag(r):
         parts = []
@@ -292,7 +327,9 @@ def main():
           f"({len(yesterday)} stories) | Delta boundary: after {since:%Y-%m-%d}T00:00Z")
     print(f"Coverage window: stories not covered since {recent_cutoff} count as uncovered")
     print(f"Freshness: dev= newest genuine development (recap articles about older KEV adds "
-          f"don't count); CATCH-UP = newest development >= {CATCHUP_DAYS} days old — nothing new today\n")
+          f"don't count); CATCH-UP = newest development >= {CATCHUP_DAYS} days old — nothing new today")
+    print(f"Scores are ADVISORY priors (severity/velocity/breadth proxy), not editorial "
+          f"verdicts: promote/demote freely, log every deviation in the digest json overrides\n")
 
     print(f"YESTERDAY'S COVERAGE ({len(yesterday_rows)}) — baseline for [UPDATE] deltas")
     for r in yesterday_rows:
@@ -310,6 +347,14 @@ def main():
     for r in uncovered:
         print(" " + fmt(r) + flag(r) + f" — {r['title'][:70]}")
 
+    print(f"\nBENCH ({len(bench)}) — outside the slate, flagged for wildcard consideration "
+          f"(burst >=5 sources, cve-rich >=3 CVEs, regional = non-EN origin, near-gate score). "
+          f"Wildcard picks may also come from anywhere in the store.")
+    for b in bench:
+        cov = b["last_covered"] or "never"
+        print(f"  {b['score']:4.1f} [{','.join(b['flags']):<24}] cov={cov:<10} "
+              f"{b['slug']} — {b['title'][:60]}")
+
     payload = {
         "date": today,
         "last_digest": last_digest,
@@ -320,6 +365,7 @@ def main():
         "yesterday": yesterday_rows,
         "evolved": evolved,
         "uncovered": uncovered,
+        "bench": bench,
     }
     with open(OUT_JSON, "w") as fh:
         json.dump(payload, fh, indent=1)
