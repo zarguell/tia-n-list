@@ -47,6 +47,23 @@ EVENTS = os.path.join(DATA, "events")
 STORIES = os.path.join(DATA, "stories")
 TRIAGE = os.path.join(DATA, "triage")
 STATE = os.path.join(TRIAGE, "state.json")
+RUN_TAG = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H%M")
+
+SCHEMA_HINT = (
+    'Write decisions as JSON with EXACTLY this shape:\n'
+    '{\n'
+    '  "decisions": [\n'
+    '    {"event_id": "<id>", "action": "keep", "story": "<existing candidate story id>", "reason": "..."},\n'
+    '    {"event_id": "<id>", "action": "keep", "story": "NEW", "story_title": "<clean title>", "reason": "..."},\n'
+    '    {"event_id": "<id>", "action": "drop", "reason": "..."}\n'
+    '  ],\n'
+    '  "merges": [{"from": "<fragment story id>", "into": "<canonical story id>"}]\n'
+    '}\n'
+    'STRICT KEY NAMES: the array key is "decisions" (never "events"); the story\n'
+    'key is "story" (never "story_id"); "story" holds a candidate_stories id\n'
+    'verbatim or the literal string "NEW". Optional per-event field\n'
+    '"exploitation": {"CVE-...": {"status": "exploited|suspected", "evidence": "1-2 sentences"}}.'
+)
 NEEDS = os.path.join(DATA, "needs-analysis.json")
 ANALYSIS = os.path.join(DATA, "analysis")
 HOT_THRESHOLD = 3.3      # 0-10 scale (was 2.0 on 0-6); same analysis-queue bar as merge.py
@@ -115,9 +132,37 @@ def collect():
     cands.sort(key=lambda s: s.get("last_seen", ""), reverse=True)
     cands = cands[:40]
 
+    # Duplicate suspects: active stories whose slug base collides with another
+    # active story (the -2/-3 suffix pattern) or that share an event with one.
+    # Surfaced regardless of age so stranded duplicates can still be merged.
+    by_base, ev_owners = {}, {}
+    for s in stories.values():
+        if s.get("merged_into"):
+            continue
+        by_base.setdefault(re.sub(r"-\d+$", "", s["id"]), []).append(s["id"])
+        for r in s.get("events", []):
+            ev_owners.setdefault(r["event_id"], set()).add(s["id"])
+    suspect_ids = set()
+    for base, group in by_base.items():
+        if len(group) > 1:
+            suspect_ids.update(group)
+    for owners in ev_owners.values():
+        if len(owners) > 1:
+            suspect_ids.update(owners)
+    cands += [stories[sid] for sid in sorted(suspect_ids)
+              if sid not in {c["id"] for c in cands}][:20]
+
+    def _event_title(refs):
+        for r in refs or []:
+            ev = events.get(r.get("event_id"))
+            if ev:
+                return ev.get("title", "")
+        return ""
+
     os.makedirs(TRIAGE, exist_ok=True)
     ctx = {
         "date": TODAY,
+        "decisions_path": f"engine/data/triage/decisions-{RUN_TAG}.json",
         "instructions": (
             "For every new event decide: (1) keep or drop — keep only stories worth "
             "covering (real security events, vulnerabilities, attacks, breaches, "
@@ -133,7 +178,8 @@ def collect():
             "victim counts, campaigns, CISA KEV confirmation); suspected = public exploit "
             "code/PoC or likely-but-unconfirmed. Attribute ONLY the CVEs you can tie to "
             "the claim — a bulletin's blanket 'actively exploited' does NOT flag all its "
-            "CVEs. Omit the exploitation field when the event makes no claim."),
+            "CVEs. Omit the exploitation field when the event makes no claim.\n\n"
+            + SCHEMA_HINT),
         "new_events": [{
             "id": e["id"], "title": e.get("title", ""),
             "source": e.get("source", ""), "published_at": e.get("published_at", ""),
@@ -143,17 +189,93 @@ def collect():
         "candidate_stories": [{
             "id": s["id"], "title": s.get("title", ""),
             "n_events": len(s.get("events", [])), "last_seen": s.get("last_seen", ""),
-            "first_event_title": (next((x.get("title", "") for x in s.get("events", [])), "")),
+            "first_event_title": _event_title(s.get("events")),
         } for s in cands],
     }
-    path = os.path.join(TRIAGE, f"context-{TODAY}.json")
+    path = os.path.join(TRIAGE, f"context-{RUN_TAG}.json")
     json.dump(ctx, open(path, "w"), indent=1)
     print(f"triage: {len(recent)} new events (48h window, capped), {len(cands)} candidate stories -> {path}")
+    print(f"triage: write decisions to {ctx['decisions_path']}")
 
 
 def _read_event(eid):
     p = os.path.join(EVENTS, eid + ".json")
     return json.load(open(p)) if os.path.exists(p) else None
+
+
+def _normalize_decisions(dec):
+    """Tolerant front end for LLM-written decision files. The documented
+    schema is {"decisions": [...], "merges": [...]}, but models drift (seen in
+    the wild: top-level "events", "keep"/"drop" lists, "story_id" instead of
+    "story", exploitation values as bare strings). Accept the variants, count
+    what cannot be salvaged so apply() can report it loudly instead of
+    silently discarding the run's judgment."""
+    out, ignored = [], 0
+    raw = dec.get("decisions")
+    if not isinstance(raw, list):
+        raw = dec.get("events")
+    if not isinstance(raw, list):
+        raw = ([dict(d, action="keep") for d in dec.get("keep", []) if isinstance(d, dict)] +
+               [dict(d, action="drop") for d in dec.get("drop", []) if isinstance(d, dict)])
+    for d in raw if isinstance(raw, list) else []:
+        if not isinstance(d, dict):
+            ignored += 1
+            continue
+        eid = d.get("event_id") or d.get("id")
+        action = d.get("action")
+        if action not in ("keep", "drop"):
+            if d.get("story") or d.get("story_id") or d.get("story_title"):
+                action = "keep"
+            elif str(d.get("drop", "")).lower() in ("true", "1"):
+                action = "drop"
+            else:
+                ignored += 1
+                continue
+        if not eid:
+            ignored += 1
+            continue
+        norm = {"event_id": eid, "action": action,
+                "story": d.get("story") or d.get("story_id"),
+                "story_title": d.get("story_title"), "reason": d.get("reason") or d.get("rationale")}
+        ex = {}
+        if isinstance(d.get("exploitation"), dict):
+            for cve, v in d["exploitation"].items():
+                if isinstance(v, str):
+                    v = {"status": v}
+                if isinstance(v, dict):
+                    ex[cve] = v
+        norm["exploitation"] = ex
+        out.append(norm)
+    merges = dec.get("merges", []) if isinstance(dec.get("merges", []), list) else []
+    return out, merges, ignored
+
+
+def _strip_event_refs(stories, eid, keep_sid):
+    """An event lives in exactly ONE story: drop stale references the
+    mechanical merge left in other stories. Returns slugs emptied by the
+    strip so callers can redirect them."""
+    emptied = []
+    for sid, s in stories.items():
+        if sid == keep_sid or s.get("merged_into"):
+            continue
+        if any(r["event_id"] == eid for r in s.get("events", [])):
+            s["events"] = [r for r in s["events"] if r["event_id"] != eid]
+            if not s["events"]:
+                emptied.append(sid)
+    return emptied
+
+
+def _sole_holder(stories, eid):
+    """The active story whose ONLY event is this one (the mechanical merge's
+    fresh mint). Reusing it instead of creating a twin prevents -2 slug
+    duplicates when the LLM says NEW for an event merge.py already placed."""
+    for sid, s in stories.items():
+        if s.get("merged_into"):
+            continue
+        evs = s.get("events", [])
+        if len(evs) == 1 and evs[0]["event_id"] == eid:
+            return sid
+    return None
 
 
 def _write_event(e):
@@ -183,6 +305,20 @@ def _absorb(story, ev, label):
     return True
 
 
+def _new_story(stories, title, ev, eid):
+    slug = _slugify(title, set(stories))
+    stories[slug] = {
+        "id": slug, "title": re.sub(r"\s+", " ", title).strip(),
+        "first_seen": ev.get("published_at", ""), "last_seen": ev.get("published_at", ""),
+        "sources": [dom for dom in [_domain(ev.get("url"))] if dom],
+        "n_sources": 1 if ev.get("url") else 0,
+        "cves": ev.get("cves", []), "score": 0.0,
+        "reddit_signal": {"posts": 0, "best_score": 0},
+        "events": [{"event_id": eid, "label": "original"}],
+    }
+    return slug
+
+
 def apply(decisions_path):
     if not os.path.exists(decisions_path):
         print(f"no decisions file: {decisions_path}")
@@ -191,29 +327,25 @@ def apply(decisions_path):
     state = _load_state()
     processed = set(state["processed"])
     stories = _load_stories()
+    decisions, merges, ignored = _normalize_decisions(dec)
     moved = drops = 0
 
-    for d in dec.get("decisions", []):
-        eid = d.get("event_id")
-        if not eid:
-            continue
+    for d in decisions:
+        eid = d["event_id"]
         ev = _read_event(eid)
         processed.add(eid)
         if not ev:
             continue
-        if d.get("action") == "drop":
+        if d["action"] == "drop":
             ev["excluded"] = True
             ev["exclude_reason"] = d.get("reason", "")
             _write_event(ev)
             # remove from any story that references it (shouldn't happen for new
             # events, but be safe)
-            for s in stories.values():
-                if any(r["event_id"] == eid for r in s.get("events", [])):
-                    s["events"] = [r for r in s["events"] if r["event_id"] != eid]
-                    json.dump(s, open(os.path.join(STORIES, s["id"] + ".json"), "w"), indent=1)
+            _strip_event_refs(stories, eid, None)
             drops += 1
             continue
-        if d.get("action") != "keep":
+        if d["action"] != "keep":
             continue
         ev["excluded"] = False
         # exploitation assessment (optional): per-CVE map, CVE_RE-gated,
@@ -233,52 +365,60 @@ def apply(decisions_path):
         elif "exploitation" in ev:
             del ev["exploitation"]
         target = d.get("story")
+        # If the mechanical merge already minted a story whose ONLY event is
+        # this one, reuse it instead of creating a -2 twin (retake it, with an
+        # optional cleaner title from the decision).
+        sole = _sole_holder(stories, eid)
+        if (not target or target == "NEW") and sole:
+            target = sole
+            if d.get("story_title"):
+                stories[sole]["title"] = re.sub(r"\s+", " ", d["story_title"]).strip()
         if not target or target == "NEW":
-            title = d.get("story_title") or ev.get("title", "")
-            slug = _slugify(title, set(stories))
-            stories[slug] = {
-                "id": slug, "title": re.sub(r"\s+", " ", title).strip(),
-                "first_seen": ev.get("published_at", ""), "last_seen": ev.get("published_at", ""),
-                "sources": [d for d in [_domain(ev.get("url"))] if d],
-                "n_sources": 1 if ev.get("url") else 0,
-                "cves": ev.get("cves", []), "score": 0.0,
-                "reddit_signal": {"posts": 0, "best_score": 0},
-                "events": [{"event_id": eid, "label": "original"}],
-            }
+            target = _new_story(stories, d.get("story_title") or ev.get("title", ""), ev, eid)
             ev["kind"] = "original"
-            _write_event(ev)
+            moved += 1
+        elif target not in stories:
+            print(f"  WARN: keep -> unknown story {target} for {eid}; creating")
+            target = _new_story(stories, d.get("story_title") or ev.get("title", ""), ev, eid)
+            ev["kind"] = "original"
             moved += 1
         else:
-            if target not in stories:
-                print(f"  WARN: keep -> unknown story {target} for {eid}; creating")
-                title = d.get("story_title") or ev.get("title", "")
-                slug = _slugify(title, set(stories))
-                stories[slug] = {
-                    "id": slug, "title": re.sub(r"\s+", " ", title).strip(),
-                    "first_seen": ev.get("published_at", ""), "last_seen": ev.get("published_at", ""),
-                    "sources": [d for d in [_domain(ev.get("url"))] if d],
-                    "n_sources": 1 if ev.get("url") else 0,
-                    "cves": ev.get("cves", []), "score": 0.0,
-                    "reddit_signal": {"posts": 0, "best_score": 0},
-                    "events": [{"event_id": eid, "label": "original"}],
-                }
-                ev["kind"] = "original"
-                _write_event(ev)
-            else:
-                changed = _absorb(stories[target], ev, "update")
-                if changed:
-                    ev["kind"] = "update"
-                    moved += 1
-                # Always persist: exploitation assessments and the excluded
-                # flag must survive even when the event was already placed in
-                # the target story (e.g. by the mechanical merge).
-                _write_event(ev)
+            changed = _absorb(stories[target], ev, "update")
+            if changed:
+                ev["kind"] = "update"
+                moved += 1
+            # Always persist: exploitation assessments and the excluded
+            # flag must survive even when the event was already placed in
+            # the target story (e.g. by the mechanical merge).
+        _write_event(ev)
+        # An event lives in exactly ONE story: strip stale references the
+        # mechanical merge left behind; emptied shells redirect to the story
+        # that owns the event now.
+        for sid in _strip_event_refs(stories, eid, target):
+            stories[sid]["merged_into"] = target
 
     # story merges: move all events from -> into, mark from as merged_into
-    for m in dec.get("merges", []):
+    for m in merges:
         frm, into = m.get("from"), m.get("into")
         if frm not in stories or into not in stories or frm == into:
             print(f"  WARN: bad merge {frm} -> {into}")
+            continue
+        if stories[frm].get("merged_into"):
+            print(f"  skip merge {frm} -> {into}: {frm} already merged into "
+                  f"{stories[frm]['merged_into']}")
+            continue
+        # the target may have been emptied into another story earlier this
+        # run (shell with merged_into): follow the redirect chain so events
+        # land on a live canonical story, never inside a redirect shell
+        seen = {frm}
+        while stories[into].get("merged_into"):
+            nxt = stories[into]["merged_into"]
+            if nxt in seen or nxt not in stories or nxt == into:
+                break
+            seen.add(into)
+            into = nxt
+        if into == frm or stories[into].get("merged_into"):
+            print(f"  WARN: merge {m.get('from')} has no live target; skipping")
             continue
         for ref in list(stories[frm].get("events", [])):
             ev = _read_event(ref["event_id"])
@@ -330,7 +470,12 @@ def apply(decisions_path):
 
     state["processed"] = sorted(processed)
     _save_state(state)
-    print(f"triage applied: {moved} kept/moved, {drops} dropped, {len(dec.get('merges', []))} merges, needs-analysis {len(queue)}")
+    print(f"triage applied: {moved} kept/moved, {drops} dropped, {len(merges)} merges, needs-analysis {len(queue)}")
+    if ignored:
+        print(f"  WARN: {ignored} decision entries could not be parsed from {decisions_path}")
+    if not decisions:
+        print("  WARN: no keep/drop decisions recognized — schema mismatch? "
+              "Expected top-level 'decisions' array with event_id/action/story keys")
 
 
 if __name__ == "__main__":

@@ -188,10 +188,12 @@ def match_story(ev, stories):
     converge on one canonical story deterministically."""
     best, best_score, best_key = None, 0.0, None
     for sid in list(stories.keys()):
-        sc = match_scores(ev, stories[sid])
+        s = stories[sid]
+        if s.get("merged_into"):
+            continue               # never deposit events into a redirect shell
+        sc = match_scores(ev, s)
         if sc <= 0:
             continue
-        s = stories[sid]
         key = (s.get("last_seen", ""), len(s.get("events", [])))
         if sc > best_score or (sc == best_score and key > best_key):
             best, best_score, best_key = sid, sc, key
