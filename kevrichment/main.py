@@ -154,11 +154,9 @@ def run_pipeline(research_engine=None, nvd_api_key=None,
     print(f"  Source: {kev_source_date}  |  Total entries: {total_entries}")
 
     # ---- 2.  Select KEV entries ---------------------------------------------
-    print(f"\n[2/4] Fetching {cve_count} most recently added KEV entries …")
     latest = get_latest_kev_entries(kev_data, count=cve_count)
-    for i, e in enumerate(latest, 1):
-        print(f"  {i:>2}. {e['cveID']:20s}  {e.get('vendorProject','?'):20s}  "
-              f"{e.get('product','?'):25s}  added {e.get('dateAdded','?')}")
+    print(f"[2/4] Fetched {len(latest)} most recent KEV entries "
+          f"(catalog total {total_entries}, window {cve_count})")
 
     # ---- 3.  Process each CVE --------------------------------------------
     print("\n[3/4] Processing …")

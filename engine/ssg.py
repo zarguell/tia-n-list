@@ -530,18 +530,22 @@ def lint_backlinks(cards):
     return errs
 
 
+WROTE = 0
+
+
 def write(rel, content):
+    global WROTE
     path = os.path.join(ROOT, rel)
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, "w") as f:
         f.write(content)
+    WROTE += 1
     if rel.endswith(".html"):
         for m in re.finditer(r'(?:href|src|action)="/', content):
             snippet = content[max(0, m.start() - 34):m.end() + 16].replace("\n", " ")
             LINT_HITS.append((rel, snippet))
             print(f"WARN {rel}: path-absolute internal URL (resolves against the origin,"
                   f" not the Pages base): …{snippet}…", file=sys.stderr)
-    print(f"  {rel}")
 
 
 def main():
@@ -571,7 +575,7 @@ def main():
                   f" kev link errors + {len(bad_chips)} chip errors - fix before publishing.",
                   file=sys.stderr)
             sys.exit(1)
-        print("done (--kev).")
+        print(f"done (--kev): wrote {WROTE} files.")
         return
 
     hot_cards = [c for c in cards if c["score"] >= HOT_THRESHOLD]
@@ -874,7 +878,7 @@ def main():
             "last_build": built, "entries": items,
         }))
 
-    print("done.")
+    print(f"done: wrote {WROTE} files.")
 
     bad_links = lint_links()
     for rel, url, why in bad_links:
