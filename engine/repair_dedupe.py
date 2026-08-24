@@ -26,6 +26,7 @@ import re
 import sys
 from datetime import datetime, timezone
 
+from build_registry import domain_of
 from merge import (GENERIC, DATE_STOP, _norm_tokens, _series_codes,
                    title_jaccard as jac, distinct_series_codes,
                    title_discriminators)
@@ -213,6 +214,35 @@ def main():
 
     # 3. remaining double-referenced events -> single owner
     strip_double_refs(stories, events, log)
+
+    # 0c. derived-fields sweep: absorb unions last_seen/cves/sources in, but
+    # the drift incident stripped events without rolling them back — dead
+    # stories stayed "hot" on timestamps (and CVEs) of events they no longer
+    # hold. Recompute from current events for every live story.
+    recomputed = 0
+    for s in stories.values():
+        if s.get("merged_into") or not s.get("events"):
+            continue
+        last, cves, sources = "", set(), []
+        for r in s["events"]:
+            e = events.get(r["event_id"])
+            if not e:
+                continue
+            last = max(last, e.get("published_at", "") or "")
+            cves |= set(e.get("cves") or [])
+            d = domain_of(e["url"]) if e.get("url") else ""
+            if d and d not in sources:
+                sources.append(d)
+        if (s.get("last_seen") != (last or s.get("last_seen", ""))
+                or set(s.get("cves", [])) != cves or s.get("sources") != sources):
+            s["last_seen"] = last or s.get("last_seen", "")
+            s["cves"] = sorted(cves)
+            s["sources"] = sources
+            s["n_sources"] = len(sources)
+            recomputed += 1
+    if recomputed:
+        log.append(f"derived fields recomputed on {recomputed} stories "
+                   f"(stale last_seen/cves/sources rolled back)")
 
     print(f"repair: {len(log)} actions")
     for line in log:

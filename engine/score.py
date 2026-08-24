@@ -36,7 +36,11 @@ AUTHORITY = {"reuters.com": 2.0, "apnews.com": 1.9, "bbc.com": 1.9, "bloomberg.c
              "malware.news": 1.2}
 DEFAULT_AUTHORITY = 1.0
 
-KEV_DIR = "/home/coder/workspace/kevrichment/data/cves"
+KEV_DIR = os.environ.get("TIA_KEV_DIR") or os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+    "kevrichment", "data", "cves")
+# (was hardcoded /home/coder/workspace/... — a dead path on this host, which
+# silently disabled KEV lookup: stories showed kev:false for CVEs CISA listed)
 
 SIGNALS = [
     (re.compile(r"\bzero[- ]day\b", re.I), 0.3),

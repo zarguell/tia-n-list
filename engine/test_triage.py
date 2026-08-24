@@ -86,10 +86,22 @@ try:
                "published_at": "2026-08-20T00:00:00Z", "cves": [], "kind": "original"},
               open(os.path.join(tmp, "events", "e9.json"), "w"))
 
+    # contamination probe: mech also absorbed a stale event e_stale (newer
+    # timestamp + CVE) that a later strip must roll back out of derived fields
+    json.dump({"id": "e_stale", "title": "T stale", "source": "y", "url": "",
+               "published_at": "2026-08-24T23:00:00Z", "cves": ["CVE-2026-99999"],
+               "kind": "update"}, open(os.path.join(tmp, "events", "e_stale.json"), "w"))
+    mech = json.load(open(os.path.join(tmp, "stories", "mech.json")))
+    mech["events"].append({"event_id": "e_stale", "label": "update"})
+    mech["cves"] = ["CVE-2026-99999"]
+    mech["last_seen"] = "2026-08-24T23:00:00Z"
+    json.dump(mech, open(os.path.join(tmp, "stories", "mech.json"), "w"))
+
     # drifted decisions: top-level "events", "story_id", one NEW for an event
     # merge.py already placed, one merge for the twin
     decfile = os.path.join(tmp, "decisions.json")
     json.dump({"events": [
+        {"id": "e_stale", "action": "keep", "story_id": "existing"},
         {"id": "e1", "action": "keep", "story_id": "existing"},
         {"id": "e2", "action": "keep", "story_id": "NEW",
          "story_title": "Clean Title"}],
@@ -108,7 +120,11 @@ try:
     st = {sid: json.load(open(os.path.join(tmp, "stories", f"{sid}.json")))
           for sid in ("mech", "existing", "dup")}
     check("e1 reassigned to existing (e2 joins via later merge)",
-          [r["event_id"] for r in st["existing"]["events"]], ["e9", "e1", "e2"])
+          [r["event_id"] for r in st["existing"]["events"]],
+          ["e9", "e_stale", "e1", "e2"])
+    check("stale derived fields rolled back on strip",
+          (st["mech"]["last_seen"], st["mech"]["cves"]),
+          ("2026-08-24T10:00:00Z", []))
     check("e1 stripped from mechanical story", st["mech"]["events"], [])
     check("emptied mech redirects", st["mech"].get("merged_into"), "existing")
     check("no -2 twin minted", sorted(os.listdir(os.path.join(tmp, "stories"))),
@@ -116,7 +132,8 @@ try:
     # merge targeted mech, which had just become a shell -> resolved to existing
     check("merge into shell resolves through redirect", st["dup"].get("merged_into"), "existing")
     check("e2 landed on the live canonical story",
-          sorted(r["event_id"] for r in st["existing"]["events"]), ["e1", "e2", "e9"])
+          sorted(r["event_id"] for r in st["existing"]["events"]),
+          ["e1", "e2", "e9", "e_stale"])
 finally:
     shutil.rmtree(tmp)
 

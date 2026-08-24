@@ -250,6 +250,29 @@ def _normalize_decisions(dec):
     return out, merges, ignored
 
 
+def _recompute_derived(story):
+    """Derived fields must reflect ONLY the events a story currently holds.
+    Absorb unions last_seen/cves/sources in, but strips (drop/reassign/merge)
+    never rolled them back — a stripped event left its timestamp and CVEs
+    behind, resurrecting dead stories in the hot scores (2026-08-24 metabase
+    incident: 12-day-old story scored hot on a roundup's last_seen)."""
+    last, cves, sources = "", set(), []
+    for r in story.get("events", []):
+        e = _read_event(r["event_id"])
+        if not e:
+            continue
+        last = max(last, e.get("published_at", "") or "")
+        cves |= set(e.get("cves") or [])
+        d = _domain(e.get("url"))
+        if d and d not in sources:
+            sources.append(d)
+    if story["events"]:
+        story["last_seen"] = last or story.get("last_seen", "")
+        story["cves"] = sorted(cves)
+        story["sources"] = sources
+    story["n_sources"] = len(story.get("sources", []))
+
+
 def _strip_event_refs(stories, eid, keep_sid):
     """An event lives in exactly ONE story: drop stale references the
     mechanical merge left in other stories. Returns slugs emptied by the
@@ -260,6 +283,7 @@ def _strip_event_refs(stories, eid, keep_sid):
             continue
         if any(r["event_id"] == eid for r in s.get("events", [])):
             s["events"] = [r for r in s["events"] if r["event_id"] != eid]
+            _recompute_derived(s)          # roll back last_seen/cves/sources too
             if not s["events"]:
                 emptied.append(sid)
     return emptied
@@ -429,6 +453,7 @@ def apply(decisions_path):
         stories[frm]["merged_into"] = into
         stories[frm]["events"] = []
         stories[frm]["n_sources"] = 0
+        _recompute_derived(stories[into])   # merged events may extend derived fields
         print(f"  merged {frm} -> {into}")
 
     # persist stories
