@@ -96,10 +96,23 @@ def load_all():
     return out
 
 
+def _prio_entry(cid, cls, attempts, d):
+    """Priority tuple for worst-first ordering: freshest KEV add first
+    (defenders are patching those today), then CVSS severity, then
+    hypothesis-class (public exploit = live detection gap) before research."""
+    added = d.get("kev_date_added") or ""
+    cvss = d.get("cvss_v3_base_score") or 0.0
+    cls_rank = 0 if cls == "hypothesis" else 1
+    return {"cve": cid, "class": cls, "attempts": attempts,
+            "kev_added": added, "cvss": cvss,
+            "_key": (added, cvss, -cls_rank)}
+
+
 def rebuild(attempts):
     """Classify every record; returns (queue_by_class, totals)."""
     all_recs = load_all()
     queue = {"research": [], "hypothesis": [], "stamp": []}
+    merged = []
     totals = {"ok": 0, "noise": 0, "stuck": 0}
     for cid, (d, _) in all_recs.items():
         c = classify(d)
@@ -110,16 +123,22 @@ def rebuild(attempts):
         if a >= MAX_ATTEMPTS:
             totals["stuck"] += 1
             continue
-        queue[c].append({"cve": cid, "class": c, "attempts": a})
+        e = _prio_entry(cid, c, a, d)
+        queue[c].append({k: v for k, v in e.items() if not k.startswith("_")})
+        merged.append(e)
     for c in queue:
         queue[c].sort(key=lambda e: e["cve"])
+    merged.sort(key=lambda e: e["_key"], reverse=True)
+    for e in merged:
+        del e["_key"]
+    queue["next"] = merged          # worst-first merged order; `take` reads this
     return queue, totals, all_recs
 
 
 def write_list(queue, totals, fixed):
     doc = {
         "updated_at": datetime.now(timezone.utc).isoformat(),
-        "queued": {c: len(v) for c, v in queue.items()},
+        "queued": {c: len(v) for c, v in queue.items() if c != "next"},
         "totals": totals,
         "deterministic_fixes_this_run": fixed,
         "queue": queue,
@@ -163,6 +182,9 @@ def cmd_fix():
             prev_batch = prev.get("current_batch", [])
         except Exception:
             pass
+    def _entries(q):
+        return [e for c in ("research", "hypothesis", "stamp") for e in q[c]]
+
     fixed = {"dup_cwe": 0, "ts_sync": 0, "stamped": 0}
     for cid, (d, p) in load_all().items():
         r = d.get("kevrichment_research", {})
@@ -194,7 +216,7 @@ def cmd_fix():
     # attempts: records from the previous batch still failing -> +1
     n, skipped = rebuild_index()
     queue, totals, _ = rebuild(attempts)
-    still = {e["cve"] for c in queue.values() for e in c}
+    still = {e["cve"] for e in _entries(queue)}
     for e in prev_batch:
         if e["cve"] in still:
             attempts[e["cve"]] = attempts.get(e["cve"], 0) + 1
@@ -213,7 +235,7 @@ def cmd_take(n):
     if not os.path.exists(LIST_PATH):
         print("no burndown.json — run fix first"); return 1
     doc = json.load(open(LIST_PATH))
-    batch = (doc["queue"]["research"] + doc["queue"]["hypothesis"])[:n]
+    batch = doc["queue"]["next"][:n]     # worst-first (freshest KEV, severity, PoC gap)
     doc["current_batch"] = batch
     json.dump(doc, open(LIST_PATH, "w"), indent=1)
     print(json.dumps(batch, indent=1))
