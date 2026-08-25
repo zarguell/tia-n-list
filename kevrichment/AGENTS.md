@@ -63,6 +63,20 @@ For each CVE:
    public PoC repo (github.com, exploit-db.com) → `public_poc_exists = "yes"`
    + URLs in `public_poc_urls`. Only set `"yes"` when a reproducible public
    artifact is confirmed — not for blog descriptions of exploitation.
+2b. **Read the exploit when one exists** — if `public_poc_exists = "yes"`,
+   fetch and READ the PoC repo (code + README, any Nuclei template) BEFORE
+   writing `hunting_hypothesis`. The hypothesis is a defender deliverable:
+   name the concrete observables the exploit produces — header names and
+   value shapes (e.g. `wl-proxy-client-ip` set to `IP;base64`), URI paths /
+   traversal patterns (`/bea_wls_internal/ProxyServlet`, `..;/`), payload
+   markers, response-side signs — AND the log source a defender needs
+   (access logs, WAF/IDS, proxy logs). Call out when default logs won't
+   capture the observable (arbitrary headers are NOT in stock Apache/IIS
+   access logs — they need WAF capture or a custom log format). Generic
+   phrasing ("crafted requests", "malformed headers attempting access-control
+   bypass") is ONLY acceptable when no exploit or technical detail is
+   public. If the "PoC" turns out to be detection-only tooling, say so in
+   `exploit_complexity_notes` instead of implying weaponized code exists.
 3. **Component info** — `"<vendor> <product> <component> vulnerability"` for
    additional sources (security blogs, vendor KBs).
 4. **Default enablement** — if `vulnerable_component_enabled_by_default` is
@@ -135,10 +149,13 @@ git diff --cached --stat        # file count should match your batch + index + r
 4. **Verify record quality before commit** — for every batch CVE:
 
    - JSON valid: `python3 -m json.tool kevrichment/data/cves/<CVE_ID>.json > /dev/null`
-   - `hunting_hypothesis`: 130–200 chars, single sentence, starts with
-     `Monitor for` / `Hunt for` / `Look for`, **never contains `designed to`**
+   - `hunting_hypothesis`: 130–240 chars, single sentence, starts with
+     `Monitor` / `Hunt` / `Look` (for ... or leading with the log source,
+     e.g. `Hunt access logs for ...`), **never contains `designed to`**
      (always boilerplate), no CVSS/PoC/precondition rehash, names the specific
-     component + attack vector + technique.
+     component + attack vector + technique, AND — when `public_poc_exists` is
+     "yes" — cites at least one concrete observable from the actual exploit
+     (header name, path, payload shape) plus the log source to hunt.
    - `vulnerable_component`: specific function/module/endpoint, NOT just the
      product name.
    - `vendor_advisory_url`: vendor advisory, not the NVD page.
