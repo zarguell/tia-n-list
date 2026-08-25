@@ -1,0 +1,5 @@
+CVE-2026-60004 is a remote code execution vulnerability in Gitea affecting all versions prior to 1.27.1. The flaw resides in the diffpatch Git hook installation mechanism, allowing attackers to execute arbitrary code on the server. CISA added this CVE to the Known Exploited Vulnerabilities database on August 25, 2026, confirming active exploitation in the wild.
+
+Gitea is a self-hosted, lightweight Git service popular with organizations running their own infrastructure. An RCE in this context means any attacker who can trigger a diffpatch operation gains full server access. This is particularly dangerous for organizations using Gitea for internal code review or CI/CD pipelines, where a single compromised repository could pivot to the broader network.
+
+Patches are available: Gitea 1.27.1 and 1.27.2. Organizations running older versions should update immediately. The KEV designation means exploitation deadlines apply for federal agencies, but any Gitea deployment should treat this as urgent given the confirmed in-the-wild activity.
