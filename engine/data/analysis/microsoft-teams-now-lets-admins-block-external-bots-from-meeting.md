@@ -1,0 +1,5 @@
+Microsoft is rolling out a new Teams meeting policy that automatically blocks identified external bots from joining meetings. The feature, announced in message center notice MC1459141 on August 21, 2026, targets unauthorized AI notetakers, transcription tools, and recording assistants that may enter sensitive virtual meetings without explicit consent.
+
+This is a direct response to the proliferation of AI meeting assistant bots that organizations have struggled to control. The policy gives Teams administrators an automated enforcement mechanism rather than relying on individual meeting organizers to manually detect and remove unwanted participants. It addresses a real operational security gap, particularly for organizations handling confidential discussions.
+
+The update affects organizations using Microsoft Teams for meetings with external participants. Administrators should review the new policy settings and test the bot-blocking behavior in non-production environments before the feature rolls out broadly. Watch for false positives if your organization uses sanctioned third-party meeting tools that rely on bot frameworks.
