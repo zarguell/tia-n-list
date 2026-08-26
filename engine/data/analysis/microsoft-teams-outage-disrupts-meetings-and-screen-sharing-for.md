@@ -1,0 +1,5 @@
+Microsoft Teams experienced a service disruption on August 26, 2026, preventing some customers from creating or joining meetings and using screen sharing. Microsoft posted an update at 7:26 a.m. IST stating that monitoring indicated the issue was largely mitigated and that engineers would continue observing for 15 to 30 minutes. Japanese users began reporting failures after 9:00 a.m. local time, and "Teams" trended on X.
+
+One-to-one calls appeared to remain functional, suggesting the outage was concentrated in meeting services rather than a complete client failure. For security and IT operations teams, this distinction matters: failed meeting joins and creation workflows can interrupt incident bridges, SOC huddles, executive escalations, and tabletop exercises.
+
+Organizations that rely on Teams as their primary emergency communication channel should classify a broad collaboration failure as a continuity event rather than a productivity issue. During vendor-side incidents, fallback options include switching to Teams on web or mobile, using a backup conference bridge, and notifying stakeholders through alternative channels.
