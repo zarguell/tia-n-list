@@ -1,0 +1,5 @@
+CVE-2026-18431 is a critical 9.8-severity vulnerability chain in the Avada WordPress theme that enables unauthenticated remote code execution with zero user interaction. The exploit chains six separate flaws across authorization, input-validation, trust-boundary, and file-handling mechanisms. Attackers must trigger these weaknesses in a specific sequence to escalate from anonymous access to arbitrary PHP code execution on the server.
+
+Avada is one of the most widely deployed WordPress themes, with the vulnerability affecting versions up to 7.16 and Fusion Builder plugin up to 3.16. Successful exploitation grants full server-side control, allowing attackers to plant backdoors, exfiltrate databases, redirect visitors, or create persistent admin accounts. The Wordfence team discovered the flaw and withheld full technical details to give site operators time to patch.
+
+ThemeFusion has released fixed versions. The attack chain requires no authentication and no clicks from victims, making mass exploitation viable. WordPress site administrators running Avada should update immediately and audit for unauthorized admin accounts or suspicious file modifications.

@@ -1,0 +1,5 @@
+Adobe and NVIDIA both released security advisories on August 25-26 covering multiple products. Adobe's advisory (AV26-848) addresses vulnerabilities in Adobe Campaign Classic, Substance 3D Designer/Painter/Sampler, XD, C2PA Tool, Content Credentials Rust SDK, and Illustrator (2025 and 2026 versions). The advisory includes version-specific patched releases for each affected product.
+
+NVIDIA's advisory (AV26-849) patches vulnerabilities across NemoClaw and OpenShell, Unified Fabric Manager, and DGX Spark (versions prior to 1.110.13). The DGX Spark patch targets a specific version threshold, suggesting potential severity in NVIDIA's AI/ML development platform.
+
+Neither advisory disclosed specific CVE details or severity scores in the Canadian Centre for Cyber Security summaries. Administrators should review vendor bulletins for affected versions and prioritize patches for products in active use. These are routine monthly advisories without indication of active exploitation, but the breadth across creative, AI infrastructure, and enterprise products warrants attention from affected organizations.
