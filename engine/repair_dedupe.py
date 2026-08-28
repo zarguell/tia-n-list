@@ -27,6 +27,7 @@ import sys
 from datetime import datetime, timezone
 
 from build_registry import domain_of
+from score import SB_DEFAULTS as _SB_DEFAULTS, backfill_score_breakdown
 from merge import (GENERIC, DATE_STOP, _norm_tokens, _series_codes,
                    title_jaccard as jac, distinct_series_codes,
                    title_discriminators)
@@ -261,11 +262,20 @@ def main():
             continue
         try:
             sc = score_mod.hot_score(s, events, reddit_posts)
+            s["score"] = sc["score"]
+            s["score_breakdown"] = {k: v for k, v in sc.items() if k != "score"}
         except Exception as e:
+            # A scoring failure for ONE story must not wipe a valid breakdown
+            # or write an empty one (that crashes the SSG render and blocks
+            # the publish). Preserve the existing breakdown/score if present;
+            # otherwise fall back to a safe zero breakdown with every key.
             print(f"  WARN: score {s['id']}: {e}")
-            sc = {"score": 0.0}
-        s["score"] = sc["score"]
-        s["score_breakdown"] = {k: v for k, v in sc.items() if k != "score"}
+            s.setdefault("score_breakdown", dict(_SB_DEFAULTS))
+            s.setdefault("score", 0.0)
+        # Crash-safety: guarantee every template key exists, so a stale or
+        # missing-key breakdown can never take down the build.
+        backfill_score_breakdown(s)
+        s.setdefault("score", 0.0)
         json.dump(s, open(os.path.join(STORIES, s["id"] + ".json"), "w"), indent=1)
         if s["score"] >= HOT_THRESHOLD:
             ap = os.path.join(ANALYSIS, s["id"] + ".md")

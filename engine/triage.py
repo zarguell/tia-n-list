@@ -68,14 +68,10 @@ NEEDS = os.path.join(DATA, "needs-analysis.json")
 ANALYSIS = os.path.join(DATA, "analysis")
 HOT_THRESHOLD = 3.3      # 0-10 scale (was 2.0 on 0-6); same analysis-queue bar as merge.py
 
-# Keys the SSG "Why this score" template renders from score_breakdown. A story
-# missing any of these raises a jinja UndefinedError that aborts the whole site
-# build and blocks the hourly publish, so we backfill defensively below.
-_SB_KEYS = ("base", "breadth", "authority", "severity", "velocity",
-            "pickup", "recency", "reddit", "kev", "n_sources")
-_SB_DEFAULTS = {k: (1.0 if k == "recency" else (False if k == "kev"
-                else (0 if k == "n_sources" else 0.0)))
-                for k in _SB_KEYS}
+# SSG "Why this score" backfill helper + defaults live in score.py (so a
+# story missing any breakdown key can't raise jinja UndefinedError and abort
+# the build).
+from score import SB_DEFAULTS as _SB_DEFAULTS, backfill_score_breakdown
 
 NOW = datetime.now(timezone.utc)
 TODAY = NOW.strftime("%Y-%m-%d")
@@ -493,15 +489,7 @@ def apply(decisions_path):
             s.setdefault("score", 0.0)
         # Crash-safety: guarantee every template key exists, so a stale or
         # missing-key breakdown can never take down the build.
-        sb = s.get("score_breakdown")
-        if not isinstance(sb, dict):
-            sb = {}
-            s["score_breakdown"] = sb
-        missing = [k for k in _SB_KEYS if k not in sb]
-        if missing:
-            print(f"  WARN: {s['id']} score_breakdown missing {missing}; backfilling")
-            for k in missing:
-                sb[k] = _SB_DEFAULTS[k]
+        backfill_score_breakdown(s)
         s.setdefault("score", 0.0)
         json.dump(s, open(os.path.join(STORIES, s["id"] + ".json"), "w"), indent=1)
         if s["score"] >= HOT_THRESHOLD:

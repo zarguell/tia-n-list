@@ -16,7 +16,7 @@ import re
 from datetime import datetime, timezone
 
 from build_registry import clean_title, tokens, domain_of
-from score import hot_score
+from score import hot_score, SB_DEFAULTS as _SB_DEFAULTS, backfill_score_breakdown
 
 ENGINE = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(ENGINE, "data")
@@ -312,9 +312,22 @@ def main():
             manifest["stories_per_day"][day].append(target_slug)
 
     for s in stories.values():
-        sc = real_score(s)
-        s["score"] = sc["score"]
-        s["score_breakdown"] = {k: v for k, v in sc.items() if k != "score"}
+        try:
+            sc = real_score(s)
+            s["score"] = sc["score"]
+            s["score_breakdown"] = {k: v for k, v in sc.items() if k != "score"}
+        except Exception as e:
+            # One story's scoring failure must not abort the whole merge nor
+            # leave an empty score_breakdown (which crashes the SSG render and
+            # blocks the publish). Preserve the existing breakdown/score; else
+            # fall back to a safe zero breakdown with every template key.
+            print(f"  WARN: score {s['id']}: {e}")
+            s.setdefault("score_breakdown", dict(_SB_DEFAULTS))
+            s.setdefault("score", 0.0)
+        # Crash-safety: guarantee every template key exists, so a stale or
+        # missing-key breakdown can never take down the build.
+        backfill_score_breakdown(s)
+        s.setdefault("score", 0.0)
         json.dump(s, open(os.path.join(STORIES, s["id"] + ".json"), "w"), indent=1)
 
     json.dump(manifest, open(MANIFEST, "w"), indent=1)

@@ -59,6 +59,32 @@ SIGNALS = [
 ]
 SIGNAL_CAP = 1.5
 
+# Keys the SSG "Why this score" template renders from a score breakdown.
+# A story missing any of these raises a jinja UndefinedError that aborts the
+# whole site build, so the store writers (merge / repair_dedupe / triage)
+# backfill defensively. recency is a temporal MULTIPLIER, so its neutral
+# fallback is 1.0 (no decay), not 0.0 (which would zero the score).
+SB_KEYS = ("base", "breadth", "authority", "severity", "velocity",
+           "pickup", "recency", "reddit", "kev", "n_sources")
+SB_DEFAULTS = {k: (1.0 if k == "recency" else (False if k == "kev"
+             else (0 if k == "n_sources" else 0.0))) for k in SB_KEYS}
+
+
+def backfill_score_breakdown(story):
+    """Guarantee story['score_breakdown'] carries every key the SSG 'Why this
+    score' template renders, so a stale or exception-produced breakdown can
+    never raise jinja UndefinedError and abort the build. Preserves existing
+    values; backfills only missing keys from SB_DEFAULTS."""
+    sb = story.get("score_breakdown")
+    if not isinstance(sb, dict):
+        sb = {}
+        story["score_breakdown"] = sb
+    for k in SB_KEYS:
+        if k not in sb:
+            sb[k] = SB_DEFAULTS[k]
+    return story
+
+
 _cve_store = None
 
 
