@@ -68,6 +68,15 @@ NEEDS = os.path.join(DATA, "needs-analysis.json")
 ANALYSIS = os.path.join(DATA, "analysis")
 HOT_THRESHOLD = 3.3      # 0-10 scale (was 2.0 on 0-6); same analysis-queue bar as merge.py
 
+# Keys the SSG "Why this score" template renders from score_breakdown. A story
+# missing any of these raises a jinja UndefinedError that aborts the whole site
+# build and blocks the hourly publish, so we backfill defensively below.
+_SB_KEYS = ("base", "breadth", "authority", "severity", "velocity",
+            "pickup", "recency", "reddit", "kev", "n_sources")
+_SB_DEFAULTS = {k: (1.0 if k == "recency" else (False if k == "kev"
+                else (0 if k == "n_sources" else 0.0)))
+                for k in _SB_KEYS}
+
 NOW = datetime.now(timezone.utc)
 TODAY = NOW.strftime("%Y-%m-%d")
 
@@ -471,11 +480,29 @@ def apply(decisions_path):
             continue
         try:
             sc = score_mod.hot_score(s, events, reddit_posts)
+            s["score"] = sc["score"]
+            s["score_breakdown"] = {k: v for k, v in sc.items() if k != "score"}
         except Exception as e:
+            # A scoring failure for ONE story must not wipe a valid breakdown
+            # or write an empty one (that crashes the SSG render and blocks the
+            # whole publish). Preserve the existing breakdown/score if present;
+            # otherwise fall back to a minimal zero breakdown carrying every
+            # template key.
             print(f"  WARN: score {s['id']}: {e}")
-            sc = {"score": 0.0}
-        s["score"] = sc["score"]
-        s["score_breakdown"] = {k: v for k, v in sc.items() if k != "score"}
+            s.setdefault("score_breakdown", dict(_SB_DEFAULTS))
+            s.setdefault("score", 0.0)
+        # Crash-safety: guarantee every template key exists, so a stale or
+        # missing-key breakdown can never take down the build.
+        sb = s.get("score_breakdown")
+        if not isinstance(sb, dict):
+            sb = {}
+            s["score_breakdown"] = sb
+        missing = [k for k in _SB_KEYS if k not in sb]
+        if missing:
+            print(f"  WARN: {s['id']} score_breakdown missing {missing}; backfilling")
+            for k in missing:
+                sb[k] = _SB_DEFAULTS[k]
+        s.setdefault("score", 0.0)
         json.dump(s, open(os.path.join(STORIES, s["id"] + ".json"), "w"), indent=1)
         if s["score"] >= HOT_THRESHOLD:
             ap = os.path.join(ANALYSIS, s["id"] + ".md")
