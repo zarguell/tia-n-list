@@ -1,0 +1,45 @@
+title: Potential Unauthenticated RCE via ServiceNow Code Injection (CVE-2026-18885)
+id: c5e9f2b4-7a3d-4c8b-af6e-2d4a9c1c3e5f
+status: experimental
+description: Detects potential exploitation of ServiceNow AI Platform code injection vulnerabilities CVE-2026-18885 (RCE), CVE-2026-18886 (privilege escalation), and CVE-2026-74820 (SQL injection). Monitor for anomalous process creation on ServiceNow instances.
+references:
+  - https://cyberpress.org/servicenow-patches-critical-rce-sql-injection
+  - https://www.bleepingcomputer.com/news/security/servicenow-critical-vulnerabilities
+author: Tia N. List
+date: 2026-08-28
+tags:
+  - attack.t1190
+logsource:
+  category: process_creation
+  product: linux
+detection:
+  selection_process:
+    EventID: 1
+    Image|endswith:
+      - '/java'
+      - '/java.exe'
+    CommandLine|contains:
+      - '-Dcatalina.base'
+      - '-Dservicenow'
+      - 'glide.servlet.properties'
+  selection_anomalous_cmd:
+    EventID: 1
+    Image|endswith:
+      - '/sh'
+      - '/bash'
+      - '/dash'
+    ParentImage|contains:
+      - 'java'
+      - 'servicenow'
+  selection_sql_artifact:
+    EventID: 1
+    CommandLine|contains:
+      - 'UNION SELECT'
+      - 'DROP TABLE'
+      - 'xp_cmdshell'
+      - 'EXEC xp_'
+  condition: selection_process or (selection_anomalous_cmd and selection_sql_artifact)
+falsepositives:
+  - Legitimate ServiceNow platform administration
+  - Scheduled ServiceNow maintenance tasks
+level: high

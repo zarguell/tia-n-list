@@ -1,0 +1,45 @@
+title: AI Infrastructure Compromise - Environment Variable Exfiltration
+id: e7a1b4c6-9c5f-4e0d-cf8a-4f6c1e3d5a7b
+status: experimental
+description: Detects potential compromise of AI gateway infrastructure (LiteLLM, RAGFlow, Kestra) through environment variable harvesting from /proc/1/environ and anomalous database access patterns. Based on Microsoft and GBHackers reporting on AI infrastructure targeting campaigns.
+references:
+  - https://cyberpress.org/hackers-target-litellm-ragflow-kestra-ai
+  - https://www.microsoft.com/en-us/security/blog/ai-infrastructure-targeting
+author: Tia N. List
+date: 2026-08-28
+tags:
+  - attack.t1190
+  - attack.t1552
+  - attack.t1041
+logsource:
+  category: process_creation
+  product: linux
+detection:
+  selection_environ_access:
+    EventID: 1
+    CommandLine|contains:
+      - '/proc/1/environ'
+      - 'cat /proc/1/environ'
+      - 'strings /proc/1/environ'
+  selection_env_harvest:
+    EventID: 1
+    CommandLine|contains:
+      - 'OPENAI_API_KEY'
+      - 'ANTHROPIC_API_KEY'
+      - 'LITELLM_MASTER_KEY'
+      - 'AZURE_API_KEY'
+      - 'GEMINI_API_KEY'
+      - 'DATABASE_URL'
+  selection_db_access:
+    EventID: 1
+    CommandLine|contains:
+      - 'psql'
+      - 'pg_dump'
+      - 'SELECT * FROM model_config'
+      - 'SELECT * FROM virtual_key'
+      - 'litelimit.postgresql'
+  condition: selection_environ_access or selection_env_harvest or selection_db_access
+falsepositives:
+  - Legitimate AI platform administration
+  - Authorized database maintenance operations
+level: critical

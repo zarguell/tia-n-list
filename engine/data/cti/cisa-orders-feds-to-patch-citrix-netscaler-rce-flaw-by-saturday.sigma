@@ -1,0 +1,35 @@
+title: Potential Citrix NetScaler Memory Overflow Exploitation (CVE-2026-8452)
+id: b4d8e1a3-6f2c-4b7a-9e5d-1c3a8f0b2d4e
+status: experimental
+description: Detects potential exploitation attempts against Citrix NetScaler ADC/Gateway appliances via CVE-2026-8452 memory overflow. Monitor for anomalous Gateway VPN/AAA virtual server activity and unexpected root shell spawning on NetScaler appliances.
+references:
+  - https://www.bleepingcomputer.com/news/security/cisa-orders-patch-citrix-netscaler-rce
+  - https://www.securityweek.com/citrix-netscaler-rce-cve-2026-8452
+  - https://www.cisa.gov/known-exploited-vulnerabilities-catalog
+author: Tia N. List
+date: 2026-08-28
+tags:
+  - attack.t1190
+logsource:
+  category: process_creation
+  product: netscaler
+detection:
+  selection_gateway:
+    EventID: 300010
+    Description|contains:
+      - 'Gateway'
+      - 'AAA'
+  selection_shell_spawn:
+    EventID: 1
+    Image|endswith:
+      - '/bin/sh'
+      - '/bin/bash'
+    ParentImage|contains:
+      - 'nscmond'
+      - 'nsaadclientd'
+      - 'nsppe'
+  condition: selection_gateway and selection_shell_spawn
+falsepositives:
+  - Authorized administrative access to NetScaler appliances
+  - Legitimate Gateway VPN session handling
+level: critical
