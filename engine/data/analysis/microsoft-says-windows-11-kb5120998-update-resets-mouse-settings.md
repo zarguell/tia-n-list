@@ -1,0 +1,5 @@
+Microsoft confirmed that the KB5120998 August 2026 non-security preview update reverts mouse cursor personalization settings on Windows 11 systems. Affected users report that high-DPI mouse cursors are replaced with larger white cursors and custom cursor animations revert to standard settings. More critically, Microsoft says attempts to restore previous cursor customizations are unsuccessful.
+
+The issue affects Windows 11 versions 25H2 and 24H2. Microsoft is investigating the root cause and asking affected users to file Feedback Hub reports. Since KB5120998 is an optional non-security update, users who have not enabled "Get the latest updates as soon as they're available" are not automatically exposed.
+
+While this is not a security vulnerability, it is an operational regression in an update that introduces Start menu, taskbar, and Windows search improvements. The inability to restore settings makes it more than a cosmetic annoyance. Organizations that allow optional Windows updates should be aware this can affect user productivity, and users who rely on accessibility-related cursor customizations may face real disruption.
