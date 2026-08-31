@@ -1,0 +1,39 @@
+title: Blind Eagle VBScript Dropper via wscript.exe from Archive Extraction
+id: b7e2d4f1-9c3a-4b8e-a1d5-6f8c2e4a3b71
+status: experimental
+description: >
+  Detects VBScript execution by wscript.exe from paths typically associated with
+  self-extracting archive extraction (Temp, Downloads, AppData\Local\Temp), as used
+  by the Blind Eagle-linked loader to deploy AsyncRAT. The campaign uses self-extracting
+  RAR archives disguised as invoice/PDF attachments that launch VBScript-based droppers.
+references:
+  - https://cyberpress.org
+  - https://gbhackers.com
+author: Tia N. List
+date: 2026-08-31
+tags:
+  - attack.t1059
+  - attack.t1193
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection_wscript:
+    Image|endswith: '\wscript.exe'
+    CommandLine|contains:
+      - '.vbs'
+      - '.vbe'
+  selection_paths:
+    - CommandLine|contains:
+        - '\AppData\Local\Temp\'
+        - '\Temp\'
+        - '\Downloads\'
+        - '\AppData\Roaming\'
+    - ParentImage|endswith:
+        - '\rar.exe'
+        - '\7z.exe'
+        - '\7zFM.exe'
+  condition: selection_wscript and selection_paths
+falsepositives:
+  - Legitimate VBScript files executed from temporary directories
+level: high

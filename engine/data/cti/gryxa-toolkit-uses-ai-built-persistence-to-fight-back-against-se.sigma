@@ -1,0 +1,39 @@
+title: Gryxa Toolkit Scheduled Task Persistence in Hidden Directories
+id: a3f7c2e1-8b4d-4e9a-b6f2-1d5e8c3a7b90
+status: experimental
+description: >
+  Detects creation of scheduled tasks pointing to executables in hidden or
+  non-standard directories such as C:\ProgramData\WinRTCS or Windows Error
+  Reporting-like paths, as used by the Gryxa toolkit for aggressive persistence.
+  Gryxa creates at least seven scheduled tasks running as SYSTEM at 1/5/15 minute
+  intervals across multiple hidden directories to survive incomplete remediation.
+references:
+  - https://gbhackers.com
+  - https://cyberpress.org
+author: Tia N. List
+date: 2026-08-31
+tags:
+  - attack.t1053
+  - attack.t1547
+logsource:
+  product: windows
+  service: scheduled-task
+detection:
+  selection_hidden_dir:
+    EventID: 106
+    TaskName|contains:
+      - '\WinRTCS\'
+      - '\WerReporting\'
+      - '\WinErr\'
+      - '\ProgramData\.'
+  selection_hidden_dir_action:
+    EventID: 200
+    TaskName|contains:
+      - '\WinRTCS\'
+      - '\WerReporting\'
+      - '\WinErr\'
+      - '\ProgramData\.'
+  condition: selection_hidden_dir or selection_hidden_dir_action
+falsepositives:
+  - Legitimate software using ProgramData subdirectories for scheduled tasks
+level: high
