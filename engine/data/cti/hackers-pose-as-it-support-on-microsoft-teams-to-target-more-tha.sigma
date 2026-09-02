@@ -1,0 +1,44 @@
+title: Spring Ring Campaign - Teams Social Engineering Reconnaissance Commands
+id: c9a5d3e6-14b8-5f0c-d7a3-5e9b1c4f0a6d
+status: experimental
+description: >
+    Detects reconnaissance commands executed after Spring Ring campaign
+    actors gain remote access via Microsoft Teams social engineering
+    (gbhackers, 2026). Attackers impersonate IT support, use Quick Assist
+    or third-party RMM tools, then run whoami /groups, net group /dom,
+    and PowerShell to download a RAT from san-sid.com. A second variant
+    uses NTLM relay techniques after obtaining NTLMv2 hashes.
+references:
+    - https://gbhackers.com
+    - https://cyberpress.org
+author: Tia N. List
+date: 2026/09/02
+tags:
+    - attack.t1059
+    - attack.t1219
+    - attack.t1087
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_recon_whoami:
+        Image|endswith: '\whoami.exe'
+        CommandLine|contains: '/groups'
+    selection_recon_net:
+        Image|endswith: '\net.exe'
+        CommandLine|contains:
+            - 'group /dom'
+            - 'group /domain'
+    selection_rmm_download:
+        Image|endswith:
+            - '\powershell.exe'
+            - '\pwsh.exe'
+        CommandLine|contains:
+            - 'san-sid.com'
+            - 'Invoke-WebRequest'
+            - 'DownloadString'
+    condition: selection_recon_whoami or selection_recon_net or selection_rmm_download
+falsepositives:
+    - Legitimate IT administration performing group enumeration
+    - RMM tools performing similar reconnaissance during authorized remote sessions
+level: high
