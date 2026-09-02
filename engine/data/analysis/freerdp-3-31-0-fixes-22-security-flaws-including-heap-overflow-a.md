@@ -1,0 +1,5 @@
+FreeRDP version 3.31.0 addresses 22 disclosed vulnerabilities, including heap overflow and pre-authentication denial-of-service bugs. The project maintainers called it a "huge bugfix and security release" and urged immediate distribution updates. Pre-authentication flaws are particularly concerning because unauthenticated attackers can crash or disrupt exposed RDP services before any login occurs.
+
+The memory-corruption issues, including the heap overflow, carry potential for information disclosure or code execution depending on the affected component and runtime mitigations. FreeRDP is widely deployed in Linux desktop environments, thin clients, RDP gateways, virtualization consoles, and embedded systems, making the blast radius significant across enterprise and service-provider infrastructure.
+
+FreeRDP has not publicly detailed every individual CVE in its release announcement but linked 22 associated security advisories. Organizations using FreeRDP-based products should prioritize patching, particularly where RDP endpoints are internet-facing. The pre-auth DoS bugs alone warrant expedited deployment since they require no credentials to trigger.
