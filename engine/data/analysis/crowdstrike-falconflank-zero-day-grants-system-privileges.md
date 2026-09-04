@@ -1,0 +1,5 @@
+An anonymous researcher operating under the handle "Nightmare Eclipse" has released a CrowdStrike Falcon zero-day exploit named "FalconFlank." The vulnerability enables privilege escalation to SYSTEM on fully updated Windows 11 25H2 and Windows Server 2025 systems running CrowdStrike Falcon. The exploit abuses Falcon's Office malicious macros remediation feature.
+
+CrowdStrike is investigating the claims and has advised customers to disable the Microsoft Office File Suspicious Macro Removal Windows policy setting. The researcher states the exploit works on fully updated systems but notes CrowdStrike would likely have detections by the time of disclosure.
+
+This vulnerability is particularly concerning because it targets a security product designed to protect endpoints. Organizations using CrowdStrike Falcon should apply any available mitigations and monitor for updates from the vendor. The disclosure follows responsible disclosure practices, with CrowdStrike given advance notice.

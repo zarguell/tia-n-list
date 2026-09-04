@@ -1,0 +1,5 @@
+The financially motivated threat actor Toy Ghouls has expanded its malware arsenal with two new Windows backdoors. The group now abuses HiveMQ's public MQTT infrastructure and the Matrix-based Element messaging platform for command-and-control communications. This represents a notable evolution from the group's previous reliance on publicly available tools and leaked ransomware builders.
+
+The use of legitimate messaging infrastructure for C2 is a growing trend. MQTT brokers and Matrix servers provide encrypted, resilient communication channels that blend with normal enterprise traffic, making detection more difficult for defenders.
+
+Toy Ghouls' shift to custom malware suggests increasing sophistication and investment in their operations. Organizations should monitor for anomalous MQTT and Matrix protocol traffic, particularly from endpoints that have no legitimate reason to use these services.
