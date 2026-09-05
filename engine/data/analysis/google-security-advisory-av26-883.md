@@ -1,0 +1,1 @@
+google-security-advisory-av26-883: merged into google-warns-of-new-chrome-zero-day-flaw-exploited-in-attacks (Google Chrome zero-day, CVE-2026-85046 among others). This advisory covered the same active Chrome exploit as the parent story; no independent analysis needed.
