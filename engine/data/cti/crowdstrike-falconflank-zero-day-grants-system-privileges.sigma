@@ -1,0 +1,41 @@
+title: CrowdStrike FalconFlank Privilege Escalation via Macro Remediation
+id: c8d4e9f2-5a3b-48c7-b6d9-2e0f8a3c1d57
+status: experimental
+description: >
+    Detects potential exploitation of the FalconFlank zero-day vulnerability in
+    CrowdStrike Falcon Sensor for Windows. The exploit abuses Falcon's Office
+    malicious macros remediation feature to escalate to SYSTEM privileges. This
+    rule detects the anomalous pattern of Falcon's remediation process spawning
+    shell interpreters (cmd.exe, powershell.exe) with elevated privileges, which
+    indicates the remediation workflow is being abused for privilege escalation.
+references:
+    - https://www.bleepingcomputer.com
+    - https://cyberpress.org
+    - https://github.com/MSNightmare/FalconFlank
+author: Tia N. List
+date: 2026/09/05
+tags:
+    - attack.t1068
+    - attack.t1548
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_falcon_shell:
+        ParentImage|endswith:
+            - '\falconsvc.exe'
+            - '\falconcontainer.exe'
+            - '\CSFalconService.exe'
+        Image|endswith:
+            - '\cmd.exe'
+            - '\powershell.exe'
+            - '\pwsh.exe'
+            - '\conhost.exe'
+    selection_falcon_spawn:
+        Image|endswith: '\falconsvc.exe'
+        IntegrityLevel: 'System'
+    condition: selection_falcon_shell or selection_falcon_spawn
+falsepositives:
+    - Legitimate Falcon remediation actions (rare, should be validated with CrowdStrike support)
+    - Falcon service process spawning conhost.exe for logging output (uncommon)
+level: high
