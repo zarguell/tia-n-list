@@ -33,10 +33,15 @@ def safe_url(url):
 def load_events():
     """All events as {id: {...meta, content_md, url}} — content merged from the
     .md sidecar, url scheme-filtered."""
+    import sys
     events = {}
     for path in sorted(glob.glob(os.path.join(EVENTS_DIR, "*.json"))):
         eid = os.path.splitext(os.path.basename(path))[0]
-        meta = json.load(open(path))
+        try:
+            meta = json.load(open(path))
+        except (json.JSONDecodeError, OSError) as exc:
+            print(f"WARN: skipping corrupt event file {path}: {exc}", file=sys.stderr)
+            continue
         md_path = os.path.join(EVENTS_DIR, eid + ".md")
         md_text = open(md_path).read() if os.path.exists(md_path) else ""
         meta["content_md"] = md_text
