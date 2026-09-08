@@ -56,6 +56,11 @@ def _load_stories():
         s = json.load(open(p))
         if s.get("merged_into"):
             continue
+        # Mirror ssg.py::load_stories: event-less stories render no
+        # stories/<id>/ page, so referencing them here produces dangling
+        # candidate stories/<id>/ links that fail the publish link lint.
+        if not s.get("events"):
+            continue
         out[s["id"]] = s
     return out
 
