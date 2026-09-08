@@ -26,7 +26,13 @@ EVENTS = os.path.join(DATA, "events")
 STATE = os.path.join(DATA, "state.json")
 QUEUE = os.path.join(DATA, "new-events.json")
 REDDIT = os.path.join(DATA, "reddit.json")
-REDDIT_RSS = "https://www.reddit.com/r/cybersecurity/.rss?limit=100"
+# Reddit is a FULL source now, not just a hot-score signal: posts with an
+# outbound article link are promoted to events (queued for merge clustering
+# like miniflux entries); link-less posts stay signal-only.
+REDDIT_FEEDS = (
+    ("cybersecurity", "https://www.reddit.com/r/cybersecurity/.rss?limit=100"),
+    ("netsec", "https://www.reddit.com/r/netsec/.rss?limit=100"),
+)
 UA = "tia-storyline/1.0"
 CVE_RE = re.compile(r"CVE-\d{4}-\d{4,7}", re.IGNORECASE)
 LOOKBACK_H = 48
@@ -161,37 +167,77 @@ def ingest_miniflux(st, hours):
 
 
 def ingest_reddit(st):
-    posts = []
-    req = urllib.request.Request(REDDIT_RSS, headers={"User-Agent": UA})
-    try:
-        root = ET.fromstring(urllib.request.urlopen(req, timeout=30).read())
-    except Exception as e:
-        print(f"reddit RSS failed: {e}", file=sys.stderr)
-        return
+    """Fetch all reddit feeds; write data/reddit.json (signal layer) AND
+    promote link-posts to events (queued for merge like miniflux entries).
+    Returns (post_count, new_event_ids)."""
+    posts = []          # signal layer (reddit.json shape)
+    new_ids = []        # promoted event ids for the merge queue
     ns = {"a": "http://www.w3.org/2005/Atom"}
     seen_set = set(st.get("seen_reddit", []))
     seen_list = st.get("seen_reddit", [])
-    for e in root.findall("a:entry", ns):
-        title = (e.findtext("a:title", default="", namespaces=ns) or "").strip()
-        pid = (e.findtext("a:id", default="", namespaces=ns) or "").strip()
-        content = e.findtext("a:content", default="", namespaces=ns) or ""
-        links = [l for l in re.findall(r'href="([^"]+)"', content) if "reddit.com" not in l]
-        key = pid or (links[0] if links else title[:40])
-        if key in seen_set:
+    seen_urls = set()
+    for sub, feed in REDDIT_FEEDS:
+        req = urllib.request.Request(feed, headers={"User-Agent": UA})
+        try:
+            root = ET.fromstring(urllib.request.urlopen(req, timeout=30).read())
+        except Exception as e:
+            print(f"reddit RSS failed ({sub}): {e}", file=sys.stderr)
             continue
-        seen_set.add(key)
-        seen_list.append(key)
-        pub = e.findtext("a:published", default="", namespaces=ns)
-        posts.append({"id": pid, "title": title,
-                      "article_url": links[0] if links else None,
-                      "published_at": norm_dt(pub) if pub else None})
+        for e in root.findall("a:entry", ns):
+            title = (e.findtext("a:title", default="", namespaces=ns) or "").strip()
+            pid = (e.findtext("a:id", default="", namespaces=ns) or "").strip()
+            content = e.findtext("a:content", default="", namespaces=ns) or ""
+            links = [l for l in re.findall(r'href="([^"]+)"', content)
+                     if "reddit.com" not in l]
+            key = pid or (links[0] if links else title[:40])
+            if key in seen_set:
+                continue
+            seen_set.add(key)
+            seen_list.append(key)
+            pub = e.findtext("a:published", default="", namespaces=ns)
+            article_url = links[0] if links else None
+            # one event per article per run — two subs posting the same
+            # link must not double-count
+            if article_url and article_url.lower() in seen_urls:
+                article_url_dupe = True
+            else:
+                article_url_dupe = False
+            if article_url:
+                seen_urls.add(article_url.lower())
+            posts.append({"id": pid, "title": title, "sub": sub,
+                          "article_url": article_url,
+                          "published_at": norm_dt(pub) if pub else None})
+            # ── promotion: link-posts become events ──
+            if not article_url or article_url_dupe:
+                continue
+            eid = "rd:" + re.sub(r"[^A-Za-z0-9_-]", "",
+                                 pid or article_url)[:40]
+            if not eid[3:]:
+                continue
+            body = strip_html(content, max_chars=800)
+            ev = {"id": eid,
+                  "title": clean_title(title) or title[:140],
+                  "kind": "pending",
+                  "source": domain_of(article_url),
+                  "url": article_url,
+                  "published_at": norm_dt(pub) if pub
+                  else datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+                  "cves": sorted({c.upper() for c in CVE_RE.findall(
+                      title + " " + body)}),
+                  "lang": detect_lang(title + " " + body)}
+            with open(os.path.join(EVENTS, eid + ".md"), "w") as f:
+                f.write((body + "\n\n" if body else "") +
+                        f"via reddit r/{sub}: {title}\n")
+            json.dump(ev, open(os.path.join(EVENTS, eid + ".json"), "w"),
+                      indent=1)
+            new_ids.append(eid)
     # trim from the FRONT (insertion order), not set order
     if len(seen_list) > REDDIT_WINDOW:
         seen_list = seen_list[-REDDIT_WINDOW:]
         seen_set = set(seen_list)
     st["seen_reddit"] = seen_list
     json.dump(posts, open(REDDIT, "w"), indent=1)
-    return len(posts)
+    return len(posts), new_ids
 
 
 def main():
@@ -200,14 +246,16 @@ def main():
         hours = int(sys.argv[sys.argv.index("--hours") + 1])
     st = load_state()
     new_ids = ingest_miniflux(st, hours)
-    reddit_n = ingest_reddit(st)
+    reddit_n, reddit_event_ids = ingest_reddit(st)
     save_state(st)
     # append to any unconsumed queue (merge may have failed between runs)
     prev = json.load(open(QUEUE)) if os.path.exists(QUEUE) else {"events": []}
-    merged_q = list(dict.fromkeys(prev.get("events", []) + new_ids))
+    merged_q = list(dict.fromkeys(
+        prev.get("events", []) + new_ids + reddit_event_ids))
     queue = {"date": datetime.now(timezone.utc).strftime("%Y-%m-%d"), "events": merged_q}
     json.dump(queue, open(QUEUE, "w"), indent=1)
-    print(f"miniflux new events: {len(new_ids)} | reddit posts: {reddit_n} | watermark: {st['last_miniflux_id']} | queue: {len(merged_q)}")
+    print(f"miniflux new events: {len(new_ids)} | reddit posts: {reddit_n} "
+          f"(+{len(reddit_event_ids)} promoted) | watermark: {st['last_miniflux_id']} | queue: {len(merged_q)}")
 
 
 if __name__ == "__main__":
