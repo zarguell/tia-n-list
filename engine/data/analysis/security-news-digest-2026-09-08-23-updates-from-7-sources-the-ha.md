@@ -1,0 +1,5 @@
+This is a security news digest aggregating 23 updates from 7 sources, anchored by a The Hacker News report on BengalSEO, a search poisoning campaign that hijacks Bing search results to distribute MayaBot malware. The digest flags CVE-2026-75650 as a known exploited vulnerability, which ties to the Adobe Commerce/Magento StyleSmuggler zero-day also being tracked in this cycle.
+
+The digest format limits depth on individual items, but the MayaBot/BengalSEO lead warrants attention: search engine poisoning campaigns that distribute banking trojans or info-stealers through compromised or spoofed search results have historically scaled quickly. The CVE-2026-75650 reference confirms this digest overlaps with the active Magento/Adobe Commerce exploitation wave.
+
+With no individual event files attached, the substance here is the aggregation signal itself: multiple sources converging on the same set of vulnerabilities on the same day, which is a useful breadth indicator even if the individual items require further reading through their source links.
