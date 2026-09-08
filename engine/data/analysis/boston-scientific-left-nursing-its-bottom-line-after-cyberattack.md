@@ -1,0 +1,5 @@
+Boston Scientific disclosed that an August 2026 cyberattack will materially impact its Q3 and full-year financial results. The medical device manufacturer warned investors of the intrusion's operational and revenue consequences, though specific details on the attack vector, data exposure, or threat actor remain limited in public disclosures.
+
+The financial forecast hit signals the incident went beyond a contained network event. For a company that produces cardiac devices, endoscopy tools, and oncology products across global supply chains, downtime or production disruption carries patient-safety implications beyond balance-sheet losses.
+
+Watch for follow-up disclosures on whether protected health information or intellectual property was accessed, regulatory filings related to HIPAA or international data protection obligations, and any CISA or FBI attribution. Medical device manufacturers are high-value targets due to the combination of proprietary RCHD and the urgency of restoring operations.
