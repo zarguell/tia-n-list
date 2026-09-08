@@ -1,0 +1,5 @@
+The U.S. State Department's Rewards for Justice program announced a $10 million reward for information on Amir Yaryab, identified as leading the IRGC-Cyber Electronic Command's Cyber Operations Command. The reward targets individuals conducting malicious cyber activity against U.S. critical infrastructure under foreign government direction.
+
+Yaryab is alleged to oversee Shahid Hemmat and Shahid Shushtari components linked to cyber operations targeting defense, media, shipping, energy, financial services, and telecommunications sectors across the U.S., Europe, and the Middle East. RFJ names three IRGC-CEC-affiliated entities under his direction: CyberAv3ngers, Dadeh Afzar Arman (DAA), and Mehrsam Andisheh Saz Nik (MASN).
+
+CyberAv3ngers gained prominence after targeting internet-exposed Unitronics Vision Series PLCs in late 2023, demonstrating the group's focus on operational technology as both a cyber and cyber-physical threat vector. The reward offer signals U.S. intent to attribute and pursue Iranian cyber operators at the leadership level, not just foot soldiers. It follows recent DOJ indictments and sanctions actions against IRGC-linked cyber actors.
