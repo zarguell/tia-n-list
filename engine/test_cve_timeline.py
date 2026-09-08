@@ -88,11 +88,15 @@ FIXTURES = {
     "stories/cve-a.json": {
         "id": "cve-a", "title": "A", "first_seen": "2026-07-30T00:00:00Z",
         "last_seen": "2026-07-30T00:00:00Z", "cves": ["CVE-2026-59310"],
-        "score": 5.0, "events": [], "merged_into": None},
+        "score": 5.0, "events": [{"event_id": "e1"}], "merged_into": None},
     "stories/cve-b.json": {
         "id": "cve-b", "title": "B", "first_seen": "2026-08-12T11:51:45Z",
         "last_seen": "2026-08-13T09:00:00Z", "cves": ["CVE-2026-59310"],
-        "score": 6.0, "events": []},
+        "score": 6.0, "events": [{"event_id": "e2"}]},
+    "stories/empty-only.json": {   # event-less -> no stories/<id>/ page rendered (ssg.py skips)
+        "id": "empty-only", "title": "Empty digest", "first_seen": "2026-08-13T00:00:00Z",
+        "last_seen": "2026-08-13T00:00:00Z", "cves": ["CVE-2026-90001"],
+        "score": 6.5, "events": []},
     "stories/shell.json": {   # merged-away -> excluded from the join
         "id": "shell", "title": "S", "first_seen": "2026-06-01T00:00:00Z",
         "last_seen": "2026-06-01T00:00:00Z", "cves": ["CVE-2026-59310"],
@@ -165,6 +169,23 @@ def test_build_min_aggregation_and_merged_exclusion():
         assert r["bod"]["timeline_if_not_publicly_exposed"] == "60_days"
         assert r["bod"]["due_if_public"] == "2026-08-16"
         assert r["bod"]["due_if_not_public"] == "2026-10-12"
+
+
+def test_empty_events_story_excluded_no_dangling_candidate_link():
+    """SSG never renders stories/<id>/ for event-less stories, so the
+    timeline join must skip them too — otherwise candidate_view() emits a
+    stories/<id>/ link to a page that was never rendered and the fail-closed
+    publish link lint aborts (2026-09-08: CVE-2026-75650 mentioned only in
+    an empty-events digest blocked the 17:00 and 18:00 UTC publishes)."""
+    for rows in _rows():
+        # CVE mentioned ONLY in the empty-events story must not appear at all
+        assert "CVE-2026-90001" not in rows
+        # ... and no row may reference the event-less story (no dangling link target)
+        for r in rows.values():
+            assert all(s["id"] != "empty-only" for s in r["stories"])
+        for r in tl.candidates(rows):
+            urls = [s["url"] for s in kev.candidate_view(r)["stories"]]
+            assert "stories/empty-only/" not in urls
 
 
 def test_index_rows_include_on_kev_with_name():
