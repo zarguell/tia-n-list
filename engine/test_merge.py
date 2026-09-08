@@ -20,6 +20,10 @@ Wired into CI (site-deploy.yml).
 """
 import os
 import sys
+import json
+import tempfile
+import io
+import contextlib
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import merge  # noqa: E402
@@ -134,6 +138,53 @@ pick = merge.match_story(ev("later", "TheGentlemen Ransomware Attack on Next Vic
                             "2026-08-16T00:00:00Z"),
                          {"series": series, "solo": solo})
 check("later claim converges on the 7-event series", pick, "series")
+
+print("== corrupt-JSON hardening (fail-open loads) ==")
+# One bad file must not stall the hourly pipeline: stories skip-and-warn,
+# MANIFEST/QUEUE fall back to the same defaults main() used for missing files.
+_orig_stories, _orig_manifest, _orig_queue = merge.STORIES, merge.MANIFEST, merge.QUEUE
+try:
+    with tempfile.TemporaryDirectory() as td:
+        good = {"id": "good-story", "title": "Good", "events": []}
+        with open(os.path.join(td, "good.json"), "w") as f:
+            json.dump(good, f)
+        open(os.path.join(td, "empty.json"), "w").close()  # zero-length -> JSONDecodeError
+        with open(os.path.join(td, "corrupt.json"), "w") as f:
+            f.write("{not json")
+        merge.STORIES = td
+        err = io.StringIO()
+        with contextlib.redirect_stderr(err):
+            loaded = merge.load_stories()
+        check("empty+corrupt story files skipped, good kept", ",".join(sorted(loaded.keys())), "good-story")
+        check("story warning names the bad file", str("empty.json" in err.getvalue() and "corrupt.json" in err.getvalue()), "True")
+    with tempfile.TemporaryDirectory() as td:
+        bad_manifest = os.path.join(td, "manifest.json")
+        with open(bad_manifest, "w") as f:
+            f.write("{oops")
+        merge.MANIFEST = bad_manifest
+        err = io.StringIO()
+        with contextlib.redirect_stderr(err):
+            got = merge._load_json_or_default(merge.MANIFEST, {"stories_per_day": {}})
+        check("corrupt MANIFEST falls back to default", json.dumps(got, sort_keys=True), json.dumps({"stories_per_day": {}}, sort_keys=True))
+        check("manifest warning names the file", str(bad_manifest in err.getvalue()), "True")
+        empty_manifest = os.path.join(td, "empty-manifest.json")
+        open(empty_manifest, "w").close()
+        with contextlib.redirect_stderr(io.StringIO()):
+            check("empty MANIFEST falls back to default",
+                  json.dumps(merge._load_json_or_default(empty_manifest, {"stories_per_day": {}}), sort_keys=True),
+                  json.dumps({"stories_per_day": {}}, sort_keys=True))
+    with tempfile.TemporaryDirectory() as td:
+        bad_queue = os.path.join(td, "new-events.json")
+        with open(bad_queue, "w") as f:
+            f.write("")  # empty queue file
+        merge.QUEUE = bad_queue
+        err = io.StringIO()
+        with contextlib.redirect_stderr(err):
+            got = merge._load_json_or_default(merge.QUEUE, {"events": []})
+        check("corrupt/empty QUEUE falls back to empty", json.dumps(got, sort_keys=True), json.dumps({"events": []}, sort_keys=True))
+        check("queue warning names the file", str(bad_queue in err.getvalue()), "True")
+finally:
+    merge.STORIES, merge.MANIFEST, merge.QUEUE = _orig_stories, _orig_manifest, _orig_queue
 
 print()
 if failures:

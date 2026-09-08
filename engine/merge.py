@@ -13,6 +13,7 @@ import glob
 import json
 import os
 import re
+import sys
 from datetime import datetime, timezone
 
 from build_registry import clean_title, tokens, domain_of
@@ -34,10 +35,26 @@ def parse_utc(iso):
     return datetime.fromisoformat(iso.replace("Z", "+00:00")).astimezone(timezone.utc)
 
 
+def _load_json_or_default(path, default):
+    """Fail-open JSON load: corrupt/empty/unreadable file warns to stderr
+    and falls back to default so one bad file can't stall the hourly run."""
+    try:
+        with open(path) as f:
+            return json.load(f)
+    except (json.JSONDecodeError, ValueError, OSError) as exc:
+        print(f"WARN: skipping corrupt file {path}: {exc}", file=sys.stderr)
+        return default
+
+
 def load_stories():
     out = {}
     for f in glob.glob(os.path.join(STORIES, "*.json")):
-        s = json.load(open(f))
+        try:
+            with open(f) as fh:
+                s = json.load(fh)
+        except (json.JSONDecodeError, ValueError, OSError) as exc:
+            print(f"WARN: skipping corrupt story file {f}: {exc}", file=sys.stderr)
+            continue
         out[s["id"]] = s
     return out
 
@@ -264,10 +281,12 @@ def main():
     stories = load_stories()
     from store import load_social_posts
     reddit_posts = load_social_posts()
-    manifest = json.load(open(MANIFEST)) if os.path.exists(MANIFEST) else {"stories_per_day": {}}
+    manifest = (_load_json_or_default(MANIFEST, {"stories_per_day": {}})
+                if os.path.exists(MANIFEST) else {"stories_per_day": {}})
     story_url_cache = {sid: story_event_urls(s) for sid, s in stories.items()}
 
-    queue = json.load(open(QUEUE)) if os.path.exists(QUEUE) else {"events": []}
+    queue = (_load_json_or_default(QUEUE, {"events": []})
+             if os.path.exists(QUEUE) else {"events": []})
     new_ids = queue.get("events", [])
     created = merged = 0
     for eid in new_ids:
