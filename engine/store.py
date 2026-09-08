@@ -17,6 +17,7 @@ import os
 from urllib.parse import urlsplit
 
 ENGINE = os.path.dirname(os.path.abspath(__file__))
+DATA = os.path.join(ENGINE, "data")
 EVENTS_DIR = os.path.join(ENGINE, "data", "events")
 
 
@@ -48,3 +49,23 @@ def load_events():
         meta["url"] = safe_url(meta.get("url") or "")
         events[eid] = meta
     return events
+
+
+def load_social_posts():
+    """Reddit + X signal posts, combined (data/reddit.json + data/x.json).
+
+    The load-bearing field is article_url: score.hot_score matches it
+    against story event URLs for pickup signal. Social posts never create
+    stories — they amplify or attach. Missing files contribute nothing;
+    malformed entries are skipped so one bad record can't blind the score.
+    """
+    posts = []
+    for name in ("reddit.json", "x.json"):
+        try:
+            with open(os.path.join(DATA, name)) as f:
+                for entry in json.load(f):
+                    if isinstance(entry, dict) and entry.get("article_url"):
+                        posts.append(entry)
+        except (OSError, ValueError):
+            continue
+    return posts

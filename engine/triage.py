@@ -469,7 +469,8 @@ def apply(decisions_path):
     from store import load_events
     import score as score_mod
     events = load_events()
-    reddit_posts = json.load(open(os.path.join(DATA, "reddit.json"))) if os.path.exists(os.path.join(DATA, "reddit.json")) else []
+    from store import load_social_posts
+    reddit_posts = load_social_posts()
     queue = []
     for s in stories.values():
         if s.get("merged_into"):

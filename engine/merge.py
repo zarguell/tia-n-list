@@ -262,7 +262,8 @@ def main():
     global events, reddit_posts, story_url_cache
     events = load_events()
     stories = load_stories()
-    reddit_posts = json.load(open(os.path.join(DATA, "reddit.json"))) if os.path.exists(os.path.join(DATA, "reddit.json")) else []
+    from store import load_social_posts
+    reddit_posts = load_social_posts()
     manifest = json.load(open(MANIFEST)) if os.path.exists(MANIFEST) else {"stories_per_day": {}}
     story_url_cache = {sid: story_event_urls(s) for sid, s in stories.items()}
 
