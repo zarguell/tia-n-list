@@ -1,0 +1,5 @@
+The Gunra ransomware group breached Blanco & Etcheverry, a Uruguayan law and accounting firm, and exfiltrated 300 GB of sensitive data. After a ransom deadline passed, the data was published on the dark web. The breach affects at least 35 individuals and 149 companies whose records were stored by the firm.
+
+The leaked trove includes judicial case files, IRPF and capital gains tax returns, KYC documents, beneficial ownership records, and full due diligence folders, all organized by client. Team Capybara's investigation rated the confidentiality impact as CRITICAL. The data exposes not just the firm's own operations but the legal and financial details of its entire client base.
+
+This is a textbook supply-chain risk scenario: a single law firm's breach cascades into exposure for 149 downstream organizations. Firms holding third-party legal or accounting data should verify whether they were clients of Blanco & Etcheverry and assess their own exposure. The Gunra group has been active in Latin America; this breach fits their pattern of targeting professional services firms that sit on high-value, poorly encrypted data.
