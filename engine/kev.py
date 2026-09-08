@@ -287,6 +287,22 @@ def site_url(path):
     return "https://zarguell.github.io/tia-n-list/" + path.lstrip("/")
 
 
+# CISA KEV catalog search params. Every param is required — dropping any of
+# them trips the CISA WAF. CVE ids are shape-gated (gate_cve), so no further
+# escaping is needed in the query value.
+CISA_CATALOG_URL = (
+    "https://www.cisa.gov/known-exploited-vulnerabilities-catalog"
+    "?search={cve}&field_date_added_wrapper=all&field_cve="
+    "&sort_by=field_date_added&items_per_page=20&url="
+)
+
+
+def cisa_catalog_url(cve_id):
+    """CISA catalog search URL for a CVE, or '' for a malformed id."""
+    c = gate_cve(cve_id) or ""
+    return safe_url(CISA_CATALOG_URL.format(cve=c)) if c else ""
+
+
 # ---------------------------------------------------------------------------
 # Detail-page view shaping
 # ---------------------------------------------------------------------------
@@ -329,6 +345,7 @@ def cve_view(rec, mentioned, tia_timeline=None):
 
     return {
         "cve_id": c,
+        "cisa_url": cisa_catalog_url(c),
         "schema_version": rec.get("schema_version", ""),
         "cvss": rec.get("cvss_v3_base_score"),
         "cvss_vector": rec.get("cvss_v3_vector", ""),

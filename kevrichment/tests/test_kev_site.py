@@ -174,3 +174,27 @@ def test_kev_sitemap_entries_bounded_and_gated():
     assert "kev/cves/CVE-2026-9001/" in paths
     assert "kev/cves/CVE-2025-9001/" not in paths  # outside window
     assert not any(p.startswith("kev/cves/bad") for p in paths)
+
+
+# ---------------------------------------------------------------------------
+# CISA catalog link (every KEV detail page links out to CISA)
+# ---------------------------------------------------------------------------
+
+def test_cisa_catalog_url_exact():
+    assert kev.cisa_catalog_url("CVE-2026-85880") == (
+        "https://www.cisa.gov/known-exploited-vulnerabilities-catalog"
+        "?search=CVE-2026-85880&field_date_added_wrapper=all&field_cve="
+        "&sort_by=field_date_added&items_per_page=20&url=")
+
+
+def test_cisa_catalog_url_rejects_malformed():
+    assert kev.cisa_catalog_url("bad-id") == ""
+    assert kev.cisa_catalog_url(None) == ""
+    assert kev.cisa_catalog_url("cve-2026-85880") == kev.cisa_catalog_url("CVE-2026-85880")
+
+
+def test_cve_view_includes_cisa_url():
+    v = kev.cve_view({"cve_id": "CVE-2026-85880"}, [])
+    assert v["cisa_url"] == kev.cisa_catalog_url("CVE-2026-85880")
+    v = kev.cve_view({"cve_id": "bad-id"}, [])
+    assert v["cisa_url"] == ""
