@@ -1,0 +1,5 @@
+Microsoft's September 2026 Patch Tuesday addressed two zero-day vulnerabilities actively exploited in the wild: CVE-2026-81963 and CVE-2026-85880. Both were confirmed exploited prior to the release. This update also marks the first time Microsoft is publishing Vulnerability Exploitability eXchange (VEX) data alongside its security bulletins, a new transparency initiative aimed at providing machine-readable exploitability information.
+
+The release also included Windows 11 cumulative updates KB5124008 and KB5122880. Coverage from The Verge characterized this as a record-breaking Patch Tuesday in terms of sheer volume of CVEs addressed. Four sources covered the story across security blogs, Microsoft's own MSRC announcement, BleepingComputer, and The Verge, giving it broad reach.
+
+The two exploited zero-days are the priority here. Organizations should verify that the September updates have been deployed across their Windows estates, with particular attention to the zero-day CVEs which were already being leveraged by attackers before patches were available.

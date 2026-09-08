@@ -1,0 +1,1 @@
+This story is a Wired interview with director Richard Kelly about the 25th anniversary of the film Donnie Darko and his debut novel. It is entertainment and film culture content, not a security event. It has no relevance to cybersecurity, vulnerabilities, or threat activity.
