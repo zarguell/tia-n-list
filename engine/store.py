@@ -60,7 +60,7 @@ def load_social_posts():
     malformed entries are skipped so one bad record can't blind the score.
     """
     posts = []
-    for name in ("reddit.json", "x.json"):
+    for name in ("reddit.json", "x.json", "masto.json"):
         try:
             with open(os.path.join(DATA, name)) as f:
                 for entry in json.load(f):
