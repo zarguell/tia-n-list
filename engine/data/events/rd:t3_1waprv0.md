@@ -1,0 +1,3 @@
+I started a blog series to provide free insights into appsec. It’s mainly to breakdown what application security is all about and it’s mainly targeted towards beginners and startups, so take it as you will. Just want to teach every one interested in appsec my perspective on it from my experience in big tech. So far, we've understood what appsec means , we've understood the application , what's next? This post I talk about the first steps that are taken after understanding the application in a two part post. This one is about identity with the next one being authority. Stay tuned! submitted by /u/donkeybutt123 [link] [comments]
+
+via reddit r/cybersecurity: Breaking Down Appsec Part 2: Identity
