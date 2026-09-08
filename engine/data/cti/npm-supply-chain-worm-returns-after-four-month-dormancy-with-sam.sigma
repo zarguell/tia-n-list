@@ -1,0 +1,32 @@
+title: Shai-Hulud npm Worm - Preinstall Hook Credential Harvesting
+id: 7c9e1f3a-5b2d-4a8c-6e0f-3d7b9a1c5e8f
+status: experimental
+description: Detects npm packages executing preinstall lifecycle hooks that run 'bun run index.js' or similar credential-harvesting payloads. The Shai-Hulud worm uses this mechanism to automatically execute malware when developers or CI/CD pipelines install affected dependencies.
+references:
+  - https://gbhackers.com/known-npm-worm-returns-after-111-days-and-security-scanning-still-let-it-through/
+author: Tia N. List
+date: 2026-09-08
+tags:
+  - attack.t1195
+  - attack.t1059
+logsource:
+  category: process_creation
+  product: linux
+detection:
+  selection_bun:
+    Image|endswith: '/bun'
+    CommandLine|contains: 'run'
+    CommandLine|contains: 'index.js'
+  selection_npm_preinstall:
+    Image|endswith: '/npm'
+    CommandLine|contains: 'preinstall'
+    CommandLine|contains: 'bun'
+  selection_credential_harvest:
+    CommandLine|contains: 'npm_token'
+    OR CommandLine|contains: 'github_token'
+    OR CommandLine|contains: 'ssh_keyscan'
+    OR CommandLine|contains: 'docker_config'
+  condition: (selection_bun and selection_credential_harvest) or selection_npm_preinstall
+falsepositives:
+  - Legitimate bun-based development workflows running index.js (unlikely with credential keywords)
+level: high

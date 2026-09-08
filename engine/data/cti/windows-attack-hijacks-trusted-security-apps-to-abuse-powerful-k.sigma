@@ -1,0 +1,30 @@
+title: BYOTC - Trusted Security Process Injection Abusing Kernel Driver
+id: 6d8e0f2a-4b6c-4d8e-a0f2-4b6c8d0e2f4a
+status: experimental
+description: Detects process injection into signed security applications to abuse kernel driver trust relationships (Bring Your Own Trusted Caller). Attackers inject code into legitimate security processes (e.g. Malwarebytes) that have trusted access to kernel drivers with sensitive capabilities like ZwTerminateProcess.
+references:
+  - https://cyberpress.org/windows-attack-hijacks-trusted-security-apps-to-abuse-powerful-kernel-drivers/
+author: Tia N. List
+date: 2026-09-08
+tags:
+  - attack.t1055
+  - attack.t1574
+logsource:
+  category: process_access
+  product: windows
+detection:
+  selection_target:
+    TargetImage|endswith: '\\mbamchameleon.sys'
+    OR TargetImage|contains: 'mbamchameleon'
+  selection_injection:
+    GrantedAccess|contains:
+      - '0x1410'
+      - '0x1FFFFF'
+      - '0x1F0FFF'
+  selection_zwterminate:
+    TargetImage|contains: 'Malwarebytes'
+    CallTrace|contains: 'ZwTerminateProcess'
+  condition: selection_target and selection_injection or selection_zwterminate
+falsepositives:
+  - Legitimate security software operations (Malwarebytes self-protection)
+level: medium

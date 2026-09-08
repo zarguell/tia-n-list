@@ -1,0 +1,30 @@
+title: Metabase Unauthenticated Admin Access Exploitation
+id: 3a5b7c9d-1e2f-4a6b-8c0d-2e4f6a8b0c2d
+status: experimental
+description: Detects exploitation of Metabase credential-bypass vulnerabilities that grant unauthenticated admin access. Attackers exploit flaws in self-hosted Metabase installations to gain administrator access without valid credentials.
+references:
+  - https://bleepingcomputer.com/news/security/mathspace-discloses-data-breach-affecting-over-1-million-people/
+author: Tia N. List
+date: 2026-09-08
+tags:
+  - attack.t1190
+logsource:
+  category: webserver
+  product: metabase
+detection:
+  selection_unauth_admin:
+    cs-uri-statement|contains: '/api/session'
+    cs-method: 'POST'
+    sc-status: 200
+  selection_setup_bypass:
+    cs-uri-statement|contains: '/setup/validate'
+    cs-method: 'POST'
+  selection_admin_api:
+    cs-uri-statement|contains: '/api/database'
+    cs-uri-statement|contains: '/api/card'
+    cs-cookie|contains: 'metabase.SESSION_ID'
+  condition: selection_unauth_admin or selection_setup_bypass or selection_admin_api
+falsepositives:
+  - Legitimate Metabase setup during initial deployment
+  - Authorized API usage by Metabase administrators
+level: medium

@@ -1,0 +1,29 @@
+title: Coder Registry Supply-Chain Compromise - Credential Exfiltration Script
+id: 2b4d6e8f-0a1c-4b3e-9f5d-7c8a2e6f0b4d
+status: experimental
+description: Detects execution of the dlp-docker.sh script used in the Coder module registry supply-chain compromise. The script contacts coder-infra[.]com to exfiltrate cloud, CI/CD, and authentication credentials via an X-CLI-Token HTTP header.
+references:
+  - https://gbhackers.com/hackers-compromise-coder-module-registry-to-serve-malicious-packages-and-steal-credentials/
+author: Tia N. List
+date: 2026-09-08
+tags:
+  - attack.t1059
+  - attack.t1195
+logsource:
+  category: process_creation
+  product: linux
+detection:
+  selection_script:
+    Image|endswith: '/dlp-docker.sh'
+    OR CommandLine|contains: 'dlp-docker.sh'
+  selection_network:
+    CommandLine|contains: 'coder-infra'
+    OR CommandLine|contains: '/cli/check'
+  selection_terraform:
+    Image|endswith: '/terraform'
+    CommandLine|contains: 'external'
+    CommandLine|contains: 'telemetry'
+  condition: selection_script or (selection_network and selection_terraform)
+falsepositives:
+  - Legitimate Coder infrastructure scripts (should use different naming)
+level: high

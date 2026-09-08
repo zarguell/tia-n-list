@@ -1,0 +1,31 @@
+title: Roundcube Zero-Click XSS via TNEF MIME Tag Injection
+id: 5f7a9b1c-3d5e-4f7a-9b1c-3d5e7f9a1b3c
+status: experimental
+description: Detects exploitation of Roundcube's zero-click stored XSS vulnerability via TNEF MIME tag injection. A malicious email embeds crafted MIME metadata that causes attacker-controlled script to execute when the recipient opens the webmail interface, enabling session theft and account compromise.
+references:
+  - https://gbhackers.com/roundcube-fixes-12-security-flaws-including-zero-click-xss-and-ssrf-bypass/
+author: Tia N. List
+date: 2026-09-08
+tags:
+  - attack.t1189
+  - attack.t1059
+logsource:
+  category: webserver
+  product: roundcube
+detection:
+  selection_tnef:
+    cs-uri-statement|contains: '/export.php'
+    cs-uri-statement|contains: 'tnef'
+  selection_ssrf_bypass:
+    cs-uri-statement|contains: '/css/'
+    cs-uri-statement|contains: '[0:'
+    OR cs-uri-statement|contains: '[0x'
+  selection_xss:
+    cs-uri-statement|contains: '<script'
+    OR cs-uri-statement|contains: 'javascript:'
+    OR cs-uri-statement|contains: 'onerror='
+  condition: selection_tnef or selection_ssrf_bypass or selection_xss
+falsepositives:
+  - Legitimate TNEF email attachments (rare in modern environments)
+  - Normal CSS proxy requests to external stylesheets
+level: high

@@ -1,0 +1,32 @@
+title: Google Infrastructure Abuse for Multi-Stage Phishing Redirects
+id: 1a3c5e7f-9b1d-4f3a-5c7e-9b1d3f5a7c9e
+status: experimental
+description: Detects phishing campaigns that abuse Google services (Meet, Search, DoubleClick, Custom Search, Tag Manager, Analytics) as multi-stage redirect chains to bypass email security controls and deliver credential-harvesting pages or ScreenConnect RAT.
+references:
+  - https://gbhackers.com/global-phishing-campaign-abuses-google-infrastructure-to-evade-security-and-steal-credentials/
+author: Tia N. List
+date: 2026-09-08
+tags:
+  - attack.t1566
+  - attack.t1102
+logsource:
+  category: proxy
+  product: webproxy
+detection:
+  selection_redirects:
+    cs-uri-statement|contains: 'google.com/redirect'
+    OR cs-uri-statement|contains: 'google.com/url'
+    OR cs-uri-statement|contains: 'meet.google.com/lookup'
+  selection_tracking:
+    cs-uri-statement|contains: 'doubleclick.net'
+    OR cs-uri-statement|contains: 'googletagmanager.com'
+    OR cs-uri-statement|contains: 'google-analytics.com'
+  selection_screenconnect:
+    cs-uri-statement|contains: 'ScreenConnect'
+    OR cs-uri-statement|contains: '.msi'
+    OR cs-uri-statement|contains: 'setup.exe'
+  condition: (selection_redirects and selection_tracking) or selection_screenconnect
+falsepositives:
+  - Legitimate Google redirect links in business communications
+  - Normal use of Google Analytics and Tag Manager
+level: medium

@@ -1,0 +1,32 @@
+title: Suspicious Microsoft 365 Session Cookie Replay via AiTM Proxy
+id: 8a3c1f72-4b9e-4d6a-a8c3-7e2f5d9b1c4a
+status: experimental
+description: Detects patterns consistent with adversary-in-the-middle proxy phishing (e.g. Evilginx2/BigBear 2.0) where stolen session cookies are replayed from anomalous IP addresses or geographic locations to access Microsoft 365 services without completing MFA.
+references:
+  - https://databreaches.net/2026/09/07/bigbear-microsoft-365-phishing-service-bypassed-mfa-at-258-organizations/
+author: Tia N. List
+date: 2026-09-08
+tags:
+  - attack.t1557
+  - attack.t1539
+logsource:
+  product: cloud
+  service: office365
+detection:
+  selection_auth:
+    EventSource: AzureActiveDirectory
+    EventOperation: Sign-in
+    ResultType: 0
+  selection_anomaly:
+    ResultStatus: Success
+    MfaDetail: null
+    DeviceDetail: contains 'Browser'
+  selection_vpn_or_proxy:
+    IPAddress: contains 'Vultr'
+    OR IPAddress: contains 'The Constant Company'
+    OR LocationInfo: contains 'VPN'
+  condition: selection_auth and selection_anomaly and selection_vpn_or_proxy
+falsepositives:
+  - Legitimate VPN or proxy usage by remote workers
+  - Corporate network egress through shared IP ranges
+level: medium
