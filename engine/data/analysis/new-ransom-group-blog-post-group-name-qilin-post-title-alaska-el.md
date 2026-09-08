@@ -1,0 +1,5 @@
+Two ransom groups posted new victim blogs in the past day. The Qilin group listed Alaska Electrical Apprenticeship, adding to their ongoing campaign of posting victims on their leak site. Separately, the SafePay group posted multiple victims including hbpro.pt and gayafores.es. Both groups operate traditional double-extortion models, encrypting systems and threatening to publish stolen data.
+
+Qilin has been active throughout 2026 and maintains one of the more active ransom leak sites. The Alaska Electrical Apprenticeship listing suggests targeting of trade education organizations, which often hold sensitive apprentice records, financial data, and employer information. SafePay is a newer entrant and the dual victim posts in a single day indicate an active operational tempo.
+
+Organizations in the education and manufacturing sectors should monitor these leak sites for their own data. The presence of two different groups posting victims on the same day reflects the continued fragmentation of the ransomware ecosystem, where multiple groups operate independently with shared tooling and infrastructure patterns.
