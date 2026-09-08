@@ -1,0 +1,5 @@
+Law enforcement has arrested members of a network that stole over $240 million in bitcoin, one of the largest cryptocurrency thefts in US history. The scheme involved social engineering a victim into transferring the funds, followed by sophisticated laundering to obscure the digital trail. The arrests were reported by the AP via Michael Kunzelman, with the case covered by DataBreaches.net.
+
+The group, described as a network of young men, attempted to hide their fingerprints through layered laundering techniques but ultimately went on a spending spree that drew attention. The case highlights the ongoing trend of large-scale social engineering attacks targeting cryptocurrency holders, where technical exploitation is unnecessary if the human element can be compromised.
+
+This is a significant enforcement outcome for a theft of this scale. The $240 million figure places it among the top cryptocurrency thefts by value. Defenders should note that the attack vector was social engineering, not protocol or smart contract exploitation, reinforcing the need for multi-signature controls and transaction verification procedures for high-value crypto accounts.
