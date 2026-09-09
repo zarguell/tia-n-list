@@ -1,0 +1,5 @@
+Nvidia, AMD, and Arm each released security advisories this week as part of the September patch cycle. The advisories cover vulnerabilities across GPU drivers, firmware, and management software used in data center and enterprise environments. CVE-2026-85788 is among the tracked vulnerabilities in this batch.
+
+Chipmaker security updates often receive less attention than Microsoft or browser patches, but the affected components sit at the hardware-software boundary where exploitation can provide deep system access. GPU drivers and firmware have become increasingly targeted as organizations deploy accelerated computing for AI workloads, expanding the attack surface beyond traditional CPU-based paths.
+
+SecurityWeek compiled the updates across all three vendors. Organizations running Nvidia, AMD, or Arm-based hardware in production should review the respective advisories and prioritize patches for components exposed to untrusted workloads or accessible from network segments. The convergence of multiple chipmaker advisories in a single patch cycle is worth noting as a reminder that hardware-layer security maintenance requires the same cadence as software patching.
