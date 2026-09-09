@@ -1,0 +1,5 @@
+September 2026 Patch Tuesday is the largest single-day security release Microsoft has ever published, with 999 total CVEs. This includes 974 Microsoft product vulnerabilities and 25 non-Microsoft CVEs patched through Microsoft. Windows alone accounts for 723 of the fixes. Two CVEs are confirmed exploited in the wild, making them immediate patching priorities.
+
+The first zero-day is CVE-2026-85880, a Windows ALPC kernel privilege escalation via buffer overflow that grants SYSTEM access. Notably, Windows 11 and Server 2025 are not affected, suggesting Microsoft's memory safety rewrite in those codebases prevented this class of vulnerability. The second zero-day is CVE-2026-81963, details on which are in the advisory. Rapid7 noted that Patch Tuesday volumes are unlikely to return to pre-2026 levels.
+
+Organizations should prioritize the two zero-days, then work through critical and high-severity fixes. The inclusion of 25 third-party CVEs means this release affects environments beyond pure Microsoft deployments.

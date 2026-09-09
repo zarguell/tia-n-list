@@ -1,0 +1,5 @@
+Google has begun complying with EU Digital Markets Act requirements for travel search results, but the company publicly stated that the mandated changes produce degraded results. The EU rules require Google to give competing travel services equal prominence in search results, breaking Google's practice of integrating its own Flight and Hotel products directly into the search page.
+
+Google's public acknowledgment that compliance degrades user experience is unusual and likely a strategic move to build public pressure against further EU regulation. The company framed the changes as forced mediocrity rather than genuine competition. The dispute is part of the broader EU effort to reduce Big Tech dominance in vertical search markets.
+
+From a security perspective, the forced changes to Google's search infrastructure represent a significant modification to one of the internet's most critical gateways. Changes to how search results are ranked and displayed can have downstream effects on which services users trust and visit, potentially creating new phishing or typosquatting opportunities during the transition period.
