@@ -1,0 +1,5 @@
+CISA published advisory AA26-251A on September 8, 2026, warning that China-based AI companies are conducting industrial-scale distillation campaigns against U.S. AI firms. The advisory identifies coordinated efforts by Chinese entities to systematically extract proprietary model weights, training data, and architecture details from American AI companies through automated querying and API abuse.
+
+The advisory names specific techniques including high-volume API requests designed to map model behavior, prompt engineering to extract internal representations, and infrastructure fingerprinting to identify model architectures. CISA recommends AI companies implement rate limiting, query monitoring, and output watermarking to detect and disrupt distillation attempts.
+
+This lands in the context of escalating U.S.-China tech tensions. The advisory follows reported U.S. government discussions about requiring AI firms to silently degrade responses to traffic suspected of Chinese model harvesting. Organizations operating AI models should review their API monitoring capabilities and consider deploying canary tokens in model outputs to track unauthorized distillation.

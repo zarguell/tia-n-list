@@ -1,0 +1,5 @@
+Apple released iOS 26.6.2 on September 8, describing it as a fix for "an issue that prevents downloading a software update over a cellular network." The release came on the eve of Apple's iPhone launch event, suggesting it was a targeted fix for a bug affecting the update mechanism itself rather than a security-focused patch.
+
+Coverage from MacRumors and 9to5mac confirms the update addresses only the cellular download issue. No CVEs or security advisories were associated with this release. The timing is notable: Apple chose to push a maintenance fix the day before its biggest product announcement, indicating the bug was affecting enough users to warrant immediate attention.
+
+This is not a security-relevant release. The update quality bar is low for security monitoring purposes. Organizations managing iOS device fleets should note the fix for cellular update issues, which may have been blocking some devices from receiving prior security patches.

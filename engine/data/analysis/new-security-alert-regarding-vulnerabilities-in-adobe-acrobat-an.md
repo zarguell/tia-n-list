@@ -1,0 +1,5 @@
+Adobe released security bulletin APSB26-141 addressing vulnerabilities in Acrobat and Reader. The update was flagged by JPCERT on September 9, with coverage from multiple sources including malware.news. The bulletin covers patches across the Acrobat family on Windows, macOS, and Linux platforms.
+
+The specific CVE details were not fully disclosed in the reporting, but the advisory follows Adobe's standard Patch Tuesday cycle. Given that Acrobat and Reader are among the most widely deployed document viewers, any critical vulnerability in these products represents significant exposure. Previous Acrobat advisories have included privilege escalation and code execution flaws triggered by specially crafted PDF files.
+
+Organizations should prioritize deployment of APSB26-141 across managed endpoints. The cross-platform nature of the patches means both Windows and macOS environments require attention. Users should be warned against opening PDFs from untrusted sources until patches are applied, as Acrobat vulnerabilities are frequently weaponized in phishing campaigns.
