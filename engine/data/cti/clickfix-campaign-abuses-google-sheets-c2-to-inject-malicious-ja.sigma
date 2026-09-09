@@ -1,0 +1,30 @@
+title: ClickFix Campaign Google Sheets C2 — Tampermonkey Extension Installation
+id: d4e5f6a7-b8c9-4d0e-1f2a-3b4c5d6e7f80
+status: experimental
+description: Detects ClickFix campaigns that abuse Google Sheets and the Google Visualization API as a C2 channel, where victims are tricked into installing Tampermonkey scripts or pasting JavaScript into Chrome.
+references:
+  - https://cyberpress.org/clickfix-google-sheets-c2/
+  - https://gbhackers.com/clickfix-campaign-google-sheets/
+author: Tia N. List
+date: 2026/09/09
+tags:
+  - attack.t1566
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection:
+    Image|endswith: '\\chrome.exe'
+    CommandLine|contains:
+      - 'tampermonkey'
+      - 'docs.google.com/spreadsheets'
+      - 'visualizationapi'
+  selection2:
+    Image|endswith: '\\msedge.exe'
+    CommandLine|contains:
+      - 'tampermonkey'
+      - 'docs.google.com/spreadsheets'
+  condition: selection or selection2
+falsepositives:
+  - Legitimate Tampermonkey extension usage with Google Sheets
+level: medium

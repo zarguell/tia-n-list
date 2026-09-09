@@ -1,0 +1,28 @@
+title: Adobe Commerce Magento StyleSmuggler Exploitation CVE-2026-75650
+id: a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d
+status: experimental
+description: Detects exploitation of CVE-2026-75650 (StyleSmuggler), an unauthenticated RCE zero-day in Adobe Commerce and Magento Open Source that abuses the template engine to inject PHP via Payment Transaction Failed Reminder email templates.
+references:
+  - https://threat-intelligence.redeyesecurity.com/blog/stylesmuggler-magento-zero-day-cve-2026-75650
+  - https://helpx.adobe.com/security/products/commerce/apsb26-58.html
+author: Tia N. List
+date: 2026/09/09
+tags:
+  - attack.t1190
+logsource:
+  category: webserver
+  product: apache
+detection:
+  selection:
+    cs-uri-query|contains:
+      - 'payment/transaction'
+      - 'template'
+      - 'email/reminder'
+  selection2:
+    sc-status:
+      - 200
+      - 500
+  condition: selection and selection2
+falsepositives:
+  - Legitimate Magento transaction notification requests
+level: high
