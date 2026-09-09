@@ -1,0 +1,5 @@
+Proton's privacy team published an argument for RSS as a security and privacy tool. The core claim: RSS lets you read the internet without revealing your identity, location, or reading habits to publishers, trackers, or ad networks. Unlike visiting a website directly, an RSS reader fetches content without sending your IP address or browser fingerprint to the source.
+
+This is a practical privacy recommendation with real substance. RSS feeds are fetched by your reader, not by your browser, which means no JavaScript execution, no cookie tracking, and no referrer headers. For security researchers, journalists, or anyone monitoring threat intelligence feeds, RSS provides a way to consume information without creating a behavioral footprint that could be correlated or surveilled.
+
+What to watch: Whether Proton integrates RSS more deeply into their product ecosystem. The broader trend of privacy-focused organizations pushing RSS as an alternative to algorithmic feeds. Track adoption among security teams who need to monitor advisories and threat intel without tipping off adversaries.
