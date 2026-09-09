@@ -1,0 +1,3 @@
+I’ve been seeing talk about this exploit that was going around in early this year. Even though it’s patched now, I’m wondering what the chances were of a random user getting hit with this. 99% of the time, attacks like these are saved for high profile targets, but this seems different, considering the code got leaked. Will this mean anything for the security of an iphone in the future? And does this mean the “Only high profile targets get hit by malware on an iphone” myth is false? submitted by /u/paranoidiphone200 [link] [comments]
+
+via reddit r/cybersecurity: Realistically, what are the risks of your average iphone user being hit with the Dark sword exploit for ios?
