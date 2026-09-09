@@ -1,0 +1,5 @@
+Microsoft's September 2026 Patch Tuesday is the largest on record, addressing 974 CVEs with 113 rated critical. The release includes fixes for 2 zero-day vulnerabilities exploited in the wild (CVE-2026-81963 and CVE-2026-85880) and 20 wormable bugs that can spread without user interaction. The previous record was 664 CVEs in July 2026.
+
+The two zero-days are local privilege escalation flaws: CVE-2026-81963 affects the Windows Update Stack on Windows 11 23H2, and CVE-2026-85880 targets Windows 10 1607 via ALPC. Both allow authenticated attackers to elevate to SYSTEM. Notable critical patches include RCE fixes in Skype for Business, MSMQ, and RRAS. The sheer volume reflects both the expanded scope of Microsoft's codebase (AI features in Notepad, new taskbar options) and the increasing tempo of vulnerability discovery.
+
+Organizations should prioritize the zero-days and wormable CVEs for immediate deployment. The 20 wormable bugs in particular warrant emergency patching in any network with flat or poorly segmented architecture. The Windows 10 1607 zero-day is especially concerning for organizations still running that legacy build.

@@ -1,0 +1,5 @@
+September 2026 ICS Patch Tuesday brought fixes from Schneider Electric, Siemens, and Aveva for critical vulnerabilities in industrial control systems. The Schneider Electric advisories address flaws that could enable unauthorized access and remote code execution in SCADA and HMI products. Siemens patched vulnerabilities across multiple product lines including SINEMA Remote Connect and SINEC NMS.
+
+The critical flaws affect availability and confidentiality of OT environments. Schneider's patches are particularly urgent given the widespread deployment of EcoStruxure and Modicon controllers in manufacturing and energy sectors. Siemens fixes cover network management and remote access components that sit at the IT/OT boundary.
+
+Organizations running ICS infrastructure should prioritize these patches, but test thoroughly in staging environments first. The operational risk of a failed patch in a production control system often outweighs the vulnerability risk, so plan maintenance windows carefully. Cross-reference with CISA advisories for any compensating controls.
