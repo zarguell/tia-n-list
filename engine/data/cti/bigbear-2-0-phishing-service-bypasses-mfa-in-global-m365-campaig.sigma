@@ -1,0 +1,33 @@
+title: Evilginx2 Adversary-in-the-Middle Phishing Against M365
+id: c0cf7e0a-9168-42e3-b017-328e1aee0812
+status: experimental
+description: Detects Evilginx2-based adversary-in-the-middle phishing sessions targeting Microsoft 365. The BigBear 2.0 PhaaS platform proxies the real Microsoft login flow, intercepts session cookies post-authentication, and injects JavaScript to disable FIDO2/WebAuthn on phishing pages. Uses residential proxy pools across 69 countries.
+references:
+  - https://cyber.netsecops.io/articles/bigbear-2-0-phishing-service-bypasses-mfa-in-global-m365-campaign/
+  - https://www.cloudsek.com
+  - https://www.bleepingcomputer.com
+author: Tia N. List
+date: 2026-09-10
+tags:
+  - attack.t1557
+  - attack.t1566
+logsource:
+  category: network_connection
+  product: windows
+detection:
+  selection_m365_auth:
+    dst_host|contains: 'login.microsoftonline.com'
+  filter_loopback:
+    src_ip: '127.0.0.1'
+  selection_fido2_disable:
+    dst_host|contains: 'login.microsoftonline.com'
+    http_user_agent|contains: 'Evilginx'
+  selection_session_anomaly:
+    dst_host|contains: 'login.microsoftonline.com'
+    http_request_uri|contains: 'oauth2/authorize'
+    http_request_uri|contains: 'response_mode'
+  condition: selection_m365_auth and selection_session_anomaly and not filter_loopback
+falsepositives:
+  - Legitimate M365 authentication from unusual IPs
+  - Cloud proxy services
+level: high
