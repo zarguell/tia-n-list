@@ -1,0 +1,3 @@
+Chief information security officers are largely expected to ensure the security of AI across the enterprise, but many say they are not receiving adequate support, according to findings from Proofpoint. About 85% of CISOs said ensuring the safe use of AI assistants, copilots and automation is a top priority over the next two years, according to Proofpoint’s annual Voice of the CISO report. Eight of every 10 CISOs said they are expected to manage AI-related security risks without receiving a proportional increase in resources or expertise. submitted by /u/anthonyDavidson31 [link] [comments]
+
+via reddit r/cybersecurity: CISOs are feeling the security burden of accelerated AI use
