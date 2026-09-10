@@ -1,0 +1,5 @@
+CrowdStrike's latest report positions AI as both a defensive tool and an attack surface. The report summarizes findings that widespread AI adoption has created new vectors for threat actors. Organizations deploying AI systems at scale are now defending both their traditional infrastructure and their AI pipelines against adversarial manipulation.
+
+The report highlights that AI models can be poisoned during training, manipulated through prompt injection, or abused to generate convincing phishing content. CrowdStrike's telemetry shows increasing attempts to target the data supply chains feeding AI systems, not just the models themselves. This represents a shift from targeting endpoints to targeting the decision-making infrastructure.
+
+For security teams, the practical implication is that AI deployments need threat modeling just like any other critical system. Access controls on training data, validation of model inputs, and monitoring for anomalous AI behavior should be baseline requirements. The dual-use nature of AI means defenders need to assume adversaries are using the same tools to automate reconnaissance and craft targeted attacks.
