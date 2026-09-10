@@ -896,16 +896,19 @@ def main():
     import sigma as sigma_mod
     sigma_errs = []
     for f in sorted(glob.glob(os.path.join(CTI_DIR, "*.sigma"))):
-        cli_errs, missing = sigma_mod.check_with_cli(f)
-        if cli_errs is None and missing:
-            # sigma-cli not installed — structural check only
-            cli_errs = sigma_mod.validate_sigma(f)
-        for e in cli_errs:
+        # sigma.validate() = the same gate-grade check authors are told to run
+        # (sigma-cli spec check, structural fallback only if the CLI is gone).
+        for e in sigma_mod.validate(f):
             sigma_errs.append(f"{os.path.basename(f)}: {e}")
     for f in sorted(glob.glob(os.path.join(CTI_DIR, "*.splunk"))):
         sigma_errs += [f"{os.path.basename(f)}: {e}" for e in sigma_mod.validate_variant(f, "splunk")]
     for f in sorted(glob.glob(os.path.join(CTI_DIR, "*.kql"))):
         sigma_errs += [f"{os.path.basename(f)}: {e}" for e in sigma_mod.validate_variant(f, "kql")]
+    # per-file lines, so the failure excerpt names the offending rule instead of
+    # only a count (2026-09-10: a bare "2 Sigma errors" needed manual
+    # reproduction to identify the two files).
+    for e in sigma_errs:
+        print(f"SIGMA FAIL {e}", file=sys.stderr)
     import yara as yara_mod
     yara_errs = []
     for f in sorted(glob.glob(os.path.join(CTI_DIR, "*.yara"))):

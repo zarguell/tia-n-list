@@ -60,8 +60,28 @@ def convert_variants(sigma_path):
             (kql.stdout or "").strip() if kql.returncode == 0 else None)
 
 
+def validate(path):
+    """THE gate-grade Sigma check — one function, so the author-time check and
+    the publish gate can never disagree.
+
+    2026-09-10: the CTI agent self-validated with validate_sigma() (YAML shape
+    + required keys only), reported "6 Sigma rules, all validated clean (OK)",
+    and the publish gate — which uses `sigma check` — then rejected 2 rules
+    using the non-existent `|isnot` modifier. The agent saw green, the gate
+    saw red, and the site stayed unpublished for hours. Anything an author is
+    told to run must be this function.
+
+    Falls back to the structural check only when sigma-cli is absent.
+    """
+    cli_errs, missing = check_with_cli(path)
+    if cli_errs is None and missing:
+        return validate_sigma(path)
+    return cli_errs or []
+
+
 def validate_sigma(path):
-    """Return a list of errors for a Sigma YAML file (empty = valid shape)."""
+    """Structural fallback (YAML shape + required keys) — used only when
+    sigma-cli is unavailable. NOT a substitute for validate()."""
     errs = []
     try:
         import yaml
