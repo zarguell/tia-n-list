@@ -1,0 +1,5 @@
+Palo Alto Networks released security updates addressing 13 vulnerabilities across its product line in advisory AV26-905, dated September 10, 2026. Affected products include Cloud NGFW (AWS and Azure), multiple PAN-OS versions, multiple Prisma Access versions, and Prisma Browser prior to 151.26.5.170.
+
+The most notable CVE is CVE-2026-0310, a buffer overflow vulnerability in PAN-OS via XML processing. No critical CVEs beyond this were highlighted in the Canadian Centre for Cyber Security advisory, and no active exploitation indicators were disclosed. The advisory also references a Chromium monthly vulnerability update for September 2026 affecting Prisma Browser.
+
+This is a routine advisory with no confirmed exploitation. Organizations running Palo Alto products should review the vendor advisory and apply updates as they become available. The lack of active exploitation or critical severity keeps this at standard patching priority rather than emergency.

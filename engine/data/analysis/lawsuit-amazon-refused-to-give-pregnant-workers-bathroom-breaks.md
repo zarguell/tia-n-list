@@ -1,0 +1,3 @@
+This story covers a lawsuit against Amazon for refusing to provide bathroom breaks and chairs to pregnant workers. It is a labor and employment law story, not a cybersecurity event. The Ars Technica article reports four women suing Amazon over denied basic workplace accommodations.
+
+There are no security vulnerabilities, data breaches, threat actors, or technical content relevant to a cybersecurity briefing. This story was likely mis-clustered by the ingestion system due to being published on a technology news site. It has no analytical value for a security-focused digest.
