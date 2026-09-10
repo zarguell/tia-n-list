@@ -1,0 +1,5 @@
+DarkWebSonar tracked forum posts by a threat actor using the handle "X Forum Bot" claiming webmail login access to two targets: Medicover, a Polish healthcare and pharma provider, and patria.org.ve, a Venezuelan government platform known as Sistema Patria. Both claims allege portal-level access obtained through unknown means.
+
+The actor appears to be shopping access to healthcare and government targets across different countries. Medicover operates clinics and pharmacies across Poland, making patient data a likely objective. The Venezuelan platform is a government services portal. Neither claim has been independently verified, and the tooling or method of initial access is unknown.
+
+These are access-broker style posts rather than confirmed breaches. The pattern of posting across multiple unrelated sectors and geographies suggests either a broad reconnaissance campaign or a broker aggregating access for resale. Worth monitoring for follow-up data dumps or secondary sales that would confirm the claims.

@@ -1,0 +1,5 @@
+A vulnerability in WhatsApp for Android allows an unauthorized person to view private photos from the app without unlocking the smartphone. The flaw bypasses the device's lock screen protection, meaning anyone with physical access to an unlocked or recently-unlocked device can browse WhatsApp media through a specific interaction path.
+
+The practical risk is physical access scenarios: a stolen phone, a borrowed device, or an unlocked phone left unattended. WhatsApp's default behavior exposes shared photos and media in the chat interface, and this loophole extends that exposure beyond what the lock screen is supposed to prevent. There is no indication of remote exploitation; this is a local-only issue.
+
+WhatsApp has not publicly disclosed a timeline for a fix. Users concerned about physical access to their devices should enable WhatsApp's built-in app lock feature (available in WhatsApp settings) as an additional layer, or ensure the device screen lock timeout is set to a short duration. This is a privacy issue rather than a data exfiltration vulnerability, but it undermines the expectation that a locked phone protects app contents.

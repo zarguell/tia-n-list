@@ -1,0 +1,5 @@
+CVE-2026-88770 is a logic flaw in Keycloak's device login flow (OAuth device authorization grant). When an account is locked due to brute-force detection, an attacker who already holds an active session can use the device flow to obtain fresh tokens for that locked account, effectively bypassing the lockout. The device grant endpoint does not check the account's brute-force lock status before issuing tokens.
+
+The attack requires an existing valid session, so it is not a standalone unauthenticated exploit. However, in environments where Keycloak issues long-lived sessions or where users do not regularly log out, this creates a persistent bypass of brute-force protections. An attacker who compromises or steals a session cookie can keep refreshing tokens even after the account owner triggers a lockout.
+
+Keycloak is widely deployed as an identity broker in Kubernetes and enterprise environments. Organizations relying on Keycloak's brute-force detection as a primary account-lockout mechanism should treat this as a bypass and consider supplementary rate-limiting or session-revocation controls until a patch is available.
