@@ -1,0 +1,5 @@
+A researcher from Anthropic has publicly resigned, stating that the people building AI earnestly believe it could kill us all. The departure, covered by both Gizmodo and Ars Technica, highlights growing internal tension within AI companies about the trajectory of development and safety timelines.
+
+The resignation reflects a broader pattern of AI safety researchers leaving major labs over concerns about the pace of deployment versus the maturity of safety techniques. The researcher's statement frames the issue as a fundamental disconnect between the stated beliefs of AI developers about existential risk and the continued push to release more capable systems. This follows similar high-profile departures from other AI labs in recent years.
+
+The incident adds to public discourse about AI governance and the gap between corporate safety rhetoric and development practices. As AI systems become more capable, the question of whether labs are taking sufficient precautions remains contentious among researchers, policymakers, and the public.

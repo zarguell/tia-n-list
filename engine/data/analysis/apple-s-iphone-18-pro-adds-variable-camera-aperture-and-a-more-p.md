@@ -1,0 +1,5 @@
+Apple's iPhone 18 Pro introduces a mechanical variable aperture system for the camera, a feature previously abandoned by Android flagship manufacturers. The device also includes a new thermal management system designed to reduce overheating during sustained workloads. The Pro chip provides incremental performance gains over the previous generation.
+
+The variable aperture allows the camera to physically adjust its opening size, enabling better control over depth of field and low-light performance without relying solely on computational photography. This hardware approach contrasts with the software-based solutions most smartphone manufacturers have adopted. The thermal management improvements address a persistent complaint about iPhone Pro models running hot during intensive tasks like video recording or gaming.
+
+Apple also announced a $100 base price increase for the iPhone 18 Pro, with the 1TB storage variant seeing a $300 price jump. The device is part of Apple's broader September product refresh alongside the iPhone Duo foldable and AppleCare One Family plan.

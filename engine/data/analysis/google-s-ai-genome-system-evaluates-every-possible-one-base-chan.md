@@ -1,0 +1,5 @@
+Google has developed an AI system that evaluates every possible single-base change to the human genome, predicting the functional impact of each variant. Most single-base changes are neutral, but a small fraction cause significant biological effects. The system aims to provide comprehensive coverage of all possible one-base mutations and their predicted consequences.
+
+The genome evaluation tool represents a shift from targeted variant analysis to exhaustive computational assessment. Traditional approaches focus on known pathogenic variants or specific genes of interest, while Google's system attempts to predict the effect of every possible single nucleotide change across the entire genome. This could accelerate rare disease diagnosis and genetic research by providing predictions for variants that have not been clinically characterized.
+
+The research aligns with Google's broader AI-for-science initiatives, applying large-scale machine learning to biological data. If validated clinically, the system could serve as a reference tool for geneticists and clinicians evaluating novel variants of uncertain significance.

@@ -1,0 +1,5 @@
+Prime Video has released the full trailer for Mike Flanagan's adaptation of Stephen King's Carrie, scheduled for release on the streaming platform. The trailer provides the first extended look at Flanagan's interpretation of the classic horror story about a telekinetic high school student. The tagline "All I ever wanted was to go to school" anchors the trailer's tone.
+
+Flanagan, known for The Haunting of Hill House and Midnight Mass, brings his established horror sensibility to the material. The adaptation marks the latest in a series of Stephen King properties being developed for streaming platforms, following Castle Rock and Lisey's Story. Prime Video is positioning the series as a flagship horror title for its fall content slate.
+
+The project represents Flanagan's first major series since his departure from Netflix and transition to Amazon MGM Studios. Production values visible in the trailer suggest a faithful adaptation with contemporary visual effects for the telekinesis sequences.
