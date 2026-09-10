@@ -1,0 +1,3 @@
+A few months ago I discovered a critical security issue in an airline's website, resulting in customer data exposure. I'm sharing this here so my findings are "on the record", and the community can see what kinds of risks they should be looking out for when securing their systems. Please refrain from attempting to identify the airline. I hope to be able to share who they are on conclusion of the ICO investigation. I'm very interested in hearing from Microsoft Azure admins, as to whether I've understated or overstated the issues. submitted by /u/DavidFixIt [link] [comments]
+
+via reddit r/cybersecurity: Open Skies: How a Few Small Mistakes Can Hand an Attacker the Keys to Your Infrastructure — and Expose All Your Customer Data

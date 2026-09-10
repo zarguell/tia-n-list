@@ -1,0 +1,5 @@
+CISA has added two MikroTik RouterOS vulnerabilities to its Known Exploited Vulnerabilities catalog: CVE-2026-67277 and CVE-2026-86060. Inclusion in the KEV catalog means CISA has confirmed these vulnerabilities are being actively exploited in the wild, and federal agencies are required to apply mitigations per Binding Operational Directive 22-01.
+
+MikroTik RouterOS runs on a large installed base of routers and network devices, including in enterprise, ISP, and small-office environments. Active exploitation of RouterOS flaws has historically been used for botnet recruitment (Mēris, VPNFilter), traffic interception, and lateral movement into internal networks. Organizations running MikroTik hardware should prioritize applying available patches or vendor-recommended mitigations.
+
+The KEV entry provides specific remediation timelines. Even for non-federal organizations, KEV inclusion is a strong signal that exploitation is ongoing and signatures or exploit code are likely available. Network devices like routers are high-value targets because they sit at the network perimeter and often lack the endpoint detection tooling available on servers and workstations.

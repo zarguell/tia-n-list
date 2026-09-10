@@ -1,0 +1,5 @@
+Microsoft Copilot experienced an approximately 100-minute outage caused by Error 1016, a Cloudflare error code typically indicating an origin server connection failure. The Register reports that a separate resilience drill was running concurrently, which may have contributed to the disruption.
+
+Error 1016 generally means the edge proxy (Cloudflare) could not establish a connection to the backend origin. This points to an infrastructure or configuration issue on Microsoft's side rather than an external attack. The coincidence with a resilience drill suggests the drill may have impacted service availability, though Microsoft has not confirmed causation.
+
+For organizations relying on Copilot as a productivity tool, this is an availability incident rather than a security event. However, it illustrates concentration risk: heavy dependence on a single AI assistant vendor means infrastructure failures at that vendor directly impact business operations. Organizations should maintain fallback workflows for critical tasks that depend on AI assistants.

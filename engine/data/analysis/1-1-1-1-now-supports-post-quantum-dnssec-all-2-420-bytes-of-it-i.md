@@ -1,0 +1,5 @@
+Cloudflare has enabled post-quantum DNSSEC on its 1.1.1.1 resolver, implementing the ML-DSA (Module-Lattice-Based Digital Signature Algorithm) draft specification. The signed DNSSEC response payload is 2,420 bytes, a notable increase from classical DNSSEC responses but still within practical limits for DNS transport.
+
+This is a concrete step toward quantum-resistant DNS infrastructure. DNSSEC signatures using classical algorithms (RSA, ECDSA) would be vulnerable to future quantum computers capable of solving the underlying mathematical problems. By deploying ML-DSA, Cloudflare is future-proofing the authentication chain for DNS responses on its public resolver.
+
+The move is significant for the broader DNS ecosystem: 1.1.1.1 is one of the most widely used public resolvers, and this deployment provides real-world data on the performance and compatibility of post-quantum DNSSEC. Organizations evaluating their own DNSSEC strategies should watch for compatibility issues with older resolvers or middleware that may not handle the larger response sizes.

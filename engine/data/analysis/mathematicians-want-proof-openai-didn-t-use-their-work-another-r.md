@@ -1,0 +1,5 @@
+Researchers are demanding OpenAI provide evidence that its mathematics training data does not include their copyrighted work, according to The Verge. This follows a broader pattern of academic and creative professionals challenging AI companies on data provenance, with mathematicians now joining the fray as OpenAI's models show increasingly capable mathematical reasoning.
+
+The core issue is data governance and IP provenance: OpenAI has not disclosed the full composition of its training corpora, and researchers suspect their published papers, preprints, or textbook content may have been ingested without consent or compensation. This is part of a growing wave of challenges to AI training practices, not a cybersecurity incident per se, but it has implications for data handling and compliance frameworks.
+
+For security teams, the relevance is indirect but worth noting: organizations deploying AI tools built on uncertain training data pipelines face potential legal and regulatory exposure, and the evolving IP landscape around AI could affect vendor risk assessments.
