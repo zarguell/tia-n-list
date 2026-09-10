@@ -1,0 +1,5 @@
+Apple announced that macOS 27, codenamed Golden Gate, will launch on September 14. The release date was confirmed on September 10, following the announcement at Apple's September 9 event alongside the iPhone Duo and other hardware. The update will be available to supported Mac hardware through Software Update.
+
+macOS Golden Gate follows the standard annual release cycle. Security researchers should watch for any new security features or changes in the release notes, particularly around Lockdown Mode, Rapid Security Response updates, and any changes to System Integrity Protection or Gatekeeper. Apple typically includes security patches in major macOS releases alongside feature additions.
+
+The launch date is notable for its proximity to Patch Tuesday (September 9), meaning organizations managing both macOS and Windows environments will have overlapping update cycles this week. IT teams should plan for testing and deployment of both macOS Golden Gate and the September Windows patches simultaneously.

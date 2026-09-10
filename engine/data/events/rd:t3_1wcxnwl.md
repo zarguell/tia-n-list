@@ -1,0 +1,3 @@
+Cross-site scripting (XSS) vulnerabilities kept the top spot in the list, followed by SQL injection and cross-site request forgery (CSRF), each up one position from last year. Missing authorization landed fourth in the 2025 CWE Top 25 list, up five positions. Out-of-bounds write placed fifth, dropping two places. P.S: if you thought that AI and quantum computing are the main focus — good news is that XSS and SQL injection is not going anywhere lol submitted by /u/anthonyDavidson31 [link] [comments]
+
+via reddit r/cybersecurity: MITRE Releases List of Top 25 Most Dangerous Software Vulnerabilities

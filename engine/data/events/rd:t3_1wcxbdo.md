@@ -1,0 +1,3 @@
+Operating over 680 facilities across the US, AdaptHealth describes itself as a network of medical equipment companies that provides patients with healthcare solutions and medical equipment. The company was hacked in early June, when a threat actor gained access to its cloud-based applications, including internal systems used for patient management and document storage. Overall, hackers stole the electronic protected health information of 2,810,878 individuals, Baylor Genetics told the HHS. submitted by /u/anthonyDavidson31 [link] [comments]
+
+via reddit r/cybersecurity: 4.1 Million Impacted by AdaptHealth Data Breach

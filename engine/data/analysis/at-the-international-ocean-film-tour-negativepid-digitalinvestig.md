@@ -1,0 +1,5 @@
+The negativepid blog published a post about steganography as part of its digital investigations and OSINT coverage, linked to the International Ocean Film Tour on September 10. The content focuses on steganography techniques used in cybersecurity investigations, covering how data can be hidden within images, audio files, and other media. This is an educational/analytical piece rather than a vulnerability disclosure or incident report.
+
+The post is part of a series from the negativepid blog covering OSINT, digital investigations, AI, and cybersecurity topics. It appeared in the context of a film tour event, suggesting the content may have been presented or promoted alongside the event. The blog targets security researchers and investigators interested in data concealment techniques.
+
+For defenders, steganography remains a relevant concern as threat actors use it to exfiltrate data or deliver malware payloads through seemingly innocuous files. However, this particular piece is instructional rather than threat reporting, and does not describe active campaigns or novel techniques.
