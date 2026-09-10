@@ -1,0 +1,28 @@
+title: N-able N-central Authentication Bypass Exploitation
+id: a92a7458-baa6-4c0e-891a-5f031c782489
+status: experimental
+description: Detects exploitation of N-able N-central authentication bypass chain (CVE-2026-86206 + CVE-2026-86207) where a semicolon/Forwarded header bypass tricks the Jetty application into treating a remote request as loopback, followed by 2FA bypass. An attacker can gain full admin access to N-central RMM platform via TCP 8443.
+references:
+  - https://www.n-able.com/blog/n-central-security-hotfix-september-5-2026
+  - https://www.rapid7.com
+author: Tia N. List
+date: 2026-09-10
+tags:
+  - attack.t1190
+  - attack.t1078
+logsource:
+  category: network_connection
+  product: linux
+detection:
+  selection_forwarded_header:
+    dst_port: 8443
+  filter_loopback:
+    src_ip: '127.0.0.1'
+  selection_admin_creation:
+    dst_port: 8443
+    http_request_uri|contains: '/api/user'
+    http_request_method: 'POST'
+  condition: selection_admin_creation or (selection_forwarded_header and not filter_loopback)
+falsepositives:
+  - Legitimate N-central admin console access
+level: high
