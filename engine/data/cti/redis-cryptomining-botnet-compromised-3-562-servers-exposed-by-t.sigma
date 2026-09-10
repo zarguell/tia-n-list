@@ -1,0 +1,28 @@
+title: Redis Rogue Replication Used for Cryptomining
+id: 16418711-39bb-4a47-bc68-ccf8a0c9ddef
+status: experimental
+description: Detects Redis rogue replication abuse where an external client issues SLAVEOF/REPLICAOF to hijack a Redis instance for cryptomining via cron job injection. Based on a botnet campaign that compromised 3,562 servers using unauthenticated Redis replication.
+references:
+  - https://hunt.io
+  - https://securityonline.info/redis-cryptomining-botnet/
+author: Tia N. List
+date: 2026-09-10
+tags:
+  - attack.t1053
+  - attack.t1496
+logsource:
+  category: process_creation
+  product: linux
+detection:
+  selection_cron_injection:
+    CommandLine|contains:
+      - 'SLAVEOF '
+      - 'REPLICAOF '
+      - 'cron'
+      - 'crontab'
+  selection_redis:
+    ParentProcessName|endswith: 'redis-server'
+  condition: selection_cron_injection and selection_redis
+falsepositives:
+  - Legitimate Redis replication setup by administrators
+level: high
