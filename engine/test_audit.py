@@ -117,6 +117,29 @@ check("actor-only match not suspected", frozenset(("clop-aol", "clop-fis")) in p
 check("distinct advisory codes not suspected", frozenset(("av-791", "av-797")) in pairs, False)
 check("stale story outside window", any("old" in p for p in pairs), False)
 
+# ── 1b. roundup_family (fragmentation classifier) ────────────────────────────
+check("dedicated Microsoft PT roundup",
+      jc.roundup_family("Microsoft's September 2026 Patch Tuesday fixes two zero-day flaws"),
+      "microsoft")
+check("date-first Microsoft PT roundup",
+      jc.roundup_family("September 2026 Microsoft Patch Tuesday: record CVE count"),
+      "microsoft")
+check("comma AFTER Patch Tuesday is still dedicated",
+      jc.roundup_family("Microsoft Patch Tuesday: 974 CVEs, plus Adobe fixes"), "microsoft")
+check("chipmaker roundup is the non-Microsoft family",
+      jc.roundup_family("Chipmaker Patch Tuesday: Nvidia, AMD, Arm Issue Security Advisories"),
+      "other")
+check("ICS roundup family",
+      jc.roundup_family("ICS Patch Tuesday: Siemens and Schneider fix flaws"), "ics")
+check("multi-topic digest is not a roundup",
+      jc.roundup_family("WeChat 0-click worm, Hacking Customer Service AI agents, "
+                        "Biggest Microsoft Patch Tuesday"), None)
+check("'V8 flaws' is not a numbered Windows roundup",
+      jc.roundup_family("Proofpoint identified BlueMoon, an exploit kit chaining "
+                        "two Chrome/V8 flaws with a Windows privilege escalation."), None)
+check("meta-story mentioning Windows flaws is not a roundup",
+      jc.roundup_family("Expects More Security Updates From AI-Discovered Flaws"), None)
+
 # ── 3. language_scan ─────────────────────────────────────────────────────────
 tmp = tempfile.mkdtemp()
 os.makedirs(os.path.join(tmp, "analysis"))
