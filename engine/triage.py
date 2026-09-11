@@ -208,6 +208,27 @@ def _read_event(eid):
     return json.load(open(p)) if os.path.exists(p) else None
 
 
+def _clean_story_ref(v):
+    """Normalize an agent-written story reference to a bare story id.
+
+    The id IS the slug, but agents routinely write the file they just read
+    (`foo.json`) or a path (`engine/data/stories/foo.json`). Left as-is,
+    `target not in stories` fires and _new_story mints a `foo-2` twin for an
+    event that belongs in `foo` — 2026-09-11: nine keep decisions in one
+    decisions file carried a `.json` suffix, triage minted nine twins (some
+    empty shells), the duplicates broke the digest backlink lint, and the
+    publish aborted for the rest of the day while the twins stayed
+    uncommitted and were re-minted every hour.
+    """
+    if not isinstance(v, str):
+        return v
+    s = v.strip().strip('"').strip("'")
+    s = s.rsplit("/", 1)[-1]
+    if s.endswith(".json"):
+        s = s[:-5]
+    return s or None
+
+
 def _normalize_decisions(dec):
     """Tolerant front end for LLM-written decision files. The documented
     schema is {"decisions": [...], "merges": [...]}, but models drift (seen in
@@ -240,7 +261,7 @@ def _normalize_decisions(dec):
             ignored += 1
             continue
         norm = {"event_id": eid, "action": action,
-                "story": d.get("story") or d.get("story_id"),
+                "story": _clean_story_ref(d.get("story") or d.get("story_id")),
                 "story_title": d.get("story_title"), "reason": d.get("reason") or d.get("rationale")}
         ex = {}
         if isinstance(d.get("exploitation"), dict):
@@ -252,6 +273,9 @@ def _normalize_decisions(dec):
         norm["exploitation"] = ex
         out.append(norm)
     merges = dec.get("merges", []) if isinstance(dec.get("merges", []), list) else []
+    merges = [dict(m, **{"from": _clean_story_ref(m.get("from")),
+                         "into": _clean_story_ref(m.get("into"))})
+              if isinstance(m, dict) else m for m in merges]
     return out, merges, ignored
 
 

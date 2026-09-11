@@ -58,6 +58,26 @@ dec, merges, ign = triage._normalize_decisions(
     {"decisions": [{"title": "no id"}, {"event_id": "e5", "action": "maybe"}]})
 check("junk entries counted, not applied", (len(dec), ign), (0, 2))
 
+# ── 1b. story refs: agents write the FILE they read, not the bare id ────────
+# 2026-09-11: nine keep decisions carried a ".json" suffix, triage saw
+# "unknown story", minted nine "-2" twins, and the duplicates broke the digest
+# backlink lint -> publish aborted every hour while they stayed uncommitted.
+for raw, want in (("foo.json", "foo"),
+                  ("engine/data/stories/bar.json", "bar"),
+                  ("  baz.json  ", "baz"),
+                  ('"qux.json"', "qux"),
+                  ("plain", "plain"),
+                  ("NEW", "NEW")):
+    check(f"story ref {raw!r} -> {want!r}", triage._clean_story_ref(raw), want)
+check("non-string story ref untouched", triage._clean_story_ref(None), None)
+
+_nd, _nm, _ = triage._normalize_decisions({
+    "decisions": [{"event_id": "e6", "action": "keep", "story": "foo.json"},
+                  {"event_id": "e7", "action": "keep", "story_id": "bar.json"}],
+    "merges": [{"from": "dup.json", "into": "engine/data/stories/mech.json"}]})
+check("decision story refs de-suffixed", [d["story"] for d in _nd], ["foo", "bar"])
+check("merge refs de-suffixed", _nm[0], {"from": "dup", "into": "mech"})
+
 # ── 2-4. end-to-end apply on a sandbox store ─────────────────────────────────
 tmp = tempfile.mkdtemp()
 try:
