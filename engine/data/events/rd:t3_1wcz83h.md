@@ -1,0 +1,3 @@
+Researcher: ...Using the API key, anyone is able to find information of the patients that includes their PII and PHI CEO: are you dumb? Researcher: What? Blocked Proof: https://imgur.com/Bul0d76 Background: Found an authentication bypass on their platform which was behind auth guard, revealing information on all their tenants, along with the API keys. Excerpt above is the part of the real conversation when tried to bring the issue forward to the CEO. Posted on YCombinator subreddit as well. submitted by /u/m-a-wanderer [link] [comments]
+
+via reddit r/cybersecurity: Average Conversation between Security Researcher and YCombinator Startup CEO
