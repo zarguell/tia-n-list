@@ -21,6 +21,7 @@ previews. Never deletes a live story (one with events).
 
 Usage: python3 cleanup_ghosts.py [--days N] [--dry-run] [--include-analyzed]
 """
+import contextlib
 import glob
 import json
 import os
@@ -30,10 +31,6 @@ from datetime import datetime, timezone
 
 ENGINE = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(ENGINE, "data")
-STORIES = os.path.join(DATA, "stories")
-ANALYSIS = os.path.join(DATA, "analysis")
-DIGESTS = os.path.join(DATA, "digests")
-CTI = os.path.join(DATA, "cti")
 DEFAULT_DAYS = 90
 DIGEST_LINK_RE = re.compile(r"\]\(stories/([^/]+)/\)")
 
@@ -110,50 +107,63 @@ def age_days(story, now):
         return 10 ** 6
 
 
+def _ghost_candidates(stories_dir):
+    """[(path, story)] for every eventless, non-redirect story file."""
+    out = []
+    for p in sorted(glob.glob(os.path.join(stories_dir, "*.json"))):
+        s = _read_json(p)
+        if s and not s.get("merged_into") and not s.get("events"):
+            out.append((p, s))
+    return out
+
+
+def _analysis_ids(data_dir):
+    return {os.path.splitext(os.path.basename(p))[0]
+            for p in glob.glob(os.path.join(data_dir, "analysis", "*.md"))}
+
+
+def _keep_reason(sid, story, refs, analyzed, days, now):
+    """Why this ghost must be kept now, or None when it is deletable."""
+    if sid in refs:
+        return "referenced"
+    if sid in analyzed:
+        return "analyzed"
+    if age_days(story, now) < days:
+        return "young"
+    return None
+
+
 def find_ghosts(data_dir, days=DEFAULT_DAYS, include_analyzed=False, now=None):
     """(deletable paths, stats). A ghost is deletable when it has no events,
     is not a redirect shell, is unreferenced, is past the retention window,
     and (unless include_analyzed) has no analysis file."""
     now = now or datetime.now(timezone.utc)
-    stories_dir = os.path.join(data_dir, "stories")
     refs = referenced_ids(data_dir)
-    base = {os.path.splitext(os.path.basename(p))[0]
-            for p in glob.glob(os.path.join(stories_dir, "*.json"))}
-    analyzable = {os.path.splitext(os.path.basename(p))[0]
-                  for p in glob.glob(os.path.join(data_dir, "analysis", "*.md"))}
-    deletable, stats = [], {"ghosts": 0, "referenced": 0, "analyzed": 0,
-                            "young": 0}
-    for p in sorted(glob.glob(os.path.join(stories_dir, "*.json"))):
-        s = _read_json(p)
-        if not s or s.get("merged_into") or s.get("events"):
-            continue
+    analyzed = set() if include_analyzed else _analysis_ids(data_dir)
+    stats = {"ghosts": 0, "referenced": 0, "analyzed": 0, "young": 0}
+    deletable = []
+    for p, s in _ghost_candidates(os.path.join(data_dir, "stories")):
         sid = s.get("id") or os.path.splitext(os.path.basename(p))[0]
         stats["ghosts"] += 1
-        if sid in refs:
-            stats["referenced"] += 1
-            continue
-        if sid in analyzable and not include_analyzed:
-            stats["analyzed"] += 1
-            continue
-        if age_days(s, now) < days:
-            stats["young"] += 1
-            continue
-        deletable.append((p, sid))
+        reason = _keep_reason(sid, s, refs, analyzed, days, now)
+        if reason is None:
+            deletable.append((p, sid))
+        else:
+            stats[reason] += 1
     return deletable, stats
 
 
-def main():
-    args = sys.argv[1:]
-    dry = "--dry-run" in args
-    include_analyzed = "--include-analyzed" in args
-    days = DEFAULT_DAYS
-    if "--days" in args:
-        try:
-            days = int(args[args.index("--days") + 1])
-        except (IndexError, ValueError):
-            print("usage: cleanup_ghosts.py [--days N] [--dry-run] [--include-analyzed]")
-            return 2
-    deletable, stats = find_ghosts(DATA, days, include_analyzed)
+def _days_arg(args):
+    """Retention window from --days N, or None on a malformed value."""
+    if "--days" not in args:
+        return DEFAULT_DAYS
+    i = args.index("--days") + 1
+    if i >= len(args) or not args[i].isdigit():
+        return None
+    return int(args[i])
+
+
+def _report(deletable, stats, days, dry):
     print(f"ghosts: {stats['ghosts']} total | {len(deletable)} deletable "
           f"(>{days}d, unreferenced) | kept: {stats['referenced']} referenced, "
           f"{stats['analyzed']} analyzed, {stats['young']} younger than {days}d")
@@ -163,14 +173,29 @@ def main():
         print(f"  ... and {len(deletable) - 20} more")
     if dry:
         print("dry-run: nothing removed")
-        return 0
+
+
+def _remove(deletable):
     removed = 0
     for p, _ in deletable:
-        try:
+        with contextlib.suppress(OSError):
             os.remove(p)
             removed += 1
-        except OSError as exc:
-            print(f"WARN: could not remove {p}: {exc}", file=sys.stderr)
+    return removed
+
+
+def main():
+    args = sys.argv[1:]
+    days = _days_arg(args)
+    if days is None:
+        print("usage: cleanup_ghosts.py [--days N] [--dry-run] [--include-analyzed]")
+        return 2
+    dry = "--dry-run" in args
+    deletable, stats = find_ghosts(DATA, days, "--include-analyzed" in args)
+    _report(deletable, stats, days, dry)
+    if dry:
+        return 0
+    removed = _remove(deletable)
     if removed:
         print(f"cleanup_ghosts: removed {removed} ghost stories")
     return 0
