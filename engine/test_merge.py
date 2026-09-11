@@ -114,6 +114,17 @@ check("HashiCorp AV26-797 vs AV26-791 distinct codes -> 0.0",
       merge.match_scores(ev("z", "HashiCorp security advisory (AV26-797)"),
                          story("h", "HashiCorp security advisory (AV26-791)")), 0.0)
 
+print("== advisory ids in the slug ==")
+check("av26-891 vs av26-825 in the slug are distinct advisories",
+      merge.distinct_advisory_ids("jetbrains-security-advisory-av26-891",
+                                  "jetbrains-security-advisory-av26-825"), True)
+check("same advisory id is not distinct",
+      merge.distinct_advisory_ids("x-av26-891", "x-av26-891"), False)
+check("bare slug-index suffix is not an advisory code",
+      merge.distinct_advisory_ids("foo-5000", "foo-6000"), False)
+check("index suffix vs advisory is not a two-sided match",
+      merge.distinct_advisory_ids("foo-5000", "foo-av26-891"), False)
+
 print("== batch convergence (the real 7-event burst) ==")
 # Simulate merge.py main(): events processed in order, one story created, the
 # rest fold into it via the actor path.

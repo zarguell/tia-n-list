@@ -16,7 +16,8 @@ import os
 import re
 from datetime import timedelta
 
-from merge import title_jaccard, distinct_series_codes, title_discriminators
+from merge import (title_jaccard, distinct_series_codes,
+                   distinct_advisory_ids, title_discriminators)
 
 CJK_RE = re.compile(r"[\u0400-\u04FF\u4E00-\u9FFF\u3040-\u30FF\uAC00-\uD7AF\u0600-\u06FF]")
 
@@ -34,10 +35,11 @@ def load_all_stories(data_dir):
 
 def dedup_invariants(stories):
     """Mechanically-detectable failure classes from the 2026-08-24 triage
-    drift: events referenced by >1 active story, merged_into cycles, events
-    stranded inside redirect shells, and true same-slug-base duplicates
-    (shared event or similar titles; distinct advisory codes exonerate).
-    Returns (ok, detail, ghost_count)."""
+    drift: events referenced by >1 active story, merged_into cycles, dangling
+    redirects (merged_into to a missing story), events stranded inside
+    redirect shells, and true same-slug-base duplicates (shared event or
+    similar titles; distinct advisory codes — in the title or the slug —
+    exonerate). Returns (ok, detail, ghost_count)."""
     owners = {}
     for sid, s in stories.items():
         for r in s.get("events", []):
@@ -57,6 +59,22 @@ def dedup_invariants(stories):
 
     in_shell = sum(len(s.get("events", [])) for s in stories.values() if s.get("merged_into"))
 
+    # dangling redirects: a shell whose merged_into chain never reaches a live
+    # story (a `-2` twin was dropped while the pointer stuck around). The
+    # cycle case is reported separately; cycles are skipped here.
+    orphans = []
+    for sid, s in stories.items():
+        if not s.get("merged_into"):
+            continue
+        seen, cur = set(), sid
+        while stories.get(cur, {}).get("merged_into") and cur not in seen:
+            seen.add(cur)
+            cur = stories[cur]["merged_into"]
+        if cur in seen:
+            continue                      # cycle, already reported above
+        if cur not in stories:
+            orphans.append(f"{sid} -> {s['merged_into']}")
+
     by_base = {}
     for sid, s in stories.items():
         if not s.get("merged_into") and s.get("events"):
@@ -72,12 +90,14 @@ def dedup_invariants(stories):
                 shares = bool({r["event_id"] for r in stories[a]["events"]} &
                               {r["event_id"] for r in stories[b]["events"]})
                 if shares or (title_jaccard(ta, tb) >= 0.4
-                              and not distinct_series_codes(ta, tb)):
+                              and not distinct_series_codes(ta, tb)
+                              and not distinct_advisory_ids(a, b)):
                     dups.append(f"{a} + {b}")
 
     ghosts = sum(1 for s in stories.values() if not s.get("merged_into") and not s.get("events"))
     problems = ([("multi-ref", x) for x in multi] +
                 [("cycle", x) for x in cycles] +
+                [("orphan-redirect", x) for x in orphans] +
                 [("in-shell", str(in_shell))] * (1 if in_shell else 0) +
                 [("same-base", x) for x in dups])
     detail = "; ".join(f"{k}: {v}" for k, v in problems[:8]) or \

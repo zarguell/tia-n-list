@@ -167,6 +167,29 @@ def distinct_series_codes(a, b):
     return bool(ca and cb and not (ca & cb))
 
 
+def _advisory_id_codes(story_id):
+    """Series codes carried by a story id/slug, but only when the code's
+    prefix itself contains a digit (av26-891, cve-2024-37079). A bare slug
+    index suffix (foo-5000) is NOT an advisory: its prefix is letters only,
+    so genuine same-base duplicates still merge."""
+    out = set()
+    for m in SERIES_RE.finditer(story_id or ""):
+        code = m.group(0).upper()
+        if any(ch.isdigit() for ch in code.rsplit("-", 1)[0]):
+            out.add(code)
+    return out
+
+
+def distinct_advisory_ids(a_id, b_id):
+    """Both story ids carry an advisory-series code and none are shared ->
+    different advisories, never duplicates. Catches the JetBrains
+    av26-891 / av26-825 false positive, where the advisory number lives only
+    in the slug and one of the two titles omits it entirely, so the title
+    guard (distinct_series_codes) cannot see it."""
+    ca, cb = _advisory_id_codes(a_id), _advisory_id_codes(b_id)
+    return bool(ca and cb and not (ca & cb))
+
+
 def _actor_norm(tokens_set):
     """Normalize actor tokens across title forms: 'thegentlemen' == 'gentlemen'.
     (bare 'the' never survives tokens(), so only a leading-'the' strip is needed)"""
