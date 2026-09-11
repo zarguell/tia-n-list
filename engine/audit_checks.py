@@ -33,6 +33,32 @@ def load_all_stories(data_dir):
     return out
 
 
+def roundup_family(title):
+    """'microsoft' | 'ics' | 'other' if title is a DEDICATED vendor Patch
+    Tuesday / numbered-Windows-flaws roundup, else None.
+
+    A dedicated roundup names the vendor/month up front. Two false positives
+    the naive substring test produced: a multi-topic weekly digest mentions
+    Patch Tuesday as the last item in a comma list ("WeChat worm, hacking AI
+    agents, biggest Microsoft Patch Tuesday"), and an exploit-kit writeup can
+    contain "V8 flaws" (the old digit-plus-flaws pattern read the "8" as a
+    count).
+    """
+    t = (title or "").lower()
+    pt = t.find("patch tuesday")
+    if pt >= 0:
+        if "," in t[:pt]:          # Patch Tuesday is a trailing list item
+            return None
+    elif not ("windows" in t
+              and re.search(r"\b\d[\d,]*\s*(cves?|vulnerabilit\w+|flaws?)", t)):
+        return None
+    if any(x in t for x in ("ics", "siemens", "schneider", "phoenix contact")):
+        return "ics"
+    if "microsoft" in t:
+        return "microsoft"
+    return "other"        # e.g. "Chipmaker Patch Tuesday: Nvidia, AMD..."
+
+
 def dedup_invariants(stories):
     """Mechanically-detectable failure classes from the 2026-08-24 triage
     drift: events referenced by >1 active story, merged_into cycles, dangling

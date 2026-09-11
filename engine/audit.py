@@ -215,7 +215,10 @@ check("coverage", True,
 # one LIVE story. (CVE-overlap is NOT used — bulletin roundups list many CVEs,
 # so shared CVEs produce false positives; this detector is deliberately
 # precise, and the LLM quality sample catches anything subtler.)
-import re as _re
+# The roundup classifier lives in audit_checks.roundup_family (pinned by
+# test_audit.py) — it rejects multi-topic digests and "V8 flaws"-style
+# substring false positives.
+import audit_checks as _ac  # noqa: E402
 month_group = {}
 for f in glob.glob(os.path.join(DATA, "stories", "*.json")):
     try:
@@ -224,25 +227,15 @@ for f in glob.glob(os.path.join(DATA, "stories", "*.json")):
         continue
     if s.get("merged_into"):
         continue
-    t = (s.get("title") or "").lower()
     # roundup class: the monthly vendor batch. Literal "patch tuesday", OR a
     # numbered Windows-flaws roundup ("Microsoft Patches 398 Windows Flaws..."
     # is the same story and lacks "patch tuesday" — this is why the August
     # fragment was missed). The NUMBER requirement keeps meta-stories out
     # ("Expects More Security Updates From AI-Discovered Flaws" is not a
     # roundup even though it mentions windows flaws).
-    is_roundup = ("patch tuesday" in t) or (
-        "windows" in t
-        and _re.search(r"\d+\s*(cves?|vulnerabilit\w+|flaws?)", t)
-    )
-    if not is_roundup:
+    fam = _ac.roundup_family(s.get("title") or "")
+    if not fam:
         continue
-    if any(x in t for x in ("ics", "siemens", "schneider", "phoenix contact")):
-        fam = "ics"
-    elif "microsoft" in t:
-        fam = "microsoft"
-    else:
-        fam = "other"      # e.g. "Chipmaker Patch Tuesday: Intel, AMD..." — NOT Microsoft
     # month from the first event's publish date (title may omit it)
     refs = s.get("events", [])
     month = "?"

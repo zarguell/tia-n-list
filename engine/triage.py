@@ -538,7 +538,7 @@ def apply(decisions_path):
     print(f"triage applied: {moved} kept/moved, {drops} dropped, {len(merges)} merges, needs-analysis {len(queue)}")
     if ignored:
         print(f"  WARN: {ignored} decision entries could not be parsed from {decisions_path}")
-    if not decisions:
+    if not decisions and not merges:
         print("  WARN: no keep/drop decisions recognized — schema mismatch? "
               "Expected top-level 'decisions' array with event_id/action/story keys")
 
