@@ -38,7 +38,8 @@ DEFAULT_DAYS = 90
 DIGEST_LINK_RE = re.compile(r"\]\(stories/([^/]+)/\)")
 
 
-def _load_story(path):
+def _read_json(path):
+    """Fail-open JSON read: corrupt/empty/unreadable -> None."""
     try:
         with open(path) as fh:
             return json.load(fh)
@@ -46,45 +47,52 @@ def _load_story(path):
         return None
 
 
-def referenced_ids(data_dir):
-    """Every story id still pointed at by something other than the story file
-    itself: digest links + metadata, CTI records, cti-queue, needs-analysis,
-    and redirect targets (other stories' merged_into)."""
+def _digest_refs(data_dir):
+    """Story ids a digest points at: narrative links (.md) and metadata
+    stories lists (.json)."""
     refs = set()
-    cti_dir = os.path.join(data_dir, "cti")
     for f in glob.glob(os.path.join(data_dir, "digests", "*.md")):
         try:
-            refs.update(DIGEST_LINK_RE.findall(open(f, encoding="utf-8",
-                                                    errors="ignore").read()))
+            with open(f, encoding="utf-8", errors="ignore") as fh:
+                refs.update(DIGEST_LINK_RE.findall(fh.read()))
         except OSError:
             pass
     for f in glob.glob(os.path.join(data_dir, "digests", "*.json")):
-        try:
-            refs.update(json.load(open(f)).get("stories", []) or [])
-        except (json.JSONDecodeError, ValueError, OSError):
-            pass
-    for f in glob.glob(os.path.join(cti_dir, "*.json")):
-        try:
-            sid = json.load(open(f)).get("story_id")
-            if sid:
-                refs.add(sid)
-        except (json.JSONDecodeError, ValueError, OSError):
-            pass
-    for name, key in (("needs-analysis.json", "stories"), ("cti-queue.json", "stories")):
-        p = os.path.join(data_dir, name)
-        if not os.path.exists(p):
-            continue
-        try:
-            for item in json.load(open(p)).get(key, []) or []:
-                refs.add(item if isinstance(item, str) else item.get("id"))
-        except (json.JSONDecodeError, ValueError, OSError):
-            pass
-    for f in glob.glob(os.path.join(data_dir, "stories", "*.json")):
-        s = _load_story(f)
-        if s and s.get("merged_into"):
-            refs.add(s["merged_into"])
+        refs.update((_read_json(f) or {}).get("stories", []) or [])
+    return refs
+
+
+def _cti_refs(data_dir):
+    """Story ids named by a CTI record (audit store_invariants checks these)."""
+    return {d["story_id"] for d in
+            (_read_json(f) for f in glob.glob(os.path.join(data_dir, "cti", "*.json")))
+            if d and d.get("story_id")}
+
+
+def _queue_refs(data_dir):
+    """Story ids in needs-analysis.json / cti-queue.json (str or {id})."""
+    refs = set()
+    for name in ("needs-analysis.json", "cti-queue.json"):
+        data = _read_json(os.path.join(data_dir, name)) or {}
+        for item in data.get("stories", []) or []:
+            refs.add(item if isinstance(item, str) else item.get("id"))
     refs.discard(None)
     return refs
+
+
+def _redirect_targets(data_dir):
+    """Story ids other stories redirect to — deleting one would dangle."""
+    return {d["merged_into"] for d in
+            (_read_json(f) for f in glob.glob(os.path.join(data_dir, "stories", "*.json")))
+            if d and d.get("merged_into")}
+
+
+def referenced_ids(data_dir):
+    """Every story id still pointed at by something other than the story
+    file itself: digest links + metadata, CTI records, cti-queue,
+    needs-analysis, and redirect targets."""
+    return (_digest_refs(data_dir) | _cti_refs(data_dir)
+            | _queue_refs(data_dir) | _redirect_targets(data_dir))
 
 
 def age_days(story, now):
@@ -116,7 +124,7 @@ def find_ghosts(data_dir, days=DEFAULT_DAYS, include_analyzed=False, now=None):
     deletable, stats = [], {"ghosts": 0, "referenced": 0, "analyzed": 0,
                             "young": 0}
     for p in sorted(glob.glob(os.path.join(stories_dir, "*.json"))):
-        s = _load_story(p)
+        s = _read_json(p)
         if not s or s.get("merged_into") or s.get("events"):
             continue
         sid = s.get("id") or os.path.splitext(os.path.basename(p))[0]
