@@ -1,0 +1,5 @@
+Ransomware leak blog activity was tracked from multiple groups on September 11, 2026. ShadowByt3$ posted victim "John Engel Team," while the pear group posted "Foss Inc." Panzer ransomware also posted new victim data. The CTI.FYI monitoring service flagged these as new blog posts from groups tracked on their platform.
+
+The Panzer group has been building a track record since emerging in mid-2026. It operates across Windows, Linux, ESXi, and FreeBSD with a multithreaded ChaCha20 encryptor. Previous reporting has linked Panzer to at least 16 victims across 11 countries, with data exfiltration preceding encryption. The group maintains a structured leak site and appears to follow the double-extortion playbook common among modern ransomware operations.
+
+ShadowByt3$ and pear are newer entrants whose operational patterns are still being characterized. The frequency of new ransom group blog posts, typically multiple per day across the ecosystem, reflects the ongoing industrialization of ransomware-as-a-service operations. Each new group adds to the fragmentation of the threat landscape, making attribution and defense more complex for incident responders.

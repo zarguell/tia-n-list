@@ -1,0 +1,3 @@
+Hey all! For my capstone I'm doing a research project, and I'd appreciate it if you took the time to take my survey about AI. It's about your opinions: do you use it? Expectations? Threat to general security/job security? Etc. Things like that. It's anonymous and should take around 5-10 minutes. There's 11 questions and a few optional comment boxes. It would really help me out. If you have any questions or concerns, you can DM me or leave a comment. Thank you guys :) (I asked the mods before posting to make sure this was okay!) submitted by /u/void_computation [link] [comments]
+
+via reddit r/cybersecurity: Anonymous Survey - Cybersec Pros' Opinions and Predictions about AI
