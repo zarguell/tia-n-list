@@ -1,0 +1,1 @@
+This is a consumer product guide for iPhone 18 models, not a security event. Wired published a buying comparison covering the new iPhone Duo (folding model) and refreshed Pro variants. No security vulnerabilities, attacks, or advisories are involved.
