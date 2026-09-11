@@ -30,7 +30,7 @@ from build_registry import domain_of
 from score import SB_DEFAULTS as _SB_DEFAULTS, backfill_score_breakdown
 from merge import (GENERIC, DATE_STOP, _norm_tokens, _series_codes,
                    title_jaccard as jac, distinct_series_codes,
-                   title_discriminators)
+                   distinct_advisory_ids, title_discriminators)
 from store import load_events
 
 ENGINE = os.path.dirname(os.path.abspath(__file__))
@@ -141,6 +141,33 @@ def break_cycles(stories, log):
         log.append(f"cycle broken: {shell} -> {keep} (live)")
 
 
+def heal_orphan_shells(stories, events, log):
+    """0a.1 Redirect shells whose merged_into chain never reaches a live story.
+
+    The 2026-09-11 `.json`-suffixed story refs made triage mint `<slug>-2`
+    twins, move the shell's events into them, then the twins were dropped while
+    the tracked shell kept the dangling pointer. We recover: a stranded
+    (unreferenced, non-excluded) event whose title matches the shell is put
+    back, then the pointer is cleared so the shell is live again. A shell with
+    no recoverable event simply becomes an eventless story."""
+    referenced = {r["event_id"] for s in stories.values()
+                  for r in s.get("events", [])}
+    stranded = {eid: ev for eid, ev in events.items()
+                if eid not in referenced and not ev.get("excluded")}
+    for sid, s in stories.items():
+        if not s.get("merged_into") or redirect_target(stories, sid) is not None:
+            continue
+        recovered = 0
+        for eid in list(stranded):
+            if jac(s.get("title", ""), stranded[eid].get("title", "")) >= 0.5:
+                s.setdefault("events", []).append(
+                    {"event_id": eid, "label": "original"})
+                del stranded[eid]
+                recovered += 1
+        s.pop("merged_into", None)
+        log.append(f"orphan shell {sid} -> live (recovered {recovered} events)")
+
+
 def main():
     dry = "--dry-run" in sys.argv
     stories = load_stories()
@@ -149,6 +176,14 @@ def main():
 
     # 0a. merged_into pointer cycles first: redirects must terminate
     break_cycles(stories, log)
+
+    # 0a.1 dangling redirect shells (the `.json`-suffixed-twin aftermath): the
+    # twin was written, the shell redirected to it, then the twin was removed
+    # while the pointer stuck around. Re-home any stranded event that belongs
+    # to the shell and make it live again, so old URLs resolve and no event is
+    # left unrendered; a shell with no recoverable event becomes an ordinary
+    # (eventless) story the audit reports as a ghost.
+    heal_orphan_shells(stories, events, log)
 
     # 0b. shells that still hold events (a mechanical merge once deposited
     # into a merged-away story): move them to the redirect target
@@ -178,7 +213,8 @@ def main():
         for s in group:
             shares = bool({r["event_id"] for r in s["events"]} &
                           {r["event_id"] for r in c["events"]})
-            same_advisory = distinct_codes(s["title"], c["title"])
+            same_advisory = (distinct_codes(s["title"], c["title"])
+                             or distinct_advisory_ids(s["id"], c["id"]))
             if s is not c and not same_advisory and (jac(s["title"], c["title"]) >= 0.4 or shares):
                 merge_story(stories, s["id"], c["id"], log)
 

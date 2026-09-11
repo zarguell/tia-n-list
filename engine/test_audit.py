@@ -82,6 +82,23 @@ ok, d, ghosts = jc.dedup_invariants({
 })
 check("distinct advisory codes exonerate; ghost informational only", (ok, ghosts), (True, 1))
 
+ok, d, _ = jc.dedup_invariants({
+    "jetbrains-security-advisory-av26-891": story(
+        "jetbrains-security-advisory-av26-891", ["e1"],
+        title="JetBrains September 2026 Security Advisory"),
+    "jetbrains-security-advisory-av26-825": story(
+        "jetbrains-security-advisory-av26-825", ["e2"],
+        title="JetBrains security advisory (AV26-825)"),
+})
+check("advisory id in the slug exonerates a one-sided title", ok, True)
+
+ok, d, _ = jc.dedup_invariants({
+    "orphan-shell": story("orphan-shell", [], merged_into="missing-target"),
+    "live": story("live", ["e1"]),
+})
+check("dangling redirect shell fails", ok, False)
+check("dangling redirect names the dead target", "missing-target" in d, True)
+
 # ── 2. duplicate_suspects ────────────────────────────────────────────────────
 stories = {
     "chrome-151-a": story("chrome-151-a", ["e1"], title="Google Chrome 151 Update Fixes 5 High Severity Flaws"),
