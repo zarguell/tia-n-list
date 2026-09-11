@@ -131,13 +131,13 @@ def _analysis_ids(data_dir):
             for p in glob.glob(os.path.join(data_dir, "analysis", "*.md"))}
 
 
-def _keep_reason(sid, story, refs, analyzed, days, now):
+def _keep_reason(sid, story, ctx):
     """Why this ghost must be kept now, or None when it is deletable."""
-    if sid in refs:
+    if sid in ctx["refs"]:
         return "referenced"
-    if sid in analyzed:
+    if sid in ctx["analyzed"]:
         return "analyzed"
-    if age_days(story, now) < days:
+    if age_days(story, ctx["now"]) < ctx["days"]:
         return "young"
     return None
 
@@ -146,15 +146,15 @@ def find_ghosts(data_dir, days=DEFAULT_DAYS, include_analyzed=False, now=None):
     """(deletable paths, stats). A ghost is deletable when it has no events,
     is not a redirect shell, is unreferenced, is past the retention window,
     and (unless include_analyzed) has no analysis file."""
-    now = now or datetime.now(timezone.utc)
-    refs = referenced_ids(data_dir)
-    analyzed = set() if include_analyzed else _analysis_ids(data_dir)
+    ctx = {"refs": referenced_ids(data_dir),
+           "analyzed": set() if include_analyzed else _analysis_ids(data_dir),
+           "days": days, "now": now or datetime.now(timezone.utc)}
     stats = {"ghosts": 0, "referenced": 0, "analyzed": 0, "young": 0}
     deletable = []
     for p, s in _ghost_candidates(os.path.join(data_dir, "stories")):
         sid = s.get("id") or os.path.splitext(os.path.basename(p))[0]
         stats["ghosts"] += 1
-        reason = _keep_reason(sid, s, refs, analyzed, days, now)
+        reason = _keep_reason(sid, s, ctx)
         if reason is None:
             deletable.append((p, sid))
         else:
