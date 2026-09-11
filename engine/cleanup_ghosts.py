@@ -107,12 +107,21 @@ def age_days(story, now):
         return 10 ** 6
 
 
+def _is_ghost(story):
+    """Eventless, non-redirect story -> renders no page, pure store weight."""
+    if not story:
+        return False
+    if story.get("merged_into"):
+        return False
+    return not story.get("events")
+
+
 def _ghost_candidates(stories_dir):
     """[(path, story)] for every eventless, non-redirect story file."""
     out = []
     for p in sorted(glob.glob(os.path.join(stories_dir, "*.json"))):
         s = _read_json(p)
-        if s and not s.get("merged_into") and not s.get("events"):
+        if _is_ghost(s):
             out.append((p, s))
     return out
 
