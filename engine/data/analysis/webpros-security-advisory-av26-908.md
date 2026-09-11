@@ -1,0 +1,5 @@
+WebPros disclosed vulnerabilities in cPanel and ConfigServer Firewall (CSF) affecting a wide range of versions. CVE-2026-67401 is a SQL injection flaw in cPanel's EmailTrack functionality. CVE-2026-65638 and CVE-2026-65639 are critical vulnerabilities in the CSF plugin, both enabling remote code execution. The CSF flaws affect versions 14.00 through 16.29, with CVE-2026-65638 impacting versions 2.15 through 16.29 as well.
+
+The Canadian Centre for Cyber Security published advisory AV26-908 on September 10, 2026, urging administrators to patch immediately. cPanel versions prior to 11.110.0.143, 11.134.0.55, 11.136.0.39, 11.138.0.4, and WP2 11.138.1.9 are all affected. CSF users on any version between 14.00 and 16.29 should update without delay.
+
+The RCE capabilities in the CSF plugin make this particularly urgent for managed hosting environments. CSF is widely deployed alongside cPanel, so the combined attack surface is significant. Organizations running self-managed cPanel servers should verify their CSF version and apply the security releases from WebPros immediately.
