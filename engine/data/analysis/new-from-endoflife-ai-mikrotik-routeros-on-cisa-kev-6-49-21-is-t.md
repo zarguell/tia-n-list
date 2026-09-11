@@ -1,0 +1,5 @@
+CVE-2026-86060, a vulnerability in MikroTik RouterOS, has been added to CISA's Known Exploited Vulnerabilities catalog. The only patched version for the 6.x branch is 6.49.21. Organizations running any other 6.x release are exposed to active exploitation. MikroTik's 7.x line is not affected if running current releases.
+
+CISA KEV listing means federal agencies have a binding deadline to remediate, but the designation also signals confirmed in-the-wild exploitation. MikroTik routers are widely deployed in small and mid-size ISPs, WISPs, and enterprise branch offices. The 6.x codebase is legacy, and many operators delay upgrades due to configuration migration concerns.
+
+Given the KEV status, this should be treated as an active threat. MikroTik devices are frequent targets for botnets and APT groups because they sit at network edges with broad traffic visibility. Operators still on 6.x should upgrade to 6.49.21 or migrate to the 7.x line. If immediate patching is not feasible, restrict management access to trusted IPs and monitor for unauthorized configuration changes.
