@@ -1,0 +1,1 @@
+This story is a promotional coupon aggregator from Wired, not a security event. The content lists discount codes for food delivery and pet supply services including DoorDash and Chewy. It has no security relevance and should not have appeared in the threat intelligence pipeline. The event likely entered the feed due to keyword overlap with technology news sources.

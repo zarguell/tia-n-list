@@ -1,0 +1,1 @@
+A puzzle game called "Who Dung It?" hosted at turdle.fun, linked from Hacker News. The game involves solving trivia or deduction challenges. It has no security relevance and entered the feed through HN aggregation noise. No vulnerability, breach, or threat actor is associated with this content.
