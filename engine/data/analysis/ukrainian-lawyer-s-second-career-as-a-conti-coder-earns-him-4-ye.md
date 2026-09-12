@@ -1,0 +1,5 @@
+A Ukrainian national who previously worked as a lawyer has been sentenced to four years in prison for developing malware for the Conti ransomware group. The individual was extradited to face charges after switching from legal work to malware development. The Register reported the sentencing on September 11.
+
+The case highlights the professional diversity within ransomware operations and the international cooperation required to bring developers to justice. Conti, one of the most prolific ransomware operations before its formal dissolution in 2022, continues to cast a long shadow through its members and affiliated operators who have scattered into other groups.
+
+The sentence of four years is modest compared to the damage Conti inflicted globally, including the attack on Ireland's Health Service Executive and numerous other victims. However, the extradition and conviction demonstrate that law enforcement is still actively pursuing Conti alumni years after the group's peak activity. This serves as a signal to current ransomware developers that attribution and prosecution remain possible across international boundaries.
