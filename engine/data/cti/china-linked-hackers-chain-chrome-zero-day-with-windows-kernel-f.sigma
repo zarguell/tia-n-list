@@ -1,0 +1,50 @@
+title: Chrome Zero-Day Exploitation Chain - GRIMWEDGE and LONGTALE Payloads
+id: f6a7b8c9-d0e1-2345-fabc-456789012345
+status: experimental
+description: Detects exploitation of Chrome zero-day CVE-2026-85046 with Windows kernel LPE and deployment of GRIMWEDGE/LONGTALE payloads
+references:
+  - https://gbhackers.com/
+  - https://cyberpress.org/
+author: Tia N. List
+date: 2026-09-12
+tags:
+  - attack.initial-access
+  - attack.t1566
+  - attack.execution
+  - attack.t1203
+  - attack.privilege-escalation
+  - attack.t1068
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection_chrome_child_spawn:
+    ParentImage|endswith:
+      - '\chrome.exe'
+    Image|endswith:
+      - '\cmd.exe'
+      - '\powershell.exe'
+      - '\pwsh.exe'
+      - '\wscript.exe'
+      - '\cscript.exe'
+      - '\mshta.exe'
+      - '\rundll32.exe'
+      - '\regsvr32.exe'
+  selection_kernel_exploit_child:
+    ParentImage|endswith:
+      - '\csrss.exe'
+      - '\lsass.exe'
+    Image|endswith:
+      - '\cmd.exe'
+      - '\powershell.exe'
+  selection_grimwedge_strings:
+    CommandLine|contains:
+      - 'GRIMWEDGE'
+      - 'grimwedge'
+      - 'LONGTALE'
+      - 'longtale'
+  condition: selection_chrome_child_spawn or selection_kernel_exploit_child or selection_grimwedge_strings
+falsepositives:
+  - Legitimate browser-initiated processes
+  - Developer tools usage
+level: critical

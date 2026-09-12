@@ -1,0 +1,38 @@
+title: GitLab CVE-2026-85706 Path Traversal Exploitation
+id: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+status: experimental
+description: Detects exploitation of CVE-2026-85706 path traversal in GitLab repository commit interface allowing unauthenticated file read
+references:
+  - https://cyberscoop.com/
+  - https://www.thehackernews.com/
+author: Tia N. List
+date: 2026-09-12
+tags:
+  - attack.initial-access
+  - attack.t1190
+  - attack.discovery
+  - attack.t1083
+logsource:
+  product: linux
+  category: webserver
+detection:
+  selection_path_traversal:
+    cs-uri|contains:
+      - '/-/repository/commits'
+      - '/api/v4/repository/commits'
+    cs-uri|contains:
+      - '..%2f'
+      - '..%252f'
+      - '..\\'
+  selection_file_read:
+    cs-uri|contains:
+      - '/etc/passwd'
+      - '/etc/shadow'
+      - '.ssh/id_rsa'
+      - 'database.yml'
+      - 'application.yml'
+      - 'secrets.yml'
+  condition: selection_path_traversal or selection_file_read
+falsepositives:
+  - Legitimate repository commit operations with unusual paths
+level: critical
