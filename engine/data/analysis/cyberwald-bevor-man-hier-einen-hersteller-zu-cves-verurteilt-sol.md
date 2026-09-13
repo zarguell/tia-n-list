@@ -1,0 +1,5 @@
+Check Point has patched two critical vulnerabilities in its VPN infrastructure, CVE-2026-85102 and CVE-2026-85103, both carrying CVSS scores of 9.8. The flaws are in Check Point's VPN products, though the exact affected versions and technical details of the vulnerabilities have not been fully disclosed in the available reporting. The advisory came from Check Point's own support portal.
+
+A German-language cybersecurity discussion surfaced around this advisory, with some commenters urging deeper research before assigning blame to the vendor. The critical severity and the fact that these are VPN gateway flaws make this high-priority for any organization running Check Point perimeter infrastructure. VPN gateways are classic high-value targets, and CVSS 9.8 typically indicates remote code execution or authentication bypass with no user interaction required.
+
+Patch immediately if running Check Point VPN products. The lack of public exploit details at this stage is not a reason to delay, given the score and product class. Watch for additional technical writeups and CISA KEV addition in the coming days.
