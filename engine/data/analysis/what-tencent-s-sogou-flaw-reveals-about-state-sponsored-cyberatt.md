@@ -1,0 +1,7 @@
+State-linked hackers targeted users of Tencent's Sogou Input Method, one of the world's most widely used Chinese-language input tools, exploiting vulnerabilities including CVE-2021-38003 (a Chrome V8 type confusion flaw) and CVE-2026-51990. The campaign reveals how state-sponsored actors leverage vulnerabilities in popular software with massive user bases to conduct surveillance or intelligence collection against targeted individuals.
+
+Sogou Input Method has hundreds of millions of installations across desktop and mobile platforms. The exploitation of CVE-2021-38003, which was a Chrome V8 vulnerability originally patched in 2021, suggests either incomplete patching among Sogou users or a deliberate targeting of the input method's embedded browser components. CVE-2026-51990 appears to be a newer vulnerability specific to the Sogou ecosystem.
+
+The campaign fits a pattern of state-sponsored actors targeting input method editors (IMEs) as surveillance vectors. IMEs process all text input on a system, making them high-value targets for keystroke logging and data exfiltration. Previous campaigns have targeted other Chinese-language IMEs including Sogou and QQ Pinyin.
+
+Users of Sogou Input Method should ensure they are running the latest version and apply any security patches released by Tencent. The incident underscores the risk profile of software that processes sensitive input data at the OS level, where vulnerabilities can provide comprehensive access to user communications.
