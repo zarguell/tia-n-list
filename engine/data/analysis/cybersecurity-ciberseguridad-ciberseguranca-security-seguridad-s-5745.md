@@ -1,0 +1,5 @@
+DarkReporting reports on voice caller exploitation campaigns targeting BYOD (Bring Your Own Device) environments and Microsoft 365 corporate data. Attackers are using phone-based social engineering to gain access to corporate resources through employees' personal devices that connect to work systems.
+
+This represents an evolving attack vector that bypasses traditional email-focused security controls. Voice-based phishing (vishing) combined with BYOD policies creates a gap where personal devices lacking enterprise security controls become entry points to corporate networks. Organizations with Microsoft 365 deployments should audit their conditional access policies and ensure BYOD devices meet minimum security requirements.
+
+Watch for follow-up reporting on specific threat actors, campaign scale, and whether this targets particular industries or geographies.
