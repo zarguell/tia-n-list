@@ -1,0 +1,5 @@
+Anthropic CEO Dario Amodei publicly called for AI development to slow down, a notable statement from the head of one of the leading frontier AI companies. BBC and The Verge both covered the announcement, with Amodei outlining plans to "pace the frontier" in terms of capability development speed.
+
+This is significant because it represents a major AI lab leader publicly advocating for slower development, at a time when competition between OpenAI, Anthropic, Google, and others has accelerated capability gains. The statement signals potential alignment between safety concerns and commercial strategy, or possibly a competitive positioning move under the guise of responsibility.
+
+Watch for concrete policy proposals from Anthropic, whether competitors respond with similar commitments, and whether this translates into actual delays in model releases or just rhetorical positioning.
