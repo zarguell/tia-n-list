@@ -1,0 +1,3 @@
+Unverified ransomware claim by actor AuditTeam targets an undisclosed victim ("vi***in"). Two identical threat-intel posts from Yazoul.net flagged the claim on Sep 13, 2026, both labeled as unverified. No CVEs, no victim disclosed, no sample or hash given to corroborate.
+
+Score is 4.2. The source (yazoul.net) is a single threat-intelligence feed, not a mainstream security outlet. No Reddit pickup, no KEV association. At this stage the claim is entirely unsubstantiated and could be noise or a garden-variety extortion stunt. Watch for follow-up posts from AuditTeam, secondary confirmations on breach forums, or victim acknowledgment. Until then, treat as low-confidence and do not escalate.
