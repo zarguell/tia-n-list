@@ -1,0 +1,5 @@
+Revolut confirmed on September 12, 2026 that it disclosed sensitive customer data to scammers after fraudulent data requests were submitted through a legitimate government agency portal. Attackers exploited the formal law enforcement data request process, sending forged requests that appeared to originate from a real government authority. Revolut complied, handing over customer information before the fraud was detected.
+
+This is not a traditional breach exploiting a software vulnerability. The attack abused institutional trust: government agencies routinely request customer records from financial institutions through established channels, and Revolut's process failed to catch forged submissions. The incident highlights a systemic weakness in how financial firms validate law enforcement requests, not just a Revolut-specific gap.
+
+The breach is significant because it demonstrates that compliance processes themselves can be attack vectors. Other financial institutions should audit their government request validation procedures. Coverage came from Hackread and BeyondMachines on September 12-13, 2026.
