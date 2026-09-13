@@ -1,0 +1,5 @@
+CISA released an updated insider threat guide on September 10, 2026, covering both physical and cyber risks. The guide provides new insights on mitigating insider threats and emphasizes structured risk management and cross-organization collaboration. This is a refresh of CISA's existing insider threat materials, not a response to a specific incident.
+
+The update comes at a time when insider threat activity is elevated across both government and private sector. CISA's guidance typically includes assessment frameworks, detection methodologies, and incident response procedures tailored to insider scenarios ranging from negligent employees to malicious actors with privileged access. The guide is aimed at critical infrastructure operators and federal agencies but is broadly applicable.
+
+For defenders, the key takeaway is that CISA continues to prioritize insider threat as a distinct category requiring dedicated programmatic attention, not just a side effect of perimeter security. Organizations that have not reviewed their insider threat programs in the past 12 months should treat this update as a trigger for reassessment. The guide is available at cisa.gov.
