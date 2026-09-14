@@ -1,0 +1,3 @@
+Many were highly skeptical about deploying Prolog for state-of-the-art cyber defense. Here is a live, concrete demonstration of our Neuro-Symbolic Core actively neutralizing a multi-vector mutated attack combining LFI and CRLF injection. The entire threat telemetry and dynamic verdict are cleanly generated into a structured JSON payload—perfectly formatted and instantly ready for LLM fine-tuning. Real-world data and deterministic performance never lie. https://github.com/lokinpendawa/aethel_core/blob/main/README.md submitted by /u/lokinpendawa [link] [comments]
+
+via reddit r/cybersecurity: Neuro-Symbolic Hybrid WAF in Prolog with a Mind-Blowing 0.17ms Latency
