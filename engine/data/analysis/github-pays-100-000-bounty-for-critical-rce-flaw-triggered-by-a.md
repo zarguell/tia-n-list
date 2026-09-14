@@ -1,0 +1,5 @@
+GitHub paid a $100,000 bug bounty to researcher Saif Ghani for CVE-2026-3854, a critical remote code execution flaw disclosed on July 22 through coordinated disclosure. The vulnerability existed in GitHub's processing of crafted repository URLs or Git push input, allowing an unauthenticated attacker to execute arbitrary commands on GitHub backend infrastructure.
+
+The proof of concept demonstrated shell access on an affected server, with the researcher showing the ability to read repository secrets and alter code mid-service. That is a direct software supply chain attack path: compromising a central development platform could let threat actors tamper with source code, steal credentials, or interfere with build and deployment pipelines across any organization using the affected instance.
+
+GitHub patched the issue before public disclosure. No evidence of exploitation in the wild has surfaced, but the combination of unauthenticated RCE on a source-code hosting platform makes this one of the higher-impact bounty payouts in recent memory. Organizations self-hosting GitHub Enterprise should verify they are running the patched version.
