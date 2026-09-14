@@ -1,0 +1,5 @@
+Microsoft's September 2026 security updates are breaking audio functionality on some Windows PCs. BleepingComputer reported the issue after users reported loss of audio output following installation of the latest cumulative updates. The problem appears to affect specific hardware configurations rather than all systems, but the exact trigger remains unclear.
+
+This follows a pattern of cumulative updates causing unintended regressions. Earlier in September, Microsoft patched a bug that wiped Windows desktop settings, and the company also acknowledged that Windows Server 2025 changes could cause application crashes. The audio issue adds to a growing list of post-patch problems this cycle.
+
+Users experiencing audio loss should check Device Manager for driver errors and consider rolling back the audio driver or the cumulative update if the issue persists. Microsoft has not yet released a fix for this specific regression. Organizations should test patches on representative hardware before broad deployment, particularly on systems where audio functionality is operationally important.
