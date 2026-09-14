@@ -1,0 +1,5 @@
+A ransomware actor using the handle "emperador" claimed a 223.2MB data dump from Navitrans, a logistics software company. The claim appeared on the actor's blog and was flagged by threat intelligence trackers. Separately, Qilin ransomware group posted new victim blogs including Minmer Global, tracked by cti.fyi. Neither claim has been independently verified at this time.
+
+The broader ransomware landscape continues to track at elevated volume. Week 37 (September 7-13) saw 189 claimed victims, down 12.1% from the prior week's 215 but still consistent with the sustained high-claim environment of 2026. This follows August's record 997 claimed attacks, a 23% increase over July according to industry tracking.
+
+Navitrans develops transport management software used by logistics and freight companies. If confirmed, a breach there could expose shipping manifests, customer data, and integration credentials that connect to downstream ERP and warehouse systems. The "emperador" actor is not among the most prolific ransomware groups, so this may be an opportunistic claim rather than a coordinated operation. Watch for verification from Navitrans or additional leak postings.
