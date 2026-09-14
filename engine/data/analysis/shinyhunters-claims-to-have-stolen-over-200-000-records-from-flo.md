@@ -1,0 +1,5 @@
+ShinyHunters claims to have breached Florida's DAVID (Driver and Vehicle Information Database) system, stealing over 200,000 records. A subsequent analysis identified 612,982 ZIP archives containing scanned SSN cards and driver's licenses, far exceeding the initial claim.
+
+Florida has confirmed the breach occurred through an API vulnerability in the DMV system. The leaked data includes highly sensitive PII: Social Security cards, driver's licenses, and associated personal information for hundreds of thousands of Florida residents.
+
+This breach is particularly severe due to the nature of the exposed documents. Stolen SSN card images and license scans enable identity theft at scale. Florida residents should monitor credit reports and consider fraud alerts. The API vulnerability suggests systemic issues with Florida's vehicle registration infrastructure that may extend beyond this single incident.

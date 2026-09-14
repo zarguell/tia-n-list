@@ -1,0 +1,5 @@
+Attackers hijacked HBO Max's verified Reddit account (u/hbomax) and ran 108 ClickFix crypto-theft ads over a 48-hour window. The campaign leveraged Reddit's ad platform to distribute fake crypto wallet apps and clipboard-hijacking malware, exploiting the trust associated with the verified brand account.
+
+The PasteSwitch operation is notable for its scale and the abuse of a legitimate verified account. ClickFix lures typically trick users into running malicious PowerShell commands, but here the attackers weaponized paid advertising infrastructure to achieve broader reach than typical organic social engineering.
+
+This represents a growing trend of threat actors hijacking verified social media accounts to bypass platform trust signals. Organizations with verified accounts should monitor for unauthorized ad campaigns and enforce strict access controls on accounts with advertising privileges.
