@@ -25,6 +25,9 @@ Rules:
   corpus already publishes upstream none/poc values for KEV records).
 - bod_26_04 is recomputed from the final SSVC values via
   schema.compute_bod_timeline (in_kev = the record's own kev_date_added).
+- Stale embedded qc_notes ("SSVC 'X' is unknown — no Vulnrichment data")
+  are pruned once the field holds a real value — the site renders those
+  notes verbatim next to the refreshed chips.
 - All-or-nothing: every planned write is validated before the first file is
   touched; a validation abort leaves the tree untouched. A crash mid-write
   is safe anyway: the next run recomputes everything (idempotent).
@@ -118,6 +121,29 @@ def _record_triple(rec):
     return tuple(str(v.get(k, "unknown")).lower() for k in RECORD_KEYS)
 
 
+def _prune_stale_ssvc_notes(new_rec, new_triple):
+    """Drop missing_ssvc qc_notes that no longer describe the record.
+
+    Records embed the qc notes captured at ingest; the site renders them
+    verbatim, so a refreshed record claimed 'SSVC automatable is unknown'
+    right next to its now-correct value. Derived-state maintenance: a note
+    is removed only when its field now holds a real (non-unknown) value.
+    Everything else (severity, other checks) is untouched.
+    """
+    notes = new_rec.get("qc_notes")
+    if not isinstance(notes, list):
+        return
+    kept = []
+    for n in notes:
+        if isinstance(n, dict) and n.get("check") == "missing_ssvc":
+            field = str(n.get("field") or "").split(".")[-1]
+            if field in RECORD_KEYS and \
+                    new_triple[RECORD_KEYS.index(field)] != "unknown":
+                continue
+        kept.append(n)
+    new_rec["qc_notes"] = kept
+
+
 def plan_refresh(repo=None, records_dir=None, fetch=None, now=None,
                  delay=DEFAULT_DELAY, limit=None, only=None):
     """Compute the update plan for every record under data/cves/.
@@ -175,7 +201,11 @@ def plan_refresh(repo=None, records_dir=None, fetch=None, now=None,
         old_bod = rec.get("bod_26_04") or {}
         bod_same = all(old_bod.get(k) == v for k, v in new_bod.items())
 
-        if new_triple == old_triple and bod_same:
+        new_rec = dict(rec)
+        _prune_stale_ssvc_notes(new_rec, new_triple)
+        notes_changed = new_rec.get("qc_notes") != rec.get("qc_notes")
+
+        if new_triple == old_triple and bod_same and not notes_changed:
             continue
         if limit and len(plans) >= limit:
             continue
@@ -183,7 +213,6 @@ def plan_refresh(repo=None, records_dir=None, fetch=None, now=None,
         vuln = dict(rec.get("vulnrichment") or {})
         vuln.update(dict(zip(RECORD_KEYS, new_triple)))
         vuln["refreshed"] = now
-        new_rec = dict(rec)
         new_rec["vulnrichment"] = vuln
         new_rec["bod_26_04"] = new_bod
         plans.append((cve_id, path, new_rec, old_triple, new_triple))

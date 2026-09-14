@@ -103,6 +103,44 @@ def test_refreshed_stamp_written_on_change(tmp_path):
     assert plans[0][2]["vulnrichment"]["refreshed"] == "2026-09-15T10:00:00Z"
 
 
+def test_stale_missing_ssvc_notes_pruned_others_kept(tmp_path):
+    """CVE-2026-81963 published 'unknown' notes next to refreshed values."""
+    _write(tmp_path, _rec("CVE-2026-81963", explo="active", **{
+        "qc_notes": [
+            {"severity": "warn", "check": "component_extraction",
+             "field": "kevrichment_research.vulnerable_component",
+             "detail": "keep me"},
+            {"severity": "info", "check": "missing_ssvc",
+             "field": "vulnrichment.automatable", "detail": "stale"},
+            {"severity": "info", "check": "missing_ssvc",
+             "field": "vulnrichment.technical_impact", "detail": "stale"},
+            {"severity": "info", "check": "missing_ssvc",
+             "field": "vulnrichment.exploitation_status", "detail": "stale too"},
+        ]}))
+
+    _summary, plans, _f = sr.plan_refresh(
+        repo=str(tmp_path), fetch=_fetch(), delay=0)
+
+    notes = plans[0][2]["qc_notes"]
+    assert [n["detail"] for n in notes] == ["keep me"]
+
+
+def test_missing_ssvc_note_kept_while_field_still_unknown(tmp_path):
+    """Upstream fixing only some fields keeps the remaining honest notes."""
+    _write(tmp_path, _rec("CVE-2026-0040", **{
+        "qc_notes": [
+            {"severity": "info", "check": "missing_ssvc",
+             "field": "vulnrichment.automatable", "detail": "now stated"},
+            {"severity": "info", "check": "missing_ssvc",
+             "field": "vulnrichment.technical_impact", "detail": "still unknown"},
+        ]}))
+    _summary, plans, _f = sr.plan_refresh(
+        repo=str(tmp_path), fetch=_fetch(auto="no", ti=None, explo=None),
+        delay=0)
+    notes = plans[0][2]["qc_notes"]
+    assert [n["detail"] for n in notes] == ["still unknown"]
+
+
 def test_absent_upstream_never_clobbers(tmp_path):
     """404 / no SSVC options yet -> record untouched, not an error."""
     p = _write(tmp_path, _rec("CVE-2026-0002"))
