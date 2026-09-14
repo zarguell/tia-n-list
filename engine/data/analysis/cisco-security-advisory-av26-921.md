@@ -1,0 +1,5 @@
+Cisco security advisory AV26-921 addresses CVE-2026-76461, a SQL injection vulnerability in Cisco Secure Email Gateway and Secure Email and Web Manager that is being actively exploited in the wild. CISA added this CVE to the Known Exploited Vulnerabilities database on September 14, 2026, confirming real-world attack activity.
+
+The vulnerability affects Cisco AsyncOS for Cisco Secure Email Gateway versions prior to 15.5.5-014, 16.0.4-302, and 16.5.0-780, as well as Cisco Secure Email and Web Manager versions prior to 15.5.5-006 and 16.5.0-429. The SQL injection flaw could allow attackers to execute arbitrary SQL queries, potentially gaining unauthorized access to email gateway configurations and message data.
+
+Organizations using Cisco Secure Email Gateway products should apply the security hardening release immediately. The active exploitation status and CISA KEV listing make this a critical priority. Email gateways are high-value targets for espionage and data theft operations, and SQL injection vulnerabilities can provide attackers with deep access to email communications and organizational data.

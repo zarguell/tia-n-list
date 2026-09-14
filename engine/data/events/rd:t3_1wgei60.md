@@ -1,0 +1,3 @@
+I have been struggling with correlating the technical and historic side of the AI development of the last 10 years with the research and news we are seeing today, so I have started this series to research and collect my thoughts on this. Part one focuses heavily on how AI specifically works and the transition from RNNs to transformers. I think this is important as we see new developments and reactions to those developments in the field. Edit: fixed typo, because I did not proofread (yes, I should have used AI) submitted by /u/Sad_Dentist_7288 [link] [comments]
+
+via reddit r/cybersecurity: Digging Into the History and Technical Side of AI
