@@ -1,0 +1,5 @@
+SSL certificates for Iranian banking domains are being revoked in connection with OFAC (Office of Foreign Assets Control) sanctions. The revocations affect domain certificates used by major Iranian financial institutions, disrupting HTTPS connections and potentially other TLS-dependent services.
+
+Certificate revocation at this scale suggests either upstream CAs responding to sanctions compliance requirements, or Iranian authorities proactively managing infrastructure to reduce exposure. Either way, the practical effect is degraded trust infrastructure for Iranian banking systems. Users and automated systems relying on certificate validation may see connection failures or warnings when accessing these domains.
+
+This falls into the category of sanctions-driven infrastructure disruption rather than a traditional cyberattack, but it has real operational impact. Iranian banks may need to issue self-signed certificates or rely on alternative trust mechanisms. Organizations with business relationships involving Iranian financial entities should expect continued TLS instability as sanctions enforcement evolves.
