@@ -1,0 +1,5 @@
+Apple released macOS Golden Gate (27) alongside security patches addressing 210 vulnerabilities across its platform stack. The update also covers macOS Sequoia 15.8 with 155 fixes. The bulletin covers kernel, WebKit, ImageIO, and multiple system frameworks. No specific CVEs were highlighted as actively exploited in the initial disclosure, though Apple typically discloses exploitation details weeks after release.
+
+The sheer volume of fixes (210 for Golden Gate, 155 for Sequoia) is consistent with Apple's recent patch cadence but still notable. The scope spans remote code execution via WebKit, kernel privilege escalation, and information disclosure across multiple media processing libraries. iOS 27 and iPadOS 27 received parallel patches covering 20 kernel bugs and 6 SceneKit fixes.
+
+Organizations running macOS fleets should prioritize deployment. The breadth of the WebKit fixes in particular suggests externally triggerable vulnerabilities that could be chained in drive-by exploitation scenarios. Apple's support page (en-us/149035) has the full CVE list.

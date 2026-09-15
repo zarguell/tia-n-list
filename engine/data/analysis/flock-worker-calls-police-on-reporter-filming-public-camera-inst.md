@@ -1,0 +1,5 @@
+A Flock Safety employee called police on an InvestigateTV reporter who was filming the installation of Flock's automated license plate reader (ALPR) cameras on public infrastructure. The incident highlights the tension between Flock Safety's expanding surveillance network and public accountability efforts. The cameras were being installed in publicly visible locations, and the reporter was filming from public property.
+
+Flock Safety's ALPR systems are deployed in over 4,000 communities across the US and have drawn criticism from civil liberties organizations over the scale of vehicle tracking data being collected without individual consent. The company markets its system as a crime reduction tool, but the data retention practices and sharing policies with law enforcement agencies vary widely by jurisdiction.
+
+The aggressive response to a journalist documenting a public installation raises questions about Flock's approach to transparency. The incident is a surveillance infrastructure story with implications for how rapidly expanding camera networks interact with press freedom and public oversight.
