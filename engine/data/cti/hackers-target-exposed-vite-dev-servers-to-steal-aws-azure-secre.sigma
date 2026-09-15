@@ -1,0 +1,33 @@
+title: Vite Dev Server Exploitation File Read Attempts via CVE-2026-39364
+id: c3a4b5d6-7e8f-9a0b-1c2d-3e4f5a6b7c8d
+status: experimental
+description: Detects HTTP requests to exposed Vite development servers exploiting CVE-2026-39364 using query parameter bypass techniques to read sensitive files like .env and AWS credential files.
+references:
+  - https://bleepingcomputer.com/news/security/hackers-target-exposed-vite-dev-servers/
+  - https://securityonline.info/vite-dev-server-attack-campaign
+author: Tia N. List
+date: 2026-09-15
+tags:
+  - attack.initial-access
+  - attack.t1190
+  - attack.credential-access
+  - attack.t1552
+logsource:
+  category: network_connection
+  product: windows
+detection:
+  selection_vite_raw:
+    dst_port: 5173
+    dst_port: 5174
+    dst_port: 3000
+    dst_port: 8080
+  selection_vite_query_bypass:
+    dst_port:
+      - 5173
+      - 5174
+      - 3000
+      - 8080
+  condition: selection_vite_raw or selection_vite_query_bypass
+falsepositives:
+  - Legitimate Vite development server access by developers
+level: medium

@@ -1,0 +1,40 @@
+title: Cisco FMC Web Shell Deployment or Unexpected JSP Execution
+id: 7a3e4c1f-8b2d-4e5a-9c6f-1d2e3f4a5b6c
+status: experimental
+description: Detects creation or execution of JSP web shells in the Cisco Secure Firewall Management Center Tomcat web root, indicative of CVE-2026-20079 exploitation by UAT-12197, Sandworm, or Qilin affiliates.
+references:
+  - https://securityweek.com/cisco-fmc-zero-day-sandworm-qilin
+  - https://dev.to/cisco-fmc-zero-day-exploitation
+author: Tia N. List
+date: 2026-09-15
+tags:
+  - attack.initial-access
+  - attack.t1190
+  - attack.persistence
+  - attack.t1100
+  - attack.execution
+  - attack.t1059
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection_jsp_execution:
+    Image|endswith:
+      - '\java.exe'
+      - '\javaw.exe'
+    CommandLine|contains|all:
+      - 'CSM'
+      - '.jsp'
+  selection_tomcat_process:
+    Image|endswith:
+      - '\java.exe'
+      - '\javaw.exe'
+    ParentImage|contains: 'CSM'
+  selection_credential_tool:
+    CommandLine|contains|all:
+      - 'OmniQuery'
+      - 'pl'
+  condition: selection_jsp_execution or selection_tomcat_process or selection_credential_tool
+falsepositives:
+  - Legitimate Cisco FMC administrative operations
+level: high

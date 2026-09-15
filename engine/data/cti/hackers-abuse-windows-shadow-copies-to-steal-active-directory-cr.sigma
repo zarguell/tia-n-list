@@ -1,0 +1,51 @@
+title: Shadow Copy Abuse for NTDS.dit Credential Theft
+id: d4e5f6a7-8b9c-0d1e-2f3a-4b5c6d7e8f9a
+status: experimental
+description: Detects abuse of Volume Shadow Copy Service to extract NTDS.dit and SYSTEM registry hives for offline credential cracking, as well as shadow copy deletion prior to ransomware deployment.
+references:
+  - https://gbhackers.com/hackers-abuse-windows-shadow-copies/
+  - https://cyberpress.org/shadow-copy-credential-theft
+author: Tia N. List
+date: 2026-09-15
+tags:
+  - attack.credential-access
+  - attack.t1003
+  - attack.impact
+  - attack.t1490
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection_vss_create:
+    Image|endswith:
+      - '\vssadmin.exe'
+      - '\wmic.exe'
+    CommandLine|contains|all:
+      - 'shadow'
+      - 'create'
+  selection_vss_delete:
+    Image|endswith:
+      - '\vssadmin.exe'
+      - '\wmic.exe'
+    CommandLine|contains|all:
+      - 'shadowcopy'
+      - 'delete'
+  selection_ntds_copy:
+    CommandLine|contains|all:
+      - 'ntds.dit'
+    CommandLine|contains:
+      - 'copy'
+      - 'esentutl'
+      - 'robocopy'
+  selection_system_hive:
+    CommandLine|contains|all:
+      - 'SYSTEM'
+      - 'registry'
+    CommandLine|contains:
+      - 'copy'
+      - 'reg.exe'
+  condition: selection_vss_create or selection_vss_delete or selection_ntds_copy or selection_system_hive
+falsepositives:
+  - Legitimate backup operations using VSS
+  - System administrators running authorized credential migrations
+level: high
