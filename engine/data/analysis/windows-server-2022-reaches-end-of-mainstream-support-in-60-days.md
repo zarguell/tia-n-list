@@ -1,0 +1,5 @@
+Windows Server 2022 mainstream support ends in approximately 60 days, shifting the operating system into extended support only. After this date, Microsoft will no longer add new features or non-security updates. Security patches will continue through extended support, but organizations lose access to free security fixes after the extended support period ends in 2031.
+
+The transition means organizations running Server 2022 in production should be planning migration paths or budgeting for extended security updates (ESUs) if they need to stay on the platform beyond the extended support window. The same pattern played out with Server 2012/R2, where many organizations delayed upgrades and paid premium ESU prices.
+
+This is an operational planning trigger, not an immediate security emergency. But the 60-day window is short for enterprise migration projects. Organizations with large Server 2022 footprints should inventory their deployments and begin planning now, especially for workloads that depend on features unique to the 2022 release or that have compatibility constraints with Server 2025.
