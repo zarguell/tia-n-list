@@ -1,0 +1,3 @@
+Researchers found a misconfigured server that exposed an entire cyberattack against one of Thailand's biggest broadband providers, while the attack was still in progress. The attacker broke into a VPN appliance using a known Fortinet vulnerability, installed remote-access software to keep control, and was going after the credentials of the ISP's subscribers. Affected parties and the national CERT were notified before the findings were published. https://hunt.io/blog/thai-broadband-fortigate-sslvpn-meshcentral-intrusion submitted by /u/Straight-Practice-99 [link] [comments]
+
+via reddit r/cybersecurity: 🇹🇭 Exposed server reveals live cyberattack against one of Thailand's largest ISPs
