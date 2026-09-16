@@ -197,6 +197,76 @@ ov = jc.digest_overrides(tmp)
 check("overrides aggregated newest-first",
       [(o["digest"], o["action"]) for o in ov], [("2026-08-23", "wildcard")])
 
+# ── 6. ingest_noise (2026-09-16 gamefan/thehackerwire incident class) ────────
+NOW2 = datetime(2026, 9, 16, 13, 0, tzinfo=timezone.utc)
+
+
+def _mk_noise_dir(tmp, events, decisions, raw_toots=None):
+    edir = os.path.join(tmp, "events"); os.makedirs(edir)
+    tdir = os.path.join(tmp, "triage"); os.makedirs(tdir)
+    for eid, ev in events.items():
+        meta = {"id": eid, "source": ev["source"],
+                "published_at": ev.get("published_at", "")}
+        if ev.get("excluded"):
+            meta["excluded"] = True
+        json.dump(meta, open(os.path.join(edir, eid + ".json"), "w"))
+        open(os.path.join(edir, eid + ".md"), "w").write("x" * ev.get("md_len", 2000))
+    for ts, dec in decisions.items():
+        json.dump({"decisions": dec},
+                  open(os.path.join(tdir, f"decisions-{ts}.json"), "w"))
+    if raw_toots is None:
+        return None
+    rdir = os.path.join(tmp, "raw"); os.makedirs(rdir)
+    with open(os.path.join(rdir, "toots-20260916.jsonl"), "w") as f:
+        for r in raw_toots:
+            f.write(json.dumps(r) + "\n")
+    return os.path.join(rdir, "toots-*.jsonl")
+
+
+ev, dec, toots = {}, {}, []
+for i in range(30):  # junk source at 93% drop, attributed to a tag-spam author
+    eid = f"masto:100{i:02d}"
+    ev[eid] = {"source": "spam.example", "published_at": "2026-08-01T00:00:00Z"}
+    dec[eid] = "drop" if i < 28 else "keep"
+    toots.append({"id": f"100{i:02d}", "author": "spam@bot.example"})
+for i in range(12):  # kept-stub source: kept but content-free
+    ev[f"s{i}"] = {"source": "stub.example", "published_at": "2026-08-01T00:00:00Z",
+                   "md_len": 150}
+    dec[f"s{i}"] = "keep"
+for i in range(60):  # flood entrant: brand-new source, half the store
+    ev[f"f{i}"] = {"source": "flood.example", "published_at": "2026-09-15T00:00:00Z"}
+noise_events = {eid: {**meta, "excluded": dec[eid] == "drop"}
+                for eid, meta in ev.items() if eid in dec}
+noise_events.update({eid: meta for eid, meta in ev.items() if eid not in dec})
+noise_decs = {
+    "2026-09-16T1100": [{"event_id": e, "action": a} for e, a in dec.items()],
+    "2026-09-16T1000": [],
+    # non-hourly filename: must be IGNORED (a parsed drop here would make it
+    # "31 decisions" and skew every count below)
+    "frag2": [{"event_id": "masto:10000", "action": "drop"}],
+}
+rglob = _mk_noise_dir(os.path.join(tmp, "noise"), noise_events, noise_decs, toots)
+p, info = jc.ingest_noise(os.path.join(tmp, "noise"), NOW2, raw_glob=rglob)
+check("junk source flagged", any(x.startswith("junk source spam.example") for x in p), True)
+check("tag-spam author flagged",
+      any(x.startswith("tag-spam author spam@bot.example: 30 decisions") for x in p),
+      True)
+check("kept-stub source flagged",
+      any(x.startswith("kept-stub source stub.example") for x in p), True)
+check("flood entrant flagged",
+      any(x.startswith("flood entrant flood.example") for x in p), True)
+check("info tables present", len(info["sources"]) > 0 and len(info["authors"]) > 0, True)
+
+clean_events = {f"g{i}": {"source": "fine.example",
+                          "published_at": "2026-08-01T00:00:00Z"}
+                for i in range(30)}
+clean_decs = {"2026-09-16T1100": [
+    {"event_id": f"g{i}", "action": "keep" if i < 20 else "drop"}
+    for i in range(30)]}
+_mk_noise_dir(os.path.join(tmp, "clean"), clean_events, clean_decs)
+p2, _ = jc.ingest_noise(os.path.join(tmp, "clean"), NOW2)
+check("healthy store passes", p2, [])
+
 print()
 if failures:
     print(f"FAIL: {len(failures)} audit checks failed")

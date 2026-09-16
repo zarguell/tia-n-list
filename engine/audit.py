@@ -271,6 +271,10 @@ _worst_h, _qa_detail = jc.queue_age(DATA, _all_stories, NOW)
 check("analysis_queue_age", _worst_h is None or _worst_h <= 48, _qa_detail)
 _lang_hits = jc.language_scan(DATA)
 check("language_scan", not _lang_hits, "; ".join(_lang_hits[:4]) or "no non-Latin script bleed")
+_noise_p, _noise_info = jc.ingest_noise(
+    DATA, NOW,
+    raw_glob="/home/ubuntu/repos/cronman/state/social-collector/raw/toots-*.jsonl")
+check("ingest_noise", not _noise_p, "; ".join(_noise_p[:4]) or "sources clean")
 
 EXTRA = {
     "duplicate_suspects": jc.duplicate_suspects(_all_stories, NOW),
@@ -278,6 +282,7 @@ EXTRA = {
     "samples": jc.sampling_targets(DATA),
     "trends": jc.store_trends(DATA, _all_stories, NOW),
     "ghost_stories": _ghosts,
+    "ingest_noise": _noise_info,
 }
 
 print(json.dumps({"date": TODAY, "checks": checks, **EXTRA}, indent=1))

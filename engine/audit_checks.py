@@ -14,7 +14,7 @@ import glob
 import json
 import os
 import re
-from datetime import timedelta
+from datetime import datetime, timedelta, timezone
 
 from merge import (title_jaccard, distinct_series_codes,
                    distinct_advisory_ids, title_discriminators)
@@ -321,3 +321,149 @@ def store_trends(data_dir, stories, now, days=7):
         "totals": {"active_stories": sum(1 for s in stories.values() if not s.get("merged_into")),
                    "merged_shells": sum(1 for s in stories.values() if s.get("merged_into"))},
     }
+
+
+def ingest_noise(data_dir, now, *, raw_glob=None, window_days=2,
+                 min_decisions=30, drop_rate=0.8, share=0.35, share_drop=0.6,
+                 stub_rate=0.5, min_kept=10, flood_days=7,
+                 flood_min=50, flood_share=0.5):
+    """Ingest-noise audit (2026-09-16): a single Mastodon tag-spam account
+    flooded ~65% of hourly triage volume for a week before anyone noticed —
+    site up, queues draining, so the output checks were blind. These are the
+    per-source ingest invariants that would have flagged it day one.
+
+    Detectors, over triage decisions windows (decisions-<ts>.json, hourly):
+      1. junk source — source with >= min_decisions decisions whose drop
+         rate >= drop_rate (gamefan's consumer links: 94% dropped).
+      2. tag-spam author — author (joined via the collector's raw toot
+         signal, raw_glob) holding >= share of attributed decisions at a
+         drop rate >= share_drop: crowds the 30-event/hour triage cap and
+         delays real articles (gamefan: 45% share, 94% dropped).
+      3. kept-stub source — kept events whose .md is < 200c: the agent
+         writes "grounded" analyses from nothing (securityweek: 62% stubs
+         kept at 81%).
+      4. flood entrant — source that minted >= flood_min events in the last
+         flood_days AND >= flood_share of its lifetime presence in that
+         window — a brand-new firehose even when triage keeps it
+         (thehackerwire: ~26/day, 94% KEPT — detectors 1-2 are blind to it).
+
+    Returns (problems, info): problems = human-readable findings (audit
+    FAILs when non-empty); info = per-source/per-author tables for the
+    report's EXTRA payload. Pure: data_dir/now/raw_glob passed in.
+    """
+    events = {}
+    for f in glob.glob(os.path.join(data_dir, "events", "*.json")):
+        try:
+            ev = json.load(open(f))
+        except Exception:
+            continue
+        eid = ev.get("id") or os.path.splitext(os.path.basename(f))[0]
+        try:
+            md_len = os.path.getsize(os.path.join(data_dir, "events", eid + ".md"))
+        except OSError:
+            md_len = 0
+        events[eid] = (ev.get("source") or "?", ev.get("published_at") or "", md_len)
+
+    author_of = {}
+    if raw_glob:
+        for f in glob.glob(raw_glob):
+            try:
+                lines = open(f, errors="replace")
+            except OSError:
+                continue
+            with lines:
+                for line in lines:
+                    try:
+                        r = json.loads(line)
+                    except Exception:
+                        continue
+                    if r.get("id"):
+                        author_of[str(r["id"])] = (r.get("author") or "?").lower()
+
+    cutoff = (now - timedelta(days=window_days)).strftime("%Y-%m-%dT%H")
+    per_source = {}   # src -> [decisions, drops, kept_stub_md]
+    per_author = {}   # author -> [decisions, drops]
+    attributed = 0
+    for f in glob.glob(os.path.join(data_dir, "triage", "decisions-*.json")):
+        ts = os.path.basename(f)[10:-5]
+        try:
+            if datetime.strptime(ts, "%Y-%m-%dT%H%M").replace(tzinfo=timezone.utc) \
+                    < now - timedelta(days=window_days):
+                continue
+        except ValueError:
+            continue  # decisions-frag2.json and other non-hourly files
+        try:
+            dec = json.load(open(f)).get("decisions", [])
+        except Exception:
+            continue
+        for d in dec:
+            eid = d.get("event_id") or ""
+            src = events.get(eid, ("?", "", 0))[0]
+            action = d.get("action")
+            ps = per_source.setdefault(src, [0, 0, 0])
+            ps[0] += 1
+            if action == "drop":
+                ps[1] += 1
+            elif events.get(eid, ("", "", 0))[2] < 200:
+                ps[2] += 1
+            raw_id = eid.split(":", 1)[1] if ":" in eid else None
+            author = author_of.get(raw_id)
+            if author:
+                pa = per_author.setdefault(author, [0, 0])
+                pa[0] += 1
+                attributed += 1
+                if action == "drop":
+                    pa[1] += 1
+
+    lifetime, recent = {}, {}
+    flood_cutoff = (now - timedelta(days=flood_days)).strftime("%Y-%m-%d")
+    for src, pub, _md in events.values():
+        lifetime[src] = lifetime.get(src, 0) + 1
+        if pub[:10] >= flood_cutoff:
+            recent[src] = recent.get(src, 0) + 1
+
+    problems = []
+    for src, (n, drops, stubs) in per_source.items():
+        if n >= min_decisions and drops / n >= drop_rate:
+            problems.append(f"junk source {src}: {100 * drops // n}% dropped "
+                            f"({drops}/{n} decisions, {window_days}d)")
+        kept = n - drops
+        if kept >= min_kept and stubs / kept >= stub_rate:
+            problems.append(f"kept-stub source {src}: {100 * stubs // kept}% of "
+                            f"{kept} kept events have <200c content")
+    for src, rec in recent.items():  # flood: decision-independent
+        life = lifetime.get(src, 0)
+        if rec >= flood_min and life and rec / life >= flood_share:
+            problems.append(f"flood entrant {src}: {rec} events in {flood_days}d "
+                            f"= {100 * rec // life}% of lifetime {life}")
+    for author, (n, drops) in per_author.items():
+        if (n >= min_decisions and attributed
+                and n / attributed >= share and drops / n >= share_drop):
+            problems.append(f"tag-spam author {author}: {n} decisions "
+                            f"({100 * n // attributed}% of attributed window), "
+                            f"{100 * drops // n}% dropped")
+
+    def table(stats, has_stub):
+        rows = sorted(stats.items(), key=lambda kv: -kv[1][0])[:12]
+        out = []
+        for key, (n, drops, stubs) in rows:
+            row = {"name": key, "decisions": n,
+                   "dropped_pct": round(100 * drops / n) if n else 0}
+            if has_stub:
+                kept = n - drops
+                row["kept_stub_pct"] = round(100 * stubs / kept) if kept else 0
+            row["events_7d"] = recent.get(key, 0)
+            row["lifetime"] = lifetime.get(key, 0)
+            out.append(row)
+        return out
+
+    info = {
+        "window_days": window_days,
+        "attributed_decisions": attributed,
+        "sources": table(per_source, True),
+        "authors": [{"name": a, "decisions": n,
+                     "dropped_pct": round(100 * d / n) if n else 0}
+                    for a, (n, d) in sorted(per_author.items(),
+                                            key=lambda kv: -kv[1][0])[:12]],
+    }
+    return problems, info
