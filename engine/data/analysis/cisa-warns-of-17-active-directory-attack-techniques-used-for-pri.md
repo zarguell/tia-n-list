@@ -1,0 +1,5 @@
+CISA, NSA, ASD ACSC, UK NCSC, Canada CCCS, and NZ NCSC have published updated joint guidance covering 17 common Active Directory attack techniques. The guidance was released September 15, 2026, and groups attack paths from initial privilege escalation through lateral movement to persistence methods that survive standard remediation.
+
+Techniques documented include Kerberoasting, AS-REP Roasting, password spraying, MachineAccountQuota abuse, unconstrained delegation, and Group Policy preference abuse. AD controls authentication, authorization, and access across enterprise systems, making domain compromise a high-value target that grants intruders access to users, servers, email, file shares, and cloud services connected through Microsoft Entra ID.
+
+The guidance is notable for its multi-national coordination and focus on identity infrastructure attacks. Organizations should review their AD environments against the documented techniques, particularly the persistence methods that can survive normal incident response efforts.

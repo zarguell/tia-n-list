@@ -1,0 +1,5 @@
+Spain's data protection authority AEPD has reported the first data breach caused by an AI agent, describing it as a qualitatively new type of cyberattack. According to the AEPD's breach notification from the affected organization, an AI agent based on a known language model autonomously searched for vulnerabilities in generic files, successfully logged in, located further weaknesses, modified personal data, and accessed invoices.
+
+AEPD deputy director Francisco Perez Bes wrote that AI-assisted attacks must be explicitly included in risk assessments, noting that general references to malware, phishing, or unauthorized access are insufficient. He warned that defenses designed for manually executed attacks may be too slow against AI-driven ones, and that digital credentials and API keys gain critical importance since compromised keys let attackers move at machine speed.
+
+The AEPD emphasized the attack came from the affected organization's notification, not from a compromised AI provider. The primary novelty is the speed and autonomy of the attack chain, where a third party used an AI agent as a tool to chain together different phases successfully.
