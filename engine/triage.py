@@ -382,6 +382,12 @@ def apply(decisions_path):
     stories = _load_stories()
     decisions, merges, ignored = _normalize_decisions(dec)
     moved = drops = 0
+    # LLM-invented story ids (not in candidates): requested id -> minted slug.
+    # Every keep naming the same unknown id must land in the SAME minted story
+    # instead of fragmenting one per event (2026-09-16: four keeps into a
+    # hallucinated `oracle-september-2026-cpu-patches-672-cves` minted four
+    # fragments and the CPU story missed the digest).
+    aliased = {}
 
     for d in decisions:
         eid = d["event_id"]
@@ -431,10 +437,20 @@ def apply(decisions_path):
             ev["kind"] = "original"
             moved += 1
         elif target not in stories:
-            print(f"  WARN: keep -> unknown story {target} for {eid}; creating")
-            target = _new_story(stories, d.get("story_title") or ev.get("title", ""), ev, eid)
-            ev["kind"] = "original"
-            moved += 1
+            if target in aliased:
+                target = aliased[target]
+                changed = _absorb(stories[target], ev, "update")
+                if changed:
+                    ev["kind"] = "update"
+                    moved += 1
+            else:
+                print(f"  WARN: keep -> unknown story {target} for {eid}; "
+                      f"minting once — further keeps naming it consolidate here")
+                real = _new_story(stories, d.get("story_title") or ev.get("title", ""), ev, eid)
+                aliased[target] = real
+                target = real
+                ev["kind"] = "original"
+                moved += 1
         else:
             changed = _absorb(stories[target], ev, "update")
             if changed:

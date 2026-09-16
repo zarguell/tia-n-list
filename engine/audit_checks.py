@@ -205,7 +205,9 @@ def triage_telemetry(cronman_log_dir, triage_dir, now):
             except Exception:
                 pass
     for pat, label in ((r"WARN: \d+ decision entries could not be parsed", "unparsed decision entries"),
-                       (r"no keep/drop decisions recognized", "no decisions recognized")):
+                       (r"no keep/drop decisions recognized", "no decisions recognized"),
+                       (r"keep -> unknown story", "keep->unknown-story WARNs "
+                        "(LLM-invented story ids; fragmented clusters possible)")):
         n = len(re.findall(pat, log_text))
         if n:
             problems.append(f"{label} x{n}")

@@ -157,6 +157,58 @@ try:
 finally:
     shutil.rmtree(tmp)
 
+# ── 5. hallucinated story ids: one mint, every keep consolidates into it ────
+# 2026-09-16: the LLM kept four Oracle CPU events into a story id it invented
+# (`oracle-september-2026-cpu-patches-672-cves` — not in candidates). apply()
+# minted a separate story PER EVENT, the CPU coverage fragmented across four
+# 1-event stories, and the story missed the daily digest. Contract: the first
+# keep naming an unknown id mints ONCE (honouring story_title); every further
+# keep naming the same id absorbs into that same story.
+tmp = tempfile.mkdtemp()
+try:
+    for var, sub in [("EVENTS", "events"), ("STORIES", "stories"),
+                     ("ANALYSIS", "analysis"), ("TRIAGE", "triage")]:
+        d = os.path.join(tmp, sub)
+        os.makedirs(d)
+        setattr(triage, var, d)
+    setattr(triage, "STATE", os.path.join(tmp, "triage", "state.json"))
+    setattr(triage, "NEEDS", os.path.join(tmp, "needs-analysis.json"))
+    setattr(triage, "DATA", tmp)
+
+    GHOST = "oracle-september-2026-cpu-patches-672-cves"
+    for eid in ("o1", "o2", "o3"):
+        json.dump({"id": eid, "title": f"Oracle CPU coverage {eid}",
+                   "source": "x", "url": f"https://x.test/{eid}",
+                   "published_at": "2026-09-15T21:00:00Z", "cves": [],
+                   "kind": "original"},
+                  open(os.path.join(tmp, "events", f"{eid}.json"), "w"))
+    decfile = os.path.join(tmp, "decisions.json")
+    json.dump({"decisions": [
+        {"event_id": "o1", "action": "keep", "story": GHOST,
+         "story_title": "Oracle September 2026 CPU patches 672 CVEs"},
+        {"event_id": "o2", "action": "keep", "story": GHOST},
+        {"event_id": "o3", "action": "keep", "story": GHOST}],
+        "merges": []}, open(decfile, "w"))
+
+    import store as store_mod
+    store_mod.load_events = lambda: {
+        e["id"]: e for e in (json.load(open(os.path.join(tmp, "events", f"{e}.json")))
+                             for e in ("o1", "o2", "o3"))}
+    import score as score_mod
+    score_mod.hot_score = lambda s, ev, rd: {"score": 5.0}
+
+    triage.apply(decfile)
+
+    files = sorted(os.listdir(os.path.join(tmp, "stories")))
+    check("exactly ONE story minted for the hallucinated id", len(files), 1)
+    minted = json.load(open(os.path.join(tmp, "stories", files[0])))
+    check("minted title from the decision's story_title",
+          minted["title"], "Oracle September 2026 CPU patches 672 CVEs")
+    check("all three events landed in the one minted story",
+          sorted(r["event_id"] for r in minted["events"]), ["o1", "o2", "o3"])
+finally:
+    shutil.rmtree(tmp)
+
 print()
 if failures:
     print(f"FAIL: {len(failures)} triage checks failed")

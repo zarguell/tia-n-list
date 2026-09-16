@@ -179,6 +179,18 @@ problems, info = jc.triage_telemetry(tlog, tdir, NOW)
 check("permissive triage detected", any("permissive" in p for p in problems), True)
 
 open(os.path.join(tlog, today + ".log"), "w").write(
+    "2026-08-24T11:00:12Z TIA pi judgment (new=5 created=4 needs_analysis=1)\n"
+    "  WARN: keep -> unknown story oracle-september-2026-cpu-patches-672-cves for mf:163813; "
+    "minting once — further keeps naming it consolidate here\n"
+    "  WARN: keep -> unknown story oracle-september-2026-cpu-patches-672-cves for masto:11727707; "
+    "minting once — further keeps naming it consolidate here\n")
+json.dump({"decisions": [{"action": "keep"} for _ in range(14)] +
+                    [{"action": "drop"} for _ in range(6)]},
+          open(os.path.join(tdir, "decisions-x.json"), "w"))
+problems, info = jc.triage_telemetry(tlog, tdir, NOW)
+check("unknown-story WARN detected", any("keep->unknown-story" in p for p in problems), True)
+
+open(os.path.join(tlog, today + ".log"), "w").write(
     "2026-08-24T11:00:12Z TIA pi judgment (new=5 created=4 needs_analysis=1)\n")
 json.dump({"decisions": [{"action": "keep"} for _ in range(14)] +
                     [{"action": "drop"} for _ in range(6)]},
