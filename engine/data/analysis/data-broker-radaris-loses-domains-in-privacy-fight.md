@@ -1,0 +1,5 @@
+A federal judge has ordered the transfer of radaris.com and more than a dozen related data broker domains to Atlas Data Privacy Corp after Radaris repeatedly ignored court orders and failed to comply with New Jersey's Daniel's Law. The statute requires data brokers to remove personal information of law enforcement officials, government personnel, judges, and their families upon request, with fines of $1,000 per violation.
+
+Atlas sued Radaris in February 2024. Radaris's attorneys stonewalled through repeated delays and noncompliance, prompting the judge to order the domain transfer. The Radaris founders, Igor and Dmitry Lubarsky, are Russian-born brothers operating from Massachusetts who run a large network of people-search services alongside Russian-language dating sites and affiliate programs.
+
+This ruling sets a significant precedent for enforcement against data brokers that ignore privacy takedown requests. Domain seizure is an unusual remedy, but it reflects the court's frustration with Radaris's sustained refusal to comply. The case may embolden other states and plaintiffs to pursue similar actions.

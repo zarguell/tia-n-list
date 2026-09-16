@@ -1,0 +1,5 @@
+Oracle's September 2026 Critical Patch Update fixes 673 vulnerabilities across a wide swath of products. The advisory covers Helidon, Oracle Access Manager, Agile PLM, Banking products, Communications Cloud Native Core, Data Integrator, Database Server, E-Business Suite, Enterprise Manager, Fusion Middleware, GraalVM, and many more.
+
+This is a large CPU by Oracle's standards. The breadth spans application servers, databases, middleware, and industry-specific banking and communications software. Without specific CVSS breakdowns in the initial reporting, organizations should consult Oracle's full advisory to prioritize patches for internet-facing and high-privilege components.
+
+The sheer volume means patching cycles will be long for organizations with diverse Oracle footprints. Prioritize Oracle Access Manager and any components with network-facing interfaces, since those tend to carry the highest exploitation risk.
