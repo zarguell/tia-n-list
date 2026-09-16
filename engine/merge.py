@@ -71,7 +71,7 @@ def story_event_urls(story):
     for ref in story.get("events", []):
         e = events.get(ref["event_id"])
         if e and e["url"]:
-            urls.add(e["url"].lower())
+            urls.add(norm_url(e["url"]))
     return urls
 
 
@@ -98,6 +98,33 @@ DATE_STOP = {"january", "february", "march", "april", "may", "june", "july", "au
              "september", "october", "november", "december", "monday", "tuesday",
              "wednesday", "thursday", "friday", "saturday", "sunday"}
 SERIES_RE = re.compile(r"\b[A-Za-z]+[0-9]*-\d{2,6}\b")   # AV26-797, CVE-2026-1234, Storm-0324
+
+# URL params that carry feed/campaign tracking, never article identity.
+TRACKING_PARAM_RE = re.compile(
+    r"(?:utm_[a-z]+|fbclid|gclid|igshid|si|mc_[a-z]+|cmpid|ref|referrer)", re.I)
+
+
+def norm_url(url):
+    """Canonical form for same-article identity. Feed republishing mutates
+    URLs (scheme, www., ?utm_source=Mastodon, fragments, trailing slash) and
+    the raw-lowercase URL cache missed every variant — 2026-09-16: three
+    Oracle CPU events linked cspusep2026.html through utm/proxy variants and
+    the 100-point URL identity never fired. Scheme+www lowered, path case
+    preserved, tracking params and fragments dropped, trailing slash gone.
+    Shared identity key for the story URL cache; never used for display."""
+    if not url:
+        return ""
+    u = url.strip()
+    u = re.sub(r"^[a-z][a-z0-9+.-]*://", "", u, flags=re.I)      # scheme
+    host, _, path = u.partition("/")
+    host = re.sub(r"^www\.", "", host.lower())
+    path = path.split("#", 1)[0]
+    if "?" in path:
+        base, q = path.split("?", 1)
+        keep = [p for p in q.split("&")
+                if p and not TRACKING_PARAM_RE.fullmatch(p.split("=", 1)[0])]
+        path = base + ("?" + "&".join(keep) if keep else "")
+    return (host + "/" + path).rstrip("/") or host
 
 # Threat actors that anchor "same actor, many victims" claim series. A title
 # token matches after stripping a leading "the" ("TheGentlemen" == "The
@@ -230,12 +257,22 @@ def _actor_series_score(ev, story, ev_disc, st_disc):
 
 def match_scores(ev, story):
     """Score how strongly this event belongs to this story (0 = no match)."""
-    if ev["url"] and ev["url"].lower() in story_url_cache.get(story["id"], set()):
+    nu = norm_url(ev["url"])
+    if nu and nu in story_url_cache.get(story["id"], set()):
         return 100.0
     ev_title_cves = {c.upper() for c in CVE_RE.findall(ev["title"])}
-    if ev_title_cves and story.get("cves") and len(ev_title_cves) <= 2:
-        if ev_title_cves & set(story["cves"]):
-            return 50.0
+    # metadata CVEs (ingest/backfill) stand in only when the title names none
+    ev_cves = ev_title_cves or {c.upper() for c in (ev.get("cves") or [])}
+    if ev_cves and story.get("cves") and len(ev_cves) <= 2:
+        # story cves are a DERIVED union and can carry a CVE from an event
+        # that was since reassigned (2026-09-16: the N-central July story
+        # held 86218). Disjoint advisory codes in the titles block even CVE
+        # overlap, same as the title path below.
+        ev_codes = _series_codes(ev["title"])
+        st_codes = _series_codes(story.get("title", ""))
+        if not (ev_codes and st_codes and not (ev_codes & st_codes)):
+            if ev_cves & set(story["cves"]):
+                return 50.0
     ev_disc = _norm_tokens(ev["title"]) - GENERIC - DATE_STOP
     st_disc = _norm_tokens(story.get("title", "")) - GENERIC - DATE_STOP
     if len(ev_disc) >= 2 and len(st_disc) >= 2:
@@ -333,7 +370,7 @@ def main():
             s["cves"] = sorted(set(s.get("cves", [])) | set(ev["cves"]))
             s["first_seen"] = min(s.get("first_seen", ev["published_at"]), ev["published_at"])
             if ev["url"]:
-                story_url_cache.setdefault(target, set()).add(ev["url"].lower())
+                story_url_cache.setdefault(target, set()).add(norm_url(ev["url"]))
             merged += 1
         else:
             ev["kind"] = "original"
@@ -346,7 +383,7 @@ def main():
                  "reddit_signal": {"posts": 0, "best_score": 0},
                  "events": [{"event_id": eid, "label": "original"}]}
             stories[slug] = s
-            story_url_cache[slug] = {ev["url"].lower()} if ev["url"] else set()
+            story_url_cache[slug] = {norm_url(ev["url"])} if ev["url"] else set()
             created += 1
         json.dump(ev, open(os.path.join(EVENTS, eid + ".json"), "w"), indent=1)
         manifest.setdefault("stories_per_day", {}).setdefault(day, [])

@@ -41,6 +41,8 @@ import re
 import sys
 from datetime import datetime, timedelta, timezone
 
+from merge import title_jaccard, CVE_RE
+
 ENGINE = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(ENGINE, "data")
 EVENTS = os.path.join(DATA, "events")
@@ -156,6 +158,36 @@ def collect():
             suspect_ids.update(owners)
     cands += [stories[sid] for sid in sorted(suspect_ids)
               if sid not in {c["id"] for c in cands}][:20]
+
+    # Semantic-affinity candidates: the recency fill above structurally misses
+    # a story that went quiet hours ago (2026-09-16: four Oracle CPU events
+    # were kept as NEW fragments because the morning announcement story had
+    # fallen out of the top-40 recency window and shared no tokens with the
+    # reworded coverage). Force-include live stories that share a CVE with an
+    # incoming event, plus the strongest title-overlap matches — sub-merge-
+    # floor jaccard still tells the LLM "same topic, reworded". Candidates
+    # only; the judgment stays with the model.
+    ev_cves = set()
+    for e in recent:
+        ev_cves |= {c.upper() for c in (e.get("cves") or [])}
+        ev_cves |= {c.upper() for c in CVE_RE.findall(e.get("title") or "")}
+    have = {c["id"] for c in cands}
+    extra = [s for s in stories.values()
+             if not s.get("merged_into") and s["id"] not in have and ev_cves
+             and ev_cves & {c.upper() for c in s.get("cves", [])}]
+    overlapped = []
+    for s in stories.values():
+        if s.get("merged_into") or s["id"] in have:
+            continue
+        j = max((title_jaccard(e.get("title") or "", s.get("title", ""))
+                 for e in recent), default=0.0)
+        if j >= 0.25:
+            overlapped.append((j, s["id"]))
+    extra_ids = {s["id"] for s in extra}
+    extra += [stories[sid] for _j, sid in
+              sorted(overlapped, key=lambda x: -x[0])[:10]
+              if sid not in extra_ids]
+    cands += extra[:20]
 
     def _event_title(refs):
         for r in refs or []:

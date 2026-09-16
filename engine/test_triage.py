@@ -11,6 +11,12 @@ while the mechanical story kept the event. This suite pins:
   2. apply() never leaves one event in two active stories.
   3. apply() reuses the mechanical sole-holder story instead of minting -2.
   4. emptied shells redirect (merged_into) instead of ghosting.
+  5. keeps naming an unknown (LLM-invented) story id mint ONCE and further
+     keeps naming the same id consolidate into that story (2026-09-16:
+     four Oracle CPU keeps fragmented into four 1-event stories).
+  6. collect() surfaces CVE-sharing and title-overlap stories as candidates
+     even when they fell out of the recency top-40 (the Oracle fragments
+     were invisible to the LLM because candidates are recency-ranked).
 
 Run: python3 engine/test_triage.py   (exit 0 = pass)
 Wired into CI (site-deploy.yml).
@@ -206,6 +212,72 @@ try:
           minted["title"], "Oracle September 2026 CPU patches 672 CVEs")
     check("all three events landed in the one minted story",
           sorted(r["event_id"] for r in minted["events"]), ["o1", "o2", "o3"])
+finally:
+    shutil.rmtree(tmp)
+
+# ── 6. collect(): affinity candidates beat the recency top-40 ───────────────
+# 2026-09-16: candidates were the 40 most-recently-seen live stories, so a
+# fragment that went quiet overnight was never shown to the LLM — coverage of
+# the same story kept minting NEW fragments. Contract: stories sharing a CVE
+# with an incoming event, or overlapping its title (>= 0.25 jaccard), appear
+# as candidates even when recency excluded them.
+from datetime import datetime, timezone as _tz  # noqa: E402
+tmp = tempfile.mkdtemp()
+try:
+    for var, sub in [("EVENTS", "events"), ("STORIES", "stories"),
+                     ("ANALYSIS", "analysis"), ("TRIAGE", "triage")]:
+        d = os.path.join(tmp, sub)
+        os.makedirs(d)
+        setattr(triage, var, d)
+    setattr(triage, "STATE", os.path.join(tmp, "triage", "state.json"))
+    setattr(triage, "NEEDS", os.path.join(tmp, "needs-analysis.json"))
+    setattr(triage, "DATA", tmp)
+    NOW = datetime(2026, 9, 16, 12, 0, tzinfo=_tz.utc)
+    triage.NOW = NOW
+
+    def wstory(sid, title, last_seen, cves=None):
+        json.dump({"id": sid, "title": title, "first_seen": last_seen,
+                   "last_seen": last_seen, "cves": cves or [], "score": 0.0,
+                   "sources": ["x"], "n_sources": 1,
+                   "reddit_signal": {"posts": 0, "best_score": 0},
+                   "events": [{"event_id": sid + "-e", "label": "original"}]},
+                  open(os.path.join(tmp, "stories", f"{sid}.json"), "w"))
+
+    # 40 decoys, all fresher than the two targets: recency top-40 = decoys only
+    for i in range(40):
+        wstory(f"decoy{i:02d}", f"Unrelated story number {i} about other things",
+               "2026-09-16T11:00:00Z")
+    # quiet targets: > 3d old, score 0 — invisible to the recency/threshold fill
+    wstory("oracle-cpu-fragment", "Oracle September 2026 CPU addresses 672 CVEs",
+           "2026-09-11T21:00:00Z", cves=["CVE-2026-87286"])
+    wstory("zeta-ransomware-spree", "Zeta Corp ransomware spree widens",
+           "2026-09-12T09:00:00Z")
+
+    events = {
+        "new-cve-event": {"id": "new-cve-event", "title": "Oracle CPU coverage",
+                          "url": "https://x.test/a", "source": "x",
+                          "published_at": "2026-09-16T10:00:00Z",
+                          "cves": ["CVE-2026-87286"], "excluded": False},
+        "new-zeta-event": {"id": "new-zeta-event",
+                           "title": "Zeta Corp ransomware hits fourth hospital",
+                           "url": "https://x.test/b", "source": "x",
+                           "published_at": "2026-09-16T10:30:00Z",
+                           "cves": [], "excluded": False},
+    }
+    import store as store_mod
+    store_mod.load_events = lambda: events
+    triage.collect()
+
+    ctx_path = os.path.join(tmp, "triage", f"context-{triage.RUN_TAG}.json")
+    ctx = json.load(open(ctx_path))
+    ids = [c["id"] for c in ctx["candidate_stories"]]
+    check("CVE-sharing story surfaced as candidate",
+          "oracle-cpu-fragment" in ids, True)
+    check("title-overlap story surfaced as candidate", "zeta-ransomware-spree" in ids, True)
+    check("recency fill still present", sum(1 for i in ids if i.startswith("decoy")) == 40, True)
+    check("new events in context",
+          sorted(e["id"] for e in ctx["new_events"]),
+          ["new-cve-event", "new-zeta-event"])
 finally:
     shutil.rmtree(tmp)
 

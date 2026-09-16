@@ -97,7 +97,7 @@ merge.story_url_cache = {}
 u = "https://example.com/unique-story"
 s_with_url = story("u2", "Title")
 s_with_url["events"] = [{"event_id": "x", "label": "original"}]
-merge.story_url_cache = {"u2": {u}}
+merge.story_url_cache = {"u2": {merge.norm_url(u)}}
 check("URL match still 100.0",
       merge.match_scores({**ev("z", "Unrelated Title"), "url": u}, s_with_url), 100.0)
 merge.story_url_cache = {}
@@ -113,6 +113,42 @@ check("LoadMaster -> SharePoint still 0.0 (no shared discriminators)",
 check("HashiCorp AV26-797 vs AV26-791 distinct codes -> 0.0",
       merge.match_scores(ev("z", "HashiCorp security advisory (AV26-797)"),
                          story("h", "HashiCorp security advisory (AV26-791)")), 0.0)
+
+print("== normalized URL identity (2026-09-16 cspusep2026 class) ==")
+# feed republishing mutates URLs: scheme, www., utm params, fragments,
+# trailing slash — all one article, all one story
+check("norm_url collapses tracking/www/scheme variants",
+      merge.norm_url("HTTPS://WWW.Oracle.com/security-alerts/cspusep2026.html?utm_source=Mastodon&x=1#f"),
+      "oracle.com/security-alerts/cspusep2026.html?x=1")
+check("norm_url drops trailing slash", merge.norm_url("https://a.b/c/"), "a.b/c")
+check("norm_url keeps non-tracking params",
+      merge.norm_url("https://a.b/p?page=2&fbclid=zz"), "a.b/p?page=2")
+check("norm_url empty-safe", merge.norm_url(""), "")
+CANON = "https://www.oracle.com/security-alerts/cspusep2026.html"
+merge.story_url_cache = {"cpu": {merge.norm_url(CANON)}}
+check("utm-variant of the advisory URL still 100.0",
+      merge.match_scores({**ev("z", "Oracle CPU marathon"),
+                          "url": "https://oracle.com/security-alerts/cspusep2026.html?utm_source=Mastodon"},
+                         story("cpu", "Oracle September 2026 CPU")), 100.0)
+merge.story_url_cache = {}
+
+print("== metadata-CVE affinity + pollution guard ==")
+check("metadata cves match when title names none",
+      merge.match_scores({**ev("z", "Oracle ships its biggest patch drop of the quarter"),
+                          "cves": ["CVE-2026-87286"]},
+                         story("cpu", "Oracle September 2026 CPU", cves=["CVE-2026-87286"])), 50.0)
+check("title CVEs still preferred over metadata",
+      merge.match_scores(ev("z", "FortiGate RCE CVE-2026-99999 exploited"),
+                         story("f", "FortiGate CVE-2026-99999", cves=["CVE-2026-99999"])), 50.0)
+check("disjoint advisory codes block polluted story cves (metadata path)",
+      merge.match_scores({**ev("z", "Check Point VPN advisory (AV26-918)"),
+                          "cves": ["CVE-2026-85102"]},
+                         story("july", "Check Point advisory (AV26-902)",
+                               cves=["CVE-2026-85102"])), 0.0)
+check("3+ metadata cves (roundup) do not snap to one story",
+      merge.match_scores({**ev("z", "This month in vendor patches"),
+                          "cves": ["CVE-2026-1", "CVE-2026-2", "CVE-2026-3"]},
+                         story("m", "Some patch roundup", cves=["CVE-2026-2"])), 0.0)
 
 print("== advisory ids in the slug ==")
 check("av26-891 vs av26-825 in the slug are distinct advisories",
