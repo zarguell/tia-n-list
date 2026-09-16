@@ -56,7 +56,7 @@ if KEV not in sys.path:
     sys.path.insert(0, KEV)
 
 import ingest  # noqa: E402 — seam reuse: _vulnrichment_path, _extract_ssvc_from_dict
-from schema import build_index_entry, compute_bod_timeline  # noqa: E402
+from schema import build_index_entry, compute_bod_timeline, sort_index_entries  # noqa: E402
 
 DEFAULT_REPO = os.path.dirname(KEV)          # tia-n-list repo root
 DEFAULT_DELAY = 0.25                          # seconds between raw fetches
@@ -275,7 +275,7 @@ def rebuild_index(repo=None, records_dir=None):
             entries.append(build_index_entry(rec))
         except (OSError, ValueError, KeyError) as e:
             skipped.append(f"{os.path.basename(path)}: {e}")
-    entries.sort(key=lambda e: e.get("kev_date_added", "") or "", reverse=True)
+    sort_index_entries(entries)
     index = {
         "last_updated": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "kev_source_date": prev.get("kev_source_date", ""),

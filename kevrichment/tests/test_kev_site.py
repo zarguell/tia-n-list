@@ -198,3 +198,48 @@ def test_cve_view_includes_cisa_url():
     assert v["cisa_url"] == kev.cisa_catalog_url("CVE-2026-85880")
     v = kev.cve_view({"cve_id": "bad-id"}, [])
     assert v["cisa_url"] == ""
+
+
+# ---------------------------------------------------------------------------
+# Feed ordering + pubDate: same-day KEV additions in true insertion order
+# ---------------------------------------------------------------------------
+
+def test_feed_items_same_day_order_follows_kev_seq(monkeypatch):
+    # 2026-09-16 regression: 87886 was the day's LAST KEV addition but the
+    # date-only sort left it at the bottom of the trio (alphabetical order).
+    # Catalog stamps: the day's batch is listed insertion-order, so 87886
+    # carries the highest seq and must render first.
+    monkeypatch.setattr(kev, "load_cve", lambda cid: {"cve_id": cid})
+    index = {"cves": [
+        {"cve_id": "CVE-2026-58704", "kev_date_added": "2026-08-10",
+         "vendor_project": "V", "product": "P",
+         "kev_catalog_count": 1713, "kev_seq": 0},
+        {"cve_id": "CVE-2026-87886", "kev_date_added": "2026-08-10",
+         "vendor_project": "V", "product": "P",
+         "kev_catalog_count": 1713, "kev_seq": 2},
+        {"cve_id": "CVE-2026-76460", "kev_date_added": "2026-08-10",
+         "vendor_project": "V", "product": "P",
+         "kev_catalog_count": 1713, "kev_seq": 1},
+    ]}
+    items = kev.feed_items(index, days=90)
+    assert [i["title"].split(":")[0] for i in items] == \
+        ["CVE-2026-87886", "CVE-2026-76460", "CVE-2026-58704"]
+
+
+def test_feed_items_pubdate_uses_ingest_time(monkeypatch):
+    monkeypatch.setattr(kev, "load_cve", lambda cid: {"cve_id": cid})
+    index = {"cves": [{"cve_id": "CVE-2026-76460",
+                       "kev_date_added": "2026-08-10",
+                       "vendor_project": "V", "product": "P",
+                       "last_researched": "2026-08-10T19:24:18Z"}]}
+    (it,) = kev.feed_items(index, days=90)
+    assert "19:24:18" in it["pub_date"]
+
+
+def test_feed_items_pubdate_falls_back_to_add_date(monkeypatch):
+    monkeypatch.setattr(kev, "load_cve", lambda cid: {"cve_id": cid})
+    index = {"cves": [{"cve_id": "CVE-2026-9001",
+                       "kev_date_added": "2026-08-10",
+                       "vendor_project": "V", "product": "P"}]}
+    (it,) = kev.feed_items(index, days=90)
+    assert "00:00:00" in it["pub_date"]

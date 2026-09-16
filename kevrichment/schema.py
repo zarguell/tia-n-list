@@ -15,8 +15,15 @@ REQUIRED_CVE_FIELDS = [
 ]
 
 
-def build_cve_record(cve_id, kev_entry, nvd_data, vulnrichment_data, research_data, research_meta, in_kev=True):
-    """Build a complete per-CVE record from all data sources."""
+def build_cve_record(cve_id, kev_entry, nvd_data, vulnrichment_data, research_data, research_meta,
+                     in_kev=True, kev_seq=None, kev_catalog_count=None):
+    """Build a complete per-CVE record from all data sources.
+
+    kev_seq / kev_catalog_count are the ingest-time CISA catalog fingerprint:
+    the entry's 0-based position in the raw catalog JSON (newest prepended,
+    so 0 = newest) and the catalog's total count at that moment. CISA's
+    dateAdded is date-only, so this fingerprint is the only faithful record
+    of WITHIN-DAY insertion order — see sort_index_entries."""
     nvd_desc = ""
     cwe = []
     cvss_v3_base = None
@@ -67,6 +74,8 @@ def build_cve_record(cve_id, kev_entry, nvd_data, vulnrichment_data, research_da
         "last_researched": research_meta.get("timestamp", ""),
         "cve_published": nvd_published,
         "kev_date_added": kev_entry.get("dateAdded", ""),
+        "kev_seq": kev_seq,
+        "kev_catalog_count": kev_catalog_count,
         "kev_vendor_project": kev_entry.get("vendorProject", ""),
         "kev_product": kev_entry.get("product", ""),
         "kev_short_description": kev_entry.get("shortDescription", ""),
@@ -101,6 +110,8 @@ def build_index_entry(cve_record):
     return {
         "cve_id": cve_record["cve_id"],
         "kev_date_added": cve_record["kev_date_added"],
+        "kev_seq": cve_record.get("kev_seq"),
+        "kev_catalog_count": cve_record.get("kev_catalog_count"),
         "cve_published": cve_record.get("cve_published", ""),
         "cvss_v3_base_score": cve_record.get("cvss_v3_base_score"),
         "vendor_project": cve_record["kev_vendor_project"],
@@ -117,6 +128,45 @@ def build_index_entry(cve_record):
         "last_researched": cve_record["last_researched"],
         "file": f"data/cves/{cve_record['cve_id']}.json",
     }
+
+
+# Sort sentinel: entries without a catalog fingerprint (pre-kev_seq corpus,
+# records dropped from the catalog) sort after fingerprinted ones within
+# their day, keeping prior relative order (stable multi-pass).
+_SEQ_MISSING = float("inf")
+
+
+def sort_index_entries(entries):
+    """Order index entries newest-first the way CISA actually added them.
+
+    kev_date_added is date-only, so same-day additions tie on it and a plain
+    date sort left them in corpus-glob (alphabetical) order — which happens
+    to equal insertion order and published the day's FIRST addition on top
+    of the feed, burying later ones where pubDate-based RSS readers never
+    see them (2026-09-16: CVE-2026-87886, the day's LAST KEV addition,
+    rendered at the bottom of the day's trio).
+
+    Tie-break with the ingest-time fingerprint recorded on each record:
+
+    - kev_date_added descending (the canonical KEV day grouping);
+    - kev_catalog_count descending (the count only grows; a higher count
+      means a later snapshot, so a later addition);
+    - kev_seq descending (CISA's catalog is newest-day-first, and within a
+      day's block entries sit in insertion order — oldest first, verified
+      live 2026-09-16: the trio stamped seq 0/1/2 in their true addition
+      order, and the day's final revision entry holds the day's highest
+      seq). So within one snapshot, higher seq = added later that day.
+
+    Stable multi-pass in reverse priority order; in-place, returns entries.
+    Entries without a fingerprint (pre-kev_seq corpus, dropped-from-KEV
+    records) keep prior relative order and sort after stamped ones within
+    their day.
+    """
+    entries.sort(key=lambda e: -e["kev_seq"]
+                 if isinstance(e.get("kev_seq"), int) else _SEQ_MISSING)
+    entries.sort(key=lambda e: e.get("kev_catalog_count") or 0, reverse=True)
+    entries.sort(key=lambda e: e.get("kev_date_added") or "", reverse=True)
+    return entries
 
 
 def build_run_log(run_id, stats):

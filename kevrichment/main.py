@@ -33,6 +33,7 @@ from research import ResearchEngine
 from schema import (
     build_cve_record,
     build_index_entry,
+    sort_index_entries,
     validate_cve_record,
 )
 
@@ -150,6 +151,12 @@ def run_pipeline(research_engine=None, nvd_api_key=None,
         raise KevrichmentError(f"KEV fetch failed: {e}") from e
 
     kev_source_date = get_kev_source_date(kev_data)
+    # Ingest-time catalog fingerprint (see schema.sort_index_entries): the
+    # raw JSON is newest-first, so each entry's position + the snapshot count
+    # preserve WITHIN-DAY insertion order, which the date-only dateAdded loses.
+    catalog_count = kev_data.get("count")
+    seq_by_cve = {e.get("cveID"): i
+                  for i, e in enumerate(kev_data.get("vulnerabilities", []))}
     total_entries = len(kev_data.get("vulnerabilities", []))
     print(f"  Source: {kev_source_date}  |  Total entries: {total_entries}")
 
@@ -234,7 +241,9 @@ def run_pipeline(research_engine=None, nvd_api_key=None,
         }
 
         # Build record
-        record = build_cve_record(cve_id, entry, nvd, vuln, research_data, research_meta)
+        record = build_cve_record(cve_id, entry, nvd, vuln, research_data, research_meta,
+                                  kev_seq=seq_by_cve.get(cve_id),
+                                  kev_catalog_count=catalog_count)
         try:
             validate_cve_record(record)
         except ValueError as e:
@@ -353,7 +362,7 @@ def run_pipeline(research_engine=None, nvd_api_key=None,
     existing_by_id = {e["cve_id"]: e for e in existing_cves}
     for entry in updated_entries:
         existing_by_id[entry["cve_id"]] = entry
-    merged_cves = list(existing_by_id.values())
+    merged_cves = sort_index_entries(list(existing_by_id.values()))
 
     index_data = {
         "last_updated": run_id,

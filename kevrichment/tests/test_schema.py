@@ -77,3 +77,65 @@ def test_unknown_ssvc_treated_as_no_conservative():
     result = compute_bod_timeline("unknown", "unknown", False)
     assert result["timeline_if_publicly_exposed"] == "60_days"
     assert result["timeline_if_not_publicly_exposed"] == "defer_to_next_upgrade"
+
+
+# ---------------------------------------------------------------------------
+# sort_index_entries: same-day KEV insertion order (kev_seq fingerprint)
+# ---------------------------------------------------------------------------
+
+from schema import sort_index_entries
+
+
+def _e(cid, date, count=None, seq=None):
+    return {"cve_id": cid, "kev_date_added": date,
+            "kev_catalog_count": count, "kev_seq": seq}
+
+
+def test_sort_same_day_orders_by_seq_within_snapshot():
+    # The 2026-09-16 trio as CISA's snapshot lists them (insertion order,
+    # oldest first): 58704 seq 0 ... 87886 seq 2. Newest-added must render
+    # first — alphabetical order used to put 58704 (the day's FIRST
+    # addition) on top.
+    rows = [_e("CVE-2026-58704", "2026-09-16", 1713, 0),
+            _e("CVE-2026-76460", "2026-09-16", 1713, 1),
+            _e("CVE-2026-87886", "2026-09-16", 1713, 2)]
+    out = sort_index_entries(rows)
+    assert [e["cve_id"] for e in out] == \
+        ["CVE-2026-87886", "CVE-2026-76460", "CVE-2026-58704"]
+
+
+def test_sort_same_day_higher_snapshot_count_is_newer():
+    # Ingested across revisions of the same day: the later snapshot has the
+    # higher catalog count (and the later addition the higher seq).
+    rows = [_e("CVE-2026-58704", "2026-09-16", 1710, 0),
+            _e("CVE-2026-87886", "2026-09-16", 1713, 2),
+            _e("CVE-2026-76460", "2026-09-16", 1712, 1)]
+    out = sort_index_entries(rows)
+    assert [e["cve_id"] for e in out] == \
+        ["CVE-2026-87886", "CVE-2026-76460", "CVE-2026-58704"]
+
+
+def test_sort_dates_descending_primary():
+    rows = [_e("CVE-2026-0002", "2026-09-16", 1713, 5),
+            _e("CVE-2026-0001", "2026-09-14", 1705, 0)]
+    out = sort_index_entries(rows)
+    assert [e["cve_id"] for e in out] == ["CVE-2026-0002", "CVE-2026-0001"]
+
+
+def test_sort_unstamped_sort_after_stamped_within_day():
+    rows = [_e("CVE-2026-0009", "2026-09-16", None, None),
+            _e("CVE-2026-87886", "2026-09-16", 1713, 0)]
+    out = sort_index_entries(rows)
+    assert out[0]["cve_id"] == "CVE-2026-87886"
+
+
+def test_sort_empty_dates_sink_to_bottom():
+    rows = [_e("CVE-2026-0009", "", None, None),
+            _e("CVE-2026-0001", "2026-09-10", 1700, 0)]
+    out = sort_index_entries(rows)
+    assert [e["cve_id"] for e in out] == ["CVE-2026-0001", "CVE-2026-0009"]
+
+
+def test_sort_in_place_returns_same_list():
+    rows = [_e("CVE-2026-0001", "2026-09-10")]
+    assert sort_index_entries(rows) is rows

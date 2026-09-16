@@ -24,6 +24,7 @@ import json
 import os
 import re
 import shutil
+import sys
 from datetime import datetime, timezone
 
 try:
@@ -177,19 +178,59 @@ def index_rows(index):
 # Feed items (M4: feeds/feed-kev.xml) — newest KEV additions, 90-day window
 # ---------------------------------------------------------------------------
 
+def _sort_kev_entries(entries):
+    """Sort index entries newest-first in true KEV insertion order.
+
+    Thin seam over kevrichment/schema.py's sort_index_entries (single source
+    of truth for the tie-break rules; kev-verify.py and the pipeline import
+    it directly). Same lazy-cross-import pattern as safe_url above."""
+    kev_rich = os.path.normpath(os.path.join(KEV_DIR, ".."))
+    if kev_rich not in sys.path:
+        sys.path.insert(0, kev_rich)
+    from schema import sort_index_entries
+    return sort_index_entries(entries)
+
+
+def _pub_iso(entry, added):
+    """Feed pubDate source for one item: the record's ingest time (index
+    last_researched), falling back to midnight UTC of the KEV add date.
+
+    The midnight stamp made every same-day addition after the first carry a
+    pubDate the reader had effectively already seen, so it never alerted as
+    new (2026-09-16: CVE-2026-76460 / CVE-2026-87886, added hours after
+    CVE-2026-58704, inherited the same 00:00Z stamp)."""
+    raw = str(entry.get("last_researched") or "").strip()
+    if raw:
+        try:
+            dt = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+            if dt.tzinfo is None:
+                dt = dt.replace(tzinfo=timezone.utc)
+            return dt.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        except ValueError:
+            pass
+    return f"{added}T00:00:00Z"
+
+
 def feed_items(index, days=90, cap=100):
     """RSS items for the KEV feed: entries with a truthy kev_date_added within
     the last `days`, newest first, capped. Title/description come from the
     per-CVE records (kev_vulnerability_name / kevrichment_summary), which the
     index does not carry. Descriptions are PLAIN TEXT (feed.xml autoescapes;
     no |safe). Non-KEV (vulnrichment-scan) entries have empty kev_date_added
-    and are excluded by the truthy guard."""
+    and are excluded by the truthy guard.
+
+    Ordering is _sort_kev_entries (dateAdded desc, then the ingest-time
+    catalog fingerprint), so same-day additions render newest-added-first
+    (CISA lists a day's batch in insertion order) instead of leaving the
+    day's first addition on top; pubDate is the record's ingest time, not
+    midnight UTC of the add date."""
     from datetime import timedelta
     today = datetime.now(timezone.utc).date()
     cutoff = today - timedelta(days=days)
 
+    rows = _sort_kev_entries(list(index.get("cves", [])))
     items = []
-    for e in index.get("cves", []):
+    for e in rows:
         c = gate_cve(e.get("cve_id"))
         added = fmt_date(e.get("kev_date_added"))
         if not c or not added:
@@ -217,13 +258,9 @@ def feed_items(index, days=90, cap=100):
         items.append({
             "title": title,
             "link": site_url(f"kev/cves/{c}/"),
-            "pub_date": rfc2822(f"{added}T00:00:00Z"),
-            "iso": f"{added}T00:00:00Z",
+            "pub_date": rfc2822(_pub_iso(e, added)),
             "description": f"{vendor} / {product} · {desc.strip()[:280]}" + (f" · {' · '.join(status)}" if status else ""),
         })
-    items.sort(key=lambda i: i["iso"], reverse=True)
-    for it in items:
-        del it["iso"]
     return items[:cap]
 
 
