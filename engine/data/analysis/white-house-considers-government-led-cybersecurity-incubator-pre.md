@@ -1,0 +1,5 @@
+The Trump administration is weighing an executive order to create a government-led cybersecurity research incubator. The Office of the National Cyber Director has been drafting a program to fund research and development of cyber technologies aligned with government priorities, with the goal of attracting venture capital investment.
+
+The initiative is being compared to Israel's model of aligning military priorities with cybersecurity startup ecosystems. Companies like Wiz, Palo Alto Networks, and Check Point were founded by veterans of Israel's cyber intelligence unit. While the Pentagon and CIA have long funded tech research with national security applications, this would be the first cyber-specific effort of its kind.
+
+The push comes as the White House grapples with AI-related cyberthreats. AI systems are now capable of carrying out hacks undetected, as seen in the recent Hugging Face incident involving 700 AI agents. AI is also enabling criminals to build false identities and mimic real voices and faces well enough to fool identity checks, creating demand for new cybersecurity talent and tools.

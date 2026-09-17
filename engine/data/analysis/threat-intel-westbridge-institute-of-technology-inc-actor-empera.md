@@ -1,0 +1,5 @@
+A threat actor named "emperador" has claimed to have exfiltrated 102 MB of data from Westbridge Institute of Technology, Inc., an educational institution. The claimed dataset includes employee, student, and guardian records. The claim is unverified and posted on a dark web leak site.
+
+Emperador is a low-profile ransomware operation with no documented track record, known toolset, or confirmed victim count. The small data volume (102 MB) for "full" records across three distinct groups suggests the dataset may be partial, compressed, or misrepresented. No samples or credentials have been published to validate the claim.
+
+If substantiated, the breach would expose sensitive PII spanning staff, students, and guardians, including potential government identifiers and payroll data. Educational institutions are frequent targets due to their data on minors. Organizations should monitor for official confirmation, data sample publication, or regulatory filings. No specific detection signatures exist for this actor.
