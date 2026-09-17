@@ -1,0 +1,34 @@
+title: Mass Scanning for Exposed Vite Dev Server Secrets
+id: b4e8d3f2-9c5a-4f0b-a7d6-e23456789012
+status: experimental
+description: Detects scanning of exposed Vite development servers for cloud credentials and sensitive files via CVE-2026-39364 path traversal. Attackers use /@fs/ endpoints with query obfuscation to bypass server.fs.deny restrictions.
+references:
+  - https://dev.to/anoymask/vite-cve-2026-39364-exploring-cloud-secrets-from-exposed-development-servers-43fc
+author: Tia N. List
+date: 2026/09/17
+tags:
+  - attack.t1190
+  - attack.initial-access
+  - attack.t1083
+  - attack.discovery
+logsource:
+  category: webserver
+detection:
+  selection:
+    cs-uri|contains: '/@fs/'
+  selection_suspicious:
+    cs-uri|contains:
+      - '.env'
+      - 'aws'
+      - 'azure'
+      - 'terraform'
+      - 'proc/self'
+  filter:
+    cs-uri|endswith:
+      - '.js'
+      - '.ts'
+      - '.mjs'
+  condition: selection and selection_suspicious and not filter
+falsepositives:
+  - Legitimate development workflows accessing local files via Vite dev server
+level: medium
