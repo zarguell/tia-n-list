@@ -1,0 +1,5 @@
+ISC released BIND 9.20.29 addressing 14 security vulnerabilities in the named DNS server and recursive resolver. Two medium-severity flaws stand out: CVE-2026-77119 (CVSS 5.9) allows a validating resolver to accept an NSEC3 record from an unrelated sibling zone as an insecurity proof, enabling forged unsigned answers and cache poisoning. CVE-2026-19941 similarly enables forged DNSSEC-validated NXDOMAIN responses by accepting NSEC records from unrelated zones. Both affect BIND versions 9.20.0 through 9.20.27.
+
+The update follows the withdrawn 9.20.28 release and is the recommended upgrade for affected 9.20 deployments. Beyond the DNSSEC bypasses, the release resolves remotely triggerable crashes and resource-exhaustion conditions that could disrupt DNS availability. Organizations operating recursive, DNSSEC-validating resolvers are primarily exposed.
+
+What to watch: DNSSEC bypass vulnerabilities undermine the trust model for DNS security extensions. Attackers able to inject responses could downgrade secure delegations and poison resolver caches. The 14-vulnerability scope suggests ISC conducted comprehensive security auditing of the BIND codebase.
