@@ -1,0 +1,3 @@
+I'm a student and this is my university project. I tried to write the security monitoring and response loop (state → observation → decision → action) as a formal system — 30 axioms and a few theorems (e.g. a decision threshold for when to act, and a detection bound). It's a draft: the math is decent to publish as demo, but I haven't validated it against real data yet. Repo: https://github.com/ChaoswareHQ/asmr I'd really appreciate advice from people who actually work in SOCs. Thanks. submitted by /u/AzzoDude [link] [comments]
+
+via reddit r/cybersecurity: Student here — I formalized the SOC loop as axioms, could I get some advice?
