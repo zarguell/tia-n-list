@@ -1,0 +1,5 @@
+Bruce Schneier published "25 Years of Mass Surveillance Is Enough," an essay arguing that the post-9/11 surveillance infrastructure has failed to deliver proportional security benefits while causing lasting harm to civil liberties. The article, hosted on Schneier's blog and widely shared across Mastodon instances, marks a quarter-century since the authorization of mass collection programs that followed the September 11 attacks.
+
+The piece synthesizes two decades of evidence that bulk metadata collection, warrantless wiretapping, and algorithmic surveillance have produced minimal actionable intelligence while normalizing pervasive monitoring of domestic communications. Schneier contends that the security establishment has conflated data collection with security, creating an apparatus that is both ineffective against sophisticated threats and corrosive to democratic norms.
+
+The article is an opinion essay, not a report on a specific security incident. It contributes to ongoing policy debates about surveillance reform, but does not contain vulnerability disclosures, threat actor analysis, or actionable security guidance.
