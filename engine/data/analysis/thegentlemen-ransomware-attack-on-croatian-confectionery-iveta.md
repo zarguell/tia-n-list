@@ -1,0 +1,5 @@
+TheGentlemen ransomware group claimed a September 15, 2026 attack against Iveta (iveta.hr), a Croatian confectionery company. The group threatened to publish stolen data unless the company initiates contact through provided channels. This fits TheGentlemen's established double-extortion playbook of encrypting systems and threatening data publication simultaneously.
+
+Separately, Cisco Talos reported that TheGentlemen dominated ransomware incidents in Japan during the first half of 2026, with attacks rising 4.7% overall in the region. The group appears to be scaling its operations across both European and Asia-Pacific targets, focusing on mid-sized organizations with valuable data but potentially less mature security postures.
+
+The Iveta attack underscores the group's willingness to target food and consumer goods companies, sectors that often lack dedicated security teams. Organizations in similar industries should ensure they have offline backups, monitor dark web leak sites for group-specific indicators, and establish incident response playbooks that account for double-extortion scenarios.
