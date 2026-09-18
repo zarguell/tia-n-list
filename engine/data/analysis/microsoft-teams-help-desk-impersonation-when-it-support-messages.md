@@ -1,0 +1,5 @@
+Attackers are exploiting Microsoft Teams' default external chat settings to impersonate IT help desk staff and socially engineer targets into installing malware or granting remote access. Expel documented a campaign where adversaries open Teams chats from rogue tenants they control, set their display name to something like "IT Service Desk," and ask the target to approve a file download or remote session.
+
+In the documented case, the payload was an MSI hosted on a Microsoft Azure storage endpoint. The resulting fake Windows lock screen captured the user's password in cleartext. Teams allows chat from any external domain by default, and the attacker only needs the target to click yes once.
+
+Two Teams admin center settings and one sentence of user training close most of this attack surface. Admins should restrict external domain communication to approved organizations only, and staff should be told that legitimate IT will never initiate unsolicited Teams chats asking for software installs or remote session approvals.

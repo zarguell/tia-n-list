@@ -1,0 +1,3 @@
+Attackers are opening Microsoft Teams chats from tenants they control, using a display name like IT Service Desk , and talking people into either installing a file or handing over a remote session. Teams allows chat from any external domain by default, and the attacker only needs the target to say yes once. In the case Expel documented, the yes was an MSI hosted on a Microsoft Azure storage endpoint; the payoff was a fake Windows lock screen that captured the user’s password in the clear. Two settings in the Teams admin center and one sentence said out loud to your staff close most of this. submitted by /u/scamdrill [link] [comments]
+
+via reddit r/cybersecurity: Microsoft Teams Help Desk Impersonation: When IT Support Messages You First
