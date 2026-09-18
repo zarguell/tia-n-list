@@ -1,0 +1,3 @@
+I have recently requested to be made the moderator for r/Darktrace and had that granted. For anyone using the product, curious about it, or otherwise wanting to constructively engage in discussions about the product or company, go ahead and swing by! It was a restricted community, and I am keeping it that way for the moment in case there is a ridiculous amount of interest or sudden bot spam or something. I will be approving pretty much anyone who requests for now though, and you can expect a reasonably quick turnaround. I would like to see it get slowly a bit more active again and open it to the world after I have another mod or two. submitted by /u/Jinnmaster [link] [comments]
+
+via reddit r/cybersecurity: R/Darktrace- soft reopening
