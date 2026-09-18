@@ -1,0 +1,5 @@
+Ransomware actor "Panzer" posted an unverified claim on September 18, 2026, alleging a data breach at Stim, a Honda subsidiary operating in Peru. The claim states that NDA documents were exposed, though no specific data samples or ransom demands have been published as of the time of reporting. The claim was posted to a known ransomware leak site monitored by Yazoul threat intelligence.
+
+The claim is currently marked as unverified. No victim response, ransom demand amounts, or data leak samples have surfaced to corroborate the allegation. Panzer is a relatively low-profile actor with limited historical claims, making attribution confidence moderate at best. Honda Peru's operational status has not been publicly affected as of this writing.
+
+Threat intelligence teams should monitor Panzer's leak site for any data dumps or corroborating evidence. If validated, this would represent a supply chain risk for Honda's Latin American operations. The lack of initial data samples is consistent with either an early-stage extortion attempt or an unsubstantiated claim, both of which warrant tracking.

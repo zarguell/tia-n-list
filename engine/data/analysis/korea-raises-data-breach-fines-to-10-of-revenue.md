@@ -1,0 +1,5 @@
+South Korea's Personal Information Protection Commission announced it will raise maximum data breach fines to 10% of a company's annual revenue, effective September 19, 2026. The new penalty framework applies to companies that leaked personal data of 10 million or more people through intent or gross negligence. This brings Korea's enforcement posture closer to the EU's GDPR model, where fines can reach 4% of global turnover.
+
+The regulatory change targets large-scale breaches specifically. Companies found to have failed in their duty of care, such as storing passwords in plaintext or ignoring known vulnerabilities, face the steepest penalties. The previous fine structure was criticized as too lenient to incentivize genuine security investment, particularly for large tech firms operating in Korea.
+
+This signals continued global momentum toward stricter data protection enforcement. Companies operating in the Korean market should review their breach response capabilities and data handling practices, particularly for high-volume consumer data. The fine structure may also influence regulatory discussions in other APAC jurisdictions watching Korea's approach.
