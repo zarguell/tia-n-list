@@ -1,0 +1,5 @@
+The MSMT (Military Security and Military Technology) published its latest report on September 16, 2026, detailing nation-state cyber operations targeting defense and intelligence sectors. The report, covered by The Record, examines how foreign intelligence services are conducting cyber espionage campaigns against military and defense industry targets globally.
+
+The MSMT report adds to the growing body of evidence that state-sponsored threat actors are escalating their targeting of defense supply chains and personnel. This follows recent DCSA reporting on foreign spies exploiting LinkedIn and email to recruit US defense experts, suggesting a coordinated push by multiple nation-states to gather military-adjacent intelligence through cyber means.
+
+Defenders in the defense industrial base should review the MSMT report for specific IOCs and TTPs. The overlap with DCSA advisories suggests that organizations should strengthen monitoring of email-based social engineering campaigns and review employee exposure on professional networking platforms.
