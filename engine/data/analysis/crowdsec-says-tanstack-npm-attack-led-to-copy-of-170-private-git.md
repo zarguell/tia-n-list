@@ -1,0 +1,5 @@
+CrowdSec researchers disclosed that the TanStack npm supply chain attack resulted in the exfiltration of 170 private GitHub repositories. The attacker compromised a TanStack maintainer's npm publishing credentials and used them to inject malicious code into TanStack packages, which are among the most downloaded in the npm ecosystem.
+
+Beyond the immediate malware distribution through the npm packages, the attacker leveraged the access to reach into TanStack's GitHub organization and copy 170 private repositories. This second-stage data theft is the more damaging outcome: private source code, internal tools, configuration files, and potentially secrets or API keys embedded in repositories are now in attacker hands.
+
+The incident is a textbook example of how npm package compromise cascades into broader organizational data loss. Organizations that used TanStack packages may have been exposed to the malware payload, but the 170 stolen private repos represent a lasting intelligence loss. Companies should audit their TanStack dependency versions and assume any secrets present in those private repositories are burned.
