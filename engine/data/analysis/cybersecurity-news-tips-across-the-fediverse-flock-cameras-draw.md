@@ -1,0 +1,5 @@
+This story covers political opposition to Flock Safe automated license plate reader (ALPR) cameras, which spread across multiple fediverse posts and linked to an OPB article from September 18, 2026. The story title references opposition "from across the political spectrum," suggesting bipartisan pushback against mass surveillance infrastructure.
+
+Flock cameras are ALPR systems deployed by law enforcement that capture vehicle plates, makes, models, and other identifiers. The cybersecurity angle is twofold: the cameras collect location data at scale with minimal oversight, and their cloud-connected architecture creates attack surface for data theft or manipulation. Multiple fediverse accounts shared the story, giving it breadth across 4 sources despite no CVE or technical vulnerability being involved.
+
+The OPB source article appears to have been removed or relocated (returns 404), limiting verification of specific claims. This is a surveillance policy story rather than a technical security advisory. The score is 3.3, reflecting moderate social spread but no direct security impact.
