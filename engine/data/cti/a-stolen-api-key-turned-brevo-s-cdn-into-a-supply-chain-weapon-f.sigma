@@ -1,0 +1,31 @@
+title: Brevo CDN Supply Chain Attack - Fake CAPTCHA Content Injection
+id: b8e4d3f2-5c9a-4b2e-8d7f-3a1c6e5b9d0e
+status: experimental
+description: Detects indicators of the Brevo CDN supply chain attack where a stolen API key was used to inject malicious JavaScript via Cloudflare Workers, serving fake CAPTCHA pages that trick site administrators into executing backdoor commands.
+references:
+  - https://securityaffairs.com/
+  - https://theperimetersite.com/
+  - https://intel.threadlinqs.com/
+author: Tia N. List
+date: 2026-09-19
+tags:
+  - attack.t1195
+  - attack.t1659
+logsource:
+  product: webserver
+  service: cloudflare
+detection:
+  selection_worker:
+    cs_method: GET
+    cs_uri_path|contains: '/cdn-cgi/'
+    cs_ua|contains: 'Cloudflare-Workers'
+  selection_brevo:
+    cs_uri|contains: 'cdn.sendibt1.com'
+  selection_captcha:
+    cs_uri|contains: 'onboarding.brevo.com'
+    cs_ua|contains: 'Cloudflare-Workers'
+  condition: selection_worker or selection_brevo or selection_captcha
+falsepositives:
+  - Legitimate Cloudflare Worker deployments
+  - Legitimate Brevo widget loading
+level: medium
