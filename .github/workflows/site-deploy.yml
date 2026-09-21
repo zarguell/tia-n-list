@@ -23,10 +23,12 @@ jobs:
         with:
           python-version: '3.12'
       - name: Install generator deps
-        # sigma stack pinned: unpinned pysigma >=1.6 regresses with
-        # TypeError: 'str' object is not callable in conditions.postprocess
-        # (breaks engine/test_sigma.py and the ssg.py publish gate).
-        run: pip install jinja2 markdown bleach "sigma-cli==3.1.0" "pysigma==1.5.0" "pysigma-backend-splunk==2.1.0" "pysigma-backend-kusto==1.0.1" yara-x pytest requests
+        # sigma stack pinned (2026-09-21): two independent regressions break
+        # engine/test_sigma.py and the ssg.py publish gate with
+        #   TypeError: 'str' object is not callable (conditions.postprocess)
+        # 1) unpinned pysigma >=1.6, 2) pyparsing 3.3.3 (unpinned transitive
+        #    dep) breaks pysigma 1.5.0 condition parsing — pin 3.3.2.
+        run: pip install jinja2 markdown bleach "sigma-cli==3.1.0" "pysigma==1.5.0" "pyparsing==3.3.2" "pysigma-backend-splunk==2.1.0" "pysigma-backend-kusto==1.0.1" yara-x pytest requests
       - name: Sanitizer regression suite
         run: python engine/test_sanitize.py
       - name: KEV candidates determinism suite
