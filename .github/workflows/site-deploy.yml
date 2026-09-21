@@ -23,7 +23,10 @@ jobs:
         with:
           python-version: '3.12'
       - name: Install generator deps
-        run: pip install jinja2 markdown bleach sigma-cli pysigma-backend-splunk pysigma-backend-kusto yara-x pytest requests
+        # sigma stack pinned: unpinned pysigma >=1.6 regresses with
+        # TypeError: 'str' object is not callable in conditions.postprocess
+        # (breaks engine/test_sigma.py and the ssg.py publish gate).
+        run: pip install jinja2 markdown bleach "sigma-cli==3.1.0" "pysigma==1.5.0" "pysigma-backend-splunk==2.1.0" "pysigma-backend-kusto==1.0.1" yara-x pytest requests
       - name: Sanitizer regression suite
         run: python engine/test_sanitize.py
       - name: KEV candidates determinism suite
