@@ -1,0 +1,5 @@
+A Google analyst went undercover and infiltrated TeamPCP, a hacking group focused on supply chain attacks. The operation aimed to prevent large-scale compromises by understanding the gang's methods and targets from the inside. Details on the duration of the infiltration or specific attacks prevented remain limited in the available reporting.
+
+TeamPCP is a criminal group that targets software supply chains to reach downstream victims. Two alleged members of the group were arrested in Australia in August 2026, suggesting the undercover work contributed to law enforcement action. The Wired exclusive and subsequent SecurityOnline coverage both reference the same operation.
+
+This story matters because offensive infiltration of criminal hacking groups by private sector analysts is still uncommon. Google's willingness to fund this kind of operation signals that major tech companies are investing in proactive disruption, not just defensive patching. Watch for follow-up reporting on what TeamPCP's infrastructure revealed about other supply chain compromises.
