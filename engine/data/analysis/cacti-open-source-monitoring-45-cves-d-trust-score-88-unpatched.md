@@ -1,0 +1,1 @@
+Cacti open-source monitoring carries 45 CVEs with an 88% unpatched rate and a D trust score; one CVE is in CISA KEV. SQL injection leads the weakness profile. Organizations running Cacti should audit exposure immediately and apply available patches.
