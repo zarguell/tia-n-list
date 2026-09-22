@@ -1,0 +1,1 @@
+BigCommerce alerted merchants that attackers used compromised Ribon app credentials to inject malicious scripts into stores between September 13 and 17. Master of Malt confirmed exposure of shopper names, emails, phone numbers, and shipping addresses. Account passwords and payment cards were not exposed. The incident highlights supply-chain risk through SaaS integrations.
