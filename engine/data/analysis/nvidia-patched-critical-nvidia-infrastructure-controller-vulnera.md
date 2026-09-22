@@ -1,0 +1,1 @@
+NVIDIA patched critical NVIDIA Infrastructure Controller vulnerabilities across Linux builds tied to CVE-2026-65113. The advisory targets Linux builds and carries critical severity. Update systems running the affected controller builds. Monitor for follow-on exploitation reports.
