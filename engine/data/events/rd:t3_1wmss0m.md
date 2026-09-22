@@ -1,0 +1,3 @@
+A recent measurement study looked at almost 8,000 live remote MCP servers and found 40.55% expose their tools with no auth at all, and among the ones that did use OAuth, every single one had at least one security flaw. Over 300 CVEs have already been filed against MCP infrastructure. The core issue is that every MCP server is quietly acting as an identity issuer now, deciding what an agent can access, and most of them were never built to do that job safely. Anyone running MCP servers in production, is this something your team has actually locked down or is it flying under the radar right now? submitted by /u/Glittering_Royal6799 [link] [comments]
+
+via reddit r/cybersecurity: Turns out 40% of MCP servers have zero authentication, and even the ones that do are broken
