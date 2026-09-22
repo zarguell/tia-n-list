@@ -1,0 +1,1 @@
+SETTRA ransomware uses MeshAgent RMM and BYOVD to encrypt Windows, per Huntress reports of July and September 2026 incidents. Victim-specific binaries, log clearing, and defense-evasion are consistent. MeshAgent abuse provides persistence. Monitor MeshAgent deployments and Windows event clearing patterns.

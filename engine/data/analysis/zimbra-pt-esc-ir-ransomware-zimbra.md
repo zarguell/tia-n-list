@@ -1,0 +1,1 @@
+Zimbra servers face ransomware attacks using CVE-2026-73570 command injection. PT ESC IR observed active exploitation, with HookProbe demonstrating detection capabilities. Ensure Zimbra patches are applied and monitor for command-injection indicators.

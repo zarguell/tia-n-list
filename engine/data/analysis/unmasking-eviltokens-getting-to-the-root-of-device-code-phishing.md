@@ -1,0 +1,1 @@
+EvilTokens PhaaS, tracked as Storm-2992, facilitated device-code phishing that compromised over 12,000 inboxes across 10,000 organizations. The AI-powered toolkit automates lure creation, token theft, and persistence through malicious inbox rules. Microsoft Defender XDR detections and hunting queries are available. Monitor device-code flows and inbox rules.

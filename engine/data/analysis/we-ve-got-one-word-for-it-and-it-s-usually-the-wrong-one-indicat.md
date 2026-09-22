@@ -1,0 +1,1 @@
+Cofense reports a global group moving from payment-plan schemes to ransomware, with extracted indicators of operation patterns, infrastructure, and victim targeting. Monitor for overlapping IOCs linking financial fraud to ransomware deployments.
