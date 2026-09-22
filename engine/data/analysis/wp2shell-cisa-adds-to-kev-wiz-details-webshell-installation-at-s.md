@@ -1,0 +1,1 @@
+CVE-2026-63030 (wp2shell) is a critical pre-auth WordPress core RCE, now in CISA KEV. Exploitation allowed attackers to install webshells and steal at least 18,566 records across 29 countries. Confirm patches for WordPress core and scan for webshell indicators.
