@@ -1,0 +1,1 @@
+Water-system intrusion in Colorado. Attackers targeted control infrastructure in August; governance and segmentation gaps remain the core exposure. Monitor federal water-sector guidance and patch remote-access gateways.
