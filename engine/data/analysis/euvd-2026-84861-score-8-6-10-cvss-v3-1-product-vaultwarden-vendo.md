@@ -1,0 +1,1 @@
+Vaultwarden through 1.37 carries EUVD-2026-84861 at CVSS 8.6 (v3.1). The advisory covers Vaultwarden by vendor dani-garcia, updated 2026-09-22. Watch for patch releases addressing the rated vulnerability.

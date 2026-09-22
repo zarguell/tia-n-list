@@ -1,0 +1,1 @@
+A hacking group claims it breached FBI-related services and extracted personal data on all FBI employees and applicants. The FBI stated awareness of the claims but did not confirm. Monitor for verification.
