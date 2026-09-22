@@ -1,0 +1,2 @@
+APT36 Operation RapidRust Deploys RUSTYSHADE, RUSTYMOVE, and Other New Malware covers recent security developments. Key references include . The event content notes IntroductionIn August 2026, Zscaler ThreatLabz observed new activity by the Pakistan-nexus threat actor APT36 in a campaign we’re tracking as Operation RapidRust. Since our last publication about the group’s activity in January 2026, APT36 has maintained a high operational tempo and updated their ta.
+This matters because it affects systems users rely on. Watch for patches and confirmed exploitation updates.

@@ -1,5 +1,0 @@
-Microsoft's September 2026 Patch Tuesday addressed a record 972 vulnerabilities, with 112 rated critical. This follows an accelerating trend: 570 CVEs in July and approximately 620 in August. Bruce Schneier highlighted the numbers on his blog, noting that the surge reflects AI-powered vulnerability discovery across the industry.
-
-The patch volume comes two weeks after an open letter signed by OpenAI, Anthropic, AWS, Google, Microsoft, and 100 other organizations warning of a narrowing patch window ahead of expected AI-enabled exploitation campaigns. Microsoft itself has stated the window to patch has shrunk to "immediately." The escalation from 570 to 620 to 972 CVEs in three consecutive months signals that AI tooling is scaling vulnerability discovery faster than teams can remediate.
-
-Key risk: the sheer volume of patches creates operational burden. Organizations running Microsoft ecosystems need to prioritize the 112 critical-severity fixes while managing the long tail of important and moderate updates. The trend is expected to continue climbing as AI finders improve, then potentially plateau as the most accessible vulnerability classes get exhausted.

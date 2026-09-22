@@ -1,5 +1,0 @@
-The ShipMonk data breach affecting Trezor customers has expanded significantly. What began as an incident impacting 14,000 customers now encompasses approximately 67,000 additional US customers. The newly identified data pertains to Trezor orders processed during a prior partnership with ShipMonk that lasted from November 2019 onward.
-
-Exposed information includes personal and order details of affected customers. The breach underscores risks in third-party supply chain relationships, particularly fulfillment providers handling sensitive customer data for hardware wallet manufacturers.
-
-This is a reminder that cryptocurrency hardware wallet security extends beyond the device itself. Customer data held by vendors remains attractive to attackers, and breach scope can grow materially as investigations proceed.

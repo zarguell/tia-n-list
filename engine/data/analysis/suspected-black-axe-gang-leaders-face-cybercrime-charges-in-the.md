@@ -1,5 +1,0 @@
-Multiple suspected leaders of the Black Axe cybercrime network have been extradited to the United States and now face federal cybercrime charges, according to BleepingComputer. Black Axe is a Nigeria-linked organized crime group primarily known for business email compromise (BEC) fraud, romance scams, and money laundering through a network of shell companies and money mules.
-
-The group has been linked to losses exceeding $1 billion across multiple countries. Black Axe operations typically combine social engineering with compromised email accounts to redirect wire transfers. The organization has been the target of a multi-year international law enforcement investigation involving agencies from the US, UK, Nigeria, and several European countries.
-
-Federal indictments against senior members suggest a significant disruption to the group's leadership structure, though Black Axe's decentralized operational model means rank-and-file affiliates are likely to continue activity under the same or rebranded banners.

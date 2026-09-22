@@ -1,7 +1,0 @@
-A joint law enforcement advisory from four countries details that North Korean APT group WaterPlum compromised at least 30,000 devices worldwide between December 2025 and July 2026, moving over $10.7 million in stolen cryptocurrency. The group posed as recruiters and lured targets into completing coding tests that delivered crypto-stealing malware. The campaign targeted both individual developers and organizational infrastructure.
-
-The operation is notable for its social engineering approach. Rather than exploiting software vulnerabilities directly, WaterPlum used fake job interviews as the delivery mechanism, weaponizing the trust inherent in the hiring process. Victims believed they were completing legitimate technical assessments. The malware deployed during these fake interviews provided persistent access and enabled cryptocurrency theft at scale.
-
-The scale of 30,000 compromised devices across multiple countries represents a significant North Korean cyber operation beyond the typical ransomware or exchange-heist playbook. The $10.7 million in stolen crypto is modest by Lazarus Group standards, but the 30,000-device botnet provides infrastructure for future operations. The campaign ran for eight months before the joint advisory was published, suggesting sustained operational tempo.
-
-This campaign fits the broader pattern of North Korean threat actors diversifying beyond cryptocurrency exchange theft into broader cybercrime revenue streams. The recruiter-impersonation tactic is likely to be adopted by other APT groups given its effectiveness.

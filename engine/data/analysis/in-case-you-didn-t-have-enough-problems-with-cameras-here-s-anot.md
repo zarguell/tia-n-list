@@ -1,5 +1,0 @@
-OPSWAT discovered two vulnerabilities in TP-Link Tapo cameras: CVE-2026-15315, an authentication bypass, and CVE-2026-15316, a denial-of-service flaw. The authentication bypass is the more serious of the two, as it allows attackers to gain access to camera functions without valid credentials. TP-Link Tapo cameras are consumer-grade IoT devices with significant market share in the home security and smart home space.
-
-Authentication bypass on IP cameras is a persistent class of vulnerability. Compromised cameras provide real-time video surveillance of private spaces, and botnets like Mirai have historically weaponized camera vulnerabilities at scale. The combination of an auth bypass with a DoS vulnerability suggests the attack surface on these devices is broader than a single flaw.
-
-TP-Link should have patches available or forthcoming. Tapo camera owners should check for firmware updates and ensure cameras are not exposed directly to the internet. If remote access is needed, it should go through TP-Link's cloud service or a VPN rather than port forwarding.

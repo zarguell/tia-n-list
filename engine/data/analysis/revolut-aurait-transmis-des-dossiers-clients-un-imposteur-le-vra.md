@@ -1,5 +1,0 @@
-A second wave of reporting on Revolut's data breach focuses on the identity verification failures that allowed the breach to occur. Mac4ever.com (in French) and Meterpreter.org both covered how fraudsters obtained customer records by impersonating government officials through a legitimate government email domain. The breach exposed passports, selfies, and Bitcoin transaction histories.
-
-The key detail distinguishing this coverage is the emphasis on Revolut's verification process weaknesses. Meterpreter.org confirmed the attackers used a real government domain infrastructure, which bypassed Revolut's standard fraud detection. This suggests the bank's verification procedures did not include callback verification or multi-factor confirmation of government data requests.
-
-This story is a companion to the main Revolut breach reporting. It adds technical context about the attack vector and highlights systemic issues in how fintech companies handle government data disclosure requests. Organizations processing similar requests should implement callback verification to known government contacts and audit all customer data access against external requests.

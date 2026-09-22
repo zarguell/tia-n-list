@@ -1,1 +1,0 @@
-Vidar has added a custom virtual machine and per-build stream-cipher variations to conceal embedded strings, increasing reverse-engineering cost. This is an evolution of the 2018 infostealer family, using bytecode interpretation and ARX ciphers rather than simple obfuscation. Monitor for updated malware-analysis signatures and detection evasion reports.

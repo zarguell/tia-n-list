@@ -1,5 +1,0 @@
-A supply chain compromise hit Admin Menu Editor Pro, a premium WordPress plugin. The maintainer's website was breached on September 15, and the attacker pushed a trojanized version 2.35 to customers. That version contained a hidden file, includes/wp-user-consent.php, that installed a web shell and created a hidden WordPress admin account on affected sites.
-
-Developer Janis Elsts removed the malicious update and pushed version 2.36, but the attacker still had website access and compromised that version too. At least 230 customers installed the malicious update across roughly 1,500 sites. The free version of Admin Menu Editor is present on over 300,000 sites, though the premium version is the one that was compromised.
-
-The malicious PHP code in version 2.35 was available from approximately 06:00 to 13:00 UTC. The attack is notable for its persistence: the developer could not reclaim the website in time to prevent a second compromised release. Site operators who installed any version between 2.35 and 2.36 should assume compromise and audit for the hidden user account and web shell.

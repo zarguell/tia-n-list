@@ -1,5 +1,0 @@
-Microsoft has released a fix for a widespread issue affecting Excel copy and paste functionality across all Office versions. The bug prevented users from copying and pasting cell content within Excel, disrupting a fundamental workflow for spreadsheet users. While not a security vulnerability, the issue impacted productivity across enterprise environments and was reported by BleepingComputer as affecting Office users globally.
-
-The fix was pushed through Microsoft's standard update channels, and users should ensure their Office installations are current. The issue appears to have been a regression rather than a newly introduced bug, though Microsoft has not detailed the root cause. The broad impact across all Office versions suggests a shared component was affected.
-
-This type of functional regression in core productivity software highlights the risk of dependency on single-vendor office suites. Organizations should maintain update management processes that can rapidly deploy fixes for widespread functional issues, even when they are not security-critical.

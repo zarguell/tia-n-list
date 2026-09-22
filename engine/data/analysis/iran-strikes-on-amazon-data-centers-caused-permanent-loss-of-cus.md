@@ -1,5 +1,0 @@
-Iranian military strikes physically targeted Amazon data centers, causing permanent loss of customer data according to Ars Technica reporting. This is a kinetic attack on cloud infrastructure, not a cyber operation in the traditional sense, but the consequence is identical to a destructive cyberattack: irreversible data destruction.
-
-The significance is the blurring of lines between physical and cyber warfare against civilian infrastructure. AWS hosts a massive share of global digital services, and a successful strike that destroys data at rest violates assumptions about cloud resilience that underpin most enterprise disaster recovery plans. Customers who relied solely on cloud-native backups without off-cloud copies have no recovery path.
-
-Watch for AWS post-incident reporting on scope of affected customers, whether this triggers any SLA or liability disputes, and whether this accelerates demand for multi-region or multi-cloud replication mandates. Also watch for US government response, as strikes on US commercial infrastructure abroad would normally carry severe escalation implications.

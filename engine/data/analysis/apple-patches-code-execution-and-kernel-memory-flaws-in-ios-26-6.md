@@ -1,5 +1,0 @@
-Apple has released iOS 27, iPadOS 27, and macOS Golden Gate 27, delivering a broad security update addressing vulnerabilities that could enable arbitrary code execution, kernel memory corruption, privilege escalation, sandbox escape, information disclosure, and denial of service. The updates became available September 14, 2026, for eligible devices worldwide.
-
-The most significant finding is CVE-2026-84607 affecting AVEVideoEncoder, where a race condition allows a sandboxed application to execute arbitrary code with kernel privileges, crossing a core platform isolation boundary. CVE-2026-28968 is an out-of-bounds write that could cause termination or corrupt kernel memory, while CVE-2026-43689 could let a malicious application gain root privileges. The update covers approximately 126 vulnerabilities across kernel, WebKit, authentication services, and other security-sensitive components.
-
-Apple's mobile advisory covers iPhone 11 and later, alongside specified iPad generations. The Mac release supports Apple-silicon systems including the 2026 MacBook Neo. The AVEVideoEncoder sandbox escape is particularly notable as it breaks a fundamental security boundary.

@@ -1,5 +1,0 @@
-A new JavaScript stealer dubbed WeaselBiscuit has been found in 13 npm packages, targeting Chrome browser extension storage for data exfiltration. The malware was documented by The Hacker News and CyberWorldOps, which linked it to BeaverTail, a loader associated with the North Korean threat actor group known as Contagious (also tracked as Diamond Sleet).
-
-WeaselBiscuit is compact and focused: it scans for installed Chrome extensions and extracts their stored data, which can include authentication tokens, API keys, and session credentials. The 13 identified packages appear designed to blend into legitimate dependency trees, making detection through standard code review difficult.
-
-The DPRK attribution connects this to a broader pattern of North Korean supply-chain attacks targeting developer ecosystems. Developers should audit their npm dependencies for the identified packages and review any Chrome extension data that may have been exposed. The BeaverTail linkage suggests this is part of an ongoing campaign rather than an isolated incident.

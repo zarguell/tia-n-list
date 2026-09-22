@@ -1,5 +1,0 @@
-CVE-2026-90847 is an OS command injection vulnerability in the EFM ipTIME C200E router running firmware version 1.094. The flaw is reachable through the iux_set.cgi endpoint and carries a CVSS score of 9.4. Public exploit code is available, and the vulnerability is remotely exploitable without authentication.
-
-The ipTIME C200E is a consumer-grade router sold primarily in South Korea. Command injection in a network edge device means an attacker on the public internet can execute arbitrary commands as root, turning the device into a foothold for lateral movement or botnet enrollment.
-
-EFM Networks needs to issue a firmware patch immediately. Until then, users should disable remote management interfaces and restrict access to the admin panel. The availability of public exploit code makes mass scanning and exploitation highly likely within days.

@@ -1,1 +1,0 @@
-Reolink firmware shows 22 unpatched CVEs, 100% unpatched, Trust Score C. Hard-coded cryptographic keys and command injection in camera firmware are present; CVE count rose 20%. Self-hosted budget camera users face sustained exposure.

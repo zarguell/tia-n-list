@@ -1,5 +1,0 @@
-StellarWP patched two critical unauthenticated remote code execution vulnerabilities in The Events Calendar WordPress plugin, which has over 600,000 active installations. Wordfence's Argus scanner identified both flaws as unauthenticated RCE chains exploitable through the plugin's unapproved comments feature, meaning no login is required to achieve code execution on affected sites.
-
-The vulnerabilities allow attackers to inject and execute arbitrary PHP code by submitting crafted comments that bypass the plugin's approval workflow. With 600,000+ sites running the plugin, the attack surface is substantial. Any WordPress installation with The Events Calendar enabled and comments not fully disabled is at risk until updated.
-
-Sites should update The Events Calendar to the patched version immediately. If immediate patching is not possible, disabling comments on the Events Calendar post type eliminates the attack vector. Monitor for signs of compromise including unauthorized admin accounts, modified plugin files, or outbound connections to known C2 infrastructure.

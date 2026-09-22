@@ -1,5 +1,0 @@
-RatonRAT is a remote access trojan documented by Any.run that uses batch scripts for both execution and cleanup phases. The malware achieves persistence through Windows scheduled tasks or the Active Setup registry mechanism, which runs once per user at logon. Its target set is focused on credential theft and sensitive data collection from compromised hosts.
-
-The BAT-script execution model is notable because it blends into normal Windows admin activity. Batch files rarely trigger behavioral detections that look for native API calls or shellcode injection patterns. Cleanup via the same BAT mechanism means the malware removes its own artifacts using tools defenders typically trust, making forensic recovery harder.
-
-This is a credential stealer dressed up as a RAT. The scheduled task and Active Setup persistence choices suggest it is designed for long-duration access rather than quick data grabs. Organizations should look for unexpected scheduled tasks running batch scripts, especially ones that reference temp directories or execute cmd.exe with encoded arguments.

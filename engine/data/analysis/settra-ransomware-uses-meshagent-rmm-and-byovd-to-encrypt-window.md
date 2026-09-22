@@ -1,5 +1,0 @@
-SETTRA is a newly observed ransomware operation that uses the legitimate MeshAgent remote monitoring and management platform for persistence and bring-your-own-vulnerable-driver (BYOVD) techniques for defense evasion. Huntress investigated two SETTRA incidents in July and September 2026 and found a repeatable operational pattern.
-
-The attackers deploy victim-specific ransomware binaries, clear Windows logs, and use MeshAgent for sustained remote access. The BYOVD component loads a vulnerable kernel driver to disable or bypass security controls before encryption. This combination of legitimate RMM abuse and kernel-level defense evasion makes detection harder, particularly for organizations that already use MeshAgent or similar tools in their environment.
-
-The campaign targets Windows systems and has been documented by Huntress, GBHackers, and OSINTSights. SETTRA joins a growing list of ransomware groups that leverage legitimate administrative tools rather than developing custom C2 infrastructure, blending into normal network management traffic until encryption begins.

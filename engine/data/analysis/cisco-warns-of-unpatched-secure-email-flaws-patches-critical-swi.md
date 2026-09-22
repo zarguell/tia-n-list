@@ -1,5 +1,0 @@
-Cisco patched critical vulnerabilities in its Nexus 9000 switch platform while simultaneously warning of unpatched flaws in Cisco Secure Email. The Nexus 9000 fixes address high-severity issues in the switch operating system, though the most notable CVE in this story is CVE-2026-20212. The Secure Email warnings cover vulnerabilities that remain unpatched, with Cisco providing workarounds in the interim.
-
-The dual nature of this advisory, fixes shipping alongside warnings about unpatched products, is a common pattern in large vendor portfolios but creates a triage challenge for defenders. The Nexus 9000 patches should be applied to switch infrastructure, while Secure Email deployments need to evaluate the exposure of the unpatched flaws and implement the recommended workarounds.
-
-Organizations running Cisco Secure Email should review the advisory for the specific workaround guidance, as the unpatched status means exploits could emerge before fixes are available. The Nexus 9000 patches are straightforward and should be scheduled for the next maintenance window.

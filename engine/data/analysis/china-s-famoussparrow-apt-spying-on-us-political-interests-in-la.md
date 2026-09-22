@@ -1,5 +1,0 @@
-China's FamousSparrow APT group has been observed spying on US political interests in Latin America, deploying a stealthy backdoor for espionage. The campaign was documented by Dark Reading and represents a continuation of FamousSparrow's long-running targeting of government and diplomatic entities.
-
-FamousSparrow (also tracked as Earth Preta) is a Chinese state-sponsored group first identified in 2021, known for targeting government agencies, hospitality, and media organizations across multiple regions. The group has historically exploited Microsoft Exchange ProxyShell vulnerabilities and used custom backdoors like Spreshell. The Latin American focus suggests an expansion of their geographic targeting to counter US diplomatic and political activity in the region.
-
-The deployment of a new stealthy backdoor indicates the group has updated its tooling to evade detection. Organizations with operations or interests in Latin America, particularly those connected to US diplomatic or political activities, should review network logs for indicators associated with FamousSparrow and ensure Exchange and other internet-facing systems are fully patched.

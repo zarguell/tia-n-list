@@ -1,5 +1,0 @@
-Cisco has disclosed a critical flaw in its email security appliances that allows an attacker to gain root access through a specially crafted email. Attackers are already exploiting the vulnerability. Cisco warns that successful exploitation may allow attackers to pivot beyond the appliance to internal network resources.
-
-The attack vector is the email itself, which makes this especially dangerous for organizations that rely on Cisco email security gateways as a perimeter control. The Register reported the story September 15. No specific CVE number was attached to the initial reporting, though it appears to be part of a broader batch of Cisco security advisories.
-
-Organizations running Cisco email security appliances should apply any available patches immediately and review logs for signs of compromise. Given the root-level access, full re-imaging may be necessary if exploitation is confirmed.

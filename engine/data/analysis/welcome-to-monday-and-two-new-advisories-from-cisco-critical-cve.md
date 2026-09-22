@@ -1,5 +1,0 @@
-Cisco published two security advisories on September 14 covering four CVEs in Cisco Secure Email Gateway. The critical advisories address CVE-2026-20353, CVE-2026-76440, CVE-2026-76441, and CVE-2026-76461, all affecting Cisco AsyncOS Software for the Secure Email Gateway product line.
-
-CVE-2026-76461 specifically involves the email parsing subsystem, where a vulnerability could allow an unauthenticated attacker to inject malicious content through crafted email messages. The advisory links to cisco-sa-esa-inj-2bLVGmhX, indicating an injection-class flaw. The other three CVEs (CVE-2026-20353, CVE-2026-76440, CVE-2026-76441) are grouped under a hardening advisory (cisco-sa-hardening-esa-dfCrfXkm), suggesting configuration or default-state weaknesses.
-
-Secure Email Gateway is widely deployed in enterprise environments. Organizations running Cisco ESA should review both advisories and apply patches or mitigations immediately, particularly for the critical-severity items. The email parsing injection (CVE-2026-76461) is especially dangerous as it requires no authentication.

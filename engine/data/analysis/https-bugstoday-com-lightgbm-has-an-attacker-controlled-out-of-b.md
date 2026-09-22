@@ -1,5 +1,0 @@
-A vulnerability in LightGBM, the popular gradient boosting framework, allows attacker-controlled out-of-bounds writes when processing crafted model files. LightGBM is widely used in machine learning pipelines across industry and academia for tabular data tasks. The flaw means that loading a maliciously constructed model file could lead to arbitrary code execution on the system running inference or training.
-
-The vulnerability matters because ML model files are increasingly shared across teams, uploaded to model registries, and loaded in automated pipelines. An attacker who can supply a poisoned model file to a production or CI/CD pipeline could compromise the host running that pipeline. This is especially relevant for organizations that load third-party or community-contributed models without integrity verification.
-
-No public exploit code has been published, and no CISA KEV entry exists. Organizations using LightGBM should verify model file provenance, restrict which model files can be loaded in production environments, and watch for an official patch or advisory from the LightGBM maintainers.

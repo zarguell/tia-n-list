@@ -1,5 +1,0 @@
-Qilin ransomware group posted new victim announcements including Vitar Group and Booba Project on their leak site. The posts follow the group's standard format of naming victims and linking to their dedicated leak pages. Qilin continues active operations as one of the more prolific ransomware-as-a-service operations, with multiple affiliates conducting attacks across various sectors.
-
-The ransomware group has been tracked by CTI researchers at cti.fyi, who monitor their leak site activity. Qilin uses double extortion tactics, stealing data before encryption and threatening to publish exfiltrated files if victims refuse to pay. The group's leak site serves as both a pressure mechanism against victims and a marketing tool to recruit new affiliates.
-
-Recent Qilin activity shows they continue targeting small to medium businesses, often in sectors like construction, education, and professional services. The Alaska Electrical Apprenticeship posting indicates targeting of trade and vocational organizations. Organizations in these sectors should ensure backups are isolated and test incident response plans.

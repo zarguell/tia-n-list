@@ -1,5 +1,0 @@
-The Qilin ransomware group claims to have breached Thorndale Foundation, an Australian not-for-profit that provides disability support services. The gang is pressuring the charity to pay a ransom, with CyberDaily reporting exclusive details on the incident. Thorndale Foundation is currently investigating the breach.
-
-This is the latest in a string of ransomware attacks targeting charities and nonprofits, organizations that typically have limited security budgets and cannot afford extended downtime. Qilin has been active throughout 2026, hitting victims across multiple sectors. The group's willingness to extort a disability services provider highlights the indiscriminate nature of ransomware operations.
-
-Watch for Thorndale's public response and whether the breach involved data exfiltration or just encryption. If personal information of disability support clients was stolen, the regulatory and reputational fallout could be significant under Australian privacy law.

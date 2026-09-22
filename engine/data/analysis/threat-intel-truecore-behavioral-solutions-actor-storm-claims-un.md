@@ -1,5 +1,0 @@
-Threat actor "Storm" has claimed a data breach at TrueCore Behavioral Solutions, alleging exposure of health records, employee data, and personal information. The claim appeared on September 21, 2026, on yazoul.net, a threat intelligence aggregation source. The disclosure amount is listed as "Undisclosed," meaning the actor has not yet published a specific data volume.
-
-TrueCore Behavioral Solutions operates in the behavioral health sector, which handles protected health information under HIPAA. If the claim is legitimate, the exposed health records would represent a significant regulatory and privacy incident. The combination of health records, employee data, and personal information suggests access to multiple internal systems or databases.
-
-This is a single-source threat intelligence claim with no independent verification yet. The actor "Storm" has not been previously tracked in major threat reports. Organizations in the behavioral health sector should monitor for further disclosure or data publication. TrueCore has not issued a public statement as of this analysis.

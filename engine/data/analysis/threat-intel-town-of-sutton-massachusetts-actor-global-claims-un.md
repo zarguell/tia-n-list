@@ -1,5 +1,0 @@
-Threat intelligence reports show multiple ransomware actors targeting the Town of Sutton, Massachusetts. The claims came through yazoul.net, a ransomware claim tracking service, with actor "safepay" claiming triniticaring.org and earlier activity from actor "AuditTeam" against a Virginia-based entity. The claims are unverified and marked with low confidence indicators.
-
-The town is a small municipality, and the triniticaring.org domain appears to be a healthcare-related service. Ransomware groups frequently target local government and healthcare organizations due to limited security budgets and high operational impact. The fact that multiple actors are claiming the same target suggests either a coordinated campaign or independent groups discovering the same vulnerable infrastructure.
-
-These claims remain unverified, so there is no confirmation of data exfiltration or encryption. Small municipalities are common ransomware targets, and the pattern of rapid, unverified claims is typical of the current threat landscape where actors rush to publicize targets for pressure.

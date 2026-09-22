@@ -1,1 +1,0 @@
-The DOJ seized nightmare-stresser.com and nightmarestresser.org, both DDoS-for-hire platforms. Visitors now see a seizure banner. This removes active stresser infrastructure; watch for mirrored replacements.

@@ -1,5 +1,0 @@
-The French Ministry of the Economy and Finance confirmed a breach of the General Directorate of Public Finances (DGFiP) after threat actor "ZeroBytes" listed a stolen database on the PwnForums hacking forum on August 12. The breach exposed data on 678,000 individuals and professionals, including reference tax income, family quotient, withholding tax rates, and for businesses, company identification data. The ministry said the attacker's access has been interrupted.
-
-This is significant because DGFiP holds France's most sensitive tax records. The stolen fields are enough for targeted spear-phishing, tax fraud, or identity theft at scale. Two outlets (BleepingComputer, SecurityWeek) are covering it, and the breach was independently confirmed by the ministry after the forum post, which lends credibility to the claimed data volume.
-
-Watch for whether ZeroBytes follows through on selling the dataset or dumps it publicly. The 678,000 figure likely represents a subset of the total exfiltration window. French authorities have not yet disclosed how the initial access was achieved or whether other government systems were reachable from the same entry point.

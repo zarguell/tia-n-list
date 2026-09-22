@@ -1,5 +1,0 @@
-Russia reported "powerful" cyberattacks targeting its parliamentary vote infrastructure on September 19, 2026, the second day of the election. The attacks were disclosed by Russian state media and covered by EuropeSays and ByteSEU, with both sources confirming the targeting of election-related systems.
-
-The timing and attribution follow a familiar pattern in the Russia-Ukraine conflict: cyber operations timed to coincide with politically significant events. Russia has previously blamed Ukraine-linked actors for attacks during elections and national holidays, though independent verification of these claims is routinely difficult. The term "powerful" suggests volumetric or disruptive attacks rather than data exfiltration, consistent with DDoS or defacement campaigns against government web portals.
-
-This fits the broader trend of election infrastructure becoming a persistent target in the hybrid conflict. Operators on both sides use cyber operations as signaling tools alongside kinetic activity. Defenders monitoring Eastern European government networks should treat election periods as elevated-threat windows regardless of which country is voting.

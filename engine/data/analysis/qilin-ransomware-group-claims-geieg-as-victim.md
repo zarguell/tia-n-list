@@ -1,5 +1,0 @@
-The Qilin ransomware group has added Geieg to its leak site, joining Bravo Group and Taurus Iberica as recent victims claimed in rapid succession. Qilin, a Russian-speaking operation that has been active since 2022, runs a double-extortion model combining data theft with encryption. The group is known for targeting mid-market European and Asian companies, particularly in manufacturing and industrial sectors.
-
-Geieg appears to be a German industrial firm. The Qilin leak site post follows their typical pattern: company name, minimal details, and a countdown to data publication. Three victims claimed within a single day suggests either a coordinated campaign or backlog posting after a period of quiet operations.
-
-The group maintains a relatively small but consistent footprint. Unlike larger operations like LockBit or BlackCat, Qilin tends to target fewer victims but claims them more quickly. Their infrastructure relies on .onion leak sites and Telegram channels for negotiation. Security teams should monitor for Qilin-specific TTPs, including PowerShell-based lateral movement and abuse of legitimate remote management tools for persistence.

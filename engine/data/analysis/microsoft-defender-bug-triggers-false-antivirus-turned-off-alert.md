@@ -1,5 +1,0 @@
-Microsoft resolved a known issue causing false "Microsoft Defender Antivirus is turned off" alerts on Windows systems. The bug, first reported by Windows Insider Release Preview users as early as June, was fixed in Microsoft Defender Antivirus update version 4.18.26080.4 released September 17. The issue affects all supported Windows client and server versions including Windows 11 26H1 and Windows Server 2025.
-
-The false alerts appear in the Windows Security app prompting users to "Tap or click to turn on Microsoft Defender Antivirus," even though the antivirus is functioning correctly. Notifications persist even when notification settings are turned off, and appear at startup and intermittently afterward.
-
-This is a false-positive operational issue rather than a security vulnerability, but it can cause confusion in SOC environments where automated alerting feeds on Windows Security notifications. Organizations with large Windows fleets may see a spike of help desk tickets from users alarmed by the alerts.

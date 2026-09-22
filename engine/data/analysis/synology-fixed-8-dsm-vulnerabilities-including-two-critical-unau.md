@@ -1,5 +1,6 @@
-Synology patched eight vulnerabilities in DiskStation Manager (DSM) under advisory SA_26_13, including two critical unauthenticated flaws. CVE-2026-13684 (CVSS 9.8) is an output-encoding flaw in the SCGI component, and CVE-2026-13639 (CVSS 9.8) is an insufficient-entropy flaw in the login logic. Both allow a remote attacker to read or write arbitrary files and trigger denial of service without authentication or user interaction.
+Synology fixed 8 DSM vulnerabilities, including two critical unauthenticated flaws (CVE-2026-13684, CVE-2026-13639) on DiskStation Manager. covers recent security developments. Key references include CVE-2026-13639, CVE-2026-13684. The event content notes Synology fixed 8 DSM vulnerabilities, including two critical unauthenticated flaws (CVE-2026-13684, CVE-2026-13639) on DiskStation Manager. 
 
-The remaining six CVEs require some level of access: CVE-2026-13673 (CVSS 8.8) and CVE-2026-6205 (CVSS 8.1) allow authenticated file writes through the LDAP and Upload APIs. Lower-rated bugs cover CRLF injection, cross-site scripting, and SQL injection. The flaws affect DSM versions 7.2.1, 7.2.2, 7.3, and 7.4. Synology reports no active exploitation and no public proof-of-concept.
+via Mastodon https://securityonline.info/synology-dsm-vulnerabilities-sa-26-13/?utm_source=mastodon&amp;utm_medium=jetpack_social
 
-NAS devices are high-value targets because they hold backups, files, and business data. The two critical CVSS 9.8 flaws requiring no login make this a priority patch. Update to DSM 7.4-90075, 7.3.2-86009-4, 7.2.2-72806-9, or 7.2.1-69057-12 or above. Limit internet exposure of NAS devices and restrict admin access.
+📢 [VULN] Alerte sécurité :.
+This matters because it affects systems users rely on. Watch for patches and confirmed exploitation updates.

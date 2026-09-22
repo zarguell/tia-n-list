@@ -1,1 +1,0 @@
-This Ars Technica article covers Mozilla's report on the gap between frontier and open AI models and is not a cybersecurity event. It was aggregated due to domain authority but has no security relevance.

@@ -1,5 +1,0 @@
-WIRED reported on September 15 that the US Census Bureau has been infiltrated by staffers from a Trump-aligned think tank focused on voting rights. The Census Bureau holds vast troves of sensitive personal data on nearly every person in the United States, including detailed demographic, economic, and housing information collected through the decennial census and ongoing surveys.
-
-The concern is twofold: political operatives with access to granular census data could potentially misuse it for voter suppression or gerrymandering purposes, and the presence of non-career political staff in a data-sensitive agency creates insider threat risk. Census data includes names, addresses, income information, and housing characteristics linked to individuals and households.
-
-This is primarily a data governance and insider threat story rather than a traditional cybersecurity incident. However, the sensitivity of the data held by the Census Bureau and the potential for misuse by actors with political motivations makes it relevant to the data security and privacy landscape.

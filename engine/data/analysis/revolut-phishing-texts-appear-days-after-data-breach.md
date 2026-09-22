@@ -1,5 +1,0 @@
-Phishing texts targeting Revolut customers began appearing on September 14, just two days after the company disclosed a data breach. The messages appeared in the same conversation thread as legitimate Revolut texts, making them appear authentic. One phishing domain was first scanned on VirusTotal the same day.
-
-The phishing pages request camera access and mimic Revolut's live-video identity verification check before prompting for a password. This technique lowers suspicion while potentially collecting selfies or video that could be used for further social engineering or identity fraud. If the campaign is connected to the breach, the stolen data combined with login details entered by victims could enable full account takeover.
-
-It remains unclear whether the phishing uses data from the breach or if scammers are exploiting news of the incident to target Revolut customers more broadly. Revolut has not confirmed a connection. Affected customers should avoid clicking links in unsolicited messages and access their accounts directly through the official app.

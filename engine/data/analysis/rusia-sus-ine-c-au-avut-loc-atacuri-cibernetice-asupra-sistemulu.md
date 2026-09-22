@@ -1,5 +1,0 @@
-Russia claims cyberattacks hit its electronic voting systems during parliamentary elections. According to reports from Romanian news outlets, fiber optic lines were cut and the electronic voting infrastructure experienced disruptions during the vote. Putin subsequently accused Ukraine of attempting to interfere with the elections.
-
-The claims come from Russian state sources and have not been independently verified. The narrative follows a familiar pattern: Russian authorities alleging foreign cyber interference during elections, with Ukraine named as the perpetrator. No technical indicators, IOCs, or independent forensic analysis have been published to support the claims.
-
-The story is notable primarily as a geopolitical signal rather than a confirmed cyber incident. Previous Russian election interference claims have sometimes served as cover operations or pretexts. The lack of corroborating evidence from security researchers or independent monitoring groups warrants skepticism until more information emerges.

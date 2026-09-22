@@ -1,5 +1,0 @@
-The Interlock ransomware group claims to have stolen 5.7 TB of sensitive data from the City of Fort Smith, Arkansas. The group added the municipality to its leak site, indicating a successful compromise of city government systems. Interlock is a relatively new ransomware operation that has been active since mid-2026, targeting local governments and critical infrastructure.
-
-This matters because municipal ransomware attacks disrupt essential services like water, public safety, and utilities. The 5.7 TB data claim suggests exfiltration of a significant portion of city records, which could include resident PII, financial records, and operational data. Local governments are frequent targets due to limited security budgets and high operational impact.
-
-Watch for the data to appear on Interlock's leak site if the city does not pay. The group has a history of publishing stolen data within 7-10 days of listing victims. Fort Smith should be assessing which systems were accessed and whether backup integrity was maintained.

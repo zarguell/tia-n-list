@@ -1,5 +1,0 @@
-A detailed analysis from carlesi.vg maps a rotating Epic Games and Fortnite credential-phishing network comprising 9 pivot IPs and 4 bulletproof-hosting /24 blocks. The investigation started from a single indicator and expanded through full-coverage domain scanning to reveal the infrastructure's scope. The network uses bulletproof hosting to resist takedown attempts and rotates IPs to maintain availability.
-
-The analysis documents how the phishing operation targets Fortnite players specifically, a high-value demographic due to young users with associated payment methods. The use of bulletproof hosting across multiple /24 blocks indicates a professional operation with significant investment in infrastructure resilience. The rotating IP pattern suggests active countermeasures against domain-based detection and takedown.
-
-This is a useful reference for threat intelligence teams tracking credential-phishing infrastructure targeting gaming platforms. The detailed network mapping provides IOCs that can be integrated into detection rules, and the infrastructure analysis offers insight into how modern phishing operations invest in resilience against disruption.

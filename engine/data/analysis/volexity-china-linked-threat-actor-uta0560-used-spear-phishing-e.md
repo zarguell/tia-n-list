@@ -1,5 +1,0 @@
-Volexity disclosed that a China-linked threat actor it tracks as UTA0560 exploited recently patched Chrome and Windows vulnerabilities in spear-phishing campaigns to deploy a backdoor called GRIMWED. The attacks targeted organizations with strategic intelligence value, consistent with Chinese state-sponsored collection priorities.
-
-The exploitation chain leveraged Chrome and Windows flaws that had been patched in recent update cycles, indicating the actor moved quickly after patch availability to weaponize the vulnerabilities before widespread deployment. GRIMWED is a previously documented implant capable of persistence, file exfiltration, and command-and-control communication over encrypted channels.
-
-This campaign illustrates the narrow window between patch release and active exploitation by well-resourced threat actors. Organizations that delayed patching Chrome and Windows were the primary targets. The use of spear-phishing as the initial access vector, combined with n-day exploitation rather than zero-days, is a standard Chinese APT operational pattern that prioritizes operational security over novelty.
