@@ -1,0 +1,3 @@
+Has your organization been hit by ransomware? I'm a doctoral candidate at Capitol Technology University, MD. I'm researching which security controls actually enable recovery and resilience in SMEs after a ransomware attack, one of the first empirical looks at what works at small-business scale, not enterprise scale. Doctoral survey, IRB-approved. Looking for U.S.-based security/IT Pros at organizations with https://techstudy.limesurvey.net/748327?lang=en&newtest=Y [Mod approval 9/22] submitted by /u/ransomwarestudy [link] [comments]
+
+via reddit r/cybersecurity: [Academic Research] Do you have experience with ransomware?
