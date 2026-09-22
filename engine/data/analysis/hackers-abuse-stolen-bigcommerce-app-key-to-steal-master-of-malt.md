@@ -1,0 +1,1 @@
+Attackers compromised a BigCommerce application key linked to Ribon (managed by Be A Part Of) to steal Master of Malt customer data. The breach is confirmed by the retailer; scope and exact record count are not specified in the event. Treat as an active third-party supply-chain breach and rotate any similar app keys.

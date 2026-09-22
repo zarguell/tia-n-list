@@ -1,0 +1,1 @@
+Nearly two in ten U.S. water and wastewater organizations have identity data actively exposed from infostealers harvesting credentials, per identity-risk research. This is exposure evidence, not a breach of control systems directly. Prioritize credential rotation and infostealer detection for operational-technology staff.

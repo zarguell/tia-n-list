@@ -1,0 +1,1 @@
+CVE-2026-77521 allows prompt injection in MaxKB AI knowledge-base deployments to execute operating system commands, including directly on the host in some configurations. No exploitation claim in the event. Isolate MaxKB instances and apply vendor patches once available.

@@ -1,0 +1,1 @@
+CVE-2026-75939 is an Important OpenShift vulnerability allowing attackers to bypass release-image signature verification and inject malicious payloads into disconnected registries. Red Hat disclosed it; no active exploitation claim in the event. Patch or restrict disconnected registry access.
