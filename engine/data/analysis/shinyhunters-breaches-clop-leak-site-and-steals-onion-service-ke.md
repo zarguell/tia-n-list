@@ -1,1 +1,3 @@
-See queued story shinyhunters-breaches-clop-leak-site-and-steals-onion-service-ke; brief analysis written based on event content.
+Story: ShinyHunters breaches Clop leak site and steals onion service keys
+Score: 7.4
+Covers CVEs and events. Watch for updates.
