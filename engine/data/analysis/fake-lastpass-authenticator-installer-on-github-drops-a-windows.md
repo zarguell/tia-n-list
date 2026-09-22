@@ -1,0 +1,1 @@
+A fake LastPass Authenticator on GitHub installs a Microsoft-signed driver that kills 145 AV and EDR processes using the Rapuncel payload. The signed driver bypasses kernel protections and grants persistent root-level access. Verify LastPass downloads through official channels only; audit endpoint protection logs for unexpected driver loads.

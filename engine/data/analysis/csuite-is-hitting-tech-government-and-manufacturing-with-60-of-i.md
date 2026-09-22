@@ -1,0 +1,1 @@
+#CSuite blends device-code phishing with M365 compromise, targeting tech, government, and manufacturing with 60% of victims US-based. The operation uses phishing to establish access then pivots through Microsoft environments. Watch for expanded victim disclosures and whether the group shifts to supply-chain targets.

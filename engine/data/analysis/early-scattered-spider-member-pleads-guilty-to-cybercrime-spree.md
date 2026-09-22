@@ -1,0 +1,1 @@
+Ahmed Hossam Eldin Elbadawy, 24, from Texas, pleaded guilty to wire fraud conspiracy for Scattered Spider extortion attacks spanning 2021-2023. Another core member of The Com subset, this plea adds to prior convictions and confirms sustained federal focus on the group. Monitor for sentencing details and any cooperation agreements.

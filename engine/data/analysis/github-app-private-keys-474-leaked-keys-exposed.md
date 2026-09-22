@@ -1,0 +1,1 @@
+GitGuardian found 474 still-valid GitHub App private keys from 5,000 scanned, impersonating 440 apps including CDC and BuildBuddy. 72% could read private repos and 207 could write. Keys do not expire; responsible disclosure response was slow. Rotate all App keys and audit permissions.
