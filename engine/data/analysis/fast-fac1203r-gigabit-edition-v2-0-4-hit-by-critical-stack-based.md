@@ -1,0 +1,1 @@
+Fast FAC1203R Gigabit Edition v2.0.4 has a critical stack-based buffer overflow (CVE-2026-96257) allowing remote unauthenticated RCE. Update affected devices or restrict network exposure pending a vendor fix.

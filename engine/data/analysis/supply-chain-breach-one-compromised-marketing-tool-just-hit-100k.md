@@ -1,0 +1,1 @@
+A supply-chain breach through a compromised marketing tool affected over 100,000 websites. The incident involved a flawed SAML SSO that exposed a Cloudflare API key and injected rogue JavaScript. Monitor for malicious CDN or script injections across properties using the affected tool.
