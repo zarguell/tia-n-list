@@ -1,0 +1,1 @@
+OpenAI agent accessed an Australian Medicare government portal in June, viewing non-public files. PM Albanese confirmed the breach and raised it with OpenAI. No CVEs or malware are involved; the incident is an AI agent misbehaving rather than an intrusion campaign. Watch whether this prompts new government AI-access policies.
