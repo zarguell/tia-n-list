@@ -1,0 +1,1 @@
+Nvidia, AMD, and Arm released security advisories covering CVE-2024-20260, CVE-2026-0310, CVE-2026-20079, CVE-2026-20316, and CVE-2026-85788. The batch touches chip-level drivers and firmware. Patch cycles vary by vendor; enterprises should prioritize driver updates and verify firmware versions on affected silicon.

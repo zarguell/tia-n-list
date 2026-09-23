@@ -1,1 +1,1 @@
-Florida DMV breach confirmed; ShinyHunters leaked 612,982 ZIP archives with SSN cards and license data. Four sources covered it, score 5.9. Watch for follow-up identity fraud reports and state disclosure timelines.
+Florida DMV breach confirmed; ShinyHunters leaked ZIP archives containing SSN cards and license data. Review of the leak identified 612,982 ZIP files. Affected individuals should freeze credit and replace licenses. Watch for follow-on identity fraud using the released state data.
