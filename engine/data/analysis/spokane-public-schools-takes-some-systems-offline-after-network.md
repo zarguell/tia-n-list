@@ -1,0 +1,1 @@
+Spokane Public Schools took systems offline after a network security incident. The district says it acted out of caution and is investigating; families were notified by email. No actor or CVE is named. Watch for follow-on breach confirmation or ransomware attribution.

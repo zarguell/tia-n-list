@@ -1,1 +1,1 @@
-Fortinet patched critical authentication bypass and proxy flaws across its product line, including CVE-2026-84388 and CVE-2026-84390. Both carry critical ratings. Apply patches promptly and review Fortinet product configurations.
+Fortinet released patches for critical authentication bypass and proxy flaws. The story includes multiple event updates; no single CVE number is dominant in titles. Monitor CISA KEV listings and patch adoption metrics.

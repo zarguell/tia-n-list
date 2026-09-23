@@ -1,0 +1,1 @@
+Check Point management servers and VPN gateways face active zero-day exploitation. The event references critical exploited vulnerabilities allowing arbitrary script execution. Patch immediately and review server logs.

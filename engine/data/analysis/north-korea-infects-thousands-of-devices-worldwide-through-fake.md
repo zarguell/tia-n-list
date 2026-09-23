@@ -1,3 +1,1 @@
-Chinese-speaking threat actor linked to Red Heron exploited WordPress wp2shell flaws (CVE-2026-63030, CVE-2026-60137) and ZyXEL GS1900 switch bugs to steal data from 996 devices and 18,500+ backend records across 49 organizations in 29 countries. GreyNoise GOG sensors tracked scans from a single IP since June 2026, with a Western government intrusion noted. Active exploitation followed public exploits released mid-July.
-
-This is a sustained, multi-vendor campaign rather than a single CVE event. Watch for additional wp2shell variants targeting WordPress core pre-auth RCE and government-sector follow-up reporting.
+North Korean actors are infecting devices globally through fake job offers. The event links to a BleepingComputer report; no CVEs are listed. Watch for updated victim counts and malware family identification.

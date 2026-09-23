@@ -1,1 +1,1 @@
-A Windows Defender zero-day released by researcher Abdelhamid Naceri (BigDiskBuster) blocks antivirus updates, triggering false "antivirus turned off" alerts. This is a denial-of-protection issue, not malware infection. Monitor for the researcher disclosure and apply Microsoft updates when released.
+A Microsoft Defender bug triggers false "antivirus turned off" alerts. No CVE or active exploitation is noted. Monitor for a fix release and enterprise false-positive rates.
