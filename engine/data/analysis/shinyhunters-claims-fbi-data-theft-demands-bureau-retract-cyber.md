@@ -1,0 +1,3 @@
+ShinyHunters claims it breached FBI systems including Criminal Justice, HR, and Medlink services, alleging access to data on nearly all FBI agents and applicants. To back the claim, it defaced fbijobs.gov with a seizure message and demanded the FBI retract a May FLASH report that accused the group of exaggerating access, swatting, and false sextortion claims. The FBI is investigating but has not independently verified the breach. The group framed its actions as First Amendment speech rather than extortion.
+
+Even unverified breach claims from high-profile actors warrant attention. Monitor for confirmed IOCs, watch FBI response updates, and review whether sensitive employee data is actually at risk. The defacement is confirmed; data access claims are not.
