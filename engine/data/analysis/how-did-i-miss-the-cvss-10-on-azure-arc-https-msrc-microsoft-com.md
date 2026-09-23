@@ -1,0 +1,1 @@
+CVE-2026-69399 is a CVSS 10 vulnerability in Azure Arc. The event points to Microsoft update guide. Impact is critical; remote unauthenticated compromise likely given the score. Watch for CISA KEV inclusion and active exploitation reports. Organizations running Azure Arc should apply patches as Microsoft releases them.
