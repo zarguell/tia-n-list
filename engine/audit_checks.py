@@ -155,16 +155,31 @@ def duplicate_suspects(stories, now, max_out=10, max_age_days=45, min_jaccard=0.
     pool = [s for s in stories.values()
             if not s.get("merged_into") and s.get("events")
             and s.get("last_seen", "") >= cutoff]
+    # Hoist per-story tokenization out of the pair loop (2026-09-23 audit):
+    # the old code called title_discriminators twice plus title_jaccard (which
+    # calls it twice more) for EVERY pair — 4 re-tokenizations x O(n^2) pairs
+    # (~4.8M at n=3091) = ~10min of CPU and audit.py never printed. The
+    # hoisted sets are exactly what title_jaccard and the shared-discriminator
+    # gate compute, so results are bit-identical: jaccard = |A n B| / |A u B|
+    # over the discriminator sets, shared = |A n B|.
+    titles = [s.get("title", "") for s in pool]
+    disc = [title_discriminators(t) for t in titles]
     out = []
     for i in range(len(pool)):
+        A, ia, ta = disc[i], len(disc[i]), titles[i]
+        if not ia:
+            continue
         for j in range(i + 1, len(pool)):
-            a, b = pool[i], pool[j]
-            ta, tb = a.get("title", ""), b.get("title", "")
-            shared = title_discriminators(ta) & title_discriminators(tb)
-            j_ = title_jaccard(ta, tb)
-            if j_ < min_jaccard or len(shared) < 2 or distinct_series_codes(ta, tb):
+            B = disc[j]
+            inter = len(A & B) if B else 0   # == len(shared)
+            if not inter:                    # == title_jaccard 0.0 gate
                 continue
-            out.append({"a": a["id"], "b": b["id"], "jaccard": round(j_, 2),
+            j_ = inter / (ia + len(B) - inter)
+            tb = titles[j]
+            if j_ < min_jaccard or inter < 2 or distinct_series_codes(ta, tb):
+                continue
+            out.append({"a": pool[i]["id"], "b": pool[j]["id"],
+                        "jaccard": round(j_, 2),
                         "title_a": ta[:70], "title_b": tb[:70]})
     out.sort(key=lambda x: -x["jaccard"])
     return out[:max_out]
