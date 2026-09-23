@@ -1,0 +1,1 @@
+CVE-2026-95675 affects D-Link DAP-1360; technical details and a public PoC are now available per securityonline.info. It is an unauthenticated flaw. Monitor for active exploitation attempts against exposed devices.

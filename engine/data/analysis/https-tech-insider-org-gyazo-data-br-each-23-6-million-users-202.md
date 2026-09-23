@@ -1,0 +1,1 @@
+Gyazo data breach exposes 23.6 million users according to tech-insider.org. The incident involves user account data exposure; specific data classes and timeline are not fully detailed in the event. Monitor for regulatory filings or victim notifications.
