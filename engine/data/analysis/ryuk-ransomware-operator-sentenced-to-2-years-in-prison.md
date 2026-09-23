@@ -1,0 +1,1 @@
+An Armenian national extradited from Ukraine was sentenced to two years in federal prison for Ryuk ransomware attacks in 2019-2020. Pleaded guilty to computer fraud and conspiracy; restitution set at about $1.2 million. Victims include a Michigan company ($1.2M ransom), an Oregon tech firm, and a Texas school. Watch for whether co-conspirators face similar sentences.

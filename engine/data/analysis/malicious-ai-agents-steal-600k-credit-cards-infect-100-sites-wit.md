@@ -1,0 +1,1 @@
+Campaign uses open-source AI agent frameworks — Strix, Cairn, Hermes — to attack online retailers at scale. Active since July; over 600,000 card records stolen, 27 companies compromised in five days, skimmers on five sites. Human operator appears Chinese. Watch for expansion beyond retail and for defensive detection of the agent toolchain.
