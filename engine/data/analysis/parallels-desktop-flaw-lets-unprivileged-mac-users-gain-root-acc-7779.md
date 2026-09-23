@@ -1,0 +1,1 @@
+CVE-2026-90894 affects Parallels Desktop. A local unprivileged macOS user can gain root via an unsanitized sVmParentPath parameter and tar injection in prl_disp_service, CVSS 7.8. Disclosed by JFrog researcher Yuval Moravchick; unpatched at time of report. Watch for a vendor fix and verify all macOS hosts running Parallels.
