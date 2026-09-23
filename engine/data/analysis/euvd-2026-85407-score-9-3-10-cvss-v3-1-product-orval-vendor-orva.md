@@ -1,0 +1,1 @@
+EUVD-2026-85407 rates 9.3 CVSS v3.1 for orval-labs orval versions before 8.29.0, which fails to properly escape output. Patch to 8.29.0. The event is a single ENISA advisory; watch for wider exploitation reports.

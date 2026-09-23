@@ -1,0 +1,1 @@
+EvilTokens PhaaS, tracked as Storm-2992, was disrupted after compromising 12,000 Microsoft accounts across 10,000 organizations. It enabled device-code phishing with AI-assisted customization. Monitor for residual compromised accounts and enforce conditional access.

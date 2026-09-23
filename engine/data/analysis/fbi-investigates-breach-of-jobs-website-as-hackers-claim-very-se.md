@@ -1,0 +1,1 @@
+ShinyHunters claimed defacement of FBIjobs.gov on Sept 22 with alleged theft of FBI staff and applicant data. The FBI is investigating. Confirmed breach scope remains unverified; watch for official verification.

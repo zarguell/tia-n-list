@@ -1,1 +1,1 @@
-Malicious NPM package indexed-btree mimicked sorted-btree and reached 2 million weekly downloads. Code was hidden in BTree.prototype.set and connected to Slack, Telegram, and a blockchain contract. Active supply chain campaign.
+Malicious npm package indexed-btree accumulated roughly 2 million weekly downloads by hijacking dependency builds. Supply-chain risk is significant given download volume. Audit dependency trees and remove the package.
