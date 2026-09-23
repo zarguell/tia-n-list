@@ -1,0 +1,40 @@
+title: EvilTokens PhaaS Suspicious Inbox Rule Creation via Device Code Phishing
+id: 7c3e8a1f-4b2d-4e9c-a6f1-3d8e5c7b2a94
+status: experimental
+description: Detects creation of suspicious Microsoft 365 inbox rules that move, delete, or mark messages as read — a persistence and concealment technique used by EvilTokens (Storm-2992) after stealing OAuth tokens via device-code phishing flows.
+references:
+  - https://www.bleepingcomputer.com
+  - https://www.microsoft.com/en-us/security/blog
+author: Tia N. List
+date: 2026-09-23
+tags:
+  - attack.credential-access
+  - attack.t1621
+  - attack.t1539
+  - attack.t1098
+logsource:
+  product: m365
+  service: audit
+detection:
+  selection_rule_created:
+    EventOperation: New-InboxRule
+  selection_rule_modified:
+    EventOperation: Set-InboxRule
+  selection_suspicious_actions:
+    Parameters|contains:
+      - 'MoveToFolder'
+      - 'DeleteMessage'
+      - 'MarkAsRead'
+      - 'SoftDelete'
+  selection_suspicious_folders:
+    Parameters|contains:
+      - 'Deleted Items'
+      - 'Junk Email'
+      - 'RSS Feeds'
+      - 'Conversation History'
+      - 'Notes'
+  condition: (selection_rule_created or selection_rule_modified) and (selection_suspicious_actions or selection_suspicious_folders)
+falsepositives:
+  - Legitimate automation rules created by IT administrators
+  - Third-party email management tools
+level: medium
