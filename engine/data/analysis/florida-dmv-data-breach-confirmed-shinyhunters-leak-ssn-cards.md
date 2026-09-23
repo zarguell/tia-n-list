@@ -1,0 +1,1 @@
+ShinyHunters claimed a breach of FBI-linked systems exposing data on almost all employees and applicants. The group is linked to a separate Florida DMV breach confirmed earlier, with 612,982 ZIP archives containing SSN cards and license data. This is a claimed, not fully verified, FBI incident. Monitor official FBI confirmation and any leaked sample verification.
