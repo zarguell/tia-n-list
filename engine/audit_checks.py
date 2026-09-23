@@ -56,7 +56,21 @@ def roundup_family(title):
         return "ics"
     if "microsoft" in t:
         return "microsoft"
-    return "other"        # e.g. "Chipmaker Patch Tuesday: Nvidia, AMD..."
+    # "other" bucket: only a DEDICATED roundup, not a story that merely
+    # mentions Windows CVEs. Two 2026-09-22 audit false positives: a legacy
+    # exploitation story ("CVE-2011-3402, CVE-2013-3918" reads as a count
+    # via the digit-comma prefix) and vendor advisories without a month
+    # reference ("Chipmaker Patch Tuesday: Nvidia, AMD, Arm..."). Require
+    # a month reference or a patches/fixes verb — tested against the title
+    # with the literal "patch tuesday" removed so the noun use can't
+    # satisfy the verb half of the gate.
+    stripped = t.replace("patch tuesday", " ")
+    if (re.search(r"\b(january|february|march|april|may|june|july|"
+                   r"august|september|october|november|december)\b", stripped)
+            or re.search(r"\b(patch(?:es|ed|ing)?|fix(?:es|ed|ing)?)\b",
+                          stripped)):
+        return "other"
+    return None
 
 
 def dedup_invariants(stories):
