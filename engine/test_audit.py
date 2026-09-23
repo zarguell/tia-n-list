@@ -126,8 +126,17 @@ check("date-first Microsoft PT roundup",
       "microsoft")
 check("comma AFTER Patch Tuesday is still dedicated",
       jc.roundup_family("Microsoft Patch Tuesday: 974 CVEs, plus Adobe fixes"), "microsoft")
-check("chipmaker roundup is the non-Microsoft family",
+check("chipmaker advisory without month ref is its own story, not a roundup",
       jc.roundup_family("Chipmaker Patch Tuesday: Nvidia, AMD, Arm Issue Security Advisories"),
+      None)
+check("dedicated non-Microsoft roundup WITH month ref stays in other family",
+      jc.roundup_family("September 2026 Patch Tuesday: virtualization and middleware critical RCEs"),
+      "other")
+check("legacy CVE enumeration is not a numbered roundup (2026-09-22 audit FP)",
+      jc.roundup_family("Legacy Windows CVEs (CVE-2011-3402, CVE-2013-3918) under active exploitation"),
+      None)
+check("numbered Windows roundup with month ref still classified",
+      jc.roundup_family("Adobe Fixes 130 Vulnerabilities Affecting Windows, September Release"),
       "other")
 check("ICS roundup family",
       jc.roundup_family("ICS Patch Tuesday: Siemens and Schneider fix flaws"), "ics")

@@ -98,7 +98,14 @@ def build_bundle(iocs, records, base_url, date_str):
             objects.append({
                 "type": "threat-actor", "id": _stix_id("threat-actor", f"https://tia-n-list/actor/{sid}/{name}"),
                 "name": name, "threat_actor_types": ["threat-actor"], **common})
-    objects.sort(key=lambda o: (o["type"], o.get("name", "")))
+    # Total order: (type, name, id). The id tiebreak is load-bearing —
+    # several CTI records routinely name the same malware/campaign/actor
+    # (74 duplicate (type, name) keys at 514 records, 2026-09-22), and
+    # without it the stable sort preserves records-dict insertion order,
+    # which follows unsorted glob order in load_records() and is therefore
+    # build-to-build non-deterministic (snapshot_pin MISMATCH, 2026-09-22
+    # audit). Ids are uuid5 seeds, so this order is stable everywhere.
+    objects.sort(key=lambda o: (o["type"], o.get("name", ""), o["id"]))
     return {
         "type": "bundle", "id": _stix_id("bundle", "https://tia-n-list/snapshot/" + date_str),
         "spec_version": "2.1", "objects": objects,
