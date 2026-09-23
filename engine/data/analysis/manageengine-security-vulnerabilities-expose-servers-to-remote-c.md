@@ -1,0 +1,1 @@
+ManageEngine OpManager MSP has critical RCE CVE-2026-19599 (CWE-78) with CVSS 9.8. Unauthenticated remote attackers can execute commands through improper neutralization of special elements. Patch to the latest version immediately; review non-default configurations that could expose the service.
