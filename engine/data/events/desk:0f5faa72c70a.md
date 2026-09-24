@@ -1,0 +1,1 @@
+ReversingLabs reported the fake recruiter attack against crypto developers had respawned under the name Graphalgo, this time fronted by a registered LLC and using new techniques to hide malware. Aikido's September analysis links the new Terraform and Go payloads back to this campaign through shared smart contract addresses, Telegram addresses, and Slack workspaces.

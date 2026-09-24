@@ -1,0 +1,1 @@
+The Australian Cyber Security Center (ACSC) warned organizations about an ongoing malware campaign using the ClickFix social engineering technique to distribute the Vidar Stealer info-stealing malware. BleepingComputer's coverage is an early government-level warning on the technique.

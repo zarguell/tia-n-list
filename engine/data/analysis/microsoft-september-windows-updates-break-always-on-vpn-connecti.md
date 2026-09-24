@@ -1,0 +1,5 @@
+Microsoft has notified IT administrators through a service alert that users may hit Always On VPN connection failures after installing the September 2026 Windows 11 security updates. The alert, seen by BleepingComputer and shared by MVP Susan Bradley, describes connections stuck in a "Connecting" state or retrying without success, with later attempts showing "The specified port is already in use."
+
+The breakage occurs when the VPN profile is set to fall back automatically to another connection method, specifically automatic protocol selection with IKEv2 and SSTP. Always On VPN replaced DirectAccess and tunnels automatically in the background on Windows 10, Windows 11, and Windows Server, so affected clients quietly lose corporate network access until the profile is adjusted or Microsoft ships a fix.
+
+This is a reliability regression, not a vulnerability, but it lands on security infrastructure: admins weighing the September updates against broken remote access may delay patching. Watch Microsoft's advisory for the fix, check whether your profiles use automatic protocol selection, and test VPN connectivity on a pilot ring before broad deployment.

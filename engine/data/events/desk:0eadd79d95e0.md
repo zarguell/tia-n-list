@@ -1,0 +1,1 @@
+SafeDep traced an npm math solver package to encrypted code, walking through the loader, the trigger matrix that unlocks it, and the remote access payload with full indicators. The trigger-based activation SafeDep described is the same condition-gated design later found in the Graphalgo Terraform providers and the gogets.dev/btreex Go module.

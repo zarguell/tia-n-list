@@ -1,0 +1,1 @@
+Opera introduced Paste Protect, a browser security feature designed to block ClickFix-style attacks that trick users into executing malicious commands pasted from web pages. BleepingComputer described it as one of the first browser-side mitigations aimed specifically at paste-and-run social engineering.

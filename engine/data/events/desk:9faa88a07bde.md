@@ -1,0 +1,1 @@
+Microsoft warned about TerminalFix, a ClickFix variant that uses fake Cloudflare CAPTCHA prompts on compromised websites to trick victims into running malicious PowerShell commands in Windows Terminal and then deploys reverse tunnels. BleepingComputer reported the warning nine days before this story's first_seen.
