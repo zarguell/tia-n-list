@@ -1,0 +1,3 @@
+Ransomware-Angriff: Diakoniewerk Apolda. The attack targets a medical service provider, with reporting from security-incidents.de. The event updates an existing story with a new Mastodon source confirming the ransomware classification, intrusion, and data theft. The story remains a single-source report with limited technical detail.
+
+The event confirms the ransomware attack classification but provides no CVEs, actor attribution, or specific victim count beyond the service provider name. The primary value is threat intelligence awareness for healthcare-sector defenders tracking German medical infrastructure targeting. Monitor for any follow-up reports identifying the ransomware family or confirming data exfiltration volume.

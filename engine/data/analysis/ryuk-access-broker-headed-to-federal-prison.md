@@ -1,0 +1,3 @@
+Armenian national Karen Vardanyan, identified as a core Ryuk affiliate, received a two-year US federal sentence and a $1.2 million restitution order. The sentencing confirms his role as an access broker who enabled ransomware crew operations. The story updates an existing single-source report with a second source confirming the sentencing details.
+
+The event adds concrete legal outcomes to the Ryuk group profile: federal prison time and significant financial restitution. This is a law enforcement milestone rather than a new technical threat, but it provides actionable context for threat intelligence tracking Ryuk infrastructure and affiliates. Watch for any remaining Vardanyan-linked infrastructure being decommissioned or repurposed by other ransomware affiliates.

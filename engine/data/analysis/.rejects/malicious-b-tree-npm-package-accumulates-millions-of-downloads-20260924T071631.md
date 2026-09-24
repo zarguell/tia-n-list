@@ -1,0 +1,3 @@
+A malicious b-tree NPM package accumulated millions of downloads before being removed. The package used the trusted b-tree naming convention to blend into dependency trees, making it difficult to distinguish from legitimate packages. The event updates an existing story with additional reporting confirming the scale of the compromise.
+
+The primary risk is dependency confusion and supply chain contamination. Because the package accumulated millions of downloads, many applications may have incorporated the malicious dependency without awareness. Organizations should audit package-lock files for the malicious b-tree identifier, review recent dependency updates, and implement dependency verification checks to prevent similar supply chain compromises.
