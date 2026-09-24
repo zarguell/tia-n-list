@@ -1,0 +1,1 @@
+Two legitimate MemTensor packages on npm and PyPI were compromised to push sckit, a Go-based credential stealer. The event content is brief and references The Hacker News. No CVE is assigned. The attack targets developers using the compromised packages. Watch for package removal timelines, IOCs, and whether credentials stolen via sckit have been used in follow-on intrusions.
