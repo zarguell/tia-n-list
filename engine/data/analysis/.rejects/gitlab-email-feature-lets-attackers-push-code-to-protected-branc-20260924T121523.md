@@ -1,0 +1,5 @@
+GitLab's "Email work item to this project" feature generates an incoming email address containing a long-lived token (glimt- value) that does not expire by default. Security researcher Joe Leon of Aikido Security found that the same token appears in addresses for multiple projects, including private repositories, making it an account-scoped credential rather than a project-scoped one. An attacker who captures the incoming-email address can change the suffix from -issue to -merge-request and submit a Git patch attachment, causing GitLab to apply the patch to an existing branch or create a new branch under the victim's identity.
+
+If the target account has authorization to push to protected branches, the attacker may be able to inject commits and trigger CI/CD pipelines. The event describes this as an account-level code delivery mechanism rather than a single-project flaw. There is no CVE assigned in the event content, and no confirmed exploitation count is reported.
+
+What to watch: whether GitLab revokes or scopes these incoming tokens by project and whether any confirmed abuse surfaces in protected-branch push logs.

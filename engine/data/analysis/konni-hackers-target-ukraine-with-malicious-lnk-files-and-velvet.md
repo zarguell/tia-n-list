@@ -1,0 +1,5 @@
+SOCRadar's Threat Research Unit tracks Operation Conflict Compass, a targeted cyberespionage campaign against Ukraine-focused entities attributed with moderate confidence to Konni (TA406 / Opal Sleet), linked to North Korea. Activity began in early August 2026. The entry point is a spear-phishing email with a ZIP attachment containing a malicious LNK file disguised as a PDF. Document themes include Russia-Ukraine peace plans, a Ukrainian social researcher resume, and the Strait of Hormuz's effect on food prices, suggesting targets may include diplomatic groups, think tanks, and NGOs.
+
+When opened, the LNK runs a command that retrieves files from GitHub. One is a VBScript that creates a scheduled task named OneDriveUpdateScheduler, launching a PowerShell payload every minute. The other file is VelvetCake, a PowerShell malware family that collects intelligence. The event does not confirm a specific victim list or provide victim counts.
+
+What to watch: additional IOCs from the VelvetCake payload and confirmation of which Ukraine-focused organizations have been impacted.
