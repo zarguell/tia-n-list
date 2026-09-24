@@ -1,0 +1,1 @@
+The second community fix referenced by advisory WSO2-2026-5328, merged into product-apim under a generic testing title about ten days after the carbon-apimgt change. Together the two April merges show the vulnerability was patched in code well before any public disclosure named it or gave it a CVE record.

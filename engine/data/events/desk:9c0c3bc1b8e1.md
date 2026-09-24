@@ -1,0 +1,1 @@
+The open source fix for CVE-2026-5430 in carbon-apimgt was merged on this date under the inconspicuous title "Improve exception handling", three weeks before the vendor advisory. Advisory WSO2-2026-5328 later linked this pull request as the community remediation, so the critical fix sat in the codebase with no public indication of its severity until May.

@@ -1,0 +1,3 @@
+An isolation failure in an LLM-orchestrated environment due to simple isolation misconfigurations led to Rovo sessions belonging to other users and tenants being discovered, reached, and ultimately used to execute code within their contexts. The finding was rated Critical and is pretty bad. At this point, I feel like AI security is regressing back to simple misconfigurations, except now we're giving users direct access to systems built on top of them. What do you guys think? Write-up: https://mononclemich.medium.com/so-apparently-rovo-has-neighbors-88998d0ad59c submitted by /u/Story_Lost [link] [comments]
+
+via reddit r/cybersecurity: Critical Cross-user and Cross-tenant compromise in Atlassian Rovo
