@@ -551,6 +551,7 @@ def apply(decisions_path):
             sc = score_mod.hot_score(s, events, reddit_posts)
             s["score"] = sc["score"]
             s["score_breakdown"] = {k: v for k, v in sc.items() if k != "score"}
+            score_mod.update_peak(s, sc)
         except Exception as e:
             # A scoring failure for ONE story must not wipe a valid breakdown
             # or write an empty one (that crashes the SSG render and blocks the

@@ -85,6 +85,47 @@ def backfill_score_breakdown(story):
     return story
 
 
+def update_peak(story, sc):
+    """High-water mark: the best score a story has ever reached.
+
+    The published score decays with a 36h half-life, so a cooled story is
+    indistinguishable from one that never mattered — nothing downstream
+    (cold-tier freezing, best-of surfaces, REVISIT picks) can tell them
+    apart. peak_score/peak_at are written by every store rescoring path
+    (merge + triage apply) and never decrease. Callers pass the hot_score
+    dict (or a bare number) on SUCCESS paths only — the exception fallbacks
+    that preserve stale breakdowns must not touch the peak either.
+    """
+    score = float(sc.get("score", 0.0)) if isinstance(sc, dict) else float(sc)
+    peak = float(story.get("peak_score") or 0.0)
+    if score > peak:
+        story["peak_score"] = round(min(10.0, score), 2)
+        story["peak_at"] = datetime.now(timezone.utc).strftime(
+            "%Y-%m-%dT%H:%M:%SZ")
+    elif "peak_score" not in story:
+        # First touch on a pre-peak story: stamp the current (decayed) value
+        # so the field exists everywhere; backfill_peaks.py raises old peaks.
+        story["peak_score"] = round(min(10.0, peak), 2)
+
+
+def undecayed_score(breakdown):
+    """The score a breakdown would produce with recency = 1.0 (no decay).
+
+    score = (breadth + authority + severity + velocity + pickup) * recency
+    + community, and the breakdown carries `base` = the parenthesized sum,
+    so the undecayed value is base + reddit. Used by the one-off peak
+    backfill to give pre-existing stories an honest high-water mark.
+    """
+    if not isinstance(breakdown, dict):
+        return 0.0
+    base = breakdown.get("base")
+    if base is None:
+        base = sum(breakdown.get(k, 0.0) or 0.0 for k in
+                   ("breadth", "authority", "severity", "velocity", "pickup"))
+    reddit = breakdown.get("reddit") or 0.0
+    return round(min(10.0, float(base) + float(reddit)), 2)
+
+
 _cve_store = None
 
 
