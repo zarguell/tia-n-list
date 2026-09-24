@@ -1,0 +1,1 @@
+Vendor patch release dated September 4, 2024 fixing CVE-2024-45519, a vulnerability in the postjournal service that may allow unauthenticated users to execute commands, rated CVSS 9.8. Zimbra's security advisories table maps the same fix to 10.0.9, 10.1.1, and 8.8.15 Patch 46, crediting researcher lebr0nli (Alan Li).

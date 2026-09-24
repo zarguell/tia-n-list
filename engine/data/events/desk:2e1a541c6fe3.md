@@ -1,0 +1,1 @@
+Coverage dated July 28, 2026 reporting that CVE-2026-63077 could let unauthenticated attackers bypass TeamCity authentication checks and run OS commands, and that JetBrains patched all on-premises versions.

@@ -1,0 +1,1 @@
+Early exploitation coverage reporting that CVE-2024-45519, a critical-severity vulnerability in Zimbra, was exploited in the wild to deploy a web shell on vulnerable servers one day after a public proof-of-concept appeared.
