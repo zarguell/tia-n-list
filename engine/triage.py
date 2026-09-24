@@ -42,6 +42,7 @@ import sys
 from datetime import datetime, timedelta, timezone
 
 from merge import title_jaccard, CVE_RE
+import lifecycle
 
 ENGINE = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(ENGINE, "data")
@@ -49,6 +50,7 @@ EVENTS = os.path.join(DATA, "events")
 STORIES = os.path.join(DATA, "stories")
 TRIAGE = os.path.join(DATA, "triage")
 STATE = os.path.join(TRIAGE, "state.json")
+PENDING = os.path.join(DATA, "social-pending.json")
 RUN_TAG = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H%M")
 
 SCHEMA_HINT = (
@@ -132,9 +134,13 @@ def collect():
     _save_state({"processed": sorted(processed)})
 
     stories = _load_stories()
+    # Cold tier: frozen stories are invisible to triage candidate collection
+    # (one frozen_ids() call for the whole stories section) — the LLM never
+    # sees them as keep targets, so the freeze stops collecting work too.
+    frozen = lifecycle.frozen_ids()
     cutoff3 = (NOW - timedelta(days=3)).strftime("%Y-%m-%dT%H:%M:%SZ")
     cands = [s for s in stories.values()
-             if not s.get("merged_into")
+             if not s.get("merged_into") and s["id"] not in frozen
              and (s.get("last_seen", "") >= cutoff3 or s.get("score", 0) >= HOT_THRESHOLD)]
     cands.sort(key=lambda s: s.get("last_seen", ""), reverse=True)
     cands = cands[:40]
@@ -157,7 +163,8 @@ def collect():
         if len(owners) > 1:
             suspect_ids.update(owners)
     cands += [stories[sid] for sid in sorted(suspect_ids)
-              if sid not in {c["id"] for c in cands}][:20]
+              if sid not in frozen
+              and sid not in {c["id"] for c in cands}][:20]
 
     # Semantic-affinity candidates: the recency fill above structurally misses
     # a story that went quiet hours ago (2026-09-16: four Oracle CPU events
@@ -173,11 +180,12 @@ def collect():
         ev_cves |= {c.upper() for c in CVE_RE.findall(e.get("title") or "")}
     have = {c["id"] for c in cands}
     extra = [s for s in stories.values()
-             if not s.get("merged_into") and s["id"] not in have and ev_cves
+             if not s.get("merged_into") and s["id"] not in frozen
+             and s["id"] not in have and ev_cves
              and ev_cves & {c.upper() for c in s.get("cves", [])}]
     overlapped = []
     for s in stories.values():
-        if s.get("merged_into") or s["id"] in have:
+        if s.get("merged_into") or s["id"] in have or s["id"] in frozen:
             continue
         j = max((title_jaccard(e.get("title") or "", s.get("title", ""))
                  for e in recent), default=0.0)
@@ -404,6 +412,25 @@ def _new_story(stories, title, ev, eid):
     return slug
 
 
+def _pending_discard(eids):
+    """Remove decided event ids from merge's social-pending replay file: a
+    keep materialized the story, a drop excluded the event — either way the
+    TTL replay has no say left. Never raises."""
+    eids = set(eids)
+    if not eids:
+        return
+    try:
+        pending = json.load(open(PENDING))
+    except (OSError, ValueError):
+        return
+    if not isinstance(pending, list):
+        return
+    kept = [p for p in pending
+            if isinstance(p, dict) and p.get("id") not in eids]
+    if len(kept) != len(pending):
+        json.dump(kept, open(PENDING, "w"), indent=1)
+
+
 def apply(decisions_path):
     if not os.path.exists(decisions_path):
         print(f"no decisions file: {decisions_path}")
@@ -414,6 +441,7 @@ def apply(decisions_path):
     stories = _load_stories()
     decisions, merges, ignored = _normalize_decisions(dec)
     moved = drops = 0
+    frozen_touched = set()   # frozen story ids that received an event this run
     # LLM-invented story ids (not in candidates): requested id -> minted slug.
     # Every keep naming the same unknown id must land in the SAME minted story
     # instead of fragmenting one per event (2026-09-16: four keeps into a
@@ -484,6 +512,9 @@ def apply(decisions_path):
                 ev["kind"] = "original"
                 moved += 1
         else:
+            if d.get("story") == target:
+                # explicit editorial naming (sole-holder retakes aren't)
+                frozen_touched.add(target)
             changed = _absorb(stories[target], ev, "update")
             if changed:
                 ev["kind"] = "update"
@@ -531,7 +562,28 @@ def apply(decisions_path):
         stories[frm]["events"] = []
         stories[frm]["n_sources"] = 0
         _recompute_derived(stories[into])   # merged events may extend derived fields
+        frozen_touched.add(into)            # explicit canonical naming = editorial
         print(f"  merged {frm} -> {into}")
+
+    # Editorial corroboration beats the freeze: a keep/merge decision that
+    # explicitly names a frozen story IS human-quality evidence it still
+    # matters — thaw it (merge won't have targeted it while frozen, so an
+    # event landing here could only have come from this decision).
+    unfroze = lifecycle.unfreeze_ids(frozen_touched)
+    if unfroze:
+        print(f"  unfroze {len(unfroze)} frozen story/ies on explicit editorial "
+              f"keep: {', '.join(sorted(unfroze)[:3])}{'...' if len(unfroze) > 3 else ''}")
+
+    # Decided social events leave the pending replay.
+    _pending_discard(d.get("event_id") for d in decisions)
+
+    # Drops that emptied a candidate leave zero-event shells. They never
+    # rendered a page (SSG skips orphaned stories), so deleting them breaks
+    # no URL; digest-referenced ids are spared by lifecycle. 2026-09: ~4.5k
+    # shells accumulated this way and rode every hourly commit.
+    removed = lifecycle.tombstone_orphans(stories)
+    if removed:
+        print(f"  tombstoned {len(removed)} orphaned candidate shell(s)")
 
     # persist stories
     for s in stories.values():
@@ -551,6 +603,7 @@ def apply(decisions_path):
             sc = score_mod.hot_score(s, events, reddit_posts)
             s["score"] = sc["score"]
             s["score_breakdown"] = {k: v for k, v in sc.items() if k != "score"}
+            score_mod.update_peak(s, sc)
         except Exception as e:
             # A scoring failure for ONE story must not wipe a valid breakdown
             # or write an empty one (that crashes the SSG render and blocks the

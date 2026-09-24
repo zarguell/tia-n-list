@@ -52,6 +52,8 @@ def gate_cve(c):
 
 def _load_stories():
     out = {}
+    import lifecycle
+    frozen = lifecycle.frozen_ids()          # one read for the whole scan
     for p in glob.glob(os.path.join(STORIES, "*.json")):
         s = json.load(open(p))
         if s.get("merged_into"):
@@ -60,6 +62,12 @@ def _load_stories():
         # stories/<id>/ page, so referencing them here produces dangling
         # candidate stories/<id>/ links that fail the publish link lint.
         if not s.get("events"):
+            continue
+        # Same rule for cold-tier frozen stories (2026-09-24 join fix): ssg
+        # renders no page for them, so candidate-page links into them 404
+        # and fail the same lint. A story returns to this join exactly the
+        # way it left the cold tier: a strong (URL/CVE) event unfreezes it.
+        if s["id"] in frozen:
             continue
         out[s["id"]] = s
     return out

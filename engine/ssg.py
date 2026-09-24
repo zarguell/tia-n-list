@@ -254,14 +254,37 @@ def _card_snippet(st, original):
 
 
 def load_stories(events):
+    import lifecycle
+    # ---- cold-tier freeze ----
+    # STALE-FILE FINDING (2026-09-24, leaf verification): ssg.py has NO
+    # prune/cleanup pass — main() and write() only ever create or overwrite;
+    # nothing deletes output it stops regenerating. In the live checkout a
+    # frozen story's last-built page therefore stays on disk. BUT the deploy
+    # path is .github/workflows/site-deploy.yml, which clones CLEAN (all
+    # generated output is gitignored) and deploys the fresh build artifact —
+    # so for the published site, skipping the render is equivalent to a
+    # prune: frozen pages leave the site on the next deploy. This is the
+    # task's branch A (skip rendering entirely — the cheap path): no frozen
+    # story is re-rendered and no events are re-read for it. It is safe
+    # against dangling links because freeze_sweep spares digest-referenced
+    # ids (the only narrative source that hard-links stories — enforced by
+    # lint_backlinks) and the kev/cti "mentioned-in" joins derive from cards.
+    # A story that BECOMES digest-referenced after freezing fails that lint
+    # loudly (fail-closed): unfreeze it (triage keep / drop the id from
+    # frozen.json) and the next build heals.
+    frozen = lifecycle.frozen_ids()
     cards = []
     max_score = 1
     for path in sorted(glob.glob(os.path.join(STORIES_DIR, "*.json"))):
         st = json.load(open(path))
+        if st["id"] in frozen:
+            continue
         evs = [events[e["event_id"]] for e in st["events"] if e["event_id"] in events]
         max_score = max(max_score, st.get("score", 0))
     for path in sorted(glob.glob(os.path.join(STORIES_DIR, "*.json"))):
         st = json.load(open(path))
+        if st["id"] in frozen:
+            continue
         evs = [events[e["event_id"]] for e in st["events"] if e["event_id"] in events]
         if not evs:
             continue
@@ -501,6 +524,41 @@ def lint_kev_chips():
                 if "://" in m.group(1).lower():
                     bad.append((rel, m.group(1)[:70]))
     return bad
+
+
+def run_prose_gate(cards_by_id, today=None, log=print):
+    """Prose-quality gate (store-health LEAF-3): KEV records get a hard verify
+    gate; prose had none, and the gap shipped — one analysis read exactly
+    "Analyst note based on event content. Watch for updates." (the generic
+    filler prompts/tia-hourly.md bans). Two halves, two failure modes:
+
+    ANALYSES (non-fatal, self-healing): lint every analysis whose story is a
+    live card — cards already exclude frozen/merged, so orphan/frozen files
+    are never quarantined. Violations move the file to .rejects/ and clear
+    the story json's "analysis" key, which re-queues the story via
+    merge.emit_needs (it queues any story whose analysis file is missing);
+    the story is re-analyzed next hour under the prompt that already bans
+    this. WARN per quarantined file, never a build failure.
+
+    DIGEST (fail-closed, PROSE FAIL): today's digest md is the flagship
+    artifact and daily_digest's recover sweep would republish a violating
+    one in a loop — a failed build records telemetry and pages via autodiag
+    instead of shipping slop. Absent digest: skip silently (no digest day).
+
+    Returns the digest violations (empty list = gate passed); analysis
+    quarantine is reported via log only. Sequenced after the other lints by
+    the caller so link/path errors surface first."""
+    import prose_lint
+    for cid in sorted(cards_by_id):
+        prose_lint.quarantine_analysis(STORIES_DIR, ANALYSIS_DIR,
+                                       {"id": cid}, log=log)
+    today = today or datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    dp = os.path.join(DIGESTS_DIR, today + ".md")
+    if not os.path.exists(dp):
+        return []
+    with open(dp, encoding="utf-8") as f:
+        return [f"digest {today}.md: {v}"
+                for v in prose_lint.lint_digest(f.read())]
 
 
 def lint_backlinks(cards):
@@ -814,6 +872,10 @@ def main():
                        events[ref["event_id"]]["published_at"][:10] == date
                        for ref in stj.get("events", [])):
                     slugs.append(slug)
+        # frozen stories render no card (cold tier) — the manifest fallback
+        # path above never needed a membership check before because every
+        # event-bearing story got a card; now it does (KeyError otherwise).
+        slugs = [s for s in slugs if s in cards_by_id]
         return sorted((cards_by_id[s] for s in slugs), key=lambda c: -c["score"])[:DIGEST_TOP_N]
 
     digest_meta = {}
@@ -915,11 +977,17 @@ def main():
         yara_errs += yara_mod.validate_yara(f)
     for e in yara_errs:
         print(f"YARA FAIL {e}", file=sys.stderr)
-    if LINT_HITS or bad_links or bad_chips or backlink_errs or cti_errs or sigma_errs or yara_errs:
+    # prose gate runs after the existing lints: link/path errors surface first
+    prose_digest_errs = run_prose_gate(cards_by_id, today, log=print)
+    for e in prose_digest_errs:
+        print(f"PROSE FAIL {e}", file=sys.stderr)
+    if (LINT_HITS or bad_links or bad_chips or backlink_errs or cti_errs
+            or sigma_errs or yara_errs or prose_digest_errs):
         print(f"LINT FAIL: {len(LINT_HITS)} path-absolute + {len(bad_links)} unresolvable"
               f" internal URL(s) + {len(bad_chips)} URL-in-chip + {len(backlink_errs)}"
               f" backlink errors + {len(cti_errs)} CTI errors + {len(sigma_errs)}"
-              f" Sigma errors + {len(yara_errs)} YARA errors — fix before publishing.",
+              f" Sigma errors + {len(yara_errs)} YARA errors + {len(prose_digest_errs)}"
+              f" prose errors — fix before publishing.",
               file=sys.stderr)
         sys.exit(1)
 
