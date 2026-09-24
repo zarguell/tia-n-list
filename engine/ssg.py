@@ -254,14 +254,37 @@ def _card_snippet(st, original):
 
 
 def load_stories(events):
+    import lifecycle
+    # ---- cold-tier freeze ----
+    # STALE-FILE FINDING (2026-09-24, leaf verification): ssg.py has NO
+    # prune/cleanup pass — main() and write() only ever create or overwrite;
+    # nothing deletes output it stops regenerating. In the live checkout a
+    # frozen story's last-built page therefore stays on disk. BUT the deploy
+    # path is .github/workflows/site-deploy.yml, which clones CLEAN (all
+    # generated output is gitignored) and deploys the fresh build artifact —
+    # so for the published site, skipping the render is equivalent to a
+    # prune: frozen pages leave the site on the next deploy. This is the
+    # task's branch A (skip rendering entirely — the cheap path): no frozen
+    # story is re-rendered and no events are re-read for it. It is safe
+    # against dangling links because freeze_sweep spares digest-referenced
+    # ids (the only narrative source that hard-links stories — enforced by
+    # lint_backlinks) and the kev/cti "mentioned-in" joins derive from cards.
+    # A story that BECOMES digest-referenced after freezing fails that lint
+    # loudly (fail-closed): unfreeze it (triage keep / drop the id from
+    # frozen.json) and the next build heals.
+    frozen = lifecycle.frozen_ids()
     cards = []
     max_score = 1
     for path in sorted(glob.glob(os.path.join(STORIES_DIR, "*.json"))):
         st = json.load(open(path))
+        if st["id"] in frozen:
+            continue
         evs = [events[e["event_id"]] for e in st["events"] if e["event_id"] in events]
         max_score = max(max_score, st.get("score", 0))
     for path in sorted(glob.glob(os.path.join(STORIES_DIR, "*.json"))):
         st = json.load(open(path))
+        if st["id"] in frozen:
+            continue
         evs = [events[e["event_id"]] for e in st["events"] if e["event_id"] in events]
         if not evs:
             continue
@@ -814,6 +837,10 @@ def main():
                        events[ref["event_id"]]["published_at"][:10] == date
                        for ref in stj.get("events", [])):
                     slugs.append(slug)
+        # frozen stories render no card (cold tier) — the manifest fallback
+        # path above never needed a membership check before because every
+        # event-bearing story got a card; now it does (KeyError otherwise).
+        slugs = [s for s in slugs if s in cards_by_id]
         return sorted((cards_by_id[s] for s in slugs), key=lambda c: -c["score"])[:DIGEST_TOP_N]
 
     digest_meta = {}

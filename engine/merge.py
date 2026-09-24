@@ -19,6 +19,7 @@ from datetime import datetime, timedelta, timezone
 from build_registry import clean_title, tokens, domain_of
 from score import (hot_score, SB_DEFAULTS as _SB_DEFAULTS,
                    backfill_score_breakdown, update_peak)
+import lifecycle
 
 ENGINE = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(ENGINE, "data")
@@ -325,9 +326,15 @@ def real_score(s):
     return hot_score(s, events, reddit_posts)
 
 
-def emit_needs(stories):
+def emit_needs(stories, exclude=None):
+    """Analysis-queue emit. `exclude` is the frozen set: a cold-tier story
+    never queues analysis work (its peak never crossed the bar anyway, but
+    the explicit filter keeps the freeze contract local and testable)."""
+    exclude = exclude or set()
     queue = []
     for s in stories.values():
+        if s["id"] in exclude:
+            continue
         if s["score"] < HOT_THRESHOLD:
             continue
         analysis_path = os.path.join(ANALYSIS_DIR, s["id"] + ".md")
@@ -390,6 +397,10 @@ def main():
     manifest = (_load_json_or_default(MANIFEST, {"stories_per_day": {}})
                 if os.path.exists(MANIFEST) else {"stories_per_day": {}})
     story_url_cache = {sid: story_event_urls(s) for sid, s in stories.items()}
+    # Cold tier, loaded once per run: frozen stories are invisible to
+    # matching/needs/rescoring below. unfreeze_strong thaws on strong event
+    # evidence and writes through to frozen.json, so the local set mirrors it.
+    frozen = lifecycle.frozen_ids()
 
     queue = (_load_json_or_default(QUEUE, {"events": []})
              if os.path.exists(QUEUE) else {"events": []})
@@ -416,7 +427,10 @@ def main():
                       indent=1)
             expired += 1
             continue
+        frozen -= lifecycle.unfreeze_strong(ev, stories)
         target = match_story(ev, stories)
+        if target in frozen:
+            target = None       # still frozen = weak similarity: park, don't thaw
         if target and _attach_event(eid, ev, stories[target]):
             merged += 1
             day = ev["published_at"][:10]
@@ -431,7 +445,13 @@ def main():
         ev = events.get(eid)
         if not ev:
             continue
+        frozen -= lifecycle.unfreeze_strong(ev, stories)
         target = match_story(ev, stories)
+        if target in frozen:
+            # unfreeze_strong already ran for THIS event, so a still-frozen
+            # target is weak similarity only — never thaw a cold story by
+            # accident; fall through to the mint/park logic.
+            target = None
         day = ev["published_at"][:10]
         if target:
             if not _attach_event(eid, ev, stories[target]):
@@ -468,6 +488,8 @@ def main():
             manifest["stories_per_day"][day].append(target_slug)
 
     for s in stories.values():
+        if s["id"] in frozen:
+            continue    # frozen: score/peak stay as frozen — skips the bulk of hourly CPU
         try:
             sc = real_score(s)
             s["score"] = sc["score"]
@@ -489,12 +511,15 @@ def main():
 
     _save_pending(pending)
     json.dump(manifest, open(MANIFEST, "w"), indent=1)
-    needs = emit_needs(stories)
+    needs = emit_needs(stories, exclude=frozen)
     json.dump({"date": queue.get("date", ""), "events": []}, open(QUEUE, "w"), indent=1)
     print(f"new events: {len(new_ids)} | merged: {merged} | created: {created} "
           f"| social parked: {parked} | social expired: {expired} "
           f"| needs analysis: {needs}")
     print(f"stories total: {len(stories)}")
+    # Cold-tier sweep LAST (after persist): anything that never mattered now
+    # leaves the paid set — next run's matching/rescoring/rendering skips it.
+    lifecycle.freeze_sweep(stories)
 
 
 def build_slug(title, stories):
