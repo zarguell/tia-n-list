@@ -42,6 +42,7 @@ import sys
 from datetime import datetime, timedelta, timezone
 
 from merge import title_jaccard, CVE_RE
+import lifecycle
 
 ENGINE = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(ENGINE, "data")
@@ -49,6 +50,7 @@ EVENTS = os.path.join(DATA, "events")
 STORIES = os.path.join(DATA, "stories")
 TRIAGE = os.path.join(DATA, "triage")
 STATE = os.path.join(TRIAGE, "state.json")
+PENDING = os.path.join(DATA, "social-pending.json")
 RUN_TAG = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H%M")
 
 SCHEMA_HINT = (
@@ -404,6 +406,25 @@ def _new_story(stories, title, ev, eid):
     return slug
 
 
+def _pending_discard(eids):
+    """Remove decided event ids from merge's social-pending replay file: a
+    keep materialized the story, a drop excluded the event — either way the
+    TTL replay has no say left. Never raises."""
+    eids = set(eids)
+    if not eids:
+        return
+    try:
+        pending = json.load(open(PENDING))
+    except (OSError, ValueError):
+        return
+    if not isinstance(pending, list):
+        return
+    kept = [p for p in pending
+            if isinstance(p, dict) and p.get("id") not in eids]
+    if len(kept) != len(pending):
+        json.dump(kept, open(PENDING, "w"), indent=1)
+
+
 def apply(decisions_path):
     if not os.path.exists(decisions_path):
         print(f"no decisions file: {decisions_path}")
@@ -532,6 +553,17 @@ def apply(decisions_path):
         stories[frm]["n_sources"] = 0
         _recompute_derived(stories[into])   # merged events may extend derived fields
         print(f"  merged {frm} -> {into}")
+
+    # Decided social events leave the pending replay.
+    _pending_discard(d.get("event_id") for d in decisions)
+
+    # Drops that emptied a candidate leave zero-event shells. They never
+    # rendered a page (SSG skips orphaned stories), so deleting them breaks
+    # no URL; digest-referenced ids are spared by lifecycle. 2026-09: ~4.5k
+    # shells accumulated this way and rode every hourly commit.
+    removed = lifecycle.tombstone_orphans(stories)
+    if removed:
+        print(f"  tombstoned {len(removed)} orphaned candidate shell(s)")
 
     # persist stories
     for s in stories.values():
