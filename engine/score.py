@@ -65,7 +65,7 @@ SIGNAL_CAP = 1.5
 # backfill defensively. recency is a temporal MULTIPLIER, so its neutral
 # fallback is 1.0 (no decay), not 0.0 (which would zero the score).
 SB_KEYS = ("base", "breadth", "authority", "severity", "velocity",
-           "pickup", "recency", "reddit", "kev", "n_sources")
+           "pickup", "recency", "reddit", "kev", "epss", "n_sources")
 SB_DEFAULTS = {k: (1.0 if k == "recency" else (False if k == "kev"
              else (0 if k == "n_sources" else 0.0))) for k in SB_KEYS}
 
@@ -157,16 +157,27 @@ def _load_cve_store():
 
 
 def _cvss_severity(cves):
+    """(cvss-band score, kev flag, epss bonus) across the story's CVEs.
+
+    The EPSS bonus comes from the kevrichment records (daily bulk refresh,
+    kevrichment/epss.py): +0.4 at exploitation probability >= 0.5, +0.2 at
+    >= 0.1 — a CVE the model expects to be exploited any day now is worth
+    more attention than its CVSS alone admits. Records without an enriched
+    score (not yet refreshed) contribute 0."""
     store = _load_cve_store()
     if not cves:
-        return 0.5, False
+        return 0.5, False, 0.0
     best = 0.0
     kev = False
+    epss = 0.0
     for c in cves:
         info = store.get(c.upper())
         if info:
             best = max(best, info.get("cvss") or 0.0)
             kev = kev or info.get("kev")
+            e = info.get("epss")
+            if isinstance(e, (int, float)):
+                epss = max(epss, e)
     if best >= 9.0:
         s = 4.5
     elif best >= 7.0:
@@ -177,7 +188,8 @@ def _cvss_severity(cves):
         s = 1.5
     else:
         s = 1.0            # CVE present but not in the local store
-    return s, kev
+    bonus = 0.4 if epss >= 0.5 else (0.2 if epss >= 0.1 else 0.0)
+    return s, kev, bonus
 
 
 def hot_score(story, events, reddit_posts, now=None):
@@ -196,12 +208,13 @@ def hot_score(story, events, reddit_posts, now=None):
 
     # severity (real CVSS + KEV + content signals) — the dominant axis
     cves = story.get("cves", [])
-    sev, kev = _cvss_severity(cves)
+    sev, kev, epss_bonus = _cvss_severity(cves)
     title = (story.get("title") or "").lower()
     body_text = " ".join(events.get(r["event_id"], {}).get("content_md", "") for r in story.get("events", []))[:4000].lower()
     text = title + " " + body_text
     signals = sum(w for rx, w in SIGNALS if rx.search(text))
-    severity = min(5.0, sev + (0.5 if kev else 0.0) + min(SIGNAL_CAP, signals))
+    severity = min(5.0, sev + (0.5 if kev else 0.0) + min(SIGNAL_CAP, signals)
+                   + epss_bonus)
 
     # velocity (events in last 48h)
     n48 = 0
@@ -260,5 +273,6 @@ def hot_score(story, events, reddit_posts, now=None):
         "recency": round(recency, 2),
         "reddit": round(reddit, 2),
         "kev": kev,
+        "epss": round(epss_bonus, 2),
         "n_sources": story.get("n_sources", 0),
     }

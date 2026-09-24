@@ -118,7 +118,8 @@ def collect():
     state = _load_state()
     processed = set(state["processed"])
     new = [e for eid, e in events.items()
-           if eid not in processed and not e.get("excluded")]
+           if eid not in processed and not e.get("excluded")
+           and not eid.startswith("desk:")]   # desk backfills: pre-adjudicated
     new.sort(key=lambda e: e.get("published_at", ""), reverse=True)
 
     # Only the recent window needs LLM judgment — events older than 48h were
