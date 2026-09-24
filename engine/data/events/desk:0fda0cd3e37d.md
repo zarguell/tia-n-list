@@ -1,0 +1,1 @@
+Google's Chrome stable channel advisory, dated Thursday, September 3, 2026, ships 152.0.7977.82/.83 for Windows and Mac and 152.0.7977.82 for Linux. It fixes High CVE-2026-85046, a type confusion in V8 reported by Salvatore Gulizia (Serotav) on 2026-08-04, and states Google is aware an exploit for CVE-2026-85046 exists in the wild.

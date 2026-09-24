@@ -1,0 +1,1 @@
+CISA's KEV feed lists CVE-2026-85046, a Google Chromium V8 type confusion, with dateAdded 2026-09-04 and a federal remediation due date of 2026-09-18. The entry cites Google's September 3 stable channel advisory. This placed the first of the two V8 flaws in the catalog five days before the chained attacks became public.

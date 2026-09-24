@@ -1,0 +1,1 @@
+Four days before the Independent piece, NTT Security Japan published an index of its WaterPlum research, linking its four published technical posts on the malware used by the Contagious Interview actors: OtterCookie and its function additions, OtterCandy, and StoatWaffle. The post is dated 2026.9.18 on the page.

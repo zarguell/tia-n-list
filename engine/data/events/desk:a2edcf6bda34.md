@@ -1,0 +1,1 @@
+First-wave news coverage of CERT Polska's September 5 warning that attackers were using RouterOS flaws to take control of devices whose SSH service was reachable from public networks. It confirmed active exploitation and urged immediate patching, but did not yet identify which two flaws formed the chain or how they combined.

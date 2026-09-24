@@ -1,0 +1,1 @@
+CISA's KEV feed lists CVE-2026-85880, a Microsoft Windows ALPC elevation-of-privilege flaw, with dateAdded 2026-09-08 and a federal remediation due date of 2026-09-22. The entry links Microsoft's update guide page for the CVE. CISA catalogued it as exploited the same day Microsoft shipped the fix.
