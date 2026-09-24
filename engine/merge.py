@@ -14,7 +14,7 @@ import json
 import os
 import re
 import sys
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from build_registry import clean_title, tokens, domain_of
 from score import (hot_score, SB_DEFAULTS as _SB_DEFAULTS,
@@ -30,6 +30,17 @@ ANALYSIS_DIR = os.path.join(DATA, "analysis")
 NEEDS = os.path.join(DATA, "needs-analysis.json")
 HOT_THRESHOLD = 3.3      # analysis-queue gate on the 0-10 scale (was 2.0 on 0-6); deliberately below the display 5.0 for coverage
 CVE_RE = re.compile(r"CVE-\d{4}-\d{4,7}", re.IGNORECASE)
+
+# Collector channels (x-collector, social-collector) feed events that may
+# ATTACH to stories but never MINT them — social amplifies, feeds create.
+# Unmatched social events park in social-pending.json and retry every merge
+# until a feed-minted story corroborates them or the TTL expires them.
+# 2026-09 incident: masto link-posts minted ~1.6k stories/month (2.4x the
+# entire Miniflux category), and the triage drops that rejected them left
+# ~4.5k zero-event shells in the store.
+SOCIAL_PREFIXES = ("masto:", "x:", "bsky:")
+PENDING = os.path.join(DATA, "social-pending.json")
+SOCIAL_TTL_H = 48
 
 
 def parse_utc(iso):
@@ -336,6 +347,40 @@ def emit_needs(stories):
     return len(queue)
 
 
+def _load_pending():
+    """Parked social events: [{id, since}]. Missing/corrupt file -> empty
+    (they just stop retrying; the events stay on disk for triage)."""
+    if not os.path.exists(PENDING):
+        return []
+    return _load_json_or_default(PENDING, [])
+
+
+def _save_pending(pending):
+    json.dump(pending, open(PENDING, "w"), indent=1)
+
+
+def _attach_event(eid, ev, s):
+    """Merge an event into an existing story as an update. Shared by the
+    new-event queue and the social-pending replay (identical semantics:
+    never touch kind of an already-placed event). Returns False when the
+    event was already in the story."""
+    refs = [r["event_id"] for r in s["events"]]
+    if eid in refs:                      # already processed — never touch kind
+        return False
+    ev["kind"] = "update"
+    s["events"].append({"event_id": eid, "label": "update"})
+    if ev["published_at"] > s.get("last_seen", ""):
+        s["last_seen"] = ev["published_at"]
+    domains = [domain_of(ev["url"])] if ev["url"] else []
+    s["sources"] = list(dict.fromkeys(s.get("sources", []) + [d for d in domains if d]))
+    s["n_sources"] = len(s["sources"])
+    s["cves"] = sorted(set(s.get("cves", [])) | set(ev["cves"]))
+    s["first_seen"] = min(s.get("first_seen", ev["published_at"]), ev["published_at"])
+    if ev["url"]:
+        story_url_cache.setdefault(s["id"], set()).add(norm_url(ev["url"]))
+    return True
+
+
 def main():
     global events, reddit_posts, story_url_cache
     events = load_events()
@@ -349,7 +394,39 @@ def main():
     queue = (_load_json_or_default(QUEUE, {"events": []})
              if os.path.exists(QUEUE) else {"events": []})
     new_ids = queue.get("events", [])
-    created = merged = 0
+    created = merged = parked = expired = 0
+    pending = _load_pending()
+    cutoff = (datetime.now(timezone.utc)
+              - timedelta(hours=SOCIAL_TTL_H)).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+    # Replay parked social events before today's queue (oldest first): attach
+    # when a corroborating story now exists, expire them past the TTL. An
+    # attach here is exactly the feed-corroboration the mint bar demands.
+    still = []
+    for p in pending:
+        eid = p.get("id")
+        ev = events.get(eid)
+        if not ev or ev.get("excluded"):
+            continue                   # gone, or triage already decided
+        if ev.get("published_at", "") < cutoff:
+            ev["excluded"] = True
+            ev["exclude_reason"] = (f"social: no feed corroboration "
+                                    f"within {SOCIAL_TTL_H}h")
+            json.dump(ev, open(os.path.join(EVENTS, eid + ".json"), "w"),
+                      indent=1)
+            expired += 1
+            continue
+        target = match_story(ev, stories)
+        if target and _attach_event(eid, ev, stories[target]):
+            merged += 1
+            day = ev["published_at"][:10]
+            manifest.setdefault("stories_per_day", {}).setdefault(day, [])
+            if target not in manifest["stories_per_day"][day]:
+                manifest["stories_per_day"][day].append(target)
+            continue
+        still.append(p)
+    pending = still
+
     for eid in new_ids:
         ev = events.get(eid)
         if not ev:
@@ -357,22 +434,20 @@ def main():
         target = match_story(ev, stories)
         day = ev["published_at"][:10]
         if target:
-            s = stories[target]
-            refs = [r["event_id"] for r in s["events"]]
-            if eid in refs:                      # already processed — never touch kind
+            if not _attach_event(eid, ev, stories[target]):
                 continue
-            ev["kind"] = "update"
-            s["events"].append({"event_id": eid, "label": "update"})
-            if ev["published_at"] > s.get("last_seen", ""):
-                s["last_seen"] = ev["published_at"]
-            domains = [domain_of(ev["url"])] if ev["url"] else []
-            s["sources"] = list(dict.fromkeys(s.get("sources", []) + [d for d in domains if d]))
-            s["n_sources"] = len(s["sources"])
-            s["cves"] = sorted(set(s.get("cves", [])) | set(ev["cves"]))
-            s["first_seen"] = min(s.get("first_seen", ev["published_at"]), ev["published_at"])
-            if ev["url"]:
-                story_url_cache.setdefault(target, set()).add(norm_url(ev["url"]))
             merged += 1
+        elif eid.startswith(SOCIAL_PREFIXES):
+            # Social amplifies, feeds create: park it instead of minting.
+            # The event file is still written so the triage collect window
+            # can see it (an explicit LLM keep materializes the story).
+            ev.setdefault("kind", "original")
+            json.dump(ev, open(os.path.join(EVENTS, eid + ".json"), "w"),
+                      indent=1)
+            if not any(p.get("id") == eid for p in pending):
+                pending.append({"id": eid, "since": ev["published_at"]})
+                parked += 1
+            continue
         else:
             ev["kind"] = "original"
             slug = build_slug(ev["title"], stories)
@@ -412,10 +487,13 @@ def main():
         s.setdefault("score", 0.0)
         json.dump(s, open(os.path.join(STORIES, s["id"] + ".json"), "w"), indent=1)
 
+    _save_pending(pending)
     json.dump(manifest, open(MANIFEST, "w"), indent=1)
     needs = emit_needs(stories)
     json.dump({"date": queue.get("date", ""), "events": []}, open(QUEUE, "w"), indent=1)
-    print(f"new events: {len(new_ids)} | merged: {merged} | created: {created} | needs analysis: {needs}")
+    print(f"new events: {len(new_ids)} | merged: {merged} | created: {created} "
+          f"| social parked: {parked} | social expired: {expired} "
+          f"| needs analysis: {needs}")
     print(f"stories total: {len(stories)}")
 
 
