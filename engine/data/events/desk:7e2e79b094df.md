@@ -1,0 +1,1 @@
+A Check Point community post dated September 10, 2026 states that the Check Point research team identified and remediated two critical VPN-related vulnerabilities, CVE-2026-85102 and CVE-2026-85103. It is the vendor's early customer-facing notice twelve days before the September 22 security alert that also disclosed CVE-2026-93616.

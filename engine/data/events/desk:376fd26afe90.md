@@ -1,0 +1,1 @@
+SecurityWeek reported on July 28, 2026 that hackers had been exploiting a critical OS injection vulnerability in Arista VeloCloud Orchestrator as a zero-day. The report covers the same on-prem orchestrator product affected by the September CVE-2026-93952 exploitation.

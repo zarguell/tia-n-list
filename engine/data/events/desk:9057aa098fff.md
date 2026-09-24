@@ -1,0 +1,1 @@
+Arctic Wolf's September 14, 2026 blog on CVE-2026-85102 and CVE-2026-85103 states the two vulnerabilities were discovered internally by Check Point and first disclosed on September 7, 2026, with the vendor advisory updated afterward. The post provides context and detection guidance for the pair of CVSS 9.8 VPN flaws ahead of the CVE-2026-93616 disclosure.

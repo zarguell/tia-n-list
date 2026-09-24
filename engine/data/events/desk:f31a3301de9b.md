@@ -1,0 +1,1 @@
+Arista published Security Advisory 0144 on July 27, 2026 for CVE-2026-16812, a vulnerability in VeloCloud Orchestrator on-prem. Third-party trackers describe that issue as a CVSS 10.0 unauthenticated OS command injection in the same management product now hit by CVE-2026-93952.
