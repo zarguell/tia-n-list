@@ -9,8 +9,12 @@ merge/collect/audit scan. This module is the lifecycle home:
 
   - tombstone_orphans: delete zero-event candidate shells (never rendered,
     so the URL-stability rule does not apply; digest-referenced ids are
-    spared and reported). Called by triage apply after every run and
-    store-wide by repair_shells.py.
+    spared and reported). Called store-wide by repair_shells.py — and
+    deliberately NOT from triage apply: apply runs inside cronman's guarded
+    tia-agent stage, where _restore_deleted_data restores any tracked
+    deletion and records agent-deleted-tracked-data (2026-09-24: the
+    apply-time sweep was undone and re-reported every hourly run). Hourly
+    shell reaping is cleanup_ghosts.py's, which runs after that guard.
   - referenced_story_ids: story ids any published digest page still links —
     the "never delete" guard for live URLs.
 

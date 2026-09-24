@@ -1,11 +1,15 @@
 #!/usr/bin/env python3
 """One-time orphaned-shell repair for the story store (store-health L1).
 
-triage.apply() now tombstones zero-event candidate shells at the end of
-every run (engine/lifecycle.py), but the 2026-05..09 era left thousands
-behind: drops stripped the last event from a minted candidate and its json
-rode every hourly commit forever (~4.5k shells by 2026-09-24). This removes
-them store-wide.
+The 2026-05..09 era left thousands of shells behind: drops stripped the
+last event from a minted candidate and its json rode every hourly commit
+forever (~4.5k shells by 2026-09-24). This removes them store-wide.
+Deliberately a standalone sweep, not a triage.apply() step: apply runs
+inside cronman's guarded tia-agent stage, where _restore_deleted_data
+restores any tracked deletion and records agent-deleted-tracked-data
+(engine/lifecycle.tombstone_orphans docstring has the incident detail).
+Run this between the guard and the publish (or let the deletions ride the
+next publish commit) — never leave a swept tree to be restored from HEAD.
 
 Shells never rendered a page (SSG skips orphaned stories), so no published
 URL is affected; digest-referenced ids are spared and reported.

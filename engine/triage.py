@@ -577,13 +577,15 @@ def apply(decisions_path):
     # Decided social events leave the pending replay.
     _pending_discard(d.get("event_id") for d in decisions)
 
-    # Drops that emptied a candidate leave zero-event shells. They never
-    # rendered a page (SSG skips orphaned stories), so deleting them breaks
-    # no URL; digest-referenced ids are spared by lifecycle. 2026-09: ~4.5k
-    # shells accumulated this way and rode every hourly commit.
-    removed = lifecycle.tombstone_orphans(stories)
-    if removed:
-        print(f"  tombstoned {len(removed)} orphaned candidate shell(s)")
+    # NOTE: apply must NOT tombstone shells here (removed 2026-09-24).
+    # apply runs inside cronman's tia-agent stage, whose
+    # _restore_deleted_data guard restores EVERY tracked deletion under
+    # engine/data/stories/ and records agent-deleted-tracked-data — so the
+    # ~4.5k-shell sweep was undone and re-reported on every hourly run
+    # instead of landing. Shell reaping belongs to the post-guard paths:
+    # cleanup_ghosts.py (hourly, reference-safe, 90d retention) and
+    # repair_shells.py (explicit store-wide sweep, committed by the next
+    # publish). lifecycle.tombstone_orphans itself is unchanged.
 
     # persist stories
     for s in stories.values():
