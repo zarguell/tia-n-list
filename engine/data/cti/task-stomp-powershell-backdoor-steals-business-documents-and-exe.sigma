@@ -1,0 +1,51 @@
+title: TASK#STOMP PowerShell Backdoor Staging and Persistence
+id: 4f8c2a16-9d3e-4b7a-85c1-2e6f0d9a7b34
+status: experimental
+description: Detects TASK#STOMP backdoor staging and persistence artifacts reported in case analysis - Windows Script Host running a VBScript from the user's Desktop, references to the WinDefendSvc staging folder and its hidden PowerShell loaders sysloader.ps1 and winconn.ps1 with DAT payloads diagpack.dat and winconncfg.dat, msdiag.vbs in the Startup folder, and schtasks creating tasks from XML files under LOCALAPPDATA
+references:
+  - https://gbhackers.com/taskstomp-powershell-backdoor/
+  - https://cyberpress.org/taskstomp-backdoor-steals-documents/
+  - https://securityonline.info/taskstomp-powershell-backdoor/
+author: Tia N. List
+date: 2026-09-24
+tags:
+  - attack.execution
+  - attack.persistence
+  - attack.collection
+  - attack.t1059
+  - attack.t1053
+  - attack.t1547
+  - attack.t1099
+  - attack.t1005
+  - attack.t1113
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection_wsh_desktop_vbs:
+    Image|endswith:
+      - '\wscript.exe'
+      - '\cscript.exe'
+    CommandLine|contains|all:
+      - '\Desktop\'
+      - '.vbs'
+  selection_staged_payloads:
+    CommandLine|contains:
+      - 'WinDefendSvc'
+      - 'sysloader.ps1'
+      - 'winconn.ps1'
+      - 'diagpack.dat'
+      - 'winconncfg.dat'
+      - 'msdiag.vbs'
+  selection_schtasks_from_xml:
+    Image|endswith:
+      - '\schtasks.exe'
+    CommandLine|contains|all:
+      - '/create'
+      - '/xml'
+      - '\AppData\'
+  condition: selection_wsh_desktop_vbs or selection_staged_payloads or selection_schtasks_from_xml
+falsepositives:
+  - IT or software distribution scripts creating scheduled tasks from XML definitions under AppData
+  - Administrative scripts referencing documents in user Desktop folders
+level: high
