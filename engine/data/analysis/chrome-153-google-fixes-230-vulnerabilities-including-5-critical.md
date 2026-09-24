@@ -1,0 +1,3 @@
+Google released Chrome 153 addressing 230 vulnerabilities, including 5 critical, according to the event title and snippet. The update covers the Stable desktop channel and includes critical WebGL and Dawn graphics component fixes tied to CVE-2026-19137 and CVE-2026-19170. The event sources include securityonline.info, bleepingcomputer.com, and other security outlets. Organizations should deploy immediately, especially endpoints that visit untrusted sites or run GPU-accelerated web apps.
+
+What to watch: whether restricted bug reports reveal new exploitation techniques and whether Chrome 154 (mentioned in a separate event) introduces additional fixes that supersede this release.
