@@ -1,0 +1,5 @@
+ENISA's EUVD database currently lists two flaws in Red Hat Ansible Automation Platform. EUVD-2026-85548, scored 8.2 under CVSS v3.1, describes a flaw in the platform's automation controller component and was updated on 2026-09-23. EUVD-2026-85867, scored 6.8, describes an authorization bypass in the same product and was updated on 2026-09-24. Neither entry carries a CVE id or any exploitation evidence in the recorded data.
+
+Ansible Automation Platform sits in the privileged path of enterprise automation: its controller holds credentials for managed hosts and executes playbooks across large fleets. An authorization bypass or controller-tier flaw in that position is worth fast patching even with no public exploit reports, because control-plane access usually converts directly into workload access.
+
+The entries are thin on technical detail, so the practical check is Red Hat's advisory stream for the affected component and any fix releases. Watch for CVE assignments, Red Hat errata, and whether either flaw later picks up a CISA KEV listing or public exploit code.

@@ -1,0 +1,5 @@
+Huntress incident responders describe an unusual intrusion pattern against Samsung MagicINFO servers: rather than dropping a prebuilt miner binary, the threat actor compiled the SilentXMRMiner directly on the compromised endpoint. The report, titled Compiling Cryptominers On-Endpoint, ties the activity to exploitation of a Samsung MagicINFO vulnerability tracked as CVE-2025-4632.
+
+The recorded chain reflects observed in-the-wild exploitation. After access through the MagicINFO flaw, the actor installed AnyDesk for remote access, created a new local administrator account, and then built the XMR miner on the host itself. Compiling on the endpoint is the notable part: it sidesteps file-based detections that key on known miner hashes, since the artifact is produced fresh on the victim machine.
+
+MagicINFO powers internet-facing digital signage and has been a repeated exploitation target, so exposed instances should be treated as likely targets. Watch for patch coverage for CVE-2025-4632 across MagicINFO versions, continued exploitation against signage infrastructure, and whether the on-endpoint compilation technique spreads to other miner families.
