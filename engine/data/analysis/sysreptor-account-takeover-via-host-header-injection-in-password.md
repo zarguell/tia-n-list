@@ -1,0 +1,5 @@
+SysReptor, the pentest reporting platform, has an unpatched account takeover flaw tracked as CVE-2026-81179, rated CVSS 8.1. The bug is a Host header injection in the password reset flow: an attacker who can control the Host header seen by the server can shape the reset link sent to a victim so it points at an attacker-controlled domain. A victim who follows the reset link hands the reset token to the attacker, who completes the takeover of the account.
+
+The disclosure notes there is no patch yet. The recommended mitigations are restricting the ALLOWED_HOSTS setting so the application only accepts expected Host values, and updating as soon as a fixed release lands. Self-hosted deployments that leave Host header handling permissive are the exposed population.
+
+This is a classic password-reset poisoning pattern, so impact hinges on reachability: internet-facing SysReptor instances are the urgent case, since the tooling stores sensitive pentest findings and client data. Watch for a vendor advisory and fixed version, confirmations from self-hosted operators, and any mass-scanning of exposed SysReptor instances now that the CVE is public.
