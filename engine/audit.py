@@ -96,8 +96,12 @@ def qlen(path, key=None):
         return -1
 
 
-needs = qlen(os.path.join(DATA, "needs-analysis.json"), "events")
-ctiq = qlen(os.path.join(DATA, "cti-queue.json"))
+# both queues are written as {"stories": [...]} (cti_pass.py,
+# repair_dedupe.py); audit_checks.queue_age already reads "stories".
+# passing the wrong key made qlen fall back to len(dict) and report the
+# top-level key count (2 / 1) instead of the pending backlog (15 / 49).
+needs = qlen(os.path.join(DATA, "needs-analysis.json"), "stories")
+ctiq = qlen(os.path.join(DATA, "cti-queue.json"), "stories")
 iocc = qlen(os.path.join(DATA, "iocs-candidates.json"), "candidates")
 check("analysis_queue", needs >= 0, f"{needs} pending")
 check("cti_queue", ctiq >= 0, f"{ctiq} uncovered cases")
