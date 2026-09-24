@@ -1,0 +1,7 @@
+Gambit reports a Chinese-speaking, financially motivated threat actor running autonomous AI agents against hundreds of online retailers, active since July 2026. The campaign is built on three AI harnesses that automate the full chain: vulnerability research, exploitation, and orchestration.
+
+The volume is concrete. Between 10 and 15 September alone, 105 attack projects were launched and at least 27 companies were compromised to varying degrees. Data stolen from two compromised companies covered more than 600,000 unexpired credit cards, and skimmer scripts were injected into five online stores. The actor also gained partial access to a Fortune 500 hospitality company and three US firms: an airline, a private industrial supplies distributor, and an online fashion retailer. Gambit notes that where access was achieved it usually took less than a day, often just hours.
+
+The tooling is off the shelf. The actor used the open source AI penetration testing tool Strix for vulnerability hunting, running it 146 times in deep mode against 138 hosts between August 23 and 31 through OpenRouter on GLM 5.2 and DeepSeek v4 Pro, then feeding the generated reports to the autonomous penetration testing engine Cairn.
+
+Watch commercial model broker accounts for abuse signals, and treat fast, iterative scanning of e-commerce infrastructure as a likely AI-assisted operation rather than manual reconnaissance.
