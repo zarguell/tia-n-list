@@ -271,6 +271,27 @@ with tempfile.TemporaryDirectory() as td:
     ids = {c["id"] for c in cards}
     check("frozen story renders no card", ids == {"live-card"})
 
+# --- digest slate excludes frozen (parent-join fix) ------------------------
+import digest_candidates  # noqa: E402
+
+with tempfile.TemporaryDirectory() as td:
+    sd = os.path.join(td, "stories")
+    os.makedirs(sd)
+    json.dump({"id": "frozen-story", "score": 2.9,
+               "events": [{"event_id": "e1"}]},
+              open(os.path.join(sd, "frozen-story.json"), "w"))
+    json.dump({"id": "live-story", "score": 3.5,
+               "events": [{"event_id": "e2"}]},
+              open(os.path.join(sd, "live-story.json"), "w"))
+    orig = lifecycle.frozen_ids
+    lifecycle.frozen_ids = lambda: {"frozen-story"}
+    try:
+        out = digest_candidates.load_stories(sd)
+    finally:
+        lifecycle.frozen_ids = orig
+    check("digest slate excludes frozen stories",
+          "frozen-story" not in out and "live-story" in out)
+
 print()
 if FAILS:
     print(f"FAILED: {len(FAILS)} check(s): {', '.join(FAILS)}")
