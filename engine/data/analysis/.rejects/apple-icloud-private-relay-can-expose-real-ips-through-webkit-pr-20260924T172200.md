@@ -1,0 +1,5 @@
+Reporting circulating via The Hacker News and r/cybersecurity says Apple's iCloud Private Relay can expose a user's real IP address through WebKit proxy bypasses. Private Relay is Apple's two-hop proxy for Safari browsing and insecure HTTP traffic, marketed as hiding a user's IP from websites and network observers, so a class of bypass that makes WebKit traffic skip the proxy undercuts the product's core promise.
+
+The practical risk is deanonymization rather than malware: sites, trackers, or a local network observer that can induce a proxy bypass could attribute requests to a user's real IP and approximate location. The single event source here is a headline and link, so specifics such as affected OS versions, researcher attribution, and proof-of-concept detail are not yet in the store.
+
+Worth watching: a full writeup naming the WebKit code paths involved, any Apple security advisory or WebKit fix shipping in Safari/iOS updates, and whether the technique survives Apple's next release cycle or gets added to public fingerprinting and deanonymization tooling.
