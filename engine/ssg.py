@@ -526,6 +526,41 @@ def lint_kev_chips():
     return bad
 
 
+def run_prose_gate(cards_by_id, today=None, log=print):
+    """Prose-quality gate (store-health LEAF-3): KEV records get a hard verify
+    gate; prose had none, and the gap shipped — one analysis read exactly
+    "Analyst note based on event content. Watch for updates." (the generic
+    filler prompts/tia-hourly.md bans). Two halves, two failure modes:
+
+    ANALYSES (non-fatal, self-healing): lint every analysis whose story is a
+    live card — cards already exclude frozen/merged, so orphan/frozen files
+    are never quarantined. Violations move the file to .rejects/ and clear
+    the story json's "analysis" key, which re-queues the story via
+    merge.emit_needs (it queues any story whose analysis file is missing);
+    the story is re-analyzed next hour under the prompt that already bans
+    this. WARN per quarantined file, never a build failure.
+
+    DIGEST (fail-closed, PROSE FAIL): today's digest md is the flagship
+    artifact and daily_digest's recover sweep would republish a violating
+    one in a loop — a failed build records telemetry and pages via autodiag
+    instead of shipping slop. Absent digest: skip silently (no digest day).
+
+    Returns the digest violations (empty list = gate passed); analysis
+    quarantine is reported via log only. Sequenced after the other lints by
+    the caller so link/path errors surface first."""
+    import prose_lint
+    for cid in sorted(cards_by_id):
+        prose_lint.quarantine_analysis(STORIES_DIR, ANALYSIS_DIR,
+                                       {"id": cid}, log=log)
+    today = today or datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    dp = os.path.join(DIGESTS_DIR, today + ".md")
+    if not os.path.exists(dp):
+        return []
+    with open(dp, encoding="utf-8") as f:
+        return [f"digest {today}.md: {v}"
+                for v in prose_lint.lint_digest(f.read())]
+
+
 def lint_backlinks(cards):
     """Integrity: every digest narrative link and every explicit digest 'stories'
     entry must resolve to an existing story — INCLUDING merged-away stories
@@ -942,11 +977,17 @@ def main():
         yara_errs += yara_mod.validate_yara(f)
     for e in yara_errs:
         print(f"YARA FAIL {e}", file=sys.stderr)
-    if LINT_HITS or bad_links or bad_chips or backlink_errs or cti_errs or sigma_errs or yara_errs:
+    # prose gate runs after the existing lints: link/path errors surface first
+    prose_digest_errs = run_prose_gate(cards_by_id, today, log=print)
+    for e in prose_digest_errs:
+        print(f"PROSE FAIL {e}", file=sys.stderr)
+    if (LINT_HITS or bad_links or bad_chips or backlink_errs or cti_errs
+            or sigma_errs or yara_errs or prose_digest_errs):
         print(f"LINT FAIL: {len(LINT_HITS)} path-absolute + {len(bad_links)} unresolvable"
               f" internal URL(s) + {len(bad_chips)} URL-in-chip + {len(backlink_errs)}"
               f" backlink errors + {len(cti_errs)} CTI errors + {len(sigma_errs)}"
-              f" Sigma errors + {len(yara_errs)} YARA errors — fix before publishing.",
+              f" Sigma errors + {len(yara_errs)} YARA errors + {len(prose_digest_errs)}"
+              f" prose errors — fix before publishing.",
               file=sys.stderr)
         sys.exit(1)
 
