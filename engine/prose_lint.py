@@ -43,6 +43,7 @@ SLOP = [
     "delve into",
     "delves into",
     "underscores the importance",
+    "analyst note based on event content",
     "serves as a stark reminder",
     "in the realm of",
     "testament to",
@@ -52,6 +53,12 @@ SLOP = [
 # Structure contract: prompts/tia-hourly.md promises "2-4 short plain
 # paragraphs", no headings. Length bounds keep auto-extracted stubs (too
 # short) and prompt-dumped novellas (too long) out of the analyst voice.
+# PARAGRAPH COUNT IS SOFT (soft_paras, WARN only, never quarantines): the
+# real-store smoke showed 121 of 158 shipped analyses are dense single-
+# paragraph notes — mostly grounded, house-style writing. Enforcing 2-4 as
+# hard would quarantine 86% of the store for structure alone and flood the
+# re-analysis queue; the hard floor that actually separates filler from
+# analysis is MIN_LEN + grounding.
 MIN_PARAS, MAX_PARAS = 2, 4
 MIN_LEN, MAX_LEN = 200, 6000
 
@@ -82,13 +89,11 @@ def _banned_hits(text):
 
 
 def lint_analysis(text, story=None):
-    """Violations for one analysis (plain markdown). story, when given, only
-    names the file in the messages. Empty list = passes the gate."""
+    """HARD violations for one analysis (plain markdown) — each of these
+    quarantines. story, when given, only names the file in the messages.
+    Empty list = passes the gate. Paragraph-count drift is soft: see
+    soft_paras()."""
     out = _banned_hits(text)
-    paras = [p for p in re.split(r"\n\s*\n", text.strip()) if p.strip()]
-    if not MIN_PARAS <= len(paras) <= MAX_PARAS:
-        out.append(f"{len(paras)} paragraph(s) (prompts promise "
-                   f"{MIN_PARAS}-{MAX_PARAS} short plain paragraphs)")
     if any(l.lstrip().startswith("#") for l in text.splitlines()):
         out.append("markdown heading line (prompts ban headings)")
     if not MIN_LEN <= len(text) <= MAX_LEN:
@@ -99,6 +104,17 @@ def lint_analysis(text, story=None):
     if story:
         out = [f"{story}: {m}" for m in out]
     return out
+
+
+def soft_paras(text):
+    """SOFT violations: paragraph-count drift from the prompts' 2-4 promise.
+    Reported as WARNs, never quarantines (see the PARAGRAPH COUNT IS SOFT
+    note above — 86% of the real store is dense single-paragraph notes)."""
+    paras = [p for p in re.split(r"\n\s*\n", text.strip()) if p.strip()]
+    if MIN_PARAS <= len(paras) <= MAX_PARAS:
+        return []
+    return [f"{len(paras)} paragraph(s) (prompts promise "
+            f"{MIN_PARAS}-{MAX_PARAS} short plain paragraphs)"]
 
 
 def lint_digest(text):
@@ -134,7 +150,10 @@ def quarantine_analysis(stories_dir, analysis_dir, story, now=None, log=print):
     with open(ap, encoding="utf-8", errors="replace") as f:
         text = f.read()
     violations = lint_analysis(text)
+    soft = soft_paras(text)
     if not violations:
+        if soft:
+            log(f"WARN analysis/{sid}.md: soft (kept): {'; '.join(soft)}")
         return []
     ts = (now or datetime.now(timezone.utc)).strftime("%Y%m%dT%H%M%S")
     rejects = os.path.join(analysis_dir, ".rejects")

@@ -50,6 +50,9 @@ from datetime import datetime, timezone
 DATA = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
 DIGESTS = os.path.join(DATA, "digests")
 STORIES = os.path.join(DATA, "stories")
+KEV_INDEX = os.path.normpath(os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), "..", "kevrichment", "data",
+    "index.json"))
 # sibling of stories/ (derived the same way STORIES is derived from DATA), so
 # repointing STORIES in tests moves the event dir with it
 EVENTS = os.path.join(os.path.dirname(STORIES), "events")
@@ -180,6 +183,26 @@ def _save_frozen(ids):
               open(FREEZE_FILE, "w"), indent=1)
 
 
+def _kev_cves():
+    """CVE ids in the CISA KEV catalog (kevrichment index, same source the
+    /kev/ pages render). A story touching one is remediation-relevant by
+    definition — it anchors hunting and BOD 26-04 timelines — so it never
+    enters the cold tier, however quiet its coverage. Missing/corrupt
+    index -> empty set (freeze proceeds; fail-open by design)."""
+    try:
+        idx = json.load(open(KEV_INDEX))
+    except (OSError, ValueError):
+        return set()
+    out = set()
+    for e in (idx.get("cves") or []):
+        if not isinstance(e, dict):
+            continue
+        cid = e.get("cve_id") or e.get("id")
+        if isinstance(cid, str) and cid.upper().startswith("CVE-"):
+            out.add(cid.upper())
+    return out
+
+
 def freeze_sweep(stories, referenced=None, log=print):
     """Move never-mattered stories to the cold tier. Returns the NEWLY
     frozen ids (the pre-existing frozen set is not re-reported).
@@ -187,13 +210,16 @@ def freeze_sweep(stories, referenced=None, log=print):
     Eligibility (ALL must hold — each criterion independently blocks):
     not merged_into, not already frozen, not digest-referenced (live URLs),
     no truthy "analysis" key (a written analysis = someone cared), age over
-    FREEZE_MIN_AGE_DAYS, peak_score under FREEZE_PEAK, and n_sources within
-    FREEZE_MAX_SOURCES. Saves frozen.json once at the end; logs one summary
-    line (count + first few ids), never per-id spam — this runs hourly.
+    FREEZE_MIN_AGE_DAYS, peak_score under FREEZE_PEAK, n_sources within
+    FREEZE_MAX_SOURCES, and no CVE in the CISA KEV catalog (remediation-
+    relevant by definition — see _kev_cves). Saves frozen.json once at the
+    end; logs one summary line (count + first few ids), never per-id spam —
+    this runs hourly.
     """
     if referenced is None:
         referenced = referenced_story_ids()
     frozen = frozen_ids()
+    kev = _kev_cves()
     newly = []
     for sid, s in stories.items():
         if (sid in frozen or sid in referenced or s.get("merged_into")
@@ -204,6 +230,8 @@ def freeze_sweep(stories, referenced=None, log=print):
         if float(s.get("peak_score") or 0) >= FREEZE_PEAK:
             continue
         if int(s.get("n_sources") or 0) > FREEZE_MAX_SOURCES:
+            continue
+        if kev and {c.upper() for c in (s.get("cves") or [])} & kev:
             continue
         newly.append(sid)
     if newly:

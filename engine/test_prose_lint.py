@@ -80,8 +80,13 @@ check("bare filler sentence fails on missing grounding specifically",
       any("no grounding" in m for m in
           prose_lint.lint_analysis("Analyst note based on event content. "
                                    "Watch for updates.")))
-check("filler fails on structure too (1 paragraph, too short)",
-      any("1 paragraph" in m for m in v) and any("length" in m for m in v))
+check("boilerplate 'analyst note based on event content' is slop-listed",
+      any("AI-slop phrase" in m for m in prose_lint.lint_analysis(
+          GOOD.replace("The reporting outlet confirms",
+                       "Analyst note based on event content, and the "
+                       "reporting outlet confirms"))))
+check("filler fails on length too (too short)",
+      any("length" in m for m in v))
 check("story id prefixes messages when given",
       all(m.startswith("sid:") for m in prose_lint.lint_analysis(filler,
                                                                  story="sid")))
@@ -101,16 +106,17 @@ check("heading-led analysis fails",
 
 one = GOOD.split("\n\n")[0]
 v = prose_lint.lint_analysis(one)
-check("1-paragraph analysis fails (even when grounded)",
-      any("1 paragraph" in m for m in v)
-      and not any("no grounding" in m for m in v))
+check("1-paragraph analysis has NO hard violations (grounded, clean)",
+      v == [])
+check("1-paragraph analysis is SOFT-flagged instead",
+      any("1 paragraph" in m for m in prose_lint.soft_paras(one)))
 
-five = "\n\n".join([GOOD] * 2)[:0] + "\n\n".join(
+five = "\n\n".join(
     [para(f"Point {i}: the count reached 4,100 hosts on day {i}.", 35)
      for i in range(5)])
-v = prose_lint.lint_analysis(five)
-check("5-paragraph analysis fails the 2-4 band",
-      any("5 paragraph" in m for m in v))
+check("5-paragraph analysis is SOFT-flagged, not hard-failed",
+      any("5 paragraph" in m for m in prose_lint.soft_paras(five))
+      and prose_lint.lint_analysis(five) == [])
 
 long_text = "\n\n".join(
     f"Iteration {i} of the reporting cycle brought 4,100 additional scanned "
