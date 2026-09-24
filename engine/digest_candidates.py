@@ -76,8 +76,18 @@ def parse_utc(iso):
 
 def load_stories(stories_dir=STORIES_DIR):
     out = {}
+    # cold-tier freeze: frozen stories are invisible to the digest slate.
+    # Without this, an EVOLVED/bench candidate could be a frozen story, the
+    # digest agent would link it, and lint_backlinks would abort the publish
+    # (fail-closed outage). The path back onto the slate is the same one
+    # that froze the story in the first place: a strong event (URL/CVE) —
+    # merge unfreezes it and the next slate includes it naturally.
+    import lifecycle
+    frozen = lifecycle.frozen_ids()
     for f in glob.glob(os.path.join(stories_dir, "*.json")):
         s = json.load(open(f))
+        if s["id"] in frozen:
+            continue
         out[s["id"]] = s
     return out
 
