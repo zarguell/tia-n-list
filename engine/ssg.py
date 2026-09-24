@@ -306,6 +306,7 @@ def load_stories(events):
             "heat_label": hl,
             "heat_var": hv,
             "heat_pct": min(100, int(st.get("score", 0) / max_score * 100)),
+            "desk": bool(st.get("desk_reviewed_at")),
             "reddit": st.get("reddit_signal", {}).get("best_score") or None,
             "score_breakdown": st.get("score_breakdown", {}),
             "n_sources": st.get("n_sources", len(st.get("sources", []))),
