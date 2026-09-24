@@ -17,7 +17,8 @@ import sys
 from datetime import datetime, timezone
 
 from build_registry import clean_title, tokens, domain_of
-from score import hot_score, SB_DEFAULTS as _SB_DEFAULTS, backfill_score_breakdown
+from score import (hot_score, SB_DEFAULTS as _SB_DEFAULTS,
+                   backfill_score_breakdown, update_peak)
 
 ENGINE = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(ENGINE, "data")
@@ -396,6 +397,7 @@ def main():
             sc = real_score(s)
             s["score"] = sc["score"]
             s["score_breakdown"] = {k: v for k, v in sc.items() if k != "score"}
+            update_peak(s, sc)
         except Exception as e:
             # One story's scoring failure must not abort the whole merge nor
             # leave an empty score_breakdown (which crashes the SSG render and
