@@ -1,0 +1,1 @@
+CISA's KEV feed shows CVE-2026-59310 (Broadcom VMware vCenter Path Traversal Vulnerability, CWE-22) added on August 18, 2026 with a required action due date of August 21, 2026. The entry marks known ransomware campaign use, requires forensic triage, and points to the Broadcom advisory (notification 38017) and BOD 26-04 guidance.

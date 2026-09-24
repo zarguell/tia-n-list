@@ -1,0 +1,1 @@
+First news coverage of VMSA-2026-0006, published July 30, 2026, reports that Broadcom released updates fixing five vulnerabilities across vCenter, ESX, Workstation and Fusion, including three critical flaws allowing authentication bypass, arbitrary code execution, and escape from a virtual machine to the host.
