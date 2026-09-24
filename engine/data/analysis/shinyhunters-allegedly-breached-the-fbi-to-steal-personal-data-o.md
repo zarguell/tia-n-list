@@ -1,1 +1,5 @@
-ShinyHunters claim to have breached the FBI job portal, stealing employee personal data and forcing it offline. The FBI is investigating. No CVEs cited; watch for confirmation and scale.
+ShinyHunters claimed responsibility for a breach of FBI employee and applicant data on September 23, 2026, alleging thousands of officials' personal details were stolen. The group demanded removal of a FLASH report they say falsely accused them. The claim includes addresses, phone numbers, and spouse information, with members of the FBI's secretive hacking team among the exposed, according to a 404 Media investigation by Joseph Cox.
+
+The FBI is investigating whether the claim is real. The bureau's job portal was forced offline. The stolen dataset's sensitivity is significant because it could reveal the identity of FBI hacking team members. The group linked its demand to an alleged false FLASH report, mixing a breach claim with a grievance narrative.
+
+What to watch: FBI confirmation of the breach, any leak releases, and whether the exposed hacking team identities lead to further targeting. The mix of breach claim and demand for report removal is unusual and suggests either an extortion attempt or an attempt to discredit prior FBI attribution.
