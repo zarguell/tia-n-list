@@ -1,0 +1,5 @@
+CISA has published its 2026 Election Infrastructure Security Plan, a document describing the cyber and physical threats facing US election systems and the free services the agency offers to election officials and partners. The plan calls out patching barriers as a persistent weakness in election infrastructure and flags attacks against voter registration databases as an ongoing threat vector.
+
+The significance is less in new intelligence than in priorities and resourcing. A public plan that names patching friction and voter database attacks tells state and local election offices where CISA will focus voluntary services, and it gives a baseline to measure next cycle's gaps against. It lands ahead of the 2026 midterm period, when election infrastructure typically draws elevated targeting from criminal and nation-state actors alike.
+
+Watch for whether the named services see actual uptake by local jurisdictions, whether CISA follows with technical guidance on the patching barriers it identifies, and whether any incident in the coming cycle maps to the threat scenarios the plan describes.

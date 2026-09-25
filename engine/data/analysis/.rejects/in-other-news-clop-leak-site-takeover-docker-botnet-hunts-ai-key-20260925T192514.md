@@ -1,0 +1,5 @@
+ShinyHunters defaced Cl0p's Tor leak site and claims it exfiltrated the site's server logs, source code, and onion private keys. The group is threatening further action against Cl0p, the extortion brand behind some of the largest data-theft campaigns of recent years, including the Oracle and Mangle-style wave of enterprise breaches.
+
+Infighting between extortion crews matters operationally, not just as spectacle. If the claimed key theft is real, ShinyHunters can impersonate Cl0p's leak site and post fabricated or real victim data under Cl0p's name, poisoning the trust model that leak-site extortion depends on. Victim organizations negotiating with either crew, and defenders tracking Cl0p leak postings for breach confirmation, should treat anything published from that infrastructure now as unverified.
+
+Watch for Cl0p's response, whether it rebuilds on new infrastructure, whether purported Cl0p victim data resurfaces under ShinyHunters' brands, and for a wave of scams targeting victims who assume their data leaked when it may not have, or the reverse.
