@@ -1,0 +1,1 @@
+The NVD record, assigned by security@android.com and published June 1, 2026, describes the flaw as an integer overflow in multiple locations permitting code execution, leading to local escalation of privilege with no additional execution privileges and no user interaction needed. A secondary CVSS 3.1 score of 8.4 High accompanies it (AV:L/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H).
