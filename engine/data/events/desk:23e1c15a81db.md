@@ -1,0 +1,1 @@
+NVD record for the JCE editor extension for Joomla, which allows unauthenticated users to create new editor profiles, ultimately resulting in PHP code upload and execution. This is the Joomla flaw in the ACSC list that CISA added to the KEV catalog in mid-June.

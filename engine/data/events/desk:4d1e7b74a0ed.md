@@ -1,0 +1,1 @@
+NVD record for the WavePlayer WordPress plugin before 3.8.0, which lacks authorization on an AJAX action and validation of copied files, letting unauthenticated users upload arbitrary files and achieve remote code execution. Fixed in 3.8.0.

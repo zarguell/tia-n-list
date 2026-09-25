@@ -1,0 +1,1 @@
+NVD record for the goodoneuz/pay-uz Laravel payment package up to and including 2.2.24, exposing /payment/api/editable/update via Route::any without authentication middleware. Unauthenticated attackers can overwrite existing PHP payment hook files, yielding remote code execution. The component is a Laravel package rather than a CMS plugin.

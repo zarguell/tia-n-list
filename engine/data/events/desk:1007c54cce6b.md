@@ -1,0 +1,1 @@
+NVD record for the Breeze Cache performance plugin for WordPress, vulnerable up to and including 2.4.4 through missing file type validation in the fetch_gravatar_from_remote function. Unauthenticated arbitrary file upload is possible.

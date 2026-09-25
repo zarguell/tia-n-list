@@ -1,0 +1,1 @@
+NVD record describing a remote code execution vulnerability in Craft CMS from 3.0.0-RC1 before 3.9.15, 4.0.0-RC1 before 4.14.15, and 5.0.0-RC1 before 5.6.17, with a high-impact, low-complexity attack vector. Patched in versions 3.9.15, 4.14.15, and 5.6.17. This is the Craft CMS flaw named in the ACSC campaign alert.

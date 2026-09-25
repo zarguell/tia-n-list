@@ -1,0 +1,1 @@
+NVD record for the WPvivid Backup & Migration plugin for WordPress, vulnerable up to and including 0.9.123 through improper error handling in RSA decryption combined with missing path sanitization when writing files. Enables unauthenticated arbitrary file upload.

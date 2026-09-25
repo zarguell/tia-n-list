@@ -1,0 +1,1 @@
+NVD record for the Sneeit Framework plugin for WordPress, vulnerable in all versions up to and including 8.3 via sneeit_articles_pagination_callback() passing user input to call_user_func(). Unauthenticated code execution can be leveraged to inject backdoors. Sneeit Framework exploitation was publicly reported in late 2025.

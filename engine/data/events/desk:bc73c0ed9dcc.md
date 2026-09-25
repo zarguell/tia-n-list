@@ -1,0 +1,1 @@
+NVD record for the Simple-File-List plugin for WordPress, vulnerable in versions up to and including 4.2.2 via a rename function that converts an uploaded PNG to a PHP file, giving unauthenticated attackers code execution. One of the two Simple File List identifiers in the ACSC campaign list.

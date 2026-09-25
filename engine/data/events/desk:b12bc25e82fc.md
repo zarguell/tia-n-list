@@ -1,0 +1,1 @@
+NVD record for the Gravity Forms plugin, vulnerable up to and including 2.9.20 through missing file type validation in the copy_post_image() function. Unauthenticated attackers can upload arbitrary files, which may enable remote code execution.
