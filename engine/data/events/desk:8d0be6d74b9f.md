@@ -1,0 +1,1 @@
+On October 20, 2025, CISA added CVE-2025-2746 to its Known Exploited Vulnerabilities catalog, confirming active exploitation of the Kentico Xperience authentication bypass. The alert requires federal agencies to apply patches by specified deadlines and reflects real-world attacker use of the Staging Sync Server vulnerability for pre-auth administrative access.

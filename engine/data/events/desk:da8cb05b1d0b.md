@@ -1,0 +1,1 @@
+Roundcube released security updates 1.6.11 and 1.5.10 on June 1, 2025, patching the deserialization vulnerability later tracked as CVE-2025-49113. The advisory confirms the RCE risk for authenticated users and provides the commit references that fix improper input validation in program/actions/settings/upload.php.

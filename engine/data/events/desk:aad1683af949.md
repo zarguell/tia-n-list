@@ -1,0 +1,1 @@
+On September 9, 2026, CISA added CVE-2026-20079 (Cisco Firewall Management Center authentication bypass) to its Known Exploited Vulnerabilities catalog, citing evidence of active exploitation. The alert notes the vulnerability allows malicious actors to gain total control of affected assets and directs federal agencies to prioritize rapid remediation under BOD 26-04.

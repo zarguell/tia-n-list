@@ -1,0 +1,1 @@
+OP Innovate reported on October 21, 2025 that CVE-2025-33073 enables an authenticated remote attacker to escalate privileges to NT AUTHORITY\SYSTEM by abusing SMB access controls when SMB signing is not enforced. The post notes public PoC exploits and that the vulnerability is listed in CISA's KEV with a CVSS 8.8 score.

@@ -1,0 +1,1 @@
+Broadcom published a protection bulletin on October 23, 2025 describing CVE-2025-33073 as a high severity (CVSS 8.8) privilege escalation vulnerability in Windows SMB Client with evidence of active exploitation in the wild.

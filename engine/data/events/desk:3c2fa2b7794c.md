@@ -1,0 +1,1 @@
+Microsoft published the vendor advisory for CVE-2025-33073 on June 10, 2025. The vulnerability is an improper access control flaw in the Windows SMB client that allows an authorized attacker to elevate privileges over a network when SMB message integrity is not cryptographically enforced.

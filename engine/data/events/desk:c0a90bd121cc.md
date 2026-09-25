@@ -1,0 +1,1 @@
+SentinelOne's vulnerability database entry from April 9, 2026, classifies CVE-2026-39987 as a pre-authentication remote code execution vulnerability in the marimo Python notebook. It notes the affected endpoint /terminal/ws allows unauthenticated attackers to obtain an interactive shell, and confirms versions through 0.20.4 are vulnerable with 0.23.0 as the patched release.

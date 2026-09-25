@@ -1,0 +1,1 @@
+Imperva reported on June 27, 2017 disclosure of CVE-2017-9841, a remote code execution vulnerability in PHPUnit before 4.8.28 and 5.x before 5.6.3 via eval-stdin.php. The study observed around nine million attack attempts through 2020, with campaigns such as sssp.php and traber targeting CMS modules that embed PHPUnit in production.

@@ -1,0 +1,1 @@
+NIST listed CVE-2025-33073 in the National Vulnerability Database on June 10, 2025. The entry describes improper access control in Windows SMB allowing an authorized attacker to elevate privileges over a network, with CVSS metrics recorded.
