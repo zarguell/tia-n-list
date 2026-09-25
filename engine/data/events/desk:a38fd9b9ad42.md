@@ -1,0 +1,1 @@
+The Exchange Team published this blog post on May 14, 2026 as the official mitigation guidance for CVE-2026-42897. Microsoft links to it directly from the MSRC advisory FAQ for instructions on protecting Exchange Server, pointing admins to the Exchange Emergency Mitigation Service.

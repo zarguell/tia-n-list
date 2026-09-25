@@ -1,0 +1,1 @@
+The KEV feed records CVE-2024-40766 (SonicWall SonicOS Improper Access Control Vulnerability) with dateAdded 2024-09-09, a required-action due date of 2024-09-30, and knownRansomwareCampaignUse set to Known. The entry cites the SonicWall advisory SNWLID-2024-0015 and a SonicWall notice on Gen 7 and newer firewall SSLVPN recent threat activity.
