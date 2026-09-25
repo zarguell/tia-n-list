@@ -1,0 +1,1 @@
+PyPI's JSON API records the starlette 1.0.1 distribution upload at 2026-05-21T21:58:56 UTC, minutes after the GitHub release. The patched wheel was therefore publicly installable from May 21, 2026, seven days before the story's first_seen of May 28. PyPI upload time is the authoritative distribution date for the fixed release.
