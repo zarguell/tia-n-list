@@ -1,0 +1,47 @@
+title: Suspicious Child Processes of Samsung MagicINFO Tomcat
+id: 13492049-498b-4c32-871d-4b973f6cd8ab
+status: experimental
+description: >
+    Detects post-exploitation activity of CVE-2025-4632 against Samsung
+    MagicINFO 9 Server: every observed step ran as a child of
+    tomcat9.exe — certutil and PowerShell pulling AnyDesk from
+    194.87.89.30:8899, and compiler tooling (csc.exe, cvtres.exe,
+    tcc.exe, cc1.exe, gcc.exe, donut.exe) building a Monero miner on
+    the host — plus explorer.exe launched with RandomX mining
+    arguments targeting auto.c3pool.org:19999 (Huntress, September
+    2026).
+references:
+    - https://www.huntress.com/blog/threat-actor-compiles-cryptominer
+    - https://www.huntress.com/blog/post-exploitation-activities-observed-from-samsung-magicinfo-9-server-flaw
+author: Tia N. List
+date: 2026/09/25
+tags:
+    - attack.t1190
+    - attack.t1105
+    - attack.t1500
+    - attack.t1059
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_parent:
+        ParentImage|endswith: '\tomcat9.exe'
+    selection_child:
+        Image|endswith:
+            - '\certutil.exe'
+            - '\powershell.exe'
+            - '\anydesk.exe'
+            - '\csc.exe'
+            - '\cvtres.exe'
+            - '\tcc.exe'
+            - '\cc1.exe'
+            - '\gcc.exe'
+            - '\donut.exe'
+    selection_miner:
+        Image|endswith: '\explorer.exe'
+        CommandLine|contains: 'c3pool.org'
+    condition: (selection_parent and selection_child) or selection_miner
+falsepositives:
+    - Legitimate administrative use of certutil, PowerShell or AnyDesk on a MagicINFO host
+    - Benign compiler invocations under the MagicINFO Tomcat process during vendor maintenance
+level: high
