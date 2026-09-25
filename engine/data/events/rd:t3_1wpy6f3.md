@@ -1,0 +1,3 @@
+Hello everyone, Some updates about my OSINT / IoC analysis open source tool Cyberbro. Since v0.15 you can use (directly on the demo website): - the new ScanMalware engine - the updated DFIR-IRIS engine to search for IoCs in notes - the new Microsoft tenant check to verify if a domain is linked to a Microsoft tenant + region I hope you find these features interesting! Thanks to the community for keeping Cyberbro alive, I am always pleased to get quality Pull Requests. Feel free to check the repo here via the attached link. submitted by /u/stan_frbd [link] [comments]
+
+via reddit r/cybersecurity: Cyberbro v0.15.2 released - MS tenant check, ScanMalware
