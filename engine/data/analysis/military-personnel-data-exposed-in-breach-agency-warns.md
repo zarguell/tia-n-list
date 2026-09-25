@@ -1,0 +1,5 @@
+The Defense Manpower Data Center disclosed a data breach after a vulnerability exposed military personnel data, with the agency warning affected individuals; Military Times reported the disclosure on September 24, 2026. DMDC is the Department of Defense's central personnel and manpower records hub, which makes any exposure there significant even before the full scope is public.
+
+The public reporting available so far is limited: the disclosure, the vulnerability as the exposure path, and the agency's warning to personnel. No affected count, no named exploit, and no adversary attribution appear in the coverage captured here, so the actual blast radius is unknown.
+
+Watch for three things: the affected population size and which data elements were exposed, whether the vulnerability was internally disclosed or found in exploitation, and notification mechanics for service members. Personnel data from DoD systems feeds targeting, phishing, and fraud against military members, so follow-on social engineering is the predictable second-order effect while the facts are still thin.
