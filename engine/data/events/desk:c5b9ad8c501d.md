@@ -1,0 +1,1 @@
+CISA added the BerriAI LiteLLM Command Injection Vulnerability, CVE-2026-42271, to the Known Exploited Vulnerabilities Catalog on June 8, 2026, with a federal remediation due date of June 22, 2026 under BOD 22-01. The KEV listing documents confirmed in-the-wild exploitation roughly eleven weeks before the Wiz honeypot research reached the news coverage in this story.

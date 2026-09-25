@@ -1,0 +1,5 @@
+DriveWealth disclosed a data breach after a social engineering campaign led to unauthorized access to customer personal information. The impact reaches beyond DriveWealth's own customers: Stake disclosed that some of its customer data was exposed in the same third-party breach, and Hatch disclosed that some customer information may have been exposed as well.
+
+DriveWealth is a brokerage backend that powers consumer trading apps, so a single compromise of its systems fans out across multiple brands and their customer bases at once. The social engineering vector points at people and vendor access controls rather than a product vulnerability, which means the same campaign may work against other financial infrastructure providers.
+
+Watch the full scope of what records were exposed, additional DriveWealth partners disclosing in the coming days, and a likely wave of targeted phishing against affected customers using the leaked personal details. Affected users should treat unexpected brokerage or identity-related contact as hostile until verified.

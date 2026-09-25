@@ -1,0 +1,5 @@
+BigDiskBuster is a proof-of-concept published on GitHub by user MSNightmare, credited to researcher NightmareEclipse, that blocks Microsoft Defender from completing its platform and security intelligence signature updates by filling disk space. The effect is a denial-of-service condition on protection updates: Windows endpoints keep running but on stale anti-malware definitions. The reports describe it as an unpatched zero-day with no fix available.
+
+The concern is availability of defense rather than a code execution bug. An endpoint stuck on old signatures loses coverage of new malware families with every hour it stays stuck, and the blocking technique needs nothing exotic, just disk consumption, so it is plausible as a pre-staging step for attackers who want Defender blind before dropping a payload.
+
+Watch Microsoft's assessment and whether a patch or a Defender-side guard lands, any CVE assignment, and whether malware in the wild starts pairing disk-filling with payload delivery. Until then, monitoring free disk space on endpoints is the practical mitigation signal.
