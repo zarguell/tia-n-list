@@ -1,0 +1,1 @@
+CISA added CVE-2025-9242 to the Known Exploited Vulnerabilities catalog on 2025-11-12, giving federal agencies a 2025-12-03 remediation deadline under BOD 22-01. The catalog entry carries knownRansomwareCampaignUse set to Unknown and references WatchGuard advisory WGSA-2025-00015.
