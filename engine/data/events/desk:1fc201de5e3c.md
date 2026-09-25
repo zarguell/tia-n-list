@@ -1,0 +1,1 @@
+NVD's record describes a critical RCE in PTC Windchill PDMLink and PTC FlexPLM exploitable through deserialization of untrusted data, scored 9.3 Critical (CVSS v4) by CNA PTC, with CWE-20 and CWE-502 and affected builds spanning releases prior to 11.0 M030 through 13.1.3. It records the CISA KEV addition on June 25, 2026 with a federal remediation due date of June 28, 2026.

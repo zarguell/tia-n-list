@@ -1,0 +1,5 @@
+ShinyHunters defaced Cl0p's Tor leak site and claims it exfiltrated the site's server logs, source code, and onion private keys. The story also bundles two smaller items from the same roundup: a Docker-hosted botnet that hunts for leaked AI API keys, and an exposed water utility instance. The leak-site takeover is the notable piece because it targets the infrastructure extortion crews rely on for naming and shaming victims.
+
+The theft of onion private keys matters operationally. Whoever holds them can impersonate a leak site that victims have been trained to check, which opens a second-round extortion lane: fake leak pages, spoofed victim contact, and demands that never come from the real Cl0p. Rivalry between crews has mostly played out in claims and counterclaims, but this one touches the victims directly if the key theft is real.
+
+Watch for Cl0p confirming or denying the compromise, for mirror archives of the defaced site, and for any victims reporting contact from impostors using the cloned infrastructure. If the botnet hunting AI keys in Docker environments is corroborated, it fits the broader pattern of attackers mining developer and cloud credentials.

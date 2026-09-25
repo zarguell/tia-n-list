@@ -1,0 +1,1 @@
+CISA's KEV feed records CVE-2026-20045, named Cisco Unified Communications Products Code Injection Vulnerability, with dateAdded 2026-01-21, the same day Cisco published the advisory. Federal agencies were given a remediation due date of 2026-02-11 under BOD 22-01. The entry lists CWE-94 and marks known ransomware campaign use as Unknown.

@@ -1,0 +1,5 @@
+A new PamStealer macOS variant is circulating with two upgrades that matter for analysis and cleanup: the payload is decrypted live from its command-and-control server rather than embedded in the binary, and the malware establishes persistence across multiple layers. The JXA dropper has been refreshed with a new lure and updated delivery, per The Hacker News's writeup.
+
+Live C2 decryption means static samples reveal little, so sandbox detonation with recorded traffic becomes the only reliable way to recover the second stage. Multi-layer persistence raises remediation cost, since removing one mechanism leaves the others to reinstall the implant. macOS infostealers keep maturing because macOS fleets hold the same browser, wallet, and corporate SSO session material Windows boxes do.
+
+Watch for IOC publication once researchers capture C2 traffic, the lure themes the new dropper uses, and whether PamStealer shows up in malvertising or SEO poisoning campaigns. Defenders on Mac estates should treat unidentified JXA execution and unexpected launch agents or login items as reportable events.

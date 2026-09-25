@@ -1,0 +1,5 @@
+The Supreme Court allowed states to use the federal SAVE database for citizenship checks, per CyberScoop's report on the voter citizenship verification fight. SAVE is the Systematic Alien Verification for Entitlements service, a federal dataset states previously could not lean on for voter roll maintenance at scale.
+
+The security angle is data access and accuracy rather than exploitation: a large expansion of who can query a federal identity database for election purposes, with the usual risks of false mismatches on common names, inconsistent records, and no clear audit trail for queries. CyberScoop frames it as part of the ongoing voter-citizenship verification push, and the database was built for benefits eligibility, not roll maintenance.
+
+Watch which states turn SAVE queries on first, what error and appeal processes appear for flagged voters, and whether DHS imposes query logging or purpose limits. Any breach or misuse of SAVE queries would now touch election administration directly.
