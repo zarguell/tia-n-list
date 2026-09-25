@@ -1,0 +1,1 @@
+CVE record published by the Joomla CNA for arbitrary file upload in iCagenda's file attachment feature, ultimately resulting in PHP code upload and execution. Versions 3.2.1 through 4.0.7 are listed as affected. CVSS v4.0 base score is 10.0 with exploit maturity marked ATTACKED, and the record references a public exploit repository on GitHub.

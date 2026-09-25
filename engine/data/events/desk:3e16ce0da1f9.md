@@ -1,0 +1,1 @@
+Vendor changelog from developer JoomliC for the iCagenda Joomla events component, version 4.0.8 dated 2026.06.15, marked as a critical security release fixing a full unauthenticated remote code execution. No technical detail is given, with the developer stating more details would be provided later. This release ends the affected 4.x line at 4.0.7.

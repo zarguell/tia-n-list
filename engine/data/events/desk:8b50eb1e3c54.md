@@ -1,0 +1,1 @@
+CVE record published by the Joomla CNA for unauthenticated arbitrary file upload in Balbooa Forms below 2.4.1, with versions 1.0 through 2.4.0 affected, leading to full RCE. CVSS v4.0 base score is 10.0 with exploit maturity marked ATTACKED and Automatable set to YES.

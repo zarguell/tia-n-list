@@ -1,0 +1,1 @@
+CISA added CVE-2026-48939 (iCagenda) and CVE-2026-56291 (Balbooa Forms) to the KEV catalog on July 10, 2026, each as a CWE-434 unrestricted upload entry with a federal remediation due date of July 13, 2026 under BOD 26-04. Both require forensic triage; known ransomware campaign use is listed as Unknown for both.
