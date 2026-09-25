@@ -1,0 +1,5 @@
+Zscaler ThreatLabz documented an August 2026 phishing campaign that used fraudulent Google ads to target Ledger hardware wallet users. The ads ran under a Google-verified advertiser profile, then routed victims through Google Cloud Storage and Vercel to a Google Sites page that displayed a Ledger lookalike phishing page in an iframe. The Vercel redirect targets rotated every 15 to 20 minutes during observation.
+
+The fake page walked users through a device-verification flow and asked for their secret recovery phrases, which were sent to an attacker-controlled Vercel domain. A recovery phrase is enough to drain a wallet without ever touching the physical device, so this flow converts ad clicks directly into theft.
+
+The campaign abuses Google's own trusted infrastructure at every hop, which helps it evade domain reputation checks and browser warnings. What to watch: takedown pace by Google, whether the verified-advertiser abuse pattern recurs against other wallet vendors, and new infrastructure indicators from ThreatLabz follow-ups.

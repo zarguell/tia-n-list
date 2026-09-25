@@ -1,0 +1,5 @@
+BleepingComputer confirmed that the Clop ransomware gang's data leak site was breached earlier this month by the ShinyHunters extortion gang through an unauthenticated path traversal vulnerability in an unpatched Grav CMS installation. ShinyHunters first uploaded a small text file, then replaced the site with a full-page defacement carrying its Umbreon logo and a link to its own leak site.
+
+ShinyHunters claims it stole source code, Grav CMS plugins, server logs, and the private keys for Clop's Tor onion service, and issued a ransom demand threatening to publish the files. Clop has moved to a new onion address, says the old one will be retired, denies any relationship or negotiation with ShinyHunters, and disputes parts of the theft claim. Clop confirmed its Grav install was not fully updated.
+
+The episode is a rare documented case of one ransomware operation hacking another's leak infrastructure, and stolen onion private keys create a phishing risk for victims who verify Clop communications. What to watch: any leaked Clop victim logs, whether Clop's new onion address is widely re-verified, and Grav CMS patching guidance for the path traversal flaw.
