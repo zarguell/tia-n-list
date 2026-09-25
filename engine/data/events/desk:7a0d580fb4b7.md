@@ -1,0 +1,1 @@
+The NVD record for CVE-2026-28325 was published 2026-09-22T20:17:03Z, the same publication batch as CVE-2026-28324. The description matches the vendor advisory: unauthenticated RCE from deserialization of untrusted data in a specific communication mode.

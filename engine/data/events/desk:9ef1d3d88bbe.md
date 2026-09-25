@@ -1,0 +1,1 @@
+The CVE record was published on 2025-06-17 and describes insufficient input validation leading to memory overread when NetScaler is configured as a Gateway (VPN virtual server, ICA Proxy, CVPN, RDP Proxy) or AAA virtual server. NVD scores it 7.5 with the vector AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N. Date taken from the NVD API record.

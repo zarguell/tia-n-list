@@ -1,0 +1,1 @@
+The KEV feed shows CVE-2025-5777 was added on 2025-07-10 with a due date of 2025-07-11 and the flag knownRansomwareCampaignUse: Known. The entry describes an out-of-bounds read (CWE-125) in NetScaler ADC and Gateway and cites the vendor advisory CTX693420. Date taken from the CISA KEV JSON feed.
