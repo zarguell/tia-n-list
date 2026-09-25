@@ -1,0 +1,1 @@
+The July 2024 CPU advisory lists CVE-2024-21182 affecting Oracle WebLogic Server versions 12.2.1.4.0 and 14.1.1.0.0. The vulnerability allows remote exploitation without authentication via T3/IIOP protocols. Credits include Boogipop, J0hNs0N of Qianxin wuji Lab, yemoli, and yulate. The advisory was initially released on July 16, 2024 (Rev 1).
