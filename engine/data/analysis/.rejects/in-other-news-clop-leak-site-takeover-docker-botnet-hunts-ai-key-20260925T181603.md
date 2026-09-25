@@ -1,0 +1,5 @@
+ShinyHunters has defaced Cl0p's Tor-based leak site and claims it exfiltrated the site's server logs, source code, and onion private keys. The group is also issuing threats against Cl0p, though the reporting captured here cuts off before the specifics. This is an escalation of the rivalry between the two extortion crews rather than an attack on victims.
+
+The operationally significant detail is the claimed theft of onion private keys. Whoever holds a leak site's onion keys can stand up an indistinguishable copy of the site, so victims, researchers, and journalists can no longer trust that they are reading Cl0p's authentic postings. Claims of stolen logs and source code could also expose Cl0p's victim list and internal tooling to a competitor crew.
+
+The story's framing bundles this takeover with a Docker-targeting botnet that hunts AI API keys and exposed water utility systems, based on reporting from SecurityWeek and CyberworldOps. Watch for whether ShinyHunters publishes or monetizes the claimed Cl0p material, whether Cl0p rotates its onion infrastructure, and whether any stolen victim data resurfaces on a new extortion brand.

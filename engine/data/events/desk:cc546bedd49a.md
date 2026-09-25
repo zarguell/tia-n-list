@@ -1,0 +1,1 @@
+The NVD record for CVE-2025-3248 was published April 7, 2025 with VulnCheck as CNA and a CVSS 3.1 base score of 9.8. It describes code injection in Langflow versions prior to 1.3.0 through the /api/v1/validate/code endpoint, letting a remote unauthenticated attacker execute arbitrary code, and references the Horizon3 disclosure and the Langflow 1.3.0 patch release.

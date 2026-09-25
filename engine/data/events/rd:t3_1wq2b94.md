@@ -1,0 +1,3 @@
+I'm a Salesforce admin, not a cybersecurity expert, so please talk to me like I'm dumb. Salesforce had a similar exploit that was "patched" last year. My question is, is there anything that prevents exfiltration via calling 3rd party URLs in other AI clients, like Claude? In Agentforce, after the first web-to-lead vulnerability was discovered last year, you have to allowlist URLs for your users to access. You don't have to do that in Claude. Is this a vulnerability anywhere you can do that? submitted by /u/Material-Draw4587 [link] [comments]
+
+via reddit r/cybersecurity: 'Salesbleed' Exploits Salesforce Agents to Enable Slack Phishing
