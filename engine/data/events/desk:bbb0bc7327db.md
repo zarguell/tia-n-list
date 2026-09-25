@@ -1,0 +1,1 @@
+CISA added CVE-2026-42271, the BerriAI LiteLLM command injection vulnerability, to the Known Exploited Vulnerabilities catalog on June 8, 2026 based on evidence of active exploitation, alongside CVE-2026-50751, a Check Point Security Gateway improper authentication vulnerability. Federal agencies were given the standard KEV remediation deadline to patch or discontinue use.

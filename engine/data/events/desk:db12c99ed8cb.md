@@ -1,0 +1,1 @@
+The vendor advisory itself: Anthropic's Threat Intelligence team reports operations it identified and disrupted in which threat actors tried to use Claude for malicious activity, sharing case studies from December 2025 through August 2026 across seven areas of harm, from cyber operations to biological misuse. Day-level date taken from Anthropic's own news index listing.

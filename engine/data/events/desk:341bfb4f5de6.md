@@ -1,0 +1,1 @@
+Kaspersky's Securelist published technical analysis of The Gentlemen RaaS, documenting ransomware variants written in C and Go and a custom Go-based backdoor used by the group. Unit 42's July 2026 report cites this write-up for the group's encryption tooling.

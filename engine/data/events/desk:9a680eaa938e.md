@@ -1,0 +1,1 @@
+Brian Krebs published evidence on the identity of hastalamuerte, founder and administrator of The Gentlemen, whom Group-IB describes as a disgruntled former Qilin affiliate. The reporting builds on the group's May 2026 internal data leak.
