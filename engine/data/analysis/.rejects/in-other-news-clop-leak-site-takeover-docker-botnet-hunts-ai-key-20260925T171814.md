@@ -1,0 +1,5 @@
+ShinyHunters defaced Cl0p's Tor-based leak site and claims it walked away with server logs, source code and the onion service private keys. The captured event is a short pointer to CyberworldOps coverage, so the exfiltration claims come from ShinyHunters themselves and remain unverified.
+
+This is infighting between two of the most active extortion brands. Cl0p depends on its leak site to pressure victims stolen from large-scale data theft campaigns, so a hostile takeover of that infrastructure undercuts its leverage even before anything is published. If the claimed onion private keys are genuine, ShinyHunters could impersonate the site, serve its own content under Cl0p's address, or lock Cl0p out of its own storefront.
+
+Watch for ShinyHunters releasing the claimed logs, source or keys, Cl0p rebuilding or relocating its leak infrastructure, and any sign the takeover exposed Cl0p's victim list or negotiations. Treat the exfiltration claims as unconfirmed until independent researchers verify artifacts.

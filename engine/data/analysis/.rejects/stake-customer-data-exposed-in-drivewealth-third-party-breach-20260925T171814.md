@@ -1,0 +1,5 @@
+Stake disclosed that some customer data was exposed after attackers gained unauthorized access to DriveWealth, the third-party trading infrastructure provider behind its brokerage service. Hatch, another consumer platform on the same backend, separately told customers their information may have been exposed in the same incident, making this a supplier breach rippling across multiple brokers at once.
+
+The significance is concentration risk. DriveWealth sits behind many retail trading apps, so a single intrusion touches several firms' customer bases simultaneously. Both disclosures captured here describe data exposure rather than confirmed fund loss, and neither lists the exact data types or record counts, so scope is still open.
+
+Watch for a DriveWealth statement naming affected clients and data categories, confirmation of whether identity documents or tax IDs were in the exposed set, and state or regulator notifications. Additional brokers on the same backend disclosing over the coming days would confirm the blast radius is wider than the two known so far.
