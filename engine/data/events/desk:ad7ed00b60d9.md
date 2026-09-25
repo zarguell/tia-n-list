@@ -1,0 +1,1 @@
+Ubuntu shipped kernel fixes covering CVE-2022-0492 starting with USN-5302-1 for the OEM kernel on 22 February 2022, before the CVE record was published. Ubuntu's CVE tracker lists a follow-on series of notices (USN-5337-1 through USN-5377-1) fixing the same vulnerability across additional kernel flavors.
