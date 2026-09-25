@@ -1,0 +1,1 @@
+Manifold Security's disclosure links this Internet Archive capture of http://third-party.com/ as evidence the domain has served the ClickFix lure since at least June 2026. The capture timestamp embedded in the archived URL is June 15, 2026 02:33:40 UTC, making it the earliest documented malicious activity of the domain, roughly three months before the September 23, 2026 coverage.
