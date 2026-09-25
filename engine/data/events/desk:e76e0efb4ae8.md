@@ -1,0 +1,1 @@
+NVD record published September 8, 2026 for a missing-authorization flaw in NVIDIA Triton Inference Server for Linux whose successful exploitation can lead to information disclosure, data tampering, and denial of service. Scored CVSS 7.5 HIGH. Canada's CCCS advisory AV26-900 lists affected Triton versions through the 26.03 and 26.06 trains.
