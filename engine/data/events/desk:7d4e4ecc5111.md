@@ -1,0 +1,1 @@
+CISA added CVE-2025-24472, the CSF proxy request variant of the Fortinet authentication bypass, to the KEV catalog on March 18, 2025 with a federal remediation due date of April 8, 2025 and a known ransomware campaign use flag. This confirmed exploitation of the second flaw now chained by Gunra roughly two months after the initial advisory.

@@ -1,0 +1,5 @@
+The Mini Shai-Hulud npm supply chain worm is not contained. SafeDep reports it keeps infecting GitHub repositories through hijacked GitHub Actions workflows, and Socket documents that compromised Actions left dormant since May reactivated this week, executing malicious payloads inside CI/CD pipelines. The earlier containment effort has effectively turned into a renewed attack wave, with thousands of repositories exposed.
+
+The persistence mechanism is the problem. Repositories that cleaned their dependencies but kept compromised workflow files were reinfected the moment the attackers flipped the Actions back on, because the worm's foothold lives in CI configuration and trusted secrets rather than only in package manifests.
+
+Any repository that pulled affected packages or ran compromised workflows should treat its GitHub tokens, npm publish credentials, and cloud secrets issued in pipeline runs as compromised, not just its lockfiles. Watch whether GitHub forces workflow reviews or suspends the implicated Actions, and whether a third Shai-Hulud generation appears with new reactivation switches.

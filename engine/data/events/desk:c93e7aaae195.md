@@ -1,0 +1,1 @@
+CISA added CVE-2021-38003, the Chromium V8 bug exploited in the Sogou attack chain, to the Known Exploited Vulnerabilities Catalog on November 3, 2021, per the KEV feed. The payload bug in the 2026 UNC3569 campaign has therefore been a documented, exploited vulnerability for almost five years, and Sogou's bundled Chromium 80 build never received the fix.

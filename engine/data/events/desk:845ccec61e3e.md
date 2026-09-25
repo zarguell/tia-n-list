@@ -1,0 +1,1 @@
+CISA added CVE-2025-53521 to the Known Exploited Vulnerabilities catalog on March 27, 2026, based on evidence of active exploitation, and ordered federal agencies to secure their BIG-IP APM systems by midnight on Monday, March 30, 2026. The required action is to apply mitigations per vendor instructions or discontinue use of the product.

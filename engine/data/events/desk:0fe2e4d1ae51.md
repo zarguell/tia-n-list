@@ -1,0 +1,1 @@
+CISA added CVE-2024-55591 to the Known Exploited Vulnerabilities catalog on January 14, 2025, the same day Fortinet published FG-IR-24-535, with a federal remediation due date of January 21, 2025. The entry is flagged with known ransomware campaign use, establishing ransomware exploitation of this Fortinet authentication bypass more than a year before Gunra's advisory.
