@@ -1,0 +1,1 @@
+IBM released a security bulletin on Aug 17, 2026 for CVE-2026-9198 affecting IBM Langflow OSS 1.0.0 through 1.10.0. The flaw allows unauthenticated attackers to chain /api/v1/auto_login to mint SUPERUSER tokens and achieve remote code execution on default configurations.

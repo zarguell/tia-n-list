@@ -1,0 +1,1 @@
+MITRE's CVE record for CVE-2026-9198 was published on Jul 17, 2026. It describes an unauthenticated remote code execution vulnerability in IBM Langflow OSS versions 1.0.0 through 1.10.0 via an auto-login bypass combined with insufficient code validation.

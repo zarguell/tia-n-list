@@ -1,0 +1,3 @@
+The Mini Shai-Hulud worm has reactivated compromised GitHub Actions that had been dormant since May, injecting malicious payloads back into CI/CD pipelines, per safedep.io and socket.dev reports. Two separate updates note that containment failed and thousands of repositories remain exposed. The worm targets hijacked Actions workflows rather than direct repository code pushes.
+
+Score is 3.8 with three sources (safedep.io, socket.dev, deafnews.it) and no named CVEs. Organizations using GitHub Actions should audit dormant workflows, rotate secrets, and verify pipeline artifacts from the past week. Watch for a broader GitHub security response or confirmed victim count.
