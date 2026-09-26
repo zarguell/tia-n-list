@@ -1,0 +1,3 @@
+The events in this story are job listings reposted from jobicy.com via Mastodon: a Remote Technical Threat Investigator in Threat Intel Engineering, a Remote Security Engineer for Infrastructure Security, and a Remote Security Engineer for Agent Security, all at OpenAI. There is no security event, incident, or vulnerability in the content.
+
+The only signal here is defensive: OpenAI is visibly staffing agent security and threat intel functions, which aligns with the wave of AI agent incidents covered elsewhere in this store. That is context, not a reportable event. Readers can disregard this story as hiring noise.

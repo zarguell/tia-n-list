@@ -1,0 +1,5 @@
+Dark Reading has published an analysis under its physical security desk framing Russia's war against European targets as a hybrid campaign that fuses cyber operations with physical effects. The event captured here is the article's distribution; it points to Russia's hybrid cyber-physical war in Europe as the subject.
+
+The framing matters because European governments and infrastructure operators are increasingly treating cyber intrusions, sabotage, and physical attacks as one continuous threat rather than separate categories. Coverage of this kind typically drives how operators in energy, transport, and logistics prioritize joint cyber-physical protective security postures, and how NATO and EU members attribute and respond to hybrid actions.
+
+The captured event carries only headline-level detail, so specifics from the full article are not yet in the store. Watch for the concrete incidents, sectors, and attributions the piece documents, and for corroborating reports that tie specific European infrastructure disruptions to Russian actors.
