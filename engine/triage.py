@@ -643,8 +643,18 @@ def apply(decisions_path):
     if ignored:
         print(f"  WARN: {ignored} decision entries could not be parsed from {decisions_path}")
     if not decisions and not merges:
-        print("  WARN: no keep/drop decisions recognized — schema mismatch? "
-              "Expected top-level 'decisions' array with event_id/action/story keys")
+        # A well-formed but explicitly empty file ("decisions": []) is the
+        # documented output for a window with zero new events — schema is
+        # provably correct, so warning "schema mismatch?" here is wrong and
+        # the phrase propagates into the daily audit's triage_drift check as
+        # a false FAIL (2026-09-26). Warn only when no recognized key exists
+        # or a recognized key is present but malformed/non-empty-and-unused.
+        keys = [k for k in ("decisions", "events", "keep", "drop") if k in dec]
+        explicit_empty = bool(keys) and all(
+            isinstance(dec.get(k), list) and not dec[k] for k in keys)
+        if not explicit_empty:
+            print("  WARN: no keep/drop decisions recognized — schema mismatch? "
+                  "Expected top-level 'decisions' array with event_id/action/story keys")
 
 
 if __name__ == "__main__":
