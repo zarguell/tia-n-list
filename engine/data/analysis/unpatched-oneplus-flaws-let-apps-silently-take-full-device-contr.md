@@ -1,0 +1,3 @@
+Unpatched OnePlus device flaws let malicious Android apps gain root-level control without user interaction or permissions, according to The Hacker News. The vulnerability affects installed apps that can silently take complete control of the phone. No CVE identifier or patched firmware version appears in the available reports. The risk is unpatched root access on OnePlus hardware, which could allow full device compromise from a rogue app.
+
+OnePlus users should treat this as an active threat until a vendor patch ships. The event material cites a single source (thehackernews.com) via Mastodon updates, with score 3.9 and no CVE or KEV linkage. Watch for an official OnePlus security advisory naming affected models and a firmware release version.
