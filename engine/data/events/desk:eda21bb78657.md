@@ -1,0 +1,1 @@
+Cybernews reports that Qrator Labs found x47.c, a Windows botnet package advertising an AI API drain feature in which valid API keys are used to send billable AI requests and exhaust victims' credits. Article date of September 24, 2026 is taken from Cybernews's own X post sharing the piece (page itself is Cloudflare-challenged).
