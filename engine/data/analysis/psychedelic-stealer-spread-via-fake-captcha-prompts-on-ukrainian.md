@@ -1,0 +1,5 @@
+Lunex Stealer, also tracked as Psychedelic Stealer, is an infostealer sold as malware-as-a-service. It reaches users through ClickFix-style fake CAPTCHA prompts planted on compromised Ukrainian company websites. Visitors who follow the prompt launch the payload themselves on Windows, which is what makes the social engineering the effective entry point. Ontinue describes a four-stage chain aimed at Ukrainian-speaking users.
+
+The chain elevates via a UAC bypass that abuses the CMSTPLUA COM object, then loads a vulnerable AMD driver tracked as CVE-2023-20598 as an evasion layer to impair security monitoring on the host. The AMD flaw is a 2023 local privilege escalation issue; here it is abused in the wild as a step inside the stealer's kill chain, not as remote entry.
+
+Watch for the fake-CAPTCHA pattern spreading beyond Ukrainian sites, since the MaaS model means affiliates reuse whatever chain works, and for other stealers copying the vulnerable-driver abuse. Defenders should alert on CMSTPLUA COM object use for UAC bypass and on loads of the affected AMD driver build.
