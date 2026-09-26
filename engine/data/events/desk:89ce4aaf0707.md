@@ -1,0 +1,1 @@
+Ars Technica reported that the high-severity WinRAR zero-day had been exploited for weeks by two distinct groups. The piece noted the exploits allow persistent backdooring when targets open a booby-trapped archive.

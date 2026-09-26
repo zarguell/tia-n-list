@@ -1,0 +1,1 @@
+CISA added CVE-2025-8088, RARLAB WinRAR Path Traversal Vulnerability (CWE-35), to the Known Exploited Vulnerabilities catalog on August 12, 2025, with a required-action due date of September 2, 2025 for federal agencies. The entry carries knownRansomwareCampaignUse: Known and points to the RARLAB advisory and NVD as references.

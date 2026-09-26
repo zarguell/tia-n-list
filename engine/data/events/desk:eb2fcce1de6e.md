@@ -1,0 +1,1 @@
+NVD published CVE-2025-8088 on August 8, 2025: a path traversal vulnerability in the Windows version of WinRAR that allows arbitrary code execution via maliciously crafted archive files. The record marks the vulnerability as exploited in the wild and credits discovery to Anton Cherepanov, Peter Kosinar, and Peter Strycek of ESET.
