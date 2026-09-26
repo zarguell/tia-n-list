@@ -1,0 +1,3 @@
+A Mastodon post links to a CyberWorldOps article reporting that ShinyHunters defaced the Cl0p Tor leak site, claiming exfiltration of server logs, source code, and onion private keys. The group threatens further action, but the event content does not specify a timeline, victim count, or technical mechanism beyond the defacement claim. The event points to the same ShinyHunters/Clop infrastructure covered by other stories.
+
+What to watch: confirmation from ShinyHunters or independent reporting about whether the exfiltration claim is verified. The event content does not mention any new victim disclosures or law-enforcement response, so this is primarily an update to the existing Clop-leak-site cluster.

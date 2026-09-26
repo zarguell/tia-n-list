@@ -1,0 +1,1 @@
+Danny Palmer reports the incident came to light on the evening of 18 September and traces the feud to competing claims over the Oracle E-Business Suite zero-day CVE-2025-61882 exploited by Clop in 2025. It notes the stolen logs could reveal the IP addresses of people who connected to Clop's service, potentially unmasking gang members. Page is dated 21 September 2026.

@@ -1,0 +1,3 @@
+The Mini Shai-Hulud worm continues to reinfect GitHub repositories through hijacked GitHub Actions. Event content from SafeDep.io and Socket.dev, relayed via Mastodon, reports that two compromised Actions dormant since May reactivated this week, executing malicious payloads in CI/CD pipelines. A DeafNews.it post states containment failed. The events describe a persistent supply-chain infection targeting GitHub repositories, with no specific victim count, repository names, or payload hash mentioned in the content.
+
+What to watch: whether GitHub revokes the compromised Actions tokens or publishes an advisory. The content does not mention a CVE or patch version for the Actions mechanism, and no observed downstream exploitation of infected repositories is described.
