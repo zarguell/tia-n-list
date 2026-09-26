@@ -249,6 +249,17 @@ with tempfile.TemporaryDirectory() as td:
     check("frozen hot story not queued, live one is",
           n == 1 and json.load(open(merge.NEEDS))["stories"] == ["hot-live"])
 
+# --- 5b: emit_needs skips .capped stories (2026-09-25 retry cap) ------------
+with tempfile.TemporaryDirectory() as td:
+    merge.NEEDS = os.path.join(td, "needs-analysis.json")
+    merge.ANALYSIS_DIR = os.path.join(td, "analysis")
+    os.makedirs(os.path.join(merge.ANALYSIS_DIR, ".rejects"))
+    hot = {"id": "hot-capped", "score": 5.0, "events": []}
+    open(os.path.join(merge.ANALYSIS_DIR, ".rejects", "hot-capped.capped"), "w").close()
+    n = merge.emit_needs({"hot-capped": hot})
+    check("capped story not requeued", n == 0
+          and json.load(open(merge.NEEDS))["stories"] == [])
+
 # --- 6: ssg.load_stories drops frozen from cards ------------------------------
 with tempfile.TemporaryDirectory() as td:
     sdir = os.path.join(td, "stories")

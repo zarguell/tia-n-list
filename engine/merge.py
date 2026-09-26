@@ -337,6 +337,13 @@ def emit_needs(stories, exclude=None):
             continue
         if s["score"] < HOT_THRESHOLD:
             continue
+        # 2026-09-25: a story that failed the analysis gate MAX times carries
+        # a .capped marker — requeuing it hourly just burns an agent run on a
+        # structurally unpassable analysis (a no-CVE research story under the
+        # old grounding rule thrashed 10+ times). Flagged for drop review.
+        if os.path.exists(os.path.join(ANALYSIS_DIR, ".rejects",
+                                       s["id"] + ".capped")):
+            continue
         analysis_path = os.path.join(ANALYSIS_DIR, s["id"] + ".md")
         marker = (s.get("analysis") or {}).get("updated_at", "")
         if not os.path.exists(analysis_path):

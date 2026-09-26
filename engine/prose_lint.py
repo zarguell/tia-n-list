@@ -25,6 +25,7 @@ artifact and daily_digest's recover sweep would republish a bad one in a
 loop; a failed publish records telemetry and pages via autodiag instead of
 shipping slop.
 """
+import glob
 import json
 import os
 import re
@@ -73,6 +74,32 @@ VERSION_RE = re.compile(r"\b\d+\.\d+\b")
 # appears in prose, linked once as [name](stories/<slug>/)").
 DIGEST_LINK_RE = re.compile(r"\]\(stories/")
 
+# Grounding alternative for non-CVE stories (2026-09-25): a research
+# disclosure with no CVE id, a policy/landscape piece, an incident note —
+# none can ever contain a CVE/version token, so the numeric grounding rule
+# was structurally unpassable for them (the kubernetes/GCP research story
+# was re-analyzed and re-quarantined 10+ times before this existed). An
+# analysis that NAMES THE STORY'S SUBJECT is grounded: ≥2 capitalized
+# title tokens (≥4 chars, not function words) appearing in the text.
+# Generic filler ("Analyst note based on event content") still fails — it
+# never names the subject.
+TITLE_STOPWORDS = {
+    "the", "this", "that", "these", "those", "their", "a", "an", "and",
+    "or", "of", "in", "on", "for", "to", "with", "without", "from", "at",
+    "by", "as", "is", "are", "be", "was", "were", "after", "before",
+    "amid", "among", "into", "onto", "over", "under", "per", "via", "new",
+    "how", "why", "what", "when", "where", "who", "all", "more", "most",
+    "than", "then", "some", "still", "says", "said", "report", "reports",
+    "warning", "warnings", "issue", "issues", "update", "updates", "take",
+    "takes", "taken", "puts", "put", "gets", "get", "goes", "gone",
+}
+
+# A story that fails the analysis gate this many times is flagged for drop
+# review instead of being requeued forever (the kubernetes/GCP story burned
+# an agent run every hour for 10+ hours on a structurally unpassable
+# analysis). Remove .rejects/<id>.capped to reset.
+MAX_ANALYSIS_QUARANTINES = 3
+
 
 def _banned_hits(text):
     """Banned-string violations shared by analyses and digests. Curly
@@ -88,19 +115,44 @@ def _banned_hits(text):
     return out
 
 
-def lint_analysis(text, story=None):
+def _subject_tokens(title):
+    """Capitalized ≥4-char title tokens that aren't function words."""
+    out = []
+    for tok in re.findall(r"[A-Za-z][A-Za-z0-9.-]{3,}", title or ""):
+        if tok[0].isupper() and tok.lower() not in TITLE_STOPWORDS:
+            out.append(tok)
+    return out
+
+
+def _names_subject(text, title):
+    low = text.lower()
+    matched = 0
+    for tok in _subject_tokens(title):
+        if re.search(r"\b" + re.escape(tok) + r"\b", low, re.IGNORECASE):
+            matched += 1
+    # ≥2 distinct tokens: one common word ("controller", "network") must not
+    # ground an analysis of a different story.
+    return matched >= 2
+
+
+def lint_analysis(text, story=None, subject_title=None):
     """HARD violations for one analysis (plain markdown) — each of these
     quarantines. story, when given, only names the file in the messages.
-    Empty list = passes the gate. Paragraph-count drift is soft: see
-    soft_paras()."""
+    subject_title, when given, enables the subject-grounding alternative
+    (see TITLE_STOPWORDS note): a non-CVE story's analysis is grounded when
+    it names the story's subject. Empty list = passes the gate.
+    Paragraph-count drift is soft: see soft_paras()."""
     out = _banned_hits(text)
     if any(l.lstrip().startswith("#") for l in text.splitlines()):
         out.append("markdown heading line (prompts ban headings)")
     if not MIN_LEN <= len(text) <= MAX_LEN:
         out.append(f"length {len(text)} chars (need {MIN_LEN}..{MAX_LEN})")
-    if not (CVE_RE.search(text) or NUM2_RE.search(text) or VERSION_RE.search(text)):
+    grounded = bool(CVE_RE.search(text) or NUM2_RE.search(text) or VERSION_RE.search(text))
+    if not grounded and subject_title:
+        grounded = _names_subject(text, subject_title)
+    if not grounded:
         out.append("no grounding: no CVE id, no 2+ digit number, no version "
-                   "token anywhere")
+                   "token, and the story subject is never named")
     if story:
         out = [f"{story}: {m}" for m in out]
     return out
@@ -149,7 +201,9 @@ def quarantine_analysis(stories_dir, analysis_dir, story, now=None, log=print):
         return []
     with open(ap, encoding="utf-8", errors="replace") as f:
         text = f.read()
-    violations = lint_analysis(text)
+    violations = lint_analysis(text, story=story,
+                               subject_title=(story.get("title") or "")
+                               if isinstance(story, dict) else None)
     soft = soft_paras(text)
     if not violations:
         if soft:
@@ -158,8 +212,19 @@ def quarantine_analysis(stories_dir, analysis_dir, story, now=None, log=print):
     ts = (now or datetime.now(timezone.utc)).strftime("%Y%m%dT%H%M%S")
     rejects = os.path.join(analysis_dir, ".rejects")
     os.makedirs(rejects, exist_ok=True)
+    prior = len(glob.glob(os.path.join(rejects, sid + "-*.md")))
     name = f"{sid}-{ts}.md"
     os.replace(ap, os.path.join(rejects, name))
+    if prior + 1 >= MAX_ANALYSIS_QUARANTINES:
+        # Retry cap: flag for drop review instead of requeuing forever
+        # (2026-09-25: one story burned an agent run every hour for 10+
+        # hours on a structurally unpassable analysis). merge.emit_needs
+        # skips capped stories; remove the marker to reset.
+        cap_marker = os.path.join(rejects, sid + ".capped")
+        open(cap_marker, "w").close()
+        log(f"CAPPED analysis/{sid}.md: failed the gate {prior + 1} times — "
+            f"flagged for drop review, will not re-analyze "
+            f"(remove .rejects/{sid}.capped to reset)")
     sp = os.path.join(stories_dir, sid + ".json")
     try:
         with open(sp, encoding="utf-8") as f:

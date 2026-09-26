@@ -238,6 +238,63 @@ with tempfile.TemporaryDirectory() as td:
     twice = [n for n in os.listdir(rejects) if n.startswith("twice-story")]
     check("repeat violations land under fresh timestamps", len(twice) == 2)
 
+# --- 5b: subject grounding for non-CVE stories + retry cap -------------------
+# (2026-09-25: the kubernetes/GCP research disclosure has no CVE id — the
+# numeric grounding rule was structurally unpassable, and the requeue loop
+# re-analyzed it hourly for 10+ hours.)
+
+NOCVE = ("Varonis research shows a Kubernetes YAML file with limited "
+         "namespace access can escalate to full GCP organization ownership "
+         "through service account keys and GitOps controllers like the "
+         "Google Kubernetes Config Connector. The controller authenticates "
+         "to the cloud provider on behalf of developers, so the escalation "
+         "needs no stolen key material at all. Watch for Google's response: "
+         "either documented key rotation guidance or a config change that "
+         "separates namespace identity from organization ownership.")
+K8S_TITLE = "A Single Kubernetes YAML can hand an attacker full GCP org ownership"
+
+check("non-CVE analysis grounded by naming the story subject",
+      prose_lint.lint_analysis(NOCVE, subject_title=K8S_TITLE) == [])
+check("same text without a title still fails grounding",
+      any("no grounding" in m for m in prose_lint.lint_analysis(NOCVE)))
+check("wrong-subject title does not ground",
+      any("no grounding" in m for m in prose_lint.lint_analysis(
+          NOCVE, subject_title="Cisco SD-WAN Controller peering authentication")))
+check("filler still fails even with the subject title",
+      any("no grounding" in m for m in prose_lint.lint_analysis(
+          "Analyst note based on event content. Watch for updates.",
+          subject_title=K8S_TITLE)))
+
+with tempfile.TemporaryDirectory() as td:
+    stories_dir = os.path.join(td, "stories")
+    analysis_dir = os.path.join(td, "analysis")
+    os.makedirs(stories_dir)
+    os.makedirs(analysis_dir)
+    log = []
+    from datetime import timedelta
+    now = datetime.now(timezone.utc)
+    for i in range(prose_lint.MAX_ANALYSIS_QUARANTINES):
+        open(os.path.join(analysis_dir, "cap-story.md"), "w").write(filler)
+        prose_lint.quarantine_analysis(stories_dir, analysis_dir,
+                                       {"id": "cap-story"},
+                                       now=now + timedelta(seconds=i),
+                                       log=log.append)
+    rejects = os.path.join(analysis_dir, ".rejects")
+    check("cap marker written after MAX quarantines",
+          os.path.exists(os.path.join(rejects, "cap-story.capped")))
+    check("CAPPED logged on the final attempt",
+          any("CAPPED" in m for m in log))
+    # the cap counts prior rejects: a 4th quarantine still moves the file
+    # (evidence preserved) but the marker is what stops the requeue loop
+    open(os.path.join(analysis_dir, "cap-story.md"), "w").write(filler)
+    prose_lint.quarantine_analysis(stories_dir, analysis_dir,
+                                   {"id": "cap-story"},
+                                   now=now + timedelta(seconds=9),
+                                   log=log.append)
+    check("post-cap violations still quarantined for evidence",
+          len([n for n in os.listdir(rejects) if n.startswith("cap-story-")])
+          == prose_lint.MAX_ANALYSIS_QUARANTINES + 1)
+
 # --- 6: ssg.run_prose_gate ------------------------------------------------------
 with tempfile.TemporaryDirectory() as td:
     stories_dir = os.path.join(td, "stories")
