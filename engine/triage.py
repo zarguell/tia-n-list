@@ -410,7 +410,11 @@ def _absorb(story, ev, label):
     if ev["id"] in refs:
         return False
     story["events"].append({"event_id": ev["id"], "label": label})
-    d = _domain(ev.get("url"))
+    # Unverified low-trust events attach (amplify) but never credit their
+    # domain as a story source — the aggregator is a messenger, not a source.
+    # Verified provenance credits the PRIMARY domain instead (apply handles it).
+    creditable = not (ev.get("low_trust") and not ev.get("provenance"))
+    d = _domain(ev.get("url")) if creditable else ""
     if d and d not in story["sources"]:
         story["sources"].append(d)
     story["n_sources"] = len(story["sources"])

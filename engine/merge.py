@@ -385,7 +385,12 @@ def _attach_event(eid, ev, s):
     s["events"].append({"event_id": eid, "label": "update"})
     if ev["published_at"] > s.get("last_seen", ""):
         s["last_seen"] = ev["published_at"]
-    domains = [domain_of(ev["url"])] if ev["url"] else []
+    # Unverified low-trust events attach (amplify) but never credit their
+    # domain as a story source; verified provenance credits the primary.
+    if ev.get("low_trust") and not ev.get("provenance"):
+        domains = []
+    else:
+        domains = [domain_of(ev["url"])] if ev["url"] else []
     s["sources"] = list(dict.fromkeys(s.get("sources", []) + [d for d in domains if d]))
     s["n_sources"] = len(s["sources"])
     s["cves"] = sorted(set(s.get("cves", [])) | set(ev["cves"]))
