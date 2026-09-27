@@ -1,0 +1,3 @@
+Ten NHS staff from East Suffolk and North Essex NHS Foundation Trust have been removed or suspended after unauthorized access to the digital medical records of three-year-old Noah Woods. The BBC reported the breach and the trust's apology; Databreaches.net added that an urgent investigation is under way. No CVEs or technical details are public yet.
+
+Watch for whether the investigation reveals an insider vector versus an external intrusion, and whether the digital records system had proper access controls. The age of the victim makes this a high-profile case with regulatory exposure under UK data-protection rules.

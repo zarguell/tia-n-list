@@ -1,0 +1,3 @@
+BSidesLuxembourg 2026 recordings have been circulated across Mastodon, LinkedIn, and archive.org covering talks by Tailia Malloy, Van Nguyen, Jeremy Snyder, Glen Sorensen, and Andrii Bezverkhyi. Topics include AI-as-a-service logging, malicious browser extension detection, SOC tooling, and AI-flavored social engineering. No vulnerabilities or breach reports are involved; the value is community knowledge sharing.
+
+Useful for analysts tracking conference-level technical depth, but these recordings do not change risk posture. Prioritize any talk content that reveals new attack techniques or tool configurations over conference attendance metrics.

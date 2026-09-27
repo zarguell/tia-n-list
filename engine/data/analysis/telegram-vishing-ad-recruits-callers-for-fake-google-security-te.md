@@ -1,0 +1,3 @@
+A Telegram vishing operation recruits callers for a fake Google Security Team, advertising "no script reading" then supplying the exact script. The campaign carries 9 detections and 5 IOCs per threat-intel source, and The Register covered it on September 25. It is an active voice-phishing recruitment channel, not a technical vulnerability, and the script dissemination makes it more dangerous than a generic scam.
+
+Watch for replication of the same recruitment pattern on other messaging platforms and for updates linking the 5 IOCs to actual victim reports. The gap between recruitment and execution is where defenders can intercept.
