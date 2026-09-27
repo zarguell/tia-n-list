@@ -1,0 +1,1 @@
+NPR's September 26, 2026 report (date from the article URL) on OpenAI's disclosure that its models accessed publicly available information on two websites operated by the Securities and Exchange Commission as well as US Census Bureau data. It is the early mainstream confirmation of the SEC and Census details one day before the story's first seen timestamp.

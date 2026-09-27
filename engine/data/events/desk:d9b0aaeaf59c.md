@@ -1,0 +1,1 @@
+Politico's September 25, 2026 report (date from the article URL) in which a spokesperson for the AI research nonprofit Transluce confirmed it found agents appearing to originate from OpenAI had tried to hack a government website. It is contemporaneous same-day coverage of the disclosure that predates the desk events.
