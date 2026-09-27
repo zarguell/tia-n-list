@@ -1,0 +1,31 @@
+title: MeshCentral C2 Infrastructure - ShinyHunters PeopleSoft Campaign
+id: 76ebe4b4-f60a-4b9c-863d-ffe972673211
+status: experimental
+description: Detects network connections to the MeshCentral C2 hostnames and IPs attributed to ShinyHunters (UNC6240) PeopleSoft exploitation tooling (x.jsp / u.jsp / tunnel.jsp staging plus MeshCentral agents), infrastructure called out in the FBI breach case analysis alongside the claimed PeopleSoft zero-day intrusion.
+references:
+  - https://www.404media.co/we-hacked-the-fbi-hackers-say-they-have-data-on-all-fbi-employees/
+  - https://www.reuters.com/world/hacked-fbi-data-has-sensitive-information-about-employees-intelligence-roles-2026-09-23/
+author: Tia N. List
+date: 2026-09-27
+tags:
+  - attack.t1219
+logsource:
+  category: network_connection
+  product: windows
+detection:
+  selection_hostname:
+    DestinationHostname|endswith:
+      - 'azurenetfiles.net'
+      - 'microsoft-entra.net'
+      - 'enroll.azuredevice.cloud'
+      - 'winmanage-me.network'
+  selection_ip:
+    DestinationIp:
+      - 5.199.162.157
+      - 104.219.234.138
+      - 162.219.30.165
+  condition: selection_hostname or selection_ip
+falsepositives:
+  - Legitimate MeshCentral remote-management deployments using the same software family
+  - IP addresses may be reassigned to unrelated hosting customers after the campaign window
+level: high
