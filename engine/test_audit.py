@@ -208,6 +208,29 @@ problems, info = jc.triage_telemetry(tlog, tdir, NOW)
 check("healthy triage passes", problems, [])
 check("ratio reported", "keep/drop 14/6 (70% keep)" in info, True)
 
+# Narration that merely quotes a WARN phrase must not trip the invariant:
+# on 2026-09-26 and 2026-09-27 the hourly agent narrated "no keep/drop
+# decisions recognized" into this log and triage_drift FAILED twice with no
+# real WARN line present (both matches were agent prose).
+open(os.path.join(tlog, today + ".log"), "w").write(
+    "2026-08-24T11:00:12Z TIA pi judgment (new=0 created=0 needs_analysis=1)\n"
+    "STEP 1 — Triage gate: 0 new events in the 48h window, so decisions array "
+    "is empty; the script emitted a false-positive \"no keep/drop decisions "
+    "recognized\" WARN because the array is empty, but ignored=0.\n")
+json.dump({"decisions": [], "merges": []},
+          open(os.path.join(tdir, "decisions-x.json"), "w"))
+problems, info = jc.triage_telemetry(tlog, tdir, NOW)
+check("narration of a WARN phrase does not trip triage_drift",
+      any("no decisions recognized" in p for p in problems), False)
+
+open(os.path.join(tlog, today + ".log"), "w").write(
+    "2026-08-24T11:00:12Z TIA pi judgment (new=0 created=0 needs_analysis=1)\n"
+    "  WARN: no keep/drop decisions recognized — schema mismatch? Expected "
+    "top-level 'decisions' array with event_id/action/story keys\n")
+problems, info = jc.triage_telemetry(tlog, tdir, NOW)
+check("real WARN line still trips triage_drift",
+      any("no decisions recognized" in p for p in problems), True)
+
 # ── 5. digest_overrides ──────────────────────────────────────────────────────
 ddir = os.path.join(tmp, "digests")
 json.dump({"stories": [], "overrides": [

@@ -233,9 +233,14 @@ def triage_telemetry(cronman_log_dir, triage_dir, now):
                 log_text += open(p, encoding="utf-8", errors="ignore").read()
             except Exception:
                 pass
+    # Anchor every pattern on the `WARN: ` prefix the emitter prints. The bare
+    # phrases also appear in the hourly agent's NARRATION of its triage step
+    # ("the script emitted a false-positive \"no keep/drop decisions
+    # recognized\" WARN…"), which manufactured triage_drift FAILs on 2026-09-26
+    # and 2026-09-27 while no real WARN line was ever logged.
     for pat, label in ((r"WARN: \d+ decision entries could not be parsed", "unparsed decision entries"),
-                       (r"no keep/drop decisions recognized", "no decisions recognized"),
-                       (r"keep -> unknown story", "keep->unknown-story WARNs "
+                       (r"WARN: no keep/drop decisions recognized", "no decisions recognized"),
+                       (r"WARN: keep -> unknown story", "keep->unknown-story WARNs "
                         "(LLM-invented story ids; fragmented clusters possible)")):
         n = len(re.findall(pat, log_text))
         if n:
