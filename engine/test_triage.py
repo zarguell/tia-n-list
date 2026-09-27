@@ -21,6 +21,8 @@ while the mechanical story kept the event. This suite pins:
 Run: python3 engine/test_triage.py   (exit 0 = pass)
 Wired into CI (site-deploy.yml).
 """
+import contextlib
+import io
 import json
 import os
 import shutil
@@ -278,6 +280,54 @@ try:
     check("new events in context",
           sorted(e["id"] for e in ctx["new_events"]),
           ["new-cve-event", "new-zeta-event"])
+finally:
+    shutil.rmtree(tmp)
+
+# ── 7. empty input is NOT a schema mismatch (2026-09-27) ────────────────────
+# Hourly runs with 0 new events write {"decisions": [], "merges": []} and
+# apply() printed the "schema mismatch?" WARN for them anyway. audit.py counts
+# that exact string as triage_drift, so the emitter manufactured invariant
+# FAILs (log note: "ignored=0 confirms the schema is exact"). Contract: warn
+# only when the schema really was not recognized or entries failed to parse.
+tmp = tempfile.mkdtemp()
+try:
+    for var, sub in [("EVENTS", "events"), ("STORIES", "stories"),
+                     ("ANALYSIS", "analysis"), ("TRIAGE", "triage")]:
+        d = os.path.join(tmp, sub)
+        os.makedirs(d)
+        setattr(triage, var, d)
+    setattr(triage, "STATE", os.path.join(tmp, "triage", "state.json"))
+    setattr(triage, "NEEDS", os.path.join(tmp, "needs-analysis.json"))
+    setattr(triage, "DATA", tmp)
+
+    import store as store_mod
+    store_mod.load_events = lambda: {}
+    import score as score_mod
+    score_mod.hot_score = lambda s, ev, rd: {"score": 0.0}
+
+    decfile = os.path.join(tmp, "decisions.json")
+    json.dump({"decisions": [], "merges": []}, open(decfile, "w"))
+    buf = io.StringIO()
+    with contextlib.redirect_stdout(buf):
+        triage.apply(decfile)
+    out = buf.getvalue()
+    check("empty input: no schema-mismatch WARN",
+          "no keep/drop decisions recognized" not in out, True)
+    check("empty input: schema-ok line printed", "schema ok" in out, True)
+
+    json.dump({"decisions": [{"nonsense": 1}]}, open(decfile, "w"))
+    buf = io.StringIO()
+    with contextlib.redirect_stdout(buf):
+        triage.apply(decfile)
+    check("unparseable entries still WARN",
+          "no keep/drop decisions recognized" in buf.getvalue(), True)
+
+    json.dump({"unexpected": "shape"}, open(decfile, "w"))
+    buf = io.StringIO()
+    with contextlib.redirect_stdout(buf):
+        triage.apply(decfile)
+    check("real schema mismatch still WARNs",
+          "no keep/drop decisions recognized" in buf.getvalue(), True)
 finally:
     shutil.rmtree(tmp)
 

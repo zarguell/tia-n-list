@@ -63,6 +63,14 @@ SCHEMA_HINT = (
     '  ],\n'
     '  "merges": [{"from": "<fragment story id>", "into": "<canonical story id>"}]\n'
     '}\n'
+    'For events marked "low_trust" (AI-drafted aggregator reposts) a decision\n'
+    'may carry an optional "provenance" object when you VERIFIED the claim at\n'
+    'the named primary source: {"event_id": ..., "action": "keep", ...}\n'
+    '  "provenance": {"url": "<primary source url>", "source": "<domain>", "evidence": "<one line>"}\n'
+    'Only include provenance when the primary source (vendor advisory, CISA,\n'
+    'the named researcher/outlet) really carries the claim — verified\n'
+    'provenance lets a low-trust event mint a story and set freshness; without\n'
+    'it the event can only amplify an existing story.\n'
     'STRICT KEY NAMES: the array key is "decisions" (never "events"); the story\n'
     'key is "story" (never "story_id"); "story" holds a candidate_stories id\n'
     'verbatim or the literal string "NEW". Optional per-event field\n'
@@ -224,12 +232,26 @@ def collect():
             "victim counts, campaigns, CISA KEV confirmation); suspected = public exploit "
             "code/PoC or likely-but-unconfirmed. Attribute ONLY the CVEs you can tie to "
             "the claim — a bulletin's blanket 'actively exploited' does NOT flag all its "
-            "CVEs. Omit the exploitation field when the event makes no claim.\n\n"
+            "CVEs. Omit the exploitation field when the event makes no claim.\n"
+            "(5) LOW-TRUST events (\"low_trust\": true — AI-drafted aggregator reposts, "
+            "late and overstated): treat as unverified leads. When the text attributes "
+            "the claim to a named primary source (a researcher firm like watchTowr, a "
+            "vendor advisory, CISA, a major outlet) and attribution_urls or a web "
+            "search (/home/ubuntu/repos/cronman/bin/web-search.sh \"query\") locate "
+            "that primary source CONFIRMING the claim, include a provenance object in "
+            "the decision: {\"url\": <primary url>, \"source\": <domain>, "
+            "\"evidence\": <one line>, \"verified\": true}. VERIFIED provenance lets "
+            "the event mint a story (credited to the primary source) and count as a "
+            "development; without it, a low-trust event can only attach to an EXISTING "
+            "story, never mint. If you cannot verify, keep/drop on normal merit and "
+            "omit provenance.\n\n"
             + SCHEMA_HINT),
         "new_events": [{
             "id": e["id"], "title": e.get("title", ""),
             "source": e.get("source", ""), "published_at": e.get("published_at", ""),
             "cves": e.get("cves", []),
+            "low_trust": bool(e.get("low_trust")),
+            "attribution_urls": e.get("attribution_urls", []),
             "snippet": (e.get("content_md") or "")[:220].replace("\n", " "),
         } for e in recent],
         "candidate_stories": [{
@@ -304,6 +326,7 @@ def _normalize_decisions(dec):
         norm = {"event_id": eid, "action": action,
                 "story": _clean_story_ref(d.get("story") or d.get("story_id")),
                 "story_title": d.get("story_title"), "reason": d.get("reason") or d.get("rationale")}
+        norm["provenance"] = d.get("provenance") if isinstance(d.get("provenance"), dict) else {}
         ex = {}
         if isinstance(d.get("exploitation"), dict):
             for cve, v in d["exploitation"].items():
@@ -441,7 +464,7 @@ def apply(decisions_path):
     processed = set(state["processed"])
     stories = _load_stories()
     decisions, merges, ignored = _normalize_decisions(dec)
-    moved = drops = 0
+    moved = drops = denied = 0
     frozen_touched = set()   # frozen story ids that received an event this run
     # LLM-invented story ids (not in candidates): requested id -> minted slug.
     # Every keep naming the same unknown id must land in the SAME minted story
@@ -484,6 +507,20 @@ def apply(decisions_path):
             ev["exploitation"] = assessed
         elif "exploitation" in ev:
             del ev["exploitation"]
+        # provenance stamp: only VERIFIED primary-source attributions count.
+        # A verified stamp exempts a low-trust event from the mint/freshness
+        # bans (it inherits the primary source's credibility) and credits
+        # the primary's domain to the story's sources at attach time.
+        prov = d.get("provenance") or {}
+        if ev.get("low_trust") and prov.get("verified") and prov.get("url"):
+            ev["provenance"] = {
+                "url": str(prov["url"])[:500],
+                "source": str(prov.get("source") or _domain(str(prov["url"]))),
+                "evidence": str(prov.get("evidence") or "")[:400],
+                "verified_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            }
+        elif "provenance" in ev:
+            del ev["provenance"]
         target = d.get("story")
         # If the mechanical merge already minted a story whose ONLY event is
         # this one, reuse it instead of creating a -2 twin (retake it, with an
@@ -494,6 +531,16 @@ def apply(decisions_path):
             if d.get("story_title"):
                 stories[sole]["title"] = re.sub(r"\s+", " ", d["story_title"]).strip()
         if not target or target == "NEW":
+            if ev.get("low_trust") and not ev.get("provenance"):
+                # Low-trust feeds amplify, never create: a keep cannot
+                # materialize a new story from one. 2026-09-27: a threadlinqs
+                # repost of 5-day-old KEV adds minted a single-source story
+                # the daily digest then headlined as "added to KEV today".
+                # Attaching to an EXISTING story stays allowed below.
+                print(f"  SKIP: keep -> NEW denied for low-trust event {eid}")
+                denied += 1
+                _write_event(ev)
+                continue
             target = _new_story(stories, d.get("story_title") or ev.get("title", ""), ev, eid)
             ev["kind"] = "original"
             moved += 1
@@ -505,6 +552,14 @@ def apply(decisions_path):
                     ev["kind"] = "update"
                     moved += 1
             else:
+                if ev.get("low_trust") and not ev.get("provenance"):
+                    # Same mint bar as the NEW path above: a low-trust keep
+                    # naming an unknown story may not materialize it.
+                    print(f"  SKIP: keep -> unknown story denied for "
+                          f"low-trust event {eid}")
+                    denied += 1
+                    _write_event(ev)
+                    continue
                 print(f"  WARN: keep -> unknown story {target} for {eid}; "
                       f"minting once — further keeps naming it consolidate here")
                 real = _new_story(stories, d.get("story_title") or ev.get("title", ""), ev, eid)
@@ -524,6 +579,14 @@ def apply(decisions_path):
             # flag must survive even when the event was already placed in
             # the target story (e.g. by the mechanical merge).
         _write_event(ev)
+        # Verified provenance credits the PRIMARY source's domain to the
+        # story (the aggregator is the messenger, the primary the source).
+        pv = ev.get("provenance") or {}
+        pd = _domain(pv.get("url") or "")
+        pstory = stories.get(target)
+        if pd and pstory is not None and pd not in pstory["sources"]:
+            pstory["sources"].append(pd)
+            pstory["n_sources"] = len(pstory["sources"])
         # An event lives in exactly ONE story: strip stale references the
         # mechanical merge left behind; emptied shells redirect to the story
         # that owns the event now.
@@ -639,12 +702,28 @@ def apply(decisions_path):
 
     state["processed"] = sorted(processed)
     _save_state(state)
-    print(f"triage applied: {moved} kept/moved, {drops} dropped, {len(merges)} merges, needs-analysis {len(queue)}")
+    print(f"triage applied: {moved} kept/moved, {drops} dropped, {denied} low-trust mints denied, {len(merges)} merges, needs-analysis {len(queue)}")
     if ignored:
         print(f"  WARN: {ignored} decision entries could not be parsed from {decisions_path}")
     if not decisions and not merges:
-        print("  WARN: no keep/drop decisions recognized — schema mismatch? "
-              "Expected top-level 'decisions' array with event_id/action/story keys")
+        # An EMPTY-but-valid file (0 new events in the window, so the LLM
+        # wrote {"decisions": [], "merges": []}) is not a schema mismatch.
+        # Emitting the WARN anyway made audit.py's triage_drift check fail on
+        # a false positive (2026-09-27: "no decisions recognized x2" for two
+        # runs that parsed exactly, ignored=0). Warn only when the schema
+        # really was not recognized or entries failed to parse.
+        has_schema_key = (
+            isinstance(dec.get("decisions"), list)
+            or isinstance(dec.get("events"), list)
+            or isinstance(dec.get("keep"), list)
+            or isinstance(dec.get("drop"), list)
+        )
+        if has_schema_key and not ignored:
+            print(f"  triage: 0 decisions in {decisions_path} "
+                  "(empty input, schema ok)")
+        else:
+            print("  WARN: no keep/drop decisions recognized — schema mismatch? "
+                  "Expected top-level 'decisions' array with event_id/action/story keys")
 
 
 if __name__ == "__main__":
