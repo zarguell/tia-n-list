@@ -12,6 +12,7 @@ $PY test_cve_timeline.py
 $PY test_ingest.py
 $PY test_score.py
 $PY test_digest_candidates.py
+$PY test_lowtrust.py
 $PY test_ssg.py
 $PY test_sigma.py
 $PY ssg.py

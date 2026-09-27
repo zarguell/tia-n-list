@@ -475,6 +475,15 @@ def main():
                 pending.append({"id": eid, "since": ev["published_at"]})
                 parked += 1
             continue
+        elif ev.get("low_trust") and not ev.get("provenance"):
+            # Low-trust feeds amplify, never create (2026-09-27 threadlinqs
+            # incident: an AI-drafted repost minted a single-source story the
+            # digest headlined as "added to KEV today" 5 days late). Social
+            # events already park above; non-social low-trust events stay
+            # unattached for the triage window (triage can attach them to an
+            # existing story but cannot mint from one either). VERIFIED
+            # provenance (primary source confirmed by triage) exempts.
+            continue
         else:
             ev["kind"] = "original"
             slug = build_slug(ev["title"], stories)

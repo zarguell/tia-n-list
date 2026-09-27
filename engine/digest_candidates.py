@@ -22,7 +22,11 @@ traps are handled deterministically:
    explicitly mentions the KEV catalog, and it was published >= RECAP_DAYS
    after the CVE's `dateAdded`. Its development date collapses to the KEV add
    date, so a recap can never re-evolve a story or extend its freshness.
-2. ANALYSIS MARKERS: `analysis.updated_at` churns whenever the hourly engine
+2. LOW-TRUST EVENTS (2026-09-27 threadlinqs incident): events tagged
+   `low_trust` (AI-drafted aggregator reposts — late, overstated) never set
+   the development clock by themselves. They stay in ev_dates (visible), but
+   only a non-low-trust event can make a story evolve or look fresh today.
+3. ANALYSIS MARKERS: `analysis.updated_at` churns whenever the hourly engine
    touches a story (including recap-driven rewrites), so it is NOT a
    development signal. It stays visible as substance, but does not evolve a
    story.
@@ -191,6 +195,12 @@ def build_rows(stories, events, kev_map, coverage, canonical, since, recent_cuto
             except ValueError:
                 continue
             ev_dates.append(pub)
+            if e.get("low_trust") and not (e.get("provenance") or {}).get("verified"):
+                # amplify-never-establish: a low-trust repost cannot make the
+                # story look fresh today (2026-09-27 threadlinqs incident:
+                # a 5-day-late KEV repost read as stale_days=0). VERIFIED
+                # provenance (triage confirmed the primary source) counts.
+                continue
             if _is_kev_recap(e, kev_added):
                 dev_dates.append(kev_dt)
             else:
