@@ -211,6 +211,57 @@ r = rows[0]
 check("verified provenance counts as development", r["evolved"], True)
 check("verified provenance sets dev date", r["newest_development_at"], "2026-09-27")
 
+# ── 4. cold-story social revival guard (2026-09-27 Cisco SD-WAN incident) ────
+# A single tweet re-sharing Rapid7's May analysis bumped the 130-day-cold
+# Cisco SD-WAN story (CVE-2026-20182) to score 8.7 and onto the digest slate
+# as fresh. Contract: mechanical attach refuses a social event published more
+# than TIA_SOCIAL_REVIVE_GAP_DAYS (default 3) after the story's newest
+# non-social event; active stories accept social events normally.
+import merge as merge_mod  # noqa: E402
+
+story = {"id": "cisco", "title": "Cisco SD-WAN zero-day",
+         "sources": ["bleepingcomputer.com"], "n_sources": 1, "cves": ["CVE-2026-20182"],
+         "score": 8.7, "reddit_signal": {"posts": 0, "best_score": 0},
+         "events": [{"event_id": "feed_old", "label": "original"}]}
+events_mock = {
+    "feed_old": {"id": "feed_old", "title": "t", "source": "bleepingcomputer.com",
+                 "url": "", "published_at": "2026-05-16T00:00:00Z", "cves": []},
+}
+merge_mod.events = events_mock
+merge_mod.story_url_cache = {}
+
+echo = {"id": "x:2104239914539782488", "title": "old flaw resurfaced",
+        "source": "www.rapid7.com", "url": "https://www.rapid7.com/blog/old",
+        "published_at": "2026-09-27T16:01:05Z", "cves": []}
+fresh_tweet = {**echo, "id": "x:1", "published_at": "2026-05-17T00:00:00Z"}
+feed_event = {"id": "mf:new", "title": "New advisory", "source": "vendor.example",
+              "url": "https://vendor.example/new", "published_at": "2026-09-27T16:01:05Z",
+              "cves": []}
+
+check("echo cannot revive a 130-day-cold story",
+      merge_mod._attach_event(echo["id"], echo, story), False)
+check("refused echo left no event ref on the story",
+      [r["event_id"] for r in story["events"]], ["feed_old"])
+check("social event within the gap on an active story attaches",
+      merge_mod._attach_event(fresh_tweet["id"], fresh_tweet, story), True)
+check("feed events always attach (never blocked by the guard)",
+      merge_mod._attach_event(feed_event["id"], feed_event, story), True)
+check("non-social events are exempt from the guard",
+      merge_mod._social_revive_blocked(feed_event, story), False)
+
+# digest dev clock: an already-attached legacy echo cannot extend freshness
+rows = digest_candidates.build_rows(
+    {"s": _story([{"event_id": "feed_old", "label": "original"},
+                  {"event_id": "echo", "label": "update"}])},
+    {"feed_old": _ev("feed_old", "2026-05-16T00:00:00Z"),
+     "echo": dict(_ev("echo", "2026-09-27T16:01:05Z"), id="x:echo")},
+    {}, {}, lambda s: s,
+    since=datetime(2026, 9, 26, tzinfo=timezone.utc),
+    recent_cutoff="2026-09-24", today="2026-09-27", last_digest="2026-09-26")
+r = rows[0]
+check("legacy echo does not evolve a cold story", r["evolved"], False)
+check("legacy echo does not set the dev date", r["newest_development_at"], "2026-05-16")
+
 print()
 if failures:
     print(f"FAILED: {failures}")

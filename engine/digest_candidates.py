@@ -26,7 +26,14 @@ traps are handled deterministically:
    `low_trust` (AI-drafted aggregator reposts — late, overstated) never set
    the development clock by themselves. They stay in ev_dates (visible), but
    only a non-low-trust event can make a story evolve or look fresh today.
-3. ANALYSIS MARKERS: `analysis.updated_at` churns whenever the hourly engine
+3. SOCIAL ECHOES / COLD-STORY REVIVALS (2026-09-27 Cisco SD-WAN incident):
+   a social event (masto:/x:/bsky:) published more than
+   TIA_SOCIAL_REVIVE_GAP_DAYS (default 3) after the story's newest
+   non-social event is an echo of old coverage — a re-share or repost, not
+   news. It stays visible in ev_dates but cannot extend the development
+   clock (merge already refuses to attach such events; this also covers
+   echoes attached before that guard existed).
+4. ANALYSIS MARKERS: `analysis.updated_at` churns whenever the hourly engine
    touches a story (including recap-driven rewrites), so it is NOT a
    development signal. It stays visible as substance, but does not evolve a
    story.
@@ -186,6 +193,18 @@ def build_rows(stories, events, kev_map, coverage, canonical, since, recent_cuto
 
         ev_dates = []   # raw article publish dates (display)
         dev_dates = []  # genuine development dates (recaps collapsed to the KEV add)
+        newest_feed_dev = None   # newest non-social event (echo-rule baseline)
+        for ref in s.get("events", []):
+            e = events.get(ref["event_id"])
+            if not e or not e.get("published_at"):
+                continue
+            if not str(e.get("id", "")).startswith(("masto:", "x:", "bsky:")):
+                try:
+                    d = parse_utc(e["published_at"])
+                except ValueError:
+                    d = None
+                if d and (newest_feed_dev is None or d > newest_feed_dev):
+                    newest_feed_dev = d
         for ref in s.get("events", []):
             e = events.get(ref["event_id"])
             if not e or not e.get("published_at"):
@@ -195,11 +214,19 @@ def build_rows(stories, events, kev_map, coverage, canonical, since, recent_cuto
             except ValueError:
                 continue
             ev_dates.append(pub)
+            is_social = str(e.get("id", "")).startswith(("masto:", "x:", "bsky:"))
             if e.get("low_trust") and not (e.get("provenance") or {}).get("verified"):
                 # amplify-never-establish: a low-trust repost cannot make the
                 # story look fresh today (2026-09-27 threadlinqs incident:
                 # a 5-day-late KEV repost read as stale_days=0). VERIFIED
                 # provenance (triage confirmed the primary source) counts.
+                continue
+            if is_social and newest_feed_dev is not None \
+                    and (pub - newest_feed_dev).days > int(os.environ.get(
+                        "TIA_SOCIAL_REVIVE_GAP_DAYS", "3")):
+                # social echo of old coverage cannot extend freshness either
+                # (2026-09-27 Cisco SD-WAN: one tweet revived a 130-day-cold
+                # story onto the slate as fresh)
                 continue
             if _is_kev_recap(e, kev_added):
                 dev_dates.append(kev_dt)

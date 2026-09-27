@@ -373,13 +373,44 @@ def _save_pending(pending):
     json.dump(pending, open(PENDING, "w"), indent=1)
 
 
+def _iso(s):
+    return datetime.fromisoformat((s or "").replace("Z", "+00:00"))
+
+
+def _social_revive_blocked(ev, s):
+    """True when a social event would mechanically revive a story that was
+    already cold when the post was published. Social amplifies active
+    coverage; it does not resurrect archived stories (2026-09-27: a single
+    tweet re-sharing Rapid7's May analysis bumped the 130-day-cold Cisco
+    SD-WAN story to score 8.7 and onto the digest slate as fresh). The gap
+    is measured from the story's newest NON-social event; editorial triage
+    keeps bypass this via apply()'s own attach path."""
+    if not str(ev.get("id", "")).startswith(SOCIAL_PREFIXES):
+        return False
+    gap = int(os.environ.get("TIA_SOCIAL_REVIVE_GAP_DAYS", "3"))
+    newest_feed = ""
+    for r in s.get("events", []):
+        e = (events or {}).get(r["event_id"])
+        if e and not str(e.get("id", "")).startswith(SOCIAL_PREFIXES):
+            newest_feed = max(newest_feed, e.get("published_at", ""))
+    if not newest_feed:
+        return False          # no feed coverage yet — nothing to revive from
+    try:
+        cold = (_iso(ev["published_at"]) - _iso(newest_feed)).days
+    except (KeyError, ValueError):
+        return False
+    return cold > gap
+
+
 def _attach_event(eid, ev, s):
     """Merge an event into an existing story as an update. Shared by the
     new-event queue and the social-pending replay (identical semantics:
     never touch kind of an already-placed event). Returns False when the
-    event was already in the story."""
+    event was already in the story or is a cold-story social revival."""
     refs = [r["event_id"] for r in s["events"]]
     if eid in refs:                      # already processed — never touch kind
+        return False
+    if _social_revive_blocked(ev, s):
         return False
     ev["kind"] = "update"
     s["events"].append({"event_id": eid, "label": "update"})
