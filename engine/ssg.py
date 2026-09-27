@@ -286,6 +286,13 @@ def load_stories(events):
         if st["id"] in frozen:
             continue
         evs = [events[e["event_id"]] for e in st["events"] if e["event_id"] in events]
+        # Public pages are the product: unverified low-trust events (AI-drafted
+        # aggregator reposts, template-inflated) stay in the store but do not
+        # render — same amplify-never-establish bar as merge/triage/digest.
+        # Verified-provenance events render (the primary source was checked).
+        evs = [ev for ev in evs
+               if not (ev.get("low_trust")
+                       and not (ev.get("provenance") or {}).get("verified"))]
         if not evs:
             continue
         evs_sorted = sorted(evs, key=lambda e: e["published_at"])
