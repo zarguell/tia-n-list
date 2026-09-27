@@ -1,0 +1,5 @@
+Google released Chrome updates addressing critical vulnerabilities in Shared Tab Groups (CVE-2026-84353) and WebGL (CVE-2026-84352), both rated critical as use-after-free flaws. The update also fixes nine high-severity issues including use-after-free in Proxy, Browser, and Dawn; an uninitialized resource in V8; and a GPU buffer overflow. Mozilla released Firefox 155 with 29 fixes covering use-after-free, sandbox escape, and memory corruption. The events reference Chrome versions 152.0.7977.75/.76 and 153.0.8010.47/.48, and Firefox ESR updates.
+
+Why it matters: Critical use-after-free bugs in browser components that process web content are regularly chained into code execution via malicious pages. Shared Tab Groups and WebGL are high-traffic features, increasing exposure. Firefox fixes include sandbox escape, which lowers the barrier from code execution to full system compromise.
+
+What to watch: Confirm Chrome and Firefox updates are deployed across endpoints. Watch for any disclosure of in-the-wild exploitation of CVE-2026-84352 or CVE-2026-84353, and verify that enterprise update policies do not delay the rollout.
