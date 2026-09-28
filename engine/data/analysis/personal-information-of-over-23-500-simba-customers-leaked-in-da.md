@@ -1,0 +1,3 @@
+Simba Telecom reported a data breach in September 2026 affecting over 23,000 Singaporean customers, according to beyondmachines.net. The event states a specific customer count (over 23,000) and a time frame (September 2026), but does not list specific data types exposed, a threat actor, or a root cause such as vulnerability exploitation or phishing.
+
+The story now has two sources: malware.news (original) and beyondmachines.net (update). There is no CVE or technical vector mentioned. Watch for regulatory filings in Singapore, a vendor disclosure with technical details, or confirmation of whether the breach involved personally identifiable information or account credentials.

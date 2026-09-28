@@ -1,0 +1,3 @@
+A US soldier received a 70-month prison sentence for extorting 10 technology and telecommunications firms, according to bleepingcomputer.com. The case involves a single perpetrator and a specific victim count (10 firms), with the sentencing outcome clearly stated. There is no CVE or vulnerability tied to this event; it is a law-enforcement and criminal outcome story rather than a technical security advisory.
+
+The event provides concrete figures: 70 months, 10 firms, and names the source domain (bleepingcomputer.com). No actor names beyond the generic reference are included in the snippet. Watch for follow-up reporting on restitution orders, victim disclosure, or whether the extortion method involved cyber intrusion versus social engineering.
