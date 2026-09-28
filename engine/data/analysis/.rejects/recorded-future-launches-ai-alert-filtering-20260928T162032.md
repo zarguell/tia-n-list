@@ -1,0 +1,5 @@
+Recorded Future has made its MCP server generally available, giving AI agents and LLM workflows direct access to the company's Intelligence Graph. The stated goal is alert triage and filtering decisions at machine speed, with the intelligence feed acting as the grounding layer for automated judgment.
+
+The significance is less the product than the interface. MCP is becoming the default way agents reach external tools, and a major intelligence provider exposing its graph through it means enrichment and verdict calls move inside agent loops rather than sitting in analyst queues. Buyers get an official, licensed path instead of scraping or homegrown connectors.
+
+The open question is calibration. Alert filtering is exactly the task where a confident wrong answer is expensive, so the value hinges on how the service expresses uncertainty and how much of the Intelligence Graph a client can actually reach per query. Watch how early deployments measure false-suppression rates, and whether competitors follow with MCP endpoints of their own, which would standardize machine-readable threat intelligence across the industry.
