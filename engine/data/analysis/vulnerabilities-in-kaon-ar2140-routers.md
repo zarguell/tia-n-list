@@ -1,0 +1,5 @@
+CERT Polska has received a report of two vulnerabilities in Kaon AR2140 routers, tracked as CVE-2026-52748 and CVE-2026-52749. The EUVD entry EUVD-2026-88246, updated September 28, scores the flaw in the Kaon AR2140X router at 7.1 CVSS v3.1. Technical detail beyond the CVE identifiers has not circulated yet in the collected coverage.
+
+Kaon set-top and router hardware is deployed at scale by European ISPs, so flaws in the AR2140 line sit on the network edge of ordinary homes and small offices. Devices in that class are rarely patched promptly, and a 7.1-rated issue in the router itself is a stepping stone to the local network rather than a single endpoint problem.
+
+Watch for CERT Polska to publish the advisory with affected firmware versions and mitigations, for Kaon or the ISPs shipping the hardware to issue updates, and for any evidence of scanning or exploitation. Until details land, treat exposed AR2140 management interfaces as at-risk and confirm they are not reachable from the WAN.
