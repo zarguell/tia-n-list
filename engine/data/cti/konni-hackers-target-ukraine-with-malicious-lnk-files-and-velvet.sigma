@@ -1,0 +1,36 @@
+title: Konni Operation Conflict Compass OneDriveUpdateScheduler Scheduled Task
+id: 84ad05ae-c591-4224-a7b5-f2b24ce9a427
+status: experimental
+description: >
+    Detects command lines creating the OneDriveUpdateScheduler scheduled task,
+    the persistence mechanism of the Konni (TA406/Opal Sleet) Operation
+    Conflict Compass campaign against Ukraine-focused entities: a LNK lure
+    disguised as a PDF downloads a VBScript that registers the task to launch
+    the VelvetCake PowerShell payload every minute (SOCRadar, September 2026).
+references:
+    - https://cyberpress.org/konni-targets-ukraine-with-velvetcake/
+    - https://gbhackers.com/velvetcake-powershell-malware/
+    - https://malware.news/t/konni-cv-olesiatsvientukh-socialresearcher-sociologist-qualitativelnk/125920#post_1
+author: Tia N. List
+date: 2026/09/28
+tags:
+    - attack.t1053
+    - attack.t1086
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_schtasks:
+        Image|endswith: '\schtasks.exe'
+        CommandLine|contains: 'OneDriveUpdateScheduler'
+    selection_shell:
+        Image|endswith:
+            - '\powershell.exe'
+            - '\pwsh.exe'
+            - '\cmd.exe'
+        CommandLine|contains: 'OneDriveUpdateScheduler'
+    condition: selection_schtasks or selection_shell
+falsepositives:
+    - Security research or red-team tooling reproducing the published campaign artifacts
+    - A legitimate updater task coincidentally named OneDriveUpdateScheduler (unlikely)
+level: high
