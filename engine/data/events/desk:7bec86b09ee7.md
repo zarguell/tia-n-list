@@ -1,0 +1,1 @@
+Ivanti disclosed ten vulnerabilities across Neurons for ITSM, Sentry, and EPMM. CVE-2026-12744 and CVE-2026-12745 are critical deserialization flaws (CVSS 9.8) enabling unauthenticated remote code execution on Neurons for ITSM. Fixes were released for versions 2025.2, 2025.3, 2025.4, and 2026.1.
