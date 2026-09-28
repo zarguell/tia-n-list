@@ -1,0 +1,5 @@
+This story tracks unverified extortion claims made by an actor using the handle "Panzer", as logged by the yazoul.net claim tracker. The claims on record are Stim, posted September 18, 2026 with no data type specified, and SMCare, posted September 28, 2026, allegedly exposing health records. None of the claims is verified: the collected events contain no leak site listing, no data samples, and no victim confirmation.
+
+The value is pattern-level. One handle recurring across separate claimed victims within ten days suggests either a small active extortion operation or a claims-farming account riding on other groups' leaks. The SMCare claim matters most if true, since health records carry legal and safety impact beyond ordinary PII, but the tracker itself marks every entry unverified and this feed historically resolves few claims into confirmed incidents.
+
+Treat these as leads, not facts. Watch for corroboration in the form of leak site entries, victim breach notifications, or researcher validation with samples, and note whether claims are quietly dropped, which is the usual outcome for unverified claim feeds.
