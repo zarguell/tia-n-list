@@ -1,0 +1,7 @@
+Keio Corporation, the major private railway operator in Tokyo, confirmed a ransomware attack on its group servers in the early hours of Saturday, September 26, 2026. The company detected a system failure, confirmed ransomware, and shut down its network to prevent the attack from spreading. It has reported the incident to police and is investigating the attack route and damage with external experts.
+
+The impact so far sits on the hospitality side of the business, not train operations. Keio runs 85 km of track with 69 stations alongside a hotel business of 25 properties, and the Keio Plaza Hotel Tokyo has warned of delays on some customer-facing services. Local media report the attack disrupted payment systems. The company has about 2,200 employees and roughly $2.6 billion in annual revenue, and says it is still determining whether attackers accessed customer or business partner information.
+
+No ransomware group had claimed the attack as of September 28, which leaves attribution and data-theft claims open. Japanese rail and hospitality operators have become regular ransomware targets because payment and booking outages are immediately visible and pressuring.
+
+Worth watching: a group claim or leak-site listing, confirmation of whether customer or partner data was accessed, and how long the hotel payment systems stay degraded. The separation between the rail network and the hospitality systems appears to have held, which is the outcome that matters for public safety.
