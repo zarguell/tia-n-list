@@ -1,0 +1,1 @@
+CISA amplified Citrix's disclosure of eight vulnerabilities in NetScaler ADC and Gateway on September 27, 2026. The alert confirms active global exploitation of CVE-2026-88771 and CVE-2026-88772, both added to the KEV catalog, and urges compromise checks before patching.

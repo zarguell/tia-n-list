@@ -1,0 +1,1 @@
+watchTowr published a detailed FAQ on September 27, 2026, covering the zero-day RCE vulnerabilities in NetScaler ADC and Gateway. The post confirms exploitation in the wild, lists affected versions (14.1 before 14.1-73.37 and 13.1 before 13.1-64.23), and notes watchTowr warned clients of exposure on September 26, 2026, before CVE IDs existed.
