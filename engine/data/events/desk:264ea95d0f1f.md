@@ -1,0 +1,1 @@
+The GitHub release that triggered the repository's PyPI publishing workflow was published at 2026-09-23T05:24:20Z by the account Memtensor-AI, with its tag on commit 41bf5c7. The malicious MemoryOS 2.0.34 wheel reached PyPI about a minute later. Researchers later showed the release was preceded by a token-capture build under a deleted tag named v2.0.34-capture-1.

@@ -1,0 +1,1 @@
+The npm registry timestamps version 0.1.21 at 2026-09-23T02:23:04.778Z, followed by 0.1.22 (03:45:44), 0.1.23 (03:49:20), 0.1.24 (04:33:30) and 0.1.25 (04:36:58) the same morning. Versions 0.1.21, 0.1.23 and 0.1.25 were later identified as malicious; 0.1.22 and 0.1.24 are clean. Current dist-tags point latest at the clean 0.1.24.
