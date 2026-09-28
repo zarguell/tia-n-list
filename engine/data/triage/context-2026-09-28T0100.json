@@ -1,0 +1,772 @@
+{
+ "date": "2026-09-28",
+ "decisions_path": "engine/data/triage/decisions-2026-09-28T0100.json",
+ "instructions": "For every new event decide: (1) keep or drop \u2014 keep only stories worth covering (real security events, vulnerabilities, attacks, breaches, advisories with substance); drop press releases, vendor marketing, generic explainers, and anything duplicating an existing story. (2) If keep, assign the event to the RIGHT story: an existing candidate story id if it belongs there (this FIXES mechanical clustering \u2014 e.g. different outlets' Patch Tuesday roundups are ONE story), or NEW with a clean story_title. (3) merges: list candidate stories that are really the same story (from = fragment, into = the most complete one). (4) For every kept event that names CVEs, optionally assess exploitation: exploited = the event reports OBSERVED in-the-wild exploitation (implants, victim counts, campaigns, CISA KEV confirmation); suspected = public exploit code/PoC or likely-but-unconfirmed. Attribute ONLY the CVEs you can tie to the claim \u2014 a bulletin's blanket 'actively exploited' does NOT flag all its CVEs. Omit the exploitation field when the event makes no claim.\n(5) LOW-TRUST events (\"low_trust\": true \u2014 AI-drafted aggregator reposts, late and overstated): treat as unverified leads. When the text attributes the claim to a named primary source (a researcher firm like watchTowr, a vendor advisory, CISA, a major outlet) and attribution_urls or a web search (/home/ubuntu/repos/cronman/bin/web-search.sh \"query\") locate that primary source CONFIRMING the claim, include a provenance object in the decision: {\"url\": <primary url>, \"source\": <domain>, \"evidence\": <one line>, \"verified\": true}. VERIFIED provenance lets the event mint a story (credited to the primary source) and count as a development; without it, a low-trust event can only attach to an EXISTING story, never mint. If you cannot verify, keep/drop on normal merit and omit provenance.\n\nWrite decisions as JSON with EXACTLY this shape:\n{\n  \"decisions\": [\n    {\"event_id\": \"<id>\", \"action\": \"keep\", \"story\": \"<existing candidate story id>\", \"reason\": \"...\"},\n    {\"event_id\": \"<id>\", \"action\": \"keep\", \"story\": \"NEW\", \"story_title\": \"<clean title>\", \"reason\": \"...\"},\n    {\"event_id\": \"<id>\", \"action\": \"drop\", \"reason\": \"...\"}\n  ],\n  \"merges\": [{\"from\": \"<fragment story id>\", \"into\": \"<canonical story id>\"}]\n}\nFor events marked \"low_trust\" (AI-drafted aggregator reposts) a decision\nmay carry an optional \"provenance\" object when you VERIFIED the claim at\nthe named primary source: {\"event_id\": ..., \"action\": \"keep\", ...}\n  \"provenance\": {\"url\": \"<primary source url>\", \"source\": \"<domain>\", \"evidence\": \"<one line>\"}\nOnly include provenance when the primary source (vendor advisory, CISA,\nthe named researcher/outlet) really carries the claim \u2014 verified\nprovenance lets a low-trust event mint a story and set freshness; without\nit the event can only amplify an existing story.\nSTRICT KEY NAMES: the array key is \"decisions\" (never \"events\"); the story\nkey is \"story\" (never \"story_id\"); \"story\" holds a candidate_stories id\nverbatim or the literal string \"NEW\". Optional per-event field\n\"exploitation\": {\"CVE-...\": {\"status\": \"exploited|suspected\", \"evidence\": \"1-2 sentences\"}}.",
+ "new_events": [
+  {
+   "id": "masto:117345884948705330",
+   "title": "A critical macOS CoreServices vulnerability (CVE-2026-43786) is patched. Apple privilege escalation PoC details are now public. # macOS # Ap",
+   "source": "securityonline.info",
+   "published_at": "2026-09-28T00:41:45.000Z",
+   "cves": [
+    "CVE-2026-43786"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "A critical macOS CoreServices vulnerability (CVE-2026-43786) is patched. Apple privilege escalation PoC details are now public. # macOS # Ap  via Mastodon https://securityonline.info/exploited-macos-coreservices-vulnerab"
+  },
+  {
+   "id": "masto:117345744417362153",
+   "title": "Krytyczna luka w Linux KVM na ARM64. W okre\u015blonych warunkach mo\u017cna przej\u0105\u0107 kontrol\u0119 nad hostem [CVE-2026-89775] Na portalu openwall.com bada",
+   "source": "sekurak.pl",
+   "published_at": "2026-09-28T00:06:00.000Z",
+   "cves": [
+    "CVE-2026-89775"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Krytyczna luka w Linux KVM na ARM64. W okre\u015blonych warunkach mo\u017cna przej\u0105\u0107 kontrol\u0119 nad hostem [CVE-2026-89775] Na portalu openwall.com bada  via Mastodon https://sekurak.pl/krytyczna-luka-w-linux-kvm-na-arm64-w-okreslon"
+  },
+  {
+   "id": "masto:117345744458265410",
+   "title": "Powa\u017cne podatno\u015bci w popularnych kamerach TP\u2013Link Tapo C200. Z poziomu sieci lokalnej mo\u017cna by\u0142o zdoby\u0107 uprawnienia administratora lub przep",
+   "source": "sekurak.pl",
+   "published_at": "2026-09-28T00:06:00.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Powa\u017cne podatno\u015bci w popularnych kamerach TP\u2013Link Tapo C200. Z poziomu sieci lokalnej mo\u017cna by\u0142o zdoby\u0107 uprawnienia administratora lub przep  via Mastodon https://sekurak.pl/powazne-podatnosci-w-popularnych-kamerach-tp-l"
+  },
+  {
+   "id": "masto:117345726727993574",
+   "title": "\ud83d\udcc8 CVE Published in last 7 days (2026-09-21 - 2026-09-21) See more at https:// secdb.nttzen.cloud/dashboard Total CVEs: Severity: - Critical:",
+   "source": "secdb.nttzen.cloud",
+   "published_at": "2026-09-28T00:01:31.000Z",
+   "cves": [
+    "CVE-2026-15027",
+    "CVE-2026-19599",
+    "CVE-2026-43641",
+    "CVE-2026-74849",
+    "CVE-2026-76978",
+    "CVE-2026-85542",
+    "CVE-2026-87902",
+    "CVE-2026-93616",
+    "CVE-2026-94097",
+    "CVE-2026-94098"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "\ud83d\udcc8 CVE Published in last 7 days (2026-09-21 - 2026-09-21) See more at https:// secdb.nttzen.cloud/dashboard Total CVEs: Severity: - Critical:  via Mastodon https://secdb.nttzen.cloud/dashboard "
+  },
+  {
+   "id": "masto:117345721364294434",
+   "title": "\ud83d\udea8 EUVD-2026-88048 \ud83d\udcca Score: 5.3/10 (CVSS v3.1) \ud83d\udce6 Product: laravel-crm, laravel-crm, laravel-crm (+3 more) \ud83c\udfe2 Vendor: krayin \ud83d\udcc5 Updated: 2026-09",
+   "source": "euvd.enisa.europa.eu",
+   "published_at": "2026-09-28T00:00:09.687Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "\ud83d\udea8 EUVD-2026-88048 \ud83d\udcca Score: 5.3/10 (CVSS v3.1) \ud83d\udce6 Product: laravel-crm, laravel-crm, laravel-crm (+3 more) \ud83c\udfe2 Vendor: krayin \ud83d\udcc5 Updated: 2026-09  via Mastodon https://euvd.enisa.europa.eu/vulnerability/EUVD-2026-88048 "
+  },
+  {
+   "id": "masto:117345721335058515",
+   "title": "\ud83d\udea8 EUVD-2026-88049 \ud83d\udcca Score: 6.9/10 (CVSS v3.1) \ud83d\udce6 Product: laravel-crm, laravel-crm, laravel-crm (+2 more) \ud83c\udfe2 Vendor: krayin \ud83d\udcc5 Updated: 2026-09",
+   "source": "euvd.enisa.europa.eu",
+   "published_at": "2026-09-28T00:00:09.241Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "\ud83d\udea8 EUVD-2026-88049 \ud83d\udcca Score: 6.9/10 (CVSS v3.1) \ud83d\udce6 Product: laravel-crm, laravel-crm, laravel-crm (+2 more) \ud83c\udfe2 Vendor: krayin \ud83d\udcc5 Updated: 2026-09  via Mastodon https://euvd.enisa.europa.eu/vulnerability/EUVD-2026-88049 "
+  },
+  {
+   "id": "masto:117345721306230131",
+   "title": "\ud83d\udea8 EUVD-2026-88050 \ud83d\udcca Score: 10.0/10 (CVSS v3.1) \ud83d\udce6 Product: T8108P, T8116, T8232 (+1 more) \ud83c\udfe2 Vendor: Seetong \ud83d\udcc5 Updated: 2026-09-27 \ud83d\udcdd A vulnera",
+   "source": "euvd.enisa.europa.eu",
+   "published_at": "2026-09-28T00:00:08.800Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "\ud83d\udea8 EUVD-2026-88050 \ud83d\udcca Score: 10.0/10 (CVSS v3.1) \ud83d\udce6 Product: T8108P, T8116, T8232 (+1 more) \ud83c\udfe2 Vendor: Seetong \ud83d\udcc5 Updated: 2026-09-27 \ud83d\udcdd A vulnera  via Mastodon https://euvd.enisa.europa.eu/vulnerability/EUVD-2026-88050 "
+  },
+  {
+   "id": "masto:117345721242098899",
+   "title": "\ud83d\udea8 EUVD-2026-88051 \ud83d\udcca Score: 5.3/10 (CVSS v3.1) \ud83d\udce6 Product: Mini-Inventory-and-Sales-Management-System \ud83c\udfe2 Vendor: amirsanni \ud83d\udcc5 Updated: 2026-09-2",
+   "source": "euvd.enisa.europa.eu",
+   "published_at": "2026-09-28T00:00:07.837Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "\ud83d\udea8 EUVD-2026-88051 \ud83d\udcca Score: 5.3/10 (CVSS v3.1) \ud83d\udce6 Product: Mini-Inventory-and-Sales-Management-System \ud83c\udfe2 Vendor: amirsanni \ud83d\udcc5 Updated: 2026-09-2  via Mastodon https://euvd.enisa.europa.eu/vulnerability/EUVD-2026-88051 "
+  },
+  {
+   "id": "masto:117345717020005089",
+   "title": "Foul texts such as the Pnakotic Manuscripts and the dread Necronomicon of Abdul al-Hazred show the danger of writing incantations incautious",
+   "source": "cromwell-intl.com",
+   "published_at": "2026-09-27T23:59:01.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Foul texts such as the Pnakotic Manuscripts and the dread Necronomicon of Abdul al-Hazred show the danger of writing incantations incautious  via Mastodon https://cromwell-intl.com/cybersecurity/software.html?s=mc "
+  },
+  {
+   "id": "masto:117345714639878936",
+   "title": "Mantax Otax hijacks your screen live, steals PINs and WhatsApp chats, then encrypts files to extort you. 9 detections, 19 IOCs. Full analysi",
+   "source": "intel.threadlinqs.com",
+   "published_at": "2026-09-27T23:58:27.081Z",
+   "cves": [],
+   "low_trust": true,
+   "attribution_urls": [],
+   "snippet": "Mantax Otax hijacks your screen live, steals PINs and WhatsApp chats, then encrypts files to extort you. 9 detections, 19 IOCs. Full analysi  via Mastodon https://intel.threadlinqs.com/threat/TL-2026-2719 "
+  },
+  {
+   "id": "x:2104355637928816659",
+   "title": "OpenAI is preparing \u201co,\u201d an always-on ChatGPT assistant that could handle email https:// bleepingcomputer.com/news/artificia l-intelligence/",
+   "source": "www.bleepingcomputer.com",
+   "published_at": "2026-09-27T23:40:55.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "OpenAI is preparing \u201co,\u201d an always-on ChatGPT assistant that could handle email https:// bleepingcomputer.com/news/artificia l-intelligence/  via X https://www.bleepingcomputer.com/news/artificial-intelligence/openai-is-"
+  },
+  {
+   "id": "masto:117345600305569328",
+   "title": "\ud83d\udee1\ufe0f # Cybersecurity news & tips across the # fediverse \u201c\ud83d\udcf7 17 new license plate readers just reported around Lincoln, NE\u2024 Newly mapped by volu",
+   "source": "mastodon.social",
+   "published_at": "2026-09-27T23:29:20.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "\ud83d\udee1\ufe0f # Cybersecurity news & tips across the # fediverse \u201c\ud83d\udcf7 17 new license plate readers just reported around Lincoln, NE\u2024 Newly mapped by volu  via Mastodon https://mastodon.social/@deflocktheusa/117343211354534138 "
+  },
+  {
+   "id": "masto:117345591872323176",
+   "title": "Powa\u017cne podatno\u015bci w popularnych kamerach TP\u2013Link Tapo C200. Z poziomu sieci lokalnej mo\u017cna by\u0142o zdoby\u0107 uprawnienia administratora lub przep",
+   "source": "sekurak.pl",
+   "published_at": "2026-09-27T23:27:13.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Powa\u017cne podatno\u015bci w popularnych kamerach TP\u2013Link Tapo C200. Z poziomu sieci lokalnej mo\u017cna by\u0142o zdoby\u0107 uprawnienia administratora lub przep  via Mastodon https://sekurak.pl/powazne-podatnosci-w-popularnych-kamerach-tp-l"
+  },
+  {
+   "id": "masto:117345591822205575",
+   "title": "https://www. europesays.com/3276340/ Devolutions wants to support Qu\u00e9bec\u2019s IT ecosystem with corporate venture capital # business # Cybersec",
+   "source": "www.europesays.com",
+   "published_at": "2026-09-27T23:23:02.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "https://www. europesays.com/3276340/ Devolutions wants to support Qu\u00e9bec\u2019s IT ecosystem with corporate venture capital # business # Cybersec  via Mastodon https://www.europesays.com/3276340/ "
+  },
+  {
+   "id": "masto:117345572485294382",
+   "title": "Krytyczna luka w Linux KVM na ARM64. W okre\u015blonych warunkach mo\u017cna przej\u0105\u0107 kontrol\u0119 nad hostem [CVE-2026-89775] https:// sekurak.pl/krytyczn",
+   "source": "sekurak.pl",
+   "published_at": "2026-09-27T23:22:17.000Z",
+   "cves": [
+    "CVE-2026-89775"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Krytyczna luka w Linux KVM na ARM64. W okre\u015blonych warunkach mo\u017cna przej\u0105\u0107 kontrol\u0119 nad hostem [CVE-2026-89775] https:// sekurak.pl/krytyczn  via Mastodon https://sekurak.pl/krytyczna-luka-w-linux-kvm-na-arm64-w-okreslon"
+  },
+  {
+   "id": "masto:117345572452005755",
+   "title": "\u0420\u0430\u0437\u0431\u043e\u0440 CVE-2026-83557 \u0432 jackson-databind: \u043f\u043e\u0447\u0435\u043c\u0443 \u043d\u0435 \u0432\u0441\u0435\u0445 CVE \u043d\u0430\u0434\u043e \u0431\u043e\u044f\u0442\u044c\u0441\u044f \u0423\u0442\u0440\u043e \u0447\u0435\u0442\u0432\u0435\u0440\u0433\u0430. \u0412\u044b \u043e\u0442\u043a\u0440\u044b\u0432\u0430\u0435\u0442\u0435 \u0442\u0430\u0441\u043a-\u0442\u0440\u0435\u043a\u0435\u0440, \u0430 \u0442\u0430\u043c \u0442\u0438\u043a\u0435\u0442 \u043e\u0442 \u0441\u043a\u0430\u043d\u0435\u0440\u0430 \u0437",
+   "source": "habr.com",
+   "published_at": "2026-09-27T23:22:16.000Z",
+   "cves": [
+    "CVE-2026-83557"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "\u0420\u0430\u0437\u0431\u043e\u0440 CVE-2026-83557 \u0432 jackson-databind: \u043f\u043e\u0447\u0435\u043c\u0443 \u043d\u0435 \u0432\u0441\u0435\u0445 CVE \u043d\u0430\u0434\u043e \u0431\u043e\u044f\u0442\u044c\u0441\u044f \u0423\u0442\u0440\u043e \u0447\u0435\u0442\u0432\u0435\u0440\u0433\u0430. \u0412\u044b \u043e\u0442\u043a\u0440\u044b\u0432\u0430\u0435\u0442\u0435 \u0442\u0430\u0441\u043a-\u0442\u0440\u0435\u043a\u0435\u0440, \u0430 \u0442\u0430\u043c \u0442\u0438\u043a\u0435\u0442 \u043e\u0442 \u0441\u043a\u0430\u043d\u0435\u0440\u0430 \u0437  via Mastodon https://habr.com/ru/articles/1087034/ "
+  },
+  {
+   "id": "x:2104350924298932608",
+   "title": "For the last year, random phishing emails have been landing in my Gmail inbox, cycling through IP address encoding tricks like hXXp://secure",
+   "source": "github.com",
+   "published_at": "2026-09-27T23:22:11.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "For the last year, random phishing emails have been landing in my Gmail inbox, cycling through IP address encoding tricks like hXXp://secure  via X https://github.com/HackingLZ/ip-obfuscation "
+  },
+  {
+   "id": "masto:117345560459779203",
+   "title": "\ud83e\udd16 Open-source GNSS interference/jamming/spoofing detector: typed Python 3 prototype parsing NMEA-0183 + RINEX v2/v3, with a seeded signal si",
+   "source": "github.com",
+   "published_at": "2026-09-27T23:19:14.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "\ud83e\udd16 Open-source GNSS interference/jamming/spoofing detector: typed Python 3 prototype parsing NMEA-0183 + RINEX v2/v3, with a seeded signal si  via Mastodon https://github.com/juiwenchen/gnss-worker "
+  },
+  {
+   "id": "masto:117345541446479167",
+   "title": "D-Link DIR-895L routers hit by CVE-2026-100740, a CVSS 9.9 vulnerability. No patch coming: the series reached end-of-life in 2019. # Cyberse",
+   "source": "deafnews.it",
+   "published_at": "2026-09-27T23:14:23.000Z",
+   "cves": [
+    "CVE-2026-100740"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "D-Link DIR-895L routers hit by CVE-2026-100740, a CVSS 9.9 vulnerability. No patch coming: the series reached end-of-life in 2019. # Cyberse  via Mastodon https://deafnews.it/en/article/d-link-already-declared-eol-for-di"
+  },
+  {
+   "id": "masto:117345526782325720",
+   "title": "Back from GrrCon and ready to catch up. \ud83d\udd34 Checking out the new Steam Frame VR, diving into some cybersecurity rants, and settling into some ",
+   "source": "kick.com",
+   "published_at": "2026-09-27T23:10:38.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Back from GrrCon and ready to catch up. \ud83d\udd34 Checking out the new Steam Frame VR, diving into some cybersecurity rants, and settling into some   via Mastodon https://kick.com/chiefgyk3d "
+  },
+  {
+   "id": "masto:117345485586261132",
+   "title": "\ud83d\udea8 [CISA-2026:0927] CISA Adds 2 Known Exploited Vulnerabilities to Catalog ( https:// secdb.nttzen.cloud/security-ad visory/detail/CISA-2026:",
+   "source": "secdb.nttzen.cloud",
+   "published_at": "2026-09-27T23:00:11.000Z",
+   "cves": [
+    "CVE-2026-88771",
+    "CVE-2026-88772",
+    "CVE-2026-88778"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "\ud83d\udea8 [CISA-2026:0927] CISA Adds 2 Known Exploited Vulnerabilities to Catalog ( https:// secdb.nttzen.cloud/security-ad visory/detail/CISA-2026:  via Mastodon https://secdb.nttzen.cloud/security-advisory/detail/CISA-2026:092"
+  },
+  {
+   "id": "masto:117345480517906580",
+   "title": "Soft-404s: The Silent Killer of DAST Scans Traditional DAST tools have a dirty secret:... # cybersecurity # security # testing # software # ",
+   "source": "dev.to",
+   "published_at": "2026-09-27T22:58:54.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Soft-404s: The Silent Killer of DAST Scans Traditional DAST tools have a dirty secret:... # cybersecurity # security # testing # software #   via Mastodon https://dev.to/matarturo/soft-404s-the-silent-killer-of-dast-scan"
+  }
+ ],
+ "candidate_stories": [
+  {
+   "id": "cve-published-in-last-7-days-2026-09-07-2026-09-07-see-more-at-h",
+   "title": "CVE Published in last 7 days (2026-09-07 - 2026-09-07) See more at https:// secdb.nttzen.cloud/dashboard Total CVEs: Severity: - Critical:",
+   "n_events": 1,
+   "last_seen": "2026-09-28T00:01:31.000Z",
+   "first_event_title": "\ud83d\udcc8 CVE Published in last 7 days (2026-09-21 - 2026-09-21) See more at https:// secdb.nttzen.cloud/dashboard Total CVEs: Severity: - Critical:"
+  },
+  {
+   "id": "euvd-2026-85706-score-9-3-10-cvss-v3-1-product-laravel-mediable",
+   "title": "EUVD-2026-85706 \ud83d\udcca Score: 9.3/10 (CVSS v3.1) \ud83d\udce6 Product: laravel-mediable \ud83c\udfe2 Vendor: plank \ud83d\udcc5 Updated: 2026-09-23 \ud83d\udcdd Laravel-Mediable 7.0.0 bef",
+   "n_events": 3,
+   "last_seen": "2026-09-28T00:00:09.687Z",
+   "first_event_title": "\ud83d\udea8 EUVD-2026-85706 \ud83d\udcca Score: 9.3/10 (CVSS v3.1) \ud83d\udce6 Product: laravel-mediable \ud83c\udfe2 Vendor: plank \ud83d\udcc5 Updated: 2026-09-23 \ud83d\udcdd Laravel-Mediable 7.0.0 bef"
+  },
+  {
+   "id": "d-link-dir-895l-critical-rce-cve-2026-100740",
+   "title": "D-Link DIR-895L Critical RCE CVE-2026-100740",
+   "n_events": 2,
+   "last_seen": "2026-09-27T23:14:23.000Z",
+   "first_event_title": "D-Link DIR-895L hit by CRITICAL vuln: CVE-2026-100740 (CVSS 9.4) in tunnel_set_params \u2014 public exploit code enables remote RCE or DoS via ou"
+  },
+  {
+   "id": "we-found-that-only-8-of-4-688-small-business-sites-we-scanned-pa",
+   "title": "We found that only 8 of 4,688 small business sites we scanned pass a real script-CSP check",
+   "n_events": 0,
+   "last_seen": "2026-09-27T23:06:18Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "noobie-questions-i-m-trying-to-type-a-command-in-kali-linux-but",
+   "title": "( noobie questions ) I'm trying to type a command in Kali Linux, but nothing appears on the screen, as if the keyboard were locked and a second problem.",
+   "n_events": 0,
+   "last_seen": "2026-09-27T23:00:43Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "beyond-the-ransomware-tracking-storm-2570-s-consistent-tradecraf",
+   "title": "Beyond the ransomware: Tracking Storm-2570\u2019s consistent tradecraft across deployments",
+   "n_events": 6,
+   "last_seen": "2026-09-27T22:15:29.000Z",
+   "first_event_title": "Beyond the ransomware: Tracking Storm-2570\u2019s consistent tradecraft across deployments"
+  },
+  {
+   "id": "wordpress-7-1-2-patches-a-critical-wordpress-rce-vulnerability-c",
+   "title": "WordPress 7.1.2 patches a critical WordPress RCE vulnerability (CVE-2026-87902). Update your site to prevent conditional remote code executi",
+   "n_events": 28,
+   "last_seen": "2026-09-27T22:10:26.000Z",
+   "first_event_title": "WordPress 7.1.2 patches a critical WordPress RCE vulnerability (CVE-2026-87902). Update your site to prevent conditional remote code executi"
+  },
+  {
+   "id": "citrix-netscaler-unpatched-rce-zero-days",
+   "title": "Citrix NetScaler zero-days CVE-2026-88771-88778 patched after confirmed exploitation",
+   "n_events": 36,
+   "last_seen": "2026-09-27T22:04:33.553Z",
+   "first_event_title": "NetScaler alert: watchTowr says reports of unpatched remote code execution flaws in Citrix NetScaler are verified, and organisations are shu"
+  },
+  {
+   "id": "wp2shell-cisa-adds-to-kev-wiz-details-webshell-installation-at-s",
+   "title": "wp2shell \u2014 CISA Adds to KEV; Wiz Details Webshell Installation at Scale",
+   "n_events": 11,
+   "last_seen": "2026-09-27T21:16:35.000Z",
+   "first_event_title": "wp2shell \u2014 CISA Adds to KEV; Wiz Details Webshell Installation at Scale"
+  },
+  {
+   "id": "cve-2026-92747-cockpit-machines-leaks-vm-root-and-user-passwords",
+   "title": "CVE-2026-92747: cockpit-machines leaks VM root and user passwords via process arguments",
+   "n_events": 1,
+   "last_seen": "2026-09-27T20:10:16.664Z",
+   "first_event_title": "CVE-2026-92747: cockpit-machines leaks VM root/user passwords via process args during install. Local attacker with process visibility can gr"
+  },
+  {
+   "id": "teamcity-rce-exploit-window-closes-today-rapid7-details-permissi",
+   "title": "TeamCity RCE Exploit Window Closes Today \u2014 Rapid7 Details Permissive XStream Allowlist",
+   "n_events": 16,
+   "last_seen": "2026-09-27T20:08:17.019Z",
+   "first_event_title": "TeamCity RCE Exploit Window Closes Today \u2014 Rapid7 Details Permissive XStream Allowlist"
+  },
+  {
+   "id": "cloudclassroom-php-project-vulnerabilities-cve-2026-100874-sql-i-3",
+   "title": "CloudClassroom-PHP-Project vulnerabilities: CVE-2026-100874 SQL injection",
+   "n_events": 10,
+   "last_seen": "2026-09-27T20:01:07.870Z",
+   "first_event_title": "CVE-2026-100874 is a remotely exploitable SQL injection vulnerability in mathurvishal's CloudClassroom-PHP-Project, a PHP web application. A"
+  },
+  {
+   "id": "oracle-peoplesoft-cve-2026-35273-cvss-9-8-mitigations-released-m",
+   "title": "Oracle PeopleSoft CVE-2026-35273 (CVSS 9.8) \u2014 Mitigations Released, Mandiant/GTIG Confirm ShinyHunters Targeting 100+ Organizations, Primarily Higher Education",
+   "n_events": 18,
+   "last_seen": "2026-09-27T19:37:16.000Z",
+   "first_event_title": "Oracle PeopleSoft CVE-2026-35273 (CVSS 9.8) \u2014 Mitigations Released, Mandiant/GTIG Confirm ShinyHunters Targeting 100+ Organizations, Primarily Higher Education"
+  },
+  {
+   "id": "unprivileged-android-app-can-abort-the-identity-credential-hal",
+   "title": "Unprivileged_Android_app_can_abort_the_Identity_Credential_HAL",
+   "n_events": 1,
+   "last_seen": "2026-09-27T19:35:49Z",
+   "first_event_title": "Unprivileged_Android_app_can_abort_the_Identity_Credential_HAL"
+  },
+  {
+   "id": "storm-3168-agentic-driven-cloud-attacks-using-compromised-servic",
+   "title": "Storm-3168: Agentic-driven cloud attacks using compromised service principals",
+   "n_events": 8,
+   "last_seen": "2026-09-27T19:14:12.000Z",
+   "first_event_title": "Storm-3168: Agentic-driven cloud attacks using compromised service principals"
+  },
+  {
+   "id": "threat-actor-compiles-cryptominer-on-endpoint-via-samsung-magici",
+   "title": "Threat actor compiles cryptominer on endpoint via Samsung MagicINFO flaw",
+   "n_events": 9,
+   "last_seen": "2026-09-27T19:10:45.000Z",
+   "first_event_title": "(huntress.com) Compiling Cryptominers On-Endpoint: A Novel Approach Leveraging Samsung MagicINFO Vulnerabilities and SilentXMRMiner In brief"
+  },
+  {
+   "id": "salesforce-agentforce-flaw-enables-0-click-data-exfiltration-via",
+   "title": "Salesforce Agentforce Flaw Enables 0-Click Data Exfiltration via Prompt Injection",
+   "n_events": 6,
+   "last_seen": "2026-09-27T19:06:47.065Z",
+   "first_event_title": "Salesforce Agentforce Flaw Enables 0-Click Data Exfiltration via Prompt Injection"
+  },
+  {
+   "id": "openai-s-systems-meddled-with-u-s-government-sites",
+   "title": "OpenAI\u2019s Systems Meddled With U.S. Government Sites",
+   "n_events": 10,
+   "last_seen": "2026-09-27T19:04:29.455Z",
+   "first_event_title": "OpenAI\u2019s Systems Meddled With U.S. Government Sites"
+  },
+  {
+   "id": "cve-2026-90817-critical-rce-in-redcap-13-3-0-unauth-attackers-ca",
+   "title": "CVE-2026-90817: Critical RCE in REDCap via survey hash code injection",
+   "n_events": 2,
+   "last_seen": "2026-09-27T18:15:18.000Z",
+   "first_event_title": "CVE-2026-90817: CRITICAL RCE in REDCap (13.3.0+). Unauth attackers can exploit improper code generation via survey hash for full server comp"
+  },
+  {
+   "id": "google-gemini-autonomously-hacked-three-companies-during-irregul",
+   "title": "Google Gemini autonomously hacked three companies during Irregular security test",
+   "n_events": 1,
+   "last_seen": "2026-09-27T17:51:50.000Z",
+   "first_event_title": "# cybersecurity https://www. bbc.com/news/articles/c607l0k7 2rlvo"
+  },
+  {
+   "id": "162-216-149-185-is-flagged-as-a-scanner-62-confidence-on-google",
+   "title": "162.216.149.185 is flagged as a scanner (62% confidence) on Google Cloud us-east1, tracked by 4 feeds. Check your logs. https://www. valters",
+   "n_events": 0,
+   "last_seen": "2026-09-27T17:20:21.744Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "dbhunter-data-breach-claim-targeting-chinese-energy-operator",
+   "title": "DBHunter Data Breach Claim Targeting Chinese Energy Operator",
+   "n_events": 4,
+   "last_seen": "2026-09-27T17:12:57.000Z",
+   "first_event_title": "\ud83c\udde8\ud83c\uddf3 We tracked a data breach claim by DBHunter targeting an unnamed Chinese coal and energy operator. The actor alleges exfiltration of datab"
+  },
+  {
+   "id": "memoryos-2-0-34-on-pypi-runs-credential-stealer-on-import",
+   "title": "MemoryOS 2.0.34 on PyPI runs credential stealer on import",
+   "n_events": 1,
+   "last_seen": "2026-09-27T16:02:14.914Z",
+   "first_event_title": "\"import memos\" alone is enough to start a credential stealer. MemoryOS 2.0.34 on PyPI: 149 modules call get_logger() at import time, and the"
+  },
+  {
+   "id": "euvd-2026-72498-score-8-8-10-cvss-v3-1-product-youtrack-vendor-j",
+   "title": "EUVD-2026-72498 \ud83d\udcca Score: 8.8/10 (CVSS v3.1) \ud83d\udce6 Product: YouTrack \ud83c\udfe2 Vendor: JetBrains \ud83d\udcc5 Published: 2026-09-07 | Updated: 2026-09-22 \ud83d\udcdd In Jet",
+   "n_events": 0,
+   "last_seen": "2026-09-27T16:01:06.689Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "i-m-a-ciso-who-s-built-many-security-teams-i-want-to-help-you-le",
+   "title": "I\u2019m a CISO who\u2019s built many security teams. I want to help you level up your career. Ask me anything.",
+   "n_events": 0,
+   "last_seen": "2026-09-27T15:26:16Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "oracle-communications-carries-a-d-trust-score-10-cves-8-high-max",
+   "title": "Oracle Communications carries a D trust score: 10 CVEs, 8 high, max CVSS 9, and 100% unpatched. Access control flaws dominate. Patch before",
+   "n_events": 0,
+   "last_seen": "2026-09-27T15:20:25.942Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "wireshark-4-6-9-released-sun-sep-27th",
+   "title": "Wireshark 4.6.9 Released, (Sun, Sep 27th)",
+   "n_events": 1,
+   "last_seen": "2026-09-27T15:15:40Z",
+   "first_event_title": "Wireshark 4.6.9 Released, (Sun, Sep 27th)"
+  },
+  {
+   "id": "konni-hackers-target-ukraine-with-malicious-lnk-files-and-velvet",
+   "title": "Konni Hackers Target Ukraine With Malicious LNK Files and VelvetCake PowerShell Malware",
+   "n_events": 3,
+   "last_seen": "2026-09-27T15:06:16Z",
+   "first_event_title": "Konni Hackers Target Ukraine With Malicious LNK Files and VelvetCake PowerShell Malware"
+  },
+  {
+   "id": "leaked-accounts-to-rce-writeup",
+   "title": "Leaked Accounts to RCE: Writeup",
+   "n_events": 1,
+   "last_seen": "2026-09-27T15:02:52Z",
+   "first_event_title": "Leaked Accounts to RCE: Writeup"
+  },
+  {
+   "id": "introducing-ade-skills-adversarial-detection-engineering-knowled",
+   "title": "Introducing ADE-Skills \u2014 Adversarial Detection Engineering Knowledge Base",
+   "n_events": 0,
+   "last_seen": "2026-09-27T14:40:58Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "cloudflare-fixes-containers-cross-tenant-flaw-exposing-customer",
+   "title": "Cloudflare Fixes Containers Cross-Tenant Flaw Exposing Customer Data",
+   "n_events": 2,
+   "last_seen": "2026-09-27T14:15:14.000Z",
+   "first_event_title": "Cloudflare fixes Containers cross-tenant flaw exposing customer data https:// bleepingcomputer.com/news/security/ cloudflare-fixes-container"
+  },
+  {
+   "id": "cve-2026-82890-ibm-guardium-data-protection-12-2-arbitrary-javas",
+   "title": "CVE-2026-82890 IBM Guardium Data Protection 12.2 Arbitrary JavaScript Execution",
+   "n_events": 1,
+   "last_seen": "2026-09-27T14:00:25.683Z",
+   "first_event_title": "CVE-2026-82890 IBM Guardium Data Protection 12.2 allows remote authenticated attackers to execute arbitrary JavaScript via improper input ne"
+  },
+  {
+   "id": "kiteworks-urges-customers-to-shut-down-servers-over-imminent-zer",
+   "title": "KiteWorks urges customers to shut down servers over imminent zero-day attacks",
+   "n_events": 14,
+   "last_seen": "2026-09-27T13:41:36.800Z",
+   "first_event_title": "Imminent Zero-Day Attack: KiteWorks Urges Customers to Shut Down Servers"
+  },
+  {
+   "id": "cisa-adds-exploited-wso2-adobe-commerce-sharepoint-and-routeros",
+   "title": "CISA adds exploited WSO2, Adobe Commerce, SharePoint and RouterOS flaws to KEV catalog",
+   "n_events": 20,
+   "last_seen": "2026-09-27T13:41:31.314Z",
+   "first_event_title": "CISA warns of Sharepoint, WSO2, Adobe Commerce flaws exploited in attacks"
+  },
+  {
+   "id": "anthropic-turns-claude-into-an-ai-marketplace-with-2-000-plugins",
+   "title": "Anthropic turns Claude into an AI marketplace with 2,000+ plugins and connectors",
+   "n_events": 1,
+   "last_seen": "2026-09-27T13:38:40Z",
+   "first_event_title": "Anthropic turns Claude into an AI marketplace with 2,000+ plugins and connectors"
+  },
+  {
+   "id": "personal-information-of-over-23-500-simba-customers-leaked-in-da",
+   "title": "Personal information of over 23,500 Simba customers leaked in data breach",
+   "n_events": 1,
+   "last_seen": "2026-09-27T13:35:44Z",
+   "first_event_title": "Personal information of over 23,500 Simba customers leaked in data breach"
+  },
+  {
+   "id": "nhs-trust-noah-woods-data-breach",
+   "title": "NHS Trust Noah Woods Data Breach",
+   "n_events": 2,
+   "last_seen": "2026-09-27T13:35:42Z",
+   "first_event_title": "Investigation launched as NHS trust apologises for Noah Woods data breach https://www.bbc.co.uk/news/articles/cmqjkk55qg25o?at_medium=RSS&at"
+  },
+  {
+   "id": "malware-in-requests-cache-utils-v1-0-0-pypi-package-critical-inf",
+   "title": "Malware in requests-cache-utils v1.0.0 PyPI Package (Critical Infostealer)",
+   "n_events": 1,
+   "last_seen": "2026-09-27T13:30:22.000Z",
+   "first_event_title": "Malware in requests-cache-utils v1.0.0 (PyPI): install runs an infostealer, exfiltrating browser data. Severity: CRITICAL. Remove package if"
+  },
+  {
+   "id": "bsidesluxembourg2026-recording-by-tailia-malloy-https",
+   "title": "# BSidesLuxembourg2026 recording: \"\ud835\udc13\ud835\udc1e\ud835\udc1a\ud835\udc26\ud835\udc22\ud835\udc27\ud835\udc20, \ud835\udc13\ud835\udc2b\ud835\udc2e\ud835\udc2c\ud835\udc2d, \ud835\udc00\ud835\udc27\ud835\udc1d \ud835\udc13\ud835\udc21\ud835\udc2b\ud835\udc1e\ud835\udc1a\ud835\udc2d\ud835\udc2c: \ud835\udc07\ud835\udc28\ud835\udc30 \ud835\udc07\ud835\udc2e\ud835\udc26\ud835\udc1a\ud835\udc27\ud835\udc2c \ud835\udc08\ud835\udc27\ud835\udc2d\ud835\udc1e\ud835\udc2b\ud835\udc1a\ud835\udc1c\ud835\udc2d \ud835\udc16\ud835\udc22\ud835\udc2d\ud835\udc21 \ud835\udc06\ud835\udc1e\ud835\udc27\ud835\udc1e\ud835\udc2b\ud835\udc1a\ud835\udc2d\ud835\udc22\ud835\udc2f\ud835\udc1e \ud835\udc00\ud835\udc08 \ud835\udc08\ud835\udc27 \ud835\udc12\ud835\udc1e\ud835\udc1c\ud835\udc2e\ud835\udc2b\ud835\udc22\ud835\udc2d\ud835\udc32\" by Tailia Malloy https:/",
+   "n_events": 4,
+   "last_seen": "2026-09-27T13:28:34.000Z",
+   "first_event_title": "# BSidesLuxembourg2026 recording: \"\ud835\udc02\ud835\udc28\ud835\udc26\ud835\udc29\ud835\udc2b\ud835\udc1e\ud835\udc21\ud835\udc1e\ud835\udc27\ud835\udc2c\ud835\udc22\ud835\udc2f\ud835\udc1e \ud835\udc05\ud835\udc2b\ud835\udc1a\ud835\udc26\ud835\udc1e\ud835\udc30\ud835\udc28\ud835\udc2b\ud835\udc24 \ud835\udc05\ud835\udc28\ud835\udc2b \ud835\udc00\ud835\udc27\ud835\udc1a\ud835\udc25\ud835\udc32\ud835\udc33\ud835\udc22\ud835\udc27\ud835\udc20 \ud835\udc00\ud835\udc27\ud835\udc1d \ud835\udc03\ud835\udc1e\ud835\udc2d\ud835\udc1e\ud835\udc1c\ud835\udc2d\ud835\udc22\ud835\udc27\ud835\udc20 \ud835\udc0c\ud835\udc1a\ud835\udc25\ud835\udc22\ud835\udc1c\ud835\udc22\ud835\udc28\ud835\udc2e\ud835\udc2c \ud835\udc01\ud835\udc2b\ud835\udc28\ud835\udc30\ud835\udc2c\ud835\udc1e\ud835\udc2b \ud835\udc04\ud835\udc31\ud835\udc2d\ud835\udc1e\ud835\udc27\ud835\udc2c\ud835\udc22\ud835\udc28\ud835\udc27\ud835\udc2c\" by Van Nguyen https:// "
+  },
+  {
+   "id": "threat-intel-siinqeebank-com-actor-lockbit5-claims-undisclosed-a",
+   "title": "THREAT INTEL | siinqeebank.com \ud83d\udd34 Actor \"lockbit5\" claims Undisclosed Allegedly exposed \u2022 Financial records \u26a0\ufe0f Unverified claim https://www",
+   "n_events": 0,
+   "last_seen": "2026-09-27T12:50:54.000Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "adobe-security-advisory-av26-808",
+   "title": "Adobe security advisory (AV26-808)",
+   "n_events": 2,
+   "last_seen": "2026-08-13T08:12:33Z",
+   "first_event_title": "Adobe security advisory (AV26-808)"
+  },
+  {
+   "id": "adobe-security-advisory-av26-888",
+   "title": "Adobe security advisory (AV26-888)",
+   "n_events": 3,
+   "last_seen": "2026-09-09T00:35:01.000Z",
+   "first_event_title": "Adobe security advisory (AV26-888)"
+  },
+  {
+   "id": "adobe-security-advisory-av26-953",
+   "title": "Adobe security advisory (AV26-953)",
+   "n_events": 1,
+   "last_seen": "2026-09-23T17:45:38Z",
+   "first_event_title": "Adobe security advisory (AV26-953)"
+  },
+  {
+   "id": "apple-security-advisory-av26-823",
+   "title": "Apple security advisory (AV26-823)",
+   "n_events": 1,
+   "last_seen": "2026-08-17T15:35:39Z",
+   "first_event_title": "Apple security advisory (AV26-823)"
+  },
+  {
+   "id": "commvault-security-advisory-av26-799",
+   "title": "Commvault security advisory (AV26-799)",
+   "n_events": 1,
+   "last_seen": "2026-08-11T17:46:10Z",
+   "first_event_title": "Commvault security advisory (AV26-799)"
+  },
+  {
+   "id": "control-systems-siemens-security-advisory-av26-890",
+   "title": "[Control Systems] Siemens security advisory (AV26-890)",
+   "n_events": 3,
+   "last_seen": "2026-09-23T08:01:13.000Z",
+   "first_event_title": "[Control Systems] Siemens security advisory (AV26-890)"
+  },
+  {
+   "id": "dell-security-advisory-av26-863",
+   "title": "Dell security advisory (AV26-863)",
+   "n_events": 2,
+   "last_seen": "2026-09-11T08:40:47.000Z",
+   "first_event_title": "Dell security advisory (AV26-863)"
+  },
+  {
+   "id": "dell-security-advisory-av26-959",
+   "title": "Dell security advisory (AV26-959)",
+   "n_events": 1,
+   "last_seen": "2026-09-23T19:20:39Z",
+   "first_event_title": "Dell security advisory (AV26-959)"
+  },
+  {
+   "id": "erlang-security-advisory-av26-948",
+   "title": "Erlang security advisory (AV26-948)",
+   "n_events": 1,
+   "last_seen": "2026-09-22T18:25:40Z",
+   "first_event_title": "Erlang security advisory (AV26-948)"
+  },
+  {
+   "id": "gitlab-security-advisory-av26-814",
+   "title": "GitLab security advisory (AV26-814)",
+   "n_events": 1,
+   "last_seen": "2026-08-13T14:00:38Z",
+   "first_event_title": "GitLab security advisory (AV26-814)"
+  },
+  {
+   "id": "google-security-advisory-av26-904",
+   "title": "Google security advisory (AV26-904)",
+   "n_events": 2,
+   "last_seen": "2026-09-09T20:49:30Z",
+   "first_event_title": "Google security advisory (AV26-904)"
+  },
+  {
+   "id": "grafana-security-advisory-av26-796",
+   "title": "Grafana security advisory (AV26-796)",
+   "n_events": 1,
+   "last_seen": "2026-08-11T13:30:40Z",
+   "first_event_title": "Grafana security advisory (AV26-796)"
+  },
+  {
+   "id": "grafana-security-advisory-av26-860",
+   "title": "Grafana Alloy Vulnerability CVE-2026-19516",
+   "n_events": 1,
+   "last_seen": "2026-08-28T15:10:44Z",
+   "first_event_title": "Grafana security advisory (AV26-860)"
+  },
+  {
+   "id": "hashicorp-security-advisory-av26-797",
+   "title": "HashiCorp security advisory (AV26-797)",
+   "n_events": 1,
+   "last_seen": "2026-08-11T14:05:42Z",
+   "first_event_title": "HashiCorp security advisory (AV26-797)"
+  },
+  {
+   "id": "hashicorp-security-advisory-av26-817",
+   "title": "HashiCorp security advisory (AV26-817)",
+   "n_events": 1,
+   "last_seen": "2026-08-14T16:05:44Z",
+   "first_event_title": "HashiCorp security advisory (AV26-817)"
+  },
+  {
+   "id": "hpe-security-advisory-av26-951",
+   "title": "HPE security advisory (AV26-951)",
+   "n_events": 0,
+   "last_seen": "2026-09-23T15:25:39Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "ibm-security-advisory-av26-943",
+   "title": "IBM security advisory (AV26-943)",
+   "n_events": 1,
+   "last_seen": "2026-09-21T15:06:10Z",
+   "first_event_title": "IBM security advisory (AV26-943)"
+  },
+  {
+   "id": "ivanti-security-advisory-av26-805",
+   "title": "Ivanti security advisory (AV26-805)",
+   "n_events": 1,
+   "last_seen": "2026-08-11T20:20:39Z",
+   "first_event_title": "Ivanti security advisory (AV26-805)"
+  },
+  {
+   "id": "ivanti-security-advisory-av26-897",
+   "title": "Ivanti September 2026 security advisory: EPMM, ITSM, Sentry vulnerabilities",
+   "n_events": 3,
+   "last_seen": "2026-09-09T06:39:58Z",
+   "first_event_title": "Ivanti security advisory (AV26-897)"
+  },
+  {
+   "id": "jetbrains-security-advisory-av26-825",
+   "title": "JetBrains security advisory (AV26-825)",
+   "n_events": 1,
+   "last_seen": "2026-08-18T13:40:50Z",
+   "first_event_title": "JetBrains security advisory (AV26-825)"
+  },
+  {
+   "id": "cisa-2026-0908-cisa-adds-4-known-exploited-vulnerabilities-to-ca",
+   "title": "[CISA-2026:0908] CISA Adds 4 Known Exploited Vulnerabilities to Catalog ( https:// secdb.nttzen.cloud/security-ad visory/detail/CISA-2026:",
+   "n_events": 11,
+   "last_seen": "2026-09-23T08:26:14.000Z",
+   "first_event_title": "\ud83d\udea8 [CISA-2026:0908] CISA Adds 4 Known Exploited Vulnerabilities to Catalog ( https:// secdb.nttzen.cloud/security-ad visory/detail/CISA-2026:"
+  },
+  {
+   "id": "a-critical-manageengine-adselfservice-plus-vulnerability-cve-202",
+   "title": "A critical ManageEngine ADSelfService Plus vulnerability (CVE-2026-74849) allows system compromise. Update to build 7001 to secure your endp",
+   "n_events": 4,
+   "last_seen": "2026-09-23T10:21:21Z",
+   "first_event_title": "A critical ManageEngine ADSelfService Plus vulnerability (CVE-2026-74849) allows system compromise. Update to build 7001 to secure your endp"
+  },
+  {
+   "id": "manageengine-security-vulnerabilities-expose-servers-to-remote-c",
+   "title": "ManageEngine security vulnerabilities expose servers to remote code execution. Patch these OpManager vulnerabilities and CVE-2026-19599 to s",
+   "n_events": 2,
+   "last_seen": "2026-09-23T14:35:09.000Z",
+   "first_event_title": "ManageEngine security vulnerabilities expose servers to remote code execution. Patch these OpManager vulnerabilities and CVE-2026-19599 to s"
+  },
+  {
+   "id": "a-critical-kvm-guest-escape-cve-2026-89775-enables-an-lpe-to-gai",
+   "title": "A critical KVM guest escape (CVE-2026-89775) enables an LPE to gain root on Linux hosts. Patch this KVM guest escape vulnerability now. # KV",
+   "n_events": 4,
+   "last_seen": "2026-09-22T12:35:47Z",
+   "first_event_title": "A critical KVM guest escape (CVE-2026-89775) enables an LPE to gain root on Linux hosts. Patch this KVM guest escape vulnerability now. # KV"
+  },
+  {
+   "id": "a-critical-exploited-check-point-management-vulnerability-cve-20",
+   "title": "A critical exploited Check Point Management vulnerability (CVE-2026-93616) allows attackers to execute arbitrary scripts. Secure your server",
+   "n_events": 35,
+   "last_seen": "2026-09-25T11:15:24Z",
+   "first_event_title": "A critical exploited Check Point Management vulnerability (CVE-2026-93616) allows attackers to execute arbitrary scripts. Secure your server"
+  },
+  {
+   "id": "euvd-2026-85013-score-4-8-10-cvss-v3-1-product-manalyze-vendor-j",
+   "title": "EUVD-2026-85013 \ud83d\udcca Score: 4.8/10 (CVSS v3.1) \ud83d\udce6 Product: Manalyze \ud83c\udfe2 Vendor: JusticeRage \ud83d\udcc5 Updated: 2026-09-23 \ud83d\udcdd A security flaw has been dis",
+   "n_events": 1,
+   "last_seen": "2026-09-23T04:02:07.071Z",
+   "first_event_title": "\ud83d\udea8 EUVD-2026-85013 \ud83d\udcca Score: 4.8/10 (CVSS v3.1) \ud83d\udce6 Product: Manalyze \ud83c\udfe2 Vendor: JusticeRage \ud83d\udcc5 Updated: 2026-09-23 \ud83d\udcdd A security flaw has been dis"
+  },
+  {
+   "id": "euvd-2026-78826-score-5-3-10-cvss-v3-1-product-record-management",
+   "title": "EUVD-2026-78826 \ud83d\udcca Score: 5.3/10 (CVSS v3.1) \ud83d\udce6 Product: Record Management System \ud83c\udfe2 Vendor: code-projects \ud83d\udcc5 Published: 2026-09-15 | Updated:",
+   "n_events": 0,
+   "last_seen": "2026-09-25T03:01:10.088Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "euvd-2026-85729-score-5-3-10-cvss-v3-1-product-coze-scraper-exte",
+   "title": "EUVD-2026-85729 \ud83d\udcca Score: 5.3/10 (CVSS v3.1) \ud83d\udce6 Product: Coze Scraper Extension, Coze Scraper Extension, Coze Scraper Extension \ud83c\udfe2 Vendor: by",
+   "n_events": 1,
+   "last_seen": "2026-09-24T00:01:10.737Z",
+   "first_event_title": "\ud83d\udea8 EUVD-2026-85729 \ud83d\udcca Score: 5.3/10 (CVSS v3.1) \ud83d\udce6 Product: Coze Scraper Extension, Coze Scraper Extension, Coze Scraper Extension \ud83c\udfe2 Vendor: by"
+  },
+  {
+   "id": "euvd-2026-85407-score-9-3-10-cvss-v3-1-product-orval-vendor-orva",
+   "title": "EUVD-2026-85407 \ud83d\udcca Score: 9.3/10 (CVSS v3.1) \ud83d\udce6 Product: orval \ud83c\udfe2 Vendor: orval-labs \ud83d\udcc5 Updated: 2026-09-23 \ud83d\udcdd orval before 8.29.0 fails to esc",
+   "n_events": 4,
+   "last_seen": "2026-09-23T18:03:10.546Z",
+   "first_event_title": "\ud83d\udea8 EUVD-2026-85407 \ud83d\udcca Score: 9.3/10 (CVSS v3.1) \ud83d\udce6 Product: orval \ud83c\udfe2 Vendor: orval-labs \ud83d\udcc5 Updated: 2026-09-23 \ud83d\udcdd orval before 8.29.0 fails to esc"
+  },
+  {
+   "id": "euvd-2026-83653-score-6-9-10-cvss-v3-1-product-nginx-proxy-manag",
+   "title": "EUVD-2026-83653 \ud83d\udcca Score: 6.9/10 (CVSS v3.1) \ud83d\udce6 Product: nginx-proxy-manager, nginx-proxy-manager, nginx-proxy-manager (+63 more) \ud83c\udfe2 Vendor:",
+   "n_events": 0,
+   "last_seen": "2026-09-22T17:08:20.731Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "euvd-2026-85168-score-8-6-10-cvss-v3-1-product-cgservisign-vendo",
+   "title": "EUVD-2026-85168 \ud83d\udcca Score: 8.6/10 (CVSS v3.1) \ud83d\udce6 Product: CGServiSign \ud83c\udfe2 Vendor: CHANGING \ud83d\udcc5 Updated: 2026-09-23 \ud83d\udcdd CGServiSign developed by Cha",
+   "n_events": 0,
+   "last_seen": "2026-09-23T10:01:10.861Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "euvd-2026-84801-score-5-3-10-cvss-v3-1-product-js-toml-vendor-su",
+   "title": "EUVD-2026-84801 \ud83d\udcca Score: 5.3/10 (CVSS v3.1) \ud83d\udce6 Product: js-toml \ud83c\udfe2 Vendor: sunnyadn \ud83d\udcc5 Updated: 2026-09-22 \ud83d\udcdd js-toml is a TOML parser for Jav",
+   "n_events": 0,
+   "last_seen": "2026-09-22T20:03:10.744Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "euvd-2025-27096-score-7-1-10-cvss-v3-1-product-ash-ash-vendor-as",
+   "title": "EUVD-2025-27096 \ud83d\udcca Score: 7.1/10 (CVSS v3.1) \ud83d\udce6 Product: ash, ash \ud83c\udfe2 Vendor: ash-project \ud83d\udcc5 Published: 2025-09-07 | Updated: 2026-09-22 \ud83d\udcdd Inco",
+   "n_events": 0,
+   "last_seen": "2026-09-27T06:01:06.838Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "euvd-2026-83123-score-5-5-10-cvss-v3-1-product-openimageio-openi",
+   "title": "EUVD-2026-83123 \ud83d\udcca Score: 5.5/10 (CVSS v3.1) \ud83d\udce6 Product: OpenImageIO, OpenImageIO, OpenImageIO \ud83c\udfe2 Vendor: AcademySoftwareFoundation \ud83d\udcc5 Publish",
+   "n_events": 0,
+   "last_seen": "2026-09-22T16:05:07.832Z",
+   "first_event_title": ""
+  }
+ ]
+}
