@@ -1,0 +1,3 @@
+This story tracks the backlash against Flock's surveillance camera network in the United States. A detailed map of Flock camera locations circulated publicly, and Flock has pushed to have the map taken down. The coverage asks who would oversee the cameras and their data if Flock withdraws from a deployment, a question that remains unanswered.
+
+The significance is oversight, not exploitation. A camera network this large has no clear custodian once the vendor steps back, and the fight over the map shows how little control communities have over their own surveillance footprint. Watch whether the map actually comes down, whether any regulator claims authority over the data, and whether Axon's gains in public-safety reporting accelerate the same model.

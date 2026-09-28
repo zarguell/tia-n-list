@@ -1,0 +1,3 @@
+Researchers found that Poper Blocker, a pop-up blocking extension in the Chrome Web Store, exfiltrates users' full browsing history. Per DarkReading, the extension remains listed with more than 2 million users, a Featured badge, and a 4.8 star rating, so the store's curation signals still point users at it.
+
+The significance is trust in browser extension distribution. Installation numbers, ratings, and editorial badges did not reflect the data collection, and the install base makes this a large-scale history harvesting channel. Watch whether Google removes the extension, what the exfiltrated data was used for, and whether any similar Featured extensions surface in the same research.
