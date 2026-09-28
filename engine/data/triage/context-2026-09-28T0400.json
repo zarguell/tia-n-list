@@ -1,0 +1,451 @@
+{
+ "date": "2026-09-28",
+ "decisions_path": "engine/data/triage/decisions-2026-09-28T0400.json",
+ "instructions": "For every new event decide: (1) keep or drop \u2014 keep only stories worth covering (real security events, vulnerabilities, attacks, breaches, advisories with substance); drop press releases, vendor marketing, generic explainers, and anything duplicating an existing story. (2) If keep, assign the event to the RIGHT story: an existing candidate story id if it belongs there (this FIXES mechanical clustering \u2014 e.g. different outlets' Patch Tuesday roundups are ONE story), or NEW with a clean story_title. (3) merges: list candidate stories that are really the same story (from = fragment, into = the most complete one). (4) For every kept event that names CVEs, optionally assess exploitation: exploited = the event reports OBSERVED in-the-wild exploitation (implants, victim counts, campaigns, CISA KEV confirmation); suspected = public exploit code/PoC or likely-but-unconfirmed. Attribute ONLY the CVEs you can tie to the claim \u2014 a bulletin's blanket 'actively exploited' does NOT flag all its CVEs. Omit the exploitation field when the event makes no claim.\n(5) LOW-TRUST events (\"low_trust\": true \u2014 AI-drafted aggregator reposts, late and overstated): treat as unverified leads. When the text attributes the claim to a named primary source (a researcher firm like watchTowr, a vendor advisory, CISA, a major outlet) and attribution_urls or a web search (/home/ubuntu/repos/cronman/bin/web-search.sh \"query\") locate that primary source CONFIRMING the claim, include a provenance object in the decision: {\"url\": <primary url>, \"source\": <domain>, \"evidence\": <one line>, \"verified\": true}. VERIFIED provenance lets the event mint a story (credited to the primary source) and count as a development; without it, a low-trust event can only attach to an EXISTING story, never mint. If you cannot verify, keep/drop on normal merit and omit provenance.\n\nWrite decisions as JSON with EXACTLY this shape:\n{\n  \"decisions\": [\n    {\"event_id\": \"<id>\", \"action\": \"keep\", \"story\": \"<existing candidate story id>\", \"reason\": \"...\"},\n    {\"event_id\": \"<id>\", \"action\": \"keep\", \"story\": \"NEW\", \"story_title\": \"<clean title>\", \"reason\": \"...\"},\n    {\"event_id\": \"<id>\", \"action\": \"drop\", \"reason\": \"...\"}\n  ],\n  \"merges\": [{\"from\": \"<fragment story id>\", \"into\": \"<canonical story id>\"}]\n}\nFor events marked \"low_trust\" (AI-drafted aggregator reposts) a decision\nmay carry an optional \"provenance\" object when you VERIFIED the claim at\nthe named primary source: {\"event_id\": ..., \"action\": \"keep\", ...}\n  \"provenance\": {\"url\": \"<primary source url>\", \"source\": \"<domain>\", \"evidence\": \"<one line>\"}\nOnly include provenance when the primary source (vendor advisory, CISA,\nthe named researcher/outlet) really carries the claim \u2014 verified\nprovenance lets a low-trust event mint a story and set freshness; without\nit the event can only amplify an existing story.\nSTRICT KEY NAMES: the array key is \"decisions\" (never \"events\"); the story\nkey is \"story\" (never \"story_id\"); \"story\" holds a candidate_stories id\nverbatim or the literal string \"NEW\". Optional per-event field\n\"exploitation\": {\"CVE-...\": {\"status\": \"exploited|suspected\", \"evidence\": \"1-2 sentences\"}}.",
+ "new_events": [
+  {
+   "id": "rd:t3_1ws3fre",
+   "title": "Proactive Defense: Hardening Code Pipelines and CI/CD Infrastructure",
+   "source": "cloud.google.com",
+   "published_at": "2026-09-28T03:08:15Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "submitted by /u/ni5arga [link] [comments]  via reddit r/cybersecurity: Proactive Defense: Hardening Code Pipelines and CI/CD Infrastructure "
+  },
+  {
+   "id": "mf:165180",
+   "title": "Vulnerability Attack Case: Installation of a Web Shell and Execution of a Scanner by Exploiting a Telerik UI Vulnerability",
+   "source": "asec.ahnlab.com",
+   "published_at": "2026-09-27T15:00:00Z",
+   "cves": [
+    "CVE-2019-18935"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "The AhnLab SEcurity intelligence Center (ASEC) has identified two vulnerability attack cases that exploited a remote code execution vulnerability (CVE-2019-18935) targeting unpatched Telerik UI for ASP.NET AJAX servers. "
+  }
+ ],
+ "candidate_stories": [
+  {
+   "id": "proactive-defense-hardening-code-pipelines-and-ci-cd-infrastruct",
+   "title": "Proactive Defense: Hardening Code Pipelines and CI/CD Infrastructure",
+   "n_events": 1,
+   "last_seen": "2026-09-28T03:08:15Z",
+   "first_event_title": "Proactive Defense: Hardening Code Pipelines and CI/CD Infrastructure"
+  },
+  {
+   "id": "beyond-the-ransomware-tracking-storm-2570-s-consistent-tradecraf",
+   "title": "Beyond the ransomware: Tracking Storm-2570\u2019s consistent tradecraft across deployments",
+   "n_events": 7,
+   "last_seen": "2026-09-28T02:45:09.211Z",
+   "first_event_title": "Beyond the ransomware: Tracking Storm-2570\u2019s consistent tradecraft across deployments"
+  },
+  {
+   "id": "fake-cloudflare-captcha-pushes-malware-via-compromised-ukrainian",
+   "title": "Fake Cloudflare CAPTCHA pushes malware via compromised Ukrainian business sites",
+   "n_events": 1,
+   "last_seen": "2026-09-28T02:40:00.000Z",
+   "first_event_title": "Compromised Ukrainian business sites are serving a fake Cloudflare CAPTCHA via hidden iframes. Clicking copies an msiexec command that victi"
+  },
+  {
+   "id": "citrix-netscaler-unpatched-rce-zero-days",
+   "title": "Citrix NetScaler zero-days CVE-2026-88771-88778 patched after confirmed exploitation",
+   "n_events": 41,
+   "last_seen": "2026-09-28T02:20:12.337Z",
+   "first_event_title": "NetScaler alert: watchTowr says reports of unpatched remote code execution flaws in Citrix NetScaler are verified, and organisations are shu"
+  },
+  {
+   "id": "touring-club-suisse-ransomware-claim-by-qilin",
+   "title": "Touring Club Suisse ransomware claim by qilin",
+   "n_events": 4,
+   "last_seen": "2026-09-28T02:08:10.000Z",
+   "first_event_title": "\ud83d\udee1 THREAT INTEL | Touring Club Suisse \ud83d\udfe2 Actor \"qilin\" claims Undisclosed \u26a0\ufe0f Unverified claim https://www. yazoul.net/intel/claim/2026-09 -20-"
+  },
+  {
+   "id": "august-2026-threat-trend-report-on-ransomware",
+   "title": "August 2026 Threat Trend Report on Ransomware",
+   "n_events": 1,
+   "last_seen": "2026-09-28T01:51:39Z",
+   "first_event_title": "August 2026 Threat Trend Report on Ransomware"
+  },
+  {
+   "id": "vulnerability-attack-case-installation-of-a-web-shell-and-execut",
+   "title": "Vulnerability Attack Case: Installation of a Web Shell and Execution of a Scanner by Exploiting a Telerik UI Vulnerability",
+   "n_events": 6,
+   "last_seen": "2026-09-28T01:51:15.402Z",
+   "first_event_title": "Vulnerability Attack Case: Installation of a Web Shell and Execution of a Scanner by Exploiting a Telerik UI Vulnerability"
+  },
+  {
+   "id": "don-t-call-us-we-ll-call-your-apis-tradertraitor-backdoors-resur",
+   "title": "TraderTraitor macOS Backdoors Found on Non-Crypto Victim",
+   "n_events": 2,
+   "last_seen": "2026-09-28T01:16:43.000Z",
+   "first_event_title": "Don\u2019t Call Us, We\u2019ll Call Your APIs | TraderTraitor Backdoors Resurface on Victim With No Crypto Ties"
+  },
+  {
+   "id": "macos-coreservices-vulnerability-cve-2026-43786-patched-privileg",
+   "title": "macOS CoreServices vulnerability CVE-2026-43786 patched, privilege escalation PoC public",
+   "n_events": 1,
+   "last_seen": "2026-09-28T00:41:45.000Z",
+   "first_event_title": "A critical macOS CoreServices vulnerability (CVE-2026-43786) is patched. Apple privilege escalation PoC details are now public. # macOS # Ap"
+  },
+  {
+   "id": "a-critical-kvm-guest-escape-cve-2026-89775-enables-an-lpe-to-gai",
+   "title": "A critical KVM guest escape (CVE-2026-89775) enables an LPE to gain root on Linux hosts. Patch this KVM guest escape vulnerability now. # KV",
+   "n_events": 7,
+   "last_seen": "2026-09-28T00:06:00.000Z",
+   "first_event_title": "A critical KVM guest escape (CVE-2026-89775) enables an LPE to gain root on Linux hosts. Patch this KVM guest escape vulnerability now. # KV"
+  },
+  {
+   "id": "cve-published-in-last-7-days-2026-09-07-2026-09-07-see-more-at-h",
+   "title": "CVE Published in last 7 days (2026-09-07 - 2026-09-07) See more at https:// secdb.nttzen.cloud/dashboard Total CVEs: Severity: - Critical:",
+   "n_events": 4,
+   "last_seen": "2026-09-28T00:01:31.000Z",
+   "first_event_title": "Security Advisory Ivanti Neurons for ITSM (Multiple CVEs)"
+  },
+  {
+   "id": "mantax-otax-android-malware-combines-ransomware-spyware-and-remo",
+   "title": "Mantax Otax Android malware combines ransomware, spyware and remote control (verified via Zimperium zLabs)",
+   "n_events": 1,
+   "last_seen": "2026-09-27T23:58:27.081Z",
+   "first_event_title": "Mantax Otax hijacks your screen live, steals PINs and WhatsApp chats, then encrypts files to extort you. 9 detections, 19 IOCs. Full analysi"
+  },
+  {
+   "id": "openai-is-preparing-o-an-always-on-chatgpt-assistant-that-could",
+   "title": "OpenAI is preparing \u201co,\u201d an always-on ChatGPT assistant that could handle email",
+   "n_events": 0,
+   "last_seen": "2026-09-27T23:40:39Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "jackson-databind-cve-2026-83557-vulnerability-analysis-russian-h",
+   "title": "jackson-databind CVE-2026-83557 vulnerability analysis: why not every CVE should be feared (translated from Russian Habr)",
+   "n_events": 1,
+   "last_seen": "2026-09-27T23:22:16.000Z",
+   "first_event_title": "Analysis of CVE-2026-83557 in jackson-databind: why not every CVE should be feared. Thursday morning. You open the task tracker, and there is a ticket from the dependency scanner z"
+  },
+  {
+   "id": "d-link-dir-895l-critical-rce-cve-2026-100740",
+   "title": "D-Link DIR-895L Critical RCE CVE-2026-100740",
+   "n_events": 2,
+   "last_seen": "2026-09-27T23:14:23.000Z",
+   "first_event_title": "D-Link DIR-895L hit by CRITICAL vuln: CVE-2026-100740 (CVSS 9.4) in tunnel_set_params \u2014 public exploit code enables remote RCE or DoS via ou"
+  },
+  {
+   "id": "we-found-that-only-8-of-4-688-small-business-sites-we-scanned-pa",
+   "title": "We found that only 8 of 4,688 small business sites we scanned pass a real script-CSP check",
+   "n_events": 0,
+   "last_seen": "2026-09-27T23:06:18Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "noobie-questions-i-m-trying-to-type-a-command-in-kali-linux-but",
+   "title": "( noobie questions ) I'm trying to type a command in Kali Linux, but nothing appears on the screen, as if the keyboard were locked and a second problem.",
+   "n_events": 0,
+   "last_seen": "2026-09-27T23:00:43Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "wordpress-7-1-2-patches-a-critical-wordpress-rce-vulnerability-c",
+   "title": "WordPress 7.1.2 patches a critical WordPress RCE vulnerability (CVE-2026-87902). Update your site to prevent conditional remote code executi",
+   "n_events": 28,
+   "last_seen": "2026-09-27T22:10:26.000Z",
+   "first_event_title": "WordPress 7.1.2 patches a critical WordPress RCE vulnerability (CVE-2026-87902). Update your site to prevent conditional remote code executi"
+  },
+  {
+   "id": "wp2shell-cisa-adds-to-kev-wiz-details-webshell-installation-at-s",
+   "title": "wp2shell \u2014 CISA Adds to KEV; Wiz Details Webshell Installation at Scale",
+   "n_events": 11,
+   "last_seen": "2026-09-27T21:16:35.000Z",
+   "first_event_title": "wp2shell \u2014 CISA Adds to KEV; Wiz Details Webshell Installation at Scale"
+  },
+  {
+   "id": "cve-2026-92747-cockpit-machines-leaks-vm-root-and-user-passwords",
+   "title": "CVE-2026-92747: cockpit-machines leaks VM root and user passwords via process arguments",
+   "n_events": 1,
+   "last_seen": "2026-09-27T20:10:16.664Z",
+   "first_event_title": "CVE-2026-92747: cockpit-machines leaks VM root/user passwords via process args during install. Local attacker with process visibility can gr"
+  },
+  {
+   "id": "teamcity-rce-exploit-window-closes-today-rapid7-details-permissi",
+   "title": "TeamCity RCE Exploit Window Closes Today \u2014 Rapid7 Details Permissive XStream Allowlist",
+   "n_events": 16,
+   "last_seen": "2026-09-27T20:08:17.019Z",
+   "first_event_title": "TeamCity RCE Exploit Window Closes Today \u2014 Rapid7 Details Permissive XStream Allowlist"
+  },
+  {
+   "id": "cloudclassroom-php-project-vulnerabilities-cve-2026-100874-sql-i-3",
+   "title": "CloudClassroom-PHP-Project vulnerabilities: CVE-2026-100874 SQL injection",
+   "n_events": 10,
+   "last_seen": "2026-09-27T20:01:07.870Z",
+   "first_event_title": "CVE-2026-100874 is a remotely exploitable SQL injection vulnerability in mathurvishal's CloudClassroom-PHP-Project, a PHP web application. A"
+  },
+  {
+   "id": "oracle-peoplesoft-cve-2026-35273-cvss-9-8-mitigations-released-m",
+   "title": "Oracle PeopleSoft CVE-2026-35273 (CVSS 9.8) \u2014 Mitigations Released, Mandiant/GTIG Confirm ShinyHunters Targeting 100+ Organizations, Primarily Higher Education",
+   "n_events": 18,
+   "last_seen": "2026-09-27T19:37:16.000Z",
+   "first_event_title": "Oracle PeopleSoft CVE-2026-35273 (CVSS 9.8) \u2014 Mitigations Released, Mandiant/GTIG Confirm ShinyHunters Targeting 100+ Organizations, Primarily Higher Education"
+  },
+  {
+   "id": "unprivileged-android-app-can-abort-the-identity-credential-hal",
+   "title": "Unprivileged_Android_app_can_abort_the_Identity_Credential_HAL",
+   "n_events": 1,
+   "last_seen": "2026-09-27T19:35:49Z",
+   "first_event_title": "Unprivileged_Android_app_can_abort_the_Identity_Credential_HAL"
+  },
+  {
+   "id": "storm-3168-agentic-driven-cloud-attacks-using-compromised-servic",
+   "title": "Storm-3168: Agentic-driven cloud attacks using compromised service principals",
+   "n_events": 8,
+   "last_seen": "2026-09-27T19:14:12.000Z",
+   "first_event_title": "Storm-3168: Agentic-driven cloud attacks using compromised service principals"
+  },
+  {
+   "id": "threat-actor-compiles-cryptominer-on-endpoint-via-samsung-magici",
+   "title": "Threat actor compiles cryptominer on endpoint via Samsung MagicINFO flaw",
+   "n_events": 9,
+   "last_seen": "2026-09-27T19:10:45.000Z",
+   "first_event_title": "(huntress.com) Compiling Cryptominers On-Endpoint: A Novel Approach Leveraging Samsung MagicINFO Vulnerabilities and SilentXMRMiner In brief"
+  },
+  {
+   "id": "salesforce-agentforce-flaw-enables-0-click-data-exfiltration-via",
+   "title": "Salesforce Agentforce Flaw Enables 0-Click Data Exfiltration via Prompt Injection",
+   "n_events": 6,
+   "last_seen": "2026-09-27T19:06:47.065Z",
+   "first_event_title": "Salesforce Agentforce Flaw Enables 0-Click Data Exfiltration via Prompt Injection"
+  },
+  {
+   "id": "openai-s-systems-meddled-with-u-s-government-sites",
+   "title": "OpenAI\u2019s Systems Meddled With U.S. Government Sites",
+   "n_events": 10,
+   "last_seen": "2026-09-27T19:04:29.455Z",
+   "first_event_title": "OpenAI\u2019s Systems Meddled With U.S. Government Sites"
+  },
+  {
+   "id": "cve-2026-90817-critical-rce-in-redcap-13-3-0-unauth-attackers-ca",
+   "title": "CVE-2026-90817: Critical RCE in REDCap via survey hash code injection",
+   "n_events": 2,
+   "last_seen": "2026-09-27T18:15:18.000Z",
+   "first_event_title": "CVE-2026-90817: CRITICAL RCE in REDCap (13.3.0+). Unauth attackers can exploit improper code generation via survey hash for full server comp"
+  },
+  {
+   "id": "google-gemini-autonomously-hacked-three-companies-during-irregul",
+   "title": "Google Gemini autonomously hacked three companies during Irregular security test",
+   "n_events": 1,
+   "last_seen": "2026-09-27T17:51:50.000Z",
+   "first_event_title": "# cybersecurity https://www. bbc.com/news/articles/c607l0k7 2rlvo"
+  },
+  {
+   "id": "162-216-149-185-is-flagged-as-a-scanner-62-confidence-on-google",
+   "title": "162.216.149.185 is flagged as a scanner (62% confidence) on Google Cloud us-east1, tracked by 4 feeds. Check your logs. https://www. valters",
+   "n_events": 0,
+   "last_seen": "2026-09-27T17:20:21.744Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "dbhunter-data-breach-claim-targeting-chinese-energy-operator",
+   "title": "DBHunter Data Breach Claim Targeting Chinese Energy Operator",
+   "n_events": 4,
+   "last_seen": "2026-09-27T17:12:57.000Z",
+   "first_event_title": "\ud83c\udde8\ud83c\uddf3 We tracked a data breach claim by DBHunter targeting an unnamed Chinese coal and energy operator. The actor alleges exfiltration of datab"
+  },
+  {
+   "id": "memoryos-2-0-34-on-pypi-runs-credential-stealer-on-import",
+   "title": "MemoryOS 2.0.34 on PyPI runs credential stealer on import",
+   "n_events": 1,
+   "last_seen": "2026-09-27T16:02:14.914Z",
+   "first_event_title": "\"import memos\" alone is enough to start a credential stealer. MemoryOS 2.0.34 on PyPI: 149 modules call get_logger() at import time, and the"
+  },
+  {
+   "id": "euvd-2026-72498-score-8-8-10-cvss-v3-1-product-youtrack-vendor-j",
+   "title": "EUVD-2026-72498 \ud83d\udcca Score: 8.8/10 (CVSS v3.1) \ud83d\udce6 Product: YouTrack \ud83c\udfe2 Vendor: JetBrains \ud83d\udcc5 Published: 2026-09-07 | Updated: 2026-09-22 \ud83d\udcdd In Jet",
+   "n_events": 0,
+   "last_seen": "2026-09-27T16:01:06.689Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "i-m-a-ciso-who-s-built-many-security-teams-i-want-to-help-you-le",
+   "title": "I\u2019m a CISO who\u2019s built many security teams. I want to help you level up your career. Ask me anything.",
+   "n_events": 0,
+   "last_seen": "2026-09-27T15:26:16Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "oracle-communications-carries-a-d-trust-score-10-cves-8-high-max",
+   "title": "Oracle Communications carries a D trust score: 10 CVEs, 8 high, max CVSS 9, and 100% unpatched. Access control flaws dominate. Patch before",
+   "n_events": 0,
+   "last_seen": "2026-09-27T15:20:25.942Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "wireshark-4-6-9-released-sun-sep-27th",
+   "title": "Wireshark 4.6.9 Released, (Sun, Sep 27th)",
+   "n_events": 1,
+   "last_seen": "2026-09-27T15:15:40Z",
+   "first_event_title": "Wireshark 4.6.9 Released, (Sun, Sep 27th)"
+  },
+  {
+   "id": "konni-hackers-target-ukraine-with-malicious-lnk-files-and-velvet",
+   "title": "Konni Hackers Target Ukraine With Malicious LNK Files and VelvetCake PowerShell Malware",
+   "n_events": 3,
+   "last_seen": "2026-09-27T15:06:16Z",
+   "first_event_title": "Konni Hackers Target Ukraine With Malicious LNK Files and VelvetCake PowerShell Malware"
+  },
+  {
+   "id": "leaked-accounts-to-rce-writeup",
+   "title": "Leaked Accounts to RCE: Writeup",
+   "n_events": 1,
+   "last_seen": "2026-09-27T15:02:52Z",
+   "first_event_title": "Leaked Accounts to RCE: Writeup"
+  },
+  {
+   "id": "introducing-ade-skills-adversarial-detection-engineering-knowled",
+   "title": "Introducing ADE-Skills \u2014 Adversarial Detection Engineering Knowledge Base",
+   "n_events": 0,
+   "last_seen": "2026-09-27T14:40:58Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "adobe-security-advisory-av26-808",
+   "title": "Adobe security advisory (AV26-808)",
+   "n_events": 2,
+   "last_seen": "2026-08-13T08:12:33Z",
+   "first_event_title": "Adobe security advisory (AV26-808)"
+  },
+  {
+   "id": "adobe-security-advisory-av26-888",
+   "title": "Adobe security advisory (AV26-888)",
+   "n_events": 3,
+   "last_seen": "2026-09-09T00:35:01.000Z",
+   "first_event_title": "Adobe security advisory (AV26-888)"
+  },
+  {
+   "id": "adobe-security-advisory-av26-953",
+   "title": "Adobe security advisory (AV26-953)",
+   "n_events": 1,
+   "last_seen": "2026-09-23T17:45:38Z",
+   "first_event_title": "Adobe security advisory (AV26-953)"
+  },
+  {
+   "id": "apple-security-advisory-av26-823",
+   "title": "Apple security advisory (AV26-823)",
+   "n_events": 1,
+   "last_seen": "2026-08-17T15:35:39Z",
+   "first_event_title": "Apple security advisory (AV26-823)"
+  },
+  {
+   "id": "commvault-security-advisory-av26-799",
+   "title": "Commvault security advisory (AV26-799)",
+   "n_events": 1,
+   "last_seen": "2026-08-11T17:46:10Z",
+   "first_event_title": "Commvault security advisory (AV26-799)"
+  },
+  {
+   "id": "control-systems-siemens-security-advisory-av26-890",
+   "title": "[Control Systems] Siemens security advisory (AV26-890)",
+   "n_events": 3,
+   "last_seen": "2026-09-23T08:01:13.000Z",
+   "first_event_title": "[Control Systems] Siemens security advisory (AV26-890)"
+  },
+  {
+   "id": "dell-security-advisory-av26-863",
+   "title": "Dell security advisory (AV26-863)",
+   "n_events": 2,
+   "last_seen": "2026-09-11T08:40:47.000Z",
+   "first_event_title": "Dell security advisory (AV26-863)"
+  },
+  {
+   "id": "dell-security-advisory-av26-959",
+   "title": "Dell security advisory (AV26-959)",
+   "n_events": 1,
+   "last_seen": "2026-09-23T19:20:39Z",
+   "first_event_title": "Dell security advisory (AV26-959)"
+  },
+  {
+   "id": "erlang-security-advisory-av26-948",
+   "title": "Erlang security advisory (AV26-948)",
+   "n_events": 1,
+   "last_seen": "2026-09-22T18:25:40Z",
+   "first_event_title": "Erlang security advisory (AV26-948)"
+  },
+  {
+   "id": "gitlab-security-advisory-av26-814",
+   "title": "GitLab security advisory (AV26-814)",
+   "n_events": 1,
+   "last_seen": "2026-08-13T14:00:38Z",
+   "first_event_title": "GitLab security advisory (AV26-814)"
+  },
+  {
+   "id": "google-security-advisory-av26-904",
+   "title": "Google security advisory (AV26-904)",
+   "n_events": 2,
+   "last_seen": "2026-09-09T20:49:30Z",
+   "first_event_title": "Google security advisory (AV26-904)"
+  },
+  {
+   "id": "grafana-security-advisory-av26-796",
+   "title": "Grafana security advisory (AV26-796)",
+   "n_events": 1,
+   "last_seen": "2026-08-11T13:30:40Z",
+   "first_event_title": "Grafana security advisory (AV26-796)"
+  },
+  {
+   "id": "grafana-security-advisory-av26-860",
+   "title": "Grafana Alloy Vulnerability CVE-2026-19516",
+   "n_events": 1,
+   "last_seen": "2026-08-28T15:10:44Z",
+   "first_event_title": "Grafana security advisory (AV26-860)"
+  },
+  {
+   "id": "hashicorp-security-advisory-av26-797",
+   "title": "HashiCorp security advisory (AV26-797)",
+   "n_events": 1,
+   "last_seen": "2026-08-11T14:05:42Z",
+   "first_event_title": "HashiCorp security advisory (AV26-797)"
+  },
+  {
+   "id": "hashicorp-security-advisory-av26-817",
+   "title": "HashiCorp security advisory (AV26-817)",
+   "n_events": 1,
+   "last_seen": "2026-08-14T16:05:44Z",
+   "first_event_title": "HashiCorp security advisory (AV26-817)"
+  },
+  {
+   "id": "hpe-security-advisory-av26-951",
+   "title": "HPE security advisory (AV26-951)",
+   "n_events": 0,
+   "last_seen": "2026-09-23T15:25:39Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "ibm-security-advisory-av26-943",
+   "title": "IBM security advisory (AV26-943)",
+   "n_events": 1,
+   "last_seen": "2026-09-21T15:06:10Z",
+   "first_event_title": "IBM security advisory (AV26-943)"
+  },
+  {
+   "id": "ivanti-security-advisory-av26-805",
+   "title": "Ivanti security advisory (AV26-805)",
+   "n_events": 1,
+   "last_seen": "2026-08-11T20:20:39Z",
+   "first_event_title": "Ivanti security advisory (AV26-805)"
+  },
+  {
+   "id": "ivanti-security-advisory-av26-897",
+   "title": "Ivanti September 2026 security advisory: EPMM, ITSM, Sentry vulnerabilities",
+   "n_events": 3,
+   "last_seen": "2026-09-09T06:39:58Z",
+   "first_event_title": "Ivanti security advisory (AV26-897)"
+  },
+  {
+   "id": "jetbrains-security-advisory-av26-825",
+   "title": "JetBrains security advisory (AV26-825)",
+   "n_events": 1,
+   "last_seen": "2026-08-18T13:40:50Z",
+   "first_event_title": "JetBrains security advisory (AV26-825)"
+  }
+ ]
+}
