@@ -1,0 +1,1 @@
+NVD record for CVE-2026-52749, published 2026-09-28T13:17:22 and last modified 2026-09-28T14:17:16, sourced from CNA CERT-PL. Scores the improper-authentication flaw, titled 'Improper Authentication in Kaon AR2140X', at CVSS v4.0 5.3 with vector CVSS:4.0/AV:A/AC:L/AT:N/PR:N/UI:N/VC:L/VI:L/VA:N/SC:L/SI:L/SA:N, again with an ADJACENT attack vector.

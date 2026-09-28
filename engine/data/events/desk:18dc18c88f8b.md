@@ -1,0 +1,1 @@
+NVD record for CVE-2026-52748, published 2026-09-28T13:17:21 and last modified 2026-09-28T14:17:15, sourced from CNA CERT-PL. Confirms the CVSS v4.0 base score of 7.1 with ADJACENT attack vector for the missing-authentication backup flaw, titled 'Missing authentication for backup functionality in Kaon AR2140X'.
