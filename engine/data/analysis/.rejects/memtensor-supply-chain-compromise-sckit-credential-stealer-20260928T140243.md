@@ -1,0 +1,3 @@
+MemTensor supply chain: legitimate npm and PyPI packages compromised to push sckit, a Go-based credential stealer. Two packages affected. The attacker did not push code directly; they infiltrated the GitHub Actions release workflow, intercepted publish tokens before the real job ran, then used those tokens to ship malicious packages. A newer report notes the MemTensor worm stole a maintainer's credentials, signed malware as the maintainer, and published to npm and PyPI.
+
+This fixes earlier clustering: the supply chain story now covers the credential-theft angle plus the CI pipeline interception, confirming the same campaign from multiple angles. The campaign targets AI developers. Watch for additional package updates or remediation from MemTensor maintainers.

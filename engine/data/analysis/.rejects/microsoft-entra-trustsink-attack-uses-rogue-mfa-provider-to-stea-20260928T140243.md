@@ -1,0 +1,3 @@
+TrustSink abuses Microsoft Entra External Authentication Methods (EAMs) to place a rogue password prompt inside a legitimate Microsoft sign-in flow. The adversary needs elevated tenant privileges. The attack captures plaintext passwords while returning a valid signed token to Entra, letting the victim's login complete normally without raising alerts.
+
+This is a post-compromise credential-phishing technique. It exploits trust relationships in multi-factor authentication flows, not a remote vulnerability. Organizations using custom EAM integrations in Entra should review which providers are registered and whether any unauthorized EAM providers have been added. Monitor for unexpected MFA provider registrations.
