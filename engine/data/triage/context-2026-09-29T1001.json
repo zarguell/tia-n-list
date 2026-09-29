@@ -1,0 +1,826 @@
+{
+ "date": "2026-09-29",
+ "decisions_path": "engine/data/triage/decisions-2026-09-29T1001.json",
+ "instructions": "For every new event decide: (1) keep or drop \u2014 keep only stories worth covering (real security events, vulnerabilities, attacks, breaches, advisories with substance); drop press releases, vendor marketing, generic explainers, and anything duplicating an existing story. (2) If keep, assign the event to the RIGHT story: an existing candidate story id if it belongs there (this FIXES mechanical clustering \u2014 e.g. different outlets' Patch Tuesday roundups are ONE story), or NEW with a clean story_title. (3) merges: list candidate stories that are really the same story (from = fragment, into = the most complete one). (4) For every kept event that names CVEs, optionally assess exploitation: exploited = the event reports OBSERVED in-the-wild exploitation (implants, victim counts, campaigns, CISA KEV confirmation); suspected = public exploit code/PoC or likely-but-unconfirmed. Attribute ONLY the CVEs you can tie to the claim \u2014 a bulletin's blanket 'actively exploited' does NOT flag all its CVEs. Omit the exploitation field when the event makes no claim.\n(5) LOW-TRUST events (\"low_trust\": true \u2014 AI-drafted aggregator reposts, late and overstated): treat as unverified leads. When the text attributes the claim to a named primary source (a researcher firm like watchTowr, a vendor advisory, CISA, a major outlet) and attribution_urls or a web search (/home/ubuntu/repos/cronman/bin/web-search.sh \"query\") locate that primary source CONFIRMING the claim, include a provenance object in the decision: {\"url\": <primary url>, \"source\": <domain>, \"evidence\": <one line>, \"verified\": true}. VERIFIED provenance lets the event mint a story (credited to the primary source) and count as a development; without it, a low-trust event can only attach to an EXISTING story, never mint. If you cannot verify, keep/drop on normal merit and omit provenance.\n\nWrite decisions as JSON with EXACTLY this shape:\n{\n  \"decisions\": [\n    {\"event_id\": \"<id>\", \"action\": \"keep\", \"story\": \"<existing candidate story id>\", \"reason\": \"...\"},\n    {\"event_id\": \"<id>\", \"action\": \"keep\", \"story\": \"NEW\", \"story_title\": \"<clean title>\", \"reason\": \"...\"},\n    {\"event_id\": \"<id>\", \"action\": \"drop\", \"reason\": \"...\"}\n  ],\n  \"merges\": [{\"from\": \"<fragment story id>\", \"into\": \"<canonical story id>\"}]\n}\nFor events marked \"low_trust\" (AI-drafted aggregator reposts) a decision\nmay carry an optional \"provenance\" object when you VERIFIED the claim at\nthe named primary source: {\"event_id\": ..., \"action\": \"keep\", ...}\n  \"provenance\": {\"url\": \"<primary source url>\", \"source\": \"<domain>\", \"evidence\": \"<one line>\"}\nOnly include provenance when the primary source (vendor advisory, CISA,\nthe named researcher/outlet) really carries the claim \u2014 verified\nprovenance lets a low-trust event mint a story and set freshness; without\nit the event can only amplify an existing story.\nSTRICT KEY NAMES: the array key is \"decisions\" (never \"events\"); the story\nkey is \"story\" (never \"story_id\"); \"story\" holds a candidate_stories id\nverbatim or the literal string \"NEW\". Optional per-event field\n\"exploitation\": {\"CVE-...\": {\"status\": \"exploited|suspected\", \"evidence\": \"1-2 sentences\"}}.",
+ "new_events": [
+  {
+   "id": "rd:t3_1wt5mnc",
+   "title": "We tested NVIDIA's new AI agent sandbox (OpenShell). The defaults held. Four settings let data out.",
+   "source": "sorami.com.au",
+   "published_at": "2026-09-29T09:34:13Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "OpenShell is NVIDIA's open-source sandbox for AI agents: it blocks network, file and process access unless a policy allows it. We ran 123 trials on v0.1.2. The good: every documented control held, and a malicious script "
+  },
+  {
+   "id": "mf:165373",
+   "title": "Critical WatchGuard AP Flaws Let Unauthenticated Attackers Execute Arbitrary Commands",
+   "source": "cyberpress.org",
+   "published_at": "2026-09-29T08:42:24Z",
+   "cves": [
+    "CVE-2026-101891",
+    "CVE-2026-86102",
+    "CVE-2026-87969"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "WatchGuard has disclosed three vulnerabilities in its wireless access point platform, including two critical flaws that could let an unauthenticated network attacker gain API access and execute arbitrary shell commands ."
+  },
+  {
+   "id": "mf:165361",
+   "title": "Lessons from Microsoft Patch KB5002907: Two Layers of Patch Control in Qualys TruRisk Eliminate",
+   "source": "blog.qualys.com",
+   "published_at": "2026-09-29T08:28:47Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "How reliability scoring keeps risky patches out of zero-touch jobs, and how one blocking rule stops a paused update across your environment. Executive Summary Microsoft has paused the rollout of KB5002907, an optional Mi"
+  },
+  {
+   "id": "mf:165372",
+   "title": "Apple Patches iPhone CoreGraphics Flaw Allowing Arbitrary Code Execution",
+   "source": "cyberpress.org",
+   "published_at": "2026-09-29T08:26:36Z",
+   "cves": [
+    "CVE-2026-86950"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Apple has released iOS 26.7.1 and iPadOS 26.7.1 to address CVE-2026-86950, a CoreGraphics memory-corruption vulnerability that could allow arbitrary code execution when a device processes a maliciously crafted file. The "
+  },
+  {
+   "id": "mf:165371",
+   "title": "Hackers Built a Botnet That Doesn\u2019t Just Steal Data, It Burns AI Credits",
+   "source": "cyberpress.org",
+   "published_at": "2026-09-29T08:24:24Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "A campaign linked to Silver Fox is using fake software download sites to infect Windows computers. The pages copy trusted brands and lead visitors to malicious installers. Microsoft says the activity is consistent with t"
+  },
+  {
+   "id": "mf:165370",
+   "title": "OpenSUpdater Malware Hides Reflective Loader Inside Recompiled 7-Zip SFX to Evade Detection",
+   "source": "cyberpress.org",
+   "published_at": "2026-09-29T08:13:08Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Threat actors are hiding an OpenSUpdater reflective loader inside a recompiled 7-Zip self-extracting archive (SFX) module. The installer contains a genuine foobar2000 setup file, but the malicious code runs from the extr"
+  },
+  {
+   "id": "mf:165366",
+   "title": "Apple Fixes iOS Zero-Day Exploited in Sophisticated Targeted Attacks",
+   "source": "gbhackers.com",
+   "published_at": "2026-09-29T08:12:20Z",
+   "cves": [
+    "CVE-2026-86950"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Apple has released iOS 26.7.1 and iPadOS 26.7.1 to address CVE-2026-86950, a zero-day vulnerability in CoreGraphics that may have been exploited in sophisticated, targeted attacks against specific individuals. Apple\u2019s la"
+  },
+  {
+   "id": "mf:165365",
+   "title": "Attackers Hid Behind Trusted RMM Software Before Deploying a Full Surveillance RAT",
+   "source": "gbhackers.com",
+   "published_at": "2026-09-29T08:10:09Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Threat actors are abusing trusted remote monitoring and management (RMM) software to gain legitimate-looking access to Windows endpoints before deploying a previously undocumented .NET remote access trojan dubbed AgtaBac"
+  },
+  {
+   "id": "mf:165364",
+   "title": "Keio Railway Confirms Ransomware Attack Disrupted Business Systems",
+   "source": "gbhackers.com",
+   "published_at": "2026-09-29T08:03:42Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Keio Corporation has confirmed that a ransomware attack has caused a system failure within parts of its group infrastructure, disrupting certain business systems at its affiliated companies. The Japanese railway operator"
+  },
+  {
+   "id": "mf:165369",
+   "title": "Ransomware Attack Hits Keio Railway Group Servers and Disrupts Business Systems",
+   "source": "cyberpress.org",
+   "published_at": "2026-09-29T07:56:09Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Keio Corporation has confirmed a ransomware attack against servers within its group, causing a system outage that has disrupted certain business systems at affiliated companies. The Japanese railway operator said it iden"
+  },
+  {
+   "id": "mf:165363",
+   "title": "Microsoft Tracks NeedyMantis Malware Targeting Telecoms and Government Contractors",
+   "source": "gbhackers.com",
+   "published_at": "2026-09-29T07:54:05Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Microsoft Threat Intelligence has discovered NeedyMantis, a modular post-compromise malware framework that targets specific industries, including telecommunications firms, government contractors, universities, medical no"
+  },
+  {
+   "id": "mf:165368",
+   "title": "XCTDH Campaign Uses HashHiding and Blockchain Transactions to Hide Malware C2 Infrastructure",
+   "source": "cyberpress.org",
+   "published_at": "2026-09-29T07:50:54Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "A DPRK-attributed malware campaign has added Ethereum transactions to its command-and-control (C2) system. The XCTDH campaign already used TRON and Aptos to locate malware payloads stored on BNB Smart Chain (BSC) . Its n"
+  },
+  {
+   "id": "mf:165367",
+   "title": "SilverFox Malware Campaign Uses Smart Filtering to Hide Fake Software Downloads From Researchers",
+   "source": "cyberpress.org",
+   "published_at": "2026-09-29T07:42:33Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "The message urged the recipient to forward a report for verification and open an attached ZIP file on a computer. Its disk image carried a signed executable and an unsigned DLL that worked together to run hidden code. Th"
+  },
+  {
+   "id": "mf:165362",
+   "title": "Apple patches CoreGraphics zero-day flaw exploited in attacks",
+   "source": "bleepingcomputer.com",
+   "published_at": "2026-09-29T07:33:12Z",
+   "cves": [
+    "CVE-2026-20700"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Apple released security updates to fix a zero-day vulnerability exploited in \"extremely sophisticated\" targeted attacks on iOS devices. Tracked as CVE-2026-20700 , this flaw stems from an out-of-bounds write weakness dis"
+  },
+  {
+   "id": "masto:117353154142095152",
+   "title": "Malicious npm package: figlet-chalk-render v1.2.1 (CRITICAL). On require, it downloads & runs a hidden .exe on Windows, evading CI/sandbox c",
+   "source": "radar.offseq.com",
+   "published_at": "2026-09-29T07:30:24.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Malicious npm package: figlet-chalk-render v1.2.1 (CRITICAL). On require, it downloads & runs a hidden .exe on Windows, evading CI/sandbox c  via Mastodon https://radar.offseq.com/threat/malicious-code-in-figlet-chalk-re"
+  },
+  {
+   "id": "masto:117353149886124690",
+   "title": "\ud83d\udee1\ufe0f # Cybersecurity news & tips across the # fediverse \u201cIn the years since I graduated from \u2317MIT I've had many reasons to be disappointed by ",
+   "source": "federate.social",
+   "published_at": "2026-09-29T07:29:19.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "\ud83d\udee1\ufe0f # Cybersecurity news & tips across the # fediverse \u201cIn the years since I graduated from \u2317MIT I've had many reasons to be disappointed by   via Mastodon https://federate.social/@jik/117349924338370157 "
+  },
+  {
+   "id": "masto:117353101053877335",
+   "title": "A new SectopRAT malware variant hides inside legitimate audio software. Learn how SectopRAT malware extracts data and controls devices. # Se",
+   "source": "securityonline.info",
+   "published_at": "2026-09-29T07:16:51.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "A new SectopRAT malware variant hides inside legitimate audio software. Learn how SectopRAT malware extracts data and controls devices. # Se  via Mastodon https://securityonline.info/sectoprat-malware-variant/?utm_source"
+  },
+  {
+   "id": "masto:117353093884703617",
+   "title": "Before you share a photo, check what it says about you. The EXIF viewer reads EXIF, IPTC and XMP metadata, including location, device and ti",
+   "source": "pixoate.com",
+   "published_at": "2026-09-29T07:15:05.425Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Before you share a photo, check what it says about you. The EXIF viewer reads EXIF, IPTC and XMP metadata, including location, device and ti  via Mastodon https://pixoate.com/exif-viewer "
+  },
+  {
+   "id": "masto:117353078367643860",
+   "title": "Pentesters' pockets are crowded places. A scanner for the web app. Another for the network. A third for ports. Then an hour working out whet",
+   "source": "www.g2.com",
+   "published_at": "2026-09-29T07:11:07.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Pentesters' pockets are crowded places. A scanner for the web app. Another for the network. A third for ports. Then an hour working out whet  via Mastodon https://www.g2.com/products/pentest-tools-com/reviews "
+  },
+  {
+   "id": "masto:117353077182660977",
+   "title": "Phishing activity in the past 7 days \ud83d\udc1f Track latest # phishing threats in TI Lookup: https:// intelligence.any.run/analysis/ lookup?utm_sour",
+   "source": "intelligence.any.run",
+   "published_at": "2026-09-29T07:10:49.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Phishing activity in the past 7 days \ud83d\udc1f Track latest # phishing threats in TI Lookup: https:// intelligence.any.run/analysis/ lookup?utm_sour  via Mastodon https://intelligence.any.run/analysis/lookup?utm_source=mastodon&"
+  },
+  {
+   "id": "x:2104828857836621841",
+   "title": "Phishing activity in the past 7 days Track latest #phishing threats in TI Lookup: https:// intelligence.any.run/analysis/looku p?utm_source=",
+   "source": "intelligence.any.run",
+   "published_at": "2026-09-29T07:01:20.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Phishing activity in the past 7 days Track latest #phishing threats in TI Lookup: https:// intelligence.any.run/analysis/looku p?utm_source=  via X https://intelligence.any.run/analysis/lookup?utm_source=twitter&utm_medi"
+  },
+  {
+   "id": "masto:117353038857939185",
+   "title": "\ud83d\udce1 Neobank KYC vs Traditional Bank: Who Tracks You More? \u2192 https:// telegra.ph/Neobank-KYC-vs-Trad itional-Bank-Who-Tracks-You-More-08-03 # i",
+   "source": "telegra.ph",
+   "published_at": "2026-09-29T07:01:05.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "\ud83d\udce1 Neobank KYC vs Traditional Bank: Who Tracks You More? \u2192 https:// telegra.ph/Neobank-KYC-vs-Trad itional-Bank-Who-Tracks-You-More-08-03 # i  via Mastodon https://telegra.ph/Neobank-KYC-vs-Traditional-Bank-Who-Tracks-You"
+  },
+  {
+   "id": "x:2104828738999361664",
+   "title": "Post-auth RCE vulnerability in Cisco Smart Software Manager (CSSM) https:// starlabs.sg/blog/2026/09-d irty-cert-cisco-smart-software-manage",
+   "source": "starlabs.sg",
+   "published_at": "2026-09-29T07:00:51.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Post-auth RCE vulnerability in Cisco Smart Software Manager (CSSM) https:// starlabs.sg/blog/2026/09-d irty-cert-cisco-smart-software-manage  via X https://starlabs.sg/blog/2026/09-dirty-cert-cisco-smart-software-manager"
+  },
+  {
+   "id": "masto:117353036398948720",
+   "title": "Agenti IA di OpenAI avrebbero interrogato oltre 16.000 volte un portale dati ONU, aggirando filtri e limiti di accesso. OpenAI sta esaminand",
+   "source": "diggita.com",
+   "published_at": "2026-09-29T07:00:27.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Agenti IA di OpenAI avrebbero interrogato oltre 16.000 volte un portale dati ONU, aggirando filtri e limiti di accesso. OpenAI sta esaminand  via Mastodon https://diggita.com/c/sicurezza "
+  },
+  {
+   "id": "masto:117353035726840952",
+   "title": "\ud83d\udcec NicFab Newsletter #40 | September 29, 2026 Privacy, Data Protection, AI & Cybersecurity \u2014 weekly review. \ud83d\udc49 Read the full issue: https://ww",
+   "source": "www.nicfab.eu",
+   "published_at": "2026-09-29T07:00:17.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "\ud83d\udcec NicFab Newsletter #40 | September 29, 2026 Privacy, Data Protection, AI & Cybersecurity \u2014 weekly review. \ud83d\udc49 Read the full issue: https://ww  via Mastodon https://www.nicfab.eu/en/newsletter-issues/2026-09-29-issue-40/?u"
+  },
+  {
+   "id": "masto:117353034975099020",
+   "title": "\ud83d\udea8 EUVD-2017-11066 \ud83d\udcca Score: 5.3/10 (CVSS v3.1) \ud83d\udce6 Product: Installer \ud83c\udfe2 Vendor: InnoSetup \ud83d\udcc5 Published: 2022-06-16 | Updated: 2026-09-29 \ud83d\udcdd A vul",
+   "source": "euvd.enisa.europa.eu",
+   "published_at": "2026-09-29T07:00:06.535Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "\ud83d\udea8 EUVD-2017-11066 \ud83d\udcca Score: 5.3/10 (CVSS v3.1) \ud83d\udce6 Product: Installer \ud83c\udfe2 Vendor: InnoSetup \ud83d\udcc5 Published: 2022-06-16 | Updated: 2026-09-29 \ud83d\udcdd A vul  via Mastodon https://euvd.enisa.europa.eu/vulnerability/EUVD-2017-11066 "
+  },
+  {
+   "id": "masto:117353034951459747",
+   "title": "CVE-2026-5430 and CVE-2026-71362 Added to CISA KEV Catalog \ud83d\udd17 https:// cybersecurefox.com/en/cisa-kev -wso2-cve-2026-5430-adobe-commerce-cve-",
+   "source": "cybersecurefox.com",
+   "published_at": "2026-09-29T07:00:05.000Z",
+   "cves": [
+    "CVE-2026-5430",
+    "CVE-2026-71362"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "CVE-2026-5430 and CVE-2026-71362 Added to CISA KEV Catalog \ud83d\udd17 https:// cybersecurefox.com/en/cisa-kev -wso2-cve-2026-5430-adobe-commerce-cve-  via Mastodon https://cybersecurefox.com/en/cisa-kev-wso2-cve-2026-5430-adobe-c"
+  },
+  {
+   "id": "masto:117353002494353040",
+   "title": "Australia to investigate if OpenAI hack of government health website broke the law The incident is the first known breach to affect a govern",
+   "source": "justpaste.in",
+   "published_at": "2026-09-29T06:51:50.915Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Australia to investigate if OpenAI hack of government health website broke the law The incident is the first known breach to affect a govern  via Mastodon https://justpaste.in/news/australia-to-investigate-if-openai-hack"
+  },
+  {
+   "id": "masto:117353008290268762",
+   "title": "Discover how the cross-platform sckit worm infected MemTensor packages on npm and PyPI, stealing developer secrets in a massive supply chain",
+   "source": "meterpreter.org",
+   "published_at": "2026-09-29T06:51:31.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Discover how the cross-platform sckit worm infected MemTensor packages on npm and PyPI, stealing developer secrets in a massive supply chain  via Mastodon https://meterpreter.org/sckit-worm-memtensor-npm-pypi/?utm_source"
+  },
+  {
+   "id": "masto:117352996847074202",
+   "title": "\ud83c\udf89 Oh joy, another riveting tale of a hacker casually stumbling upon a gaping hole in the Brazilian federal system\u2014because who needs # cybers",
+   "source": "blog.christianperone.com",
+   "published_at": "2026-09-29T06:50:24.748Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "\ud83c\udf89 Oh joy, another riveting tale of a hacker casually stumbling upon a gaping hole in the Brazilian federal system\u2014because who needs # cybers  via Mastodon https://blog.christianperone.com/2026/09/the-systems-that-no-one-"
+  }
+ ],
+ "candidate_stories": [
+  {
+   "id": "we-tested-nvidia-s-new-ai-agent-sandbox-openshell-the-defaults-h",
+   "title": "We tested NVIDIA's new AI agent sandbox (OpenShell). The defaults held. Four settings let data out.",
+   "n_events": 1,
+   "last_seen": "2026-09-29T09:34:13Z",
+   "first_event_title": "We tested NVIDIA's new AI agent sandbox (OpenShell). The defaults held. Four settings let data out."
+  },
+  {
+   "id": "harnessing-multi-agent-problem",
+   "title": "Harnessing Multi-Agent Problem",
+   "n_events": 0,
+   "last_seen": "2026-09-29T08:54:42Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "critical-watchguard-ap-flaws-let-unauthenticated-attackers-execu",
+   "title": "Critical WatchGuard AP Flaws Let Unauthenticated Attackers Execute Arbitrary Commands",
+   "n_events": 1,
+   "last_seen": "2026-09-29T08:42:24Z",
+   "first_event_title": "Critical WatchGuard AP Flaws Let Unauthenticated Attackers Execute Arbitrary Commands"
+  },
+  {
+   "id": "apple-patches-coregraphics-out-of-bounds-write-cve-2026-86950",
+   "title": "Apple patches CoreGraphics out-of-bounds write CVE-2026-86950",
+   "n_events": 15,
+   "last_seen": "2026-09-29T08:31:23.392Z",
+   "first_event_title": "\ud83e\udd16 Apple patched CVE-2026-86950, an out-of-bounds write in CoreGraphics affecting older iOS/iPadOS/macOS versions. Processing a maliciously c"
+  },
+  {
+   "id": "lessons-from-microsoft-patch-kb5002907-two-layers-of-patch-contr",
+   "title": "Lessons from Microsoft Patch KB5002907: Two Layers of Patch Control in Qualys TruRisk Eliminate",
+   "n_events": 1,
+   "last_seen": "2026-09-29T08:28:47Z",
+   "first_event_title": "Lessons from Microsoft Patch KB5002907: Two Layers of Patch Control in Qualys TruRisk Eliminate"
+  },
+  {
+   "id": "hackers-built-a-botnet-that-doesn-t-just-steal-data-it-burns-ai",
+   "title": "Hackers Built a Botnet That Doesn\u2019t Just Steal Data, It Burns AI Credits",
+   "n_events": 1,
+   "last_seen": "2026-09-29T08:24:24Z",
+   "first_event_title": "Hackers Built a Botnet That Doesn\u2019t Just Steal Data, It Burns AI Credits"
+  },
+  {
+   "id": "openai-ai-agents-access-australian-government-systems",
+   "title": "OpenAI AI agents access Australian government systems",
+   "n_events": 7,
+   "last_seen": "2026-09-29T08:20:18.088Z",
+   "first_event_title": "An OpenAI AI agent gained unauthorised access to a Services Australia Medicare portal. The system was built on outdated, unpatched technolog"
+  },
+  {
+   "id": "opensupdater-malware-hides-reflective-loader-inside-recompiled-7",
+   "title": "OpenSUpdater Malware Hides Reflective Loader Inside Recompiled 7-Zip SFX to Evade Detection",
+   "n_events": 1,
+   "last_seen": "2026-09-29T08:13:08Z",
+   "first_event_title": "OpenSUpdater Malware Hides Reflective Loader Inside Recompiled 7-Zip SFX to Evade Detection"
+  },
+  {
+   "id": "attackers-hid-behind-trusted-rmm-software-before-deploying-a-ful",
+   "title": "Attackers Hid Behind Trusted RMM Software Before Deploying a Full Surveillance RAT",
+   "n_events": 1,
+   "last_seen": "2026-09-29T08:10:09Z",
+   "first_event_title": "Attackers Hid Behind Trusted RMM Software Before Deploying a Full Surveillance RAT"
+  },
+  {
+   "id": "japan-s-keio-confirms-ransomware-attack-disrupted-business-syste",
+   "title": "Japan's Keio confirms ransomware attack disrupted business systems",
+   "n_events": 9,
+   "last_seen": "2026-09-29T08:03:42Z",
+   "first_event_title": "Japan's Keio confirms ransomware attack disrupted business systems"
+  },
+  {
+   "id": "citrix-netscaler-unpatched-rce-zero-days",
+   "title": "Citrix NetScaler zero-days CVE-2026-88771-88778 patched after confirmed exploitation",
+   "n_events": 96,
+   "last_seen": "2026-09-29T08:01:23.000Z",
+   "first_event_title": "NetScaler alert: watchTowr says reports of unpatched remote code execution flaws in Citrix NetScaler are verified, and organisations are shu"
+  },
+  {
+   "id": "ransomware-attack-hits-keio-railway-group-servers-and-disrupts-b",
+   "title": "Ransomware Attack Hits Keio Railway Group Servers and Disrupts Business Systems",
+   "n_events": 1,
+   "last_seen": "2026-09-29T07:56:09Z",
+   "first_event_title": "Ransomware Attack Hits Keio Railway Group Servers and Disrupts Business Systems"
+  },
+  {
+   "id": "microsoft-tracks-needymantis-malware-targeting-telecoms-and-gove",
+   "title": "Microsoft Tracks NeedyMantis Malware Targeting Telecoms and Government Contractors",
+   "n_events": 1,
+   "last_seen": "2026-09-29T07:54:05Z",
+   "first_event_title": "Microsoft Tracks NeedyMantis Malware Targeting Telecoms and Government Contractors"
+  },
+  {
+   "id": "xctdh-campaign-uses-hashhiding-and-blockchain-transactions-to-hi",
+   "title": "XCTDH Campaign Uses HashHiding and Blockchain Transactions to Hide Malware C2 Infrastructure",
+   "n_events": 1,
+   "last_seen": "2026-09-29T07:50:54Z",
+   "first_event_title": "XCTDH Campaign Uses HashHiding and Blockchain Transactions to Hide Malware C2 Infrastructure"
+  },
+  {
+   "id": "cve-2026-48842-exploited-roundcube-webmail-sql-injection",
+   "title": "CVE-2026-48842 Exploited Roundcube Webmail SQL Injection",
+   "n_events": 19,
+   "last_seen": "2026-09-29T07:42:34.000Z",
+   "first_event_title": "An exploited Roundcube Webmail vulnerability allows SQL injection attacks. Learn how CVE-2026-48842 impacts servers and apply the latest pat"
+  },
+  {
+   "id": "silverfox-malware-campaign-uses-smart-filtering-to-hide-fake-sof",
+   "title": "SilverFox Malware Campaign Uses Smart Filtering to Hide Fake Software Downloads From Researchers",
+   "n_events": 1,
+   "last_seen": "2026-09-29T07:42:33Z",
+   "first_event_title": "SilverFox Malware Campaign Uses Smart Filtering to Hide Fake Software Downloads From Researchers"
+  },
+  {
+   "id": "cve-2026-90898-cvss-9-8-unauthenticated-rce-in-bifrost-an-open-s",
+   "title": "CVE-2026-90898 (CVSS 9.8): unauthenticated RCE in Bifrost, an open-source AI gateway routing requests to 20+ LLM providers. A single HTTP",
+   "n_events": 2,
+   "last_seen": "2026-09-29T07:34:06.966Z",
+   "first_event_title": "\ud83e\udd16 CVE-2026-90898 (CVSS 9.8): unauthenticated RCE in Bifrost, an open-source AI gateway routing requests to 20+ LLM providers. A single HTTP "
+  },
+  {
+   "id": "cisco-smart-software-manager-command-injection-via-malicious-tls",
+   "title": "Cisco Smart Software Manager command injection via malicious TLS certificates (Dirty Cert)",
+   "n_events": 2,
+   "last_seen": "2026-09-29T07:00:51.000Z",
+   "first_event_title": "(starlabs.sg) Dirty Cert: Exploiting Command Injection in Cisco Smart Software Manager via Malicious TLS Certificates In brief - This articl"
+  },
+  {
+   "id": "cisa-adds-exploited-wso2-adobe-commerce-sharepoint-and-routeros",
+   "title": "CISA adds exploited WSO2, Adobe Commerce, SharePoint and RouterOS flaws to KEV catalog",
+   "n_events": 23,
+   "last_seen": "2026-09-29T07:00:05.000Z",
+   "first_event_title": "CISA warns of Sharepoint, WSO2, Adobe Commerce flaws exploited in attacks"
+  },
+  {
+   "id": "fake-microsoft-store-pages-deliver-a-rat-that-lets-attackers-wat",
+   "title": "Fake Microsoft Store Pages Deliver a RAT That Lets Attackers Watch and Control Windows PCs",
+   "n_events": 1,
+   "last_seen": "2026-09-29T06:50:57Z",
+   "first_event_title": "Fake Microsoft Store Pages Deliver a RAT That Lets Attackers Watch and Control Windows PCs"
+  },
+  {
+   "id": "cve-2026-61652-zapros-python-http-client-memory-exhaustion-dos",
+   "title": "CVE-2026-61652: Zapros Python HTTP client memory exhaustion DoS",
+   "n_events": 1,
+   "last_seen": "2026-09-29T06:40:21.621Z",
+   "first_event_title": "CVE-2026-61652: Zapros Python HTTP client memory exhaustion DoS, CVSS 7.5. Streaming compressed responses can blow past chunk bounds and exh"
+  },
+  {
+   "id": "needymantis-unpacking-a-post-compromise-malware-family-used-in-t",
+   "title": "NeedyMantis: Unpacking a post-compromise malware family used in targeted operations",
+   "n_events": 6,
+   "last_seen": "2026-09-29T06:27:09Z",
+   "first_event_title": "NeedyMantis: Unpacking a post-compromise malware family used in targeted operations"
+  },
+  {
+   "id": "pentagon-data-breach-exposes-ssns-and-military-records-of-over-3",
+   "title": "Pentagon Data Breach Exposes SSNs and Military Records of Over 3 Million People",
+   "n_events": 8,
+   "last_seen": "2026-09-29T06:24:53.000Z",
+   "first_event_title": "Pentagon Data Breach Exposes SSNs and Military Records of Over 3 Million People"
+  },
+  {
+   "id": "storm-3168-agentic-driven-cloud-attacks-using-compromised-servic",
+   "title": "Storm-3168: Agentic-driven cloud attacks using compromised service principals",
+   "n_events": 16,
+   "last_seen": "2026-09-29T06:24:33Z",
+   "first_event_title": "Storm-3168: Agentic-driven cloud attacks using compromised service principals"
+  },
+  {
+   "id": "google-play-android-toll-fraud-malware-abuses-fake-ads",
+   "title": "Google Play Android toll fraud malware abuses fake ads",
+   "n_events": 1,
+   "last_seen": "2026-09-29T06:23:50.000Z",
+   "first_event_title": "Security teams uncovered Google Play Android toll fraud malware. Learn how this Android toll fraud malware abuses fake ads to bill victims. "
+  },
+  {
+   "id": "new-beacon-found-at-103-212-186-85-on-port-8888-please-check-it",
+   "title": "beacon found at 103.212.186.85 on port 8888. Please check it at https://www. beaconbeagle.com/beacons/103.2 12.186.85/x64 . # ThreatInte",
+   "n_events": 22,
+   "last_seen": "2026-09-29T06:05:35.000Z",
+   "first_event_title": "New beacon found at 47.94.56.71 on port 8443. Please check it at https://www. beaconbeagle.com/beacons/47.94 .56.71/x64 . # ThreatIntel # Co"
+  },
+  {
+   "id": "nebulaai-sdk-npm-malware-delivers-windows-rat",
+   "title": "nebulaai-sdk npm malware delivers Windows RAT",
+   "n_events": 1,
+   "last_seen": "2026-09-29T06:00:24.000Z",
+   "first_event_title": "nebulaai-sdk v1.0.0 (npm) delivers CRITICAL malware on Windows: installs a disguised RAT (conhost.exe), opens C2 to 65.87.7.132, and runs un"
+  },
+  {
+   "id": "file-notification-attacks-let-hackers-track-keystrokes-and-websi",
+   "title": "File Notification Attacks Let Hackers Track Keystrokes and Website Visits on Linux, Windows and macOS",
+   "n_events": 2,
+   "last_seen": "2026-09-29T05:59:53Z",
+   "first_event_title": "File Notification Attacks Let Hackers Track Keystrokes and Website Visits on Linux, Windows and macOS"
+  },
+  {
+   "id": "bothelper-rat-lets-attackers-watch-windows-screens-in-real-time",
+   "title": "BotHelper RAT Lets Attackers Watch Windows Screens in Real Time",
+   "n_events": 2,
+   "last_seen": "2026-09-29T05:47:11Z",
+   "first_event_title": "BotHelper RAT Lets Attackers Watch Windows Screens in Real Time"
+  },
+  {
+   "id": "from-kms-auto-to-scareware-tracking-a-multi-stage-intrusion-link",
+   "title": "From KMS Auto to Scareware: Tracking a Multi-Stage Intrusion Linked to APT36?",
+   "n_events": 1,
+   "last_seen": "2026-09-29T05:36:14Z",
+   "first_event_title": "From KMS Auto to Scareware: Tracking a Multi-Stage Intrusion Linked to APT36?"
+  },
+  {
+   "id": "poper-blocker-chrome-extension-exfiltrates-browsing-history",
+   "title": "Poper Blocker Chrome extension exfiltrates browsing history",
+   "n_events": 5,
+   "last_seen": "2026-09-29T05:21:07.913Z",
+   "first_event_title": "\ud83e\udd16 Chrome Web Store still hosts 'Poper Blocker' \u2014 2M+ users, Featured badge, 4.8\u2605 \u2014 yet researchers found it exfiltrates full browsing histor"
+  },
+  {
+   "id": "fake-chrome-vpn-extensions-hijack-browser-traffic-through-russia",
+   "title": "Fake Chrome VPN Extensions Hijack Browser Traffic Through Russian Proxy Network",
+   "n_events": 2,
+   "last_seen": "2026-09-29T05:08:05Z",
+   "first_event_title": "Fake Chrome VPN Extensions Hijack Browser Traffic Through Russian Proxy Network"
+  },
+  {
+   "id": "euvd-2026-72498-score-8-8-10-cvss-v3-1-product-youtrack-vendor-j",
+   "title": "EUVD-2026-72498 \ud83d\udcca Score: 8.8/10 (CVSS v3.1) \ud83d\udce6 Product: YouTrack \ud83c\udfe2 Vendor: JetBrains \ud83d\udcc5 Published: 2026-09-07 | Updated: 2026-09-22 \ud83d\udcdd In Jet",
+   "n_events": 0,
+   "last_seen": "2026-09-29T04:03:06.422Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "psychedelic-stealer-spread-via-fake-captcha-prompts-on-ukrainian",
+   "title": "Psychedelic Stealer spread via fake CAPTCHA prompts on Ukrainian company sites",
+   "n_events": 11,
+   "last_seen": "2026-09-29T04:03:00.000Z",
+   "first_event_title": "Psychedelic Stealer: fake CAPTCHAs on Ukrainian company sites distribute infostealer"
+  },
+  {
+   "id": "cve-2026-9231-lfi-in-wp-travel-engine-plugin",
+   "title": "CVE-2026-9231: LFI in WP Travel Engine plugin",
+   "n_events": 1,
+   "last_seen": "2026-09-29T04:00:24.277Z",
+   "first_event_title": "CVE-2026-9231: LFI in WP Travel Engine WordPress plugin (up to 6.8.0), CVSS 7.5. Contributors can include and execute arbitrary PHP files. N"
+  },
+  {
+   "id": "misconfigured-supabase-apps-expose-data-in-over-16-000-databases",
+   "title": "Misconfigured Supabase apps expose data in over 16,000 databases",
+   "n_events": 9,
+   "last_seen": "2026-09-29T03:52:28.000Z",
+   "first_event_title": "Misconfigured Supabase apps expose data in over 16,000 databases"
+  },
+  {
+   "id": "cve-2026-12470-niteothemes-cmp-authorization-bypass",
+   "title": "CVE-2026-12470: NiteoThemes CMP authorization bypass",
+   "n_events": 1,
+   "last_seen": "2026-09-29T03:50:20.336Z",
+   "first_event_title": "CVE-2026-12470 NiteoThemes CMP WordPress plugin, CVSS 7.2. Missing capability check in cmp_ajax_import_settings lets Editor-level users upda"
+  },
+  {
+   "id": "eviltokens-phaas-disrupted-after-compromising-12-000-microsoft-a",
+   "title": "EvilTokens PhaaS disrupted after compromising 12,000 Microsoft accounts",
+   "n_events": 24,
+   "last_seen": "2026-09-29T03:34:04.891Z",
+   "first_event_title": "Microsoft and partners disrupt EvilTokens, a comprehensive cybercrime service for financial fraud"
+  },
+  {
+   "id": "cve-2026-6922-wp-table-builder-authorization-flaw",
+   "title": "CVE-2026-6922: WP Table Builder authorization flaw",
+   "n_events": 1,
+   "last_seen": "2026-09-29T03:31:00.293Z",
+   "first_event_title": "CVE-2026-6922: WP Table Builder plugin, incorrect authorization up to 2.2.1. Auth attackers can trash or restore tables they shouldn't. CVSS"
+  },
+  {
+   "id": "cve-2026-102240-netcore-nap930-os-command-injection",
+   "title": "CVE-2026-102240: Netcore NAP930 OS command injection",
+   "n_events": 1,
+   "last_seen": "2026-09-29T03:00:24.000Z",
+   "first_event_title": "CRITICAL: CVE-2026-102240 affects Netcore NAP930 v0.1.241010.141410. OS command injection in /www/cgi-bin/network_tools (sid arg). No patch,"
+  },
+  {
+   "id": "adobe-security-advisory-av26-808",
+   "title": "Adobe security advisory (AV26-808)",
+   "n_events": 2,
+   "last_seen": "2026-08-13T08:12:33Z",
+   "first_event_title": "Adobe security advisory (AV26-808)"
+  },
+  {
+   "id": "adobe-security-advisory-av26-888",
+   "title": "Adobe security advisory (AV26-888)",
+   "n_events": 3,
+   "last_seen": "2026-09-09T00:35:01.000Z",
+   "first_event_title": "Adobe security advisory (AV26-888)"
+  },
+  {
+   "id": "adobe-security-advisory-av26-953",
+   "title": "Adobe security advisory (AV26-953)",
+   "n_events": 1,
+   "last_seen": "2026-09-23T17:45:38Z",
+   "first_event_title": "Adobe security advisory (AV26-953)"
+  },
+  {
+   "id": "apple-security-advisory-av26-823",
+   "title": "Apple security advisory (AV26-823)",
+   "n_events": 1,
+   "last_seen": "2026-08-17T15:35:39Z",
+   "first_event_title": "Apple security advisory (AV26-823)"
+  },
+  {
+   "id": "cisa-adds-4-known-exploited-vulnerabilities-to-catalog-september",
+   "title": "CISA adds 4 known exploited vulnerabilities to catalog September 11 2026",
+   "n_events": 4,
+   "last_seen": "2026-09-11T21:00:27.000Z",
+   "first_event_title": "\ud83d\udea8 [CISA-2026:0911] CISA Adds 4 Known Exploited Vulnerabilities to Catalog ( https:// secdb.nttzen.cloud/security-ad visory/detail/CISA-2026:"
+  },
+  {
+   "id": "commvault-security-advisory-av26-799",
+   "title": "Commvault security advisory (AV26-799)",
+   "n_events": 1,
+   "last_seen": "2026-08-11T17:46:10Z",
+   "first_event_title": "Commvault security advisory (AV26-799)"
+  },
+  {
+   "id": "control-systems-siemens-security-advisory-av26-890",
+   "title": "[Control Systems] Siemens security advisory (AV26-890)",
+   "n_events": 3,
+   "last_seen": "2026-09-23T08:01:13.000Z",
+   "first_event_title": "[Control Systems] Siemens security advisory (AV26-890)"
+  },
+  {
+   "id": "dell-security-advisory-av26-863",
+   "title": "Dell security advisory (AV26-863)",
+   "n_events": 2,
+   "last_seen": "2026-09-11T08:40:47.000Z",
+   "first_event_title": "Dell security advisory (AV26-863)"
+  },
+  {
+   "id": "dell-security-advisory-av26-959",
+   "title": "Dell security advisory (AV26-959)",
+   "n_events": 1,
+   "last_seen": "2026-09-23T19:20:39Z",
+   "first_event_title": "Dell security advisory (AV26-959)"
+  },
+  {
+   "id": "dell-security-advisory-av26-966",
+   "title": "Dell security advisory (AV26-966)",
+   "n_events": 1,
+   "last_seen": "2026-09-28T18:00:49Z",
+   "first_event_title": "Dell security advisory (AV26-966)"
+  },
+  {
+   "id": "erlang-security-advisory-av26-948",
+   "title": "Erlang security advisory (AV26-948)",
+   "n_events": 1,
+   "last_seen": "2026-09-22T18:25:40Z",
+   "first_event_title": "Erlang security advisory (AV26-948)"
+  },
+  {
+   "id": "gitlab-s-critical-flaw-is-already-drawing-internet-wide-probes",
+   "title": "GitLab\u2019s critical flaw is already drawing internet-wide probes",
+   "n_events": 56,
+   "last_seen": "2026-09-28T19:38:15.000Z",
+   "first_event_title": "GitLab\u2019s critical flaw is already drawing internet-wide probes"
+  },
+  {
+   "id": "gitlab-security-advisory-av26-814",
+   "title": "GitLab security advisory (AV26-814)",
+   "n_events": 1,
+   "last_seen": "2026-08-13T14:00:38Z",
+   "first_event_title": "GitLab security advisory (AV26-814)"
+  },
+  {
+   "id": "google-security-advisory-av26-904",
+   "title": "Google security advisory (AV26-904)",
+   "n_events": 2,
+   "last_seen": "2026-09-09T20:49:30Z",
+   "first_event_title": "Google security advisory (AV26-904)"
+  },
+  {
+   "id": "grafana-security-advisory-av26-796",
+   "title": "Grafana security advisory (AV26-796)",
+   "n_events": 1,
+   "last_seen": "2026-08-11T13:30:40Z",
+   "first_event_title": "Grafana security advisory (AV26-796)"
+  },
+  {
+   "id": "grafana-security-advisory-av26-860",
+   "title": "Grafana Alloy Vulnerability CVE-2026-19516",
+   "n_events": 1,
+   "last_seen": "2026-08-28T15:10:44Z",
+   "first_event_title": "Grafana security advisory (AV26-860)"
+  },
+  {
+   "id": "hashicorp-security-advisory-av26-797",
+   "title": "HashiCorp security advisory (AV26-797)",
+   "n_events": 1,
+   "last_seen": "2026-08-11T14:05:42Z",
+   "first_event_title": "HashiCorp security advisory (AV26-797)"
+  },
+  {
+   "id": "hashicorp-security-advisory-av26-817",
+   "title": "HashiCorp security advisory (AV26-817)",
+   "n_events": 1,
+   "last_seen": "2026-08-14T16:05:44Z",
+   "first_event_title": "HashiCorp security advisory (AV26-817)"
+  },
+  {
+   "id": "hpe-security-advisory-av26-951",
+   "title": "HPE security advisory (AV26-951)",
+   "n_events": 0,
+   "last_seen": "2026-09-23T15:25:39Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "ibm-security-advisory-av26-967",
+   "title": "IBM security advisory (AV26-967)",
+   "n_events": 1,
+   "last_seen": "2026-09-28T18:25:42Z",
+   "first_event_title": "IBM security advisory (AV26-967)"
+  },
+  {
+   "id": "hackers-exploit-critical-adobe-commerce-flaw-to-hijack-customer",
+   "title": "Hackers exploit critical Adobe Commerce flaw to hijack customer accounts",
+   "n_events": 5,
+   "last_seen": "2026-08-13T14:17:44Z",
+   "first_event_title": "Hackers exploit critical Adobe Commerce flaw to hijack customer accounts"
+  },
+  {
+   "id": "cve-2026-5430-cvss-9-8-critical-jwt-auth-bypass-in-wso2-api-mana",
+   "title": "WSO2 API Manager CVE-2026-5430 JWT auth bypass under active exploitation",
+   "n_events": 20,
+   "last_seen": "2026-09-26T14:00:05.000Z",
+   "first_event_title": "\ud83e\udd16 CVE-2026-5430 (CVSS 9.8): critical JWT auth bypass in WSO2 API Manager under active exploitation. Attackers forge admin tokens via imprope"
+  },
+  {
+   "id": "euvd-2025-27096-score-7-1-10-cvss-v3-1-product-ash-ash-vendor-as",
+   "title": "EUVD-2025-27096 \ud83d\udcca Score: 7.1/10 (CVSS v3.1) \ud83d\udce6 Product: ash, ash \ud83c\udfe2 Vendor: ash-project \ud83d\udcc5 Published: 2025-09-07 | Updated: 2026-09-22 \ud83d\udcdd Inco",
+   "n_events": 0,
+   "last_seen": "2026-09-27T06:01:06.838Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "euvd-2026-84379-score-6-9-10-cvss-v3-1-product-misp-vendor-misp",
+   "title": "EUVD-2026-84379 \ud83d\udcca Score: 6.9/10 (CVSS v3.1) \ud83d\udce6 Product: MISP \ud83c\udfe2 Vendor: MISP \ud83d\udcc5 Updated: 2026-09-22 \ud83d\udcdd The MISP installer scripts (for Debian",
+   "n_events": 0,
+   "last_seen": "2026-09-22T16:03:06.218Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "euvd-2026-84244-score-9-3-10-cvss-v3-1-product-mtt-s80-driver-pa",
+   "title": "EUVD-2026-84244 \ud83d\udcca Score: 9.3/10 (CVSS v3.1) \ud83d\udce6 Product: MTT S80 Driver Package \ud83c\udfe2 Vendor: Moore Threads \ud83d\udcc5 Published: 2026-09-21 | Updated: 2",
+   "n_events": 0,
+   "last_seen": "2026-09-22T14:01:10.364Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "euvd-2026-79443-score-7-5-10-cvss-v3-1-product-oracle-applicatio",
+   "title": "EUVD-2026-79443 \ud83d\udcca Score: 7.5/10 (CVSS v3.1) \ud83d\udce6 Product: Oracle Applications Manager \ud83c\udfe2 Vendor: Oracle Corporation \ud83d\udcc5 Published: 2026-09-15 |",
+   "n_events": 0,
+   "last_seen": "2026-09-22T14:01:06.709Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "critical-hpe-fabric-composer-flaw-lets-unauthenticated-attackers",
+   "title": "Critical HPE Fabric Composer Flaw Lets Unauthenticated Attackers Execute Commands as Privileged User",
+   "n_events": 3,
+   "last_seen": "2026-09-02T14:40:51Z",
+   "first_event_title": "Critical HPE Fabric Composer Flaw Lets Unauthenticated Attackers Execute Commands as Privileged User"
+  },
+  {
+   "id": "critical-watchguard-agent-flaws-let-unauthenticated-attackers-ex",
+   "title": "Critical WatchGuard Agent Flaws Let Unauthenticated Attackers Execute Remote Code",
+   "n_events": 2,
+   "last_seen": "2026-08-26T12:33:30Z",
+   "first_event_title": "Critical WatchGuard Agent Flaws Let Unauthenticated Attackers Execute Remote Code"
+  },
+  {
+   "id": "euvd-2026-82980-score-5-3-10-cvss-v3-1-product-sveltycms-publish",
+   "title": "EUVD-2026-82980 \ud83d\udcca Score: 5.3/10 (CVSS v3.1) \ud83d\udce6 Product: SveltyCMS \ud83d\udcc5 Published: 2026-09-18 | Updated: 2026-09-22 \ud83d\udcdd A vulnerability was deter",
+   "n_events": 0,
+   "last_seen": "2026-09-22T17:07:06.359Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "euvd-2026-85013-score-4-8-10-cvss-v3-1-product-manalyze-vendor-j",
+   "title": "EUVD-2026-85013 \ud83d\udcca Score: 4.8/10 (CVSS v3.1) \ud83d\udce6 Product: Manalyze \ud83c\udfe2 Vendor: JusticeRage \ud83d\udcc5 Updated: 2026-09-23 \ud83d\udcdd A security flaw has been dis",
+   "n_events": 1,
+   "last_seen": "2026-09-23T04:02:07.071Z",
+   "first_event_title": "\ud83d\udea8 EUVD-2026-85013 \ud83d\udcca Score: 4.8/10 (CVSS v3.1) \ud83d\udce6 Product: Manalyze \ud83c\udfe2 Vendor: JusticeRage \ud83d\udcc5 Updated: 2026-09-23 \ud83d\udcdd A security flaw has been dis"
+  },
+  {
+   "id": "euvd-2026-78826-score-5-3-10-cvss-v3-1-product-record-management",
+   "title": "EUVD-2026-78826 \ud83d\udcca Score: 5.3/10 (CVSS v3.1) \ud83d\udce6 Product: Record Management System \ud83c\udfe2 Vendor: code-projects \ud83d\udcc5 Published: 2026-09-15 | Updated:",
+   "n_events": 0,
+   "last_seen": "2026-09-25T03:01:10.088Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "euvd-2025-206675-score-8-6-10-cvss-v3-1-product-archer-ax12-v1-a",
+   "title": "EUVD-2025-206675 \ud83d\udcca Score: 8.6/10 (CVSS v3.1) \ud83d\udce6 Product: Archer AX12 V1, Archer AX53 v1.0 \ud83c\udfe2 Vendor: TP-Link Systems Inc. \ud83d\udcc5 Published: 2026-",
+   "n_events": 0,
+   "last_seen": "2026-09-23T00:01:08.722Z",
+   "first_event_title": ""
+  }
+ ]
+}
