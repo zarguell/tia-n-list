@@ -1,0 +1,30 @@
+title: EvilTokens PhaaS Landing Page Device Code Endpoints
+id: 3c7d5b91-8e24-4f6a-a0d3-5b19c7e2f840
+status: experimental
+description: "Detects HTTP requests to EvilTokens phishing landing pages: the kit's own REST endpoints (/api/device/start issues the Microsoft device code, /api/prt/convert and /api/prt/cookie mint the x-ms-RefreshTokenCredential cookie) or Cloudflare Workers hostnames following the docusign-/onedrive- prefix with a -s-account suffix used for campaign tracking. Complements the inbox-rule persistence detection by catching the capture side at the proxy or web gateway."
+references:
+  - https://www.sekoia.com/blog/new-widespread-eviltokens-kit-device-code-phishing-as-a-service-part-1
+  - https://newtonpaul.com/blog/device-code-phishing-campaign/
+  - https://github.com/PaloAltoNetworks/Unit42-timely-threat-intel/blob/main/2026-03-23-%20Device-Code-based-OAuth-Phishing.txt
+author: Tia N. List
+date: 2026/09/29
+tags:
+  - attack.t1566
+  - attack.initial-access
+  - attack.t1621
+  - attack.credential-access
+logsource:
+  category: webserver
+detection:
+  selection_api:
+    cs-uri|contains:
+      - '/api/device/start'
+      - '/api/prt/convert'
+      - '/api/prt/cookie'
+  selection_workers:
+    cs-uri|contains: '-s-account.workers.dev'
+  condition: selection_api or selection_workers
+falsepositives:
+  - Security researchers or sandboxed URLs fetched by analysts
+  - Malicious-link detonation by secure email gateways (the lures routinely pass such gateways unflagged)
+level: high
