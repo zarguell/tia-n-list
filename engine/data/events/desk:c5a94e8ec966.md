@@ -1,0 +1,1 @@
+Second-day coverage noting the ShinyHunters leak site no longer listed the FBI entry, the jobs portal remained offline, and an FBI statement left open whether the attackers hit a third party or FBI systems. It also recorded the group's reference to the May 2026 IC3 report as the trigger and its one-week ultimatum.
