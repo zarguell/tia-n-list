@@ -1,0 +1,3 @@
+Ciao Sto continuando a documentare il mio percorso pratico su Linux e Cybersecurity e ho appena pubblicato un piccolo progetto di un Syslog Server Centralizzato con rsyslog. L'obiettivo era capire come raccogliere i log dei client in un unico punto sicuro per facilitare l'analisi dei log e la sicurezza. Mi farebbe davvero piacere avere un feedback tecnico o un parere da chi lavora già in questo ramo o semplicemente anche da chi studia cybersecurity per capire cosa posso integrare o migliorare! Se trovate il progetto utile o interessante, una ⭐ sulla repo è super apprezzata! https://github.com/Radz-04/Labs-and-projects/tree/main/Server-Syslog submitted by /u/Radz__04 [link] [comments]
+
+via reddit r/cybersecurity: Syslog Server Centralizzato
