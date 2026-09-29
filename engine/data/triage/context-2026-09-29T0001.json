@@ -1,0 +1,754 @@
+{
+ "date": "2026-09-29",
+ "decisions_path": "engine/data/triage/decisions-2026-09-29T0001.json",
+ "instructions": "For every new event decide: (1) keep or drop \u2014 keep only stories worth covering (real security events, vulnerabilities, attacks, breaches, advisories with substance); drop press releases, vendor marketing, generic explainers, and anything duplicating an existing story. (2) If keep, assign the event to the RIGHT story: an existing candidate story id if it belongs there (this FIXES mechanical clustering \u2014 e.g. different outlets' Patch Tuesday roundups are ONE story), or NEW with a clean story_title. (3) merges: list candidate stories that are really the same story (from = fragment, into = the most complete one). (4) For every kept event that names CVEs, optionally assess exploitation: exploited = the event reports OBSERVED in-the-wild exploitation (implants, victim counts, campaigns, CISA KEV confirmation); suspected = public exploit code/PoC or likely-but-unconfirmed. Attribute ONLY the CVEs you can tie to the claim \u2014 a bulletin's blanket 'actively exploited' does NOT flag all its CVEs. Omit the exploitation field when the event makes no claim.\n(5) LOW-TRUST events (\"low_trust\": true \u2014 AI-drafted aggregator reposts, late and overstated): treat as unverified leads. When the text attributes the claim to a named primary source (a researcher firm like watchTowr, a vendor advisory, CISA, a major outlet) and attribution_urls or a web search (/home/ubuntu/repos/cronman/bin/web-search.sh \"query\") locate that primary source CONFIRMING the claim, include a provenance object in the decision: {\"url\": <primary url>, \"source\": <domain>, \"evidence\": <one line>, \"verified\": true}. VERIFIED provenance lets the event mint a story (credited to the primary source) and count as a development; without it, a low-trust event can only attach to an EXISTING story, never mint. If you cannot verify, keep/drop on normal merit and omit provenance.\n\nWrite decisions as JSON with EXACTLY this shape:\n{\n  \"decisions\": [\n    {\"event_id\": \"<id>\", \"action\": \"keep\", \"story\": \"<existing candidate story id>\", \"reason\": \"...\"},\n    {\"event_id\": \"<id>\", \"action\": \"keep\", \"story\": \"NEW\", \"story_title\": \"<clean title>\", \"reason\": \"...\"},\n    {\"event_id\": \"<id>\", \"action\": \"drop\", \"reason\": \"...\"}\n  ],\n  \"merges\": [{\"from\": \"<fragment story id>\", \"into\": \"<canonical story id>\"}]\n}\nFor events marked \"low_trust\" (AI-drafted aggregator reposts) a decision\nmay carry an optional \"provenance\" object when you VERIFIED the claim at\nthe named primary source: {\"event_id\": ..., \"action\": \"keep\", ...}\n  \"provenance\": {\"url\": \"<primary source url>\", \"source\": \"<domain>\", \"evidence\": \"<one line>\"}\nOnly include provenance when the primary source (vendor advisory, CISA,\nthe named researcher/outlet) really carries the claim \u2014 verified\nprovenance lets a low-trust event mint a story and set freshness; without\nit the event can only amplify an existing story.\nSTRICT KEY NAMES: the array key is \"decisions\" (never \"events\"); the story\nkey is \"story\" (never \"story_id\"); \"story\" holds a candidate_stories id\nverbatim or the literal string \"NEW\". Optional per-event field\n\"exploitation\": {\"CVE-...\": {\"status\": \"exploited|suspected\", \"evidence\": \"1-2 sentences\"}}.",
+ "new_events": [
+  {
+   "id": "masto:117350637076113459",
+   "title": "161.33.162.158 flagged mixed threat, 55% confidence. Hosted on Oracle Cloud Tokyo, tied to Tor/VPN anonymization - expect rotating exit traf",
+   "source": "www.valtersit.com",
+   "published_at": "2026-09-28T20:50:17.502Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "161.33.162.158 flagged mixed threat, 55% confidence. Hosted on Oracle Cloud Tokyo, tied to Tor/VPN anonymization - expect rotating exit traf  via Mastodon https://www.valtersit.com/threat-ip/161.33.162.158/ "
+  },
+  {
+   "id": "masto:117350633226422975",
+   "title": "Microsoft Warns of Azure Identity Hijacking in Destructive Cloud Attacks In just 18 hours, a concentrated cloud assault on an Azure tenant c",
+   "source": "osintsights.com",
+   "published_at": "2026-09-28T20:49:18.763Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Microsoft Warns of Azure Identity Hijacking in Destructive Cloud Attacks In just 18 hours, a concentrated cloud assault on an Azure tenant c  via Mastodon https://osintsights.com/microsoft-warns-of-azure-identity-hijacki"
+  },
+  {
+   "id": "x:2104670779971379292",
+   "title": "We discovered an #AgtaBackup RAT campaign impersonating a popular videoconferencing software & legitimate RMM enrollment to deploy a fully-f",
+   "source": "github.com",
+   "published_at": "2026-09-28T20:33:11.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "We discovered an #AgtaBackup RAT campaign impersonating a popular videoconferencing software & legitimate RMM enrollment to deploy a fully-f  via X https://github.com/PaloAltoNetworks/Unit42-timely-threat-intel/blob/main"
+  },
+  {
+   "id": "mf:165255",
+   "title": "OpenAI Agent Swarm Used Nearly 1 Million URLs to Hack Hugging Face",
+   "source": "gbhackers.com",
+   "published_at": "2026-09-28T12:54:52Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "A newly released forensic investigation has reconstructed how a swarm of about 700 OpenAI evaluation agents allegedly used nearly one million chained URLs to bypass restricted internet access and compromise parts of Hugg"
+  },
+  {
+   "id": "rd:t3_1wsdsp2",
+   "title": "You found SoftPerfect NetScan on a workstation. Would you investigate right away?",
+   "source": "youtube.com",
+   "published_at": "2026-09-28T12:53:12Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "I was working through a lab around ransomware discovery and one question kept coming up: When you see SoftPerfect NetScan (or Advanced IP Scanner) on a workstation, is that enough on its own, or do you need more context "
+  },
+  {
+   "id": "masto:117348757059407217",
+   "title": "Truesec has observed these potential C2 IPs: 104.248.244[.]66 139.180.152[.]138 77.83.199[.]39 https://www. truesec.com/hub/blog/multiple- c",
+   "source": "www.truesec.com",
+   "published_at": "2026-09-28T12:52:10.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Truesec has observed these potential C2 IPs: 104.248.244[.]66 139.180.152[.]138 77.83.199[.]39 https://www. truesec.com/hub/blog/multiple- c  via Mastodon https://www.truesec.com/hub/blog/multiple-critical-vulnerabilitie"
+  },
+  {
+   "id": "masto:117348756700649237",
+   "title": "Just *thrilled* to learn that a digital library made it onto the target list within the first dozen known AI cyberattacks \ud83d\ude43 https://www. kob",
+   "source": "www.kob.com",
+   "published_at": "2026-09-28T12:52:04.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Just *thrilled* to learn that a digital library made it onto the target list within the first dozen known AI cyberattacks \ud83d\ude43 https://www. kob  via Mastodon https://www.kob.com/new-mexico/openai-agent-hacking-attempt-targe"
+  },
+  {
+   "id": "masto:117348749945896556",
+   "title": "We were very happy to participate in Vulnopticon 2026 and to meet so many people interested in vulnerability identification, publication, co",
+   "source": "gcve.eu",
+   "published_at": "2026-09-28T12:50:21.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "We were very happy to participate in Vulnopticon 2026 and to meet so many people interested in vulnerability identification, publication, co  via Mastodon https://gcve.eu/2026/09/28/gcve-at-vulnopticon-2026/ "
+  },
+  {
+   "id": "mf:165259",
+   "title": "Citrix security advisory (AV26-965)",
+   "source": "malware.news",
+   "published_at": "2026-09-28T12:40:41Z",
+   "cves": [
+    "CVE-2026-88771",
+    "CVE-2026-88772",
+    "CVE-2026-88773",
+    "CVE-2026-88774",
+    "CVE-2026-88775",
+    "CVE-2026-88776",
+    "CVE-2026-88777",
+    "CVE-2026-88778"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Serial number: AV26-965 Date: September 28, 2026 As of September 27, 2026, Citrix is affected by vulnerabilities in the following products: NetScaler ADC and NetScaler Gateway 14.1 Prior to 14.1-73.37 NetScaler ADC and N"
+  },
+  {
+   "id": "mf:165242",
+   "title": "Prison Sentence for Former US Soldier Who Hacked AT&T and Verizon",
+   "source": "securityweek.com",
+   "published_at": "2026-09-28T12:36:16Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "A former US soldier was sentenced to 70 months in prison for hacking into AT&T and Verizon systems and leaking the call detail records of a government official. The individual, Cameron John Wagenius, 22, a former Army so"
+  },
+  {
+   "id": "mf:165254",
+   "title": "NVIDIA Launches In-Silicon Security Platform to Monitor and Control Autonomous AI Agents",
+   "source": "gbhackers.com",
+   "published_at": "2026-09-28T12:25:56Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "NVIDIA has launched its Open Agent Safety Platform, a security architecture designed for out-of-band monitoring, runtime policy enforcement, and hardware-backed control for autonomous AI agents. This platform combines th"
+  },
+  {
+   "id": "rd:t3_1wsd73u",
+   "title": "Why don't we use ALL of the Unicode Characters/Symbols in passwords?",
+   "source": "symbl.cc",
+   "published_at": "2026-09-28T12:25:39Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "This sounds stupid at first, you could never memorize your passwords, until you use password managers. I don't think anyone with a password manager memorizes their passwords anyways, so why not make it the absolute harde"
+  },
+  {
+   "id": "masto:117348616594541770",
+   "title": "CISA has added CVE-2026-88771 and CVE-2026-88772 to its Known Exploited Vulnerabilities (KEV) Catalog. Both are critical, zero-day vulnerabi",
+   "source": "www.cisa.gov",
+   "published_at": "2026-09-28T12:16:27.000Z",
+   "cves": [
+    "CVE-2026-88771",
+    "CVE-2026-88772"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "CISA has added CVE-2026-88771 and CVE-2026-88772 to its Known Exploited Vulnerabilities (KEV) Catalog. Both are critical, zero-day vulnerabi  via Mastodon https://www.cisa.gov/news-events/alerts/2026/09/27/critical-zero-"
+  },
+  {
+   "id": "mf:165258",
+   "title": "Vulnerabilities in F&F Filipowski mH-DEVELOPER devices",
+   "source": "malware.news",
+   "published_at": "2026-09-28T12:15:40Z",
+   "cves": [
+    "CVE-2026-82928",
+    "CVE-2026-82930",
+    "CVE-2026-82932",
+    "CVE-2026-82933",
+    "CVE-2026-82935",
+    "CVE-2026-82936"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "CERT Polska has received a report about 7 vulnerabilities (from CVE-2026-82928 to CVE-2026-82930 and CVE-2026-82932, CVE-2026-82933, CVE-2026-82935 and CVE-2026-82936) found in F&F Filipowski mH-DEVELOPER devices. Articl"
+  },
+  {
+   "id": "mf:165256",
+   "title": "NVIDIA Launches In-Silicon Security Platform to Monitor and Control Autonomous AI Agents",
+   "source": "cyberpress.org",
+   "published_at": "2026-09-28T12:10:25Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "NVIDIA has launched the Open Agent Safety Platform, an open software platform and reference system design that gives enterprises continuous monitoring and enforcement controls over autonomous AI agents from testing throu"
+  },
+  {
+   "id": "mf:165253",
+   "title": "Oracle PeopleSoft Servers Targeted Again as ShinyHunters Expands Extortion Operations",
+   "source": "gbhackers.com",
+   "published_at": "2026-09-28T11:36:17Z",
+   "cves": [
+    "CVE-2026-35273"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "The ShinyHunters-linked threat cluster tracked as UNC6240 has renewed mass exploitation of Oracle PeopleSoft servers vulnerable to CVE-2026-35273. Expanding beyond its earlier focus on higher education into technology, h"
+  },
+  {
+   "id": "mf:165241",
+   "title": "DC Health Agency Exposes 400,000 Beneficiary Records",
+   "source": "securityweek.com",
+   "published_at": "2026-09-28T11:29:29Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "The District of Columbia Department of Health Care Finance (DHCF) is notifying nearly 400,000 people that their personal information was potentially compromised in a data breach. According to the agency, the incident imp"
+  },
+  {
+   "id": "mf:165238",
+   "title": "Attack Against RSA",
+   "source": "schneier.com",
+   "published_at": "2026-09-28T11:02:58Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "ArsTechnica is reporting on a \u201cnew\u201d attack against RSA, one that bypasses factoring. First, this attack isn\u2019t new. The original research is from 2007 . What is new is the implementation. Second, it is a forgery attack. I"
+  },
+  {
+   "id": "mf:165287",
+   "title": "Zero-Day Exploitation of Citrix NetScaler ADC and Gateway: CVE-2026-88771 and CVE-2026-88772",
+   "source": "rapid7.com",
+   "published_at": "2026-09-28T10:05:00Z",
+   "cves": [
+    "CVE-2026-88771",
+    "CVE-2026-88772"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Overview On September 27, 2026, Citrix disclosed eight new vulnerabilities affecting NetScaler ADC and NetScaler Gateway, including two critical remote code execution (RCE) vulnerabilities: CVE-2026-88771 and CVE-2026-88"
+  },
+  {
+   "id": "mf:165267",
+   "title": "Recorded Future Launches MCP, the Intelligence Layer for Agentic Security Operations",
+   "source": "recordedfuture.com",
+   "published_at": "2026-09-28T00:00:00Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Recorded Future MCP is now generally available, giving AI agents and LLM workflows direct access to Recorded Future's Intelligence Graph\u00ae and enabling precise, trustworthy, and cost-effective decision-making at machine s"
+  },
+  {
+   "id": "mf:165276",
+   "title": "Bitget $387M hack \ud83d\udcb8, Salesbleed Enables Slack Phishing \ud83e\udd16, Supabase data leak \ud83d\udca7",
+   "source": "tldr.tech",
+   "published_at": "2026-09-28T00:00:00Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": " "
+  }
+ ],
+ "candidate_stories": [
+  {
+   "id": "shinyhunters-hacked-clop-leak-site-using-grav-cms-path-traversal",
+   "title": "ShinyHunters hacked Clop leak site using Grav CMS path traversal flaw",
+   "n_events": 12,
+   "last_seen": "2026-09-28T22:34:41.026Z",
+   "first_event_title": "ShinyHunters hacked Clop leak site using Grav CMS path traversal flaw"
+  },
+  {
+   "id": "citrix-netscaler-unpatched-rce-zero-days",
+   "title": "Citrix NetScaler zero-days CVE-2026-88771-88778 patched after confirmed exploitation",
+   "n_events": 85,
+   "last_seen": "2026-09-28T22:34:28.161Z",
+   "first_event_title": "NetScaler alert: watchTowr says reports of unpatched remote code execution flaws in Citrix NetScaler are verified, and organisations are shu"
+  },
+  {
+   "id": "critical-citrix-netscaler-flaw-allows-attackers-to-bypass-authen",
+   "title": "Critical Citrix NetScaler Flaw Allows Attackers to Bypass Authentication",
+   "n_events": 9,
+   "last_seen": "2026-09-28T22:22:24.000Z",
+   "first_event_title": "Critical Citrix NetScaler Flaw Allows Attackers to Bypass Authentication"
+  },
+  {
+   "id": "dutch-police-arrest-reformed-hacker-in-shiny-hunters-investigati",
+   "title": "Dutch Police Arrest \u2018Reformed\u2019 Hacker in Shiny Hunters Investigation",
+   "n_events": 13,
+   "last_seen": "2026-09-28T22:17:20Z",
+   "first_event_title": "Dutch Police Arrest \u2018Reformed\u2019 Hacker in Shiny Hunters Investigation"
+  },
+  {
+   "id": "shinyhunters-claim-fbi-staff-psychiatric-and-medical-records-sto",
+   "title": "ShinyHunters claim FBI staff psychiatric and medical records stolen",
+   "n_events": 20,
+   "last_seen": "2026-09-28T21:54:39.000Z",
+   "first_event_title": "Reuters: ShinyHunters hackers say they stole psychiatric and medical records of FBI staff. \u201cFBI personnel data recently stolen by the ShinyH"
+  },
+  {
+   "id": "cisa-adds-exploited-wso2-adobe-commerce-sharepoint-and-routeros",
+   "title": "CISA adds exploited WSO2, Adobe Commerce, SharePoint and RouterOS flaws to KEV catalog",
+   "n_events": 22,
+   "last_seen": "2026-09-28T21:54:35.000Z",
+   "first_event_title": "CISA warns of Sharepoint, WSO2, Adobe Commerce flaws exploited in attacks"
+  },
+  {
+   "id": "us-data-extraction-firm-accused-of-secret-russian-control-sold-s",
+   "title": "US data-extraction firm accused of secret Russian control sold services to European agencies",
+   "n_events": 1,
+   "last_seen": "2026-09-28T21:46:59.000Z",
+   "first_event_title": "\"A U.S.-based data-extraction firm accused of being secretly run from Russia has worked on EU-backed projects and sold its services to Europ"
+  },
+  {
+   "id": "apple-patches-coregraphics-out-of-bounds-write-cve-2026-86950",
+   "title": "Apple patches CoreGraphics out-of-bounds write CVE-2026-86950",
+   "n_events": 1,
+   "last_seen": "2026-09-28T21:45:55.000Z",
+   "first_event_title": "\ud83e\udd16 Apple patched CVE-2026-86950, an out-of-bounds write in CoreGraphics affecting older iOS/iPadOS/macOS versions. Processing a maliciously c"
+  },
+  {
+   "id": "threat-intel-honda-peru-actor-panzer-claims-undisclosed-allegedl",
+   "title": "THREAT INTEL | Honda (Peru) \ud83d\udfe2 Actor \"Panzer\" claims Undisclosed Allegedly exposed \u2022 NDA documents \u26a0\ufe0f Unverified claim https://www. yazoul.",
+   "n_events": 3,
+   "last_seen": "2026-09-28T21:39:24.000Z",
+   "first_event_title": "\ud83d\udee1 THREAT INTEL | Stim \ud83d\udfe2 Actor \"Panzer\" claims Undisclosed \u26a0\ufe0f Unverified claim https://www. yazoul.net/intel/claim/2026-09 -18-stim-ransomwar"
+  },
+  {
+   "id": "rogue-agent-data",
+   "title": "Rogue Agent Data",
+   "n_events": 0,
+   "last_seen": "2026-09-28T21:21:16Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "japan-s-keio-confirms-ransomware-attack-disrupted-business-syste",
+   "title": "Japan's Keio confirms ransomware attack disrupted business systems",
+   "n_events": 2,
+   "last_seen": "2026-09-28T20:57:06.000Z",
+   "first_event_title": "Japan's Keio confirms ransomware attack disrupted business systems"
+  },
+  {
+   "id": "your-sbom-is-fan-fiction",
+   "title": "Your SBOM Is Fan Fiction",
+   "n_events": 0,
+   "last_seen": "2026-09-28T20:56:42Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "threat-actors-abuse-chatgpt-custom-gpts-to-deliver-rat-payloads",
+   "title": "Threat actors abuse ChatGPT custom GPTs to deliver RAT payloads via ClickFix-style attacks",
+   "n_events": 1,
+   "last_seen": "2026-09-28T20:45:38.000Z",
+   "first_event_title": "(huntress.com) Threat Actors Exploit ChatGPT Custom GPTs to Deliver Malicious Payloads via ClickFix-Style Attacks In brief - This article de"
+  },
+  {
+   "id": "compromised-actions-cool-github-actions-workflows-return-and-re",
+   "title": "Compromised actions-cool GitHub Actions workflows return and re-run Mini Shai-Hulud malware",
+   "n_events": 1,
+   "last_seen": "2026-09-28T20:35:37.430Z",
+   "first_event_title": "Compromised actions-cool GitHub Actions workflows are reachable again and Mini Shai-Hulud malware re-ran automatically"
+  },
+  {
+   "id": "oracle-peoplesoft-cve-2026-35273-cvss-9-8-mitigations-released-m",
+   "title": "Oracle PeopleSoft CVE-2026-35273 (CVSS 9.8) \u2014 Mitigations Released, Mandiant/GTIG Confirm ShinyHunters Targeting 100+ Organizations, Primarily Higher Education",
+   "n_events": 24,
+   "last_seen": "2026-09-28T20:34:23.000Z",
+   "first_event_title": "Oracle PeopleSoft CVE-2026-35273 (CVSS 9.8) \u2014 Mitigations Released, Mandiant/GTIG Confirm ShinyHunters Targeting 100+ Organizations, Primarily Higher Education"
+  },
+  {
+   "id": "times-car-confirms-data-breach-affecting-6-6-million-user-accoun",
+   "title": "Times Car confirms data breach affecting 6.6 million user accounts",
+   "n_events": 1,
+   "last_seen": "2026-09-28T20:31:16Z",
+   "first_event_title": "Times Car confirms data breach affecting 6.6 million user accounts"
+  },
+  {
+   "id": "nist-finalizes-guidelines-on-protecting-online-identity-and-acce",
+   "title": "NIST Finalizes Guidelines on Protecting Online Identity and Access Tokens From Misuse",
+   "n_events": 1,
+   "last_seen": "2026-09-28T20:22:19Z",
+   "first_event_title": "NIST Finalizes Guidelines on Protecting Online Identity and Access Tokens From Misuse"
+  },
+  {
+   "id": "flatpak-path-traversal-vulnerability-in-export-bin-handling-euvd",
+   "title": "Flatpak path traversal vulnerability in export/bin handling (EUVD-2026-88442)",
+   "n_events": 1,
+   "last_seen": "2026-09-28T20:01:06.386Z",
+   "first_event_title": "\ud83d\udea8 EUVD-2026-88442 \ud83d\udcca Score: 7.1/10 (CVSS v3.1) \ud83d\udcc5 Updated: 2026-09-28 \ud83d\udcdd A path traversal vulnerability in Flatpak's handling of the export/bin"
+  },
+  {
+   "id": "linux-security-advisory-av26-970",
+   "title": "Linux security advisory (AV26-970)",
+   "n_events": 0,
+   "last_seen": "2026-09-28T20:00:42Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "vllm-48-cves-max-cvss-10-75-unpatched-trust-score-c-cwe-20-tops",
+   "title": "vllm: 48 CVEs, max CVSS 10, 75% unpatched. Trust score C. CWE-20 tops its weaknesses. https://www. valtersit.com/vendors/vllm/ # cybersecuri",
+   "n_events": 0,
+   "last_seen": "2026-09-28T19:50:17.851Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "misconfigured-supabase-apps-expose-data-in-over-16-000-databases",
+   "title": "Misconfigured Supabase apps expose data in over 16,000 databases",
+   "n_events": 8,
+   "last_seen": "2026-09-28T19:42:58.000Z",
+   "first_event_title": "Misconfigured Supabase apps expose data in over 16,000 databases"
+  },
+  {
+   "id": "gitlab-s-critical-flaw-is-already-drawing-internet-wide-probes",
+   "title": "GitLab\u2019s critical flaw is already drawing internet-wide probes",
+   "n_events": 56,
+   "last_seen": "2026-09-28T19:38:15.000Z",
+   "first_event_title": "GitLab\u2019s critical flaw is already drawing internet-wide probes"
+  },
+  {
+   "id": "cloud-hosted-browser-locker-scareware-traps-users-behind-fake-al",
+   "title": "Cloud-hosted browser-locker scareware traps users behind fake alert popups",
+   "n_events": 2,
+   "last_seen": "2026-09-28T19:13:57.000Z",
+   "first_event_title": "We found a browser-locking #scareware campaign: fake social media and search-engine alert popups trap victims full-screen (HTML5 Keyboard Lo"
+  },
+  {
+   "id": "sandfly-documentation-now-online-sandfly-security",
+   "title": "Sandfly Documentation Now Online | Sandfly Security",
+   "n_events": 0,
+   "last_seen": "2026-09-28T19:13:07Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "sandfly-security-secures-funding-from-gula-tech-adventures-soren",
+   "title": "Sandfly Security Secures Funding from Gula Tech Adventures & Sorenson Capital for its First-of-a-Kind Agentless Linux Security Solution",
+   "n_events": 0,
+   "last_seen": "2026-09-28T19:13:05Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "getting-an-attacker-ip-address-from-a-malicious-linux-at-job",
+   "title": "Getting an Attacker IP Address from a Malicious Linux At Job",
+   "n_events": 0,
+   "last_seen": "2026-09-28T19:13:03Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "poper-blocker-chrome-extension-exfiltrates-browsing-history",
+   "title": "Poper Blocker Chrome extension exfiltrates browsing history",
+   "n_events": 2,
+   "last_seen": "2026-09-28T19:12:01Z",
+   "first_event_title": "\ud83e\udd16 Chrome Web Store still hosts 'Poper Blocker' \u2014 2M+ users, Featured badge, 4.8\u2605 \u2014 yet researchers found it exfiltrates full browsing histor"
+  },
+  {
+   "id": "how-to-decloak-stealth-linux-cryptocurrency-mining-malware",
+   "title": "How To Decloak Stealth Linux Cryptocurrency Mining Malware",
+   "n_events": 0,
+   "last_seen": "2026-09-28T19:10:47Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "ninjas-on-rooftops-a-better-approach-to-linux-threat-hunting",
+   "title": "Ninjas on Rooftops \u2013 A Better Approach to Linux Threat Hunting",
+   "n_events": 0,
+   "last_seen": "2026-09-28T19:10:45Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "linux-ransomeware-prevention-linux-ransomeware-malware-investiga",
+   "title": "Linux Ransomeware Prevention | Linux Ransomeware & Malware Investigation Myth | Sandfly Security",
+   "n_events": 0,
+   "last_seen": "2026-09-28T19:10:43Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "sandfly-2-2-enhanced-web-shell-detection-anti-forensics-and-more",
+   "title": "Sandfly 2.2 \u2013 Enhanced Web Shell Detection, Anti-Forensics and More",
+   "n_events": 0,
+   "last_seen": "2026-09-28T19:10:41Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "jadepuffer-agentic-ransomware-first-documented-ai-agent-driven-e",
+   "title": "JadePuffer Agentic Ransomware \u2014 First Documented AI-Agent-Driven Extortion Operation",
+   "n_events": 10,
+   "last_seen": "2026-09-28T18:51:21.000Z",
+   "first_event_title": "JadePuffer Agentic Ransomware \u2014 First Documented AI-Agent-Driven Extortion Operation"
+  },
+  {
+   "id": "wolfssl-security-advisory-av26-969",
+   "title": "wolfSSL security advisory (AV26-969)",
+   "n_events": 1,
+   "last_seen": "2026-09-28T18:45:41Z",
+   "first_event_title": "wolfSSL security advisory (AV26-969)"
+  },
+  {
+   "id": "suse-linux-security-advisory-av26-968",
+   "title": "SUSE Linux security advisory (AV26-968)",
+   "n_events": 1,
+   "last_seen": "2026-09-28T18:35:40Z",
+   "first_event_title": "SUSE Linux security advisory (AV26-968)"
+  },
+  {
+   "id": "ibm-security-advisory-av26-967",
+   "title": "IBM security advisory (AV26-967)",
+   "n_events": 1,
+   "last_seen": "2026-09-28T18:25:42Z",
+   "first_event_title": "IBM security advisory (AV26-967)"
+  },
+  {
+   "id": "as-ai-world-debates-security-nvidia-releases-open-source-tools-f",
+   "title": "As AI world debates security, NVIDIA releases open source tools for agents",
+   "n_events": 0,
+   "last_seen": "2026-09-28T18:22:53Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "threat-groups-ramp-up-social-engineering-attacks-against-healthc",
+   "title": "Threat groups ramp up social-engineering attacks against healthcare sector",
+   "n_events": 0,
+   "last_seen": "2026-09-28T18:13:46Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "euvd-2026-72498-score-8-8-10-cvss-v3-1-product-youtrack-vendor-j",
+   "title": "EUVD-2026-72498 \ud83d\udcca Score: 8.8/10 (CVSS v3.1) \ud83d\udce6 Product: YouTrack \ud83c\udfe2 Vendor: JetBrains \ud83d\udcc5 Published: 2026-09-07 | Updated: 2026-09-22 \ud83d\udcdd In Jet",
+   "n_events": 0,
+   "last_seen": "2026-09-28T18:02:11.882Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "dell-security-advisory-av26-966",
+   "title": "Dell security advisory (AV26-966)",
+   "n_events": 1,
+   "last_seen": "2026-09-28T18:00:49Z",
+   "first_event_title": "Dell security advisory (AV26-966)"
+  },
+  {
+   "id": "vulnerability-summary-for-the-week-of-september-21-2026",
+   "title": "Vulnerability Summary for the Week of September 21, 2026",
+   "n_events": 1,
+   "last_seen": "2026-09-28T17:52:24Z",
+   "first_event_title": "Vulnerability Summary for the Week of September 21, 2026"
+  },
+  {
+   "id": "adobe-security-advisory-av26-808",
+   "title": "Adobe security advisory (AV26-808)",
+   "n_events": 2,
+   "last_seen": "2026-08-13T08:12:33Z",
+   "first_event_title": "Adobe security advisory (AV26-808)"
+  },
+  {
+   "id": "adobe-security-advisory-av26-888",
+   "title": "Adobe security advisory (AV26-888)",
+   "n_events": 3,
+   "last_seen": "2026-09-09T00:35:01.000Z",
+   "first_event_title": "Adobe security advisory (AV26-888)"
+  },
+  {
+   "id": "adobe-security-advisory-av26-953",
+   "title": "Adobe security advisory (AV26-953)",
+   "n_events": 1,
+   "last_seen": "2026-09-23T17:45:38Z",
+   "first_event_title": "Adobe security advisory (AV26-953)"
+  },
+  {
+   "id": "apple-security-advisory-av26-823",
+   "title": "Apple security advisory (AV26-823)",
+   "n_events": 1,
+   "last_seen": "2026-08-17T15:35:39Z",
+   "first_event_title": "Apple security advisory (AV26-823)"
+  },
+  {
+   "id": "cisa-adds-4-known-exploited-vulnerabilities-to-catalog-september",
+   "title": "CISA adds 4 known exploited vulnerabilities to catalog September 11 2026",
+   "n_events": 4,
+   "last_seen": "2026-09-11T21:00:27.000Z",
+   "first_event_title": "\ud83d\udea8 [CISA-2026:0911] CISA Adds 4 Known Exploited Vulnerabilities to Catalog ( https:// secdb.nttzen.cloud/security-ad visory/detail/CISA-2026:"
+  },
+  {
+   "id": "commvault-security-advisory-av26-799",
+   "title": "Commvault security advisory (AV26-799)",
+   "n_events": 1,
+   "last_seen": "2026-08-11T17:46:10Z",
+   "first_event_title": "Commvault security advisory (AV26-799)"
+  },
+  {
+   "id": "control-systems-siemens-security-advisory-av26-890",
+   "title": "[Control Systems] Siemens security advisory (AV26-890)",
+   "n_events": 3,
+   "last_seen": "2026-09-23T08:01:13.000Z",
+   "first_event_title": "[Control Systems] Siemens security advisory (AV26-890)"
+  },
+  {
+   "id": "dell-security-advisory-av26-863",
+   "title": "Dell security advisory (AV26-863)",
+   "n_events": 2,
+   "last_seen": "2026-09-11T08:40:47.000Z",
+   "first_event_title": "Dell security advisory (AV26-863)"
+  },
+  {
+   "id": "dell-security-advisory-av26-959",
+   "title": "Dell security advisory (AV26-959)",
+   "n_events": 1,
+   "last_seen": "2026-09-23T19:20:39Z",
+   "first_event_title": "Dell security advisory (AV26-959)"
+  },
+  {
+   "id": "erlang-security-advisory-av26-948",
+   "title": "Erlang security advisory (AV26-948)",
+   "n_events": 1,
+   "last_seen": "2026-09-22T18:25:40Z",
+   "first_event_title": "Erlang security advisory (AV26-948)"
+  },
+  {
+   "id": "gitlab-security-advisory-av26-814",
+   "title": "GitLab security advisory (AV26-814)",
+   "n_events": 1,
+   "last_seen": "2026-08-13T14:00:38Z",
+   "first_event_title": "GitLab security advisory (AV26-814)"
+  },
+  {
+   "id": "google-security-advisory-av26-904",
+   "title": "Google security advisory (AV26-904)",
+   "n_events": 2,
+   "last_seen": "2026-09-09T20:49:30Z",
+   "first_event_title": "Google security advisory (AV26-904)"
+  },
+  {
+   "id": "grafana-security-advisory-av26-796",
+   "title": "Grafana security advisory (AV26-796)",
+   "n_events": 1,
+   "last_seen": "2026-08-11T13:30:40Z",
+   "first_event_title": "Grafana security advisory (AV26-796)"
+  },
+  {
+   "id": "grafana-security-advisory-av26-860",
+   "title": "Grafana Alloy Vulnerability CVE-2026-19516",
+   "n_events": 1,
+   "last_seen": "2026-08-28T15:10:44Z",
+   "first_event_title": "Grafana security advisory (AV26-860)"
+  },
+  {
+   "id": "hashicorp-security-advisory-av26-797",
+   "title": "HashiCorp security advisory (AV26-797)",
+   "n_events": 1,
+   "last_seen": "2026-08-11T14:05:42Z",
+   "first_event_title": "HashiCorp security advisory (AV26-797)"
+  },
+  {
+   "id": "hashicorp-security-advisory-av26-817",
+   "title": "HashiCorp security advisory (AV26-817)",
+   "n_events": 1,
+   "last_seen": "2026-08-14T16:05:44Z",
+   "first_event_title": "HashiCorp security advisory (AV26-817)"
+  },
+  {
+   "id": "hpe-security-advisory-av26-951",
+   "title": "HPE security advisory (AV26-951)",
+   "n_events": 0,
+   "last_seen": "2026-09-23T15:25:39Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "ivanti-security-advisory-av26-805",
+   "title": "Ivanti security advisory (AV26-805)",
+   "n_events": 1,
+   "last_seen": "2026-08-11T20:20:39Z",
+   "first_event_title": "Ivanti security advisory (AV26-805)"
+  },
+  {
+   "id": "ivanti-security-advisory-av26-897",
+   "title": "Ivanti September 2026 security advisory: EPMM, ITSM, Sentry vulnerabilities",
+   "n_events": 3,
+   "last_seen": "2026-09-09T06:39:58Z",
+   "first_event_title": "Ivanti security advisory (AV26-897)"
+  },
+  {
+   "id": "jetbrains-security-advisory-av26-825",
+   "title": "JetBrains security advisory (AV26-825)",
+   "n_events": 1,
+   "last_seen": "2026-08-18T13:40:50Z",
+   "first_event_title": "JetBrains security advisory (AV26-825)"
+  },
+  {
+   "id": "oracle-s-second-monthly-cspu-delivers-245-patches-120-critical-1",
+   "title": "Oracle's Second Monthly CSPU Delivers 245 Patches \u2014 120+ Critical, 100 Remotely Exploitable Without Auth",
+   "n_events": 1,
+   "last_seen": "2026-06-17T00:00:00Z",
+   "first_event_title": "Oracle's Second Monthly CSPU Delivers 245 Patches \u2014 120+ Critical, 100 Remotely Exploitable Without Auth"
+  },
+  {
+   "id": "vulnerabilities-in-f-f-filipowski-mh-developer-devices",
+   "title": "Vulnerabilities in F&F Filipowski mH-DEVELOPER devices",
+   "n_events": 1,
+   "last_seen": "2026-09-28T12:15:40Z",
+   "first_event_title": "Vulnerabilities in F&F Filipowski mH-DEVELOPER devices"
+  },
+  {
+   "id": "shinyhunters-claims-theft-of-297gb-of-council-of-europe-data-jun",
+   "title": "ShinyHunters Claims Theft of 297GB of Council of Europe Data \u2014 June 16 Leak Deadline",
+   "n_events": 2,
+   "last_seen": "2026-06-16T00:00:00Z",
+   "first_event_title": "ShinyHunters Claims Theft of 297GB of Council of Europe Data \u2014 June 16 Leak Deadline"
+  },
+  {
+   "id": "oracle-e-business-suite-critical-flaw-cve-2026-46817-now-exploit",
+   "title": "Oracle E-Business Suite Critical Flaw (CVE-2026-46817) Now Exploited \u2014 CVSS 9.8 Unauthenticated HTTP Takeover",
+   "n_events": 6,
+   "last_seen": "2026-07-02T00:00:00Z",
+   "first_event_title": "Oracle E-Business Suite Critical Flaw (CVE-2026-46817) Now Exploited \u2014 CVSS 9.8 Unauthenticated HTTP Takeover"
+  },
+  {
+   "id": "nvidia-launches-in-silicon-security-platform-to-monitor-and-cont",
+   "title": "NVIDIA Launches In-Silicon Security Platform to Monitor and Control Autonomous AI Agents",
+   "n_events": 2,
+   "last_seen": "2026-09-28T12:25:56Z",
+   "first_event_title": "NVIDIA Launches In-Silicon Security Platform to Monitor and Control Autonomous AI Agents"
+  },
+  {
+   "id": "why-don-t-we-use-all-of-the-unicode-characters-symbols-in-passwo",
+   "title": "Why don't we use ALL of the Unicode Characters/Symbols in passwords?",
+   "n_events": 1,
+   "last_seen": "2026-09-28T12:25:39Z",
+   "first_event_title": "Why don't we use ALL of the Unicode Characters/Symbols in passwords?"
+  },
+  {
+   "id": "you-found-softperfect-netscan-on-a-workstation-would-you-investi",
+   "title": "You found SoftPerfect NetScan on a workstation. Would you investigate right away?",
+   "n_events": 1,
+   "last_seen": "2026-09-28T12:53:12Z",
+   "first_event_title": "You found SoftPerfect NetScan on a workstation. Would you investigate right away?"
+  },
+  {
+   "id": "bitget-387m-hack-salesbleed-enables-slack-phishing-supabase-data",
+   "title": "Bitget $387M hack \ud83d\udcb8, Salesbleed Enables Slack Phishing \ud83e\udd16, Supabase data leak \ud83d\udca7",
+   "n_events": 1,
+   "last_seen": "2026-09-28T00:00:00Z",
+   "first_event_title": "Bitget $387M hack \ud83d\udcb8, Salesbleed Enables Slack Phishing \ud83e\udd16, Supabase data leak \ud83d\udca7"
+  },
+  {
+   "id": "citrix-security-advisory-av26-833",
+   "title": "Citrix security advisory (AV26-833)",
+   "n_events": 1,
+   "last_seen": "2026-08-19T18:45:45Z",
+   "first_event_title": "Citrix security advisory (AV26-833)"
+  },
+  {
+   "id": "dc-health-agency-exposes-400-000-beneficiary-records",
+   "title": "DC Health Agency Exposes 400,000 Beneficiary Records",
+   "n_events": 1,
+   "last_seen": "2026-09-28T11:29:29Z",
+   "first_event_title": "DC Health Agency Exposes 400,000 Beneficiary Records"
+  },
+  {
+   "id": "red-hat-security-advisory-av26-803",
+   "title": "Red Hat security advisory (AV26-803)",
+   "n_events": 1,
+   "last_seen": "2026-08-11T19:40:42Z",
+   "first_event_title": "Red Hat security advisory (AV26-803)"
+  },
+  {
+   "id": "recorded-future-launches-ai-alert-filtering",
+   "title": "Recorded Future Launches AI Alert Filtering",
+   "n_events": 1,
+   "last_seen": "2026-09-28T00:00:00Z",
+   "first_event_title": "Recorded Future Launches MCP, the Intelligence Layer for Agentic Security Operations"
+  },
+  {
+   "id": "recorded-future-launches-6-new-capabilities-for-third-party-risk",
+   "title": "Recorded Future Launches 6 New Capabilities for Third-Party Risk",
+   "n_events": 0,
+   "last_seen": "2026-08-19T16:01:28Z",
+   "first_event_title": ""
+  }
+ ]
+}
