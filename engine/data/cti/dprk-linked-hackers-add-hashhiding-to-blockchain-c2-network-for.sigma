@@ -1,0 +1,29 @@
+title: Node.js Command Line With XCTDH HashHiding Markers
+id: 9ffa244a-594a-42e9-833f-327be09646b6
+status: experimental
+description: >
+    Detects Node.js launched with -eval strings carrying the XCTDH
+    HashHiding indicators published by Ransom-ISAC (2026): the campaign
+    marker global.i = '5-3-132' and the require-alias global.r=require used
+    by the base-91, control-flow-flattened _Z module that decodes a C2
+    endpoint from Ethereum recipient-address bytes.
+references:
+    - https://ransom-isac.org/blog/xctdh-adopts-hash-hiding/
+    - https://opensourcemalware.com/blog/nullreceiver-dprk-c2-technique
+author: Tia N. List
+date: 2026/09/29
+tags:
+    - attack.t1059
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection:
+        CommandLine|contains:
+            - 'global.i='
+            - 'global.r=require'
+    condition: selection
+falsepositives:
+    - Developer scripts or test harnesses that legitimately define the same
+      globals (rare; correlate with a subsequent fetch to a bare IP endpoint)
+level: high
