@@ -1,0 +1,1 @@
+Microsoft detailed Star Blizzard's evasion upgrades: multi-registrar domain infrastructure, layered link-shortener and open-redirect chains feeding Evilginx servers, and altered OneDrive share notifications as lures. The post also carries a large table of actor-registered domains with registrar and TLS certificate metadata, useful for retrospective DNS and proxy log hunting.
