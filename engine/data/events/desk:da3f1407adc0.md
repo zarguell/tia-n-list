@@ -1,0 +1,1 @@
+Oracle merged this change into GraalVM's master branch on 2026-08-19, randomizing runtime code cache mappings with allocator hints. VUSec's Branch Target Reuse page cites this pull request as Oracle's deployed GraalVM mitigation, which hinders JIT code-cache region reuse instead of adding predictor flushes. It landed about six weeks before the research went public.
