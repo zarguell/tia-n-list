@@ -1,0 +1,1 @@
+Huntress's earlier ClickFix explainer, published March 25, 2026, sets the baseline this campaign builds on: ClickFix accounted for over 50% of malware loader activity in the Huntress 2026 Cyber Threat Report. The post argues that everyday verify-you-are-human rituals condition users to paste commands on request, which is the exact reflex the ChatGPT-hosted ClickFix pages exploit.
