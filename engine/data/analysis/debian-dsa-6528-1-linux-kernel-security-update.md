@@ -1,0 +1,5 @@
+Debian issued DSA-6528-1 on September 29, a security update for the Linux kernel package on Debian 13 trixie. The advisory is a bulk rollup: the Debian security tracker ties it to several hundred CVEs, ranging from older 2024 and 2025 fixes to a long run of 2026 issues, and moves the shipped kernel from 6.12.107-1 to 6.12.111-1. Both events in this story are the same announcement from the debian-security-announce list.
+
+Rollups of this size are routine for the kernel but still matter operationally, because they are the point where months of upstream fixes actually reach stable Debian deployments. Administrators running trixie kernels cannot cherry-pick; the practical action is to take 6.12.111-1 as a unit and plan the reboot around it.
+
+The tracker listing gives severity per CVE only through the linked entries, so no single headline flaw stands out in the advisory itself. Watch for the follow-up DSA covering bookworm or backports kernels, and for any of the bundled 2026 CVEs showing up later in CISA's KEV catalog, which would retroactively change the patching priority for anyone who let this update sit.
