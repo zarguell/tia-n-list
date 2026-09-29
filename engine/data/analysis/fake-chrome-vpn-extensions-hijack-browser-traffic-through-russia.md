@@ -1,0 +1,5 @@
+A Russian-language proxy network operates through 31 linked Chrome extensions marketed as free VPN tools for individual services such as YouTube, Telegram, Instagram, ChatGPT, Claude, Gemini, Netflix, Discord, Spotify, LinkedIn, Facebook, Threads, X, and the Russian torrent tracker RuTracker. Risky Plugins disclosed the campaign on September 19, 2026, after analyzing code and remote configuration between September 3 and 4. The cluster remained active on the last scan on September 18.
+
+The extensions share a common codebase and were published through three linked Google accounts: sherechevskiy@gmail.com, andreysherechevskiy@gmail.com, and katia.noomova@gmail.com. The largest sample, a RuTracker VPN extension, accounts for roughly 200,000 of the group's estimated 356,000 installs. The extensions redirect web sessions through remotely controlled proxy infrastructure, exposing users to traffic interception.
+
+What to watch: Chrome Web Store removals, any Google account suspension actions, and whether Risky Plugins publishes additional IOCs linking the extensions to a specific proxy service operator.

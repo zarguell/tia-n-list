@@ -1,0 +1,5 @@
+The Pentagon confirmed a major breach of the Defense Manpower Data Center (DMDC) information system affecting 2.76 million living individuals and approximately 294,000 deceased people. The exposed records include Social Security numbers, dates of birth, names, contact details, demographic data, and military occupational specialty information. The intrusion lasted from October 2025 through July 2026 and stemmed from a vulnerability in a file-sharing system that allowed external users to access files stored on a vulnerable server.
+
+The data was stored unencrypted, which significantly raises long-term identity theft and targeted espionage risk. DMDC discovered the issue on July 16, patched the flaw, restored the system, and initiated incident response. A notification letter reviewed by Military Times confirmed that accessed files combined Social Security numbers with at least one additional identifier, creating a durable threat profile for affected personnel.
+
+What to watch: congressional oversight responses, additional disclosures from the Department of Defense, and whether the file-sharing vulnerability receives a CVE or vendor advisory.

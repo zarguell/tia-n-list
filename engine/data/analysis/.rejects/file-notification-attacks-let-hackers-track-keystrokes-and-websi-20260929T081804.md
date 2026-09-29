@@ -1,0 +1,5 @@
+Researchers from Graz University of Technology disclosed a cross-platform side-channel attack class that exploits file-notification APIs in Linux (inotify), Windows (ReadDirectoryChangesW), macOS (FSEvents), and Android to infer sensitive user and system activity. The attacks work without administrative privileges and can expose keystroke timing, application launches, website visits, USB usage, VPN activity, and printing behavior.
+
+The method uses filesystem event patterns recorded during specific user actions, then matches later notification sequences against those templates to identify actions in real time. The research, titled File Notification Attacks, treats this as a generic cross-platform privacy problem rather than a single product vulnerability. The new events from GBHackers and CyberPress expand coverage without changing the core finding.
+
+What to watch: vendor responses from Linux kernel maintainers, Microsoft, Apple, and Android, along with any mitigation patches or API changes that restrict unprivileged notification access.

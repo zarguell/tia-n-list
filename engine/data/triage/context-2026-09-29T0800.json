@@ -1,0 +1,734 @@
+{
+ "date": "2026-09-29",
+ "decisions_path": "engine/data/triage/decisions-2026-09-29T0800.json",
+ "instructions": "For every new event decide: (1) keep or drop \u2014 keep only stories worth covering (real security events, vulnerabilities, attacks, breaches, advisories with substance); drop press releases, vendor marketing, generic explainers, and anything duplicating an existing story. (2) If keep, assign the event to the RIGHT story: an existing candidate story id if it belongs there (this FIXES mechanical clustering \u2014 e.g. different outlets' Patch Tuesday roundups are ONE story), or NEW with a clean story_title. (3) merges: list candidate stories that are really the same story (from = fragment, into = the most complete one). (4) For every kept event that names CVEs, optionally assess exploitation: exploited = the event reports OBSERVED in-the-wild exploitation (implants, victim counts, campaigns, CISA KEV confirmation); suspected = public exploit code/PoC or likely-but-unconfirmed. Attribute ONLY the CVEs you can tie to the claim \u2014 a bulletin's blanket 'actively exploited' does NOT flag all its CVEs. Omit the exploitation field when the event makes no claim.\n(5) LOW-TRUST events (\"low_trust\": true \u2014 AI-drafted aggregator reposts, late and overstated): treat as unverified leads. When the text attributes the claim to a named primary source (a researcher firm like watchTowr, a vendor advisory, CISA, a major outlet) and attribution_urls or a web search (/home/ubuntu/repos/cronman/bin/web-search.sh \"query\") locate that primary source CONFIRMING the claim, include a provenance object in the decision: {\"url\": <primary url>, \"source\": <domain>, \"evidence\": <one line>, \"verified\": true}. VERIFIED provenance lets the event mint a story (credited to the primary source) and count as a development; without it, a low-trust event can only attach to an EXISTING story, never mint. If you cannot verify, keep/drop on normal merit and omit provenance.\n\nWrite decisions as JSON with EXACTLY this shape:\n{\n  \"decisions\": [\n    {\"event_id\": \"<id>\", \"action\": \"keep\", \"story\": \"<existing candidate story id>\", \"reason\": \"...\"},\n    {\"event_id\": \"<id>\", \"action\": \"keep\", \"story\": \"NEW\", \"story_title\": \"<clean title>\", \"reason\": \"...\"},\n    {\"event_id\": \"<id>\", \"action\": \"drop\", \"reason\": \"...\"}\n  ],\n  \"merges\": [{\"from\": \"<fragment story id>\", \"into\": \"<canonical story id>\"}]\n}\nFor events marked \"low_trust\" (AI-drafted aggregator reposts) a decision\nmay carry an optional \"provenance\" object when you VERIFIED the claim at\nthe named primary source: {\"event_id\": ..., \"action\": \"keep\", ...}\n  \"provenance\": {\"url\": \"<primary source url>\", \"source\": \"<domain>\", \"evidence\": \"<one line>\"}\nOnly include provenance when the primary source (vendor advisory, CISA,\nthe named researcher/outlet) really carries the claim \u2014 verified\nprovenance lets a low-trust event mint a story and set freshness; without\nit the event can only amplify an existing story.\nSTRICT KEY NAMES: the array key is \"decisions\" (never \"events\"); the story\nkey is \"story\" (never \"story_id\"); \"story\" holds a candidate_stories id\nverbatim or the literal string \"NEW\". Optional per-event field\n\"exploitation\": {\"CVE-...\": {\"status\": \"exploited|suspected\", \"evidence\": \"1-2 sentences\"}}.",
+ "new_events": [
+  {
+   "id": "mf:165359",
+   "title": "Fake Microsoft Store Pages Deliver a RAT That Lets Attackers Watch and Control Windows PCs",
+   "source": "cyberpress.org",
+   "published_at": "2026-09-29T06:50:57Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "A campaign uses fake Microsoft Store product pages to trick Windows users into installing legitimate remote-management software. Attackers then use that access to deploy AgtaBackup RAT, a custom .NET malware strain that "
+  },
+  {
+   "id": "mf:165358",
+   "title": "Microsoft Tracks NeedyMantis Post-Compromise Malware Targeting Telecoms and Government Contractors",
+   "source": "cyberpress.org",
+   "published_at": "2026-09-29T06:27:09Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Microsoft Threat Intelligence has uncovered NeedyMantis, a modular post-compromise malware framework used in a limited set of targeted intrusions against telecommunications providers, government contractors, universities"
+  },
+  {
+   "id": "mf:165352",
+   "title": "Hackers Use Compromised Service Principals to Delete Azure Storage and Steal Cloud Credentials",
+   "source": "gbhackers.com",
+   "published_at": "2026-09-29T06:24:33Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Microsoft has uncovered an Azure-focused destructive campaign linked to JADEPUFFER, a threat actor the company tracks as Storm-3168. The group abused compromised service principals to map cloud resources, delete Azure St"
+  },
+  {
+   "id": "mf:165348",
+   "title": "Apple Patches Meta-Reported Zero-Day Linked to \u2018Extremely Sophisticated Attack\u2019",
+   "source": "securityweek.com",
+   "published_at": "2026-09-29T06:18:27Z",
+   "cves": [
+    "CVE-2025-43300",
+    "CVE-2025-55177",
+    "CVE-2026-86950"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Apple on Monday released iOS and macOS updates to patch a zero-day vulnerability that may have been exploited in targeted attacks. The flaw, tracked as CVE-2026-86950, is an out-of-bounds write issue in the CoreGraphics "
+  },
+  {
+   "id": "mf:165357",
+   "title": "Storm-3168 Targets Azure Storage, Key Vaults and Backups in Destructive Cloud Attacks",
+   "source": "cyberpress.org",
+   "published_at": "2026-09-29T06:02:08Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "In an incident observed in early June 2026, attackers used two compromised service principals application identities used to access cloud resources to map a victim\u2019s environment, delete storage accounts and collect acces"
+  },
+  {
+   "id": "mf:165351",
+   "title": "File Notification Attacks Let Hackers Track Keystrokes and Website Visits on Linux, Windows and macOS",
+   "source": "gbhackers.com",
+   "published_at": "2026-09-29T05:59:53Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Researchers have disclosed a new class of cross-platform side-channel attacks that exploit file-notification mechanisms in Linux, Windows, macOS, and Android to infer sensitive user and system activities. These attacks c"
+  },
+  {
+   "id": "mf:165356",
+   "title": "File Notification Attacks Let Unprivileged Users Spy on Activity Across Windows, Linux and macOS",
+   "source": "cyberpress.org",
+   "published_at": "2026-09-29T05:59:01Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "A newly disclosed class of file-notification attacks can allow unprivileged local users to infer sensitive system, application, and user activity across Linux, Windows, macOS, and Android. The attacks exploit filesystem "
+  },
+  {
+   "id": "mf:165350",
+   "title": "Researchers Found a Windows RAT That Turns Victims\u2019 Screens Into Live Streams",
+   "source": "gbhackers.com",
+   "published_at": "2026-09-29T05:47:11Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "A previously undocumented Windows remote access trojan capable of turning an infected victim\u2019s display into a live stream for its operators. Dubbed BotHelper RAT after the Bot.Helper namespace found in its .NET assembly,"
+  },
+  {
+   "id": "mf:165355",
+   "title": "BotHelper RAT Lets Attackers Watch Windows Screens in Real Time",
+   "source": "cyberpress.org",
+   "published_at": "2026-09-29T05:33:31Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "A newly analyzed Windows remote access trojan can stream a victim\u2019s screen to an attacker while also running commands, downloading files and maintaining access after a restart. Point Wild Threat Intelligence calls the pr"
+  },
+  {
+   "id": "mf:165349",
+   "title": "Pentagon Data Breach Exposes Sensitive Data of Over 3 Million People",
+   "source": "gbhackers.com",
+   "published_at": "2026-09-29T05:32:40Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "The Pentagon has confirmed a major data breach involving the Defense Manpower Data Center (DMDC) information system, exposing sensitive personal information linked to more than three million individuals. The breach affec"
+  },
+  {
+   "id": "masto:117352681834332447",
+   "title": "Warning: fixed CVE-2026-48842 Roundcube vulnerability actively exploited; unauthenticated SQL injection grants mailbox access",
+   "source": "linuxmint.hu",
+   "published_at": "2026-09-29T05:30:18.034Z",
+   "cves": [
+    "CVE-2026-48842"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Warning: the fixed CVE-2026-48842 Roundcube vulnerability is already actively exploited; attackers can access mailboxes without authentication via SQL injection.  via Mastodon https://linuxmint.hu/hir/2026/09/elohitelesi"
+  },
+  {
+   "id": "masto:117352678242419727",
+   "title": "\ud83d\udee1\ufe0f # Cybersecurity news & tips across the # fediverse \u201c\u2317NYPD officers accessed \u2317Flock public \u2317surveillance data 1,710 without a contract: No",
+   "source": "hear-me.social",
+   "published_at": "2026-09-29T05:29:21.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "\ud83d\udee1\ufe0f # Cybersecurity news & tips across the # fediverse \u201c\u2317NYPD officers accessed \u2317Flock public \u2317surveillance data 1,710 without a contract: No  via Mastodon https://hear-me.social/@nek/117349890150208998 "
+  },
+  {
+   "id": "mf:165354",
+   "title": "Pentagon Data Breach Exposes SSNs and Military Records of Over 3 Million People",
+   "source": "cyberpress.org",
+   "published_at": "2026-09-29T05:27:23Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "The Pentagon has confirmed a major breach involving a Defense Manpower Data Center (DMDC) information system, exposing sensitive personal data belonging to more than three million people connected to the Department of De"
+  },
+  {
+   "id": "masto:117352680644612592",
+   "title": "OpenAI Apologizes for Australia Medicare Hack https://www.nytimes.com/2026/09/29/world/asia/openai-australia-government-hack-apology.html # ",
+   "source": "www.nytimes.com",
+   "published_at": "2026-09-29T05:23:15.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "OpenAI Apologizes for Australia Medicare Hack https://www.nytimes.com/2026/09/29/world/asia/openai-australia-government-hack-apology.html #   via Mastodon https://www.nytimes.com/2026/09/29/world/asia/openai-australia-go"
+  },
+  {
+   "id": "masto:117352645781769359",
+   "title": "\ud83d\uddb2\ufe0f # Cybersecurity # Ciberseguridad # Ciberseguranca # Security # Seguridad # Seguranca # News # Noticia # Noticias # Tecnologia # Technolog",
+   "source": "www.darkreading.com",
+   "published_at": "2026-09-29T05:21:07.913Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "\ud83d\uddb2\ufe0f # Cybersecurity # Ciberseguridad # Ciberseguranca # Security # Seguridad # Seguranca # News # Noticia # Noticias # Tecnologia # Technolog  via Mastodon https://www.darkreading.com/application-security/chrome-store-pop"
+  },
+  {
+   "id": "masto:117352602123172368",
+   "title": "CVE-2026-93340 Gladys Assistant before 5.1.0: password reset link poisoning lets unauthenticated attackers steal reset tokens and take over ",
+   "source": "www.valtersit.com",
+   "published_at": "2026-09-29T05:10:01.737Z",
+   "cves": [
+    "CVE-2026-93340"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "CVE-2026-93340 Gladys Assistant before 5.1.0: password reset link poisoning lets unauthenticated attackers steal reset tokens and take over   via Mastodon https://www.valtersit.com/cve/CVE-2026-93340/ "
+  },
+  {
+   "id": "mf:165353",
+   "title": "Fake Chrome VPN Extensions Hijack Browser Traffic Through Russian Proxy Network",
+   "source": "cyberpress.org",
+   "published_at": "2026-09-29T05:08:05Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "A Russian-language proxy network operating through dozens of Chrome extensions has exposed an estimated 356,000 users to browser-traffic interception. The campaign involves 31 linked extensions marketed as free \u201cVPN for "
+  },
+  {
+   "id": "masto:117352578947882393",
+   "title": "* aerospace.czechinvest.org * www.kr-vysocina.cz * mpostrava.cz * temp3000.com * www.ism.kiev.ua * exporters.czechtrade.gov.cz * www.khk.cz ",
+   "source": "witha.name",
+   "published_at": "2026-09-29T05:04:08.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "* aerospace.czechinvest.org * www.kr-vysocina.cz * mpostrava.cz * temp3000.com * www.ism.kiev.ua * exporters.czechtrade.gov.cz * www.khk.cz   via Mastodon https://witha.name/data/2026-09-29_07-04-08_DDoSia-target-list-fu"
+  },
+  {
+   "id": "masto:117352563433172278",
+   "title": "Allarme LLM-jacking: i criminali violano i sistemi informatici per poter utilizzare costose risorse di IA senza pagarle. L\u2019uso illecito pu\u00f2 ",
+   "source": "the420.in",
+   "published_at": "2026-09-29T05:00:10.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Allarme LLM-jacking: i criminali violano i sistemi informatici per poter utilizzare costose risorse di IA senza pagarle. L\u2019uso illecito pu\u00f2   via Mastodon https://the420.in/llm-jacking-ai-account-theft/ "
+  },
+  {
+   "id": "masto:117352563541807617",
+   "title": "North Korean hackers steal millions in crypto heist By Ahmed Yussuf A North Korean hacking group infiltrated 30,000 devices stealing million",
+   "source": "www.abc.net.au",
+   "published_at": "2026-09-29T05:00:03.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "North Korean hackers steal millions in crypto heist By Ahmed Yussuf A North Korean hacking group infiltrated 30,000 devices stealing million  via Mastodon https://www.abc.net.au/news/2026-09-29/north-korean-waterplum-ste"
+  },
+  {
+   "id": "masto:117352523565579912",
+   "title": "156.218.117.44 (EG, TE-AS) is flagged for mixed malicious activity. Confidence 55, tracked by 2 independent feeds. Check your logs. https://",
+   "source": "www.valtersit.com",
+   "published_at": "2026-09-29T04:50:03.044Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "156.218.117.44 (EG, TE-AS) is flagged for mixed malicious activity. Confidence 55, tracked by 2 independent feeds. Check your logs. https://  via Mastodon https://www.valtersit.com/threat-ip/156.218.117.44/ "
+  },
+  {
+   "id": "x:2104789892513280252",
+   "title": "AI does not need greed, hatred or a desire for power. People can supply those. I am more afraid of a person with bad intentions using powerf",
+   "source": "www.gendigital.com",
+   "published_at": "2026-09-29T04:26:30.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "AI does not need greed, hatred or a desire for power. People can supply those. I am more afraid of a person with bad intentions using powerf  via X https://www.gendigital.com/blog/insights/leadership-perspectives/human-i"
+  }
+ ],
+ "candidate_stories": [
+  {
+   "id": "fake-microsoft-store-pages-deliver-a-rat-that-lets-attackers-wat",
+   "title": "Fake Microsoft Store Pages Deliver a RAT That Lets Attackers Watch and Control Windows PCs",
+   "n_events": 1,
+   "last_seen": "2026-09-29T06:50:57Z",
+   "first_event_title": "Fake Microsoft Store Pages Deliver a RAT That Lets Attackers Watch and Control Windows PCs"
+  },
+  {
+   "id": "cve-2026-61652-zapros-python-http-client-memory-exhaustion-dos",
+   "title": "CVE-2026-61652: Zapros Python HTTP client memory exhaustion DoS",
+   "n_events": 1,
+   "last_seen": "2026-09-29T06:40:21.621Z",
+   "first_event_title": "CVE-2026-61652: Zapros Python HTTP client memory exhaustion DoS, CVSS 7.5. Streaming compressed responses can blow past chunk bounds and exh"
+  },
+  {
+   "id": "openai-ai-agents-access-australian-government-systems",
+   "title": "OpenAI AI agents access Australian government systems",
+   "n_events": 1,
+   "last_seen": "2026-09-29T06:30:46.000Z",
+   "first_event_title": "An OpenAI AI agent gained unauthorised access to a Services Australia Medicare portal. The system was built on outdated, unpatched technolog"
+  },
+  {
+   "id": "microsoft-tracks-needymantis-post-compromise-malware-targeting-t",
+   "title": "Microsoft Tracks NeedyMantis Post-Compromise Malware Targeting Telecoms and Government Contractors",
+   "n_events": 1,
+   "last_seen": "2026-09-29T06:27:09Z",
+   "first_event_title": "Microsoft Tracks NeedyMantis Post-Compromise Malware Targeting Telecoms and Government Contractors"
+  },
+  {
+   "id": "pentagon-personnel-database-breach-exposes-data-on-3-million",
+   "title": "Pentagon personnel database breach exposes data on 3 million",
+   "n_events": 1,
+   "last_seen": "2026-09-29T06:24:53.000Z",
+   "first_event_title": "In addition to the # FBI getting hacked, the # Pentagon \u2019s personnel database breach exposed sensitive data on nearly 3 million people. The "
+  },
+  {
+   "id": "hackers-use-compromised-service-principals-to-delete-azure-stora",
+   "title": "Hackers Use Compromised Service Principals to Delete Azure Storage and Steal Cloud Credentials",
+   "n_events": 1,
+   "last_seen": "2026-09-29T06:24:33Z",
+   "first_event_title": "Hackers Use Compromised Service Principals to Delete Azure Storage and Steal Cloud Credentials"
+  },
+  {
+   "id": "google-play-android-toll-fraud-malware-abuses-fake-ads",
+   "title": "Google Play Android toll fraud malware abuses fake ads",
+   "n_events": 1,
+   "last_seen": "2026-09-29T06:23:50.000Z",
+   "first_event_title": "Security teams uncovered Google Play Android toll fraud malware. Learn how this Android toll fraud malware abuses fake ads to bill victims. "
+  },
+  {
+   "id": "apple-patches-meta-reported-zero-day-linked-to-extremely-sophist",
+   "title": "Apple Patches Meta-Reported Zero-Day Linked to \u2018Extremely Sophisticated Attack\u2019",
+   "n_events": 1,
+   "last_seen": "2026-09-29T06:18:27Z",
+   "first_event_title": "Apple Patches Meta-Reported Zero-Day Linked to \u2018Extremely Sophisticated Attack\u2019"
+  },
+  {
+   "id": "pentagon-personnel-database-breach-exposes-data-on-3-million-2",
+   "title": "Pentagon personnel database breach exposes data on 3 million",
+   "n_events": 1,
+   "last_seen": "2026-09-29T06:08:26.655Z",
+   "first_event_title": "A Pentagon personnel database breach exposed Social Security numbers and job details of nearly 3 million people. Officials say no misuse has"
+  },
+  {
+   "id": "new-beacon-found-at-103-212-186-85-on-port-8888-please-check-it",
+   "title": "beacon found at 103.212.186.85 on port 8888. Please check it at https://www. beaconbeagle.com/beacons/103.2 12.186.85/x64 . # ThreatInte",
+   "n_events": 22,
+   "last_seen": "2026-09-29T06:05:35.000Z",
+   "first_event_title": "New beacon found at 47.94.56.71 on port 8443. Please check it at https://www. beaconbeagle.com/beacons/47.94 .56.71/x64 . # ThreatIntel # Co"
+  },
+  {
+   "id": "storm-3168-targets-azure-storage-key-vaults-and-backups-in-destr",
+   "title": "Storm-3168 Targets Azure Storage, Key Vaults and Backups in Destructive Cloud Attacks",
+   "n_events": 1,
+   "last_seen": "2026-09-29T06:02:08Z",
+   "first_event_title": "Storm-3168 Targets Azure Storage, Key Vaults and Backups in Destructive Cloud Attacks"
+  },
+  {
+   "id": "pentagon-personnel-database-breach-exposes-data-on-3-million-3",
+   "title": "Pentagon personnel database breach exposes data on 3 million",
+   "n_events": 1,
+   "last_seen": "2026-09-29T06:01:19.901Z",
+   "first_event_title": "The Pentagon just confirmed hackers spent 9 months inside a Defense Manpower file-sharing system, exposing unencrypted SSNs and military job"
+  },
+  {
+   "id": "nebulaai-sdk-npm-malware-delivers-windows-rat",
+   "title": "nebulaai-sdk npm malware delivers Windows RAT",
+   "n_events": 1,
+   "last_seen": "2026-09-29T06:00:24.000Z",
+   "first_event_title": "nebulaai-sdk v1.0.0 (npm) delivers CRITICAL malware on Windows: installs a disguised RAT (conhost.exe), opens C2 to 65.87.7.132, and runs un"
+  },
+  {
+   "id": "file-notification-attacks-let-hackers-track-keystrokes-and-websi",
+   "title": "File Notification Attacks Let Hackers Track Keystrokes and Website Visits on Linux, Windows and macOS",
+   "n_events": 2,
+   "last_seen": "2026-09-29T05:59:53Z",
+   "first_event_title": "File Notification Attacks Let Hackers Track Keystrokes and Website Visits on Linux, Windows and macOS"
+  },
+  {
+   "id": "apple-patches-coregraphics-out-of-bounds-write-cve-2026-86950",
+   "title": "Apple patches CoreGraphics out-of-bounds write CVE-2026-86950",
+   "n_events": 9,
+   "last_seen": "2026-09-29T05:55:15.000Z",
+   "first_event_title": "\ud83e\udd16 Apple patched CVE-2026-86950, an out-of-bounds write in CoreGraphics affecting older iOS/iPadOS/macOS versions. Processing a maliciously c"
+  },
+  {
+   "id": "researchers-found-a-windows-rat-that-turns-victims-screens-into",
+   "title": "Researchers Found a Windows RAT That Turns Victims\u2019 Screens Into Live Streams",
+   "n_events": 1,
+   "last_seen": "2026-09-29T05:47:11Z",
+   "first_event_title": "Researchers Found a Windows RAT That Turns Victims\u2019 Screens Into Live Streams"
+  },
+  {
+   "id": "openai-ai-agents-access-australian-government-systems-2",
+   "title": "OpenAI AI agents access Australian government systems",
+   "n_events": 1,
+   "last_seen": "2026-09-29T05:42:12.425Z",
+   "first_event_title": "OpenAI's experimental AI agents autonomously hacked four Australian government websites while researching medication stats. The company wait"
+  },
+  {
+   "id": "from-kms-auto-to-scareware-tracking-a-multi-stage-intrusion-link",
+   "title": "From KMS Auto to Scareware: Tracking a Multi-Stage Intrusion Linked to APT36?",
+   "n_events": 1,
+   "last_seen": "2026-09-29T05:36:14Z",
+   "first_event_title": "From KMS Auto to Scareware: Tracking a Multi-Stage Intrusion Linked to APT36?"
+  },
+  {
+   "id": "bothelper-rat-lets-attackers-watch-windows-screens-in-real-time",
+   "title": "BotHelper RAT Lets Attackers Watch Windows Screens in Real Time",
+   "n_events": 1,
+   "last_seen": "2026-09-29T05:33:31Z",
+   "first_event_title": "BotHelper RAT Lets Attackers Watch Windows Screens in Real Time"
+  },
+  {
+   "id": "adapthealth-confirms-4-1-million-people-exposed-in-july-cyberatt",
+   "title": "AdaptHealth confirms 4.1 million people exposed in July cyberattack",
+   "n_events": 5,
+   "last_seen": "2026-09-29T05:32:40Z",
+   "first_event_title": "AdaptHealth confirms 4.1 million people exposed in July cyberattack"
+  },
+  {
+   "id": "cve-2026-48842-exploited-roundcube-webmail-sql-injection",
+   "title": "CVE-2026-48842 Exploited Roundcube Webmail SQL Injection",
+   "n_events": 18,
+   "last_seen": "2026-09-29T05:30:18.034Z",
+   "first_event_title": "An exploited Roundcube Webmail vulnerability allows SQL injection attacks. Learn how CVE-2026-48842 impacts servers and apply the latest pat"
+  },
+  {
+   "id": "pentagon-data-breach-exposes-ssns-and-military-records-of-over-3",
+   "title": "Pentagon Data Breach Exposes SSNs and Military Records of Over 3 Million People",
+   "n_events": 1,
+   "last_seen": "2026-09-29T05:27:23Z",
+   "first_event_title": "Pentagon Data Breach Exposes SSNs and Military Records of Over 3 Million People"
+  },
+  {
+   "id": "poper-blocker-chrome-extension-exfiltrates-browsing-history",
+   "title": "Poper Blocker Chrome extension exfiltrates browsing history",
+   "n_events": 5,
+   "last_seen": "2026-09-29T05:21:07.913Z",
+   "first_event_title": "\ud83e\udd16 Chrome Web Store still hosts 'Poper Blocker' \u2014 2M+ users, Featured badge, 4.8\u2605 \u2014 yet researchers found it exfiltrates full browsing histor"
+  },
+  {
+   "id": "fake-chrome-vpn-extensions-hijack-browser-traffic-through-russia",
+   "title": "Fake Chrome VPN Extensions Hijack Browser Traffic Through Russian Proxy Network",
+   "n_events": 1,
+   "last_seen": "2026-09-29T05:08:05Z",
+   "first_event_title": "Fake Chrome VPN Extensions Hijack Browser Traffic Through Russian Proxy Network"
+  },
+  {
+   "id": "malicious-vpn-extensions-turn-browser-users-into-residential-pro",
+   "title": "Malicious VPN Extensions Turn Browser Users Into Residential Proxy Servers",
+   "n_events": 1,
+   "last_seen": "2026-09-29T04:52:50Z",
+   "first_event_title": "Malicious VPN Extensions Turn Browser Users Into Residential Proxy Servers"
+  },
+  {
+   "id": "japan-s-keio-confirms-ransomware-attack-disrupted-business-syste",
+   "title": "Japan's Keio confirms ransomware attack disrupted business systems",
+   "n_events": 8,
+   "last_seen": "2026-09-29T04:20:01.000Z",
+   "first_event_title": "Japan's Keio confirms ransomware attack disrupted business systems"
+  },
+  {
+   "id": "euvd-2026-72498-score-8-8-10-cvss-v3-1-product-youtrack-vendor-j",
+   "title": "EUVD-2026-72498 \ud83d\udcca Score: 8.8/10 (CVSS v3.1) \ud83d\udce6 Product: YouTrack \ud83c\udfe2 Vendor: JetBrains \ud83d\udcc5 Published: 2026-09-07 | Updated: 2026-09-22 \ud83d\udcdd In Jet",
+   "n_events": 0,
+   "last_seen": "2026-09-29T04:03:06.422Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "psychedelic-stealer-spread-via-fake-captcha-prompts-on-ukrainian",
+   "title": "Psychedelic Stealer spread via fake CAPTCHA prompts on Ukrainian company sites",
+   "n_events": 11,
+   "last_seen": "2026-09-29T04:03:00.000Z",
+   "first_event_title": "Psychedelic Stealer: fake CAPTCHAs on Ukrainian company sites distribute infostealer"
+  },
+  {
+   "id": "cve-2026-9231-lfi-in-wp-travel-engine-plugin",
+   "title": "CVE-2026-9231: LFI in WP Travel Engine plugin",
+   "n_events": 1,
+   "last_seen": "2026-09-29T04:00:24.277Z",
+   "first_event_title": "CVE-2026-9231: LFI in WP Travel Engine WordPress plugin (up to 6.8.0), CVSS 7.5. Contributors can include and execute arbitrary PHP files. N"
+  },
+  {
+   "id": "misconfigured-supabase-apps-expose-data-in-over-16-000-databases",
+   "title": "Misconfigured Supabase apps expose data in over 16,000 databases",
+   "n_events": 9,
+   "last_seen": "2026-09-29T03:52:28.000Z",
+   "first_event_title": "Misconfigured Supabase apps expose data in over 16,000 databases"
+  },
+  {
+   "id": "cve-2026-12470-niteothemes-cmp-authorization-bypass",
+   "title": "CVE-2026-12470: NiteoThemes CMP authorization bypass",
+   "n_events": 1,
+   "last_seen": "2026-09-29T03:50:20.336Z",
+   "first_event_title": "CVE-2026-12470 NiteoThemes CMP WordPress plugin, CVSS 7.2. Missing capability check in cmp_ajax_import_settings lets Editor-level users upda"
+  },
+  {
+   "id": "eviltokens-phaas-disrupted-after-compromising-12-000-microsoft-a",
+   "title": "EvilTokens PhaaS disrupted after compromising 12,000 Microsoft accounts",
+   "n_events": 24,
+   "last_seen": "2026-09-29T03:34:04.891Z",
+   "first_event_title": "Microsoft and partners disrupt EvilTokens, a comprehensive cybercrime service for financial fraud"
+  },
+  {
+   "id": "cve-2026-6922-wp-table-builder-authorization-flaw",
+   "title": "CVE-2026-6922: WP Table Builder authorization flaw",
+   "n_events": 1,
+   "last_seen": "2026-09-29T03:31:00.293Z",
+   "first_event_title": "CVE-2026-6922: WP Table Builder plugin, incorrect authorization up to 2.2.1. Auth attackers can trash or restore tables they shouldn't. CVSS"
+  },
+  {
+   "id": "cve-2026-102240-netcore-nap930-os-command-injection",
+   "title": "CVE-2026-102240: Netcore NAP930 OS command injection",
+   "n_events": 1,
+   "last_seen": "2026-09-29T03:00:24.000Z",
+   "first_event_title": "CRITICAL: CVE-2026-102240 affects Netcore NAP930 v0.1.241010.141410. OS command injection in /www/cgi-bin/network_tools (sid arg). No patch,"
+  },
+  {
+   "id": "isc-stormcast-for-tuesday-september-29th-2026-https-isc-sans-edu",
+   "title": "ISC Stormcast For Tuesday, September 29th, 2026 https://isc.sans.edu/podcastdetail/10114, (Tue, Sep 29th)",
+   "n_events": 0,
+   "last_seen": "2026-09-29T02:05:42Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "authlib-signature-bypass-vulnerability-cve-2026-96760-cve-2026-2",
+   "title": "Authlib signature bypass vulnerability CVE-2026-96760, CVE-2026-28802, CVE-2026-27962",
+   "n_events": 1,
+   "last_seen": "2026-09-29T02:00:17.000Z",
+   "first_event_title": "An Authlib signature bypass vulnerability (CVE-2026-96760, CVE-2026-28802, CVE-2026-27962) lets attackers forge JWS payloads. Update librari"
+  },
+  {
+   "id": "watchguard-patches-critical-ap-vulnerabilities-allowing-os-comma",
+   "title": "WatchGuard patches critical AP vulnerabilities allowing OS command injection",
+   "n_events": 1,
+   "last_seen": "2026-09-29T01:51:41.000Z",
+   "first_event_title": "WatchGuard patched critical WatchGuard AP vulnerabilities allowing OS command injection. Update your access points to version 3.4.8 to preve"
+  },
+  {
+   "id": "times-car-confirms-data-breach-affecting-6-6-million-user-accoun",
+   "title": "Times Car confirms data breach affecting 6.6 million user accounts",
+   "n_events": 2,
+   "last_seen": "2026-09-29T01:50:23.000Z",
+   "first_event_title": "Times Car confirms data breach affecting 6.6 million user accounts"
+  },
+  {
+   "id": "cve-2026-94117-blind-sql-injection-in-devitems-hashbar-wordpress",
+   "title": "CVE-2026-94117: Blind SQL injection in DevItems HashBar WordPress plugin",
+   "n_events": 1,
+   "last_seen": "2026-09-29T01:50:01.972Z",
+   "first_event_title": "CVE-2026-94117: Blind SQL injection in DevItems HashBar WordPress plugin through 2.0.3. CVSS 7.6, no patch yet. If you run it, disable or re"
+  },
+  {
+   "id": "ziroom-zhome-a0101-critical-command-injection-cve-2026-101264-cv",
+   "title": "Ziroom ZHOME A0101 critical command injection CVE-2026-101264 (CVSS 9.4)",
+   "n_events": 5,
+   "last_seen": "2026-09-29T01:30:24.000Z",
+   "first_event_title": "Ziroom ZHOME A0101 v1.0.1.0 faces a CRITICAL (CVSS 9.4) command injection flaw (CVE-2026-101264) via /api/ZRnetwork/set_passwd. No patch, ve"
+  },
+  {
+   "id": "adobe-security-advisory-av26-808",
+   "title": "Adobe security advisory (AV26-808)",
+   "n_events": 2,
+   "last_seen": "2026-08-13T08:12:33Z",
+   "first_event_title": "Adobe security advisory (AV26-808)"
+  },
+  {
+   "id": "adobe-security-advisory-av26-888",
+   "title": "Adobe security advisory (AV26-888)",
+   "n_events": 3,
+   "last_seen": "2026-09-09T00:35:01.000Z",
+   "first_event_title": "Adobe security advisory (AV26-888)"
+  },
+  {
+   "id": "adobe-security-advisory-av26-953",
+   "title": "Adobe security advisory (AV26-953)",
+   "n_events": 1,
+   "last_seen": "2026-09-23T17:45:38Z",
+   "first_event_title": "Adobe security advisory (AV26-953)"
+  },
+  {
+   "id": "apple-security-advisory-av26-823",
+   "title": "Apple security advisory (AV26-823)",
+   "n_events": 1,
+   "last_seen": "2026-08-17T15:35:39Z",
+   "first_event_title": "Apple security advisory (AV26-823)"
+  },
+  {
+   "id": "cisa-adds-4-known-exploited-vulnerabilities-to-catalog-september",
+   "title": "CISA adds 4 known exploited vulnerabilities to catalog September 11 2026",
+   "n_events": 4,
+   "last_seen": "2026-09-11T21:00:27.000Z",
+   "first_event_title": "\ud83d\udea8 [CISA-2026:0911] CISA Adds 4 Known Exploited Vulnerabilities to Catalog ( https:// secdb.nttzen.cloud/security-ad visory/detail/CISA-2026:"
+  },
+  {
+   "id": "commvault-security-advisory-av26-799",
+   "title": "Commvault security advisory (AV26-799)",
+   "n_events": 1,
+   "last_seen": "2026-08-11T17:46:10Z",
+   "first_event_title": "Commvault security advisory (AV26-799)"
+  },
+  {
+   "id": "control-systems-siemens-security-advisory-av26-890",
+   "title": "[Control Systems] Siemens security advisory (AV26-890)",
+   "n_events": 3,
+   "last_seen": "2026-09-23T08:01:13.000Z",
+   "first_event_title": "[Control Systems] Siemens security advisory (AV26-890)"
+  },
+  {
+   "id": "dell-security-advisory-av26-863",
+   "title": "Dell security advisory (AV26-863)",
+   "n_events": 2,
+   "last_seen": "2026-09-11T08:40:47.000Z",
+   "first_event_title": "Dell security advisory (AV26-863)"
+  },
+  {
+   "id": "dell-security-advisory-av26-959",
+   "title": "Dell security advisory (AV26-959)",
+   "n_events": 1,
+   "last_seen": "2026-09-23T19:20:39Z",
+   "first_event_title": "Dell security advisory (AV26-959)"
+  },
+  {
+   "id": "dell-security-advisory-av26-966",
+   "title": "Dell security advisory (AV26-966)",
+   "n_events": 1,
+   "last_seen": "2026-09-28T18:00:49Z",
+   "first_event_title": "Dell security advisory (AV26-966)"
+  },
+  {
+   "id": "erlang-security-advisory-av26-948",
+   "title": "Erlang security advisory (AV26-948)",
+   "n_events": 1,
+   "last_seen": "2026-09-22T18:25:40Z",
+   "first_event_title": "Erlang security advisory (AV26-948)"
+  },
+  {
+   "id": "gitlab-s-critical-flaw-is-already-drawing-internet-wide-probes",
+   "title": "GitLab\u2019s critical flaw is already drawing internet-wide probes",
+   "n_events": 56,
+   "last_seen": "2026-09-28T19:38:15.000Z",
+   "first_event_title": "GitLab\u2019s critical flaw is already drawing internet-wide probes"
+  },
+  {
+   "id": "gitlab-security-advisory-av26-814",
+   "title": "GitLab security advisory (AV26-814)",
+   "n_events": 1,
+   "last_seen": "2026-08-13T14:00:38Z",
+   "first_event_title": "GitLab security advisory (AV26-814)"
+  },
+  {
+   "id": "google-security-advisory-av26-904",
+   "title": "Google security advisory (AV26-904)",
+   "n_events": 2,
+   "last_seen": "2026-09-09T20:49:30Z",
+   "first_event_title": "Google security advisory (AV26-904)"
+  },
+  {
+   "id": "grafana-security-advisory-av26-796",
+   "title": "Grafana security advisory (AV26-796)",
+   "n_events": 1,
+   "last_seen": "2026-08-11T13:30:40Z",
+   "first_event_title": "Grafana security advisory (AV26-796)"
+  },
+  {
+   "id": "grafana-security-advisory-av26-860",
+   "title": "Grafana Alloy Vulnerability CVE-2026-19516",
+   "n_events": 1,
+   "last_seen": "2026-08-28T15:10:44Z",
+   "first_event_title": "Grafana security advisory (AV26-860)"
+  },
+  {
+   "id": "hashicorp-security-advisory-av26-797",
+   "title": "HashiCorp security advisory (AV26-797)",
+   "n_events": 1,
+   "last_seen": "2026-08-11T14:05:42Z",
+   "first_event_title": "HashiCorp security advisory (AV26-797)"
+  },
+  {
+   "id": "hashicorp-security-advisory-av26-817",
+   "title": "HashiCorp security advisory (AV26-817)",
+   "n_events": 1,
+   "last_seen": "2026-08-14T16:05:44Z",
+   "first_event_title": "HashiCorp security advisory (AV26-817)"
+  },
+  {
+   "id": "hpe-security-advisory-av26-951",
+   "title": "HPE security advisory (AV26-951)",
+   "n_events": 0,
+   "last_seen": "2026-09-23T15:25:39Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "ibm-security-advisory-av26-967",
+   "title": "IBM security advisory (AV26-967)",
+   "n_events": 1,
+   "last_seen": "2026-09-28T18:25:42Z",
+   "first_event_title": "IBM security advisory (AV26-967)"
+  },
+  {
+   "id": "zero-click-whatsapp-account-takeover-cve-2025-43300-cve-2025-551",
+   "title": "Zero-Click WhatsApp Account Takeover (CVE-2025-43300 + CVE-2025-55177) \u2014 Active Campaign Targeting iOS 16 Devices",
+   "n_events": 1,
+   "last_seen": "2026-05-27T00:00:00Z",
+   "first_event_title": "Zero-Click WhatsApp Account Takeover (CVE-2025-43300 + CVE-2025-55177) \u2014 Active Campaign Targeting iOS 16 Devices"
+  },
+  {
+   "id": "decades-old-file-security-flaws-found-in-android-linux-macos-and",
+   "title": "Decades-old file security flaws found in Android, Linux, macOS, and Windows",
+   "n_events": 8,
+   "last_seen": "2026-09-25T17:05:51.000Z",
+   "first_event_title": "Decades-old file security flaws found in Android, Linux, macOS, and Windows"
+  },
+  {
+   "id": "cybersecurity-news-tips-across-the-fediverse-the-high-crime-of-l",
+   "title": "\ufe0f # Cybersecurity news & tips across the # fediverse \u201cThe High Crime Of 'LMAO': How Cops Are Treating Flock Mass Surveillance As A Joke web",
+   "n_events": 0,
+   "last_seen": "2026-09-28T15:29:20.000Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "storm-3168-agentic-driven-cloud-attacks-using-compromised-servic",
+   "title": "Storm-3168: Agentic-driven cloud attacks using compromised service principals",
+   "n_events": 14,
+   "last_seen": "2026-09-28T20:49:18.763Z",
+   "first_event_title": "Storm-3168: Agentic-driven cloud attacks using compromised service principals"
+  },
+  {
+   "id": "162-216-149-185-is-flagged-as-a-scanner-62-confidence-on-google",
+   "title": "162.216.149.185 is flagged as a scanner (62% confidence) on Google Cloud us-east1, tracked by 4 feeds. Check your logs. https://www. valters",
+   "n_events": 0,
+   "last_seen": "2026-09-28T17:00:04.720Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "needymantis-unpacking-a-post-compromise-malware-family-used-in-t",
+   "title": "NeedyMantis: Unpacking a post-compromise malware family used in targeted operations",
+   "n_events": 5,
+   "last_seen": "2026-09-28T16:50:54.000Z",
+   "first_event_title": "NeedyMantis: Unpacking a post-compromise malware family used in targeted operations"
+  },
+  {
+   "id": "cybersecurity-news-tips-across-the-fediverse-prospect-org-2026-0",
+   "title": "\ufe0f # Cybersecurity news & tips across the # fediverse \u201cprospect\u2024org/2026/09/09/a\u2024\u2024\u2024 \u2317Anhropic \u2317predictive \u2317Surveillance \u2317Activists Anthropic",
+   "n_events": 0,
+   "last_seen": "2026-09-21T17:29:24.000Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "cybersecurity-news-tips-across-the-fediverse-surveillance-404med",
+   "title": "\ufe0f # Cybersecurity news & tips across the # fediverse \u201c\u2317surveillance \u2317\ud83d\udcf9 \ud83d\ude05 404media\u2024co/doctor-doom-thanked-seattle-for-all-the-surveillance-c",
+   "n_events": 0,
+   "last_seen": "2026-09-22T07:29:24.000Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "cybersecurity-news-tips-across-the-fediverse-uk-palantir-surveil",
+   "title": "\ufe0f # Cybersecurity news & tips across the # fediverse \u201c\u2317uk \u2317palantir \u2317surveillance wired\u2024com/story/the-uk-government-faces-a-reckoning-over-",
+   "n_events": 0,
+   "last_seen": "2026-09-26T15:29:19.000Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "bragjack-attacks-hijack-ai-browser-agents-through-malicious-exte",
+   "title": "BragJack attacks hijack AI browser agents through malicious extensions",
+   "n_events": 7,
+   "last_seen": "2026-09-21T05:51:42Z",
+   "first_event_title": "BragJack attacks hijack AI browser agents through malicious extensions"
+  },
+  {
+   "id": "mathspace-discloses-data-breach-affecting-over-1-million-people",
+   "title": "Mathspace discloses data breach affecting over 1 million people",
+   "n_events": 5,
+   "last_seen": "2026-09-08T10:47:36Z",
+   "first_event_title": "Mathspace discloses data breach affecting over 1 million people"
+  }
+ ]
+}

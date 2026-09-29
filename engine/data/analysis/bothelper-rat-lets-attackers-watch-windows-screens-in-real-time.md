@@ -1,0 +1,5 @@
+Point Wild Threat Intelligence analyzed BotHelper RAT, a previously undocumented .NET malware that streams a victim's screen to attackers while running commands, downloading files, and maintaining persistence through a scheduled task that relaunches every 30 minutes. The infection starts with a 64-bit native stager that collects computer name, signed-in user, processor details, and installed memory, then downloads payload.bin from easyllms[.]xyz over HTTPS after disabling TLS certificate checks.
+
+The stager writes the decrypted executable to the temporary folder as msedge_proxy.exe and launches it without a visible window. The malware patches the Windows Antimalware Scan Interface (AMSI) and creates a hidden copy of itself. The new events from GBHackers and CyberPress describe the same malware family, confirming screen-streaming and persistent remote access capabilities without changing the core technical profile.
+
+What to watch: additional victim reports, any connection between easyllms[.]xyz and broader malware infrastructure, and whether Point Wild releases updated detection rules.
