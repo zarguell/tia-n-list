@@ -1,0 +1,3 @@
+Four EUVD entries (88569-88572) describe vulnerabilities in Ziroom ZHOME A0101, all rated 9.4/10 CVSS v3.1 and updated 2026-09-28. Each entry uses slightly different wording (flaw, vulnerability, was found, was determined) but points to the same product and vendor. The ENISA EUVD database does not provide a detailed vulnerability description in the event snippets, and no CVE mapping is listed.
+
+What to watch: whether the vendor publishes a consolidated security advisory, whether a common CVE is assigned to these entries, and whether the high CVSS score triggers broader scanning or exploitation attempts against exposed ZHOME A0101 devices.

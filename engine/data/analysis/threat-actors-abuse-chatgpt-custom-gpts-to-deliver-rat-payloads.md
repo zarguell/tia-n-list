@@ -1,0 +1,3 @@
+Huntress reports that attackers are abusing ChatGPT's Custom GPT feature to deliver malicious payloads through ClickFix-style attacks. The campaign lures victims using the legitimate ChatGPT domain, then redirects them to a ClickFix-style infection chain that delivers a remote access trojan. The method exploits user trust in a familiar AI brand and uses the platform's own customization tools as a delivery vector.
+
+The X update (x:2104720998800957855) confirms the same Huntress finding. What to watch: whether OpenAI tightens Custom GPT review or domain-bound execution controls, and whether similar abuse appears on other AI assistant platforms with customizable agent interfaces.

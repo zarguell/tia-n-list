@@ -1,0 +1,3 @@
+SafePay ransomware group leaked data stolen from Ryoumou Systems (Ryomo), including what appears to be a password list and 2FA backup codes. The new update from rocket-boys.co.jp describes a broader supply-chain impact: approximately 124,000 records from Daito Gas and 3,789 personal information entries from Isesaki City are at risk of exposure following the ransomware attack. The incident shows how a single service provider breach can propagate into municipal and utility customer data exposure.
+
+What to watch: whether Japanese regulators expand breach-notification obligations for supply-chain partners and whether the leaked 2FA backup codes trigger secondary account-takeover campaigns against Ryoumou customers.

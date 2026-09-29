@@ -1,0 +1,5 @@
+Infostealers steal cloud and AI credentials by extracting saved passwords, API keys, and session cookies from infected devices. Wiz research published September 25 found that Lumma C2, RedLine, and Vidar accounted for 85.7% of analyzed incidents. Among compromised secrets, 46% were AWS-related, 13% Google Cloud, roughly 10% GitHub, and 5% AI platforms, mainly OpenAI API keys. A stolen session cookie is particularly dangerous: it can replay an existing login and bypass fresh MFA prompts, giving attackers access without new authentication.
+
+The low-trust aggregator update (threadlinxs TL-2026-2757) repeats the claim about session cookies replaying past MFA to drain ChatGPT and Claude credits, but the primary source attribution was not independently verified at the named outlet. Without verified provenance, the event amplifies the existing story but does not add new fact.
+
+What to watch: whether AI session token theft moves from infostealer dumps into active account-hijacking campaigns, and whether vendors add cookie-binding or shorter session lifetimes to limit replay.
