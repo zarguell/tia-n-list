@@ -1,0 +1,1 @@
+The GitHub security advisory for Next.js, published by KarimPwnz, rates the vulnerability as Critical with a CVSS score of 9.5. It affects the Node.js ImageResponse implementation from next/og when attacker-controlled values reach SVG content, attributes, or styles. The advisory links to the related upstream Satori advisory GHSA-wx4j-mvgx-mqwp and lists the fix as version 16.3.6.
