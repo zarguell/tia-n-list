@@ -1,0 +1,3 @@
+Researchers have identified a new method to access private information stored in computer processors, reviving Spectre-style concerns for JIT engines, per The Register. The report links to a 2026-09-30 article about the Spectre bug returning to haunt JIT engines. No specific CVE, version, or vendor advisory is cited in the event content.
+
+This matters because processor-level information disclosure undermines isolation guarantees that browsers and sandboxed applications rely on. Watch for vendor patches or updated microcode guidance from Intel, AMD, or ARM. Confirm whether any public proof-of-concept exists and whether CISA or major vendors assign a CVE before treating this as an active exploitation risk.

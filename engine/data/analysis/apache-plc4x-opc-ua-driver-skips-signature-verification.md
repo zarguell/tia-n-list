@@ -1,0 +1,3 @@
+Apache PLC4X, the Apache Software Foundation protocol library, has two vulnerabilities tracked as CVE-2026-102508 and CVE-2026-102511. The OPC UA driver skips signature verification according to the event content, which references seclists.org. Both CVEs affect the same component.
+
+This is an industrial protocol library used in OT and ICS contexts. Signature verification failure in OPC UA undermines integrity and authentication for control-system communications. Watch for Apache software foundation patches specifying affected PLC4X versions and whether any ICS-CERT or CISA advisory links these CVEs to active exploitation in operational technology environments.
