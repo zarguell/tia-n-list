@@ -1,0 +1,1 @@
+Posted September 22, 2026 alongside the Chrome 154 promotion, this advisory updated the Extended Stable channel to 152.0.7977.140 for Windows and Mac. Enterprise fleets pinned two milestones back received their fixed build on the same day as the 108-fix promotion rather than with the September 29 point release.
