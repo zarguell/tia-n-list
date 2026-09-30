@@ -1,0 +1,1 @@
+NVD published the record for CVE-2026-92371, an improper link resolution flaw in the Cloud Session Recording functionality of TeamViewer Full Client and Host for Linux from V15.0 prior to V15.82, on Sep 29, 2026. A local authenticated attacker can exploit a race during path validation to cause privileged file operations in unintended locations, scored CVSS 3.1 7.0.
