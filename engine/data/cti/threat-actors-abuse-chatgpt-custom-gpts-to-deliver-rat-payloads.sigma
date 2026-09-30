@@ -1,0 +1,40 @@
+title: Custom GPT ClickFix RAT Install - Silent MSI or Signed Sideload Host From ProgramData Programs
+id: 6097dc39-46b0-4b5f-8ef4-b6a3119a19bf
+status: experimental
+description: 'Detects execution markers of the ChatGPT Custom GPT ClickFix RAT chain documented by Huntress: powershell.exe launching a silent msiexec install of the RAT MSI, or the Canon-signed COTFileReadApp.exe / Stardock-signed DeElevate64.exe sideload hosts running from %LOCALAPPDATA%\Programs (Advanced Printer Configuration Reader or Stardock Smart DeElevation Tool).'
+references:
+  - https://www.huntress.com/blog/chatgpt-custom-gpts-clickfix-rat
+  - https://www.securityweek.com/hackers-use-chatgpt-custom-gpts-in-clickfix-attacks/
+author: Tia N. List
+date: 2026-09-30
+tags:
+  - attack.execution
+  - attack.persistence
+  - attack.stealth
+  - attack.t1204
+  - attack.t1059
+  - attack.t1086
+  - attack.t1060
+  - attack.t1053
+  - attack.t1562
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection_psi_silent_msi:
+    ParentImage|endswith: '\powershell.exe'
+    Image|endswith: '\msiexec.exe'
+    CommandLine|contains|all:
+      - '/qn'
+      - '/norestart'
+  selection_sideload_host:
+    Image|contains: '\Programs\'
+    Image|endswith:
+      - '\COTFileReadApp.exe'
+      - '\DeElevate64.exe'
+  condition: selection_psi_silent_msi or selection_sideload_host
+falsepositives:
+  - Legitimate silent MSI deployments driven by administrative PowerShell wrappers
+  - Genuine Canon or Stardock software installed under a custom path containing Programs
+level: high
+
