@@ -1,0 +1,5 @@
+A new sample analysis dissects _index.js, a Shai-Hulud malware file that targets developer credentials. The sample is 5 MB, and the write-up publishes full fingerprints: MD5 bb3ed98dd2bfdc4d739525387657c40d, SHA-1 a32d571f187e764ff9222d4a61ebb57894597571, SHA-256 e1342a80d4b5e83d2c7c22e1e0aaa95f2d.
+
+The significance is the pattern, which the report calls a classic supply chain attack: malware that harvests developer credentials strikes at the layer that holds write access to source, build systems, and deployment pipelines. Credentials taken at that layer carry attacker reach into everything the developer can touch, which is why credential-targeting code keeps resurfacing under new names.
+
+What to watch: hunt build systems, developer workstations, and CI caches for the three published hashes rather than the filename, since _index.js is a ubiquitous name in JavaScript projects and a filename rule would drown in false positives. Track whether this sample correlates with earlier Shai-Hulud activity and whether new samples reuse the same code, which would indicate an ongoing operation rather than a one-off.
