@@ -1,0 +1,5 @@
+Proofpoint tracked a password-spraying campaign named UNK_CondorFiltration that targeted over 5,700 Microsoft 365 accounts across 28 tenants. The campaign breached seven forgotten service accounts that lacked multi-factor authentication. The attackers focused heavily on Chilean retail and financial organizations and abused the TeamFiltration offensive framework, originally built for legitimate Microsoft 365 testing.
+
+No CVEs are assigned; the risk is operational rather than a software vulnerability. The event content confirms concrete numbers: 5,700 accounts, 28 tenants, 7 breached service accounts, and geographic targeting of Chilean organizations. The framework's dual-use nature shows how legitimate security tools can be repurposed for account takeover at scale.
+
+Organizations should audit Microsoft 365 tenants for forgotten service accounts, enforce MFA on all accounts including service principals, and monitor for password-spraying patterns. The TeamFiltration framework's use highlights how offensive security tooling is being integrated into commodity account-compromise campaigns.
