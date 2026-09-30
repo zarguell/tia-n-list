@@ -1,0 +1,5 @@
+Recorded Future premiered an autonomous defense platform built into its product at Mastercard RiskX in Arizona. The vendor framing is that attackers already use AI to automate reconnaissance, stand up infrastructure, and pivot faster than analysts can triage, so defense needs to act at machine speed and pre-attack rather than react step by step.
+
+Both events in this story carry the same announcement text, and it stays at the marketing layer: no capability detail, no benchmarks, no named deployments, no detected campaigns attributed to the platform. As it stands this is a product launch, not a security event, and its intelligence value is low until independent material exists.
+
+Watch for concrete documentation of what the platform actually does autonomously (triage, enrichment, or active response), availability and pricing, and any customer or analyst validation of the machine-speed claims. If a real capability emerges, it belongs in a separate development on this story rather than in the announcement itself.

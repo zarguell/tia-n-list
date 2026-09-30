@@ -1,0 +1,5 @@
+CVE-2026-90882 is a CSRF flaw in Eclipse open-vsx.org, rated 9.3. The registry's CORS handling reflects any origin with credentials, so a page an attacker controls can read data belonging to a logged-in open-vsx.org user from the victim's browser.
+
+open-vsx.org is the Eclipse Foundation's open registry for VS Code-compatible extensions, which makes authenticated account data and publisher workflows the exposed surface. A reflected-origin CORS configuration combined with CSRF means cross-site requests ride the victim's session; the practical risk is account data disclosure and unauthorized actions performed as the user, with extension publishing the highest-impact action an attacker could reach through a publisher account.
+
+Watch for an Eclipse advisory with fixed versions and whether the credential-bearing reflection is closed server-side, not just documented. There is no evidence of exploitation in this listing, so treat it as a patching item for registry operators and self-hosted open-vsx deployments rather than an incident.

@@ -1,0 +1,5 @@
+Cloudflare plans to issue post-quantum TLS certificates, according to Ars Technica, as part of what the report describes as a major overhaul of the ecosystem for website authentication. A follow-up at ppc.land puts the target for Cloudflare's first quantum-safe web certificates at Q1 2027 and notes that sites on free ACME certificates may be migrated to a new issuer.
+
+The significance is less the certificates themselves than the migration mechanics. Certificate signatures moving to post-quantum algorithms touches roots, intermediates, and every client that validates a chain, and an issuer change for free ACME sites means trust stores, certificate pinning, and older TLS stacks all get exercised at once. Cloudflare's scale makes it a de facto rollout path for the rest of the web.
+
+Watch the Q1 2027 date slip or hold, how the new issuer is introduced into trust programs, and whether older clients or pinned connections break when free-tier sites start receiving post-quantum certificates. Also worth tracking: whether other CAs match the timeline or let Cloudflare absorb the early compatibility pain.
