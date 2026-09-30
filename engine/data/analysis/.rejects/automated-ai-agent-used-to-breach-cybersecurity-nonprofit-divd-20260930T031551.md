@@ -1,0 +1,5 @@
+The Dutch Institute for Vulnerability Disclosure (DIVD), a nonprofit of volunteer researchers, reported an AI-driven intrusion it described as "loud and very, very messy." The organization said the attack was carried out autonomously by an AI agent, representing a new modus operandi. DIVD launched an investigation, informed Dutch police, the Autoriteit Persoonsgegevens, and the National Cyber Security Center (NCSC). Evidence indicates a vulnerability was exploited, but the attack's purpose and impact remain unclear.
+
+This is one of the first reported cases of an agentic AI-powered breach against a cybersecurity nonprofit. The actor's automated behavior left substantial evidence, allowing reconstruction, but the organization emphasized the incident was serious. Full details were withheld to avoid influencing the investigation or exposing additional victims.
+
+Monitor DIVD and Dutch NCSC updates for confirmed vulnerability details and attacker attribution. The incident signals a shift toward autonomous AI agents in intrusion campaigns, increasing the need for automated behavioral detection rather than signature-based defense.
