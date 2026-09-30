@@ -1,0 +1,5 @@
+Signal released version 8.30, completing the rollout of encrypted backups across Android, iOS, Linux, macOS, and Windows. The feature supports Signal-hosted backups (45 days of media, 128 KB per message for free users; 100 GB for paid) and on-device local backups with no size limits. Both use end-to-end encryption with a recovery key; hosted backups add a daily-rotating supplemental key inside a Trusted Execution Environment for forward secrecy. Threat actors have already incorporated backup keys into targeting scope.
+
+This is a product update with security implications. The cross-platform backup format and key rotation reduce exposure, but the recovery key's value to attackers makes it a high-value target. Organizations depending on Signal should remind users to protect recovery keys as strongly as device passcodes, since the key decrypts all past backups it encrypted regardless of storage location.
+
+Watch for follow-on reporting on backup-targeting campaigns or Signal responding to threat-actor interest. No CVEs or exploitation claims accompany this release.
