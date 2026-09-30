@@ -1,0 +1,708 @@
+{
+ "date": "2026-09-30",
+ "decisions_path": "engine/data/triage/decisions-2026-09-30T0800.json",
+ "instructions": "For every new event decide: (1) keep or drop \u2014 keep only stories worth covering (real security events, vulnerabilities, attacks, breaches, advisories with substance); drop press releases, vendor marketing, generic explainers, and anything duplicating an existing story. (2) If keep, assign the event to the RIGHT story: an existing candidate story id if it belongs there (this FIXES mechanical clustering \u2014 e.g. different outlets' Patch Tuesday roundups are ONE story), or NEW with a clean story_title. (3) merges: list candidate stories that are really the same story (from = fragment, into = the most complete one). (4) For every kept event that names CVEs, optionally assess exploitation: exploited = the event reports OBSERVED in-the-wild exploitation (implants, victim counts, campaigns, CISA KEV confirmation); suspected = public exploit code/PoC or likely-but-unconfirmed. Attribute ONLY the CVEs you can tie to the claim \u2014 a bulletin's blanket 'actively exploited' does NOT flag all its CVEs. Omit the exploitation field when the event makes no claim.\n(5) LOW-TRUST events (\"low_trust\": true \u2014 AI-drafted aggregator reposts, late and overstated): treat as unverified leads. When the text attributes the claim to a named primary source (a researcher firm like watchTowr, a vendor advisory, CISA, a major outlet) and attribution_urls or a web search (/home/ubuntu/repos/cronman/bin/web-search.sh \"query\") locate that primary source CONFIRMING the claim, include a provenance object in the decision: {\"url\": <primary url>, \"source\": <domain>, \"evidence\": <one line>, \"verified\": true}. VERIFIED provenance lets the event mint a story (credited to the primary source) and count as a development; without it, a low-trust event can only attach to an EXISTING story, never mint. If you cannot verify, keep/drop on normal merit and omit provenance.\n\nWrite decisions as JSON with EXACTLY this shape:\n{\n  \"decisions\": [\n    {\"event_id\": \"<id>\", \"action\": \"keep\", \"story\": \"<existing candidate story id>\", \"reason\": \"...\"},\n    {\"event_id\": \"<id>\", \"action\": \"keep\", \"story\": \"NEW\", \"story_title\": \"<clean title>\", \"reason\": \"...\"},\n    {\"event_id\": \"<id>\", \"action\": \"drop\", \"reason\": \"...\"}\n  ],\n  \"merges\": [{\"from\": \"<fragment story id>\", \"into\": \"<canonical story id>\"}]\n}\nFor events marked \"low_trust\" (AI-drafted aggregator reposts) a decision\nmay carry an optional \"provenance\" object when you VERIFIED the claim at\nthe named primary source: {\"event_id\": ..., \"action\": \"keep\", ...}\n  \"provenance\": {\"url\": \"<primary source url>\", \"source\": \"<domain>\", \"evidence\": \"<one line>\"}\nOnly include provenance when the primary source (vendor advisory, CISA,\nthe named researcher/outlet) really carries the claim \u2014 verified\nprovenance lets a low-trust event mint a story and set freshness; without\nit the event can only amplify an existing story.\nSTRICT KEY NAMES: the array key is \"decisions\" (never \"events\"); the story\nkey is \"story\" (never \"story_id\"); \"story\" holds a candidate_stories id\nverbatim or the literal string \"NEW\". Optional per-event field\n\"exploitation\": {\"CVE-...\": {\"status\": \"exploited|suspected\", \"evidence\": \"1-2 sentences\"}}.",
+ "new_events": [
+  {
+   "id": "mf:165538",
+   "title": "Kubernetes Operators With Excessive Privileges Can Expose Secrets Across Entire Clusters",
+   "source": "cyberpress.org",
+   "published_at": "2026-09-30T06:57:30Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Kubernetes operators designed to automate routine cluster administration can become high-impact backdoors when their service accounts receive permissions far beyond operational requirements. Palo Alto Networks Unit 42 ha"
+  },
+  {
+   "id": "mf:165520",
+   "title": "High-Severity Vulnerabilities Patched in OpenSSL, WolfSSL",
+   "source": "securityweek.com",
+   "published_at": "2026-09-30T06:55:50Z",
+   "cves": [
+    "CVE-2026-84782",
+    "CVE-2026-84783"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "The developers of the OpenSSL and WolfSSL open source cryptographic libraries announced patches for roughly a dozen vulnerabilities each, including high-severity flaws. Of the 14 vulnerabilities fixed in OpenSSL , one ha"
+  },
+  {
+   "id": "mf:165528",
+   "title": "Storm-3068 Hijacks Azure DevOps Pipelines to Steal Kubernetes Credentials After Account Takeover",
+   "source": "gbhackers.com",
+   "published_at": "2026-09-30T06:38:15Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Microsoft has detailed a cloud-focused intrusion attributed to Storm-3068, in which attackers turned a compromised user account into a launch point for Azure DevOps abuse, Kubernetes credential theft, and potential acces"
+  },
+  {
+   "id": "mf:165537",
+   "title": "TeamFiltration Hackers Target 5,700 Microsoft 365 Accounts to Exploit Forgotten Service Accounts",
+   "source": "cyberpress.org",
+   "published_at": "2026-09-30T06:33:10Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Hackers using TeamFiltration targeted 5,714 Microsoft 365 accounts across 28 tenants, compromising seven forgotten service accounts in a campaign focused on Chilean organizations. Tracked the activity as UNK_CondorFiltra"
+  },
+  {
+   "id": "mf:165536",
+   "title": "Linux Kernel Out-of-Bounds Write Flaw Enables Local Privilege Escalation to Root",
+   "source": "cyberpress.org",
+   "published_at": "2026-09-30T06:28:19Z",
+   "cves": [
+    "CVE-2026-72018"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "A newly disclosed Linux kernel out-of-bounds write vulnerability, tracked as CVE-2026-72018, can be leveraged by a local attacker holding CAP_NET_ADMIN privileges to escalate to root. The flaw affects the DIBS loopback i"
+  },
+  {
+   "id": "mf:165535",
+   "title": "Storm-3068 Uses Azure DevOps Pipelines to Harvest Kubeconfig Credentials and Reach Kubernetes",
+   "source": "cyberpress.org",
+   "published_at": "2026-09-30T06:24:46Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "The attacker abused legitimate identity services, development tools, and trusted pipelines rather than relying on malware or software vulnerabilities. Microsoft\u2019s Detection and Response Team, known as DART , investigated"
+  },
+  {
+   "id": "mf:165527",
+   "title": "Unsloth Fixes Arbitrary Code Execution Flaw Triggered by Malicious Hugging Face Models",
+   "source": "gbhackers.com",
+   "published_at": "2026-09-30T06:22:18Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Unsloth has addressed a critical arbitrary code execution vulnerability in its Studio web interface. This flaw allowed a malicious Hugging Face model repository to execute attacker-controlled Python code simply by a user"
+  },
+  {
+   "id": "mf:165534",
+   "title": "RATHat Android Banking Trojan Uses Gemini AI and ADB Shell to Take Control of Devices",
+   "source": "cyberpress.org",
+   "published_at": "2026-09-30T06:17:02Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "RATHat, an Android banking trojan, combines Google Gemini AI with Android Debug Bridge (ADB) abuse to steal credentials and give attackers remote access. Its malicious application acts as an entry point, deploying a sepa"
+  },
+  {
+   "id": "mf:165533",
+   "title": "Critical Unsloth Studio Flaw Executes Malicious Code When Users Select Hugging Face Models",
+   "source": "cyberpress.org",
+   "published_at": "2026-09-30T06:06:46Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "A critical arbitrary code execution vulnerability in Unsloth Studio allowed malicious Hugging Face model repositories to run attacker-controlled Python code when a user merely selected a model in the interface. Unsloth f"
+  },
+  {
+   "id": "mf:165532",
+   "title": "Malware Hidden in Legitimate Software Can Steal Passwords, Cards and Crypto Wallets",
+   "source": "cyberpress.org",
+   "published_at": "2026-09-30T06:00:04Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "FortiGuard Incident Response researchers investigated an intrusion in which attackers concealed SectopRAT inside a legitimate software folder. The malware can steal passwords, saved payment cards, browser cookies, and cr"
+  },
+  {
+   "id": "mf:165526",
+   "title": "Android Malware Turns Gemini AI Into an Assistant for On-Device Attacks",
+   "source": "gbhackers.com",
+   "published_at": "2026-09-30T05:58:20Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "A newly documented Android banking trojan named RATHat is demonstrating how generative AI can be operationalized inside mobile malware. The threat uses Google Gemini models to navigate unfamiliar Android interfaces, whil"
+  },
+  {
+   "id": "mf:165531",
+   "title": "FBI and Dutch Police Arrest Alleged ShinyHunters Leader Linked to 140 Cyberattacks",
+   "source": "cyberpress.org",
+   "published_at": "2026-09-30T05:52:35Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "The FBI and Dutch National Police have announced the arrest of an alleged leader of the ShinyHunters cybercrime group , an extortion-focused threat actor network accused of compromising more than 140 organizations and co"
+  },
+  {
+   "id": "mf:165530",
+   "title": "OpenSSL Patches 14 Security Flaws Including High-Severity Memory Disclosure Bug",
+   "source": "cyberpress.org",
+   "published_at": "2026-09-30T05:36:17Z",
+   "cves": [
+    "CVE-2026-84782"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "OpenSSL has released security updates addressing 14 vulnerabilities across its TLS, DTLS, QUIC, X.509, CMP, and cryptographic implementations, including a high-severity out-of-bounds read that could disclose heap memory "
+  },
+  {
+   "id": "mf:165525",
+   "title": "SectopRAT Malware Hides in Legitimate Software to Steal Browser Credentials and Crypto Wallets",
+   "source": "gbhackers.com",
+   "published_at": "2026-09-30T05:33:58Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "A newly analyzed SectopRAT campaign demonstrates how threat actors can weaponize trusted application components to conceal a full-featured remote access trojan and steal high-value data. The investigation found no eviden"
+  },
+  {
+   "id": "mf:165524",
+   "title": "OpenAI Launches Codex Security Cloud for Always-On Application Security Scanning",
+   "source": "gbhackers.com",
+   "published_at": "2026-09-30T05:27:12Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "OpenAI has expanded its Codex platform with Codex Security Cloud, a cloud-hosted application security feature that continuously analyzes GitHub repositories, investigates potential vulnerabilities, and prepares remediati"
+  },
+  {
+   "id": "mf:165523",
+   "title": "OpenSSL High-Severity Flaw Lets Attackers Leak Heap Memory in Plaintext",
+   "source": "gbhackers.com",
+   "published_at": "2026-09-30T05:14:11Z",
+   "cves": [
+    "CVE-2026-84782"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "OpenSSL has announced a high-severity vulnerability in its Datagram Transport Layer Security (DTLS) implementation that could allow a remote peer to read unintended plaintext heap memory during handshake data transmissio"
+  },
+  {
+   "id": "mf:165529",
+   "title": "OpenAI Launches Codex Security Cloud as an Always-On Application Security Service",
+   "source": "cyberpress.org",
+   "published_at": "2026-09-30T05:09:56Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "OpenAI has expanded its Codex Security Cloud platform with always-on application security capabilities designed to continuously inspect source code, investigate vulnerabilities, and generate proposed remediation changes."
+  },
+  {
+   "id": "mf:165522",
+   "title": "FBI, Dutch Police Take Down Alleged ShinyHunters Cybercrime Group Leader",
+   "source": "gbhackers.com",
+   "published_at": "2026-09-30T05:03:36Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "The FBI and Dutch National Police have announced the arrest of a 24-year-old man from Amsterdam who is suspected of playing a major role in the ShinyHunters cybercrime group. This development marks a significant step for"
+  },
+  {
+   "id": "masto:117358227106056863",
+   "title": "I guardrail dell\u2019IA non bastano perch\u00e9 i filtri su input e output sono aggirabili e non sappiamo davvero come i modelli prendono decisioni. ",
+   "source": "www.twostepsforward.tech",
+   "published_at": "2026-09-30T05:00:31.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "I guardrail dell\u2019IA non bastano perch\u00e9 i filtri su input e output sono aggirabili e non sappiamo davvero come i modelli prendono decisioni.   via Mastodon https://www.twostepsforward.tech/p/why-ai-guardrails-dont-work "
+  },
+  {
+   "id": "masto:117358191353185272",
+   "title": "Et si votre plus grande faille \u00e9tait... un compte que vous avez oubli\u00e9 ? Les cybercriminels ne cherchent pas toujours une faille spectaculai",
+   "source": "librexpression.fr",
+   "published_at": "2026-09-30T04:51:24.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Et si votre plus grande faille \u00e9tait... un compte que vous avez oubli\u00e9 ? Les cybercriminels ne cherchent pas toujours une faille spectaculai  via Mastodon https://librexpression.fr/quand-les-cybercriminels-traquent-les-c"
+  }
+ ],
+ "candidate_stories": [
+  {
+   "id": "kubernetes-operators-with-excessive-privileges-can-expose-secret",
+   "title": "Kubernetes Operators With Excessive Privileges Can Expose Secrets Across Entire Clusters",
+   "n_events": 1,
+   "last_seen": "2026-09-30T06:57:30Z",
+   "first_event_title": "Kubernetes Operators With Excessive Privileges Can Expose Secrets Across Entire Clusters"
+  },
+  {
+   "id": "high-severity-vulnerabilities-patched-in-openssl-wolfssl",
+   "title": "High-Severity Vulnerabilities Patched in OpenSSL, WolfSSL",
+   "n_events": 3,
+   "last_seen": "2026-09-30T06:55:50Z",
+   "first_event_title": "High-Severity Vulnerabilities Patched in OpenSSL, WolfSSL"
+  },
+  {
+   "id": "dutch-police-arrest-reformed-hacker-in-shiny-hunters-investigati",
+   "title": "Dutch Police Arrest \u2018Reformed\u2019 Hacker in Shiny Hunters Investigation",
+   "n_events": 23,
+   "last_seen": "2026-09-30T06:40:38.000Z",
+   "first_event_title": "Dutch Police Arrest \u2018Reformed\u2019 Hacker in Shiny Hunters Investigation"
+  },
+  {
+   "id": "storm-3068-hijacks-azure-devops-pipelines-to-steal-kubernetes-cr",
+   "title": "Storm-3068 Hijacks Azure DevOps Pipelines to Steal Kubernetes Credentials After Account Takeover",
+   "n_events": 2,
+   "last_seen": "2026-09-30T06:38:15Z",
+   "first_event_title": "Storm-3068 Hijacks Azure DevOps Pipelines to Steal Kubernetes Credentials After Account Takeover"
+  },
+  {
+   "id": "teamfiltration-hackers-target-5-700-microsoft-365-accounts-to-ex",
+   "title": "TeamFiltration Hackers Target 5,700 Microsoft 365 Accounts to Exploit Forgotten Service Accounts",
+   "n_events": 1,
+   "last_seen": "2026-09-30T06:33:10Z",
+   "first_event_title": "TeamFiltration Hackers Target 5,700 Microsoft 365 Accounts to Exploit Forgotten Service Accounts"
+  },
+  {
+   "id": "four-linux-kernel-privilege-escalation-flaws-were-disclosed-with",
+   "title": "Four Linux kernel privilege escalation flaws were disclosed with public PoC exploits granting local root. Details and patches are now out. U",
+   "n_events": 7,
+   "last_seen": "2026-09-30T06:28:19Z",
+   "first_event_title": "Four Linux kernel privilege escalation flaws were disclosed with public PoC exploits granting local root. Details and patches are now out. U"
+  },
+  {
+   "id": "unsloth-fixes-arbitrary-code-execution-flaw-triggered-by-malicio",
+   "title": "Unsloth Fixes Arbitrary Code Execution Flaw Triggered by Malicious Hugging Face Models",
+   "n_events": 2,
+   "last_seen": "2026-09-30T06:22:18Z",
+   "first_event_title": "Unsloth Fixes Arbitrary Code Execution Flaw Triggered by Malicious Hugging Face Models"
+  },
+  {
+   "id": "vercel-fixed-a-critical-next-js-rce-vulnerability-in-image-gener",
+   "title": "Vercel fixed a critical Next.js RCE vulnerability in image generation. Update to patch this Next.js RCE vulnerability and secure your apps.",
+   "n_events": 7,
+   "last_seen": "2026-09-30T06:18:33Z",
+   "first_event_title": "Vercel fixed a critical Next.js RCE vulnerability in image generation. Update to patch this Next.js RCE vulnerability and secure your apps. "
+  },
+  {
+   "id": "rathat-android-banking-trojan-uses-gemini-ai-and-adb-shell-to-ta",
+   "title": "RATHat Android Banking Trojan Uses Gemini AI and ADB Shell to Take Control of Devices",
+   "n_events": 1,
+   "last_seen": "2026-09-30T06:17:02Z",
+   "first_event_title": "RATHat Android Banking Trojan Uses Gemini AI and ADB Shell to Take Control of Devices"
+  },
+  {
+   "id": "storm-3168-agentic-driven-cloud-attacks-using-compromised-servic",
+   "title": "Storm-3168: Agentic-driven cloud attacks using compromised service principals",
+   "n_events": 18,
+   "last_seen": "2026-09-30T06:12:57.000Z",
+   "first_event_title": "Storm-3168: Agentic-driven cloud attacks using compromised service principals"
+  },
+  {
+   "id": "pentagon-data-breach-exposes-ssns-and-military-records-of-over-3",
+   "title": "Pentagon Data Breach Exposes SSNs and Military Records of Over 3 Million People",
+   "n_events": 20,
+   "last_seen": "2026-09-30T06:12:40.000Z",
+   "first_event_title": "Pentagon Data Breach Exposes SSNs and Military Records of Over 3 Million People"
+  },
+  {
+   "id": "cve-2026-61852-chartbrew-authenticated-sql-injection-cvss-8-8",
+   "title": "CVE-2026-61852: Chartbrew authenticated SQL injection (CVSS 8.8)",
+   "n_events": 1,
+   "last_seen": "2026-09-30T06:10:01.494Z",
+   "first_event_title": "CVE-2026-61852 Chartbrew: authenticated SQLi via unvalidated row_limit in runQuery(), CVSS 8.8. Patch still under review, so restrict access"
+  },
+  {
+   "id": "cve-2026-103110-pexip-infinity-critical-out-of-bounds-write-cvss",
+   "title": "CVE-2026-103110: Pexip Infinity critical out-of-bounds write (CVSS 9.8)",
+   "n_events": 1,
+   "last_seen": "2026-09-30T06:00:23.000Z",
+   "first_event_title": "CVE-2026-103110: CRITICAL out-of-bounds write in Pexip Infinity (CVSS 9.8) allows remote code execution as unprivileged user. Versions https"
+  },
+  {
+   "id": "malware-hidden-in-legitimate-software-can-steal-passwords-cards",
+   "title": "Malware Hidden in Legitimate Software Can Steal Passwords, Cards and Crypto Wallets",
+   "n_events": 1,
+   "last_seen": "2026-09-30T06:00:04Z",
+   "first_event_title": "Malware Hidden in Legitimate Software Can Steal Passwords, Cards and Crypto Wallets"
+  },
+  {
+   "id": "android-malware-turns-gemini-ai-into-an-assistant-for-on-device",
+   "title": "Android Malware Turns Gemini AI Into an Assistant for On-Device Attacks",
+   "n_events": 1,
+   "last_seen": "2026-09-30T05:58:20Z",
+   "first_event_title": "Android Malware Turns Gemini AI Into an Assistant for On-Device Attacks"
+  },
+  {
+   "id": "fbi-dutch-police-take-down-alleged-shinyhunters-cybercrime-group",
+   "title": "FBI, Dutch Police Take Down Alleged ShinyHunters Cybercrime Group Leader",
+   "n_events": 2,
+   "last_seen": "2026-09-30T05:52:35Z",
+   "first_event_title": "FBI, Dutch Police Take Down Alleged ShinyHunters Cybercrime Group Leader"
+  },
+  {
+   "id": "sectoprat-malware-hides-in-legitimate-software-to-steal-browser",
+   "title": "SectopRAT Malware Hides in Legitimate Software to Steal Browser Credentials and Crypto Wallets",
+   "n_events": 1,
+   "last_seen": "2026-09-30T05:33:58Z",
+   "first_event_title": "SectopRAT Malware Hides in Legitimate Software to Steal Browser Credentials and Crypto Wallets"
+  },
+  {
+   "id": "openai-launches-codex-security-cloud-for-always-on-application-s",
+   "title": "OpenAI Launches Codex Security Cloud for Always-On Application Security Scanning",
+   "n_events": 2,
+   "last_seen": "2026-09-30T05:27:12Z",
+   "first_event_title": "OpenAI Launches Codex Security Cloud for Always-On Application Security Scanning"
+  },
+  {
+   "id": "euvd-2026-72498-score-8-8-10-cvss-v3-1-product-youtrack-vendor-j",
+   "title": "EUVD-2026-72498 \ud83d\udcca Score: 8.8/10 (CVSS v3.1) \ud83d\udce6 Product: YouTrack \ud83c\udfe2 Vendor: JetBrains \ud83d\udcc5 Published: 2026-09-07 | Updated: 2026-09-22 \ud83d\udcdd In Jet",
+   "n_events": 0,
+   "last_seen": "2026-09-30T05:01:08.154Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "euvd-2026-78826-score-5-3-10-cvss-v3-1-product-record-management",
+   "title": "EUVD-2026-78826 \ud83d\udcca Score: 5.3/10 (CVSS v3.1) \ud83d\udce6 Product: Record Management System \ud83c\udfe2 Vendor: code-projects \ud83d\udcc5 Published: 2026-09-15 | Updated:",
+   "n_events": 0,
+   "last_seen": "2026-09-30T05:01:06.049Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "cve-2026-61541-zapros-python-http-client-dos",
+   "title": "CVE-2026-61541: Zapros Python HTTP client DoS",
+   "n_events": 1,
+   "last_seen": "2026-09-30T04:40:08.196Z",
+   "first_event_title": "CVE-2026-61541: Zapros Python HTTP client DoS, CVSS 7.5. Malicious Content-Encoding chains exhaust resources. Fix under review for 0.14.0. P"
+  },
+  {
+   "id": "cve-2026-102911-zosmaai-pi-llm-wiki-critical-os-command-injectio",
+   "title": "CVE-2026-102911: zosmaai pi-llm-wiki critical OS command injection",
+   "n_events": 1,
+   "last_seen": "2026-09-30T04:30:24.000Z",
+   "first_event_title": "CVE-2026-102911: zosmaai pi-llm-wiki (v0.11.0 \u2013 0.11.7) suffers CRITICAL OS command injection in mcp/index.ts. Public exploit available \u2014 re"
+  },
+  {
+   "id": "lightllm-mass-disclosure-3-cves-including-cve-2026-103040-cvss-9",
+   "title": "LightLLM mass disclosure: 3 CVEs including CVE-2026-103040 (CVSS 9.8)",
+   "n_events": 1,
+   "last_seen": "2026-09-30T04:20:42.000Z",
+   "first_event_title": "\ud83d\udea8 LightLLM Mass Disclosure \u2014 3 CVEs, no patch CVE-2026-103040 (CVSS 9.8) \u2014 unauthenticated RCE, router profiler RPyC CVE-2026-103041 (CVSS 9"
+  },
+  {
+   "id": "euvd-2026-89574-anytool-vulnerability-cvss-6-9",
+   "title": "EUVD-2026-89574: AnyTool vulnerability (CVSS 6.9)",
+   "n_events": 1,
+   "last_seen": "2026-09-30T04:04:07.844Z",
+   "first_event_title": "\ud83d\udea8 EUVD-2026-89574 \ud83d\udcca Score: 6.9/10 (CVSS v3.1) \ud83d\udce6 Product: AnyTool \ud83c\udfe2 Vendor: HKUDS \ud83d\udcc5 Updated: 2026-09-30 \ud83d\udcdd A vulnerability was identified in H"
+  },
+  {
+   "id": "euvd-2026-89577-frontend-post-submission-manager-lite-vulnerabil",
+   "title": "EUVD-2026-89577: Frontend Post Submission Manager Lite vulnerability (CVSS 7.2)",
+   "n_events": 1,
+   "last_seen": "2026-09-30T04:04:06.048Z",
+   "first_event_title": "\ud83d\udea8 EUVD-2026-89577 \ud83d\udcca Score: 7.2/10 (CVSS v3.1) \ud83d\udce6 Product: Frontend Post Submission Manager Lite \u2013 Guest Post and Frontend Submission Forms \ud83c\udfe2 "
+  },
+  {
+   "id": "euvd-2026-89578-pexip-infinity-vulnerability-cvss-8-6",
+   "title": "EUVD-2026-89578: Pexip Infinity vulnerability (CVSS 8.6)",
+   "n_events": 1,
+   "last_seen": "2026-09-30T04:03:10.225Z",
+   "first_event_title": "\ud83d\udea8 EUVD-2026-89578 \ud83d\udcca Score: 8.6/10 (CVSS v3.1) \ud83d\udce6 Product: Infinity \ud83c\udfe2 Vendor: Pexip \ud83d\udcc5 Updated: 2026-09-30 \ud83d\udcdd Pexip Infinity before 41.0 is affe"
+  },
+  {
+   "id": "euvd-2026-89579-github-mcp-server-vulnerability-cvss-5-3",
+   "title": "EUVD-2026-89579: github-mcp-server vulnerability (CVSS 5.3)",
+   "n_events": 1,
+   "last_seen": "2026-09-30T04:03:09.821Z",
+   "first_event_title": "\ud83d\udea8 EUVD-2026-89579 \ud83d\udcca Score: 5.3/10 (CVSS v3.1) \ud83d\udce6 Product: github-mcp-server \ud83c\udfe2 Vendor: 0xshariq \ud83d\udcc5 Updated: 2026-09-30 \ud83d\udcdd A vulnerability was id"
+  },
+  {
+   "id": "apple-patches-coregraphics-out-of-bounds-write-cve-2026-86950",
+   "title": "Apple patches CoreGraphics out-of-bounds write CVE-2026-86950",
+   "n_events": 23,
+   "last_seen": "2026-09-30T03:50:37.000Z",
+   "first_event_title": "\ud83e\udd16 Apple patched CVE-2026-86950, an out-of-bounds write in CoreGraphics affecting older iOS/iPadOS/macOS versions. Processing a maliciously c"
+  },
+  {
+   "id": "cybersecurity-news-tips-across-the-fediverse-the-high-crime-of-l",
+   "title": "\ufe0f # Cybersecurity news & tips across the # fediverse \u201cThe High Crime Of 'LMAO': How Cops Are Treating Flock Mass Surveillance As A Joke web",
+   "n_events": 0,
+   "last_seen": "2026-09-30T03:29:21.000Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "which-area-of-cyber-would-be-best-for-transfer",
+   "title": "Which area of Cyber would be best for transfer?",
+   "n_events": 0,
+   "last_seen": "2026-09-30T03:16:09Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "cve-2026-89412-translatepress-wordpress-plugin-stored-xss",
+   "title": "CVE-2026-89412: TranslatePress WordPress plugin stored XSS",
+   "n_events": 1,
+   "last_seen": "2026-09-30T03:01:12.490Z",
+   "first_event_title": "CVE-2026-89412: Stored XSS in TranslatePress WordPress plugin up to 3.3.5. CVSS 7.2. Unauthenticated attackers can inject scripts via the Tr"
+  },
+  {
+   "id": "ziroom-zhome-a0101-critical-command-injection-cve-2026-101264-cv",
+   "title": "Ziroom ZHOME A0101 critical command injection CVE-2026-101264 (CVSS 9.4)",
+   "n_events": 7,
+   "last_seen": "2026-09-30T03:00:25.000Z",
+   "first_event_title": "Ziroom ZHOME A0101 v1.0.1.0 faces a CRITICAL (CVSS 9.4) command injection flaw (CVE-2026-101264) via /api/ZRnetwork/set_passwd. No patch, ve"
+  },
+  {
+   "id": "shinyhunters-claim-fbi-staff-psychiatric-and-medical-records-sto",
+   "title": "ShinyHunters claim FBI staff psychiatric and medical records stolen",
+   "n_events": 26,
+   "last_seen": "2026-09-30T02:41:28.892Z",
+   "first_event_title": "Reuters: ShinyHunters hackers say they stole psychiatric and medical records of FBI staff. \u201cFBI personnel data recently stolen by the ShinyH"
+  },
+  {
+   "id": "citrix-netscaler-unpatched-rce-zero-days",
+   "title": "Citrix NetScaler zero-days CVE-2026-88771-88778 patched after confirmed exploitation",
+   "n_events": 116,
+   "last_seen": "2026-09-30T02:21:06.000Z",
+   "first_event_title": "NetScaler alert: watchTowr says reports of unpatched remote code execution flaws in Citrix NetScaler are verified, and organisations are shu"
+  },
+  {
+   "id": "isc-stormcast-for-wednesday-september-30th-2026-https-isc-sans-e",
+   "title": "ISC Stormcast For Wednesday, September 30th, 2026 https://isc.sans.edu/podcastdetail/10116, (Wed, Sep 30th)",
+   "n_events": 1,
+   "last_seen": "2026-09-30T02:05:40Z",
+   "first_event_title": "ISC Stormcast For Wednesday, September 30th, 2026 https://isc.sans.edu/podcastdetail/10116, (Wed, Sep 30th)"
+  },
+  {
+   "id": "trump-says-top-tech-firms-have-signed-accord-to-self-police-ai-d",
+   "title": "Trump Says Top Tech Firms Have Signed Accord to \u2018Self-Police\u2019 AI Development",
+   "n_events": 0,
+   "last_seen": "2026-09-30T01:48:21Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "ctranslate2-cve-2026-102566-and-cve-2026-102567-memory-flaws-in-2",
+   "title": "CTranslate2 CVE-2026-102566 and CVE-2026-102567: Memory flaws in AI inference engine model loader",
+   "n_events": 2,
+   "last_seen": "2026-09-30T01:32:13.000Z",
+   "first_event_title": "A malicious model file is enough to corrupt memory in CTranslate2 \u2014 the inference engine behind... # ai # security # cybersecurity # vulnera"
+  },
+  {
+   "id": "cybersecurity-news-tips-across-the-fediverse-surveillance-404med",
+   "title": "\ufe0f # Cybersecurity news & tips across the # fediverse \u201c\u2317surveillance \u2317\ud83d\udcf9 \ud83d\ude05 404media\u2024co/doctor-doom-thanked-seattle-for-all-the-surveillance-c",
+   "n_events": 0,
+   "last_seen": "2026-09-30T01:29:23.000Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "data-breach-incident-targets-prisoner-medical-records-at-2-mass",
+   "title": "Data breach incident targets prisoner medical records at 2 Mass. jails",
+   "n_events": 1,
+   "last_seen": "2026-09-30T01:15:41Z",
+   "first_event_title": "Data breach incident targets prisoner medical records at 2 Mass. jails"
+  },
+  {
+   "id": "branch-target-reuse-practical-spectre-v2-attacks-in-jit-engines",
+   "title": "Branch Target Reuse: Practical Spectre-v2 Attacks in JIT Engines via Stale Branch Prediction Entries",
+   "n_events": 2,
+   "last_seen": "2026-09-30T01:08:05.956Z",
+   "first_event_title": "Branch Target Reuse: Practical Spectre-v2 Attacks in JIT Engines via Stale Branch Prediction Entries"
+  },
+  {
+   "id": "adobe-security-advisory-av26-808",
+   "title": "Adobe security advisory (AV26-808)",
+   "n_events": 2,
+   "last_seen": "2026-08-13T08:12:33Z",
+   "first_event_title": "Adobe security advisory (AV26-808)"
+  },
+  {
+   "id": "adobe-security-advisory-av26-888",
+   "title": "Adobe security advisory (AV26-888)",
+   "n_events": 3,
+   "last_seen": "2026-09-09T00:35:01.000Z",
+   "first_event_title": "Adobe security advisory (AV26-888)"
+  },
+  {
+   "id": "adobe-security-advisory-av26-953",
+   "title": "Adobe security advisory (AV26-953)",
+   "n_events": 1,
+   "last_seen": "2026-09-23T17:45:38Z",
+   "first_event_title": "Adobe security advisory (AV26-953)"
+  },
+  {
+   "id": "apple-security-advisory-av26-823",
+   "title": "Apple security advisory (AV26-823)",
+   "n_events": 1,
+   "last_seen": "2026-08-17T15:35:39Z",
+   "first_event_title": "Apple security advisory (AV26-823)"
+  },
+  {
+   "id": "commvault-security-advisory-av26-799",
+   "title": "Commvault security advisory (AV26-799)",
+   "n_events": 1,
+   "last_seen": "2026-08-11T17:46:10Z",
+   "first_event_title": "Commvault security advisory (AV26-799)"
+  },
+  {
+   "id": "control-systems-siemens-security-advisory-av26-890",
+   "title": "[Control Systems] Siemens security advisory (AV26-890)",
+   "n_events": 3,
+   "last_seen": "2026-09-23T08:01:13.000Z",
+   "first_event_title": "[Control Systems] Siemens security advisory (AV26-890)"
+  },
+  {
+   "id": "dell-security-advisory-av26-863",
+   "title": "Dell security advisory (AV26-863)",
+   "n_events": 2,
+   "last_seen": "2026-09-11T08:40:47.000Z",
+   "first_event_title": "Dell security advisory (AV26-863)"
+  },
+  {
+   "id": "dell-security-advisory-av26-959",
+   "title": "Dell security advisory (AV26-959)",
+   "n_events": 1,
+   "last_seen": "2026-09-23T19:20:39Z",
+   "first_event_title": "Dell security advisory (AV26-959)"
+  },
+  {
+   "id": "dell-security-advisory-av26-966",
+   "title": "Dell security advisory (AV26-966)",
+   "n_events": 1,
+   "last_seen": "2026-09-28T18:00:49Z",
+   "first_event_title": "Dell security advisory (AV26-966)"
+  },
+  {
+   "id": "erlang-security-advisory-av26-948",
+   "title": "Erlang security advisory (AV26-948)",
+   "n_events": 1,
+   "last_seen": "2026-09-22T18:25:40Z",
+   "first_event_title": "Erlang security advisory (AV26-948)"
+  },
+  {
+   "id": "freepbx-security-advisory-av26-818",
+   "title": "FreePBX security advisory (AV26-818)",
+   "n_events": 1,
+   "last_seen": "2026-08-14T16:10:48Z",
+   "first_event_title": "FreePBX security advisory (AV26-818)"
+  },
+  {
+   "id": "freepbx-security-advisory-av26-973",
+   "title": "FreePBX security advisory (AV26-973)",
+   "n_events": 0,
+   "last_seen": "2026-09-29T15:30:46Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "gitlab-security-advisory-av26-814",
+   "title": "GitLab security advisory (AV26-814)",
+   "n_events": 1,
+   "last_seen": "2026-08-13T14:00:38Z",
+   "first_event_title": "GitLab security advisory (AV26-814)"
+  },
+  {
+   "id": "google-security-advisory-av26-904",
+   "title": "Google security advisory (AV26-904)",
+   "n_events": 2,
+   "last_seen": "2026-09-09T20:49:30Z",
+   "first_event_title": "Google security advisory (AV26-904)"
+  },
+  {
+   "id": "grafana-security-advisory-av26-796",
+   "title": "Grafana security advisory (AV26-796)",
+   "n_events": 1,
+   "last_seen": "2026-08-11T13:30:40Z",
+   "first_event_title": "Grafana security advisory (AV26-796)"
+  },
+  {
+   "id": "grafana-security-advisory-av26-860",
+   "title": "Grafana Alloy Vulnerability CVE-2026-19516",
+   "n_events": 1,
+   "last_seen": "2026-08-28T15:10:44Z",
+   "first_event_title": "Grafana security advisory (AV26-860)"
+  },
+  {
+   "id": "hashicorp-security-advisory-av26-797",
+   "title": "HashiCorp security advisory (AV26-797)",
+   "n_events": 1,
+   "last_seen": "2026-08-11T14:05:42Z",
+   "first_event_title": "HashiCorp security advisory (AV26-797)"
+  },
+  {
+   "id": "hashicorp-security-advisory-av26-817",
+   "title": "HashiCorp security advisory (AV26-817)",
+   "n_events": 1,
+   "last_seen": "2026-08-14T16:05:44Z",
+   "first_event_title": "HashiCorp security advisory (AV26-817)"
+  },
+  {
+   "id": "hpe-security-advisory-av26-951",
+   "title": "HPE security advisory (AV26-951)",
+   "n_events": 0,
+   "last_seen": "2026-09-23T15:25:39Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "ibm-security-advisory-av26-967",
+   "title": "IBM security advisory (AV26-967)",
+   "n_events": 1,
+   "last_seen": "2026-09-28T18:25:42Z",
+   "first_event_title": "IBM security advisory (AV26-967)"
+  },
+  {
+   "id": "cifswitch-19-year-old-linux-kernel-privilege-escalation-gives-ro",
+   "title": "CIFSwitch \u2014 19-Year-Old Linux Kernel Privilege Escalation Gives Root on Multiple Distributions, PoC Published",
+   "n_events": 1,
+   "last_seen": "2026-05-31T00:00:00Z",
+   "first_event_title": "CIFSwitch \u2014 19-Year-Old Linux Kernel Privilege Escalation Gives Root on Multiple Distributions, PoC Published"
+  },
+  {
+   "id": "malicious-npm-package-pino-testkit-used-for-arbitrary-code-execu",
+   "title": "Malicious npm package pino-testkit used for arbitrary code execution",
+   "n_events": 1,
+   "last_seen": "2026-09-24T07:30:24.000Z",
+   "first_event_title": "CRITICAL: 'pino-testkit@10.4.5' (npm) is a malicious typosquatting package with obfuscated code enabling arbitrary code execution. Remove & "
+  },
+  {
+   "id": "cve-2026-43499-ghostlock-15-year-old-linux-kernel-flaw-enables-r",
+   "title": "CVE-2026-43499 \"GhostLock\": 15-Year-Old Linux Kernel Flaw Enables Root and Container Escape",
+   "n_events": 2,
+   "last_seen": "2026-07-10T00:00:00Z",
+   "first_event_title": "CVE-2026-43499 \"GhostLock\": 15-Year-Old Linux Kernel Flaw Enables Root and Container Escape"
+  },
+  {
+   "id": "exploit-code-published-for-two-linux-kernel-privilege-escalation",
+   "title": "Exploit Code Published for Two Linux Kernel Privilege Escalation Flaws \u2014 pedit-cow and DirtyClone",
+   "n_events": 1,
+   "last_seen": "2026-06-28T00:00:00Z",
+   "first_event_title": "Exploit Code Published for Two Linux Kernel Privilege Escalation Flaws \u2014 pedit-cow and DirtyClone"
+  },
+  {
+   "id": "700-openai-agents-coordinate-attack-on-hugging-face-and-gain-rem",
+   "title": "700 OpenAI Agents Coordinate Attack on Hugging Face and Gain Remote Code Execution",
+   "n_events": 26,
+   "last_seen": "2026-09-26T06:54:16Z",
+   "first_event_title": "700 OpenAI Agents Coordinate Attack on Hugging Face and Gain Remote Code Execution"
+  },
+  {
+   "id": "hugging-face-transformers-flaw-writes-attacker-controlled-python",
+   "title": "Hugging Face Transformers CVE-2026-80047 Allows Code Execution Before User Consent",
+   "n_events": 2,
+   "last_seen": "2026-09-02T08:25:23Z",
+   "first_event_title": "Hugging Face Transformers Flaw Writes Attacker-Controlled Python Code Before User Consent"
+  },
+  {
+   "id": "cve-2026-89761-high-7-8-in-the-linux-kernel-the-following-vulner",
+   "title": "CVE-2026-89761 - High (7.8) In the Linux kernel, the following vulnerability has been resolved: apparmor: fix out-of-bounds write when nul",
+   "n_events": 1,
+   "last_seen": "2026-09-13T08:00:11.547Z",
+   "first_event_title": "\ud83d\udfe0 CVE-2026-89761 - High (7.8) In the Linux kernel, the following vulnerability has been resolved: apparmor: fix out-of-bounds write when nul"
+  },
+  {
+   "id": "hackers-hijack-hotel-wi-fi-dns-to-steal-microsoft-365-accounts",
+   "title": "Hackers Hijack Hotel Wi-Fi DNS to Steal Microsoft 365 Accounts",
+   "n_events": 1,
+   "last_seen": "2026-07-25T00:00:00Z",
+   "first_event_title": "Hackers Hijack Hotel Wi-Fi DNS to Steal Microsoft 365 Accounts"
+  },
+  {
+   "id": "openclaw-novastealer-attacks-target-60-crypto-wallets-ssh-keys-a",
+   "title": "OpenClaw NovaStealer Attacks Target 60+ Crypto Wallets, SSH Keys and AWS Credentials",
+   "n_events": 2,
+   "last_seen": "2026-08-20T08:48:03Z",
+   "first_event_title": "OpenClaw NovaStealer Attacks Target 60+ Crypto Wallets, SSH Keys and AWS Credentials"
+  },
+  {
+   "id": "pamstealer-macos-infostealer-targets-crypto-wallets-and-steals-u",
+   "title": "PamStealer macOS Infostealer Targets Crypto Wallets and Steals User Credentials",
+   "n_events": 1,
+   "last_seen": "2026-09-23T09:24:00Z",
+   "first_event_title": "PamStealer macOS Infostealer Targets Crypto Wallets and Steals User Credentials"
+  }
+ ]
+}
