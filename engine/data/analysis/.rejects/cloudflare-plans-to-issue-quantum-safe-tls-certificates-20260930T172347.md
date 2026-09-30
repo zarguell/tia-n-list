@@ -1,0 +1,5 @@
+Cloudflare plans to issue TLS certificates that use post-quantum algorithms, according to Ars Technica. The move is framed as part of a major overhaul of the ecosystem for website authentication, extending the shift toward quantum-resistant cryptography from key exchange into the certificate hierarchy itself.
+
+This matters because certificates outlive the algorithms they carry. A certificate issued today on classical cryptography can remain in trust stores for years, so any data captured against it stays decryptable long after the issuing CA has moved on. If Cloudflare moves certificate issuance to quantum-safe signatures at scale, it drags a large share of the web's PKI along with it, since the same certificates serve millions of origin sites.
+
+Watch the timeline and the compatibility story: which algorithms Cloudflare selects, whether browsers and root programs accept them at default trust levels, and whether other CDNs and CAs follow. Setbacks in interoperability or a delayed rollout would be as telling as the announcement itself.
