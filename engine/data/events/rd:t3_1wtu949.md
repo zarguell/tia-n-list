@@ -1,0 +1,3 @@
+I'm wanting to move from Infrastructure to Cyber. I've done a bit of research and I'm thinking with my background I'll do the best in GRC, IAM or Cloud Security Engineering. I just wanted to get some real life opinions because I know it's not easy finding a job out there right now. If you have a few minutes to read over my experience and let me know which area of cyber I should do more in depth searching, learning etc... to be able to make this transfer I would really appreciate it. If you think there's a different certification or schooling I should look into that you think would improve my odds please let me know, I'm constantly studying. submitted by /u/River_806 [link] [comments]
+
+via reddit r/cybersecurity: Which area of Cyber would be best for transfer?
