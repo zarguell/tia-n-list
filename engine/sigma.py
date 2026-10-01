@@ -18,6 +18,7 @@ import os
 import re
 import shutil
 import subprocess
+import sys
 import uuid
 
 REQUIRED_KEYS = {"title", "id", "status", "description", "logsource", "detection",
@@ -25,7 +26,15 @@ REQUIRED_KEYS = {"title", "id", "status", "description", "logsource", "detection
 
 
 def _sigma_exe():
-    return shutil.which("sigma")
+    exe = shutil.which("sigma")
+    if exe:
+        return exe
+    # PATH-independent fallback: when ssg runs under the tia venv, sigma ships
+    # in the same bin/ as the interpreter (VPS has no /usr/local/bin/sigma).
+    candidate = os.path.join(os.path.dirname(os.path.abspath(sys.executable)), "sigma")
+    if os.path.isfile(candidate) and os.access(candidate, os.X_OK):
+        return candidate
+    return None
 
 
 def run_cli(args):
