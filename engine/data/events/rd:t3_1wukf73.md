@@ -1,0 +1,3 @@
+Hi everyone, i'm a 2nd year student in cybersecurity field and i decided to actually start learning binary exploitation (PWN), mostly for being able to solve CTFs,i need an actual and tested roadmap for mastering this type of CTFs, i looked all across youtube and found playlists like liveOverview and pwn.college , but i just feel like their explanation needs more explanation since i have no idea how to deal with assembly, gdb, and registers. My question is : should i just stick with one of these playlists or websites and finish their courses, or look for each topic and learn it like one by one (gdb, then C then assembly...) ? submitted by /u/Medreda_q [link] [comments]
+
+via reddit r/cybersecurity: Learning Binary Exploitation (PWN)
