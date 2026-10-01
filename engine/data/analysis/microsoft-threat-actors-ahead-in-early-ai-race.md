@@ -1,0 +1,5 @@
+Microsoft's 2026 Digital Defense Report says threat actors are outpacing defenders in the early AI race. Attackers are using AI to speed vulnerability discovery, malware development, and post-compromise activity, reducing the median weaponization window to well under 24 hours. Defenders face a multi-year spike in unpatched vulnerabilities because remediation is slower than AI-assisted discovery.
+
+Microsoft reports nation-state actors are already using AI in real-world operations: Chinese groups use AI for vulnerability search and exploitation, Russian actors use "vibe coding" and AI-generated tooling, and North Korean groups use AI for malware creation and persona development in fake-IT-worker campaigns. Less-sophisticated actors gain capabilities once reserved for advanced groups, including customized phishing and persistent attacks.
+
+The company warns the equilibrium will eventually shift, but for now attackers hold the advantage. Defenders must move sharply to close the gap, as AI allows unprecedented speed, scale, and customization while most campaigns still rely on human direction for target selection and complex decisions.
