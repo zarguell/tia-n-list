@@ -1,0 +1,1 @@
+Fortinet's Mar 2023 threat signal reported sustained exploitation of CVE-2021-35394, with daily counts exceeding 6,000 affected devices. The report links the vulnerability to active botnet campaigns including Moobot and confirms the arbitrary command injection in the MP Daemon binary remains a high-volume entry point for IoT malware.
