@@ -1,0 +1,1 @@
+CISA added both WordPress vulnerabilities to the Known Exploited Vulnerabilities catalog on 2026-07-21, four days after the fixes shipped. The batch-route RCE chain carried a remediation due date of 2026-07-24 and the SQL injection 2026-08-04, reflecting confirmed exploitation rather than theoretical risk.

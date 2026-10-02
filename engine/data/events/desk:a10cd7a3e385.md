@@ -1,0 +1,1 @@
+NVD published the record for a REST API batch endpoint route confusion issue that, combined with the author__not_in SQL injection (CVE-2026-60137), can achieve Remote Code Execution. Affected versions are 6.9.x before 6.9.5 and 7.0.x before 7.0.2. Base score is 9.8 (CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H).

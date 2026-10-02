@@ -1,0 +1,1 @@
+NVD published the record for insufficient sanitization of the author__not_in parameter in WP_Query, allowing SQL injection when a plugin or theme passes untrusted input to it. Affected versions are 6.8.x before 6.8.6, 6.9.x before 6.9.5, and 7.0.x before 7.0.2. Base score is 5.9 (CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:N).
