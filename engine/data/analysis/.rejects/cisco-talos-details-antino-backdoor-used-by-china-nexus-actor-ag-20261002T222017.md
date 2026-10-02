@@ -1,0 +1,5 @@
+Cisco Talos has published detail on Antino, a previously undocumented backdoor used by a China-nexus actor against government and policy organizations in Taiwan. The coverage captured in this story is headline-level, via The Hacker News: it establishes the tooling name, the attribution tier, and the victim set, and indicates the tradecraft involves Outlook, but the store does not yet hold the full Talos report contents.
+
+Taiwan government targeting by China-nexus actors is persistent background activity, so the significance here is a new detection name rather than a new campaign. New backdoor families produce usable detection content only after this kind of reporting, and organizations in Taiwan-adjacent or China-targeted sectors should pull the Talos report directly for indicators and hunt their Outlook and endpoint telemetry against them.
+
+Watch for the full report details to surface in the store: initial access vector, persistence mechanism, command and control infrastructure, victim count, and whether Antino appears outside Taiwan or outside government targets, which would indicate the tooling is being shared across actors.
