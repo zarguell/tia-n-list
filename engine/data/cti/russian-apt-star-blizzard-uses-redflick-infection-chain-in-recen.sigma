@@ -1,0 +1,80 @@
+title: Star Blizzard RedFlick Scheduled Task Installation
+id: 70a2af5b-b4df-4985-9d3a-77deb6839f1a
+status: experimental
+description: >
+    Detects process command lines that create or query the scheduled task
+    names installed by the Star Blizzard RedFlick infection chain to stage
+    and run the CosmicPulse Python backdoor (Microsoft Threat Intelligence,
+    September 2026): "Internet Quality Test Connection" (collects host and
+    user name, can run a remote DLL), "Network Configuration Manager"
+    (prepares WebDAV for remote file-style paths) and "System Health
+    Monitor" (launches control.exe), plus the SecureDNSObserver task
+    documented in the earlier Ukraine Recovery Conference lure chain.
+    RedFlick is delivered by a password-protected ZIP/RAR containing a VHDX
+    and an LNK disguised as a PDF after a single user interaction.
+references:
+    - https://www.microsoft.com/en-us/security/blog/2026/09/29/star-blizzard-refines-phishing-and-malware-delivery-with-the-redflick-technique/
+    - https://www.bleepingcomputer.com/news/security/russian-state-hackers-use-new-redflick-technique-to-push-malware/
+    - https://dslua.org/publications/spearphishing-via-fake-urc-2026-invitations-targets-ukrainian-csos/
+author: Tia N. List
+date: 2026/10/02
+tags:
+    - attack.t1566
+    - attack.t1204
+    - attack.t1059
+    - attack.t1053
+    - attack.t1105
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_process:
+        Image|endswith:
+            - '\schtasks.exe'
+            - '\powershell.exe'
+            - '\pwsh.exe'
+            - '\cmd.exe'
+    selection_taskname:
+        CommandLine|contains:
+            - 'Internet Quality Test Connection'
+            - 'Network Configuration Manager'
+            - 'System Health Monitor'
+            - 'SecureDNSObserver'
+    condition: selection_process and selection_taskname
+falsepositives:
+    - Enterprise maintenance tooling that registers tasks with these generic names
+    - Administrators querying or troubleshooting the same task names
+level: medium
+---
+title: Star Blizzard RedFlick Infrastructure Beaconing
+id: b4a27d1e-0c39-47a6-9d10-2e5f5c8a91d7
+status: experimental
+description: >
+    Detects network connections to infrastructure documented for the Star
+    Blizzard RedFlick chain: C2 address 103.245.213.217 reported by
+    Microsoft Threat Intelligence, WebDAV delivery host 89.125.66.183 and
+    remote command source 103.160.59.97 from the earlier Ukraine Recovery
+    Conference lure chain, and the secure-dns-hub.com remote command domain.
+references:
+    - https://www.microsoft.com/en-us/security/blog/2026/09/29/star-blizzard-refines-phishing-and-malware-delivery-with-the-redflick-technique/
+    - https://dslua.org/publications/spearphishing-via-fake-urc-2026-invitations-targets-ukrainian-csos/
+author: Tia N. List
+date: 2026/10/02
+tags:
+    - attack.t1566
+    - attack.t1105
+logsource:
+    category: network_connection
+    product: windows
+detection:
+    selection_ip:
+        DestinationIp:
+            - 103.245.213.217
+            - 89.125.66.183
+            - 103.160.59.97
+    selection_host:
+        DestinationHostname|endswith: 'secure-dns-hub.com'
+    condition: 1 of selection_*
+falsepositives:
+    - None known; the addresses and domain are documented Star Blizzard infrastructure
+level: high
