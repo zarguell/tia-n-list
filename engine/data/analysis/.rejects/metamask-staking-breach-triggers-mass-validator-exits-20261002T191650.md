@@ -1,0 +1,5 @@
+MetaMask disclosed a security incident in its infrastructure affecting its Ethereum staking service. The disclosure prompted a wave of validator exits as stakers rushed to unwind positions tied to the affected system. Reporting ties the disclosure to BleepingComputer's coverage of the infrastructure compromise.
+
+The story matters because MetaMask staking sits between a large retail user base and third-party staking infrastructure. Any compromise of that layer raises questions about validator key custody, reward flow integrity, and whether attacker access could have redirected withdrawals or signatures. Mass validator exits are the visible symptom; the unanswered question is what the attacker actually reached.
+
+Watch for MetaMask's post-incident detail: which components were touched, whether signing keys or only operational systems were exposed, user fund losses if any, and how quickly validators restaked. Also note whether the incident draws scrutiny to how consensys-vetted staking partners isolate their infrastructure.

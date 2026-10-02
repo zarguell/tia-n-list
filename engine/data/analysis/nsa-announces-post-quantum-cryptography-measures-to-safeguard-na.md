@@ -1,0 +1,5 @@
+The NSA announced post-quantum cryptography measures for National Security Systems, with reporting indicating all government software systems designated NSS, including telecom, weapons systems, and intelligence platforms, will be required to support post-quantum cryptography starting in 2027. Reddit discussion framed the announcement as a marked acceleration from the prior CNSA 2.0 timeline.
+
+The date matters because it is more aggressive than the 2029-2030 targets publicized by Cloudflare, Google, and Microsoft for their own PQC migrations. When the NSA shortens its own migration window, the usual read is that its risk assessment of quantum progress, or of harvest-now-decrypt-later collection, has worsened. NSS vendors with long procurement cycles now have materially less runway.
+
+Watch for the formal directive text and which algorithm suites are mandated, whether CISA issues parallel guidance for critical infrastructure, and whether defense contractors begin advertising CNSA 2.0 compliance on accelerated schedules. Vendors selling into NSS should treat 2027 as a contractual deadline, not a target.
