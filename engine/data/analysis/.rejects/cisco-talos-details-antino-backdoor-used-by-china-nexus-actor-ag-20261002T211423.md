@@ -1,0 +1,5 @@
+Cisco Talos has detailed Antino, a previously undocumented backdoor used by a China-nexus actor against government and policy organizations, including targets in Taiwan. The public writeup's title indicates the intrusion chain leans on Outlook, consistent with the mailbox and endpoint footholds Chinese espionage crews favor for policy-focused espionage.
+
+A previously undocumented implant attributed to a China-nexus actor and aimed at government and policy institutions matters because those organizations hold the material such actors prize: policy drafts, diplomatic correspondence, and inter-agency traffic. Taiwan-focused targeting has been a reliable bellwether for broader regional campaigns, and tooling that appears in Taiwan government networks tends to show up elsewhere within months.
+
+Worth watching: Talos's IOC release and detection guidance, whether additional victims outside Taiwan are identified, and whether the Outlook component implies exploited mail infrastructure or simple credential abuse. Government and policy organizations in the Indo-Pacific should hunt for the reported indicators now rather than waiting for second-hand coverage.

@@ -1,0 +1,5 @@
+404 Media reports that a leaked video suggests GrayKey, the mobile forensic toolkit used by law enforcement, can defeat the iPhone automatic inactivity reboot. That iOS behavior randomly reboots locked devices that have not been unlocked, a measure meant to push phones into a state that resists forensic extraction. The video, per the report, shows officers gaining access to locked phones despite the reboot protection.
+
+The post also references GrayKey Preserve and Evidence Preservation, features built to hold a device in an accessible state before it can reboot itself. If the leaked footage is authentic, the practical window for phone extraction is wider than agencies have publicly acknowledged, and the inactivity reboot offers less protection than assumed.
+
+Worth watching: independent confirmation of the video's provenance, whether Grayshift or Magnet Forensics comments on the capability, and any Apple response in a future iOS update. Buyers of iOS security should treat the inactivity reboot as a speed bump, not a hard control, until vendors state otherwise.
