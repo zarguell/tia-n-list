@@ -1,0 +1,5 @@
+The City of Vicksburg, Mississippi shut down its computer systems after a ransomware attack. Mayor Willis Thompson told The Vicksburg Post that the city had disconnected its internet operations in response. The shutdown potentially delays in-person utility payments, while emergency response and utility services continue operating.
+
+This is a small municipal incident, the kind that rarely draws attention but follows a now-familiar pattern: city government hit, systems isolated, cash payments disrupted, services otherwise maintained. Municipalities are persistent targets because they often run flat networks with limited security staff, and utility payment systems are the usual collateral damage.
+
+The reporting so far, via DataBreaches.net, covers containment but not scope. Worth watching: when systems come back online, whether the attackers exfiltrated data before encryption, whether a ransomware group claims the attack on a leak site, and whether the city discloses a breach of resident records.
