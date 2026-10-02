@@ -1,0 +1,1 @@
+Recently I have had a number of conversations with people regarding new features in Cwtch, one common thread throughout nearly all of them was the need to explain the concept of a bad "insecurity"-button

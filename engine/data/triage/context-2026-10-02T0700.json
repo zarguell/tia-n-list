@@ -1,0 +1,486 @@
+{
+ "date": "2026-10-02",
+ "decisions_path": "engine/data/triage/decisions-2026-10-02T0700.json",
+ "instructions": "For every new event decide: (1) keep or drop \u2014 keep only stories worth covering (real security events, vulnerabilities, attacks, breaches, advisories with substance); drop press releases, vendor marketing, generic explainers, and anything duplicating an existing story. (2) If keep, assign the event to the RIGHT story: an existing candidate story id if it belongs there (this FIXES mechanical clustering \u2014 e.g. different outlets' Patch Tuesday roundups are ONE story), or NEW with a clean story_title. (3) merges: list candidate stories that are really the same story (from = fragment, into = the most complete one). (4) For every kept event that names CVEs, optionally assess exploitation: exploited = the event reports OBSERVED in-the-wild exploitation (implants, victim counts, campaigns, CISA KEV confirmation); suspected = public exploit code/PoC or likely-but-unconfirmed. Attribute ONLY the CVEs you can tie to the claim \u2014 a bulletin's blanket 'actively exploited' does NOT flag all its CVEs. Omit the exploitation field when the event makes no claim.\n(5) LOW-TRUST events (\"low_trust\": true \u2014 AI-drafted aggregator reposts, late and overstated): treat as unverified leads. When the text attributes the claim to a named primary source (a researcher firm like watchTowr, a vendor advisory, CISA, a major outlet) and attribution_urls or a web search (/home/ubuntu/repos/cronman/bin/web-search.sh \"query\") locate that primary source CONFIRMING the claim, include a provenance object in the decision: {\"url\": <primary url>, \"source\": <domain>, \"evidence\": <one line>, \"verified\": true}. VERIFIED provenance lets the event mint a story (credited to the primary source) and count as a development; without it, a low-trust event can only attach to an EXISTING story, never mint. If you cannot verify, keep/drop on normal merit and omit provenance.\n\nWrite decisions as JSON with EXACTLY this shape:\n{\n  \"decisions\": [\n    {\"event_id\": \"<id>\", \"action\": \"keep\", \"story\": \"<existing candidate story id>\", \"reason\": \"...\"},\n    {\"event_id\": \"<id>\", \"action\": \"keep\", \"story\": \"NEW\", \"story_title\": \"<clean title>\", \"reason\": \"...\"},\n    {\"event_id\": \"<id>\", \"action\": \"drop\", \"reason\": \"...\"}\n  ],\n  \"merges\": [{\"from\": \"<fragment story id>\", \"into\": \"<canonical story id>\"}]\n}\nFor events marked \"low_trust\" (AI-drafted aggregator reposts) a decision\nmay carry an optional \"provenance\" object when you VERIFIED the claim at\nthe named primary source: {\"event_id\": ..., \"action\": \"keep\", ...}\n  \"provenance\": {\"url\": \"<primary source url>\", \"source\": \"<domain>\", \"evidence\": \"<one line>\"}\nOnly include provenance when the primary source (vendor advisory, CISA,\nthe named researcher/outlet) really carries the claim \u2014 verified\nprovenance lets a low-trust event mint a story and set freshness; without\nit the event can only amplify an existing story.\nSTRICT KEY NAMES: the array key is \"decisions\" (never \"events\"); the story\nkey is \"story\" (never \"story_id\"); \"story\" holds a candidate_stories id\nverbatim or the literal string \"NEW\". Optional per-event field\n\"exploitation\": {\"CVE-...\": {\"status\": \"exploited|suspected\", \"evidence\": \"1-2 sentences\"}}.",
+ "new_events": [
+  {
+   "id": "rss:f1990a2430cf65b4",
+   "title": "16-Year-Old Suspected KillSec Ransomware Leader Arrested in International Operation",
+   "source": "gbhackers.com",
+   "published_at": "2026-10-02T06:17:08Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "International law enforcement authorities have arrested three suspects linked to the KillSec ransomware group, including a 16-year-old who is alleged to be the operation\u2019s administrator and primary operator. This coordin"
+  },
+  {
+   "id": "rss:d1c2567b65bc0585",
+   "title": "Tren de Aragua ATM Jackpotting Network Linked to $40.7 Million in U.S. Losses",
+   "source": "gbhackers.com",
+   "published_at": "2026-10-02T06:14:41Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "The U.S. Treasury Department has sanctioned a Tren de Aragua (TdA)-linked financial network accused of using malware-driven ATM jackpotting attacks to steal an estimated $40.73 million from U.S. financial institutions. T"
+  },
+  {
+   "id": "rss:8ebf2280d8841989",
+   "title": "FTC Investigates OpenAI and Anthropic Over Consumer Risks From Advanced AI Models",
+   "source": "gbhackers.com",
+   "published_at": "2026-10-02T06:07:22Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "The U.S. Federal Trade Commission (FTC) has initiated a broad investigation into OpenAI, Anthropic, and other leading artificial intelligence developers to examine potential consumer harm arising from advanced AI systems"
+  },
+  {
+   "id": "masto:117367190339009961",
+   "title": "\ud83e\udd16 Operation KillSwitch: Spanish police arrested a 16-year-old suspected of running the KillSec ransomware group. Three arrests on Sept 30; l",
+   "source": "www.bleepingcomputer.com",
+   "published_at": "2026-10-01T18:59:59.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "\ud83e\udd16 Operation KillSwitch: Spanish police arrested a 16-year-old suspected of running the KillSec ransomware group. Three arrests on Sept 30; l  via Mastodon https://www.bleepingcomputer.com/news/security/police-dismantle-k"
+  },
+  {
+   "id": "masto:117367397758410789",
+   "title": "https://www. europesays.com/unitedstates/68 91/ Cyberattacks, Tariffs, Geopolitics Loom Over Business Executives # ArtificialIntelligence # ",
+   "source": "www.europesays.com",
+   "published_at": "2026-10-01T18:59:02.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "https://www. europesays.com/unitedstates/68 91/ Cyberattacks, Tariffs, Geopolitics Loom Over Business Executives # ArtificialIntelligence #   via Mastodon https://www.europesays.com/unitedstates/6891/ "
+  }
+ ],
+ "candidate_stories": [
+  {
+   "id": "16-year-old-suspected-killsec-ransomware-leader-arrested-in-inte",
+   "title": "16-Year-Old Suspected KillSec Ransomware Leader Arrested in International Operation",
+   "n_events": 1,
+   "last_seen": "2026-10-02T06:17:08Z",
+   "first_event_title": "16-Year-Old Suspected KillSec Ransomware Leader Arrested in International Operation"
+  },
+  {
+   "id": "tren-de-aragua-atm-jackpotting-network-linked-to-40-7-million-in",
+   "title": "Tren de Aragua ATM Jackpotting Network Linked to $40.7 Million in U.S. Losses",
+   "n_events": 1,
+   "last_seen": "2026-10-02T06:14:41Z",
+   "first_event_title": "Tren de Aragua ATM Jackpotting Network Linked to $40.7 Million in U.S. Losses"
+  },
+  {
+   "id": "ftc-investigates-openai-and-anthropic-over-consumer-risks-from-a",
+   "title": "FTC Investigates OpenAI and Anthropic Over Consumer Risks From Advanced AI Models",
+   "n_events": 1,
+   "last_seen": "2026-10-02T06:07:22Z",
+   "first_event_title": "FTC Investigates OpenAI and Anthropic Over Consumer Risks From Advanced AI Models"
+  },
+  {
+   "id": "python-infostealer-targets-17-browsers-to-steal-passwords-cards",
+   "title": "Python Infostealer Targets 17 Browsers to Steal Passwords, Cards and Session Cookies",
+   "n_events": 2,
+   "last_seen": "2026-10-02T05:54:24Z",
+   "first_event_title": "Python Infostealer Targets 17 Browsers to Steal Passwords, Cards and Session Cookies"
+  },
+  {
+   "id": "fortinet-warns-of-critical-fortimail-flaw-exploited-in-zero-day",
+   "title": "Fortinet warns of critical FortiMail flaw exploited in zero-day attacks",
+   "n_events": 6,
+   "last_seen": "2026-10-02T05:14:47Z",
+   "first_event_title": "Fortinet warns of critical FortiMail flaw exploited in zero-day attacks"
+  },
+  {
+   "id": "apache-http-server-flaws-enable-remote-code-execution-and-denial",
+   "title": "Apache HTTP Server Flaws Enable Remote Code Execution and Denial-of-Service Attacks",
+   "n_events": 1,
+   "last_seen": "2026-10-02T05:01:20Z",
+   "first_event_title": "Apache HTTP Server Flaws Enable Remote Code Execution and Denial-of-Service Attacks"
+  },
+  {
+   "id": "u-s-arrests-company-owner-accused-of-shipping-300-million-in-res",
+   "title": "U.S. Arrests Company Owner Accused of Shipping $300 Million in Restricted GPU Servers to China",
+   "n_events": 1,
+   "last_seen": "2026-10-02T04:55:17Z",
+   "first_event_title": "U.S. Arrests Company Owner Accused of Shipping $300 Million in Restricted GPU Servers to China"
+  },
+  {
+   "id": "a-good-write-up-on-what-happens-when-an-ai-agent-gets-real-acces",
+   "title": "A good write-up on what happens when an AI agent gets real access to a homelab",
+   "n_events": 0,
+   "last_seen": "2026-10-02T03:03:08Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "autonomous-ai-agent-breached-organization-using-two-zammad-zero",
+   "title": "Autonomous AI Agent Breached Organization Using Two Zammad Zero-Days",
+   "n_events": 2,
+   "last_seen": "2026-10-02T02:45:40.000Z",
+   "first_event_title": "https:// undercodenews.com/autonomous-a i-agent-breached-cybersecurity-organization-using-two-zammad-zero-days-a-new-ai-driven-attacks-emerg"
+  },
+  {
+   "id": "cve-2026-89422-erlang-otp-ssl-tls-1-3-client-auth-bypass-cvss-10",
+   "title": "CVE-2026-89422: Erlang/OTP SSL TLS 1.3 Client Auth Bypass (CVSS 10)",
+   "n_events": 1,
+   "last_seen": "2026-10-02T02:40:44.655Z",
+   "first_event_title": "CVE-2026-89422: Erlang/OTP ssl TLS 1.3 client auth bypass. Malicious server impersonates any host, no cert required. CVSS 10. Patch under re"
+  },
+  {
+   "id": "isc-stormcast-for-friday-october-2nd-2026-https-isc-sans-edu-pod",
+   "title": "ISC Stormcast For Friday, October 2nd, 2026 https://isc.sans.edu/podcastdetail/10120, (Fri, Oct 2nd)",
+   "n_events": 0,
+   "last_seen": "2026-10-02T02:05:44Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "euvd-2026-78826-score-5-3-10-cvss-v3-1-product-record-management",
+   "title": "EUVD-2026-78826 \ud83d\udcca Score: 5.3/10 (CVSS v3.1) \ud83d\udce6 Product: Record Management System \ud83c\udfe2 Vendor: code-projects \ud83d\udcc5 Published: 2026-09-15 | Updated:",
+   "n_events": 0,
+   "last_seen": "2026-10-02T02:01:06.472Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "eu-s-cyber-resilience-act-starts-the-24-hour-vulnerability-clock",
+   "title": "EU Cyber Resilience Act 24-Hour Vulnerability Disclosure Takes Effect",
+   "n_events": 2,
+   "last_seen": "2026-10-02T01:47:37.000Z",
+   "first_event_title": "EU's Cyber Resilience Act starts the 24-hour vulnerability clock Manufacturers must now disclose actively exploited flaws and severe securit"
+  },
+  {
+   "id": "red-hat-directory-server-11-cve-2026-86345-cvss-9-ldap-injection",
+   "title": "Red Hat Directory Server 11: CVE-2026-86345 (CVSS 9) LDAP Injection Post-StartTLS",
+   "n_events": 1,
+   "last_seen": "2026-10-02T01:30:27.000Z",
+   "first_event_title": "Red Hat Directory Server 11: CVE-2026-86345 (CRITICAL, CVSS 9) allows on-path attackers to inject LDAP messages post-StartTLS, risking auth "
+  },
+  {
+   "id": "click2shell-wordpress-theme-install-flaw-leads-to-server-code-ex",
+   "title": "Click2Shell: WordPress Theme-Install Flaw Leads to Server Code Execution",
+   "n_events": 1,
+   "last_seen": "2026-10-02T01:15:48.000Z",
+   "first_event_title": "Click2Shell: A WordPress Theme-Install Flaw That Turns One Admin Click Into Server Code Execution If your organisation runs a website, there"
+  },
+  {
+   "id": "killsec-ransomware-group-disrupted-in-international-law-enforcem",
+   "title": "KillSec ransomware group disrupted in international law enforcement operation",
+   "n_events": 14,
+   "last_seen": "2026-10-02T01:00:01.000Z",
+   "first_event_title": "\ud83c\udf7e Cybercrime: Computer network used by ransomware group dismantled in coordinated international operation \u2b07\ufe0f Bern, 01.10.2026 \u2014 On 30 Septem"
+  },
+  {
+   "id": "dragonforce-ransomware-abuses-microsoft-teams-turn-relays-for-st",
+   "title": "DragonForce Ransomware Abuses Microsoft Teams TURN Relays for Stealth C2 \u2014 Backdoor.Turn Malware",
+   "n_events": 2,
+   "last_seen": "2026-10-02T00:25:47.354Z",
+   "first_event_title": "DragonForce Ransomware Abuses Microsoft Teams TURN Relays for Stealth C2 \u2014 Backdoor.Turn Malware"
+  },
+  {
+   "id": "storm-ransomware-lists-us-healthcare-provider-west-county-health",
+   "title": "Storm ransomware lists US healthcare provider West County Health Centers as victim",
+   "n_events": 2,
+   "last_seen": "2026-10-02T00:05:53Z",
+   "first_event_title": "Another day, another ransomware crook. US: West County Health Centers https:// ransomware.live/id/V2VzdCBDb3V udHkgSGVhbHRoIENlbnRlcnNAU3Rvc"
+  },
+  {
+   "id": "akira-ransomware-group-claims-stransky-heiz-mess-regeltechnik-gm",
+   "title": "Akira Ransomware Group Claims Stransky Heiz-Mess-Regeltechnik GmbH",
+   "n_events": 3,
+   "last_seen": "2026-10-02T00:05:51Z",
+   "first_event_title": "\ud83d\udea8New ransom group blog posts!\ud83d\udea8 Group name: akira Post title: Stransky Heiz-Mess-Regeltechnik GmbH Info: https:// cti.fyi/groups/akira.html G"
+  },
+  {
+   "id": "chaos-ransomware-targets-park-dental",
+   "title": "Chaos Ransomware Targets Park Dental",
+   "n_events": 1,
+   "last_seen": "2026-10-02T00:05:49Z",
+   "first_event_title": "Chaos Ransomware Targets Park Dental"
+  },
+  {
+   "id": "thegentlemen-ransomware-attack-on-northern-nj-eye-institute",
+   "title": "TheGentlemen Ransomware Attack on Northern NJ Eye Institute",
+   "n_events": 1,
+   "last_seen": "2026-10-02T00:05:47Z",
+   "first_event_title": "TheGentlemen Ransomware Attack on Northern NJ Eye Institute"
+  },
+  {
+   "id": "morpheus-ransomware-strikes-superior-plating-technology-co",
+   "title": "Morpheus Ransomware Strikes Superior Plating Technology Co",
+   "n_events": 1,
+   "last_seen": "2026-10-02T00:05:44Z",
+   "first_event_title": "Morpheus Ransomware Strikes Superior Plating Technology Co"
+  },
+  {
+   "id": "threeam-ransomware-targets-coosalud-eps-in-colombia",
+   "title": "ThreeAM Ransomware Targets Coosalud EPS in Colombia",
+   "n_events": 1,
+   "last_seen": "2026-10-02T00:05:42Z",
+   "first_event_title": "ThreeAM Ransomware Targets Coosalud EPS in Colombia"
+  },
+  {
+   "id": "openai-ai-agents-bypassed-security-at-100-organizations-during-t",
+   "title": "OpenAI AI agents bypassed security at 100+ organizations during testing",
+   "n_events": 1,
+   "last_seen": "2026-10-01T23:42:28.350Z",
+   "first_event_title": "NEW: OpenAI's AI agents BYPASSED SECURITY at 100+ organizations without permission. This happened during testing. If that's the controlled p"
+  },
+  {
+   "id": "city-of-vicksburg-shuts-down-computers-after-ransomware-attack",
+   "title": "City of Vicksburg shuts down computers after ransomware attack",
+   "n_events": 1,
+   "last_seen": "2026-10-01T22:58:06.000Z",
+   "first_event_title": "City of Vicksburg, Mississippi, shuts down computers after ransomware attack # Ransomware # Mississippi # Cybersecurity # UtilityPayments # "
+  },
+  {
+   "id": "a-queer-kind-of-hope",
+   "title": "A Queer Kind of Hope",
+   "n_events": 0,
+   "last_seen": "2026-10-01T22:51:28.081879Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "a-brief-introduction-to-good-and-bad-insecurity-buttons",
+   "title": "A brief introduction to Good and Bad \"insecurity\"-buttons",
+   "n_events": 0,
+   "last_seen": "2026-10-01T22:51:28.081879Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "benefit-one-survey-download-feature-exposes-client-administrator",
+   "title": "Benefit One survey download feature exposes client administrator data",
+   "n_events": 1,
+   "last_seen": "2026-10-01T22:26:13.000Z",
+   "first_event_title": "Benefit One, a major Japanese employee benefits provider, says a survey download feature on its client platform gave one client's administra"
+  },
+  {
+   "id": "ai-agent-hack-attempt-on-canadian-government-website",
+   "title": "AI agent hack attempt on Canadian government website",
+   "n_events": 1,
+   "last_seen": "2026-10-01T22:03:54.000Z",
+   "first_event_title": "\ud83d\udcbb \ud83c\udde8\ud83c\udde6 \ud83e\udd16 \ud83c\udfdb\ufe0f AI Agent Hack Attempt on Canadian Government website X2 \u201cWe do not confidently attribute these attempts to OpenAI, but they exhibi"
+  },
+  {
+   "id": "okta-reports-rising-sophistication-of-fake-it-worker-profiles",
+   "title": "Okta reports rising sophistication of fake IT worker profiles",
+   "n_events": 1,
+   "last_seen": "2026-10-01T22:00:16.000Z",
+   "first_event_title": "Okta observe une mont\u00e9e en sophistication des faux profils IT infiltrant des entreprises \u2014 deepfakes, identit\u00e9s coh\u00e9rentes, historiques Link"
+  },
+  {
+   "id": "autonomous-ai-agents-probe-us-and-canadian-government-websites",
+   "title": "Autonomous AI agents probe US and Canadian government websites",
+   "n_events": 1,
+   "last_seen": "2026-10-01T22:00:15.000Z",
+   "first_event_title": "Autonomous AI agents tasked with offensive security testing attempted to access US and Canadian government websites. The interesting questio"
+  },
+  {
+   "id": "cisco-sd-wan-manager-auth-bypass-cve-2026-76504-cvss-9-8-under-e",
+   "title": "Cisco SD-WAN Manager auth bypass CVE-2026-76504 (CVSS 9.8) under exploitation warning",
+   "n_events": 23,
+   "last_seen": "2026-10-01T21:40:17.000Z",
+   "first_event_title": "Cisco SD-WAN Manager CVE-2026-76504 \u2014 CVSS 9.8 auth bypass, active exploitation warned. Hex-encode one character in the URI (%6a instead of "
+  },
+  {
+   "id": "gitlab-s-critical-flaw-is-already-drawing-internet-wide-probes",
+   "title": "GitLab\u2019s critical flaw is already drawing internet-wide probes",
+   "n_events": 59,
+   "last_seen": "2026-10-01T21:32:29.000Z",
+   "first_event_title": "GitLab\u2019s critical flaw is already drawing internet-wide probes"
+  },
+  {
+   "id": "breaking-down-appsec-part-6-let-s-build-a-model",
+   "title": "Breaking Down Appsec Part 6: Let's build a model!",
+   "n_events": 0,
+   "last_seen": "2026-10-01T21:29:20Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "cve-2026-74765-perl-punycode-out-of-bounds-read-cvss-9-8",
+   "title": "CVE-2026-74765 Perl Punycode out-of-bounds read (CVSS 9.8)",
+   "n_events": 1,
+   "last_seen": "2026-10-01T21:20:05.469Z",
+   "first_event_title": "CVE-2026-74765 Net::IDN::Punycode for Perl: out-of-bounds read via integer overflow in encode_punycode lets the digit index escape the 36-en"
+  },
+  {
+   "id": "cisa-adds-known-exploited-vulnerability-cve-2026-104286-to-catal",
+   "title": "CISA adds known exploited vulnerability CVE-2026-104286 to catalog",
+   "n_events": 1,
+   "last_seen": "2026-10-01T21:00:17.000Z",
+   "first_event_title": "\ud83d\udea8 [CISA-2026:1001] CISA Adds One Known Exploited Vulnerability to Catalog ( https:// secdb.nttzen.cloud/security-ad visory/detail/CISA-2026:"
+  },
+  {
+   "id": "fbi-flash-report-iran-cyber-actors-deploy-telegram-c2-malware-he",
+   "title": "FBI Flash report: Iran cyber actors deploy Telegram C2 malware (HEAVYGRAM / CHOSEN BRICK)",
+   "n_events": 1,
+   "last_seen": "2026-10-01T19:49:44.000Z",
+   "first_event_title": "FBI Flash report: https:// ic3.gov/CSA/2026/26091 5.pdf \u2026"
+  },
+  {
+   "id": "delphi-installer-mimicking-keybase-malware-sample",
+   "title": "Delphi installer mimicking Keybase malware sample",
+   "n_events": 1,
+   "last_seen": "2026-10-01T19:49:43.000Z",
+   "first_event_title": "Delphi installer mimicking Keybase: https:// hybrid-analysis.com/sample/485446e cb53a6177b1ea3ab63c351f6c30db5b3958fe36363563d6fd6b0f0b69 \u2026 "
+  },
+  {
+   "id": "microsoft-threat-actors-ahead-in-early-ai-race",
+   "title": "Microsoft: threat actors ahead in early AI race",
+   "n_events": 1,
+   "last_seen": "2026-10-01T19:33:01.000Z",
+   "first_event_title": "Microsoft says threat actors are ahead in the early AI race https:// bleepingcomputer.com/news/security/ microsoft-says-threat-actors-are-ah"
+  },
+  {
+   "id": "polish-dental-software-vendor-felg-reports-patient-data-breach-a",
+   "title": "Polish dental software vendor FELG reports patient data breach and ransom demand",
+   "n_events": 1,
+   "last_seen": "2026-10-01T19:16:21Z",
+   "first_event_title": "Polish dental software vendor FELG reports patient data breach and ransom demand"
+  },
+  {
+   "id": "adobe-security-advisory-av26-808",
+   "title": "Adobe security advisory (AV26-808)",
+   "n_events": 2,
+   "last_seen": "2026-08-13T08:12:33Z",
+   "first_event_title": "Adobe security advisory (AV26-808)"
+  },
+  {
+   "id": "adobe-security-advisory-av26-888",
+   "title": "Adobe security advisory (AV26-888)",
+   "n_events": 3,
+   "last_seen": "2026-09-09T00:35:01.000Z",
+   "first_event_title": "Adobe security advisory (AV26-888)"
+  },
+  {
+   "id": "apple-security-advisory-av26-823",
+   "title": "Apple security advisory (AV26-823)",
+   "n_events": 1,
+   "last_seen": "2026-08-17T15:35:39Z",
+   "first_event_title": "Apple security advisory (AV26-823)"
+  },
+  {
+   "id": "commvault-security-advisory-av26-799",
+   "title": "Commvault security advisory (AV26-799)",
+   "n_events": 1,
+   "last_seen": "2026-08-11T17:46:10Z",
+   "first_event_title": "Commvault security advisory (AV26-799)"
+  },
+  {
+   "id": "control-systems-siemens-security-advisory-av26-890",
+   "title": "[Control Systems] Siemens security advisory (AV26-890)",
+   "n_events": 3,
+   "last_seen": "2026-09-23T08:01:13.000Z",
+   "first_event_title": "[Control Systems] Siemens security advisory (AV26-890)"
+  },
+  {
+   "id": "dell-security-advisory-av26-863",
+   "title": "Dell security advisory (AV26-863)",
+   "n_events": 2,
+   "last_seen": "2026-09-11T08:40:47.000Z",
+   "first_event_title": "Dell security advisory (AV26-863)"
+  },
+  {
+   "id": "dell-security-advisory-av26-966",
+   "title": "Dell security advisory (AV26-966)",
+   "n_events": 1,
+   "last_seen": "2026-09-28T18:00:49Z",
+   "first_event_title": "Dell security advisory (AV26-966)"
+  },
+  {
+   "id": "erlang-security-advisory-av26-948",
+   "title": "Erlang security advisory (AV26-948)",
+   "n_events": 1,
+   "last_seen": "2026-09-22T18:25:40Z",
+   "first_event_title": "Erlang security advisory (AV26-948)"
+  },
+  {
+   "id": "freepbx-security-advisory-av26-818",
+   "title": "FreePBX security advisory (AV26-818)",
+   "n_events": 1,
+   "last_seen": "2026-08-14T16:10:48Z",
+   "first_event_title": "FreePBX security advisory (AV26-818)"
+  },
+  {
+   "id": "freepbx-security-advisory-av26-973",
+   "title": "FreePBX security advisory (AV26-973)",
+   "n_events": 0,
+   "last_seen": "2026-09-29T15:30:46Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "gitlab-security-advisory-av26-814",
+   "title": "GitLab security advisory (AV26-814)",
+   "n_events": 1,
+   "last_seen": "2026-08-13T14:00:38Z",
+   "first_event_title": "GitLab security advisory (AV26-814)"
+  },
+  {
+   "id": "google-security-advisory-av26-904",
+   "title": "Google security advisory (AV26-904)",
+   "n_events": 2,
+   "last_seen": "2026-09-09T20:49:30Z",
+   "first_event_title": "Google security advisory (AV26-904)"
+  },
+  {
+   "id": "grafana-security-advisory-av26-796",
+   "title": "Grafana security advisory (AV26-796)",
+   "n_events": 1,
+   "last_seen": "2026-08-11T13:30:40Z",
+   "first_event_title": "Grafana security advisory (AV26-796)"
+  },
+  {
+   "id": "grafana-security-advisory-av26-860",
+   "title": "Grafana Alloy Vulnerability CVE-2026-19516",
+   "n_events": 1,
+   "last_seen": "2026-08-28T15:10:44Z",
+   "first_event_title": "Grafana security advisory (AV26-860)"
+  },
+  {
+   "id": "hashicorp-security-advisory-av26-797",
+   "title": "HashiCorp security advisory (AV26-797)",
+   "n_events": 1,
+   "last_seen": "2026-08-11T14:05:42Z",
+   "first_event_title": "HashiCorp security advisory (AV26-797)"
+  },
+  {
+   "id": "hashicorp-security-advisory-av26-817",
+   "title": "HashiCorp security advisory (AV26-817)",
+   "n_events": 1,
+   "last_seen": "2026-08-14T16:05:44Z",
+   "first_event_title": "HashiCorp security advisory (AV26-817)"
+  },
+  {
+   "id": "ibm-security-advisory-av26-967",
+   "title": "IBM security advisory (AV26-967)",
+   "n_events": 1,
+   "last_seen": "2026-09-28T18:25:42Z",
+   "first_event_title": "IBM security advisory (AV26-967)"
+  },
+  {
+   "id": "ivanti-security-advisory-av26-805",
+   "title": "Ivanti security advisory (AV26-805)",
+   "n_events": 1,
+   "last_seen": "2026-08-11T20:20:39Z",
+   "first_event_title": "Ivanti security advisory (AV26-805)"
+  },
+  {
+   "id": "ivanti-security-advisory-av26-897",
+   "title": "Ivanti September 2026 security advisory: EPMM, ITSM, Sentry vulnerabilities",
+   "n_events": 3,
+   "last_seen": "2026-09-09T06:39:58Z",
+   "first_event_title": "Ivanti security advisory (AV26-897)"
+  },
+  {
+   "id": "jetbrains-security-advisory-av26-825",
+   "title": "JetBrains security advisory (AV26-825)",
+   "n_events": 1,
+   "last_seen": "2026-08-18T13:40:50Z",
+   "first_event_title": "JetBrains security advisory (AV26-825)"
+  },
+  {
+   "id": "anthropic-flags-ai-agent-liability-risks-as-openai-faces-hacking",
+   "title": "Anthropic Flags AI Agent Liability Risks as OpenAI Faces Hacking Lawsuit",
+   "n_events": 0,
+   "last_seen": "2026-09-30T11:19:00Z",
+   "first_event_title": ""
+  }
+ ]
+}

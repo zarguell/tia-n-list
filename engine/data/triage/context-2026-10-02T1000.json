@@ -1,0 +1,583 @@
+{
+ "date": "2026-10-02",
+ "decisions_path": "engine/data/triage/decisions-2026-10-02T1000.json",
+ "instructions": "For every new event decide: (1) keep or drop \u2014 keep only stories worth covering (real security events, vulnerabilities, attacks, breaches, advisories with substance); drop press releases, vendor marketing, generic explainers, and anything duplicating an existing story. (2) If keep, assign the event to the RIGHT story: an existing candidate story id if it belongs there (this FIXES mechanical clustering \u2014 e.g. different outlets' Patch Tuesday roundups are ONE story), or NEW with a clean story_title. (3) merges: list candidate stories that are really the same story (from = fragment, into = the most complete one). (4) For every kept event that names CVEs, optionally assess exploitation: exploited = the event reports OBSERVED in-the-wild exploitation (implants, victim counts, campaigns, CISA KEV confirmation); suspected = public exploit code/PoC or likely-but-unconfirmed. Attribute ONLY the CVEs you can tie to the claim \u2014 a bulletin's blanket 'actively exploited' does NOT flag all its CVEs. Omit the exploitation field when the event makes no claim.\n(5) LOW-TRUST events (\"low_trust\": true \u2014 AI-drafted aggregator reposts, late and overstated): treat as unverified leads. When the text attributes the claim to a named primary source (a researcher firm like watchTowr, a vendor advisory, CISA, a major outlet) and attribution_urls or a web search (/home/ubuntu/repos/cronman/bin/web-search.sh \"query\") locate that primary source CONFIRMING the claim, include a provenance object in the decision: {\"url\": <primary url>, \"source\": <domain>, \"evidence\": <one line>, \"verified\": true}. VERIFIED provenance lets the event mint a story (credited to the primary source) and count as a development; without it, a low-trust event can only attach to an EXISTING story, never mint. If you cannot verify, keep/drop on normal merit and omit provenance.\n\nWrite decisions as JSON with EXACTLY this shape:\n{\n  \"decisions\": [\n    {\"event_id\": \"<id>\", \"action\": \"keep\", \"story\": \"<existing candidate story id>\", \"reason\": \"...\"},\n    {\"event_id\": \"<id>\", \"action\": \"keep\", \"story\": \"NEW\", \"story_title\": \"<clean title>\", \"reason\": \"...\"},\n    {\"event_id\": \"<id>\", \"action\": \"drop\", \"reason\": \"...\"}\n  ],\n  \"merges\": [{\"from\": \"<fragment story id>\", \"into\": \"<canonical story id>\"}]\n}\nFor events marked \"low_trust\" (AI-drafted aggregator reposts) a decision\nmay carry an optional \"provenance\" object when you VERIFIED the claim at\nthe named primary source: {\"event_id\": ..., \"action\": \"keep\", ...}\n  \"provenance\": {\"url\": \"<primary source url>\", \"source\": \"<domain>\", \"evidence\": \"<one line>\"}\nOnly include provenance when the primary source (vendor advisory, CISA,\nthe named researcher/outlet) really carries the claim \u2014 verified\nprovenance lets a low-trust event mint a story and set freshness; without\nit the event can only amplify an existing story.\nSTRICT KEY NAMES: the array key is \"decisions\" (never \"events\"); the story\nkey is \"story\" (never \"story_id\"); \"story\" holds a candidate_stories id\nverbatim or the literal string \"NEW\". Optional per-event field\n\"exploitation\": {\"CVE-...\": {\"status\": \"exploited|suspected\", \"evidence\": \"1-2 sentences\"}}.",
+ "new_events": [
+  {
+   "id": "rss:2a21eb85d634fc4e",
+   "title": "Authentication Bypass Successfully Impersonated 95 Users Without Passwords or MFA",
+   "source": "gbhackers.com",
+   "published_at": "2026-10-02T09:46:41Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "A critical authentication bypass that enabled the impersonation of 95 employee accounts, including privileged users, without passwords, multi-factor authentication (MFA), or valid Microsoft Entra ID tokens. The issue ste"
+  },
+  {
+   "id": "rss:0ec250b62a0f3974",
+   "title": "Warlock Expands SharePoint Exploitation in Critical Infrastructure Attacks",
+   "source": "securityweek.com",
+   "published_at": "2026-10-02T09:34:41Z",
+   "cves": [
+    "CVE-2026-32201",
+    "CVE-2026-45659",
+    "CVE-2026-50522",
+    "CVE-2026-55040",
+    "CVE-2026-56164",
+    "CVE-2026-58644"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "The Warlock ransomware group continues to target SharePoint servers in attacks against critical infrastructure, government, and education entities, Symantec reports. Warlock is believed to be operated by a China-based ha"
+  },
+  {
+   "id": "rss:eabdc0eb6e708f2a",
+   "title": "Microsoft\u2019s X account hacked in crypto pump-and-dump scheme",
+   "source": "bleepingcomputer.com",
+   "published_at": "2026-10-02T09:29:56Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "On Thursday, unknown attackers hijacked the official Microsoft account on X, which has over 13 million followers, in what appeared to be a pump-and-dump scheme promoting a crypto token. The attack began when the Microsof"
+  },
+  {
+   "id": "rss:7a15f0647d279f25",
+   "title": "CVE-2026-104286: FortiMail Path Traversal Vulnerability Actively Exploited",
+   "source": "malware.news",
+   "published_at": "2026-10-02T09:15:41Z",
+   "cves": [
+    "CVE-2026-104286"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Successful exploitation may let an unauthenticated attacker send a crafted request that tricks FortiMail into writing a file outside its intended folder. By placing a file onto the underlying system, the attacker gains a"
+  }
+ ],
+ "candidate_stories": [
+  {
+   "id": "authentication-bypass-successfully-impersonated-95-users-without",
+   "title": "Authentication Bypass Successfully Impersonated 95 Users Without Passwords or MFA",
+   "n_events": 1,
+   "last_seen": "2026-10-02T09:46:41Z",
+   "first_event_title": "Authentication Bypass Successfully Impersonated 95 Users Without Passwords or MFA"
+  },
+  {
+   "id": "warlock-ransomware-exploits-sharepoint-vulnerabilities-targeting",
+   "title": "Warlock ransomware exploits SharePoint vulnerabilities targeting critical infrastructure",
+   "n_events": 2,
+   "last_seen": "2026-10-02T09:34:41Z",
+   "first_event_title": "(security.com) Warlock Ransomware: China-Nexus Threat Actor Longlegs Exploits SharePoint Vulnerabilities to Target Critical Infrastructure I"
+  },
+  {
+   "id": "microsoft-s-x-account-hacked-in-crypto-pump-and-dump-scheme",
+   "title": "Microsoft\u2019s X account hacked in crypto pump-and-dump scheme",
+   "n_events": 1,
+   "last_seen": "2026-10-02T09:29:56Z",
+   "first_event_title": "Microsoft\u2019s X account hacked in crypto pump-and-dump scheme"
+  },
+  {
+   "id": "fortinet-warns-of-critical-fortimail-flaw-exploited-in-zero-day",
+   "title": "Fortinet warns of critical FortiMail flaw exploited in zero-day attacks",
+   "n_events": 8,
+   "last_seen": "2026-10-02T09:15:41Z",
+   "first_event_title": "Fortinet warns of critical FortiMail flaw exploited in zero-day attacks"
+  },
+  {
+   "id": "milk-dragon-phishing-kit-uses-facebook-and-tiktok-discounts-to-s",
+   "title": "Milk Dragon Phishing Kit Uses Facebook and TikTok Discounts to Steal Cards and Bypass MFA",
+   "n_events": 1,
+   "last_seen": "2026-10-02T08:51:17Z",
+   "first_event_title": "Milk Dragon Phishing Kit Uses Facebook and TikTok Discounts to Steal Cards and Bypass MFA"
+  },
+  {
+   "id": "ai-agents-aimed-sql-injection-at-us-and-canadian-government-site",
+   "title": "AI Agents Aimed SQL Injection at US and Canadian Government Sites",
+   "n_events": 1,
+   "last_seen": "2026-10-02T08:38:46Z",
+   "first_event_title": "AI Agents Aimed SQL Injection at US and Canadian Government Sites"
+  },
+  {
+   "id": "residential-proxy-risk-the-employee-earns-pennies-the-buyer-gets",
+   "title": "Residential Proxy Risk: The Employee Earns Pennies, The Buyer Gets The Router",
+   "n_events": 0,
+   "last_seen": "2026-10-02T08:35:45Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "cybercrime-disruption-making-a-real-impact-ken-bagnall",
+   "title": "Cybercrime Disruption: Making a \u201cReal Impact\u201d | Ken Bagnall",
+   "n_events": 0,
+   "last_seen": "2026-10-02T08:35:42Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "vulnerability-in-gotop-software",
+   "title": "Vulnerability in gotop software",
+   "n_events": 1,
+   "last_seen": "2026-10-02T08:35:40Z",
+   "first_event_title": "Vulnerability in gotop software"
+  },
+  {
+   "id": "weekly-cybersecurity-roundup-how-stolen-credentials-continue-to",
+   "title": "Weekly Cybersecurity Roundup: How Stolen Credentials Continue to Fuel Fraud",
+   "n_events": 0,
+   "last_seen": "2026-10-02T08:25:43Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "ai-used-to-clone-st-louis-county-roofing-company-s-website",
+   "title": "AI used to clone St. Louis County roofing company\u2019s website",
+   "n_events": 0,
+   "last_seen": "2026-10-02T08:25:41Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "windows-11-26h2-enables-settings-backup-by-default-for-eligible",
+   "title": "Windows 11 26H2 Enables Settings Backup by Default for Eligible Devices",
+   "n_events": 0,
+   "last_seen": "2026-10-02T08:24:12Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "multiple-high-severity-vulnerabilities-in-teamviewer",
+   "title": "Multiple High-Severity Vulnerabilities in TeamViewer",
+   "n_events": 1,
+   "last_seen": "2026-10-02T08:20:39Z",
+   "first_event_title": "Multiple High-Severity Vulnerabilities in TeamViewer"
+  },
+  {
+   "id": "12-best-aws-security-tools-compared-2026-features-pricing",
+   "title": "12 Best AWS Security Tools Compared (2026): Features & Pricing",
+   "n_events": 0,
+   "last_seen": "2026-10-02T08:11:21Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "ordering-violence-from-abroad-five-suspects-arrested-in-spain-mo",
+   "title": "Ordering violence from abroad: five suspects arrested in Spain, Morocco, and France",
+   "n_events": 1,
+   "last_seen": "2026-10-02T08:10:41Z",
+   "first_event_title": "Ordering violence from abroad: five suspects arrested in Spain, Morocco, and France"
+  },
+  {
+   "id": "china-linked-ta419-hackers-target-us-ai-policy-experts-with-cred",
+   "title": "China-Linked TA419 Hackers Target US AI Policy Experts With Credential Phishing Attacks",
+   "n_events": 1,
+   "last_seen": "2026-10-02T08:02:58Z",
+   "first_event_title": "China-Linked TA419 Hackers Target US AI Policy Experts With Credential Phishing Attacks"
+  },
+  {
+   "id": "are-flock-cameras-taking-over-american-neighborhoods",
+   "title": "Are Flock cameras taking over American neighborhoods?",
+   "n_events": 0,
+   "last_seen": "2026-10-02T07:45:57Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "post-quantum-cryptography-resource-hub",
+   "title": "Post-Quantum Cryptography Resource Hub",
+   "n_events": 0,
+   "last_seen": "2026-10-02T07:17:46Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "killsec-ransomware-group-disrupted-in-international-law-enforcem",
+   "title": "KillSec ransomware group disrupted in international law enforcement operation",
+   "n_events": 16,
+   "last_seen": "2026-10-02T06:17:08Z",
+   "first_event_title": "\ud83c\udf7e Cybercrime: Computer network used by ransomware group dismantled in coordinated international operation \u2b07\ufe0f Bern, 01.10.2026 \u2014 On 30 Septem"
+  },
+  {
+   "id": "tren-de-aragua-atm-jackpotting-network-linked-to-40-7-million-in",
+   "title": "Tren de Aragua ATM Jackpotting Network Linked to $40.7 Million in U.S. Losses",
+   "n_events": 1,
+   "last_seen": "2026-10-02T06:14:41Z",
+   "first_event_title": "Tren de Aragua ATM Jackpotting Network Linked to $40.7 Million in U.S. Losses"
+  },
+  {
+   "id": "ftc-investigates-openai-and-anthropic-over-consumer-risks-from-a",
+   "title": "FTC Investigates OpenAI and Anthropic Over Consumer Risks From Advanced AI Models",
+   "n_events": 1,
+   "last_seen": "2026-10-02T06:07:22Z",
+   "first_event_title": "FTC Investigates OpenAI and Anthropic Over Consumer Risks From Advanced AI Models"
+  },
+  {
+   "id": "python-infostealer-targets-17-browsers-to-steal-passwords-cards",
+   "title": "Python Infostealer Targets 17 Browsers to Steal Passwords, Cards and Session Cookies",
+   "n_events": 2,
+   "last_seen": "2026-10-02T05:54:24Z",
+   "first_event_title": "Python Infostealer Targets 17 Browsers to Steal Passwords, Cards and Session Cookies"
+  },
+  {
+   "id": "apache-http-server-flaws-enable-remote-code-execution-and-denial",
+   "title": "Apache HTTP Server Flaws Enable Remote Code Execution and Denial-of-Service Attacks",
+   "n_events": 1,
+   "last_seen": "2026-10-02T05:01:20Z",
+   "first_event_title": "Apache HTTP Server Flaws Enable Remote Code Execution and Denial-of-Service Attacks"
+  },
+  {
+   "id": "u-s-arrests-company-owner-accused-of-shipping-300-million-in-res",
+   "title": "U.S. Arrests Company Owner Accused of Shipping $300 Million in Restricted GPU Servers to China",
+   "n_events": 1,
+   "last_seen": "2026-10-02T04:55:17Z",
+   "first_event_title": "U.S. Arrests Company Owner Accused of Shipping $300 Million in Restricted GPU Servers to China"
+  },
+  {
+   "id": "a-good-write-up-on-what-happens-when-an-ai-agent-gets-real-acces",
+   "title": "A good write-up on what happens when an AI agent gets real access to a homelab",
+   "n_events": 0,
+   "last_seen": "2026-10-02T03:03:08Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "autonomous-ai-agent-breached-organization-using-two-zammad-zero",
+   "title": "Autonomous AI Agent Breached Organization Using Two Zammad Zero-Days",
+   "n_events": 2,
+   "last_seen": "2026-10-02T02:45:40.000Z",
+   "first_event_title": "https:// undercodenews.com/autonomous-a i-agent-breached-cybersecurity-organization-using-two-zammad-zero-days-a-new-ai-driven-attacks-emerg"
+  },
+  {
+   "id": "cve-2026-89422-erlang-otp-ssl-tls-1-3-client-auth-bypass-cvss-10",
+   "title": "CVE-2026-89422: Erlang/OTP SSL TLS 1.3 Client Auth Bypass (CVSS 10)",
+   "n_events": 1,
+   "last_seen": "2026-10-02T02:40:44.655Z",
+   "first_event_title": "CVE-2026-89422: Erlang/OTP ssl TLS 1.3 client auth bypass. Malicious server impersonates any host, no cert required. CVSS 10. Patch under re"
+  },
+  {
+   "id": "isc-stormcast-for-friday-october-2nd-2026-https-isc-sans-edu-pod",
+   "title": "ISC Stormcast For Friday, October 2nd, 2026 https://isc.sans.edu/podcastdetail/10120, (Fri, Oct 2nd)",
+   "n_events": 0,
+   "last_seen": "2026-10-02T02:05:44Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "euvd-2026-78826-score-5-3-10-cvss-v3-1-product-record-management",
+   "title": "EUVD-2026-78826 \ud83d\udcca Score: 5.3/10 (CVSS v3.1) \ud83d\udce6 Product: Record Management System \ud83c\udfe2 Vendor: code-projects \ud83d\udcc5 Published: 2026-09-15 | Updated:",
+   "n_events": 0,
+   "last_seen": "2026-10-02T02:01:06.472Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "eu-s-cyber-resilience-act-starts-the-24-hour-vulnerability-clock",
+   "title": "EU Cyber Resilience Act 24-Hour Vulnerability Disclosure Takes Effect",
+   "n_events": 2,
+   "last_seen": "2026-10-02T01:47:37.000Z",
+   "first_event_title": "EU's Cyber Resilience Act starts the 24-hour vulnerability clock Manufacturers must now disclose actively exploited flaws and severe securit"
+  },
+  {
+   "id": "red-hat-directory-server-11-cve-2026-86345-cvss-9-ldap-injection",
+   "title": "Red Hat Directory Server 11: CVE-2026-86345 (CVSS 9) LDAP Injection Post-StartTLS",
+   "n_events": 1,
+   "last_seen": "2026-10-02T01:30:27.000Z",
+   "first_event_title": "Red Hat Directory Server 11: CVE-2026-86345 (CRITICAL, CVSS 9) allows on-path attackers to inject LDAP messages post-StartTLS, risking auth "
+  },
+  {
+   "id": "click2shell-wordpress-theme-install-flaw-leads-to-server-code-ex",
+   "title": "Click2Shell: WordPress Theme-Install Flaw Leads to Server Code Execution",
+   "n_events": 1,
+   "last_seen": "2026-10-02T01:15:48.000Z",
+   "first_event_title": "Click2Shell: A WordPress Theme-Install Flaw That Turns One Admin Click Into Server Code Execution If your organisation runs a website, there"
+  },
+  {
+   "id": "dragonforce-ransomware-abuses-microsoft-teams-turn-relays-for-st",
+   "title": "DragonForce Ransomware Abuses Microsoft Teams TURN Relays for Stealth C2 \u2014 Backdoor.Turn Malware",
+   "n_events": 2,
+   "last_seen": "2026-10-02T00:25:47.354Z",
+   "first_event_title": "DragonForce Ransomware Abuses Microsoft Teams TURN Relays for Stealth C2 \u2014 Backdoor.Turn Malware"
+  },
+  {
+   "id": "storm-ransomware-lists-us-healthcare-provider-west-county-health",
+   "title": "Storm ransomware lists US healthcare provider West County Health Centers as victim",
+   "n_events": 2,
+   "last_seen": "2026-10-02T00:05:53Z",
+   "first_event_title": "Another day, another ransomware crook. US: West County Health Centers https:// ransomware.live/id/V2VzdCBDb3V udHkgSGVhbHRoIENlbnRlcnNAU3Rvc"
+  },
+  {
+   "id": "akira-ransomware-group-claims-stransky-heiz-mess-regeltechnik-gm",
+   "title": "Akira Ransomware Group Claims Stransky Heiz-Mess-Regeltechnik GmbH",
+   "n_events": 3,
+   "last_seen": "2026-10-02T00:05:51Z",
+   "first_event_title": "\ud83d\udea8New ransom group blog posts!\ud83d\udea8 Group name: akira Post title: Stransky Heiz-Mess-Regeltechnik GmbH Info: https:// cti.fyi/groups/akira.html G"
+  },
+  {
+   "id": "chaos-ransomware-targets-park-dental",
+   "title": "Chaos Ransomware Targets Park Dental",
+   "n_events": 1,
+   "last_seen": "2026-10-02T00:05:49Z",
+   "first_event_title": "Chaos Ransomware Targets Park Dental"
+  },
+  {
+   "id": "thegentlemen-ransomware-attack-on-northern-nj-eye-institute",
+   "title": "TheGentlemen Ransomware Attack on Northern NJ Eye Institute",
+   "n_events": 1,
+   "last_seen": "2026-10-02T00:05:47Z",
+   "first_event_title": "TheGentlemen Ransomware Attack on Northern NJ Eye Institute"
+  },
+  {
+   "id": "morpheus-ransomware-strikes-superior-plating-technology-co",
+   "title": "Morpheus Ransomware Strikes Superior Plating Technology Co",
+   "n_events": 1,
+   "last_seen": "2026-10-02T00:05:44Z",
+   "first_event_title": "Morpheus Ransomware Strikes Superior Plating Technology Co"
+  },
+  {
+   "id": "threeam-ransomware-targets-coosalud-eps-in-colombia",
+   "title": "ThreeAM Ransomware Targets Coosalud EPS in Colombia",
+   "n_events": 1,
+   "last_seen": "2026-10-02T00:05:42Z",
+   "first_event_title": "ThreeAM Ransomware Targets Coosalud EPS in Colombia"
+  },
+  {
+   "id": "openai-ai-agents-bypassed-security-at-100-organizations-during-t",
+   "title": "OpenAI AI agents bypassed security at 100+ organizations during testing",
+   "n_events": 1,
+   "last_seen": "2026-10-01T23:42:28.350Z",
+   "first_event_title": "NEW: OpenAI's AI agents BYPASSED SECURITY at 100+ organizations without permission. This happened during testing. If that's the controlled p"
+  },
+  {
+   "id": "adobe-security-advisory-av26-808",
+   "title": "Adobe security advisory (AV26-808)",
+   "n_events": 2,
+   "last_seen": "2026-08-13T08:12:33Z",
+   "first_event_title": "Adobe security advisory (AV26-808)"
+  },
+  {
+   "id": "adobe-security-advisory-av26-888",
+   "title": "Adobe security advisory (AV26-888)",
+   "n_events": 3,
+   "last_seen": "2026-09-09T00:35:01.000Z",
+   "first_event_title": "Adobe security advisory (AV26-888)"
+  },
+  {
+   "id": "apple-security-advisory-av26-823",
+   "title": "Apple security advisory (AV26-823)",
+   "n_events": 1,
+   "last_seen": "2026-08-17T15:35:39Z",
+   "first_event_title": "Apple security advisory (AV26-823)"
+  },
+  {
+   "id": "commvault-security-advisory-av26-799",
+   "title": "Commvault security advisory (AV26-799)",
+   "n_events": 1,
+   "last_seen": "2026-08-11T17:46:10Z",
+   "first_event_title": "Commvault security advisory (AV26-799)"
+  },
+  {
+   "id": "control-systems-siemens-security-advisory-av26-890",
+   "title": "[Control Systems] Siemens security advisory (AV26-890)",
+   "n_events": 3,
+   "last_seen": "2026-09-23T08:01:13.000Z",
+   "first_event_title": "[Control Systems] Siemens security advisory (AV26-890)"
+  },
+  {
+   "id": "dell-security-advisory-av26-863",
+   "title": "Dell security advisory (AV26-863)",
+   "n_events": 2,
+   "last_seen": "2026-09-11T08:40:47.000Z",
+   "first_event_title": "Dell security advisory (AV26-863)"
+  },
+  {
+   "id": "dell-security-advisory-av26-966",
+   "title": "Dell security advisory (AV26-966)",
+   "n_events": 1,
+   "last_seen": "2026-09-28T18:00:49Z",
+   "first_event_title": "Dell security advisory (AV26-966)"
+  },
+  {
+   "id": "erlang-security-advisory-av26-948",
+   "title": "Erlang security advisory (AV26-948)",
+   "n_events": 1,
+   "last_seen": "2026-09-22T18:25:40Z",
+   "first_event_title": "Erlang security advisory (AV26-948)"
+  },
+  {
+   "id": "freepbx-security-advisory-av26-818",
+   "title": "FreePBX security advisory (AV26-818)",
+   "n_events": 1,
+   "last_seen": "2026-08-14T16:10:48Z",
+   "first_event_title": "FreePBX security advisory (AV26-818)"
+  },
+  {
+   "id": "freepbx-security-advisory-av26-973",
+   "title": "FreePBX security advisory (AV26-973)",
+   "n_events": 0,
+   "last_seen": "2026-09-29T15:30:46Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "gitlab-security-advisory-av26-814",
+   "title": "GitLab security advisory (AV26-814)",
+   "n_events": 1,
+   "last_seen": "2026-08-13T14:00:38Z",
+   "first_event_title": "GitLab security advisory (AV26-814)"
+  },
+  {
+   "id": "google-security-advisory-av26-904",
+   "title": "Google security advisory (AV26-904)",
+   "n_events": 2,
+   "last_seen": "2026-09-09T20:49:30Z",
+   "first_event_title": "Google security advisory (AV26-904)"
+  },
+  {
+   "id": "grafana-security-advisory-av26-796",
+   "title": "Grafana security advisory (AV26-796)",
+   "n_events": 1,
+   "last_seen": "2026-08-11T13:30:40Z",
+   "first_event_title": "Grafana security advisory (AV26-796)"
+  },
+  {
+   "id": "grafana-security-advisory-av26-860",
+   "title": "Grafana Alloy Vulnerability CVE-2026-19516",
+   "n_events": 1,
+   "last_seen": "2026-08-28T15:10:44Z",
+   "first_event_title": "Grafana security advisory (AV26-860)"
+  },
+  {
+   "id": "hashicorp-security-advisory-av26-797",
+   "title": "HashiCorp security advisory (AV26-797)",
+   "n_events": 1,
+   "last_seen": "2026-08-11T14:05:42Z",
+   "first_event_title": "HashiCorp security advisory (AV26-797)"
+  },
+  {
+   "id": "hashicorp-security-advisory-av26-817",
+   "title": "HashiCorp security advisory (AV26-817)",
+   "n_events": 1,
+   "last_seen": "2026-08-14T16:05:44Z",
+   "first_event_title": "HashiCorp security advisory (AV26-817)"
+  },
+  {
+   "id": "ibm-security-advisory-av26-967",
+   "title": "IBM security advisory (AV26-967)",
+   "n_events": 1,
+   "last_seen": "2026-09-28T18:25:42Z",
+   "first_event_title": "IBM security advisory (AV26-967)"
+  },
+  {
+   "id": "ivanti-security-advisory-av26-805",
+   "title": "Ivanti security advisory (AV26-805)",
+   "n_events": 1,
+   "last_seen": "2026-08-11T20:20:39Z",
+   "first_event_title": "Ivanti security advisory (AV26-805)"
+  },
+  {
+   "id": "ivanti-security-advisory-av26-897",
+   "title": "Ivanti September 2026 security advisory: EPMM, ITSM, Sentry vulnerabilities",
+   "n_events": 3,
+   "last_seen": "2026-09-09T06:39:58Z",
+   "first_event_title": "Ivanti security advisory (AV26-897)"
+  },
+  {
+   "id": "jetbrains-security-advisory-av26-825",
+   "title": "JetBrains security advisory (AV26-825)",
+   "n_events": 1,
+   "last_seen": "2026-08-18T13:40:50Z",
+   "first_event_title": "JetBrains security advisory (AV26-825)"
+  },
+  {
+   "id": "cve-2026-45659-microsoft-sharepoint-server-deserialization-rce-c",
+   "title": "CVE-2026-45659 \u2014 Microsoft SharePoint Server Deserialization RCE (CVSS 8.8) \u2014 Site Member-Level Access Only Required",
+   "n_events": 2,
+   "last_seen": "2026-07-02T00:00:00Z",
+   "first_event_title": "CVE-2026-45659 \u2014 Microsoft SharePoint Server Deserialization RCE (CVSS 8.8) \u2014 Site Member-Level Access Only Required"
+  },
+  {
+   "id": "swiss-government-sharepoint-breach-compromises-200-accounts",
+   "title": "Swiss Government SharePoint Breach Compromises ~200 Accounts",
+   "n_events": 1,
+   "last_seen": "2026-08-07T00:00:00Z",
+   "first_event_title": "Swiss Government SharePoint Breach Compromises ~200 Accounts"
+  },
+  {
+   "id": "microsoft-testing-cloud-rebuild-remote-system-reinstall-from-the",
+   "title": "Microsoft Testing Cloud Rebuild \u2014 Remote System Reinstall from the Cloud",
+   "n_events": 1,
+   "last_seen": "2026-07-07T00:00:00Z",
+   "first_event_title": "Microsoft Testing Cloud Rebuild \u2014 Remote System Reinstall from the Cloud"
+  },
+  {
+   "id": "microsoft-july-2026-patch-tuesday-record-622-cves-two-exploited",
+   "title": "Microsoft July 2026 Patch Tuesday \u2014 Record 622 CVEs, Two Exploited Zero-Days, Rapid7 SharePoint Auth Bypass",
+   "n_events": 1,
+   "last_seen": "2026-07-15T00:00:00Z",
+   "first_event_title": "Microsoft July 2026 Patch Tuesday \u2014 Record 622 CVEs, Two Exploited Zero-Days, Rapid7 SharePoint Auth Bypass"
+  },
+  {
+   "id": "microsoft-sharepoint-exploitation-fourth-kev-entry-tenable-confi",
+   "title": "Microsoft SharePoint Exploitation \u2014 Fourth KEV Entry, Tenable Confirms Five-CVE Active Exploitation Cluster",
+   "n_events": 1,
+   "last_seen": "2026-07-17T00:00:00Z",
+   "first_event_title": "Microsoft SharePoint Exploitation \u2014 Fourth KEV Entry, Tenable Confirms Five-CVE Active Exploitation Cluster"
+  },
+  {
+   "id": "cve-2026-63520-microsoft-sharepoint-remote-code-execution-fixed",
+   "title": "CVE-2026-63520: Microsoft SharePoint Remote Code Execution (FIXED)",
+   "n_events": 13,
+   "last_seen": "2026-09-14T14:44:10.000Z",
+   "first_event_title": "CVE-2026-63520: Microsoft SharePoint Remote Code Execution (FIXED)"
+  },
+  {
+   "id": "microsoft-s-august-2026-patch-tuesday-addresses-398-cves-cve-202",
+   "title": "Microsoft's August 2026 Patch Tuesday Addresses 398 CVEs (CVE-2026-68820)",
+   "n_events": 23,
+   "last_seen": "2026-08-18T18:06:38Z",
+   "first_event_title": "Microsoft's August 2026 Patch Tuesday Addresses 398 CVEs (CVE-2026-68820)"
+  },
+  {
+   "id": "cisa-adds-cve-2026-58644-sharepoint-rce-zero-day-and-two-fortine",
+   "title": "CISA Adds CVE-2026-58644 SharePoint RCE Zero-Day and Two Fortinet FortiSandbox Flaws to KEV",
+   "n_events": 2,
+   "last_seen": "2026-07-18T00:00:00Z",
+   "first_event_title": "CISA Adds CVE-2026-58644 SharePoint RCE Zero-Day and Two Fortinet FortiSandbox Flaws to KEV"
+  },
+  {
+   "id": "cisa-adds-known-exploited-vulnerability-cve-2026-104286-to-catal",
+   "title": "CISA adds known exploited vulnerability CVE-2026-104286 to catalog",
+   "n_events": 1,
+   "last_seen": "2026-10-01T21:00:17.000Z",
+   "first_event_title": "\ud83d\udea8 [CISA-2026:1001] CISA Adds One Known Exploited Vulnerability to Catalog ( https:// secdb.nttzen.cloud/security-ad visory/detail/CISA-2026:"
+  },
+  {
+   "id": "cve-2026-50522-new-sharepoint-rce-actively-exploited-to-steal-ma",
+   "title": "CVE-2026-50522 \u2014 New SharePoint RCE Actively Exploited to Steal Machine Keys",
+   "n_events": 2,
+   "last_seen": "2026-07-23T00:00:00Z",
+   "first_event_title": "CVE-2026-50522 \u2014 New SharePoint RCE Actively Exploited to Steal Machine Keys"
+  },
+  {
+   "id": "cve-2026-93751-uri-js-path-traversal",
+   "title": "CVE-2026-93751 uri-js path traversal",
+   "n_events": 1,
+   "last_seen": "2026-09-27T09:11:04.325Z",
+   "first_event_title": "CVE-2026-93751 uri-js path traversal via improper UTF-8 decoding, CVSS 6.5, no patch yet. Update dependencies immediately. https://www. valt"
+  },
+  {
+   "id": "cisa-adds-vmware-vcenter-path-traversal-cve-2026-59310-to-kev",
+   "title": "CISA Adds VMware vCenter Path Traversal CVE-2026-59310 to KEV",
+   "n_events": 16,
+   "last_seen": "2026-09-22T12:10:38.000Z",
+   "first_event_title": "CISA Warns Hackers Are Actively Exploiting VMware vCenter Path Traversal Flaw"
+  },
+  {
+   "id": "cve-2026-15913-high-7-7-in-versions-prior-to-7-10-2-a-path-trave",
+   "title": "Fortra GoAnywhere path traversal CVE-2026-15913 patched in 7.10.2",
+   "n_events": 1,
+   "last_seen": "2026-09-10T00:04:36.559Z",
+   "first_event_title": "\ud83d\udfe0 CVE-2026-15913 - High (7.7) In versions prior to 7.10.2 a path traversal vulnerability in the /attachRemoteFiles endpoint of Fortra's GoAn"
+  },
+  {
+   "id": "octoprint-cve-2026-94489-unpatched-path-traversal-has-public-exp",
+   "title": "OctoPrint CVE-2026-94489 unpatched path traversal has public exploit",
+   "n_events": 1,
+   "last_seen": "2026-09-29T17:40:19.892Z",
+   "first_event_title": "CVE-2026-94489 OctoPrint path traversal in the File Download API, CVSS 4.3. Exploit is public, no vendor response, no patch. Isolate or rest"
+  },
+  {
+   "id": "cve-2026-91001-critical-9-9-a-security-flaw-has-been-discovered",
+   "title": "Critical Authentication Bypass in D-Link DI-8400 Router",
+   "n_events": 1,
+   "last_seen": "2026-09-15T10:04:12.447Z",
+   "first_event_title": "\ud83d\udd34 CVE-2026-91001 - Critical (9.9) A security flaw has been discovered in D-Link DI-8400 16.07. This affects the function ddns_asp of the fil"
+  }
+ ]
+}
