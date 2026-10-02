@@ -644,6 +644,47 @@ def main():
         print(f"done (--kev): wrote {WROTE} files.")
         return
 
+    # --lint-only (leaf A architecture): source-level fail-closed lints for
+    # the VPS publish gate — NO site render. The VPS no longer renders the
+    # site (GitHub Actions does, via site-deploy.yml, which fails closed on
+    # the full build). Render-dependent lints (internal links, backlinks,
+    # path-absolute in HTML) run on the Actions builder instead.
+    if "--lint-only" in sys.argv:
+        cards_by_id = {c["id"]: c for c in cards}
+        import cti as cti_mod
+        cti_errs = cti_mod.validate_records(cti_mod.load_records())
+        for e in cti_errs:
+            print(f"CTI FAIL {e}", file=sys.stderr)
+        import sigma as sigma_mod
+        sigma_errs = []
+        for f in sorted(glob.glob(os.path.join(CTI_DIR, "*.sigma"))):
+            for e in sigma_mod.validate(f):
+                sigma_errs.append(f"{os.path.basename(f)}: {e}")
+        for f in sorted(glob.glob(os.path.join(CTI_DIR, "*.splunk"))):
+            sigma_errs += [f"{os.path.basename(f)}: {e}" for e in sigma_mod.validate_variant(f, "splunk")]
+        for f in sorted(glob.glob(os.path.join(CTI_DIR, "*.kql"))):
+            sigma_errs += [f"{os.path.basename(f)}: {e}" for e in sigma_mod.validate_variant(f, "kql")]
+        for e in sigma_errs:
+            print(f"SIGMA FAIL {e}", file=sys.stderr)
+        import yara as yara_mod
+        yara_errs = []
+        for f in sorted(glob.glob(os.path.join(CTI_DIR, "*.yara"))):
+            yara_errs += yara_mod.validate_yara(f)
+        for e in yara_errs:
+            print(f"YARA FAIL {e}", file=sys.stderr)
+        prose_digest_errs = run_prose_gate(
+            cards_by_id, datetime.now(timezone.utc).strftime("%Y-%m-%d"), log=print)
+        for e in prose_digest_errs:
+            print(f"PROSE FAIL {e}", file=sys.stderr)
+        errs = len(cti_errs) + len(sigma_errs) + len(yara_errs) + len(prose_digest_errs)
+        if errs:
+            print(f"LINT-ONLY FAIL: {len(cti_errs)} CTI + {len(sigma_errs)} Sigma "
+                  f"+ {len(yara_errs)} YARA + {len(prose_digest_errs)} prose errors.",
+                  file=sys.stderr)
+            sys.exit(1)
+        print(f"lint-only: OK ({len(cards)} stories, {errs} errors)")
+        return
+
     hot_cards = [c for c in cards if c["score"] >= HOT_THRESHOLD]
 
     manifest = {}

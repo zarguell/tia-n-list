@@ -345,6 +345,21 @@ def emit_needs(stories, exclude=None):
                                        s["id"] + ".capped")):
             continue
         analysis_path = os.path.join(ANALYSIS_DIR, s["id"] + ".md")
+        # 2026-10-02: a quarantined analysis must not requeue on every new
+        # event for the same story (the zammad story burned an agent run per
+        # hour for 7 hours: new X posts kept arriving, each re-queued a
+        # structurally unpassable analysis). Retry only when genuinely new
+        # material arrived AFTER the last rejection.
+        prior_rejects = glob.glob(os.path.join(ANALYSIS_DIR, ".rejects",
+                                               s["id"] + "-*.md"))
+        if prior_rejects and not os.path.exists(analysis_path):
+            newest_evt = max((events.get(ref["event_id"])["published_at"]
+                              for ref in s.get("events", [])
+                              if ref["event_id"] in events), default="")
+            last_reject = max(os.path.getmtime(r) for r in prior_rejects)
+            newest_dt = parse_utc(newest_evt) if newest_evt else None
+            if not newest_dt or newest_dt.timestamp() <= last_reject:
+                continue
         marker = (s.get("analysis") or {}).get("updated_at", "")
         if not os.path.exists(analysis_path):
             queue.append(s["id"])
