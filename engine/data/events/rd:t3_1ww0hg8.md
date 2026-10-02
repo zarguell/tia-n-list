@@ -1,0 +1,3 @@
+Greetings, We have a situation with the MS owned microsoftusercontent.com , and unfortunately I keep getting AI summaries and not finding any security articles, but the summaries are claiming this domain, although official, can host malicious content since it acts like a CDN for 365 content from users, i.e. a compromised user/account/site might be able to deliver malicious content from this FQDN. So this gives me pause with whitelisting it for AV providers Appreciate any insights. submitted by /u/Mother-Feedback1532 [link] [comments]
+
+via reddit r/cybersecurity: Malicious Content from Microsoft FQDN

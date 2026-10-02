@@ -1,0 +1,3 @@
+International law enforcement disrupted the KillSec ransomware group in a coordinated operation. The event references multiple sources including Europol, federal police from Switzerland (fedpol.admin.ch), and security vendors tracking the group. The operation appears to have targeted infrastructure used by the ransomware operation, though full technical details of the disruption are not in the event text.
+
+Disruptions of ransomware groups tend to produce temporary relief rather than permanent removal, as affiliates often migrate. Track follow-up reporting on infrastructure seizures and any remaining affiliate activity.
