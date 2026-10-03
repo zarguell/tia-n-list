@@ -1,0 +1,666 @@
+{
+ "date": "2026-10-03",
+ "decisions_path": "engine/data/triage/decisions-2026-10-03T1200.json",
+ "instructions": "For every new event decide: (1) keep or drop \u2014 keep only stories worth covering (real security events, vulnerabilities, attacks, breaches, advisories with substance); drop press releases, vendor marketing, generic explainers, and anything duplicating an existing story. (2) If keep, assign the event to the RIGHT story: an existing candidate story id if it belongs there (this FIXES mechanical clustering \u2014 e.g. different outlets' Patch Tuesday roundups are ONE story), or NEW with a clean story_title. (3) merges: list candidate stories that are really the same story (from = fragment, into = the most complete one). (4) For every kept event that names CVEs, optionally assess exploitation: exploited = the event reports OBSERVED in-the-wild exploitation (implants, victim counts, campaigns, CISA KEV confirmation); suspected = public exploit code/PoC or likely-but-unconfirmed. Attribute ONLY the CVEs you can tie to the claim \u2014 a bulletin's blanket 'actively exploited' does NOT flag all its CVEs. Omit the exploitation field when the event makes no claim.\n(5) LOW-TRUST events (\"low_trust\": true \u2014 AI-drafted aggregator reposts, late and overstated): treat as unverified leads. When the text attributes the claim to a named primary source (a researcher firm like watchTowr, a vendor advisory, CISA, a major outlet) and attribution_urls or a web search (/home/ubuntu/repos/cronman/bin/web-search.sh \"query\") locate that primary source CONFIRMING the claim, include a provenance object in the decision: {\"url\": <primary url>, \"source\": <domain>, \"evidence\": <one line>, \"verified\": true}. VERIFIED provenance lets the event mint a story (credited to the primary source) and count as a development; without it, a low-trust event can only attach to an EXISTING story, never mint. If you cannot verify, keep/drop on normal merit and omit provenance.\n\nWrite decisions as JSON with EXACTLY this shape:\n{\n  \"decisions\": [\n    {\"event_id\": \"<id>\", \"action\": \"keep\", \"story\": \"<existing candidate story id>\", \"reason\": \"...\"},\n    {\"event_id\": \"<id>\", \"action\": \"keep\", \"story\": \"NEW\", \"story_title\": \"<clean title>\", \"reason\": \"...\"},\n    {\"event_id\": \"<id>\", \"action\": \"drop\", \"reason\": \"...\"}\n  ],\n  \"merges\": [{\"from\": \"<fragment story id>\", \"into\": \"<canonical story id>\"}]\n}\nFor events marked \"low_trust\" (AI-drafted aggregator reposts) a decision\nmay carry an optional \"provenance\" object when you VERIFIED the claim at\nthe named primary source: {\"event_id\": ..., \"action\": \"keep\", ...}\n  \"provenance\": {\"url\": \"<primary source url>\", \"source\": \"<domain>\", \"evidence\": \"<one line>\"}\nOnly include provenance when the primary source (vendor advisory, CISA,\nthe named researcher/outlet) really carries the claim \u2014 verified\nprovenance lets a low-trust event mint a story and set freshness; without\nit the event can only amplify an existing story.\nSTRICT KEY NAMES: the array key is \"decisions\" (never \"events\"); the story\nkey is \"story\" (never \"story_id\"); \"story\" holds a candidate_stories id\nverbatim or the literal string \"NEW\". Optional per-event field\n\"exploitation\": {\"CVE-...\": {\"status\": \"exploited|suspected\", \"evidence\": \"1-2 sentences\"}}.",
+ "new_events": [
+  {
+   "id": "rss:7d6bd21f8f74e3c0",
+   "title": "doxx.net Raises $38 Million to Prevent AI Agent-on-the-Internet Misadventures",
+   "source": "securityweek.com",
+   "published_at": "2026-10-03T11:45:00Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Miami, FL-based doxx.net has raised $38 million in a Series A funding round led by Andreessen Horowitz, with participation from Animo Ventures and Focal.vc. The firm was founded in 2025 by serial founder and hacker-at-he"
+  },
+  {
+   "id": "rss:c7a4cda083b078dd",
+   "title": "Fortra Patches Critical Vulnerabilities in BoKS",
+   "source": "securityweek.com",
+   "published_at": "2026-10-03T11:34:00Z",
+   "cves": [
+    "CVE-2026-79898",
+    "CVE-2026-79901"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Fortra has released patches for eight vulnerabilities in Core Privileged Access Manager (BoKS), including three critical-severity bugs. BoKS provides organizations with central management of Unix and Linux fleets, enabli"
+  },
+  {
+   "id": "masto:117376138285476161",
+   "title": "Microsoft viene hackerata e torna Clippy! Peccato che volesse vendere crypto \ud83d\udccc Link all'articolo : https://www. redhotcyber.com/post/microso",
+   "source": "www.redhotcyber.com",
+   "published_at": "2026-10-03T08:55:29.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Microsoft viene hackerata e torna Clippy! Peccato che volesse vendere crypto \ud83d\udccc Link all'articolo : https://www. redhotcyber.com/post/microso  via Mastodon https://www.redhotcyber.com/post/microsoft-viene-hackerata-e-torn"
+  },
+  {
+   "id": "masto:117376116429455799",
+   "title": "CVE-2025-27920: Srimax Output Messenger suffers from a directory traversal vulnerability, actively exploited. Defenders should block outboun",
+   "source": "cybertop.ai",
+   "published_at": "2026-10-03T08:50:01.576Z",
+   "cves": [
+    "CVE-2025-27920"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "CVE-2025-27920: Srimax Output Messenger suffers from a directory traversal vulnerability, actively exploited. Defenders should block outboun  via Mastodon https://cybertop.ai/t/cve-2025-27920-srimax-output-messenger-dire"
+  },
+  {
+   "id": "masto:117376116417110001",
+   "title": "CYBERTOP AI detected CVE-2025-4427: An Ivanti EPMM authentication bypass vulnerability being actively exploited. Immediately restrict access",
+   "source": "cybertop.ai",
+   "published_at": "2026-10-03T08:50:01.387Z",
+   "cves": [
+    "CVE-2025-4427"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "CYBERTOP AI detected CVE-2025-4427: An Ivanti EPMM authentication bypass vulnerability being actively exploited. Immediately restrict access  via Mastodon https://cybertop.ai/t/cve-2025-4427-ivanti-endpoint-manager-mobil"
+  },
+  {
+   "id": "rss:8adafc917075bed0",
+   "title": "The AI Economy Has a Proof Problem",
+   "source": "hackernoon.com",
+   "published_at": "2026-10-03T08:37:31Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "We built the AI economy without an evidence layer. Litigation is building one for us. In June I wrote that you cannot de-risk a breakthrough . I meant it as a complaint about venture capital and game studios: a financial"
+  },
+  {
+   "id": "rss:1be5e3d5ef4605e3",
+   "title": "The Best AI Fix Isn't Adding More: It's Taking Away",
+   "source": "hackernoon.com",
+   "published_at": "2026-10-03T02:11:06Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "I noticed something interesting. Whenever an AI agent starts doing strange things, the immediate response of any team is to add more of something. More context. More tools. More logging. Anything so that the AI \"has all "
+  },
+  {
+   "id": "rss:56fa2e58f8d3f324",
+   "title": "AI vs. Super Intelligence: Is the Rename Actually More Accurate?",
+   "source": "hackernoon.com",
+   "published_at": "2026-10-03T02:06:10Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Introduction September 29, 2026, saw some notable developments in the world of AI. One was the White House putting out a statement to instruct all government departments and agencies to use \u201cSuper Intelligence (SI)\u201d inst"
+  },
+  {
+   "id": "rss:b11cc6c5cec98844",
+   "title": "299 Blog Posts To Learn About Apple",
+   "source": "hackernoon.com",
+   "published_at": "2026-10-03T02:01:11Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Let's learn about Apple via these 299 free blog posts. They are ordered by HackerNoon reader engagement data. Visit the Learn Repo or LearnRepo.com to find the most read blog posts about any technology. The best experien"
+  },
+  {
+   "id": "rss:146f8458d9b62548",
+   "title": "Do Pentesters Have Too Many Tools or Not Enough?",
+   "source": "hackernoon.com",
+   "published_at": "2026-10-03T01:27:26Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Ask five pentesters how many tools they touch in a single engagement, and you'll get five different answers, and none of them will sound especially organized. One's still running a spreadsheet next to a scanner next to t"
+  },
+  {
+   "id": "rss:f1c67ec4b1e97a42",
+   "title": "We Don\u2019t Automate Recruitment - We Automate What Keeps Recruiters From Recruiting",
+   "source": "hackernoon.com",
+   "published_at": "2026-10-03T01:08:35Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "How the Social Discovery Group Talent team works \u273e Recruiting has an odd paradox built into it. The more roles you have open at once, the less time you get to spend on actual recruiting. \u23f3 Conversations with candidates g"
+  },
+  {
+   "id": "rss:dfd457bafbc4d7f7",
+   "title": "Decoding JavaScript Errors: Beyond the AI Prompt",
+   "source": "hackernoon.com",
+   "published_at": "2026-10-03T00:40:49Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Introduction: Beyond the AI: Mastering Common JavaScript Errors and Why They Still Matter Are you seeing a bright red JavaScript error for the first time? Or are you stuck looking at a confusing crash log in your browser"
+  },
+  {
+   "id": "rss:17009c7219bd23d4",
+   "title": "Building a Football Formation Tool Was More Complicated Than I Expected",
+   "source": "hackernoon.com",
+   "published_at": "2026-10-02T23:24:27Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "What looked like eleven circles on a pitch turned into a surprisingly useful lesson in responsive design, positioning, touch interactions, and keeping a small web tool simple. A football formation looks simple when you d"
+  },
+  {
+   "id": "rss:ae6c89bf26c2ea6c",
+   "title": "Is That Award Worth Entering? What to Consider First",
+   "source": "hackernoon.com",
+   "published_at": "2026-10-02T23:20:00Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Winning an award can be useful. But entering for an award is not automatically a good investment. Before you spend money and time on an application, think about what you actually want the recognition to accomplish. Maybe"
+  },
+  {
+   "id": "rss:3e7b3d57a4dbbfc0",
+   "title": "In Search of the Dishonesty Circuit",
+   "source": "hackernoon.com",
+   "published_at": "2026-10-02T22:51:03Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Imagine if we could identify a \u201cdishonesty circuit,\u201d a specific pattern of activity that triggers whenever an AI is about to hallucinate or mislead the user. Currently, our relationship with AI is based on a bit of a gam"
+  },
+  {
+   "id": "rss:28a5d55ee909d3fe",
+   "title": "HireQuotient\u2019s EasySource Elevated to Featured Listing on Paylocity Marketplace",
+   "source": "hackernoon.com",
+   "published_at": "2026-10-02T22:50:32Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "San Francisco, United States, October 2nd, 2026/TechnologyWire/-- HireQuotient , an enterprise-grade AI-native recruiting platform, announced today that its flagship AI sourcing agent, EasySource, has been officially fea"
+  }
+ ],
+ "candidate_stories": [
+  {
+   "id": "doxx-net-raises-38-million-to-prevent-ai-agent-on-the-internet-m",
+   "title": "doxx.net Raises $38 Million to Prevent AI Agent-on-the-Internet Misadventures",
+   "n_events": 1,
+   "last_seen": "2026-10-03T11:45:00Z",
+   "first_event_title": "doxx.net Raises $38 Million to Prevent AI Agent-on-the-Internet Misadventures"
+  },
+  {
+   "id": "fortra-patches-critical-vulnerabilities-in-boks",
+   "title": "Fortra Patches Critical Vulnerabilities in BoKS",
+   "n_events": 1,
+   "last_seen": "2026-10-03T11:34:00Z",
+   "first_event_title": "Fortra Patches Critical Vulnerabilities in BoKS"
+  },
+  {
+   "id": "did-i-just-make-the-first-fully-correct-ascon-implementation",
+   "title": "Did I just make the first fully correct Ascon implementation?",
+   "n_events": 0,
+   "last_seen": "2026-10-03T10:31:12Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "bouncy-castle-bc-java-critical-cves-2026-71885-and-2026-71887",
+   "title": "Bouncy Castle BC-JAVA critical CVEs 2026-71885 and 2026-71887",
+   "n_events": 1,
+   "last_seen": "2026-10-03T10:30:24.000Z",
+   "first_event_title": "CRITICAL CVE-2026-71885 in Bouncy Castle BC-JAVA ( https:// radar.offseq.com/threat/cve-20 26-71885-cwe-295-improper-certificate-validation-"
+  },
+  {
+   "id": "japan-times-group-company-unauthorized-server-access",
+   "title": "Japan Times group company unauthorized server access",
+   "n_events": 1,
+   "last_seen": "2026-10-03T10:11:17.000Z",
+   "first_event_title": "The Japan Times, Japan's oldest English-language daily, says servers managed by a group company were accessed without authorization. Whether"
+  },
+  {
+   "id": "shinyhunters-claim-fbi-staff-psychiatric-and-medical-records-sto",
+   "title": "ShinyHunters claim FBI staff psychiatric and medical records stolen",
+   "n_events": 48,
+   "last_seen": "2026-10-03T10:03:04.000Z",
+   "first_event_title": "Reuters: ShinyHunters hackers say they stole psychiatric and medical records of FBI staff. \u201cFBI personnel data recently stolen by the ShinyH"
+  },
+  {
+   "id": "bouncy-castle-bc-java-euvd-2026-92002-vulnerability",
+   "title": "Bouncy Castle BC-JAVA EUVD-2026-92002 vulnerability",
+   "n_events": 1,
+   "last_seen": "2026-10-03T10:01:15.112Z",
+   "first_event_title": "\ud83d\udea8 EUVD-2026-92002 \ud83d\udcca Score: 8.2/10 (CVSS v3.1) \ud83d\udce6 Product: BC-JAVA \ud83c\udfe2 Vendor: Legion of the Bouncy Castle Inc. \ud83d\udcc5 Updated: 2026-10-03 \ud83d\udcdd In Bounc"
+  },
+  {
+   "id": "bouncy-castle-bc-java-euvd-2026-92003-vulnerability",
+   "title": "Bouncy Castle BC-JAVA EUVD-2026-92003 vulnerability",
+   "n_events": 1,
+   "last_seen": "2026-10-03T10:01:14.416Z",
+   "first_event_title": "\ud83d\udea8 EUVD-2026-92003 \ud83d\udcca Score: 9.2/10 (CVSS v3.1) \ud83d\udce6 Product: BC-JAVA \ud83c\udfe2 Vendor: Legion of the Bouncy Castle Inc. \ud83d\udcc5 Updated: 2026-10-03 \ud83d\udcdd In Bounc"
+  },
+  {
+   "id": "gitlab-ai-gateway-cve-2026-90970-critical-auth-escape",
+   "title": "GitLab AI Gateway CVE-2026-90970 Critical Auth Escape",
+   "n_events": 11,
+   "last_seen": "2026-10-03T10:01:13.000Z",
+   "first_event_title": "CVE-2026-90970: GitLab patched a critical flaw in its AI Gateway letting an authenticated user with Duo Agent Platform access escape the pro"
+  },
+  {
+   "id": "cto-at-ncsc-summary-week-ending-september-27th",
+   "title": "CTO at NCSC Summary: week ending September 27th",
+   "n_events": 0,
+   "last_seen": "2026-10-03T09:57:00Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "cisco-talos-details-antino-backdoor-used-by-china-nexus-actor-ag",
+   "title": "Cisco Talos details Antino backdoor used by China-nexus actor against Taiwan government orgs",
+   "n_events": 3,
+   "last_seen": "2026-10-03T09:38:00.000Z",
+   "first_event_title": "\ud83e\udd16 Cisco Talos details Antino, a previously undocumented backdoor used by a China-nexus actor against government and policy orgs in Taiwan, I"
+  },
+  {
+   "id": "teleocr-a-1-2b-vision-language-model-for-structured-document-par",
+   "title": "TeleOCR: A 1.2B Vision-Language Model for Structured Document Parsing",
+   "n_events": 0,
+   "last_seen": "2026-10-03T09:33:11Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "first-ever-exploitation-of-ptc-windchill-vulnerability-cve-2026",
+   "title": "First-Ever Exploitation of PTC Windchill Vulnerability (CVE-2026-12569) \u2014 CISA Adds to KEV, Manufacturing PLM Systems in Crosshairs",
+   "n_events": 3,
+   "last_seen": "2026-10-03T09:31:05.000Z",
+   "first_event_title": "First-Ever Exploitation of PTC Windchill Vulnerability (CVE-2026-12569) \u2014 CISA Adds to KEV, Manufacturing PLM Systems in Crosshairs"
+  },
+  {
+   "id": "i-stopped-asking-ai-for-seo-ideas-and-started-feeding-it-search",
+   "title": "I Stopped Asking AI for SEO Ideas and Started Feeding It Search Console Data Instead",
+   "n_events": 0,
+   "last_seen": "2026-10-03T09:26:21Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "cve-2026-87078-net-idn-punycode-perl-memory-leak",
+   "title": "CVE-2026-87078 Net::IDN::Punycode Perl memory leak",
+   "n_events": 1,
+   "last_seen": "2026-10-03T09:20:02.760Z",
+   "first_event_title": "CVE-2026-87078 Net::IDN::Punycode for Perl leaks its output buffer on every rejected label in decode_punycode. Unbounded labels mean memory "
+  },
+  {
+   "id": "abahouse-unauthorized-database-access-breach",
+   "title": "ABAHOUSE unauthorized database access breach",
+   "n_events": 1,
+   "last_seen": "2026-10-03T09:10:12.000Z",
+   "first_event_title": "Japanese fashion retailer ABAHOUSE says attackers reached the database holding its member and online order data, possibly covering every cus"
+  },
+  {
+   "id": "waterford-hotel-group-data-breach-and-ransomware-claims",
+   "title": "Waterford Hotel Group data breach and ransomware claims",
+   "n_events": 1,
+   "last_seen": "2026-10-03T09:01:13.000Z",
+   "first_event_title": "Waterford Hotel Group Discloses Data Breach Following Ransomware Claims Waterford Hotel Group suffered a data breach in May 2026 that compro"
+  },
+  {
+   "id": "bouncy-castle-bc-java-cve-2026-71887-cryptographic-signature-ver",
+   "title": "Bouncy Castle BC-JAVA CVE-2026-71887 cryptographic signature verification",
+   "n_events": 1,
+   "last_seen": "2026-10-03T09:00:25.000Z",
+   "first_event_title": "CVE-2026-71887 | Legion of the Bouncy Castle BC-JAVA https:// radar.offseq.com/threat/cve-20 26-71887-cwe-347-improper-verification-of-crypt"
+  },
+  {
+   "id": "the-ai-economy-has-a-proof-problem",
+   "title": "The AI Economy Has a Proof Problem",
+   "n_events": 1,
+   "last_seen": "2026-10-03T08:37:31Z",
+   "first_event_title": "The AI Economy Has a Proof Problem"
+  },
+  {
+   "id": "cisa-aa26-231a-active-threat-to-siemens-s7-plcs",
+   "title": "CISA AA26-231A Active Threat to Siemens S7 PLCs",
+   "n_events": 1,
+   "last_seen": "2026-10-03T08:24:05.000Z",
+   "first_event_title": "Defending Against an Active Threat to Siemens S7 Series PLCs (AA26-231A) \u26a0\ufe0f Critical threat alert: Hackers actively targeting Siemens S7 PLC"
+  },
+  {
+   "id": "dell-csm-flaws-allow-unauthenticated-admin-access",
+   "title": "Dell CSM Flaws Allow Unauthenticated Admin Access",
+   "n_events": 1,
+   "last_seen": "2026-10-03T08:01:13.000Z",
+   "first_event_title": "Dell CSM Flaws Allow Unauthenticated Admin Access and Root on Kubernetes Nodes Dell patched 37 vulnerabilities in its Container Storage Modu"
+  },
+  {
+   "id": "cve-2026-87080-net-idn-punycode-spoofing",
+   "title": "CVE-2026-87080 Net::IDN::Punycode Spoofing",
+   "n_events": 1,
+   "last_seen": "2026-10-03T07:50:01.183Z",
+   "first_event_title": "CVE-2026-87080 Net::IDN::Punycode CVSS 9.1: truncated label decodes to unencoded chars, enabling spoofing. Patch under review - update Perl "
+  },
+  {
+   "id": "cling-botnet-exploits-stun-protocol-for-iot-command-and-control",
+   "title": "Cling botnet exploits STUN protocol for IoT command and control",
+   "n_events": 5,
+   "last_seen": "2026-10-03T07:48:49Z",
+   "first_event_title": "(nozominetworks.com) Cling Botnet: Exploiting STUN Protocol for Stealthy Command and Control via IoT Vulnerabilities In brief - This article"
+  },
+  {
+   "id": "cve-2026-95102-monta-websocket-authentication-bypass",
+   "title": "CVE-2026-95102 Monta WebSocket authentication bypass",
+   "n_events": 4,
+   "last_seen": "2026-10-03T07:46:37.000Z",
+   "first_event_title": "Monta monta.app faces a CRITICAL risk (CVE-2026-95102, CVSS 9.4): missing auth on WebSocket endpoints allows attackers to impersonate chargi"
+  },
+  {
+   "id": "cve-2026-18397-thales-sconnect-drive-by-rce",
+   "title": "CVE-2026-18397 Thales SConnect Drive-By RCE",
+   "n_events": 1,
+   "last_seen": "2026-10-03T07:36:15.000Z",
+   "first_event_title": "\ud83e\udd16 CVE-2026-18397 (CVSS 9.4, critical): drive-by RCE in Thales SConnect, the browser extension used with SWIFT 3SKey hardware MFA and several"
+  },
+  {
+   "id": "cve-2026-18443-storeapps-smart-manager-sql-injection",
+   "title": "CVE-2026-18443 StoreApps Smart Manager SQL Injection",
+   "n_events": 1,
+   "last_seen": "2026-10-03T07:32:17.000Z",
+   "first_event_title": "CVE-2026-18443: StoreApps Smart Manager for WooCommerce has an authenticated SQL injection in versions up to and including 8.97.0, allowing "
+  },
+  {
+   "id": "sandworm-sabotages-second-polish-energy-facility-via-apn-pivot",
+   "title": "Sandworm Sabotages Second Polish Energy Facility via APN Pivot",
+   "n_events": 1,
+   "last_seen": "2026-10-03T07:24:05.000Z",
+   "first_event_title": "Novel Private APN Pivot Let Hackers Sabotage Second Polish Energy Facility \ud83d\udea8 Poland's power grid hit again! Russian APT Sandworm launched a "
+  },
+  {
+   "id": "wordpress-backdoor-rebuilds-after-cleanup",
+   "title": "WordPress Backdoor Rebuilds After Cleanup",
+   "n_events": 1,
+   "last_seen": "2026-10-03T06:47:14.382Z",
+   "first_event_title": "WordPress Backdoor Rebuilds Itself After Cleanup Using Files, Database, and Shared Memory # wordpress # cybersecurity # backdoor https:// th"
+  },
+  {
+   "id": "graykey-bypasses-iphone-automatic-inactivity-reboot",
+   "title": "GrayKey bypasses iPhone automatic inactivity reboot",
+   "n_events": 3,
+   "last_seen": "2026-10-03T06:46:16.749Z",
+   "first_event_title": "https://www. 404media.co/cops-can-bypass-ip hone-automatic-inactivity-reboot-graykey/ The idea behind GrayKey Preserve and Evidence Preserva"
+  },
+  {
+   "id": "microsoft-warns-clickfix-attacks-use-fake-captcha-lures-to-execu",
+   "title": "Microsoft Warns ClickFix Attacks Use Fake CAPTCHA Lures to Execute Malicious Commands",
+   "n_events": 1,
+   "last_seen": "2026-10-03T06:27:23Z",
+   "first_event_title": "Microsoft Warns ClickFix Attacks Use Fake CAPTCHA Lures to Execute Malicious Commands"
+  },
+  {
+   "id": "cve-2026-65634-erlang-otp-dos",
+   "title": "CVE-2026-65634 Erlang/OTP DoS",
+   "n_events": 1,
+   "last_seen": "2026-10-03T06:20:19.868Z",
+   "first_event_title": "CVE-2026-65634 Erlang/OTP DoS: crafted OID in TLS handshake triggers unbounded integer growth in the asn1 decoder CVSS 7.5. No patch yet. Li"
+  },
+  {
+   "id": "new-beacon-found-at-103-212-186-85-on-port-8888-please-check-it",
+   "title": "beacon found at 103.212.186.85 on port 8888. Please check it at https://www. beaconbeagle.com/beacons/103.2 12.186.85/x64 . # ThreatInte",
+   "n_events": 24,
+   "last_seen": "2026-10-03T06:05:23.000Z",
+   "first_event_title": "New beacon found at 47.94.56.71 on port 8443. Please check it at https://www. beaconbeagle.com/beacons/47.94 .56.71/x64 . # ThreatIntel # Co"
+  },
+  {
+   "id": "aws-ai-agent-vulnerabilities-let-attackers-bypass-authentication",
+   "title": "AWS AI Agent Vulnerabilities Let Attackers Bypass Authentication and Steal Credentials",
+   "n_events": 2,
+   "last_seen": "2026-10-03T06:04:52Z",
+   "first_event_title": "AWS AI Agent Vulnerabilities Let Attackers Bypass Authentication and Steal Credentials"
+  },
+  {
+   "id": "euvd-2026-91917-helpdesk-support-ticket-system-for-woocommerce",
+   "title": "EUVD-2026-91917 Helpdesk Support Ticket System for WooCommerce",
+   "n_events": 1,
+   "last_seen": "2026-10-03T06:01:10.305Z",
+   "first_event_title": "\ud83d\udea8 EUVD-2026-91917 \ud83d\udcca Score: 4.3/10 (CVSS v3.1) \ud83d\udce6 Product: Helpdesk Support Ticket System for WooCommerce \ud83c\udfe2 Vendor: wpcodefactory \ud83d\udcc5 Updated: 2"
+  },
+  {
+   "id": "euvd-2026-91918-alt-text-ai-vulnerability",
+   "title": "EUVD-2026-91918 Alt Text AI vulnerability",
+   "n_events": 1,
+   "last_seen": "2026-10-03T06:01:09.865Z",
+   "first_event_title": "\ud83d\udea8 EUVD-2026-91918 \ud83d\udcca Score: 4.3/10 (CVSS v3.1) \ud83d\udce6 Product: Alt Text AI \u2013 Automatically generate image alt text for SEO and accessibility \ud83c\udfe2 Ven"
+  },
+  {
+   "id": "euvd-2026-91919-wp-social-login-and-register-social-counter",
+   "title": "EUVD-2026-91919 Wp Social Login and Register Social Counter",
+   "n_events": 1,
+   "last_seen": "2026-10-03T06:01:09.336Z",
+   "first_event_title": "\ud83d\udea8 EUVD-2026-91919 \ud83d\udcca Score: 6.4/10 (CVSS v3.1) \ud83d\udce6 Product: Wp Social Login and Register Social Counter \ud83c\udfe2 Vendor: Roxnor \ud83d\udcc5 Updated: 2026-10-03 "
+  },
+  {
+   "id": "euvd-2026-91920-visitor-traffic-real-time-statistics",
+   "title": "EUVD-2026-91920 Visitor Traffic Real Time Statistics",
+   "n_events": 1,
+   "last_seen": "2026-10-03T06:01:08.881Z",
+   "first_event_title": "\ud83d\udea8 EUVD-2026-91920 \ud83d\udcca Score: 7.2/10 (CVSS v3.1) \ud83d\udce6 Product: Visitor Traffic Real Time Statistics \ud83c\udfe2 Vendor: wp-buy \ud83d\udcc5 Updated: 2026-10-03 \ud83d\udcdd The V"
+  },
+  {
+   "id": "pakistani-ip-chains-cve-2017-9841-and-cve-2021-41773-in-active-e",
+   "title": "Pakistani IP Chains CVE-2017-9841 and CVE-2021-41773 in Active Exploitation",
+   "n_events": 12,
+   "last_seen": "2026-10-03T06:00:08.000Z",
+   "first_event_title": "Spy IP of the Day: The Tinkerer from Lahore (165.99.207.153) Chaining CVE-2017-9841 and CVE-2021-41773"
+  },
+  {
+   "id": "citrix-netscaler-appliances-reboot-repeatedly-after-0-day-securi",
+   "title": "Citrix NetScaler Appliances Reboot Repeatedly After 0-Day Security Update",
+   "n_events": 2,
+   "last_seen": "2026-10-03T05:58:10.000Z",
+   "first_event_title": "Citrix NetScaler Appliances Reboot Repeatedly After 0-Day Security Update"
+  },
+  {
+   "id": "cve-2026-59265-apache-openoffice-critical-flaw",
+   "title": "CVE-2026-59265 Apache OpenOffice critical flaw",
+   "n_events": 1,
+   "last_seen": "2026-10-03T05:18:05.000Z",
+   "first_event_title": "CVE-2026-59265: A critical flaw in Apache OpenOffice's Java integration lets a crafted untrusted document execute arbitrary code when opened"
+  },
+  {
+   "id": "adobe-security-advisory-av26-808",
+   "title": "Adobe security advisory (AV26-808)",
+   "n_events": 2,
+   "last_seen": "2026-08-13T08:12:33Z",
+   "first_event_title": "Adobe security advisory (AV26-808)"
+  },
+  {
+   "id": "adobe-security-advisory-av26-888",
+   "title": "Adobe security advisory (AV26-888)",
+   "n_events": 3,
+   "last_seen": "2026-09-09T00:35:01.000Z",
+   "first_event_title": "Adobe security advisory (AV26-888)"
+  },
+  {
+   "id": "apple-security-advisory-av26-823",
+   "title": "Apple security advisory (AV26-823)",
+   "n_events": 1,
+   "last_seen": "2026-08-17T15:35:39Z",
+   "first_event_title": "Apple security advisory (AV26-823)"
+  },
+  {
+   "id": "commvault-security-advisory-av26-799",
+   "title": "Commvault security advisory (AV26-799)",
+   "n_events": 1,
+   "last_seen": "2026-08-11T17:46:10Z",
+   "first_event_title": "Commvault security advisory (AV26-799)"
+  },
+  {
+   "id": "control-systems-johnson-controls-security-advisory-av26-991",
+   "title": "[Control Systems] Johnson Controls security advisory (AV26-991)",
+   "n_events": 1,
+   "last_seen": "2026-10-02T13:35:43Z",
+   "first_event_title": "[Control Systems] Johnson Controls security advisory (AV26-991)"
+  },
+  {
+   "id": "control-systems-moxa-security-advisory-av26-995",
+   "title": "[Control Systems] Moxa security advisory (AV26-995)",
+   "n_events": 1,
+   "last_seen": "2026-10-02T18:10:42Z",
+   "first_event_title": "[Control Systems] Moxa security advisory (AV26-995)"
+  },
+  {
+   "id": "control-systems-siemens-security-advisory-av26-890",
+   "title": "[Control Systems] Siemens security advisory (AV26-890)",
+   "n_events": 3,
+   "last_seen": "2026-09-23T08:01:13.000Z",
+   "first_event_title": "[Control Systems] Siemens security advisory (AV26-890)"
+  },
+  {
+   "id": "dell-security-advisory-av26-863",
+   "title": "Dell security advisory (AV26-863)",
+   "n_events": 2,
+   "last_seen": "2026-09-11T08:40:47.000Z",
+   "first_event_title": "Dell security advisory (AV26-863)"
+  },
+  {
+   "id": "dell-security-advisory-av26-966",
+   "title": "Dell security advisory (AV26-966)",
+   "n_events": 1,
+   "last_seen": "2026-09-28T18:00:49Z",
+   "first_event_title": "Dell security advisory (AV26-966)"
+  },
+  {
+   "id": "erlang-security-advisory-av26-948",
+   "title": "Erlang security advisory (AV26-948)",
+   "n_events": 1,
+   "last_seen": "2026-09-22T18:25:40Z",
+   "first_event_title": "Erlang security advisory (AV26-948)"
+  },
+  {
+   "id": "freepbx-security-advisory-av26-818",
+   "title": "FreePBX security advisory (AV26-818)",
+   "n_events": 1,
+   "last_seen": "2026-08-14T16:10:48Z",
+   "first_event_title": "FreePBX security advisory (AV26-818)"
+  },
+  {
+   "id": "freepbx-security-advisory-av26-973",
+   "title": "FreePBX security advisory (AV26-973)",
+   "n_events": 0,
+   "last_seen": "2026-09-29T15:30:46Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "gitlab-security-advisory-av26-814",
+   "title": "GitLab security advisory (AV26-814)",
+   "n_events": 1,
+   "last_seen": "2026-08-13T14:00:38Z",
+   "first_event_title": "GitLab security advisory (AV26-814)"
+  },
+  {
+   "id": "google-security-advisory-av26-904",
+   "title": "Google security advisory (AV26-904)",
+   "n_events": 2,
+   "last_seen": "2026-09-09T20:49:30Z",
+   "first_event_title": "Google security advisory (AV26-904)"
+  },
+  {
+   "id": "grafana-security-advisory-av26-796",
+   "title": "Grafana security advisory (AV26-796)",
+   "n_events": 1,
+   "last_seen": "2026-08-11T13:30:40Z",
+   "first_event_title": "Grafana security advisory (AV26-796)"
+  },
+  {
+   "id": "grafana-security-advisory-av26-860",
+   "title": "Grafana Alloy Vulnerability CVE-2026-19516",
+   "n_events": 1,
+   "last_seen": "2026-08-28T15:10:44Z",
+   "first_event_title": "Grafana security advisory (AV26-860)"
+  },
+  {
+   "id": "hashicorp-security-advisory-av26-797",
+   "title": "HashiCorp security advisory (AV26-797)",
+   "n_events": 1,
+   "last_seen": "2026-08-11T14:05:42Z",
+   "first_event_title": "HashiCorp security advisory (AV26-797)"
+  },
+  {
+   "id": "hashicorp-security-advisory-av26-817",
+   "title": "HashiCorp security advisory (AV26-817)",
+   "n_events": 1,
+   "last_seen": "2026-08-14T16:05:44Z",
+   "first_event_title": "HashiCorp security advisory (AV26-817)"
+  },
+  {
+   "id": "ibm-security-advisory-av26-967",
+   "title": "IBM security advisory (AV26-967)",
+   "n_events": 1,
+   "last_seen": "2026-09-28T18:25:42Z",
+   "first_event_title": "IBM security advisory (AV26-967)"
+  },
+  {
+   "id": "ivanti-security-advisory-av26-805",
+   "title": "Ivanti security advisory (AV26-805)",
+   "n_events": 1,
+   "last_seen": "2026-08-11T20:20:39Z",
+   "first_event_title": "Ivanti security advisory (AV26-805)"
+  },
+  {
+   "id": "we-don-t-automate-recruitment-we-automate-what-keeps-recruiters",
+   "title": "We Don\u2019t Automate Recruitment - We Automate What Keeps Recruiters From Recruiting",
+   "n_events": 1,
+   "last_seen": "2026-10-03T01:08:35Z",
+   "first_event_title": "We Don\u2019t Automate Recruitment - We Automate What Keeps Recruiters From Recruiting"
+  },
+  {
+   "id": "is-that-award-worth-entering-what-to-consider-first",
+   "title": "Is That Award Worth Entering? What to Consider First",
+   "n_events": 1,
+   "last_seen": "2026-10-02T23:20:00Z",
+   "first_event_title": "Is That Award Worth Entering? What to Consider First"
+  },
+  {
+   "id": "the-best-ai-fix-isn-t-adding-more-it-s-taking-away",
+   "title": "The Best AI Fix Isn't Adding More: It's Taking Away",
+   "n_events": 1,
+   "last_seen": "2026-10-03T02:11:06Z",
+   "first_event_title": "The Best AI Fix Isn't Adding More: It's Taking Away"
+  },
+  {
+   "id": "ai-vs-super-intelligence-is-the-rename-actually-more-accurate",
+   "title": "AI vs. Super Intelligence: Is the Rename Actually More Accurate?",
+   "n_events": 1,
+   "last_seen": "2026-10-03T02:06:10Z",
+   "first_event_title": "AI vs. Super Intelligence: Is the Rename Actually More Accurate?"
+  },
+  {
+   "id": "decoding-javascript-errors-beyond-the-ai-prompt",
+   "title": "Decoding JavaScript Errors: Beyond the AI Prompt",
+   "n_events": 1,
+   "last_seen": "2026-10-03T00:40:49Z",
+   "first_event_title": "Decoding JavaScript Errors: Beyond the AI Prompt"
+  },
+  {
+   "id": "hirequotient-s-easysource-elevated-to-featured-listing-on-payloc",
+   "title": "HireQuotient\u2019s EasySource Elevated to Featured Listing on Paylocity Marketplace",
+   "n_events": 1,
+   "last_seen": "2026-10-02T22:50:32Z",
+   "first_event_title": "HireQuotient\u2019s EasySource Elevated to Featured Listing on Paylocity Marketplace"
+  },
+  {
+   "id": "building-a-football-formation-tool-was-more-complicated-than-i-e",
+   "title": "Building a Football Formation Tool Was More Complicated Than I Expected",
+   "n_events": 1,
+   "last_seen": "2026-10-02T23:24:27Z",
+   "first_event_title": "Building a Football Formation Tool Was More Complicated Than I Expected"
+  },
+  {
+   "id": "do-pentesters-have-too-many-tools-or-not-enough",
+   "title": "Do Pentesters Have Too Many Tools or Not Enough?",
+   "n_events": 1,
+   "last_seen": "2026-10-03T01:27:26Z",
+   "first_event_title": "Do Pentesters Have Too Many Tools or Not Enough?"
+  },
+  {
+   "id": "in-search-of-the-dishonesty-circuit",
+   "title": "In Search of the Dishonesty Circuit",
+   "n_events": 1,
+   "last_seen": "2026-10-02T22:51:03Z",
+   "first_event_title": "In Search of the Dishonesty Circuit"
+  },
+  {
+   "id": "89-blog-posts-to-learn-about-2020",
+   "title": "89 Blog Posts To Learn About 2020",
+   "n_events": 1,
+   "last_seen": "2026-10-03T02:01:11Z",
+   "first_event_title": "299 Blog Posts To Learn About Apple"
+  }
+ ]
+}
