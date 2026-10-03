@@ -1,0 +1,3 @@
+Idk where to post this honestly, but i feel like this video by Jaden Williams, about how ai will revers-engineer everything and cause the fall of digital civilization. I'm not that much aware about cybersecurity, but isn't it needs encryption keys or crack other methods of authentication, to actually cause any harm with the server architecture? Like i would get it that cracking offline products would be much easier, since you just would need to erase the drm and patch it, which ai would have no trouble identifying, but even then there are piracy methods that doesn't require to crack a game at all submitted by /u/Niko_Belic84 [link] [comments]
+
+via reddit r/cybersecurity: Isn't this video just wrong?
