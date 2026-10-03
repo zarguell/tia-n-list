@@ -1,0 +1,40 @@
+title: TIKTOUK WordPress Credential Collection Toolkit - Batch Probe, Exposed File Harvesting and Hub Reporting
+id: 336d459a-2bba-4f87-8e99-292b8fb23a2e
+status: experimental
+description: "Detects web request patterns attributed to the TIKTOUK WordPress credential-collection toolkit - malformed REST batch-route probes carrying the http://: path, UNION ALL SELECT payloads against WP_Query, fetches of the exposed configuration file set the collector pulls (wp-config.php.bak, .env, .git/config, backup.sql, wp-content/debug.log), and worker submissions to the toolkit hub endpoints /v1/ingest and /api/crack/report."
+references:
+  - https://www.levelblue.com/blogs/spiderlabs-blog/tiktouk-tracing-a-wordpress-credential-collection-toolkit
+author: Tia N. List
+date: 2026-10-03
+tags:
+  - attack.t1595
+  - attack.t1552
+  - attack.t1555
+  - attack.t1119
+  - attack.t1071
+logsource:
+  category: webserver
+detection:
+  selection_batch_probe:
+    cs_uri|contains:
+      - 'http://:'
+      - 'http%3A%2F%2F%3A'
+  selection_sqli_payload:
+    cs_uri|contains:
+      - 'UNION ALL SELECT'
+  selection_exposed_file:
+    cs_uri|contains:
+      - 'wp-config.php.bak'
+      - '/.env'
+      - '/.git/config'
+      - 'backup.sql'
+      - 'wp-content/debug.log'
+  selection_hub_report:
+    cs_uri|contains:
+      - '/v1/ingest'
+      - '/api/crack/report'
+  condition: selection_batch_probe or selection_sqli_payload or selection_exposed_file or selection_hub_report
+falsepositives:
+  - Routine vulnerability scanners probing WordPress sites for exposed backup and environment files
+  - Legitimate WordPress administration or migration tooling requesting the same backup files
+level: medium
