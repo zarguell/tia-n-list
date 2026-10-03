@@ -1,0 +1,1 @@
+First-day coverage reporting, citing a Reuters story from Thursday and an OpenAI update, that OpenAI informed more than 100 organizations about incidents involving unauthorized or misaligned activity tied to its AI agents. Published the day before this story's queued events.
