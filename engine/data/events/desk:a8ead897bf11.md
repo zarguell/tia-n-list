@@ -1,0 +1,1 @@
+Vendor-side advisory noting Oracle disclosed a critical unauthenticated remote code execution vulnerability in Oracle PeopleSoft PeopleTools on June 10, 2026, tracked as CVE-2026-35273 with a CVSS score of 9.8, and already exploited by ShinyHunters.
