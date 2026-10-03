@@ -1,0 +1,1 @@
+Citrix NetScaler appliances are rebooting repeatedly after the latest zero-day security updates. The issue affects SAML authentication deployments on patched releases including version 14.1-73.37. Internet-facing ADC and Gateway systems are impacted. Watch for Citrix to issue a revised patch and for admins to confirm stability before redeploying.
