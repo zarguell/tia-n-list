@@ -1,0 +1,1 @@
+Cisco Talos reports Antino, an undocumented backdoor used by a China-linked actor targeting Taiwan government and policy organizations. The backdoor uses Outlook-based C2. No CVEs assigned. Monitor Talos updates for IOCs and mitigation guidance.
