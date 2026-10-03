@@ -7,7 +7,7 @@ CTI records, and writes the human report to data/audits/<date>.md.
 
 Every check is best-effort and never crashes the run — a failed check is a
 data point, not a fatal error. Checks cover: the other automations' run
-status (via the automation service API), digest/hourly/CTI freshness, queue
+status (from the cronman job logs), digest/hourly/CTI freshness, queue
 drain, store invariants, detection validity, live site, snapshot pin.
 """
 import glob
@@ -25,12 +25,21 @@ DATA = os.path.join(ENGINE, "data")
 NOW = datetime.now(timezone.utc)
 TODAY = NOW.strftime("%Y-%m-%d")
 
-# the automations this site depends on (ids as registered in the service)
-AUTOMATIONS = {
-    "hourly": "9ae955b1-cbc7-4fbf-a60e-c4bb619beacf",
-    "digest": "c2d673b5-6646-4f08-9360-ef0fc53f1455",
-    "cti": "58c9d1b0-29cb-4f36-920c-8537106b488f",
-    "safety_net": "584193a5-99d8-4c01-8773-41e2570de689",
+# the automations this site depends on, and where each writes its job log
+# (cron schedules them directly on this host; the old OpenHands automation
+# service API never existed here, so the keyless check passed vacuously for
+# days — 2026-10-03 audit). CRONMAN_LOGS overrides the log root.
+LOG_ROOT = os.environ.get(
+    "CRONMAN_LOGS",
+    os.path.join(os.path.expanduser("~"), "repos", "cronman", "logs"))
+STATE_ROOT = os.environ.get(
+    "CRONMAN_STATE",
+    os.path.join(os.path.expanduser("~"), "repos", "cronman", "state"))
+AUTOMATION_LOGS = {
+    "hourly": os.path.join(LOG_ROOT, "cronman", "latest.log"),
+    "digest": os.path.join(LOG_ROOT, "daily-digest", "latest.log"),
+    "cti": os.path.join(LOG_ROOT, "cti-pass", "latest.log"),
+    "safety_net": os.path.join(LOG_ROOT, "cronman", "latest.log"),
 }
 BASE_URL = "https://zarguell.github.io/tia-n-list"
 
@@ -156,23 +165,21 @@ except Exception:
     yara_bad = -1
 check("yara_valid", yara_bad == 0, "yara-x missing" if yara_bad == -1 else f"{yara_bad} failing rules")
 
-# 5. the other automations' run status (last 24h, via the service API)
-key = os.environ.get("OPENHANDS_AUTOMATION_API_KEY", "")
+# 5. the automations' run status, from their job logs (cron schedules them
+# directly on this host; the old OpenHands service API never existed here, so
+# the keyless check passed vacuously for days — 2026-10-03 audit). The pure
+# parser lives in audit_checks (pinned by test_audit.py). Only the core
+# three can fail the check — safety_net (the 15-min KEV sentinel) only acts
+# inside CISA's window, so its age is informational.
+import audit_checks as _ac  # noqa: E402
 run_status = {}
-for name, aid in AUTOMATIONS.items():
-    if not key:
-        run_status[name] = "no-api-key"
-        continue
-    out = sh(["curl", "-s", "--max-time", "15", "-H", f"Authorization: Bearer {key}",
-              f"http://localhost:8000/api/automation/v1/{aid}/runs"])
-    try:
-        runs = json.loads(out).get("runs", [])
-        settled = [x for x in runs if x.get("status") in ("COMPLETED", "FAILED")]
-        run_status[name] = f"{settled[0]['status']} {str(settled[0].get('created_at'))[:16]}" if settled else "no-settled-run"
-    except Exception:
-        run_status[name] = "unreadable"
-core_failed = [n for n in ("hourly", "digest", "cti") if run_status.get(n, "").startswith("FAILED")]
-check("automation_runs", not core_failed, "; ".join(f"{k}: {v}" for k, v in run_status.items()))
+for name, path in AUTOMATION_LOGS.items():
+    st, detail = _ac.automation_status(path, NOW)
+    run_status[name] = detail if st == "COMPLETED" else f"{st}: {detail}"
+core_failed = [n for n in ("hourly", "digest", "cti")
+               if run_status[n].startswith(("FAILED", "MISSING", "STALE"))]
+check("automation_runs", not core_failed,
+      "; ".join(f"{k}: {v}" for k, v in run_status.items()))
 
 # 6. live site + snapshot pin (digest URL = latest EXISTING digest, so the
 # check is timing-robust — the auditor runs after the digest, but this
@@ -268,8 +275,8 @@ import audit_checks as jc  # noqa: E402
 _all_stories = jc.load_all_stories(DATA)
 _ok, _detail, _ghosts = jc.dedup_invariants(_all_stories)
 check("dedup_invariants", _ok, _detail)
-_tel_problems, _tel_info = jc.triage_telemetry("/home/ubuntu/repos/cronman/logs/cronman",
-                                               os.path.join(DATA, "triage"), NOW)
+_tel_problems, _tel_info = jc.triage_telemetry(
+    os.path.join(LOG_ROOT, "cronman"), os.path.join(DATA, "triage"), NOW)
 check("triage_drift", not _tel_problems, "; ".join(_tel_problems) or _tel_info)
 _worst_h, _qa_detail = jc.queue_age(DATA, _all_stories, NOW)
 check("analysis_queue_age", _worst_h is None or _worst_h <= 48, _qa_detail)
@@ -277,7 +284,7 @@ _lang_hits = jc.language_scan(DATA)
 check("language_scan", not _lang_hits, "; ".join(_lang_hits[:4]) or "no non-Latin script bleed")
 _noise_p, _noise_info = jc.ingest_noise(
     DATA, NOW,
-    raw_glob="/home/ubuntu/repos/cronman/state/social-collector/raw/toots-*.jsonl")
+    raw_glob=os.path.join(STATE_ROOT, "social-collector", "raw", "toots-*.jsonl"))
 check("ingest_noise", not _noise_p, "; ".join(_noise_p[:4]) or "sources clean")
 
 EXTRA = {

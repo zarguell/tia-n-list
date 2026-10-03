@@ -503,3 +503,40 @@ def ingest_noise(data_dir, now, *, raw_glob=None, window_days=2,
                                             key=lambda kv: -kv[1][0])[:12]],
     }
     return problems, info
+
+
+def automation_status(path, now, *, stale_hours=24):
+    """(state, detail) from a cronman job's latest.log — the run-status leg of
+    the automation_runs check.
+
+    The cron schedules the automations directly on this host; the old
+    OpenHands automation service API (localhost:8000 + OPENHANDS key) never
+    existed here, so the keyless check reported no-api-key and passed
+    vacuously for days (2026-10-03 audit, 3rd consecutive day). The job logs
+    are the ground truth: the latest terminal line decides — a parened DONE
+    ("DONE (publish failed)") or an ABORT is a failure, a bare DONE/SKIP
+    completed; a missing log or one silent for > stale_hours is stale (a run
+    killed mid-write leaves no terminal line, so a missing one is a failure
+    signal too). Pure: path/now passed in.
+    """
+    if not os.path.exists(path):
+        return "MISSING", f"no log at {path}"
+    status, ts = None, ""
+    try:
+        with open(path, errors="replace") as f:
+            for line in f:
+                if " DONE (" in line or "ABORT" in line:
+                    status, ts = "FAILED", line[:20]
+                elif " DONE" in line or "SKIP:" in line:
+                    status, ts = "COMPLETED", line[:20]
+    except OSError as e:
+        return "MISSING", f"unreadable {path}: {e}"
+    if status is None:
+        return "MISSING", "no terminal line (crashed mid-run?)"
+    try:
+        age = now - datetime.fromisoformat(ts.replace("Z", "+00:00"))
+        if age > timedelta(hours=stale_hours):
+            return "STALE", f"{status.lower()} {ts[:16]} ({age.days}d ago)"
+    except ValueError:
+        pass
+    return status, f"{status.lower()} {ts[:16]}"
