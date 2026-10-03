@@ -1,0 +1,3 @@
+I stumbled upon this article, and my conclusion sounds so stupid and irresponsible that I start to doubt myself and believe i misunderstood something If the IA can just access the internet once it has info from the DNS, that emplies the IA has been given "Open-Bar" access to the entire IP addresses of the world in the first place doesnt it? Did I miss something obvious or do these guys have the cybersecurity knowledge of an undergraduate? submitted by /u/Leogis [link] [comments]
+
+via reddit r/cybersecurity: What do you make of this article about the AI using DNS to escape it's "Sealed Environment"
