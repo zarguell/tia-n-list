@@ -192,6 +192,84 @@ def _cvss_severity(cves):
     return s, kev, bonus
 
 
+def is_rereport(event, prior_events, *, low_jaccard=0.25, high_jaccard=0.55,
+                min_gap_h=24):
+    """True when `event` re-reports coverage the story already carries.
+
+    Two identity signals, combined to fit the two echo shapes:
+      - CVE-anchored (event's CVEs all already carried by the priors): the
+        CVE set IS the disclosure identity, so ANY shared discriminator
+        token with a prior event settles it. Same-CVE coverage days later
+        is a re-report even when fully reworded; severity keeps KEV/CVSS
+        and the digest's own KEV-recap clock still surfaces genuine KEV
+        developments, while editorial wildcards remain the path for same-
+        CVE stories that genuinely deserve the slate.
+      - CVE-less (breach/claim stories): the headline is the only identity,
+        so require near-identical wording (jaccard >= high_jaccard, >= 2
+        shared tokens). A new victim or new claim shares the actor tokens
+        but adds its own — that is a development, not an echo.
+    Plus: the matched prior must be >= min_gap_h older — the first-day
+    multi-outlet burst is legitimate pickup velocity, not echoes.
+
+    Founding events (no priors) are never re-reports. KEV-add events are
+    deliberately NOT special-cased here: severity carries the KEV flag
+    regardless, and digest_candidates appends the KEV add date itself, so a
+    suppressed KEV echo cannot hide a KEV development from the digest.
+
+    2026-10-03 audit (2nd day recommending): this class explains most of the
+    ~340 digest demote overrides (8 slugs overridden >= 3 times) — echoes
+    reset the decay clock (merge stamps last_seen on every attach) and add
+    48h velocity, so echo-only stories stayed on the slate until demoted by
+    hand. Pure: both arguments are event dicts; tokenization reuses merge's
+    discriminator sets (lazy import — merge imports this module).
+    """
+    if not prior_events:
+        return False
+    from merge import title_discriminators, CVE_RE
+    try:
+        ev_dt = datetime.fromisoformat(
+            (event.get("published_at") or "").replace("Z", "+00:00"))
+    except ValueError:
+        ev_dt = None
+    ev_cves = {c.upper() for c in (event.get("cves") or [])}
+    ev_cves |= {c.upper() for c in CVE_RE.findall(event.get("title") or "")}
+    prior_cves = set()
+    for p in prior_events:
+        prior_cves |= {c.upper() for c in (p.get("cves") or [])}
+        prior_cves |= {c.upper() for c in CVE_RE.findall(p.get("title") or "")}
+    new_cves = ev_cves - prior_cves
+    if ev_cves and new_cves:
+        return False              # brings a new CVE: a development, not an echo
+    floor = low_jaccard if ev_cves else high_jaccard
+    min_shared = 1 if ev_cves else 2
+    disc = title_discriminators(event.get("title") or "")
+    if len(disc) < min_shared:
+        return False
+    for p in prior_events:
+        if ev_dt is not None:
+            try:
+                p_dt = datetime.fromisoformat(
+                    (p.get("published_at") or "").replace("Z", "+00:00"))
+            except ValueError:
+                p_dt = None
+            if p_dt is None or (ev_dt - p_dt).total_seconds() < min_gap_h * 3600:
+                continue          # same-day burst: legitimate velocity
+        pdisc = title_discriminators(p.get("title") or "")
+        shared = disc & pdisc
+        if ev_cves:
+            # CVE identity already settles this is the same disclosure; any
+            # shared token confirms it is not a tokenization fluke.
+            if shared:
+                return True
+            continue
+        if len(shared) < min_shared:
+            continue
+        union = disc | pdisc
+        if union and len(shared) / len(union) >= floor:
+            return True
+    return False
+
+
 def hot_score(story, events, reddit_posts, now=None):
     """Compute the CVSS-inspired hot score for a story. Returns a dict with the
     final score and every factor, for transparent display."""
@@ -216,14 +294,28 @@ def hot_score(story, events, reddit_posts, now=None):
     severity = min(5.0, sev + (0.5 if kev else 0.0) + min(SIGNAL_CAP, signals)
                    + epss_bonus)
 
-    # velocity (events in last 48h)
-    n48 = 0
-    for ref in story.get("events", []):
-        e = events.get(ref["event_id"])
-        if e:
-            dt = parse(e["published_at"])
+    # velocity (events in last 48h) + the decay clock: RE-REPORT events
+    # don't count (2026-10-03). Outlet echoes of already-carried coverage
+    # used to reset the 36h half-life and stack velocity, keeping echo-only
+    # stories on the digest slate until a manual demote; the dev clock now
+    # runs on genuine developments only. Every story has >= 1 development
+    # (founding events are never re-reports); events missing from `events`
+    # keep the old behavior (skipped entirely).
+    refs = sorted(
+        (r for r in story.get("events", []) if r["event_id"] in events),
+        key=lambda r: events[r["event_id"]].get("published_at") or "")
+    dev_dts, n_rereports, n48 = [], 0, 0
+    prior = []
+    for ref in refs:
+        e = events[ref["event_id"]]
+        dt = parse(e["published_at"])
+        if is_rereport(e, prior):
+            n_rereports += 1
+        else:
+            dev_dts.append(dt)
             if (now - dt).total_seconds() < 172800:
                 n48 += 1
+        prior.append(e)
     velocity = min(2.0, 0.5 * n48)
 
     # pickup speed: hours between the first and second event
@@ -236,9 +328,13 @@ def hot_score(story, events, reddit_posts, now=None):
 
     base = breadth + authority + severity + velocity + pickup
 
-    # recency temporal multiplier
-    last = parse(story.get("last_seen") or "")
-    hours = max(0, (now - last).total_seconds() / 3600)
+    # recency temporal multiplier — anchored to the newest GENUINE
+    # development, not the newest echo (2026-10-03 re-report penalty)
+    try:
+        last_dev = max(dev_dts) if dev_dts else parse(story.get("last_seen") or "")
+    except ValueError:
+        last_dev = parse(story.get("last_seen") or "")
+    hours = max(0, (now - last_dev).total_seconds() / 3600)
     recency = 2.718 ** (-hours / 36)
 
     # reddit community signal
@@ -271,6 +367,7 @@ def hot_score(story, events, reddit_posts, now=None):
         "velocity": round(velocity, 2),
         "pickup": round(pickup, 2),
         "recency": round(recency, 2),
+        "rereports": n_rereports,
         "reddit": round(reddit, 2),
         "kev": kev,
         "epss": round(epss_bonus, 2),

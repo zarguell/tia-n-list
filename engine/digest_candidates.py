@@ -68,6 +68,8 @@ DIGESTS_DIR = os.path.join(DATA, "digests")
 KEV_DATA_DIR = os.path.normpath(os.path.join(ENGINE, "..", "kevrichment", "data"))
 OUT_JSON = os.path.join(DATA, "digest-candidates.json")
 
+from score import is_rereport  # noqa: E402  (feed re-report dev-clock rule)
+
 ANALYSIS_GATE = 3.3  # merge.py's analysis-queue threshold on the 0-10 scale (was 2.0); the digest's coverage bar
 COVERAGE_WINDOW = 3  # a story covered within the last N digests counts as covered
 RECAP_DAYS = 2       # an event about a KEV add published >= N days after the add is a recap, not a development
@@ -194,6 +196,21 @@ def build_rows(stories, events, kev_map, coverage, canonical, since, recent_cuto
         ev_dates = []   # raw article publish dates (display)
         dev_dates = []  # genuine development dates (recaps collapsed to the KEV add)
         newest_feed_dev = None   # newest non-social event (echo-rule baseline)
+        # feed re-reports (2026-10-03): outlet echoes of already-carried
+        # coverage (no new CVEs, reworded same headline) count for n_events
+        # display but never set the development clock — the same rule
+        # score.py applies to velocity/recency, so an echo-bumped story is
+        # neither hot nor "evolved" and stops landing on the slate as
+        # EVOLVED-only-to-be-demoted (the 8-slugs-overridden-3-times class).
+        chrono = sorted(
+            (e for e in (events.get(r["event_id"]) for r in s.get("events", []))
+             if e and e.get("published_at")),
+            key=lambda e: e["published_at"])
+        rereports, prior = set(), []
+        for e in chrono:
+            if is_rereport(e, prior):
+                rereports.add(e["id"])
+            prior.append(e)
         for ref in s.get("events", []):
             e = events.get(ref["event_id"])
             if not e or not e.get("published_at"):
@@ -215,6 +232,9 @@ def build_rows(stories, events, kev_map, coverage, canonical, since, recent_cuto
                 continue
             ev_dates.append(pub)
             is_social = str(e.get("id", "")).startswith(("masto:", "x:", "bsky:"))
+            if e.get("id") in rereports:
+                # re-report echo: display-only (2026-10-03 score.py parity)
+                continue
             if e.get("low_trust") and not (e.get("provenance") or {}).get("verified"):
                 # amplify-never-establish: a low-trust repost cannot make the
                 # story look fresh today (2026-09-27 threadlinqs incident:

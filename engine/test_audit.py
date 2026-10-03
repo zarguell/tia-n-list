@@ -117,6 +117,37 @@ check("actor-only match not suspected", frozenset(("clop-aol", "clop-fis")) in p
 check("distinct advisory codes not suspected", frozenset(("av-791", "av-797")) in pairs, False)
 check("stale story outside window", any("old" in p for p in pairs), False)
 
+# ── 2b. distinct_periods (2026-10-03): recurring-series installments are not
+# duplicate suspects. title_discriminators strips month tokens, so different
+# months of the same monthly report scored jaccard 1.0 and were flagged —
+# dismissed by the auditor two days running.
+check("asec july vs august exonerated",
+      any("asec" in p for p in pairs), False)
+series = {
+    "asec-july": story("asec-july", ["e10"],
+                       title="ASEC StringTie Malware Trends Report July 2026"),
+    "asec-aug": story("asec-aug", ["e11"],
+                      title="ASEC StringTie Malware Trends Report August 2026"),
+    "asec-july-2": story("asec-july-2", ["e12"],
+                         title="ASEC StringTie Malware Trends July 2026 Update"),
+}
+s2 = jc.duplicate_suspects(series, NOW)
+pairs2 = {frozenset((x["a"], x["b"])) for x in s2}
+check("different-month installments not suspected",
+      frozenset(("asec-july", "asec-aug")) in pairs2, False)
+check("same-month near-dup still suspected",
+      frozenset(("asec-july", "asec-july-2")) in pairs2, True)
+check("distinct_periods flags disjoint months",
+      jc.distinct_periods("Report July 2026", "Report August 2026"), True)
+check("distinct_periods shared month is not distinct",
+      jc.distinct_periods("Report July 2026", "July 2026 update"), False)
+check("distinct_periods needs both sides",
+      jc.distinct_periods("Report July 2026", "Report on ASEC trends"), False)
+check("period tokens: verb-ambiguous march/may excluded",
+      jc.period_tokens("Actors may march through the network in June"), {"june"})
+check("period tokens: week-N and quarters", jc.period_tokens("DFIR week-3 Q3 h1 report"),
+      {"week-3", "q3", "h1"})
+
 # ── 1b. roundup_family (fragmentation classifier) ────────────────────────────
 check("dedicated Microsoft PT roundup",
       jc.roundup_family("Microsoft's September 2026 Patch Tuesday fixes two zero-day flaws"),

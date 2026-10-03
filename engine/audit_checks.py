@@ -17,7 +17,8 @@ import re
 from datetime import datetime, timedelta, timezone
 
 from merge import (title_jaccard, distinct_series_codes,
-                   distinct_advisory_ids, title_discriminators)
+                   distinct_advisory_ids, distinct_periods, period_tokens,
+                   title_discriminators)
 
 CJK_RE = re.compile(r"[\u0400-\u04FF\u4E00-\u9FFF\u3040-\u30FF\uAC00-\uD7AF\u0600-\u06FF]")
 
@@ -176,7 +177,8 @@ def duplicate_suspects(stories, now, max_out=10, max_age_days=45, min_jaccard=0.
                 continue
             j_ = inter / (ia + len(B) - inter)
             tb = titles[j]
-            if j_ < min_jaccard or inter < 2 or distinct_series_codes(ta, tb):
+            if j_ < min_jaccard or inter < 2 or distinct_series_codes(ta, tb) \
+                    or distinct_periods(ta, tb):
                 continue
             out.append({"a": pool[i]["id"], "b": pool[j]["id"],
                         "jaccard": round(j_, 2),

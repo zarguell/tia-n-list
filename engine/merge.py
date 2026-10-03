@@ -207,6 +207,33 @@ def distinct_series_codes(a, b):
     return bool(ca and cb and not (ca & cb))
 
 
+MONTH_PERIOD_RE = re.compile(
+    r"\b(january|february|april|june|july|august|september|october|november|"
+    r"december|q[1-4]|h1|h2|week[- ]?\d+)\b", re.I)
+
+
+def period_tokens(title):
+    """Report-period tokens in a title: month names, quarters, halves, and
+    explicit week-N markers. 'march' and 'may' are excluded — verb-ambiguous
+    ('the march of ransomware', 'actors may abuse') would misfire."""
+    return {m.group(0).lower() for m in MONTH_PERIOD_RE.finditer(title or "")}
+
+
+def distinct_periods(a, b):
+    """Both titles name a report period and none are shared -> different
+    installments of the same recurring series (ASEC monthly reports, DFIR
+    week-N series), never one story.
+
+    2026-10-03 (2nd day): title_discriminators strips month tokens, so
+    'ASEC ... July 2026' vs 'ASEC ... August 2026' scored jaccard 1.0 and the
+    duplicate-suspects probe flagged the pair; the auditor dismissed it as a
+    month-token artifact both days. Period tokens are the exception to that
+    stripping: when present on BOTH sides they discriminate, exactly like
+    distinct_series_codes."""
+    pa, pb = period_tokens(a), period_tokens(b)
+    return bool(pa and pb and not (pa & pb))
+
+
 def _advisory_id_codes(story_id):
     """Series codes carried by a story id/slug, but only when the code's
     prefix itself contains a digit (av26-891, cve-2024-37079). A bare slug
