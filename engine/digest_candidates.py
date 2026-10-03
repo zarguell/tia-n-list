@@ -247,7 +247,13 @@ def build_rows(stories, events, kev_map, coverage, canonical, since, recent_cuto
         last_covered = coverage.get(slug)
         covered_recently = last_covered is not None and last_covered >= recent_cutoff
         if last_covered is None:
-            tag = "NEW"
+            # A never-covered slug is only NEW when its content is actually
+            # fresh: a brand-new slug minted from an old article (a repost of
+            # weeks-old coverage) is CATCH-UP, never headline material.
+            # 2026-10-03 Sandworm incident: an Aug-10 article reposted on
+            # Mastodon minted a new slug; tag NEW sent it to the digest as
+            # [NEW] and the agent promoted it over the CATCH-UP flag.
+            tag = "CATCH-UP" if catchup else "NEW"
         elif last_covered == last_digest:
             tag = "UPDATE"
         elif covered_recently:

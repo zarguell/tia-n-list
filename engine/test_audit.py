@@ -311,6 +311,48 @@ _mk_noise_dir(os.path.join(tmp, "clean"), clean_events, clean_decs)
 p2, _ = jc.ingest_noise(os.path.join(tmp, "clean"), NOW2)
 check("healthy store passes", p2, [])
 
+# ── 7. automation_status (2026-10-03): job-log run status replaces the
+# OpenHands service API that never existed on this host (keyless vacuous
+# pass, 3 days running).
+NOW3 = datetime(2026, 10, 3, 13, 30, tzinfo=timezone.utc)
+tmp3 = tempfile.mkdtemp()
+try:
+    def _log(name, lines):
+        p = os.path.join(tmp3, name)
+        open(p, "w").write("\n".join(lines) + "\n")
+        return p
+
+    st, d = jc.automation_status(
+        _log("ok.log", [
+            "2026-10-03T13:09:01Z PHASE3 publish",
+            "2026-10-03T13:09:03Z DONE"]), NOW3)
+    check("bare DONE completes", (st, d), ("COMPLETED", "completed 2026-10-03T13:09"))
+
+    st, d = jc.automation_status(
+        _log("fail.log", [
+            "2026-10-03T11:00:00Z DONE",
+            "2026-10-03T12:00:00Z DONE (publish failed)"]), NOW3)
+    check("parered DONE is a failure (latest terminal wins)", st, "FAILED")
+
+    st, d = jc.automation_status(
+        _log("skip.log", ["2026-10-03T11:16:01Z DONE",
+                          "2026-10-03T11:16:01Z NOTIFY: sent"]), NOW3)
+    check("DONE beats later non-terminal lines", st, "COMPLETED")
+
+    st, _ = jc.automation_status(
+        _log("stale.log", ["2026-10-01T11:16:01Z DONE"]), NOW3)
+    check("silent > 24h is stale", st, "STALE")
+
+    st, _ = jc.automation_status(os.path.join(tmp3, "missing.log"), NOW3)
+    check("missing log is MISSING", st, "MISSING")
+
+    st, _ = jc.automation_status(
+        _log("midrun.log", ["2026-10-03T13:20:00Z PHASE1 ingest"]), NOW3)
+    check("no terminal line is MISSING (crashed mid-run)", st, "MISSING")
+finally:
+    import shutil as _sh
+    _sh.rmtree(tmp3, ignore_errors=True)
+
 print()
 if failures:
     print(f"FAIL: {len(failures)} audit checks failed")

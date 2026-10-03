@@ -41,7 +41,7 @@ import re
 import sys
 from datetime import datetime, timedelta, timezone
 
-from merge import title_jaccard, CVE_RE
+from merge import title_jaccard, norm_url, CVE_RE
 import lifecycle
 
 ENGINE = os.path.dirname(os.path.abspath(__file__))
@@ -459,6 +459,30 @@ def _pending_discard(eids):
         json.dump(kept, open(PENDING, "w"), indent=1)
 
 
+def _url_owner(stories):
+    """Article-URL identity -> live story id, from every referenced event.
+
+    The deterministic mint bar (2026-10-03): a keep naming NEW must never
+    materialize a story for an article the store already carries — a Mastodon
+    repost of an Aug-10 SecurityWeek piece minted a fresh 'Sandworm sabotages
+    second Polish energy facility' story (never covered, so the digest brief
+    tagged it NEW) while the same URL had lived in the August story since day
+    one. Title/CVE matching can miss reworded reposts; URL identity cannot.
+    Excluded (dropped) events are referenced by no story, so they never own a
+    URL here.
+    """
+    owner = {}
+    for sid, s in stories.items():
+        if s.get("merged_into"):
+            continue
+        for ref in s.get("events", []):
+            ev = _read_event(ref.get("event_id", ""))
+            nu = norm_url((ev or {}).get("url") or "")
+            if nu and nu not in owner:
+                owner[nu] = sid
+    return owner
+
+
 def apply(decisions_path):
     if not os.path.exists(decisions_path):
         print(f"no decisions file: {decisions_path}")
@@ -476,6 +500,7 @@ def apply(decisions_path):
     # hallucinated `oracle-september-2026-cpu-patches-672-cves` minted four
     # fragments and the CPU story missed the digest).
     aliased = {}
+    url_owner = _url_owner(stories)
 
     for d in decisions:
         eid = d["event_id"]
@@ -545,9 +570,22 @@ def apply(decisions_path):
                 denied += 1
                 _write_event(ev)
                 continue
-            target = _new_story(stories, d.get("story_title") or ev.get("title", ""), ev, eid)
-            ev["kind"] = "original"
-            moved += 1
+            owner = url_owner.get(norm_url(ev.get("url") or ""))
+            if owner:
+                # Repost of an article the store already carries: attach,
+                # never mint (URL identity beats a reworded title that
+                # out-voted the mechanical matcher). 2026-10-03 Sandworm
+                # incident class — see _url_owner.
+                print(f"  URL-ATTACH: keep -> NEW redirected to {owner} "
+                      f"({eid} links an already-carried article URL)")
+                _absorb(stories[owner], ev, "update")
+                ev["kind"] = "update"
+                moved += 1
+                target = owner
+            else:
+                target = _new_story(stories, d.get("story_title") or ev.get("title", ""), ev, eid)
+                ev["kind"] = "original"
+                moved += 1
         elif target not in stories:
             if target in aliased:
                 target = aliased[target]
@@ -564,13 +602,25 @@ def apply(decisions_path):
                     denied += 1
                     _write_event(ev)
                     continue
-                print(f"  WARN: keep -> unknown story {target} for {eid}; "
-                      f"minting once — further keeps naming it consolidate here")
-                real = _new_story(stories, d.get("story_title") or ev.get("title", ""), ev, eid)
-                aliased[target] = real
-                target = real
-                ev["kind"] = "original"
-                moved += 1
+                owner = url_owner.get(norm_url(ev.get("url") or ""))
+                if owner:
+                    # Same URL-identity bar as the NEW path: an unknown story
+                    # id plus an already-carried article URL attaches to the
+                    # existing carrier instead of minting a twin.
+                    print(f"  URL-ATTACH: keep -> unknown story redirected to "
+                          f"{owner} ({eid} links an already-carried article URL)")
+                    _absorb(stories[owner], ev, "update")
+                    ev["kind"] = "update"
+                    moved += 1
+                    target = owner
+                else:
+                    print(f"  WARN: keep -> unknown story {target} for {eid}; "
+                          f"minting once — further keeps naming it consolidate here")
+                    real = _new_story(stories, d.get("story_title") or ev.get("title", ""), ev, eid)
+                    aliased[target] = real
+                    target = real
+                    ev["kind"] = "original"
+                    moved += 1
         else:
             if d.get("story") == target:
                 # explicit editorial naming (sole-holder retakes aren't)
