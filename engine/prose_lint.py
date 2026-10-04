@@ -126,13 +126,20 @@ def _subject_tokens(title):
 
 def _names_subject(text, title):
     low = text.lower()
+    toks = _subject_tokens(title)
+    if not toks:
+        # No nameable subject (all-lowercase/stopword title): nothing to
+        # name, so the fallback can never fire — CVE/numeric grounding only.
+        return False
     matched = 0
-    for tok in _subject_tokens(title):
+    for tok in toks:
         if re.search(r"\b" + re.escape(tok) + r"\b", low, re.IGNORECASE):
             matched += 1
-    # ≥2 distinct tokens: one common word ("controller", "network") must not
-    # ground an analysis of a different story.
-    return matched >= 2
+    # ≥2 distinct tokens: one common word ("controller", "network") must
+    # not ground an analysis of a different story. A single-token subject
+    # (2026-10-04: "France tax office ..." yields only ["France"]) names
+    # everything it can with one hit, so the bar is min(2, len(tokens)).
+    return matched >= min(2, len(toks))
 
 
 def lint_analysis(text, story=None, subject_title=None):

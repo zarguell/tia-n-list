@@ -558,8 +558,16 @@ def run_prose_gate(cards_by_id, today=None, log=print):
     the caller so link/path errors surface first."""
     import prose_lint
     for cid in sorted(cards_by_id):
+        # 2026-10-04 (audit issue #3): pass the card title — without it
+        # quarantine_analysis can never enable the subject-grounding
+        # fallback, so every CVE-less analysis without a number/version
+        # token was quarantined even when it named the story's subject
+        # (the UK Resilience Act analyses passed the gate with a title
+        # and were quarantined 8x without one).
         prose_lint.quarantine_analysis(STORIES_DIR, ANALYSIS_DIR,
-                                       {"id": cid}, log=log)
+                                       {"id": cid,
+                                        "title": cards_by_id[cid].get("title", "")},
+                                       log=log)
     today = today or datetime.now(timezone.utc).strftime("%Y-%m-%d")
     dp = os.path.join(DIGESTS_DIR, today + ".md")
     if not os.path.exists(dp):

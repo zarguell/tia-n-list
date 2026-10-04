@@ -281,6 +281,75 @@ def test_rebuild_index_reflects_refreshed_values(tmp_path):
     assert idx["cves"][0]["cve_id"] == "CVE-2026-0014"
 
 
+# ── skip-if-unchanged (2026-10-04 audit issue #4) ─────────────────────────
+# A daily refresh with changed=0 must not rewrite index.json: the bare
+# last_updated bump permanently dirtied the worktree (day-4 drift) because
+# the hourly publisher only stages index.json when records changed.
+
+def test_rebuild_index_skips_write_when_unchanged(tmp_path):
+    _write(tmp_path, _rec("CVE-2026-0030"))
+    _write(tmp_path, _rec("CVE-2026-0031", kev_date="2026-09-01"))
+
+    entries1, _ = sr.rebuild_index(repo=str(tmp_path))
+    idx_path = tmp_path / "kevrichment" / "data" / "index.json"
+    before = idx_path.read_bytes()
+    assert entries1 == 2
+
+    entries2, skipped2 = sr.rebuild_index(repo=str(tmp_path))
+
+    assert (entries2, skipped2) == (2, [])
+    assert idx_path.read_bytes() == before, \
+        "no-change rebuild must leave index.json byte-identical"
+
+
+def test_rebuild_index_writes_when_content_changes(tmp_path):
+    _write(tmp_path, _rec("CVE-2026-0032"))
+    sr.rebuild_index(repo=str(tmp_path))
+    idx_path = tmp_path / "kevrichment" / "data" / "index.json"
+    before = json.loads(idx_path.read_text())
+
+    _write(tmp_path, _rec("CVE-2026-0033"))  # corpus grew: real change
+    entries, _ = sr.rebuild_index(repo=str(tmp_path))
+
+    after = json.loads(idx_path.read_text())
+    assert entries == 2
+    assert after["total_cves_processed"] == 2
+    assert after["cves"] != before["cves"]
+
+
+def test_rebuild_index_writes_when_no_prior_index(tmp_path):
+    _write(tmp_path, _rec("CVE-2026-0034"))
+    entries, _ = sr.rebuild_index(repo=str(tmp_path))
+    idx = json.loads(
+        (tmp_path / "kevrichment" / "data" / "index.json").read_text())
+    assert entries == 1 and idx["total_cves_processed"] == 1
+
+
+def test_index_content_equal_ignores_last_updated_and_key_order(tmp_path):
+    from schema import index_content_equal
+    prev = {"last_updated": "2026-10-03T16:40:04Z",
+            "kev_source_date": "2026-10-03",
+            "total_cves_processed": 2,
+            "cves": [{"cve_id": "CVE-2026-0001", "kev_seq": 0},
+                     {"cve_id": "CVE-2026-0002", "kev_seq": 1}]}
+    same = {"last_updated": "2026-10-04T00:10:26Z",
+            "kev_source_date": "2026-10-03",
+            "total_cves_processed": 2,
+            "cves": [{"kev_seq": 0, "cve_id": "CVE-2026-0001"},
+                     {"kev_seq": 1, "cve_id": "CVE-2026-0002"}]}
+    assert index_content_equal(prev, same) is True
+    changed = dict(same, total_cves_processed=3)
+    assert index_content_equal(prev, changed) is False
+    assert index_content_equal({}, same) is False
+    assert index_content_equal(None, same) is False
+    # order-only difference (ssvc vs burndown tie-breaks) is not a change:
+    # it must not ping-pong the file between writers.
+    reordered = dict(same, cves=list(reversed(same["cves"])))
+    assert index_content_equal(prev, reordered) is True
+    dropped = dict(same, cves=[], total_cves_processed=0)
+    assert index_content_equal(prev, dropped) is False
+
+
 # ── CLI exit codes ──────────────────────────────────────────────────────────
 
 def _last_json(out):

@@ -56,7 +56,7 @@ if KEV not in sys.path:
     sys.path.insert(0, KEV)
 
 import ingest  # noqa: E402 — seam reuse: _vulnrichment_path, _extract_ssvc_from_dict
-from schema import build_index_entry, compute_bod_timeline, sort_index_entries  # noqa: E402
+from schema import build_index_entry, compute_bod_timeline, index_content_equal, sort_index_entries  # noqa: E402
 
 DEFAULT_REPO = os.path.dirname(KEV)          # tia-n-list repo root
 DEFAULT_DELAY = 0.25                          # seconds between raw fetches
@@ -282,6 +282,11 @@ def rebuild_index(repo=None, records_dir=None):
         "total_cves_processed": len(entries),
         "cves": entries,
     }
+    # 2026-10-04 (audit issue #4): skip no-change writes — a daily refresh
+    # with changed=0 must not dirty the worktree with a bare last_updated
+    # bump the hourly publisher will never stage. See index_content_equal.
+    if index_content_equal(prev, index):
+        return len(entries), skipped
     with open(index_path, "w") as f:
         json.dump(index, f, indent=2)
     return len(entries), skipped
