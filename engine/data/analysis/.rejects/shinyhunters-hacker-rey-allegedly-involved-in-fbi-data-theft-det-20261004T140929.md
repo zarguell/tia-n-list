@@ -1,0 +1,1 @@
+A ShinyHunters member known as "Rey" was allegedly involved in FBI data theft and detained in Jordan. The arrest links the ShinyHunters extortion group to a high-profile government-targeted intrusion. Law enforcement cooperation across borders continues; organizations should review past ShinyHunters indicators for residual access.
