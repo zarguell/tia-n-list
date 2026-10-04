@@ -1,0 +1,1 @@
+SmartApeSG ClickFix campaign pushes CNCmachineRMS RAT. The malware traffic analysis from 30 September 2026 links the ClickFix social-engineering vector to a remote-access trojan deployment. This is a targeted intrusion delivery chain, not a generic threat, and should be tracked for updated IOCs or victim reports.

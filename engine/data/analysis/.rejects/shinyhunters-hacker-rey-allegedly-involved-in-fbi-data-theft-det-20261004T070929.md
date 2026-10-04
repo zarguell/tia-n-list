@@ -1,0 +1,1 @@
+A ShinyHunters member called "Rey," tied to an alleged FBI data theft, was detained in Jordan. Reuters and DataBreaches.Net report cooperation with the FBI to identify accomplices. The arrest could yield additional victim disclosures or infrastructure leads; watch for confirmation of the FBI dataset scope and any follow-on leaks.
