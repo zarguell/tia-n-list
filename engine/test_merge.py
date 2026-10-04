@@ -161,6 +161,35 @@ check("bare slug-index suffix is not an advisory code",
 check("index suffix vs advisory is not a two-sided match",
       merge.distinct_advisory_ids("foo-5000", "foo-av26-891"), False)
 
+print("== full advisory-code capture (2026-10-04 audit fix) ==")
+# SERIES_RE's own comment cites CVE-2026-1234 as a match, and
+# distinct_series_codes' docstring cites CVE-2026-19598 as a code — but the
+# old regex captured only the year segment (CVE-2026), which made the
+# advisory-code guard inert for every CVE/EUVD-titled pair: the duplicate
+# suspects probe flagged advisory-distinct pairs it was documented to
+# exonerate, and match_scores mechanically attached EUVD-2026-92047
+# (LaraDashboard) to EUVD-2026-85013 (Manalyze) at 4.44 (2026-10-04 audit).
+merge.story_url_cache = {}
+check("SERIES_RE captures the full CVE number (comment example)",
+      tuple(merge._series_codes("Gravity Forms patched (CVE-2026-1234)")),
+      ("CVE-2026-1234",))
+check("different full CVEs are distinct series codes",
+      merge.distinct_series_codes("CVE-2026-95273 path traversal in changedetection.io",
+                                  "CVE-2026-95272: path traversal in changedetection.io"), True)
+check("the same full code is not distinct",
+      merge.distinct_series_codes("CVE-2026-95273 x", "CVE-2026-95273 y"), False)
+check("CVE slug counts as advisory id (docstring example cve-2024-37079)",
+      merge.distinct_advisory_ids("flaw-cve-2024-37079-details",
+                                  "flaw-cve-2024-37078-details"), True)
+check("cross-EUVD event no longer attaches to unrelated product story",
+      merge.match_scores(
+          ev("z", "🚨 EUVD-2026-92047 📊 Score: 6.3/10 (CVSS v3.1) 📦 Product: laradashboard 🏢 Vendor: laradashboard 📅 Updated: 2026-10-03"),
+          story("m", "EUVD-2026-85013 📊 Score: 4.8/10 (CVSS v3.1) 📦 Product: Manalyze 🏢 Vendor: JusticeRage")), 0.0)
+check("same-full-code event still title-matches its story",
+      merge.match_scores(
+          ev("z", "EUVD-2026-85013 Manalyze flaw exploited in attacks update"),
+          story("m", "EUVD-2026-85013 Manalyze flaw exploited in attacks")) > 0, True)
+
 print("== batch convergence (the real 7-event burst) ==")
 # Simulate merge.py main(): events processed in order, one story created, the
 # rest fold into it via the actor path.

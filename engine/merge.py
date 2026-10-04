@@ -110,7 +110,7 @@ GENERIC = {"cisa", "urges", "immediate", "patching", "patch", "patches", "added"
 DATE_STOP = {"january", "february", "march", "april", "may", "june", "july", "august",
              "september", "october", "november", "december", "monday", "tuesday",
              "wednesday", "thursday", "friday", "saturday", "sunday"}
-SERIES_RE = re.compile(r"\b[A-Za-z]+[0-9]*-\d{2,6}\b")   # AV26-797, CVE-2026-1234, Storm-0324
+SERIES_RE = re.compile(r"\b[A-Za-z]+[0-9]*-\d{2,6}(?:-\d{2,7})?\b")   # AV26-797, CVE-2026-1234, Storm-0324
 
 # URL params that carry feed/campaign tracking, never article identity.
 TRACKING_PARAM_RE = re.compile(
