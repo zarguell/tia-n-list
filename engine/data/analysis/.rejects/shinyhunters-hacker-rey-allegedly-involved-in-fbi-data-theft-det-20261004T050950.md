@@ -1,0 +1,1 @@
+ShinyHunters faces disruption after suspected member "Rey" was detained in Jordan and is cooperating with the FBI. The group, previously linked to SaaS-related data theft and claims of FBI data exposure, is now under heightened law-enforcement pressure. Updates note cooperation could expose additional members and aid international disruption of the extortion operation.

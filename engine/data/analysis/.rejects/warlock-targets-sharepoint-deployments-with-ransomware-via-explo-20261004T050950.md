@@ -1,0 +1,1 @@
+Warlock, a suspected China-linked actor, targets SharePoint deployments using exploited flaws to deliver ransomware. Updates reference ransomware binary delivery with claims of uptime and data-integrity disruption. The campaign relies on known SharePoint vulnerabilities rather than new zero-days, emphasizing patch urgency for exposed SharePoint installations.

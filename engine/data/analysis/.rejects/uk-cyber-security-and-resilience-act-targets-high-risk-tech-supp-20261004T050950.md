@@ -1,0 +1,1 @@
+The UK's Cyber Security and Resilience Act introduces supply-chain controls targeting high-risk technology suppliers in critical infrastructure. The legislation aims to block vendors deemed security risks from providing core systems to essential services. It reflects broader European trends toward vendor risk assessments and regulatory enforcement of secure supply chains.

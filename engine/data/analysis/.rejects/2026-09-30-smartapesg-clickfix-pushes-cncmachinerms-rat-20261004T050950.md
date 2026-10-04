@@ -1,0 +1,1 @@
+SmartApeSG's ClickFix campaign pushes CNCmachineRMS RAT through fake CAPTCHA prompts that coerce users into running PowerShell. The French-language update notes the technique continues to abuse user trust to execute code. No new CVEs are named; the story remains focused on social-engineering delivery rather than a specific vulnerability.
