@@ -1,0 +1,3 @@
+Warlock, a suspected China-linked threat actor, is targeting Microsoft SharePoint deployments by exploiting both older and newer flaws to disable security tooling and deploy ransomware. A new Mastodon update references thehackernews.com reporting that the actor uses SharePoint vulnerabilities to suppress endpoint protections before ransomware deployment. The story already covers the initial exploitation reports from osintsights.com.
+
+No specific CVEs are named in the new event. The pattern matches prior SharePoint exploitation campaigns that disable security agents via privileged access to SharePoint services. Monitor for updated vendor advisories, new SharePoint CVE confirmations, and additional ransomware victim reports tied to this actor.
