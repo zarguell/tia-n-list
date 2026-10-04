@@ -1,0 +1,1 @@
+South Korea's president ordered an emergency probe after hackers breached top banks including Shinhan and Woori. Attackers conducted broad scanning of the sector. The incident is a confirmed bank-sector breach with government-level response. Watch for attribution, scope of data accessed, and whether additional institutions are named.

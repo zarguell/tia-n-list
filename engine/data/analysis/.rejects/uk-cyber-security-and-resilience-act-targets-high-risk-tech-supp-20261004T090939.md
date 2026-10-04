@@ -1,0 +1,1 @@
+UK Cyber Security and Resilience Act targets high-risk tech suppliers in critical infrastructure. The act is aimed at supply chain risk, not a specific vulnerability or breach. It reflects regulatory tightening rather than an active incident. Watch for implementation timelines and which vendors are designated high-risk.

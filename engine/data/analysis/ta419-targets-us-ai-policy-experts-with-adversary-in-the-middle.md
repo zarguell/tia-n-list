@@ -1,0 +1,1 @@
+China-nexus group TA419 targets U.S. AI policy experts with reply-triggered adversary-in-the-middle phishing. Emails impersonate prominent figures and use adversary-in-the-middle techniques to intercept communications. The campaign is targeted at policy experts, not broad phishing. Watch for additional targets and any confirmed compromises.

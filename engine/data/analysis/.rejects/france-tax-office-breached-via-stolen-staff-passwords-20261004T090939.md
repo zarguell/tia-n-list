@@ -1,0 +1,1 @@
+France's tax office was breached via stolen staff passwords. The security team noticed red flags but did not act in time. The breach involved staff credentials rather than a vulnerability. Watch for confirmation of data accessed, official disclosure, and whether attackers moved beyond initial access.
