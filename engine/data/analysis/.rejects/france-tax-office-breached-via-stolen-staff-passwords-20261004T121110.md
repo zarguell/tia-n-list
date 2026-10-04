@@ -1,0 +1,1 @@
+France's tax office was breached via stolen staff passwords, and the security team missed red flags initially. The incident is a reminder that credential compromise at government agencies carries high impact, especially when detection lags. Watch for follow-up reports on data scope and whether the stolen access led to data exfiltration.
