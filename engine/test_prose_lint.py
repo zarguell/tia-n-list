@@ -265,6 +265,31 @@ check("filler still fails even with the subject title",
           "Analyst note based on event content. Watch for updates.",
           subject_title=K8S_TITLE)))
 
+# --- 5c: single-token subjects + title-less gates (2026-10-04 audit #3) ----
+# "France tax office breached via stolen staff passwords" yields exactly
+# one subject token (["France"]): under the old >=2 bar it could never
+# ground, so the story was structurally unpassable. The UK-act rejects
+# passed lint WITH the title but were quarantined WITHOUT one, because
+# ssg.run_prose_gate dropped the card title at the call site.
+FR_TITLE = "France tax office breached via stolen staff passwords"
+FR_TEXT = ("France's tax office was breached via stolen staff passwords, "
+           "and the security team missed red flags initially. The incident "
+           "is a reminder that credential compromise at government agencies "
+           "carries high impact, especially when detection lags. Watch for "
+           "follow-up reports on data scope and exfiltration.")
+check("single-token subject grounds with one hit",
+      prose_lint.lint_analysis(FR_TEXT, subject_title=FR_TITLE) == [])
+check("single-token subject still fails when unnamed",
+      any("no grounding" in m for m in prose_lint.lint_analysis(
+          "A government agency was breached via stolen staff passwords, "
+          "and the security team missed red flags initially. Credential "
+          "compromise carries high impact when detection lags behind. "
+          "Watch for follow-up reports on data scope and exfiltration.",
+          subject_title=FR_TITLE)))
+check("tokenless title never grounds (no vacuous pass)",
+      not prose_lint._names_subject(FR_TEXT, "breached via stolen staff")
+      and not prose_lint._names_subject(FR_TEXT, ""))
+
 with tempfile.TemporaryDirectory() as td:
     stories_dir = os.path.join(td, "stories")
     analysis_dir = os.path.join(td, "analysis")
@@ -314,8 +339,16 @@ with tempfile.TemporaryDirectory() as td:
               open(os.path.join(stories_dir, "orphan-story.json"), "w"))
     open(os.path.join(analysis_dir, "live-story.md"), "w").write(filler)
     open(os.path.join(analysis_dir, "orphan-story.md"), "w").write(filler)
+    # titled card whose CVE-less analysis names its subject (2026-10-04
+    # audit #3: the gate dropped the title, quarantining analyses that
+    # pass lint with it — the UK-act loop). Must survive the gate.
+    json.dump({"id": "titled-story", "title": K8S_TITLE},
+              open(os.path.join(stories_dir, "titled-story.json"), "w"))
+    open(os.path.join(analysis_dir, "titled-story.md"), "w").write(NOCVE)
     open(os.path.join(digests_dir, "2026-09-24.md"), "w").write(GOOD_DIGEST)
-    errs = ssg.run_prose_gate({"live-story": {"id": "live-story"}},
+    errs = ssg.run_prose_gate({"live-story": {"id": "live-story"},
+                               "titled-story": {"id": "titled-story",
+                                                  "title": K8S_TITLE}},
                               today="2026-09-24", log=log.append)
     check("live card's bad analysis quarantined",
           not os.path.exists(os.path.join(analysis_dir, "live-story.md"))
@@ -330,6 +363,10 @@ with tempfile.TemporaryDirectory() as td:
           and "analysis" in json.load(
               open(os.path.join(stories_dir, "orphan-story.json"))))
     check("good digest returns no errors", errs == [])
+    check("titled card's subject-named analysis survives the gate",
+          os.path.exists(os.path.join(analysis_dir, "titled-story.md"))
+          and not [n for n in os.listdir(os.path.join(
+              analysis_dir, ".rejects")) if n.startswith("titled-story")])
     log.clear()
 
     # bad digest today: fail-closed payload for the caller

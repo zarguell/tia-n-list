@@ -149,7 +149,7 @@ def write_list(queue, totals, fixed):
 
 def rebuild_index():
     sys.path.insert(0, KEV)
-    from schema import build_index_entry
+    from schema import build_index_entry, index_content_equal
     entries, skipped = [], []
     for cid, (d, _) in load_all().items():
         try:
@@ -164,10 +164,16 @@ def rebuild_index():
             prev = json.load(open(ip))
         except Exception:
             pass
-    json.dump({"last_updated": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+    index = {"last_updated": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
                "kev_source_date": prev.get("kev_source_date", ""),
                "total_cves_processed": len(entries),
-               "cves": entries}, open(ip, "w"), indent=2)
+               "cves": entries}
+    # 2026-10-04 (audit issue #4): same skip-if-unchanged contract as
+    # ssvc_refresh.rebuild_index — a no-change rebuild must not dirty the
+    # worktree with a bare last_updated bump. See index_content_equal.
+    if index_content_equal(prev, index):
+        return len(entries), skipped
+    json.dump(index, open(ip, "w"), indent=2)
     return len(entries), skipped
 
 

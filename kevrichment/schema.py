@@ -169,6 +169,38 @@ def sort_index_entries(entries):
     return entries
 
 
+def index_content_equal(prev, new_index):
+    """True when a rebuilt index carries no content change vs `prev`.
+
+    2026-10-04 (audit issue #4, day-4 drift): the daily SSVC refresh calls
+    rebuild_index() even when changed=0, and the rebuild always rewrote
+    index.json with a fresh last_updated — semantically identical content
+    (1738 entries) that permanently dirtied the worktree because the hourly
+    publisher only stages index.json when records actually changed. Writers
+    skip the write when this returns True, so last_updated means "last
+    content change" and a no-change refresh leaves the tree clean.
+    last_updated itself is excluded: it is a write stamp, not content.
+    Dict == ignores key order, so writer-side key-order churn can never
+    read as a change either. Entries compare as a cve_id-keyed map, not a
+    list: ssvc_refresh and burndown sort ties differently, and an
+    order-only difference must not ping-pong the file between writers."""
+    if not isinstance(prev, dict):
+        return False
+    if (prev.get("kev_source_date") != new_index.get("kev_source_date")
+            or prev.get("total_cves_processed") != new_index.get("total_cves_processed")):
+        return False
+    old_entries = prev.get("cves")
+    new_entries = new_index.get("cves")
+    if not isinstance(old_entries, list) or not isinstance(new_entries, list):
+        return False
+    try:
+        old_by_id = {e["cve_id"]: e for e in old_entries}
+        new_by_id = {e["cve_id"]: e for e in new_entries}
+    except (TypeError, KeyError):
+        return False
+    return old_by_id == new_by_id
+
+
 def build_run_log(run_id, stats):
     """Build a per-run stats record."""
     processed = max(stats.get("cves_processed", 0), 1)
