@@ -1,0 +1,1 @@
+U.S. water infrastructure faces rising cyber threats from state actors, with Iranian-linked attacks hitting 12 states. The assessment notes roughly 80% of systems lack basic cyber hygiene, and AI-assisted attack cycles are compressing from minutes to seconds. Watch for regulatory mandates as exposure grows.
