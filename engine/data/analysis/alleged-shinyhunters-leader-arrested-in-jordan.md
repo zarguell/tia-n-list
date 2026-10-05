@@ -1,0 +1,5 @@
+An individual believed to lead the ShinyHunters extortion group, identified as Saif al-Din Khader (alias Rey), was reportedly arrested in Jordan and is cooperating with the FBI. The arrest followed the group's defacement of the FBI jobs site and claims of stealing 2-3 terabytes of data, including employee health and personal information. Independent reports had linked a Dutch arrest to the same investigation.
+
+This is a significant development in a long-running extortion operation that has targeted more than 140 organizations and collected at least $70 million in payments. Cooperation from a suspected leader could expose other members and operational infrastructure. The FBI has confirmed its involvement in the broader investigation.
+
+Watch for further law enforcement announcements naming additional suspects, and for potential data leaks from previously unreported victims as investigators process recovered information. No CVE or technical indicator is relevant here; the impact is organizational and legal.
