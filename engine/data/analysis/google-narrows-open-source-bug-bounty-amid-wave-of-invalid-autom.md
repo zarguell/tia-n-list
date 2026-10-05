@@ -1,0 +1,5 @@
+Google paused its Open Source Software Vulnerability Reward Program (OSS VRP) for product vulnerability submissions starting October 1, citing a sharp rise in automated, mostly invalid reports. The company said the pause does not affect supply chain reports or submissions made before the cutoff, and some Google Cloud repo issues may still go through the Cloud VRP. Google plans to resume updates in Q1 2027 and encouraged researchers to use its Patch Rewards Program and other VRPs in the meantime.
+
+The move reflects a growing strain from AI-generated or automated low-quality submissions that overwhelm manual triage. It is a program-level decision rather than a specific vulnerability or breach, but it signals how automated noise is reshaping vulnerability disclosure pipelines. Researchers relying on the OSS VRP for open-source findings will need alternate channels.
+
+Watch whether the Q1 2027 update introduces stricter filtering or verification requirements. Also track whether other major vendors adopt similar pauses, which could shift reporting dynamics across the open-source security ecosystem.
