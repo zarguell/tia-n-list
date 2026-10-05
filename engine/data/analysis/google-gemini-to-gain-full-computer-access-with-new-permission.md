@@ -1,0 +1,5 @@
+GBHackers reports Google is testing a Gemini Desktop feature that would give the AI agent extensive control over a Mac: access to files, interaction with installed applications, and network communication, with fewer per-action approval prompts than current agent flows. The capability has not been publicly released and Google has not announced it.
+
+The security relevance is the permission model, not any disclosed vulnerability. An agent with file, app, and network reach that asks less often moves the trust boundary from per-action user consent to the model's own judgment. That expands the payoff for prompt injection and for any compromise of the agent harness itself, since a single successful manipulation inherits broad system access.
+
+Watch for Google's actual permission design when this ships: whether sensitive actions stay gated, whether there is an audit log of agent actions, and whether network access can be scoped. Until then this is a reported test feature, not a shipped risk, and claims should stay limited to the GBHackers report.
