@@ -1,0 +1,5 @@
+This entry is not a discrete security event. It is a recurring Mastodon and Bluesky link roundup from the "Cybersecurity news & tips across the fediverse" account family (privacysafe.social, exquisite.social, halo.nu, mstdn.science, mas.to, and a Bluesky bridge), first seen September 11, 2026 and still surfacing posts as of October 5. Each post repackages links to surveillance-focused reporting from outlets and groups such as 404 Media, the Surveillance Technology Oversight Project, and Yale Privacy Lab.
+
+It carries no CVEs, no incident attribution, and no primary reporting of its own. Every collector event originally clustered under it was dropped during triage as aggregation noise, so the story now has zero events and survives only as a clustering artifact. Its score of 3.3 comes almost entirely from breadth across six collector accounts, not from substance.
+
+No action is warranted and nothing should be watched beyond the collector itself. If a future roundup item lands on a concrete incident, that incident should be triaged into its own story, not into this one. The entry is a candidate to starve rather than develop.
