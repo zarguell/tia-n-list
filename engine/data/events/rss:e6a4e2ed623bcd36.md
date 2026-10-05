@@ -1,0 +1,1 @@
+For an experiment, I created a script [1] that parses and send the TTY logs collected from actors or bots activity that run various commands after they successfully login the DShield sensor. Those TTY logs are sent daily at the end of each day to the DShield SIEM [2] to be correlated with all the data. Article Link: TTY Logs and the Data it Captures - SANS Internet Storm Center
