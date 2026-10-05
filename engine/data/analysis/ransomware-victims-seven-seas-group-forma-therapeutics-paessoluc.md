@@ -1,0 +1,5 @@
+This rolling story tracks ransomware victims claimed on dark-web leak sites, as aggregated daily by ransomware.ninja. Claims recorded in this window span multiple crews: spirals claimed SEVEN SEAS GROUP, nightspire claimed Forma Therapeutics Holdings, panzer claimed Paessolucoes, lockbit5 claimed capitalbankhaiti.biz, and a later 20-victim batch listed Global Security Concepts under qilin, dd-automation.ch under safepay, and Praxis EMR under insomnia, among others.
+
+Leak-site claims are extortion advertising, not confirmed breaches: they are unverified until the named organization or a credible second source confirms, and they sometimes overstate what was taken. Their value is as early warning. Victim lists reveal which crews are active, which sectors are being hit, and whether a supplier in your chain, like a healthcare software vendor or an automation firm, is exposed before official disclosure.
+
+Watch for victim confirmations or denials, sector clusters among the claimed organizations, and any of these named companies appearing in customer notifications, since a supplier breach frequently matters more to third parties than to the victim itself.
