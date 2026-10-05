@@ -1,0 +1,7 @@
+A SOC Fortress profile describes Longlegs, a China-linked threat group, targeting critical infrastructure, government bodies, and educational institutions in Spanish- and Portuguese-speaking countries with Warlock ransomware. Initial access comes from exploiting on-premises Microsoft SharePoint deployments. Post-exploitation tradecraft includes DLL sideloading, bring-your-own vulnerable-driver attacks to disable security tooling, and Visual Studio Code tunnels for covert remote access. Payloads are staged in the domain SYSVOL share so automated replication spreads the ransomware across machines at once.
+
+The profile ties Longlegs to previously documented clusters and aliases including CL-CRI-1040, CamoFei, and ChamelGang, which would make this an evolution of known China-nexus activity rather than a new entrant.
+
+This currently rests on a single Medium-sourced writeup, so treat the alias mapping and targeting claims as provisional until a major research shop corroborates. The SharePoint exploitation angle matches this year's broader pattern of on-prem SharePoint attacks and is the actionable part: defenders should assume unpatched on-prem SharePoint is a standing entry vector and verify their exposure.
+
+Watch for independent confirmation of the Longlegs attribution, any victims named on the Warlock leak site, and whether the SYSVOL staging technique shows up in other campaigns.
