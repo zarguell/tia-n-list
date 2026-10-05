@@ -1,0 +1,1 @@
+ASUS patched two critical router firmware vulnerabilities triggered by malicious VPN files: CVE-2026-14157 and CVE-2026-13313. The patches address authentication bypass and remote execution paths that could be triggered through crafted VPN configurations. Router users should apply the firmware updates immediately, especially if remote management or VPN endpoints are enabled.
