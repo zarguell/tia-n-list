@@ -1,0 +1,1 @@
+The Danish Ministry press release (ufm.dk) confirms the unauthorized access and states the CPR administration became aware of irregular behavior in the CPR system on the evening of Friday 2 October 2026. It covers the same 8.8 million individual exposure and refers to the abuse of a firm's legitimate search access.
