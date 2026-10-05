@@ -1,0 +1,1 @@
+Cisco Talos' podcast episode, published April 20, 2018, discusses the Smart Install exploitation incident and the realities of the vulnerability disclosure process, weeks after CVE-2018-0171 was exploited in the wild. It documents the researcher-side response to the same exploitation wave the 2026 advisory revisits.

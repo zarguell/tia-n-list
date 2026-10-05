@@ -1,0 +1,1 @@
+Cisco's vendor advisory for CVE-2018-0171, dated March 28, 2018, covers the Smart Install remote code execution vulnerability in IOS and IOS XE and lists affected and fixed releases. Verified via its earliest Wayback snapshot from 2018-03-31; the page confirms the March 28, 2018 publication date.

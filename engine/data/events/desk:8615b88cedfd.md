@@ -1,0 +1,1 @@
+TestingCatalog reported traces in the Gemini desktop app showing Google was developing a computer-use feature covering app control, file access, and screen sharing. The capability was in testing with no release timeline given. This is the earliest reporting found on Gemini desktop computer use, roughly seven weeks before the current coverage wave.
