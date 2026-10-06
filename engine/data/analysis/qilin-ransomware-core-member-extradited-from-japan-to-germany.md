@@ -1,0 +1,1 @@
+Qilin ransomware core member was extradited from Japan to Germany after detention in Osaka. Two sources cover the extradition: rocket-boys.co.jp and Asahi Shimbun (digital.asahi.com). The group is described as an international RaaS operation. Score 4.5. Watch for updates on the investigation and any linked attack campaigns.
