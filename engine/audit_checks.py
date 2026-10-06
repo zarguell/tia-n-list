@@ -34,6 +34,32 @@ def load_all_stories(data_dir):
     return out
 
 
+def id_hygiene(data_dir):
+    """Filename-stem vs internal-id hygiene (2026-10-06): every story file
+    must be named <id>.json and ids must be unique across files. The
+    redacted-id twins (legacy slug-named files byte-identical to an
+    id-named file) were invisible to load_all_stories, which keys by id and
+    silently collapses duplicates — so this counts FILES, not dict entries.
+    Returns (ok, detail)."""
+    seen = {}
+    problems = []
+    for f in sorted(glob.glob(os.path.join(data_dir, "stories", "*.json"))):
+        stem = os.path.splitext(os.path.basename(f))[0]
+        try:
+            sid = json.load(open(f))["id"]
+        except Exception:
+            continue
+        if stem != sid:
+            problems.append(f"stem!=id: {os.path.basename(f)} (id {sid})")
+        seen.setdefault(sid, []).append(os.path.basename(f))
+    for sid in sorted(seen):
+        if len(seen[sid]) > 1:
+            problems.append(f"duplicate id {sid}: "
+                            f"{', '.join(sorted(seen[sid]))}")
+    return (not problems,
+            "; ".join(problems[:8]) or "ids match filenames, unique")
+
+
 def roundup_family(title):
     """'microsoft' | 'ics' | 'other' if title is a DEDICATED vendor Patch
     Tuesday / numbered-Windows-flaws roundup, else None.

@@ -275,6 +275,8 @@ import audit_checks as jc  # noqa: E402
 _all_stories = jc.load_all_stories(DATA)
 _ok, _detail, _ghosts = jc.dedup_invariants(_all_stories)
 check("dedup_invariants", _ok, _detail)
+_hok, _hdetail = jc.id_hygiene(DATA)
+check("id_hygiene", _hok, _hdetail)
 _tel_problems, _tel_info = jc.triage_telemetry(
     os.path.join(LOG_ROOT, "cronman"), os.path.join(DATA, "triage"), NOW)
 check("triage_drift", not _tel_problems, "; ".join(_tel_problems) or _tel_info)

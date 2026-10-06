@@ -99,6 +99,32 @@ ok, d, _ = jc.dedup_invariants({
 check("dangling redirect shell fails", ok, False)
 check("dangling redirect names the dead target", "missing-target" in d, True)
 
+# ── 1c. id_hygiene (2026-10-06): stem!=id twins and duplicate ids ──────────
+# load_all_stories keys by id so it collapses duplicates — id_hygiene counts
+# FILES, hence the tmp-dir fixture (same pattern as the language_scan tests).
+def _hyg_dir(files):
+    d = tempfile.mkdtemp()
+    os.makedirs(os.path.join(d, "stories"))
+    for stem, sid in files:
+        json.dump({"id": sid, "title": stem, "events": []},
+                  open(os.path.join(d, "stories", stem + ".json"), "w"))
+    return d
+
+
+ok, detail = jc.id_hygiene(_hyg_dir([("story-a", "story-a"),
+                                     ("story-b", "story-b")]))
+check("clean store passes id_hygiene", ok, True)
+
+ok, detail = jc.id_hygiene(_hyg_dir([("legacy-slug-name", "real-id"),
+                                     ("good", "good")]))
+check("stem mismatch detected", ok, False)
+check("stem mismatch names the file", "legacy-slug-name.json" in detail, True)
+
+ok, detail = jc.id_hygiene(_hyg_dir([("slug-a", "shared"),
+                                     ("slug-b", "shared")]))
+check("duplicate ids detected", ok, False)
+check("duplicate detail names the id", "shared" in detail, True)
+
 # ── 2. duplicate_suspects ────────────────────────────────────────────────────
 stories = {
     "chrome-151-a": story("chrome-151-a", ["e1"], title="Google Chrome 151 Update Fixes 5 High Severity Flaws"),
