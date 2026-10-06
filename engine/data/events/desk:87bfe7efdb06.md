@@ -1,0 +1,1 @@
+CISA added CVE-2026-24858 to KEV on January 27, 2026, its publication date, for the FortiCloud SSO cross-account authentication bypass affecting FortiAnalyzer, FortiManager, FortiOS, and FortiProxy. Same-day KEV listing indicates confirmed exploitation from the start.

@@ -1,0 +1,1 @@
+CISA added CVE-2025-59718 to KEV on December 16, 2025, one week after publication, citing FortiOS, FortiSwitchManager, FortiProxy, and FortiWeb. The entry describes the improper verification of cryptographic signature that allows an unauthenticated FortiCloud SSO login bypass via a crafted SAML message.
