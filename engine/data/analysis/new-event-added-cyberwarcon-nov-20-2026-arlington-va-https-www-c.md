@@ -1,0 +1,1 @@
+CYBERWARCON is scheduled for November 20, 2026 in Arlington, Virginia. This entry is a conference announcement with no linked security event or advisory content. No story substance; it remains a fragment in the queue.
