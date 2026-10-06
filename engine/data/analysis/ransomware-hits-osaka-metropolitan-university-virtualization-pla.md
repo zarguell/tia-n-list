@@ -1,0 +1,5 @@
+Osaka Metropolitan University is dealing with a ransomware attack that reached its virtualization platform and stopped roughly 500 servers. Japan Cyber Watch reports most backups were encrypted as well, which limits clean restoration options. As of October 6, The Record reports the university cancelled classes over the incident.
+
+Two details make this worse than a routine school district ransomware case. The attackers specifically compromised the virtualization platform, the layer that would normally be used to snapshot and rebuild quickly, and they appear to have encrypted backups too. A large university running 500 servers on that platform faces a long rebuild if the encrypted backups cannot be salvaged, and class cancellations show the outage reaching core operations rather than staying on back-office systems.
+
+Watch for whether the university restores from off-platform or offline copies and how long classes stay disrupted. A separate disclosure about leaked student and staff data is being tracked as its own story, but if the operators follow the common pattern, extortion claims about stolen data will surface while systems are still being rebuilt.

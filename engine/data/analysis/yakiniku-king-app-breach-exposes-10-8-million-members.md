@@ -1,0 +1,5 @@
+Monogatari Corporation, operator of the Yakiniku King restaurant chain in Japan, has confirmed a data breach of its loyalty app. Attackers took member numbers, names, email addresses and phone numbers for 10,788,963 accounts, a figure Japan Cyber Watch reported first and Daily Tech Now echoed as nearly 11 million loyal app members.
+
+The scale makes this one of the larger Japanese consumer breaches of the year, and the data set is a ready-made phishing and smishing kit: names plus phone numbers plus emails tied to a known brand. At roughly 10.8 million records, a meaningful share of Yakiniku King's customer base is exposed, and the attackers get current contact data because loyalty apps require it.
+
+Watch for how Monogatari notifies affected members and whether it discloses the intrusion path, which has not been stated in either report. Secondary risk is predictable: brand-impersonation phishing against app members in the weeks after disclosure, and possible resale of the record set. Any escalation beyond contact data, such as payment or birthdate fields, would change the severity materially.
