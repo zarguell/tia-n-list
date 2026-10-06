@@ -1,0 +1,7 @@
+Researchers from Modat and the Dutch NCSC have found 8,547 systems belonging to European wind and solar operators openly reachable from the internet. Reuters reported the finding on October 6, 2026, framing cybersecurity for renewable energy infrastructure as an energy transition problem in its own right.
+
+The scale is the point. Distributed energy in Europe is deployed as hundreds of thousands of small sites, and the count shows that a meaningful slice of the control layer, covering wind and solar generation assets, is directly exposed rather than isolated behind operational networks. Exposed remote-management interfaces on generation equipment are exactly what researchers looking at grid security warn about, because they shorten an attack from physical access to a login page.
+
+The finding also arrives as European energy systems sit near the top of hostile-interest lists, and as the energy transition keeps adding internet-connected assets faster than OT security practice matures. Exposure counts like this one are usually the precursor to regulatory attention.
+
+Watch for the underlying research publication with vendor and protocol breakdowns, whether Dutch and EU authorities issue remediation directives, and any evidence that the exposed systems were manipulated rather than merely reachable. Follow-up work from NCSC and Modat will show how many of the 8,547 were fixed and how fast.
