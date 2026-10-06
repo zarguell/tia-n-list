@@ -1,1 +1,1 @@
-Reported that Oracle PeopleSoft zero-day CVE-2026-35273 was exploited by ShinyHunters before Oracle's June 10 advisory, exposing data and triggering extortion attacks. This places the group's PeopleSoft operation four months before the FBI breach claim.
+Reported that ShinyHunters exploited the Oracle PeopleSoft zero-day CVE-2026-35273 before Oracle's June 10 advisory, using it for data theft and extortion. This places the group's PeopleSoft operation roughly four months before its September claim of breaching the FBI.
