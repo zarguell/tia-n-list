@@ -1,0 +1,1 @@
+Domino's Pizza alerted customers to credential-stuffing attacks targeting reused passwords. The alert indicates attackers are using stolen credentials to access customer accounts. No specific breach of Domino's systems is confirmed; the risk is account takeover via reused credentials. Watch for customer reports of unauthorized orders or account changes.

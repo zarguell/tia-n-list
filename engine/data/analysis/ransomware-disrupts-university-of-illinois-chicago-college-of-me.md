@@ -1,0 +1,1 @@
+The University of Illinois Chicago College of Medicine was hit by a Booba ransomware attack that disrupted operations and led to data theft. The event notes hackers stole data and references the BoobaProject. What to watch: scope of the stolen medical data and whether patient records were exposed.

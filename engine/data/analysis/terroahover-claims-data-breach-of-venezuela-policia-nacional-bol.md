@@ -1,0 +1,1 @@
+TerroahOver published a breach claim targeting Policia Nacional Bolivariana, Venezuela's national police force. The claim was tracked via Mastodon from go.darkwebsonar.io. There is no primary source verification that the police confirmed the breach, and no details on data volume or impact. Treat as unverified actor claim only.
