@@ -1,0 +1,5 @@
+ASOS confirmed unauthorized push notifications sent through its mobile app, with attackers claiming to have stolen customer data from a Snowflake environment. The notification told customers to disregard the alert and not click external links. ASOS says third-party communication platforms were accessed without authorization and that basic personal information such as names and contact details may have been exposed. The company has not confirmed the Snowflake claim and has not disclosed how many customers are affected. ASOS states it does not believe payment card information or account passwords were impacted.
+
+This is a real breach affecting a large UK-based online fashion retailer with global customers. The unauthorized push channel is notable because it abuses a trusted customer communication path. Watch for updates on impact scope and whether the Snowflake claim is substantiated.
+
+No specific CVEs are tied to this event. The incident is recent (October 6, 2026) and still developing. Monitor for confirmation of the data exposure scale and any regulatory disclosures.
