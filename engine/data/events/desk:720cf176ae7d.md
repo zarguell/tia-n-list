@@ -1,0 +1,1 @@
+Proven Data's NightSpire analysis documents stolen data being transferred to attacker-controlled infrastructure with WinSCP, MEGACmd, or Rclone before a Go-based encryption payload obfuscated with RC4 and XOR is deployed. The writeup also describes extended sleep intervals between encryption operations to avoid real-time detection and log manipulation on the victim's systems.

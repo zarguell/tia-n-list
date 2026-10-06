@@ -1,0 +1,1 @@
+Huntress walks through an incident linked to the NightSpire ransomware workflow and uses it to show why indicators of compromise shift under a ransomware-as-a-service structure. The post argues the affiliate model means fixed IOC lists for the NightSpire brand go stale quickly.

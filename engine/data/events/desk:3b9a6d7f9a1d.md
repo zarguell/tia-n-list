@@ -1,0 +1,1 @@
+SOCRadar's dark web profile describes NightSpire as a financially motivated ransomware group that emerged in early 2025 and runs a double extortion model, encrypting victim data and threatening to publish it on the group's dark web leak site if ransoms are not paid. The profile notes wide targeting of organizations across multiple sectors.
