@@ -1,0 +1,35 @@
+title: NightSpire Ransomware Pre-Encryption Exfiltration via Rclone or MEGACmd
+id: 2f780111-8454-444e-bebc-4fe01fc41952
+status: experimental
+description: >
+    Detects execution of the data-transfer tooling NightSpire affiliates use to
+    exfiltrate victim data before deploying the Go-based encryptor. Proven
+    Data's NightSpire analysis documents data moved to attacker-controlled
+    infrastructure with WinSCP, MEGACmd, or Rclone ahead of encryption; this
+    rule targets the rarer rclone and MEGACmd binaries for precision. The
+    subsequent encryptor is obfuscated with RC4/XOR and sleeps between
+    encryption passes to evade real-time detection.
+references:
+    - https://www.provendata.com/blog/nightspire-ransomware
+    - https://www.picussecurity.com/resource/blog/nightspire-ransomware-attack-chain-tools-and-tactics
+    - https://www.huntress.com/blog/nightspire-ransomware
+    - https://ransomware.ninja/
+author: Tia N. List
+date: 2026-10-07
+tags:
+    - attack.t1567
+    - attack.exfiltration
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_exfil_tools:
+        Image|contains:
+            - 'rclone'
+            - 'MEGACmd'
+            - 'MEGAcmd'
+    condition: selection_exfil_tools
+falsepositives:
+    - Legitimate administrators using rclone for backup or replication jobs
+    - End users running the MEGACmd desktop sync client for MEGA storage
+level: medium
