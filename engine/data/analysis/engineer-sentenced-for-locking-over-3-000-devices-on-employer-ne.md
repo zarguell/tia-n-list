@@ -1,0 +1,3 @@
+A former core infrastructure engineer at a New Jersey industrial company, 57-year-old Daniel Rhyne, was sentenced to 32 months in prison for a ransomware-style insider attack that locked over 3,000 devices on his employer’s network. The case shows deliberate sabotage by a trusted insider rather than an external intrusion, with significant operational impact across thousands of endpoints.
+
+No CVEs are tied to the incident; the threat is insider abuse, not a technical vulnerability. Organizations should treat this as a reminder that privileged infrastructure roles carry high risk when access controls or offboarding gaps allow malicious action. Watch for sentencing details and whether the employer discloses additional recovery costs or regulatory filings.
