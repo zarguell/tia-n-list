@@ -1,0 +1,33 @@
+title: FortiBleed FortigateSniffer Artifact File Creation
+id: 9c5075c2-b1fd-4e20-9a40-e10854a1e3e0
+status: experimental
+description: >
+    Detects creation of the named artifacts of the FortiBleed credential theft
+    campaign: the Go-based FortigateSniffer capture output fg_capture.log and
+    the Active Directory enumeration scripts ad_enum.py and ad_full_audit.py
+    dropped after admin access is obtained on Fortinet edge devices, alongside
+    Hashcat and Hashtopolis cracking orchestration. Filenames are documented
+    by Recorded Future and SOCRadar reporting on the campaign.
+references:
+    - https://cyberscoop.com/fortibleed-fortinet-vpn-ransomware-fbi-warning/
+    - https://www.bleepingcomputer.com/news/security/fortibleed-campaign-used-custom-fortigate-sniffer-to-steal-credentials/
+    - https://unit42.paloaltonetworks.com/large-scale-credential-attacks/
+    - https://blog.qualys.com/vulnerabilities-threat-research/2026/07/08/fortibleed-fortigate-credential-reuse-internet-exposed
+author: Tia N. List
+date: 2026-10-07
+tags:
+    - attack.t1040
+    - attack.t1070
+logsource:
+    category: file_event
+detection:
+    selection_artifact:
+        TargetFilename|contains:
+            - 'fg_capture.log'
+            - 'ad_enum.py'
+            - 'ad_full_audit.py'
+    condition: selection_artifact
+falsepositives:
+    - Administrator or incident-response tooling that legitimately uses these script names
+    - Unrelated packet-capture files named fg_capture.log
+level: high

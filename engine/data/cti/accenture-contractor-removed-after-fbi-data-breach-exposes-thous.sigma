@@ -1,0 +1,41 @@
+title: ShinyHunters PeopleSoft Intrusion - Staging and Exfiltration Infrastructure
+id: 503dd8e3-e0eb-4df3-a33f-9e46eaa3f363
+status: experimental
+description: >
+    Detects network connections to documented ShinyHunters (UNC6240) staging
+    and exfiltration infrastructure used in the Oracle PeopleSoft exploitation
+    campaign (CVE-2026-35273) that also produced the FBI jobs-portal breach:
+    MeshCentral agents on 142.11.200.186-190 masquerading as Azure via
+    azurenetfiles.net, zstd-compressed exfiltration over SSH to 176.120.22.24,
+    and the 108.174.202.99 host reported in the same campaign.
+references:
+    - https://cloud.google.com/blog/topics/threat-intelligence/shinyhunters-renewed-mass-exploitation-campaign-targeting-oracle-peoplesoft/
+    - https://www.bleepingcomputer.com/news/security/shinyhunters-claims-fbi-hack-data-theft-in-peoplesoft-zero-day-breach/
+    - https://www.bleepingcomputer.com/news/security/shinyhunters-uses-waf-bypass-trick-in-oracle-peoplesoft-attacks/
+    - https://gbhackers.com/accenture-contractor-removed-after-fbi-data-breach/
+author: Tia N. List
+date: 2026-10-07
+tags:
+    - attack.t1190
+    - attack.t1048
+logsource:
+    category: network_connection
+    product: windows
+detection:
+    selection_ip:
+        DestinationIp:
+            - '142.11.200.186'
+            - '142.11.200.187'
+            - '142.11.200.188'
+            - '142.11.200.189'
+            - '142.11.200.190'
+            - '176.120.22.24'
+            - '108.174.202.99'
+    selection_host:
+        DestinationHostname|endswith:
+            - 'azurenetfiles.net'
+    condition: selection_ip or selection_host
+falsepositives:
+    - Reuse or reassignment of the reported hosting ranges after law enforcement action
+    - Rare legitimate MeshCentral or remote-monitoring deployments on the same providers
+level: high

@@ -1,0 +1,27 @@
+title: Blinder Tunnel ShelbyLoader Registry Run Persistence
+id: 63ce815f-2750-4eb7-ac5f-e84039ee512d
+status: experimental
+description: >
+    Detects creation of the HKCU Run value MicrosoftRuntime written by the
+    ShelbyLoader V2 payload of the Iran-nexus Blinder Tunnel campaign
+    (CL-STA-1178), which decrypts a Chisel tunneling configuration with the
+    hard-coded RC4 key "My name is Blackwood !" and reverse-SOCKS proxies to
+    port 10999. RuntimeBroker.dll or PsProxy.dll executed from non-standard
+    paths corroborate the same intrusion.
+references:
+    - https://unit42.paloaltonetworks.com/blinder-tunnel-targets-critical-infrastructure/
+    - https://cyber.netsecops.io/articles/iranian-blinder-tunnel-campaign-targets-iraqi-critical-infrastructure/
+author: Tia N. List
+date: 2026-10-07
+tags:
+    - attack.t1547
+logsource:
+    category: registry_event
+detection:
+    selection_run_value:
+        TargetObject|endswith:
+            - '\CurrentVersion\Run\MicrosoftRuntime'
+    condition: selection_run_value
+falsepositives:
+    - No legitimate application is known to create a Run value named MicrosoftRuntime; verify the image path before acting
+level: high
