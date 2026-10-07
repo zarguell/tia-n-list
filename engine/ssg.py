@@ -26,6 +26,7 @@ Usage: python3 ssg.py   (run from engine/)
 import glob
 import json
 import os
+import subprocess
 import posixpath
 import re
 import sys
@@ -415,6 +416,27 @@ def feed_daily_items(digest_dates, meta_by_date, limit=5):
 
 
 # ---------- render ----------
+
+def deploy_info():
+    """Build stamp for deploy verification (perf/ops 2026-10-07).
+
+    The async deploy-watch polls the LIVE site instead of the Actions API
+    (API windowing missed green runs and paged UNKNOWN on healthy
+    deploys). The stamp names the exact commit the rendered output came
+    from: GITHUB_SHA on Actions, else local HEAD. Pure dict — the caller
+    writes it. Pinned by test_ssg.py.
+    """
+    sha = os.environ.get("GITHUB_SHA", "")
+    if not sha:
+        try:
+            r = subprocess.run(["git", "rev-parse", "HEAD"],
+                               cwd=ROOT, capture_output=True, text=True)
+            sha = r.stdout.strip() if r.returncode == 0 else ""
+        except Exception:
+            sha = ""
+    return {"sha": sha,
+            "built_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")}
+
 
 def render(template, **ctx):
     return env.get_template(template).render(**ctx)
@@ -864,6 +886,7 @@ def main():
                                hot_threshold=HOT_THRESHOLD,
                                total_hot=len(hot_cards)))
     write("404.html", render("404.html", active=None))
+    write("deploy.json", json.dumps(deploy_info(), indent=1))
     write("feeds/index.html", render("feeds.html", active="feeds", og_url=site_url("feeds/")))
     write("methodology/index.html", render("methodology.html", active=None, og_url=site_url("methodology/")))
     write("about/index.html", render("about.html", active=None, og_url=site_url("about/")))

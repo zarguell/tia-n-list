@@ -192,6 +192,22 @@ def main():
         finally:
             shutil.rmtree(rd, ignore_errors=True)
 
+        # deploy stamp (2026-10-07: the async watcher verifies against
+        # the live stamp, not the Actions API)
+        import subprocess as _sp
+        info = ssg.deploy_info()
+        head = _sp.run(["git", "rev-parse", "HEAD"], capture_output=True,
+                       text=True).stdout.strip()
+        ok &= check("deploy stamp names HEAD without GITHUB_SHA",
+                    info["sha"], head)
+        ok &= check("deploy stamp has built_at", "built_at" in info, True)
+        os.environ["GITHUB_SHA"] = "abc123"
+        try:
+            ok &= check("GITHUB_SHA wins on Actions",
+                        ssg.deploy_info()["sha"], "abc123")
+        finally:
+            del os.environ["GITHUB_SHA"]
+
     print("ALL PASS" if ok else "FAILURES")
     return 0 if ok else 1
 
