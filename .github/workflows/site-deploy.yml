@@ -34,6 +34,25 @@ jobs:
         # gate could not see. Pinned to the local version so both gates
         # render identically.
         run: pip install jinja2 "markdown==3.10.3" bleach "sigma-cli==3.1.0" "pysigma==1.5.0" "pyparsing==3.3.2" "pysigma-backend-splunk==2.1.0" "pysigma-backend-kusto==1.0.1" yara-x pytest requests
+      # Derived Sigma variants are build-derived and untracked — without a
+      # cache every build re-derives all 137 rules (272 CLI spawns, ~3/4 of
+      # build time). Keyed by rule content: a rule change misses once and
+      # re-derives only through the build's hash check (perf phase 1).
+      - name: Restore derived Sigma variants
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            engine/data/cti/*.splunk
+            engine/data/cti/*.kql
+          key: sigma-variants-${{ hashFiles('engine/data/cti/*.sigma') }}
+      - name: Save derived Sigma variants
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            engine/data/cti/*.splunk
+            engine/data/cti/*.kql
+          key: sigma-variants-${{ hashFiles('engine/data/cti/*.sigma') }}
       - name: Sanitizer regression suite
         run: python engine/test_sanitize.py
       - name: KEV candidates determinism suite
