@@ -98,6 +98,16 @@ def main():
         bad = live_content(out)
         if bad:
             fails.append((p, out, bad))
+
+    # dangling img src (2026-10-07: literal <img src=x> in agent prose
+    # survived sanitize and the rendered src="x" tripped the fail-closed
+    # link lint, freezing every deploy for 12h — src must be absolute)
+    out = ssg_mod.sanitize('<img src=x onerror=alert(1)>')
+    if "src=" in out:
+        fails.append(("dangling-img-src", out, "src kept"))
+    out = ssg_mod.sanitize('<img src="https://a/b.png" alt="t">')
+    if 'src="https://a/b.png"' not in out:
+        fails.append(("https-img-src", out, "src dropped"))
     out = ssg_mod.sanitize(PROSE)
     if "onclick=alert(1)" not in out or "javascript:" not in out:
         fails.append(("PROSE-KEEP", PROSE, out))

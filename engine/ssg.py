@@ -52,11 +52,27 @@ ALLOWED_TAGS = ["p", "br", "a", "strong", "em", "b", "i", "u", "s", "code", "pre
                 "blockquote", "ul", "ol", "li", "h1", "h2", "h3", "h4", "h5", "h6",
                 "hr", "table", "thead", "tbody", "tr", "th", "td", "span", "div",
                 "sup", "sub", "img", "figure", "figcaption"]
+def _img_attrs(tag, name, value):
+    """bleach attribute filter for <img>: src must be absolute http(s).
+
+    2026-10-07: a literal `<img src=x>` in agent prose survived sanitize
+    (relative src passes the scheme check) and the rendered src="x"
+    tripped the fail-closed link lint, freezing every deploy for 12h.
+    Legit article images are absolute https; a relative src can never
+    resolve to a real image on this site, so dropping it loses nothing
+    and makes this poison class inert at render time no matter which
+    upstream layer misses it.
+    """
+    if name == "src":
+        return (value or "").strip().lower().startswith(("http://", "https://"))
+    return name in ("alt", "title")
+
+
 ALLOWED_ATTRS = {
     "a": ["href", "title"],
     "td": ["colspan", "rowspan"],
     "th": ["colspan", "rowspan"],
-    "img": ["src", "alt", "title"],
+    "img": _img_attrs,
     "code": ["class"],
     "pre": ["class"],
 }
