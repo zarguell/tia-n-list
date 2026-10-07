@@ -1,0 +1,1 @@
+Explore power grid cyber security risks, how attackers target critical infrastructure, and how to prepare for a cyber attack on the power grid. Article Link: https://www.bitsight.com/blog/power-grid-cyber-security-attacks
