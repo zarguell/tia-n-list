@@ -172,6 +172,26 @@ def main():
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
 
+        # markdown cross-refs (2026-10-07: missing-story links red-den
+        # deploys — now caught at VPS lint time instead of on Actions)
+        rd = tempfile.mkdtemp(prefix="tia-refs-")
+        try:
+            open(os.path.join(rd, "a.md"), "w").write(
+                "[x](stories/real-story/) and [y](daily/2026-10-07/) ok\n"
+                "but [z](stories/no-such-story/) breaks and "
+                "`[c](stories/also-missing/)` is code.\n")
+            errs = ssg.lint_md_refs({"real-story"}, {"2026-10-07"},
+                                    [os.path.join(rd, "a.md")])
+            ok &= check("missing story flagged, code span ignored",
+                        errs, ["a.md: stories/no-such-story/ has no story"])
+            open(os.path.join(rd, "b.md"), "w").write("[y](daily/1999-01-01/)\n")
+            errs = ssg.lint_md_refs({"real-story"}, {"2026-10-07"},
+                                    [os.path.join(rd, "b.md")])
+            ok &= check("missing digest flagged",
+                        errs, ["b.md: daily/1999-01-01/ has no digest"])
+        finally:
+            shutil.rmtree(rd, ignore_errors=True)
+
     print("ALL PASS" if ok else "FAILURES")
     return 0 if ok else 1
 

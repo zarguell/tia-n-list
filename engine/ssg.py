@@ -408,6 +408,34 @@ def render(template, **ctx):
 LINT_HITS = []
 
 
+def lint_md_refs(story_ids, digest_dates, paths):
+    """Markdown cross-references resolvable without a render.
+
+    2026-10-07 follow-up to the raw-HTML freeze: the other prose-link
+    failure mode is [text](stories/<slug>/) pointing at a story that does
+    not exist (or daily/<date>/ with no digest) — same red-deploy outcome,
+    checkable at source in milliseconds. Merged shells render redirects,
+    so id-existence (not liveness) is the bar, matching the remote check.
+    Code spans/fences are stripped (documented links are not links).
+    Returns error strings (empty = clean). Pure — pinned by test_ssg.py.
+    """
+    errs = []
+    for f in sorted(paths):
+        try:
+            with open(f, encoding="utf-8", errors="replace") as fh:
+                text = fh.read()
+        except OSError:
+            continue
+        text = re.sub(r"```.*?```", "", text, flags=re.S)
+        text = re.sub(r"`[^`\n]+`", "", text)
+        for kind, slug in re.findall(r"\]\((stories|daily)/([a-z0-9-]+)/\)", text):
+            if kind == "stories" and slug not in story_ids:
+                errs.append(f"{os.path.basename(f)}: stories/{slug}/ has no story")
+            elif kind == "daily" and slug not in digest_dates:
+                errs.append(f"{os.path.basename(f)}: daily/{slug}/ has no digest")
+    return errs
+
+
 def lint_links():
     """Every internal href/src in generated HTML must resolve (against the base,
     i.e. root-relative-without-slash) to an existing output file. Same-directory
@@ -702,11 +730,32 @@ def main():
                 html_errs.append(f"{os.path.basename(f)}: raw HTML {tag}")
         for e in html_errs:
             print(f"HTML FAIL {e}", file=sys.stderr)
-        errs = len(cti_errs) + len(sigma_errs) + len(yara_errs) + len(prose_digest_errs) + len(html_errs)
+        # Markdown cross-reference check (2026-10-07 follow-up to the
+        # raw-HTML freeze: the other prose-link failure mode is
+        # [text](stories/<slug>/) pointing at a story that does not exist
+        # (or daily/<date>/ with no digest) — same red-deploy outcome,
+        # checkable at source in milliseconds, no render needed. Merged
+        # shells render redirects, so id-existence (not liveness) is the
+        # bar, matching the remote check. Quarantined *.rejected-* digests
+        # are inert and never gate a publish.
+        story_ids = {os.path.splitext(os.path.basename(f))[0]
+                     for f in glob.glob(os.path.join(STORIES_DIR, "*.json"))}
+        digest_dates = {os.path.splitext(os.path.basename(f))[0]
+                        for f in glob.glob(os.path.join(DIGESTS_DIR, "*.md"))
+                        if ".rejected-" not in f}
+        ref_errs = []
+        ref_srcs = (glob.glob(os.path.join(ANALYSIS_DIR, "*.md"))
+                    + glob.glob(os.path.join(EVENTS_DIR, "*.md"))
+                    + [f for f in glob.glob(os.path.join(DIGESTS_DIR, "*.md"))
+                       if ".rejected-" not in f])
+        ref_errs = lint_md_refs(story_ids, digest_dates, ref_srcs)
+        for e in ref_errs:
+            print(f"REF FAIL {e}", file=sys.stderr)
+        errs = len(cti_errs) + len(sigma_errs) + len(yara_errs) + len(prose_digest_errs) + len(html_errs) + len(ref_errs)
         if errs:
             print(f"LINT-ONLY FAIL: {len(cti_errs)} CTI + {len(sigma_errs)} Sigma "
                   f"+ {len(yara_errs)} YARA + {len(prose_digest_errs)} prose + "
-                  f"{len(html_errs)} HTML errors.",
+                  f"{len(html_errs)} HTML + {len(ref_errs)} ref errors.",
                   file=sys.stderr)
             sys.exit(1)
         print(f"lint-only: OK ({len(cards)} stories, {errs} errors)")

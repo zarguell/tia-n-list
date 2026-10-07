@@ -28,7 +28,12 @@ jobs:
         #   TypeError: 'str' object is not callable (conditions.postprocess)
         # 1) unpinned pysigma >=1.6, 2) pyparsing 3.3.3 (unpinned transitive
         #    dep) breaks pysigma 1.5.0 condition parsing — pin 3.3.2.
-        run: pip install jinja2 markdown bleach "sigma-cli==3.1.0" "pysigma==1.5.0" "pyparsing==3.3.2" "pysigma-backend-splunk==2.1.0" "pysigma-backend-kusto==1.0.1" yara-x pytest requests
+        # markdown pinned (2026-10-07): unpinned latest normalizes unquoted
+        # HTML attrs (src=x -> src="x") while the local venv's 3.10.3
+        # preserves them, so the remote link lint failed on markup the VPS
+        # gate could not see. Pinned to the local version so both gates
+        # render identically.
+        run: pip install jinja2 "markdown==3.10.3" bleach "sigma-cli==3.1.0" "pysigma==1.5.0" "pyparsing==3.3.2" "pysigma-backend-splunk==2.1.0" "pysigma-backend-kusto==1.0.1" yara-x pytest requests
       - name: Sanitizer regression suite
         run: python engine/test_sanitize.py
       - name: KEV candidates determinism suite
