@@ -89,11 +89,47 @@ def main():
         else:
             print("  [SKIP] spec-grade assertions (sigma-cli unavailable)")
 
+
+    # content-hash variant cache + validation receipt (2026-10-07 ssg
+    # perf phase 1: 408 serial CLI spawns were 3/4 of the build)
+    with tempfile.TemporaryDirectory() as tmp:
+        a = os.path.join(tmp, "a.sigma")
+        open(a, "w").write(GOOD_RULE)
+        digest = sigma.source_sha256(a)
+        ok &= check("header carries source hash",
+                    "source-sha256: " + digest in
+                    sigma.variant_header("a", "Splunk SPL", digest), True)
+        ok &= check("fresh header recognized",
+                    sigma.variant_fresh_text(
+                        sigma.variant_header("a", "KQL", digest) + "body\n",
+                        digest), True)
+        ok &= check("legacy header without hash misses",
+                    sigma.variant_fresh_text("# a old header\nbody\n", digest),
+                    False)
+        ok &= check("changed source misses",
+                    sigma.variant_fresh_text(
+                        sigma.variant_header("a", "KQL", digest) + "x\n",
+                        "0" * 64), False)
+        rec = sigma.validation_receipt({"a": digest})
+        ok &= check("receipt covers identical files",
+                    sigma.receipt_covers(rec, {"a": digest}, rec["cli"]), True)
+        ok &= check("receipt rejects changed hash",
+                    sigma.receipt_covers(rec, {"a": "1" * 64}, rec["cli"]),
+                    False)
+        ok &= check("receipt rejects uncovered rule",
+                    sigma.receipt_covers(rec, {"a": digest, "b": digest},
+                                         rec["cli"]), False)
+        ok &= check("receipt rejects CLI drift",
+                    sigma.receipt_covers(rec, {"a": digest}, "other-cli"),
+                    False)
+        ok &= check("receipt rejects garbage",
+                    sigma.receipt_covers(None, {}, ""), False)
+
     # The publish gate must call the shared validator, not a private path.
     ssg_src = open(os.path.join(ENGINE, "ssg.py")).read()
     lint_block = ssg_src[ssg_src.index("sigma_errs = []"):]
-    ok &= check("ssg.py gate uses sigma_mod.validate()",
-                bool(re.search(r"sigma_mod\.validate\(", lint_block)), True)
+    ok &= check("ssg.py gate writes validation receipt",
+                bool(re.search(r"validation_receipt\(", lint_block)), True)
     ok &= check("ssg.py gate no longer picks its own check",
                 bool(re.search(r"sigma_mod\.(check_with_cli|validate_sigma)\(",
                                lint_block)), False)

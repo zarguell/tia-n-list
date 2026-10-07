@@ -14,6 +14,7 @@ Files per case (engine/data/cti/):
 Variants are never hand-written: sigma-cli (SigmaHQ) converts the generic
 rule deterministically, so the SPL/KQL can never drift from the Sigma.
 """
+import hashlib
 import os
 import re
 import shutil
@@ -23,7 +24,6 @@ import uuid
 
 REQUIRED_KEYS = {"title", "id", "status", "description", "logsource", "detection",
                  "level", "date"}
-
 
 def _sigma_exe():
     exe = shutil.which("sigma")
@@ -55,6 +55,77 @@ def check_with_cli(path):
     if r.returncode != 0:
         errs.append((r.stdout or "") + (r.stderr or ""))
     return errs, None
+
+
+CACHE_VERSION = 1
+RECEIPT_NAME = ".sigma-validate-receipt.json"
+
+
+def source_sha256(path):
+    """Content hash of a rule file (cache key that survives clean clones —
+    mtimes are useless: Actions checks out every file at the same time)."""
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(65536), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def variant_header(slug, kind, digest):
+    """Header stamped on derived variants so a build can verify freshness
+    without invoking the CLI (kind: "Splunk SPL" or "KQL")."""
+    return (f"# {slug} — {kind} variant (derived from {slug}.sigma "
+            f"via sigma convert)\n# source-sha256: {digest} "
+            f"v{CACHE_VERSION}\n")
+
+
+def variant_fresh_text(text, digest):
+    """True when variant text carries the current source hash + version."""
+    for line in (text or "").splitlines()[:4]:
+        m = re.match(r"# source-sha256: ([0-9a-f]{64}) v(\d+)",
+                       line.strip())
+        if m:
+            return m.group(1) == digest and int(m.group(2)) == CACHE_VERSION
+    return False
+
+
+def cli_version():
+    """sigma-cli version string, or "missing"/"unknown" (part of the
+    validation receipt key: a pin change must invalidate it)."""
+    r = run_cli(["--version"])
+    if r is None:
+        return "missing"
+    if r.returncode != 0:
+        return "unknown"
+    return ((r.stdout or "").strip().splitlines() or ["unknown"])[0][:80]
+
+
+def validation_receipt(files):
+    """Receipt proving these {slug: sha256} validated clean under the
+    current CLI (written by the VPS lint-only gate, consumed by the remote
+    build — trust transfer so 136 CLI re-validations are skipped for
+    identical content)."""
+    return {"version": CACHE_VERSION, "cli": cli_version(),
+            "files": dict(files), "errors": []}
+
+
+def receipt_covers(receipt, files, cli):
+    """True when every current file hash is receipted clean under the same
+    version + CLI. Any doubt returns False (caller validates fully —
+    failure mode is slowness, never unsoundness). Pure."""
+    try:
+        if not isinstance(receipt, dict):
+            return False
+        if receipt.get("version") != CACHE_VERSION:
+            return False
+        if receipt.get("cli") != cli:
+            return False
+        if receipt.get("errors"):
+            return False
+        covered = receipt.get("files") or {}
+        return all(covered.get(s) == h for s, h in files.items())
+    except Exception:
+        return False
 
 
 def convert_variants(sigma_path):

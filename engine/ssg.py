@@ -289,7 +289,9 @@ def load_stories(events):
     # loudly (fail-closed): unfreeze it (triage keep / drop the id from
     # frozen.json) and the next build heals.
     frozen = lifecycle.frozen_ids()
-    cards = []
+    # Single story pass (perf phase 1): the old code globbed + parsed every
+    # story json twice (once for max_score, once for cards).
+    parsed = []
     max_score = 1
     for path in sorted(glob.glob(os.path.join(STORIES_DIR, "*.json"))):
         st = json.load(open(path))
@@ -297,11 +299,9 @@ def load_stories(events):
             continue
         evs = [events[e["event_id"]] for e in st["events"] if e["event_id"] in events]
         max_score = max(max_score, st.get("score", 0))
-    for path in sorted(glob.glob(os.path.join(STORIES_DIR, "*.json"))):
-        st = json.load(open(path))
-        if st["id"] in frozen:
-            continue
-        evs = [events[e["event_id"]] for e in st["events"] if e["event_id"] in events]
+        parsed.append((st, evs))
+    cards = []
+    for st, evs in parsed:
         # Public pages are the product: unverified low-trust events (AI-drafted
         # aggregator reposts, template-inflated) stay in the store but do not
         # render — same amplify-never-establish bar as merge/triage/digest.
@@ -315,7 +315,6 @@ def load_stories(events):
         deltas = delta_body(evs_sorted)
         original = next((e for e in evs_sorted if e["kind"] == "original"), evs_sorted[0])
         hc, hl, hv = heat(st.get("score", 0), st.get("last_seen"))
-        src_domains = [display_domain(s) for s in st.get("sources", [])]
         src_domains = [display_domain(s) for s in st.get("sources", [])]
         cards.append({
             "id": st["id"],
@@ -649,15 +648,33 @@ def lint_backlinks(cards):
 
 
 WROTE = 0
+SKIPPED = 0
 
 
 def write(rel, content):
-    global WROTE
+    global WROTE, SKIPPED
     path = os.path.join(ROOT, rel)
     os.makedirs(os.path.dirname(path), exist_ok=True)
+    # Write-if-changed (perf phase 1): 8k+ files per build, a handful ever
+    # differ. Skipping identical writes saves the bulk of local I/O and
+    # keeps unrelated mtimes stable. The LINT_HITS scan still runs on the
+    # in-memory content, so new lints fire on old files too.
+    if os.path.exists(path):
+        try:
+            with open(path, encoding="utf-8") as f:
+                if f.read() == content:
+                    SKIPPED += 1
+                    _scan_html_hits(rel, content)
+                    return
+        except (OSError, UnicodeDecodeError):
+            pass
     with open(path, "w") as f:
         f.write(content)
     WROTE += 1
+    _scan_html_hits(rel, content)
+
+
+def _scan_html_hits(rel, content):
     if rel.endswith(".html"):
         for m in re.finditer(r'(?:href|src|action)="/', content):
             snippet = content[max(0, m.start() - 34):m.end() + 16].replace("\n", " ")
@@ -693,7 +710,7 @@ def main():
                   f" kev link errors + {len(bad_chips)} chip errors - fix before publishing.",
                   file=sys.stderr)
             sys.exit(1)
-        print(f"done (--kev): wrote {WROTE} files.")
+        print(f"done (--kev): wrote {WROTE} files, {SKIPPED} unchanged.")
         return
 
     # --lint-only (leaf A architecture): source-level fail-closed lints for
@@ -708,16 +725,36 @@ def main():
         for e in cti_errs:
             print(f"CTI FAIL {e}", file=sys.stderr)
         import sigma as sigma_mod
+        sigma_files = sorted(glob.glob(os.path.join(CTI_DIR, "*.sigma")))
         sigma_errs = []
-        for f in sorted(glob.glob(os.path.join(CTI_DIR, "*.sigma"))):
+        sigma_hashes = {}
+        for f in sigma_files:
+            sigma_hashes[os.path.splitext(os.path.basename(f))[0]] = \
+                sigma_mod.source_sha256(f)
             for e in sigma_mod.validate(f):
                 sigma_errs.append(f"{os.path.basename(f)}: {e}")
+        # Validation receipt (perf phase 1): the remote build runs minutes
+        # later against identical content — a committed receipt lets it skip
+        # 136 CLI re-validations. Written only when clean (a failing gate
+        # aborts the publish, so a failing receipt can never land).
+        if not sigma_errs:
+            import json as _json
+            receipt = sigma_mod.validation_receipt(sigma_hashes)
+            rp = os.path.join(ENGINE, "data", sigma_mod.RECEIPT_NAME)
+            try:
+                old = open(rp).read() if os.path.exists(rp) else None
+                new = _json.dumps(receipt, indent=1, sort_keys=True) + "\n"
+                if old != new:
+                    open(rp, "w").write(new)
+            except OSError:
+                pass
         for f in sorted(glob.glob(os.path.join(CTI_DIR, "*.splunk"))):
             sigma_errs += [f"{os.path.basename(f)}: {e}" for e in sigma_mod.validate_variant(f, "splunk")]
         for f in sorted(glob.glob(os.path.join(CTI_DIR, "*.kql"))):
             sigma_errs += [f"{os.path.basename(f)}: {e}" for e in sigma_mod.validate_variant(f, "kql")]
         for e in sigma_errs:
             print(f"SIGMA FAIL {e}", file=sys.stderr)
+
         import yara as yara_mod
         yara_errs = []
         for f in sorted(glob.glob(os.path.join(CTI_DIR, "*.yara"))):
@@ -852,15 +889,21 @@ def main():
         for i in kept:
             i["reason"] = curated[i["value"]]["reason"]
         iocs = kept
+    # Hoisted lookups (perf phase 1): techniques.json was re-read per
+    # record (750x) and the IOC join scanned all IOCs per record.
+    tech_by_id = cti_mod.load_techniques()
+    iocs_by_story = {}
+    for _ioc in iocs:
+        for _s in _ioc.get("stories", []):
+            iocs_by_story.setdefault(_s, []).append(_ioc)
     for sid, r in cti_records.items():
         card = cards_by_id_cti.get(sid)
         texts = {}
         for suffix in (".sigma", ".splunk", ".kql", ".yara"):
             p = os.path.join(CTI_DIR, sid + suffix)
             texts[suffix.lstrip(".") + "_text"] = open(p).read() if os.path.exists(p) else ""
-        rec_iocs = [i for i in iocs if sid in i["stories"]]
+        rec_iocs = iocs_by_story.get(sid, [])
         write(f"cti/{sid}.ioc.json", json.dumps(rec_iocs, indent=1))
-        tech_by_id = cti_mod.load_techniques()
         # Story link: only when the story actually renders (live card, or
         # merged-away -> redirect page). Orphaned stories (all events dropped
         # by triage, no merged_into) render no page - the link would 404.
@@ -882,26 +925,46 @@ def main():
                                       og_url=site_url(f"cti/{sid}/")))
 
     # Derive Splunk/KQL variants from the authored Sigma rules (deterministic —
-    # never hand-written, so they cannot drift). Overwrites stale variants;
-    # committed variants survive when sigma-cli is absent (e.g. CI fallback).
+    # never hand-written, so they cannot drift). Content-hash freshness
+    # (perf phase 1): each present variant carries its source sha256, so an
+    # unchanged rule costs two header regexes and zero subprocesses. The
+    # Actions cache restores prior variants (keyed by rule content); a cold
+    # build derives everything once. Variants stay build-derived and
+    # untracked — a missing CLI or inexpressible rule keeps the old behavior
+    # (that backend silently absent from output).
+    _fresh = _derived = 0
     for f in sorted(glob.glob(os.path.join(CTI_DIR, "*.sigma"))):
         slug = os.path.splitext(os.path.basename(f))[0]
-        splunk, kql = sigma_mod.convert_variants(f)
-        # raw rule + derived variants in the source store (committed)
         sigma_text = open(f).read()
+        # raw rule copy in the site output (write-if-changed downstream)
         write(f"cti/{slug}.sigma", sigma_text)
-        # Never overwrite a variant with 'None' when sigma-cli is absent or a
-        # conversion fails — keep the existing committed/published variant.
-        if splunk is not None:
-            variant = f"# {slug} — Splunk SPL variant (derived from {slug}.sigma via sigma convert)\n{splunk}\n"
-            with open(os.path.join(CTI_DIR, slug + ".splunk"), "w") as out:
-                out.write(variant)
-            write(f"cti/{slug}.splunk", variant)
-        if kql is not None:
-            variant = f"# {slug} — KQL variant (derived from {slug}.sigma via sigma convert)\n{kql}\n"
-            with open(os.path.join(CTI_DIR, slug + ".kql"), "w") as out:
-                out.write(variant)
-            write(f"cti/{slug}.kql", variant)
+        _digest = sigma_mod.source_sha256(f)
+        _cached = {}
+        _stale = False
+        for _ext in (".splunk", ".kql"):
+            _vp = os.path.join(CTI_DIR, slug + _ext)
+            try:
+                _cur = open(_vp).read() if os.path.exists(_vp) else ""
+            except OSError:
+                _cur = ""
+            if _cur and sigma_mod.variant_fresh_text(_cur, _digest):
+                _cached[_ext] = _cur
+            else:
+                _stale = True
+        if _stale:
+            _derived += 1
+            splunk, kql = sigma_mod.convert_variants(f)
+            for _ext, _kind, _body in ((".splunk", "Splunk SPL", splunk),
+                                      (".kql", "KQL", kql)):
+                if _body is None:
+                    continue
+                _cached[_ext] = (sigma_mod.variant_header(slug, _kind, _digest)
+                                 + _body + "\n")
+        else:
+            _fresh += 1
+        for _ext, _text in _cached.items():
+            write(f"cti/{slug}{_ext}", _text)
+    print(f"sigma variants: {_fresh} fresh, {_derived} derived")
 
     # author-authored YARA rules: publish raw for defenders
     for f in sorted(glob.glob(os.path.join(CTI_DIR, "*.yara"))):
@@ -1081,7 +1144,7 @@ def main():
             "last_build": built, "entries": items,
         }))
 
-    print(f"done: wrote {WROTE} files.")
+    print(f"done: wrote {WROTE} files, {SKIPPED} unchanged.")
 
     bad_links = lint_links()
     for rel, url, why in bad_links:
@@ -1098,11 +1161,35 @@ def main():
         print(f"CTI FAIL {e}", file=sys.stderr)
     import sigma as sigma_mod
     sigma_errs = []
-    for f in sorted(glob.glob(os.path.join(CTI_DIR, "*.sigma"))):
-        # sigma.validate() = the same gate-grade check authors are told to run
-        # (sigma-cli spec check, structural fallback only if the CLI is gone).
-        for e in sigma_mod.validate(f):
-            sigma_errs.append(f"{os.path.basename(f)}: {e}")
+    # Fan-out (perf phase 1): same rationale as the lint-only loop.
+    sigma_files = sorted(glob.glob(os.path.join(CTI_DIR, "*.sigma")))
+    # Receipt fast path (perf phase 1): the VPS lint-only gate validated
+    # identical content minutes ago and committed the receipt — skip CLI
+    # re-validation for covered rules, validate only the uncovered ones.
+    # Any doubt validates fully (failure mode is slowness, never unsound).
+    sigma_hashes = {os.path.splitext(os.path.basename(f))[0]:
+                    sigma_mod.source_sha256(f) for f in sigma_files}
+    try:
+        import json as _json2
+        _receipt = _json2.load(open(os.path.join(
+            ENGINE, "data", sigma_mod.RECEIPT_NAME)))
+    except (OSError, ValueError):
+        _receipt = None
+    _cli = sigma_mod.cli_version()
+    _rfiles = (_receipt.get("files") or {}) if isinstance(_receipt, dict) else {}
+    # sigma.validate() = the same gate-grade check authors are told to run
+    # (sigma-cli spec check, structural fallback only if the CLI is gone).
+    sigma_errs = []
+    if sigma_mod.receipt_covers(_receipt, sigma_hashes, _cli):
+        print(f"sigma: receipt covers {len(sigma_hashes)} rules "
+              f"(cli {_cli}) — skipped re-validate")
+    else:
+        for f in sigma_files:
+            _slug = os.path.splitext(os.path.basename(f))[0]
+            if _rfiles.get(_slug) == sigma_hashes[_slug]:
+                continue
+            for e in sigma_mod.validate(f):
+                sigma_errs.append(f"{os.path.basename(f)}: {e}")
     for f in sorted(glob.glob(os.path.join(CTI_DIR, "*.splunk"))):
         sigma_errs += [f"{os.path.basename(f)}: {e}" for e in sigma_mod.validate_variant(f, "splunk")]
     for f in sorted(glob.glob(os.path.join(CTI_DIR, "*.kql"))):
