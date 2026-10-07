@@ -1,0 +1,1 @@
+Summary of Vulnerability Trends for the Third Quarter of 2026 A total of 36,971 CVEs were disclosed in the third quarter of 2026, representing an increase of approximately 78.6% Compared to the second quarter. Among the vulnerabilities for which CVSS assessments were completed, approximately 12.7% Were rated “Critical” and approximately 42.6% Were rated “High,” meaning […]
