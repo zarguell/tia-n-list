@@ -381,6 +381,24 @@ with tempfile.TemporaryDirectory() as td:
     errs = ssg.run_prose_gate({}, today="2026-09-26", log=log.append)
     check("absent digest skips silently", errs == [] and log == [])
 
+
+    # raw HTML in prose (2026-10-07: literal <img src=x> in a backfill event
+    # red-ed every deploy for 12h — the rendered page trips the fail-closed
+    # link lint). Payloads in code spans are safe; bare placeholders stay
+    # allowed; href/src tags and active elements fail.
+    check("bare img payload fails raw_html_hits",
+          prose_lint.raw_html_hits("payloads such as 1<img src=x onerror=...> pass") != [])
+    check("code-span payload passes raw_html_hits",
+          prose_lint.raw_html_hits("payloads such as `1<img src=x onerror=...>` pass") == [])
+    check("placeholder tags pass raw_html_hits",
+          prose_lint.raw_html_hits("keys <ip> and <session_id> here") == [])
+    check("script tag fails raw_html_hits",
+          prose_lint.raw_html_hits("then <script>alert(1)</script> ran") != [])
+    check("html payload fails lint_analysis (quarantine path)",
+          any("raw HTML" in m for m in prose_lint.lint_analysis(
+              "CVE-2026-0000 is bad, versions 1.2.3 affected. Payload 1<img src=x> runs.")))
+    log.clear()
+
 print()
 if FAILS:
     print(f"FAILED: {len(FAILS)} check(s): {', '.join(FAILS)}")

@@ -142,6 +142,33 @@ def _names_subject(text, title):
     return matched >= min(2, len(toks))
 
 
+def raw_html_hits(text):
+    """Literal HTML in agent prose that breaks the rendered site.
+
+    2026-10-07: a desk backfill event described an XSS payload with a
+    literal `<img src=x onerror=...>` tag; markdown passes inline HTML
+    through, the story page rendered src="x", and the fail-closed link
+    lint red-ed every deploy for 12h. Payloads/markup belong in code
+    spans — code spans and fenced blocks are stripped before matching, so
+    documented payloads are safe. Only tags that actually break output are
+    flagged: href/src attributes (dangling-link FAIL) and active elements
+    (script/style/iframe/object/embed/form/link/meta/base). Bare
+    placeholders (`<ip>`, `<id>`) and tag-name mentions stay allowed.
+    Returns the offending tag strings.
+    """
+    stripped = re.sub(r"```.*?```", "", text or "", flags=re.S)
+    stripped = re.sub(r"`[^`\n]+`", "", stripped)
+    out = []
+    for m in re.finditer(r"<[a-zA-Z][^<>]*>", stripped):
+        tag = m.group(0)
+        if re.search(r"\s(?:href|src)\s*=", tag, re.IGNORECASE):
+            out.append(tag[:80])
+        elif re.match(r"<(script|style|iframe|object|embed|form|link|meta|base)\b",
+                       tag, re.IGNORECASE):
+            out.append(tag[:80])
+    return out
+
+
 def lint_analysis(text, story=None, subject_title=None):
     """HARD violations for one analysis (plain markdown) — each of these
     quarantines. story, when given, only names the file in the messages.
@@ -150,6 +177,8 @@ def lint_analysis(text, story=None, subject_title=None):
     it names the story's subject. Empty list = passes the gate.
     Paragraph-count drift is soft: see soft_paras()."""
     out = _banned_hits(text)
+    for tag in raw_html_hits(text):
+        out.append(f"raw HTML {tag} (payloads/markup belong in code spans)")
     if any(l.lstrip().startswith("#") for l in text.splitlines()):
         out.append("markdown heading line (prompts ban headings)")
     if not MIN_LEN <= len(text) <= MAX_LEN:

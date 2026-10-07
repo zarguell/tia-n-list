@@ -684,10 +684,29 @@ def main():
             cards_by_id, datetime.now(timezone.utc).strftime("%Y-%m-%d"), log=print)
         for e in prose_digest_errs:
             print(f"PROSE FAIL {e}", file=sys.stderr)
-        errs = len(cti_errs) + len(sigma_errs) + len(yara_errs) + len(prose_digest_errs)
+        # Raw HTML in EVENT prose (2026-10-07: a backfill event's literal
+        # `<img src=x>` sailed through lint-only and red-ed every deploy
+        # for 12h — the remote link lint is fail-closed but the VPS gate
+        # never saw it). Analyses self-heal via quarantine above; events
+        # are source data with no requeue path, so this is fail-closed:
+        # fix the file (payloads in code spans), never the gate.
+        import prose_lint as _pl_mod
+        html_errs = []
+        for f in sorted(glob.glob(os.path.join(EVENTS_DIR, "*.md"))):
+            try:
+                with open(f, encoding="utf-8", errors="replace") as fh:
+                    hits = _pl_mod.raw_html_hits(fh.read())
+            except OSError:
+                continue
+            for tag in hits:
+                html_errs.append(f"{os.path.basename(f)}: raw HTML {tag}")
+        for e in html_errs:
+            print(f"HTML FAIL {e}", file=sys.stderr)
+        errs = len(cti_errs) + len(sigma_errs) + len(yara_errs) + len(prose_digest_errs) + len(html_errs)
         if errs:
             print(f"LINT-ONLY FAIL: {len(cti_errs)} CTI + {len(sigma_errs)} Sigma "
-                  f"+ {len(yara_errs)} YARA + {len(prose_digest_errs)} prose errors.",
+                  f"+ {len(yara_errs)} YARA + {len(prose_digest_errs)} prose + "
+                  f"{len(html_errs)} HTML errors.",
                   file=sys.stderr)
             sys.exit(1)
         print(f"lint-only: OK ({len(cards)} stories, {errs} errors)")
