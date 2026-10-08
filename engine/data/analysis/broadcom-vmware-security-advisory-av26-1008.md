@@ -1,0 +1,3 @@
+Broadcom’s VMware advisory (AV26-1008) covers CVE-2026-59346 (CVSS 9.3, integer overflow) and CVE-2026-59347 (buffer overflow) in VMware Workstation and Fusion for macOS. A public PoC has been released for CVE-2026-59346, allowing a privileged virtual-machine attacker to execute code on the underlying host. Updates address both flaws.
+
+Guest-to-host escapes are high-impact because they break the isolation boundary between virtualized workloads and host systems. Organizations relying on VMware desktop virtualization should apply patches immediately and audit VM access controls, since a compromised guest can escalate directly to host-level control.
