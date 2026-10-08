@@ -1,0 +1,3 @@
+The U.S. Department of State announced a $10 million reward under the Rewards for Justice program for information on Zhang Yu, a Chinese national accused of participating in the Hafnium Microsoft Exchange campaign. Zhang is charged with Xu Zewei, who was extradited from Italy to the U.S. in April 2026. The indictment unsealed in July 2025 alleges unauthorized access to COVID-19 research and exploitation of Exchange vulnerabilities. Zhang remains at large and is linked to the Shanghai State Security Bureau.
+
+This is a high-value legal development that reinforces attribution for the Hafnium/Exchange intrusion campaign. Watch for any new indictments, extradition efforts, or related CISA alerts tied to the same threat actor.
