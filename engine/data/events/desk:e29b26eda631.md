@@ -1,0 +1,1 @@
+The Record reported on 2022-08-23 that both government and criminal hacking groups were targeting Hikvision cameras with the 2021 vulnerability, citing Cyfirma research published the same month. The report established that multiple unrelated actors, not one operator, were mass-exploiting CVE-2021-36260 a year before the current campaign.

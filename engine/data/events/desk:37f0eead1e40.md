@@ -1,0 +1,1 @@
+The vendor advisory from the Hikvision Security Response Center states an initial release date of 2021-09-19 and describes a command injection vulnerability in the web server of some Hikvision products. It scores the flaw 9.8 critical under CVSS v3.1 (AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H), meaning no privileges or user interaction are required for remote code execution.

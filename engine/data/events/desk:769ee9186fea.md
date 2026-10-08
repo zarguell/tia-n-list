@@ -1,0 +1,1 @@
+Researcher bashis published a public exploit entry for the Hikvision web server command injection on Packet Storm, posted October 25, 2021 at 16:15:34 UTC. The entry targets web server build 210702 and puts working exploitation code in public reach about a month after the vendor advisory.

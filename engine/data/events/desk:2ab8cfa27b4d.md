@@ -1,0 +1,1 @@
+Shinhan Bank apologized Thursday after a data breach exposed information on about 25,000 customers, and financial regulators launched an urgent inspection. The leaked data included names and phone numbers. This is the first same-day English coverage of the incident, six days before the CrowdStrike post that framed the campaign as AI-driven.

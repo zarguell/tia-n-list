@@ -1,0 +1,1 @@
+A second public exploit entry, posted February 28, 2022 at 16:38:14 UTC, documents unauthenticated command injection in Hikvision IP cameras under the same CVE. Its publication removed any remaining barrier for low-skill actors against unpatched fleets.
