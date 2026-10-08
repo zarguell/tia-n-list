@@ -1,0 +1,1 @@
+ThreatAft's October 2026 mega-roundup, published October 8 at 00:00 UTC, covers three CVSS 9.8 NX-OS NGOAM RCE vulnerabilities (CVE-2026-76485, CVE-2026-76486, CVE-2026-76501) plus additional critical CVEs including a CVSS 10 license on-prem signature bypass. The post notes 18 total CVEs and urges immediate patching with no workarounds available.

@@ -1,0 +1,1 @@
+The article reports that eight malicious npm packages, with 12 releases since August 2023, accumulated 40,767 total downloads and delivered the Overlord RAT alongside an infostealer. It names the campaign MALFEX and references the threat coverage. Published meta timestamp is 2026-10-07 17:43 UTC, earlier than the 2026-10-08 Mastodon reference.
