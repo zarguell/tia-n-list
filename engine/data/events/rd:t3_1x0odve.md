@@ -1,0 +1,3 @@
+We're sharing recent research we wrote about a fun new set of typosquatting domains that bypass Chromium's latest safeguards. We originally wanted to point to one one of the domains; Reddit's filters didn't play along, so we are sharing a few examples below (try with a Chrome-based browser): - "apple.com" https://xn--80a6aa68c8d.com/ - "spacex.com" https://xn--80a5aeq0fr0c.com/ Hope you find it interesting! Full technical writeup: https://haveibeensquatted.com/blog/turning-idn-edge-cases-into-typosquats submitted by /u/ianmuscat [link] [comments]
+
+via reddit r/cybersecurity: How we registered "apple.com"
