@@ -1,0 +1,1 @@
+The report shows a 4.8 out of 5 overall rating and a 98% willingness to recommend, exceeding the market average in many categories Article Link: Picus Security Placed With a Customers’ Choice Distinction in 2026 Gartner® Peer Insights™ Voice of the Customer for Adversarial Exposure Validation
