@@ -1,0 +1,7 @@
+IDC Frontier, a SoftBank Group subsidiary, disclosed that its IDCF Cloud service was hit by a ransomware attack starting October 7 at 3:40 AM Japan time, forcing a shutdown of the East Japan Region 1 data center cluster. The company says the disruption affects 495 companies and local governments that run websites, applications, and business systems on the platform, including public-sector clients.
+
+Response so far is containment, not restoration: IDC Frontier isolated and shut down impacted systems to stop the spread, disabled customer access to management consoles across all regions pending security verification, and says it is still identifying the intrusion route. No ransomware group has claimed the attack and no data theft has been confirmed. The company's statement, that a third-party ransomware attack caused the Region 1 disruption, leaves scope and root cause open.
+
+Japan's cloud concentration makes this one consequential: a single regional failure at one IaaS provider took hundreds of organizations offline at once, several of them government bodies. It echoes prior supply-side ransomware cases where the compromise of one operator cascaded to its customers.
+
+What to watch: IDC Frontier's restoration timeline for Region 1 and the management consoles, disclosure of initial access and whether data was exfiltrated, any group claim on a leak site, and Japanese regulatory or CERT follow-up on cloud provider resilience requirements.
