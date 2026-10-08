@@ -1,0 +1,1 @@
+Oracle Health's legacy Cerner breach now affects nearly 20 million people, per Bloomberg and a Texas attorney general report. The attack occurred early last year through an unmigrated server using stolen customer credentials, with data copied to a remote server after January 22, 2025. The tally far exceeds earlier filings; Oracle has not publicly confirmed the number.

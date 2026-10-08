@@ -1,0 +1,1 @@
+X.Org Foundation released X.Org Server 21.1.25 and Xwayland 24.1.14, patching 12 critical vulnerabilities. These updates address multiple security issues in the display server stack and should be applied promptly, particularly on workstations and servers running graphical environments.
