@@ -1,0 +1,3 @@
+A joint advisory released October 8, 2026, identifies China-based Integrity Technology Group as a facilitator of operations targeting critical infrastructure, government, healthcare, and other sectors. The hackers use automated vulnerability scanning, large-scale botnets, and hands-on exploitation to steal sensitive data. The FBI and international partners issued the warning.
+
+Why it matters: This is a government-level attribution linking a specific Chinese contractor to botnet-driven data theft. Organizations should treat it as a targeted-threat indicator rather than generic noise. Watch for CISA advisories with technical IOCs tied to Integrity Technology Group.
