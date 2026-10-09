@@ -1,0 +1,1 @@
+TechCrunch reported that ShinyHunters claimed it breached the FBI and stole data on agents and applicants after temporarily defacing the FBI jobs site. The report followed 404 Media's initial disclosure by roughly two hours on the same day.

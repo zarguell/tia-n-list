@@ -1,0 +1,1 @@
+404 Media broke the story of the breach hours before the FBI comment cycle began. ShinyHunters claimed it hacked the FBI and holds data on almost all FBI employees and individuals who applied for a job with the bureau. A sample of 5,000 alleged agents reviewed by 404 Media included names, addresses, phone numbers, and details on employees' spouses.
