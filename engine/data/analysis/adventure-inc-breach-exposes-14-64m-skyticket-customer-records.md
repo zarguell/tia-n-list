@@ -1,0 +1,5 @@
+Adventure Inc., the Japanese travel company behind the Skyticket booking service, disclosed unauthorized access affecting approximately 14.64 million Skyticket customer records. The disclosure puts it among the larger breaches of Japanese consumer services this year.
+
+The same day, the Japan Times reported that several travel companies in Japan had reported potential data breaches, raising concerns that customers' personal information may have been leaked. The timing suggests the sector is dealing with a wave rather than isolated incidents, though whether the cases share a root cause is not yet established.
+
+Watch for Adventure Inc. to specify what data types were exposed and whether credentials or payment information are involved, for the other travel companies to quantify their own exposure, and for regulator or consumer-agency involvement. Customers of Skyticket and similar booking services should treat unsolicited contact referencing their travel details as suspicious while the picture is incomplete.
