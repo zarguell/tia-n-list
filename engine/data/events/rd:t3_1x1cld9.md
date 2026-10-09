@@ -1,0 +1,3 @@
+I have identified and confirmed a critical vulnerability in Apple's iCloud infrastructure. This was reported to Apple through responsible disclosure. Apple's official response classified it as "expected behavior with no security implications." Full technical write-up, redacted proof of concept, confirmed redacted data access details, complete disclosure timeline, and Apple's full correspondence will be published shortly. Stay tuned https://security.apple.com/ submitted by /u/Manu_139 [link] [comments]
+
+via reddit r/cybersecurity: Apple iCloud Critical Vulnerability — Full Technical Details Coming Soon
