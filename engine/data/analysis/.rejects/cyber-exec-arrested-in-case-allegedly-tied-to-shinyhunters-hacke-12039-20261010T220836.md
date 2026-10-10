@@ -1,0 +1,1 @@
+Cyber exec arrest allegedly tied to ShinyHunters hackers, reported via bleepingcomputer.com. The event carries minimal detail — no names, charges, or timelines beyond the headline. It is a real security arrest story, not marketing or a duplicate. What to watch: confirmation of the suspect's identity and whether prosecutors tie the arrest to specific data breaches. Score: 3.6.
