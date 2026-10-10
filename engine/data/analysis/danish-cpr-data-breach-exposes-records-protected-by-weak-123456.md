@@ -1,0 +1,1 @@
+A massive Danish CPR data breach exposed personal records protected by the weak password "123456". The breach highlights critical credential hygiene failures in systems handling national identity data. Defensive takeaway is enforcing strong authentication requirements and auditing access controls for sensitive registries.
