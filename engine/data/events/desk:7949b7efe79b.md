@@ -1,0 +1,1 @@
+Reports the CPR warning that roughly 8.8 million people, about 80 percent of the 11 million records in the register, had personal information exposed. Describes the attack as abuse of a private company's legitimate access rather than a compromise of the registry itself.

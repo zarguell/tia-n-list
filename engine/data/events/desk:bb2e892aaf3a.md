@@ -1,0 +1,1 @@
+Early coverage explaining that attackers abused a firm's legitimate access to the national register rather than exploiting a flaw in the register itself, leaving CPR numbers exposed for 8.8 million people. The piece includes practical guidance for residents on what the breach means and what to do.
