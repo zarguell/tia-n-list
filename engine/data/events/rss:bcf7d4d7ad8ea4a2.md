@@ -1,0 +1,1 @@
+Today we will examine a Snake Keylogger family keylogger malware disguised as a design document request. Filename: design document request.js Size: 2 MB MD5:e89c8668c8b5041768a59c1532edf2ad SHA-1:e66eead0b75cbc01f0f35f4a8394266a8bf2a380 SHA-256:079932.. Article Link: Snake Keylogger family disguised as design document request - design document request.js
