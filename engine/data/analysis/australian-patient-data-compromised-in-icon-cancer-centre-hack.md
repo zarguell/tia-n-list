@@ -1,0 +1,1 @@
+Icon Cancer Centre confirmed a data breach affecting Australian patient records. The operator of a global cancer care network acknowledged the compromise. Monitor for regulatory notifications, scope of exposed health data, and whether the incident connects to prior ransomware activity against healthcare providers.
