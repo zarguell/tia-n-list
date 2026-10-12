@@ -1,0 +1,3 @@
+The GhostAction supply-chain attack compromised GitHub developer accounts and injected malicious scripts to steal API keys and secrets. The campaign targets open-source and developer workflows by abusing legitimate account access to insert payloads into repositories or releases. This is a high-impact supply-chain threat because stolen API keys and secrets can propagate to downstream users who trust the repositories or packages.
+
+Audit any repositories or releases from accounts linked to this campaign. Review secret-scanning and repository-access controls, and enforce multi-factor authentication on all maintainer accounts.

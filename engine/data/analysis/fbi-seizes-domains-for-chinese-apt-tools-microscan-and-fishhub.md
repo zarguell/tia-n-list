@@ -1,0 +1,3 @@
+The FBI seized domains linked to Chinese APT tools MicroScan and FishHub, which target critical infrastructure. The seizure disrupts command-and-control and scanning infrastructure used by the threat actor group. The event references CVE-2014-6278 and CVE-2019-11510, indicating the tools target legacy vulnerabilities in exposed systems. This is a defensive law-enforcement action that reduces attacker capability.
+
+Monitor for any residual infrastructure or replacement domains associated with MicroScan and FishHub. Ensure exposed services are patched against CVE-2014-6278 (Shellshock) and CVE-2019-11510 (Pulse Secure VPN) regardless of the seizure.

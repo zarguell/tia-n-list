@@ -1,0 +1,3 @@
+Dell security advisory AV26-863 covers multiple critical vulnerabilities in third-party components used in Dell PowerEdge Server Intel Processor Firmware and Dell AppSync (prior to 4.6.0.4 / 4.6.1.0). Affected CVEs include CVE-2024-56171, CVE-2023-4807, CVE-2023-5363, CVE-2024-6119, CVE-2025-70873, and CVE-2026-81467. The Canadian Cyber Centre recommends reviewing linked advisories and applying updates as they become available.
+
+Administrators of Dell PowerEdge and AppSync environments should review the specific firmware and software versions listed and plan updates around the CVE list. Confirm vendor patch availability for each affected component.
