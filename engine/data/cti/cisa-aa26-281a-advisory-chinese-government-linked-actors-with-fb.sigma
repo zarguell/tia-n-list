@@ -1,0 +1,29 @@
+title: Flax Typhoon Masqueraded Host Binaries - conhost dllhost or DiagTrack Outside Windows Directories
+id: 96d26e00-972d-466a-9772-ba179bea0de8
+status: experimental
+description: Detects execution of conhost.exe, dllhost.exe, or DiagTrack.exe from locations outside the Windows system directories. CISA advisory AA26-281A reports Flax Typhoon installs SoftEther VPN clients disguised as conhost.exe or dllhost.exe and delivers DiagTrack.exe malware via XSS credential-harvesting pages, so these image names running from user-writable paths indicate renamed masquerading binaries.
+references:
+  - https://www.cisa.gov/news-events/cybersecurity-advisories/aa26-281a
+  - https://malware.news/t/cisa-aa26-281a-how-chinese-government-linked-actors-steal-sensitive-data/126283#post_1
+author: Tia N. List
+date: 2026-10-12
+tags:
+  - attack.t1036
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection:
+    Image|endswith:
+      - '\conhost.exe'
+      - '\dllhost.exe'
+      - '\DiagTrack.exe'
+  filter_legit:
+    Image|startswith:
+      - 'C:\Windows\System32\'
+      - 'C:\Windows\SysWOW64\'
+  condition: selection and not filter_legit
+falsepositives:
+  - Legitimate portable applications shipping a private copy of Windows host binaries
+  - Software installers that place conhost.exe or dllhost.exe in an application directory
+level: medium
