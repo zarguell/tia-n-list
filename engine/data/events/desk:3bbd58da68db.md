@@ -1,0 +1,1 @@
+In a December 2025 post, Let's Encrypt laid out the industry-wide timeline: current 90-day certificates will be cut in half to 45 days by 2028 per CA/Browser Forum Baseline Requirements. The change aims to limit compromise scope and improve revocation efficiency, with all publicly trusted CAs making similar adjustments.
