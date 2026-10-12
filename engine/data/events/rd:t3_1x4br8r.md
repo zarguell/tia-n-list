@@ -1,0 +1,3 @@
+DanFoss - the vendor of the refrigeration units the French food stores used - confirmed that the attack was done by exploiting a known vulnerability (which had been used in an attack again US DoD commissaries in August). None of the stores had patched or updated the controllers. https://www.seattletimes.com/business/hackers-hit-french-supermarkets-in-attack-disabling-fridges/ https://www.militarytimes.com/news/your-military/2026/08/28/dod-confirms-refrigeration-disruption-at-military-commissaries/ submitted by /u/MikeTalonNYC [link] [comments]
+
+via reddit r/cybersecurity: French food store attack was not new, used a previously exploited vulnerability
