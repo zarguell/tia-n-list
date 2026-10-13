@@ -1,0 +1,1 @@
+Pwn2Own Ireland 2026 awarded $1.26 million for 98 zero-day exploits across Google, Samsung, Oracle, and other targets. Ikotas Labs won by exploiting multiple platforms. The results show rapid exploitation capabilities against major consumer and enterprise platforms, reinforcing the need for faster patch cycles and defense-in-depth.
