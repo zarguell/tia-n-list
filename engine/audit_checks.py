@@ -22,6 +22,18 @@ from merge import (title_jaccard, distinct_series_codes,
 
 CJK_RE = re.compile(r"[\u0400-\u04FF\u4E00-\u9FFF\u3040-\u30FF\uAC00-\uD7AF\u0600-\u06FF]")
 
+# Generic title tokens that dominate cross-product collisions (2026-10-13
+# owner decision ed5750725299): all 10 duplicate_suspects on 10-13 were
+# unrelated products sharing boilerplate "remote code execution" headlines
+# (Frappe LMS / IBM MQ / Issabel PBX / ArubaOS-CX / Forgejo / UANIA OS).
+# merge.title_discriminators already strips its GENERIC/DATE_STOP/FILLER set,
+# but remote/code/execution/patched survive it — the probe now demands
+# >= 2 shared NON-generic tokens before surfacing a pair.
+SUSPECT_GENERIC = frozenset({"remote", "code", "execution", "critical",
+                             "vulnerability", "vulnerabilities", "flaw",
+                             "flaws", "patched", "patch", "patches",
+                             "patching"})
+
 
 def load_all_stories(data_dir):
     out = {}
@@ -175,9 +187,13 @@ def dedup_invariants(stories):
 def duplicate_suspects(stories, now, max_out=10, max_age_days=45, min_jaccard=0.5):
     """Near-duplicate ACTIVE story pairs the mechanical merge likely missed
     (different outlets, few shared tokens): title jaccard >= min_jaccard with
-    >= 2 shared discriminators, distinct advisory codes exonerated, actor-only
-    matches (1 shared token) excluded. Recent stories only. Output is for the
-    LLM to adjudicate (merge via a triage decisions file), never automatic."""
+    >= 2 shared NON-generic discriminators (2026-10-13 owner decision
+    ed5750725299 — all 10 suspects on 10-13 were unrelated products colliding
+    on boilerplate "remote code execution" headlines; the generic-token strip
+    below makes the probe require product-specific signal), distinct advisory
+    codes exonerated, actor-only matches (1 shared token) excluded. Recent
+    stories only. Output is for the LLM to adjudicate (merge via a triage
+    decisions file), never automatic."""
     cutoff = (now - timedelta(days=max_age_days)).strftime("%Y-%m-%dT%H:%M:%S")
     pool = [s for s in stories.values()
             if not s.get("merged_into") and s.get("events")
@@ -203,8 +219,9 @@ def duplicate_suspects(stories, now, max_out=10, max_age_days=45, min_jaccard=0.
                 continue
             j_ = inter / (ia + len(B) - inter)
             tb = titles[j]
-            if j_ < min_jaccard or inter < 2 or distinct_series_codes(ta, tb) \
-                    or distinct_periods(ta, tb):
+            if j_ < min_jaccard or distinct_series_codes(ta, tb) \
+                    or distinct_periods(ta, tb) \
+                    or len((A & B) - SUSPECT_GENERIC) < 2:
                 continue
             out.append({"a": pool[i]["id"], "b": pool[j]["id"],
                         "jaccard": round(j_, 2),

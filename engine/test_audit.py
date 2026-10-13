@@ -174,6 +174,37 @@ check("period tokens: verb-ambiguous march/may excluded",
 check("period tokens: week-N and quarters", jc.period_tokens("DFIR week-3 Q3 h1 report"),
       {"week-3", "q3", "h1"})
 
+# ── 2c. non-generic token gate (2026-10-13 owner decision ed5750725299) ──────
+# All 10 suspects on 10-13 were cross-product "remote code execution"
+# boilerplate collisions (Frappe LMS / IBM MQ / Issabel PBX / ArubaOS-CX /
+# Forgejo / UANIA OS); the Midnight Mimosa pair the auditor merged the same
+# day is the genuine class that must still surface.
+rce_noise = {
+    "frappe-lms": story("frappe-lms", ["e20"],
+                        title="Frappe LMS Remote Code Execution Vulnerabilities"),
+    "ibm-mq": story("ibm-mq", ["e21"],
+                    title="Critical IBM MQ Remote Code Execution Vulnerabilities"),
+    "issabel": story("issabel", ["e22"],
+                     title="Issabel PBX remote code execution exploited in active attacks"),
+    "aruba": story("aruba", ["e23"],
+                   title="HPE patches critical ArubaOS-CX remote code execution flaw"),
+}
+check("generic-token RCE collisions no longer suspected (10-13's 10 rows)",
+      jc.duplicate_suspects(rce_noise, NOW), [])
+
+mimosa = {
+    "bitdefender-mimosa": story(
+        "bitdefender-mimosa", ["e30"],
+        title="Bitdefender reports Midnight Mimosa malware in cheap MediaTek Android firmware"),
+    "mimosa-android": story(
+        "mimosa-android", ["e31"],
+        title="Midnight Mimosa: ad-fraud malware preinstalled in cheap Android phone firmware"),
+}
+s_mimosa = jc.duplicate_suspects(mimosa, NOW)
+check("genuine same-story pair (Midnight Mimosa pre-merge) still surfaces",
+      {frozenset((x["a"], x["b"])) for x in s_mimosa},
+      {frozenset(("bitdefender-mimosa", "mimosa-android"))})
+
 # ── 1b. roundup_family (fragmentation classifier) ────────────────────────────
 check("dedicated Microsoft PT roundup",
       jc.roundup_family("Microsoft's September 2026 Patch Tuesday fixes two zero-day flaws"),
