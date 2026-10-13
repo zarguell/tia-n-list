@@ -24,6 +24,7 @@ edits; this suite pins the deterministic half:
 Run: python3 engine/test_desk_queue.py   (exit 0 = pass)
 """
 import glob
+import hashlib
 import importlib.util
 import json
 import os
@@ -178,6 +179,42 @@ with tempfile.TemporaryDirectory() as td:
     st2 = json.load(open(os.path.join(stories_dir, sid2 + ".json")))
     check("no findings still marks reviewed (one-shot)",
           bool(st2.get("desk_reviewed_at"))
+          and dq._load_queue()["stories"] == [])
+
+    # --- write-time double-reference guard (2026-10-13 owner decision
+    # 3937e99cf1aa): a backfill finding whose desk:<sha1(url+published_at)>
+    # id is already referenced by ANOTHER active story must be rejected —
+    # no second ref, no clobbering the owner's event file. Seed the
+    # double-reference: "other-owner" already carries the exact id this
+    # sidecar would mint.
+    sid3 = "dup-guard"
+    json.dump(story(sid3, score=5.4),
+              open(os.path.join(stories_dir, sid3 + ".json"), "w"))
+    f3 = {"title": "Owned elsewhere", "published_at": "2026-05-01T00:00:00Z",
+          "url": "https://owned.example/prior", "source_domain": "owned.example",
+          "summary_md": "The other story's backfill."}
+    eid3 = "desk:" + hashlib.sha1(
+        (f3["url"] + f3["published_at"]).encode()).hexdigest()[:12]
+    other = story("other-owner", score=1.0,
+                  events=[{"event_id": eid3, "label": "backfill"}])
+    json.dump(other, open(os.path.join(stories_dir, "other-owner.json"), "w"))
+    json.dump({"id": eid3, "published_at": f3["published_at"],
+               "title": "original owner's event", "kind": "backfill"},
+              open(os.path.join(events_dir, eid3 + ".json"), "w"))
+    json.dump({"findings": [f3]},
+              open(os.path.join(desk_dir, sid3 + ".backfill.json"), "w"))
+    dq.apply(sid3)
+    st3 = json.load(open(os.path.join(stories_dir, sid3 + ".json")))
+    o3 = json.load(open(os.path.join(stories_dir, "other-owner.json")))
+    check("double-referenced backfill finding rejected (no ref added)",
+          st3["events"] == [])
+    check("owner story keeps its single ref",
+          [r["event_id"] for r in o3["events"]] == [eid3])
+    check("owner's event file not clobbered by the rejected finding",
+          json.load(open(os.path.join(events_dir, eid3 + ".json")))["title"]
+          == "original owner's event")
+    check("guard still marks the story reviewed (one-shot moves on)",
+          bool(st3.get("desk_reviewed_at"))
           and dq._load_queue()["stories"] == [])
 
 print()

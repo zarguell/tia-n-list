@@ -215,6 +215,60 @@ pick = merge.match_story(ev("later", "TheGentlemen Ransomware Attack on Next Vic
                          {"series": series, "solo": solo})
 check("later claim converges on the 7-event series", pick, "series")
 
+print("== write-time double-reference guard (2026-10-13 decisions batch) ==")
+# Seed the double-reference class: event mf:1 already lives in story "alpha".
+# The writers (merge queue attach, social replay attach, mint, desk backfill)
+# must refuse to place it into a second ACTIVE story.
+guard_stories = {
+    "alpha": {"id": "alpha", "title": "Alpha holds it",
+              "events": [{"event_id": "mf:1", "label": "original"}],
+              "sources": ["a.com"], "n_sources": 1, "cves": [],
+              "first_seen": "2026-08-15T00:05:53Z",
+              "last_seen": "2026-08-15T00:05:53Z"},
+    "beta": {"id": "beta", "title": "Beta must not take it",
+             "events": [], "sources": [], "n_sources": 0, "cves": [],
+             "first_seen": "2026-08-15T00:05:53Z",
+             "last_seen": "2026-08-15T00:05:53Z"},
+    "shell": {"id": "shell", "title": "merged away",
+              "events": [{"event_id": "mf:9", "label": "original"}],
+              "sources": [], "n_sources": 0, "cves": [],
+              "merged_into": "alpha",
+              "first_seen": "2026-08-15T00:05:53Z",
+              "last_seen": "2026-08-15T00:05:53Z"},
+}
+check("owner story detected", merge.event_owner(guard_stories, "mf:1"), "alpha")
+check("own ref is not an owner (exclude)",
+      merge.event_owner(guard_stories, "mf:1", exclude="alpha") is None, True)
+check("merged shell is not an active owner",
+      merge.event_owner(guard_stories, "mf:9") is None, True)
+check("unreferenced event has no owner",
+      merge.event_owner(guard_stories, "mf:404") is None, True)
+
+guard_ev = {"id": "mf:1", "title": "reworded pickup of the same event",
+            "url": "https://a.com/mf-1", "published_at": "2026-08-16T00:05:53Z",
+            "cves": []}
+merge.story_url_cache = {}
+check("attach into a second story is rejected",
+      merge._attach_event("mf:1", guard_ev, guard_stories["beta"],
+                          guard_stories), False)
+check("rejected attach left no double reference",
+      tuple(r["event_id"] for r in guard_stories["beta"]["events"]), ())
+check("owner still holds exactly one ref",
+      tuple(r["event_id"] for r in guard_stories["alpha"]["events"]),
+      ("mf:1",))
+check("guard passes when the event is unowned (normal attach) (back-compat)",
+      merge._attach_event("mf:7", {"id": "mf:7", "title": "fresh event",
+                                   "url": "https://a.com/mf-7",
+                                   "published_at": "2026-08-16T01:00:00Z",
+                                   "cves": []},
+                          guard_stories["beta"], guard_stories), True)
+check("3-arg call (no stories passed) keeps the old contract",
+      merge._attach_event("mf:8", {"id": "mf:8", "title": "unit test path",
+                                   "url": "https://a.com/mf-8",
+                                   "published_at": "2026-08-16T02:00:00Z",
+                                   "cves": []},
+                          guard_stories["beta"]), True)
+
 print("== corrupt-JSON hardening (fail-open loads) ==")
 # One bad file must not stall the hourly pipeline: stories skip-and-warn,
 # MANIFEST/QUEUE fall back to the same defaults main() used for missing files.
