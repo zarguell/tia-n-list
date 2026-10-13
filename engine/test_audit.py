@@ -220,6 +220,35 @@ hits = jc.language_scan(tmp)
 check("cjk and cyrillic flagged, accents/emoji ignored",
       (len(hits), "bleed.md" in hits[0], "2026-08-23.md" in hits[1]), (2, True, True))
 
+# ── 3b. backticked code spans are exempt (2026-10-13 owner decision
+# 19fa08f9defd): the ARTEX CJK IOC quoted in `…` passes, the same string in
+# prose still fails — the pin that keeps the exemption from swallowing bleed.
+tmp_spans = tempfile.mkdtemp()
+os.makedirs(os.path.join(tmp_spans, "analysis"))
+os.makedirs(os.path.join(tmp_spans, "digests"))
+open(os.path.join(tmp_spans, "analysis", "ioc.md"), "w").write(
+    "Sweep page titles for `ARTEX-自主渗透测试控制台` exactly, and check "
+    "`基盤` fences too.\n\nSecond paragraph stays plain English.")
+open(os.path.join(tmp_spans, "analysis", "prose-bleed.md"), "w").write(
+    "The write-up quotes the console name 勒索 demand in running prose.")
+open(os.path.join(tmp_spans, "digests", "2026-10-13.md"), "w").write(
+    "Digest naming `ARTEX-自主渗透测试控制台` in a code span. Only.")
+spans_hits = jc.language_scan(tmp_spans)
+check("CJK in backticked code spans passes",
+      any("ioc.md" in h for h in spans_hits), False)
+check("digest code span passes too",
+      any("2026-10-13.md" in h for h in spans_hits), False)
+check("CJK in prose still fails",
+      (len(spans_hits), "prose-bleed.md" in spans_hits[0]), (1, True))
+check("prose hit context still shows the bleed word", "勒索" in spans_hits[0], True)
+
+# the real day-6 driver: the ARTEX analysis is clean once its two backticked
+# IOC occurrences are exempted (no store content edits — check semantics only)
+artex_dir = os.path.dirname(os.path.abspath(__file__))
+check("store-wide scan has no non-span bleed left (ARTEX file exempt)",
+      [h for h in jc.language_scan(os.path.join(artex_dir, "data"))
+       if "unknown-threat-actor-uses-ai-driven-artex" in h], [])
+
 # ── 4. triage_telemetry ──────────────────────────────────────────────────────
 tlog = tempfile.mkdtemp()
 tdir = tempfile.mkdtemp()
