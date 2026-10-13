@@ -1,0 +1,5 @@
+Fortinet's October advisory batch covers roughly 11 advisories and 13 fixed vulnerabilities, with the vendor's own FG-IR-26-180 among them. The standouts are CVE-2026-106173, a CVSS 9.4 critical path traversal in FortiSIEM that leads to remote code execution, and CVE-2026-107656. Coverage also flags a CVSS 9.6 authentication bypass in FortiSandbox and a CVSS 9.4 FortiSIEM flaw.
+
+None of the events report in-the-wild exploitation so far, which keeps this a routine but urgent patch cycle rather than an emergency. Fortinet's track record, including SSL-VPN flaws that fueled years of mass exploitation, argues against letting these sit.
+
+The affected products are security and management infrastructure, the exact tier attackers prize for pivoting. Watch for rapid7-style reproduction writeups, any KEV additions, and scanner noise against FortiSIEM and FortiSandbox interfaces in the coming weeks. Organizations running the affected versions should patch on the normal urgent cycle and check exposed management interfaces.

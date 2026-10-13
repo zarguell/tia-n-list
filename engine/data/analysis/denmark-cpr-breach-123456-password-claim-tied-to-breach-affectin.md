@@ -1,0 +1,5 @@
+The Register reports that the person claiming responsibility for the breach of Denmark's Central Register of Persons says a 123456 password gave them access, with the outlet tying the claim to a breach it describes as affecting 88 million. This matches the wider CPR breach narrative: a Politiken investigation traced the leak to IT firm Pays ApS, where at least three accounts including an administrator used 123456, exposing roughly 8.8 million records.
+
+The claim itself is unverified, an attacker asserting their own access path, but it is consistent with the independently reported credential findings at the implicated vendor. Treat the precise numbers with care, since coverage of this breach has carried both an 8.8 million record figure and larger register-wide counts.
+
+The developing detail to watch is corroboration: anything from Danish authorities, Pays ApS, or the prosecutors' response that confirms or refutes the trivial-password path. The practical takeaway for defenders stands regardless of attribution, that legacy government registers are being reached through small suppliers with weak credential hygiene.
