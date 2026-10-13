@@ -533,7 +533,45 @@ def ingest_noise(data_dir, now, *, raw_glob=None, window_days=2,
     return problems, info
 
 
-def automation_status(path, now, *, stale_hours=24):
+def live_run_for_log(path, proc_root="/proc"):
+    """Live-process cross-check for the RUNNING heuristic (2026-10-13).
+
+    True when some process on this host holds the cronman job's run lock
+    open: Job.run_guarded() keeps <lock_dir>/<job>.lock open (flock held) for
+    the whole run, so an open fd on that file IS a live run of that job. The
+    job name is the log directory (logs/<job>/latest.log -> <job>.lock),
+    honoring CRONMAN_LOCK_DIR exactly like cronman's lock_file() does.
+
+    Observational only — it READS /proc and never takes the lock itself
+    (probing by acquiring flock would race a concurrently starting job into
+    a spurious "SKIP: already running"). Missing /proc, other users' fds, or
+    an unreadable lock dir all answer False (cannot confirm = not live).
+    """
+    job = os.path.basename(os.path.dirname(os.path.abspath(path)))
+    if not job:
+        return False
+    lock = os.path.realpath(os.path.join(
+        os.environ.get("CRONMAN_LOCK_DIR", "/tmp"), f"{job}.lock"))
+    try:
+        pids = [p for p in os.listdir(proc_root) if p.isdigit()]
+    except OSError:
+        return False
+    for pid in pids:
+        fddir = os.path.join(proc_root, pid, "fd")
+        try:
+            fds = os.listdir(fddir)
+        except OSError:
+            continue          # kernel thread / other user / vanished pid
+        for fd in fds:
+            try:
+                if os.path.realpath(os.path.join(fddir, fd)) == lock:
+                    return True
+            except OSError:
+                continue
+    return False
+
+
+def automation_status(path, now, *, stale_hours=24, live_check=None):
     """(state, detail) from a cronman job's latest.log — the run-status leg of
     the automation_runs check.
 
@@ -545,7 +583,19 @@ def automation_status(path, now, *, stale_hours=24):
     ("DONE (publish failed)") or an ABORT is a failure, a bare DONE/SKIP
     completed; a missing log or one silent for > stale_hours is stale (a run
     killed mid-write leaves no terminal line, so a missing one is a failure
-    signal too). Pure: path/now passed in.
+    signal too).
+
+    RUNNING (2026-10-13, owner decision 321115dd4f0a): a log that exists,
+    was modified within stale_hours, and has no terminal line yet used to
+    report MISSING "no terminal line (crashed mid-run?)" — a false positive
+    on any healthy in-flight run (would hit cti/hourly/digest mid-flight).
+    Now that case reports RUNNING — but ONLY after the live-process
+    cross-check confirms a holder of the job's run lock (live_check, default
+    live_run_for_log). Fresh log + no live run still reports MISSING (a
+    crash inside stale_hours leaves a fresh log too), and a log untouched
+    for hours with no terminal line stays MISSING (genuinely crashed).
+    Pure except for the live_check probe: path/now passed in, live_check
+    injectable for tests.
     """
     if not os.path.exists(path):
         return "MISSING", f"no log at {path}"
@@ -560,6 +610,20 @@ def automation_status(path, now, *, stale_hours=24):
     except OSError as e:
         return "MISSING", f"unreadable {path}: {e}"
     if status is None:
+        if live_check is None:
+            live_check = live_run_for_log
+        try:
+            fresh = (now.timestamp() - os.path.getmtime(path)) / 3600 <= stale_hours
+        except OSError:
+            fresh = False
+        if fresh:
+            try:
+                live = live_check(path)
+            except Exception:      # noqa: BLE001 - a probe failure is not liveness
+                live = False
+            if live:
+                return "RUNNING", "in progress, no terminal line yet (live run confirmed)"
+            return "MISSING", "no terminal line and no live run (crashed mid-run?)"
         return "MISSING", "no terminal line (crashed mid-run?)"
     try:
         age = now - datetime.fromisoformat(ts.replace("Z", "+00:00"))
