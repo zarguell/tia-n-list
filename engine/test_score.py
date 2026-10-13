@@ -149,6 +149,44 @@ def main():
         ok &= check(f"bypass does not fire: {neg_title[:40]}",
                     neg["severity"], 0.5)
 
+    # --- high-impact weights (2026-10-13 owner decision fc3f6e00a8d9) ------
+    # The recurring "score under-ranks high-impact" promotes: a CVSS the
+    # coverage states must band like a stored one, unpatched CVSS >= 9.0
+    # gets explicit weight, confirmed in-the-wild exploitation gets
+    # explicit weight. Controls keep the old numbers.
+    w1 = ev("w1", iso(1), "the flaw is unpatched and cvss 10")
+    s_stated = story("stated", ["example.com"], ["CVE-2026-00001"],
+                     "CVE-2026-00001 Erlang OTP client auth bypass (CVSS 10)",
+                     [w1], iso(1))
+    rw = score.hot_score(s_stated, {"w1": w1}, [], now=base)
+    ok &= check("text-stated CVSS 10 bands like a stored CVE (store lacks it)",
+                rw["severity"] >= 4.5, True)
+    ok &= check("unpatched CVSS >= 9.0 carries the impact weight (4.5 + 0.4)",
+                rw["severity"], 4.9)
+
+    s_stated_fixed = story("stated-fixed", ["example.com"], ["CVE-2026-00001"],
+                           "CVE-2026-00001 Erlang OTP client auth bypass (CVSS 10)",
+                           [ev("w1b", iso(1), "the flaw is patched in this release")], iso(1))
+    rf = score.hot_score(s_stated_fixed,
+                         {"w1b": ev("w1b", iso(1), "the flaw is patched in this release")},
+                         [], now=base)
+    ok &= check("patched CVSS 10 gets no unpatched weight (control)",
+                rf["severity"], 4.5)
+
+    wild_ev = ev("w2", iso(1), "the flaw is actively exploited in the wild")
+    s_wild = story("wild", ["example.com"], [], "Router Flaw Under Attack",
+                   [wild_ev], iso(1))
+    neutral_ev = ev("w3", iso(1), "attackers probe devices at scale")
+    s_neutral = story("neutral", ["example.com"], [], "Router Flaw Under Attack",
+                      [neutral_ev], iso(1))
+    rwild = score.hot_score(s_wild, {"w2": wild_ev}, [], now=base)
+    rneutral = score.hot_score(s_neutral, {"w3": neutral_ev}, [], now=base)
+    ok &= check("in-the-wild exploitation carries explicit weight",
+                round(rwild["severity"] - rneutral["severity"], 2), 0.7)
+    ok &= check("severity still caps at 5.0 with weights",
+                score.hot_score(s_severe, {e["event_id"]: e for e in evs_severe},
+                                [], now=base)["severity"] <= 5.0, True)
+
     # --- A4: engine NVD cache merges into the CVE store (kev stays kev-only)
     saved_store = score._cve_store
     score._cve_store = None
