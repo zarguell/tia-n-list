@@ -1,0 +1,3 @@
+I'm a CISSP, CISM, Sec+, & doctoral candidate at Capitol Technology University, MD. I'm researching which security controls actually enable recovery and resilience in small and medium-size orgs. Takes 15–25 minutes. Anonymous. No compensation. IRB-approved. Need U.S. based I.T. folks from organizations that experienced a ransomware attack between 2021–2025. Would appreciate your help. Please share. Thank you! https://techstudy.limesurvey.net/748327?lang=en&newtest=Y submitted by /u/ransomwarestudy [link] [comments]
+
+via reddit r/cybersecurity: [Doctoral Research Survey] Looking for IT Folks with Ransomware Experience
