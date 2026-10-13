@@ -1,0 +1,1 @@
+GhostAction is back. A fake "security audit" workflow targeted 345 GitHub repos on October 8 and harvests secrets from full git history. Two sources cover it: diesec.com and threat-intelligence.redeyesecurity.com. No CVEs, no CISA KEV entry, but the technique is active. Watch for more GitHub Actions abuse and secret-exposure reports.
