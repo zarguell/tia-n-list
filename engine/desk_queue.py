@@ -44,6 +44,7 @@ from datetime import datetime, timedelta, timezone
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import lifecycle  # noqa: E402
 import store as store_mod  # noqa: E402
+from merge import event_owner  # noqa: E402  (write-time double-ref guard)
 
 ENGINE = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(ENGINE, "data")
@@ -258,10 +259,23 @@ def apply(sid):
                 print(f"applied {sid}: REJECTED finding {i} ({v}) — "
                       f"left queued")
                 return
+        stories_all = _load_stories_raw()
         for f in findings:
             h = hashlib.sha1(
                 (f["url"] + f["published_at"]).encode()).hexdigest()[:12]
             eid = f"desk:{h}"
+            owner = event_owner(stories_all, eid, exclude=sid)
+            if owner:
+                # Write-time double-reference guard (2026-10-13 owner decision
+                # 3937e99cf1aa): two sidecars finding the same source URL
+                # produce the SAME desk:<sha1(url+published_at)> id — insert it
+                # here and one event would sit in two active stories (the
+                # dedup_invariants multi-ref class). Reject BEFORE the event
+                # files are written so the owner's copy is never clobbered.
+                print(f"applied {sid}: REJECTED finding — backfill event {eid} "
+                      f"already referenced by story {owner} (double-reference "
+                      f"guard)")
+                continue
             meta = {"id": eid, "title": f["title"].strip(),
                     "url": store_mod.safe_url(f["url"]),
                     "source": f["source_domain"].strip(),
