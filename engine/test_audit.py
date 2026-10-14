@@ -470,6 +470,77 @@ finally:
     import shutil as _sh
     _sh.rmtree(tmp3, ignore_errors=True)
 
+# ── 7b. RUNNING heuristic + live-process cross-check (2026-10-13, owner
+# decision 321115dd4f0a): a fresh log mid-run used to report MISSING and fail
+# automation_runs while the run was healthy. RUNNING requires BOTH a fresh
+# log AND a confirmed live process — fresh + no live run stays MISSING (a
+# crash inside stale_hours leaves a fresh log too), and a log untouched for
+# hours with no terminal line stays MISSING even if the probe claims live.
+tmp4 = tempfile.mkdtemp()
+proc4 = tempfile.mkdtemp()
+try:
+    def _log4(name, lines):
+        p = os.path.join(tmp4, name)
+        os.makedirs(os.path.dirname(p), exist_ok=True)
+        open(p, "w").write("\n".join(lines) + "\n")
+        return p
+
+    midrun = _log4("daily-digest/latest.log",
+                   ["2026-10-03T13:20:00Z PHASE2 compose"])
+    st, d = jc.automation_status(midrun, NOW3, live_check=lambda p: True)
+    check("fresh log + live run is RUNNING", st, "RUNNING")
+    check("RUNNING detail names the in-flight run",
+          d.startswith("in progress"), True)
+
+    st, d = jc.automation_status(midrun, NOW3, live_check=lambda p: False)
+    check("fresh log + no live run stays MISSING (just crashed)",
+          (st, "no live run" in d), ("MISSING", True))
+
+    crashed = _log4("cti-pass/latest.log",
+                    ["2026-10-01T11:00:00Z PHASE2 compose"])
+    os.utime(crashed, (NOW3.timestamp() - 3 * 86400,) * 2)
+    st, d = jc.automation_status(crashed, NOW3, live_check=lambda p: True)
+    check("log untouched for hours with no terminal line is MISSING "
+          "(genuinely crashed, cross-check never consulted)",
+          (st, "no terminal line (crashed mid-run?)" == d), ("MISSING", True))
+
+    # live_run_for_log itself: fd-scan on a fake /proc root against the
+    # CRONMAN_LOCK_DIR lock file (job name = the log's parent directory).
+    lockdir = tempfile.mkdtemp()
+    old_env = os.environ.get("CRONMAN_LOCK_DIR")
+    os.environ["CRONMAN_LOCK_DIR"] = lockdir
+    try:
+        check("no holder -> not live",
+              jc.live_run_for_log(
+                  os.path.join(tmp4, "daily-digest", "latest.log"),
+                  proc_root=proc4), False)
+        lock = os.path.join(lockdir, "daily-digest.lock")
+        open(lock, "w").close()
+        piddir = os.path.join(proc4, "4242")
+        os.makedirs(os.path.join(piddir, "fd"))
+        os.symlink(lock, os.path.join(piddir, "fd", "7"))
+        check("open fd on the job lock -> live run",
+              jc.live_run_for_log(
+                  os.path.join(tmp4, "daily-digest", "latest.log"),
+                  proc_root=proc4), True)
+        other = os.path.join(lockdir, "other-job.lock")
+        open(other, "w").close()
+        os.unlink(os.path.join(piddir, "fd", "7"))
+        os.symlink(other, os.path.join(piddir, "fd", "7"))
+        check("fd on a DIFFERENT job's lock is not this job's run",
+              jc.live_run_for_log(
+                  os.path.join(tmp4, "daily-digest", "latest.log"),
+                  proc_root=proc4), False)
+    finally:
+        if old_env is None:
+            os.environ.pop("CRONMAN_LOCK_DIR", None)
+        else:
+            os.environ["CRONMAN_LOCK_DIR"] = old_env
+finally:
+    import shutil as _sh
+    _sh.rmtree(tmp4, ignore_errors=True)
+    _sh.rmtree(proc4, ignore_errors=True)
+
 print()
 if failures:
     print(f"FAIL: {len(failures)} audit checks failed")
