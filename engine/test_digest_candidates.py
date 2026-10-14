@@ -281,6 +281,49 @@ def test_bench_flags_and_slate_exclusion():
     fx.close()
 
 
+def test_never_covered_decayed_story_lands_on_uncovered_slate():
+    """Regression (2026-10-13 owner decision 38f1c57703dd — the MCP Python
+    SDK OAuth story the Oct 5-11 digests missed): a never-covered story
+    whose development is 9 days stale and whose score decayed to ~3.0
+    (below the 3.3 hot gate) must still appear on the uncovered slate.
+    The never-covered add is capped top-UNCOVERED_NEVER_MAX by score,
+    eventless ghosts never fill it, and hot-but-covered-recently stays out."""
+    fx = Fixture()
+    fx.digest("2026-08-13", ["covered-story"])   # prior digest exists
+    evs = [fx.event("e1", "2026-08-05T10:00:00Z",
+                    "MCP Python SDK OAuth flaw lets malicious servers steal tokens")]
+    fx.story("mcp-python-sdk-oauth", evs, score=3.0)   # never covered, decayed
+    # hot but covered in the last window: NOT uncovered
+    fx.story("covered-story", [fx.event("e2", "2026-08-13T09:00:00Z", "Fresh")],
+             score=5.0)
+    # eventless ghost, never covered, score that would otherwise top the cap
+    fx.story("ghost", [], score=2.0)
+    # 12 more never-covered stories below the hot gate -> cap must bite
+    for i in range(12):
+        fx.story(f"never-{i:02d}",
+                 [fx.event(f"e3-{i}", f"2026-08-05T11:{i:02d}:00Z", f"Story {i}")],
+                 score=round(0.5 + i * 0.1, 2))
+    rows, _ = fx.compute()
+    by_score = sorted(rows.values(), key=lambda r: -r["score"])
+    unc = dc.select_uncovered(by_score)
+    slugs = {r["slug"] for r in unc}
+    assert "mcp-python-sdk-oauth" in slugs, \
+        "decayed, stale, never-covered story must appear on the slate"
+    assert "covered-story" not in slugs, \
+        "hot but covered-recently is not uncovered"
+    assert "ghost" not in slugs, \
+        "eventless ghosts never fill the never-covered cap"
+    never_on = [s for s in slugs
+                if s.startswith("never-") or s == "mcp-python-sdk-oauth"]
+    assert len(never_on) == dc.UNCOVERED_NEVER_MAX, \
+        f"never-covered add capped top-{dc.UNCOVERED_NEVER_MAX} by score, got {len(never_on)}"
+    assert "mcp-python-sdk-oauth" in never_on, "top-scored never-covered stays in the cap"
+    r = rows["mcp-python-sdk-oauth"]
+    assert r["stale_days"] == 9 and r["catchup"] is True and r["hot"] is False, \
+        "fixture really is the 9-day-stale ~3.0 decayed class"
+    fx.close()
+
+
 def main():
     tests = [v for k, v in sorted(globals().items())
              if k.startswith("test_") and callable(v)]
