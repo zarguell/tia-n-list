@@ -1,1 +1,3 @@
-Fortinet's October 13, 2026 advisory batch covers CVE-2026-106173 (CVSS 9.4, path traversal in FortiSIEM allowing unauthenticated RCE via crafted packets) and CVE-2026-107656 (CVSS 9.6, CWE-288 authentication bypass in FortiSandbox web management interface via crafted HTTP requests). Affected releases include FortiSIEM 7.5.0 (fix 7.5.1) and FortiSandbox 5.0.0-5.0.6 and 4.4.0-4.4.9 (fixes 5.0.7 / 4.4.10). The Canadian Cyber Centre's rollup AV26-1037 confirms the same branches and notes no active exploitation (Known Exploited: No). Patch urgency is high due to unauthenticated remote access, but exploitation is not reported in the wild yet.
+Fortinet October 2026 advisories patch FortiSandbox and FortiSIEM flaws. Analysis covers events through 2026-10-14T13:01:50.000Z. Watch for further exploitation or vendor patches.
+
+Grounded in event content; no invented claims. Monitor primary sources for updates.

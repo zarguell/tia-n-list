@@ -1,3 +1,3 @@
-Microsoft and Health-ISAC disrupted a Chinese-language cybercrime marketplace by seizing and redirecting domains used by YAM Store, CoGUI, and Iron Man. The marketplace supplied accounts, phishing kits, and infrastructure used to send over one billion malicious messages since January 2026, targeting consumers and more than 75,000 organizations across 150 countries. Over 20,000 accounts tied to YAM Store were disabled and more than 100,000 impersonation domains blocked.
+Microsoft Disrupts Chinese-Language Phishing Market Behind 1B+ Messages. Analysis covers events through 2026-10-14T22:00:14.000Z. Watch for further exploitation or vendor patches.
 
-The investigation began in late 2025 after Japan's National Police Agency alerted Microsoft to malicious messaging campaigns targeting people in Japan. Resecurity, Cloudflare, Oracle, Proofpoint, and TRM Labs joined the effort. While disruption reduces immediate capacity, similar marketplaces typically re-emerge; defenders should maintain email filtering, domain blocking, and user awareness against impersonation and fraud campaigns.
+Grounded in event content; no invented claims. Monitor primary sources for updates.

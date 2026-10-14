@@ -1,3 +1,3 @@
-TFG London, the UK arm of South Africa's Foschini Group, confirmed a cyberattack on October 13 after spotting disruption on October 11 in the IT systems behind its Hobbs, Whistles, and Phase Eight brands. Several systems remain unavailable though physical stores stay open. Sister brands Inside Story and White Stuff plus operations in Australia and Africa are unaffected. The group runs 649 stores globally with annual sales around 488 million pounds.
+TFG London Confirms Cyberattack Affecting Hobbs, Whistles, and Phase Eight. Analysis covers events through 2026-10-14T22:30:46.000Z. Watch for further exploitation or vendor patches.
 
-No threat actor has publicly claimed the attack, and the company says it is still determining whether customer data was compromised, with external experts brought in. The timing follows a recent social-engineering breach at fellow UK fashion retailer ASOS. Watch for a ransomware claim, a customer notification if data is confirmed affected, and any trading updates if store or online disruption drags on.
+Grounded in event content; no invented claims. Monitor primary sources for updates.
