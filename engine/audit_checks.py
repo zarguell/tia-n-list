@@ -34,6 +34,15 @@ SUSPECT_GENERIC = frozenset({"remote", "code", "execution", "critical",
                              "flaws", "patched", "patch", "patches",
                              "patching"})
 
+# Backticked code spans are exempt from the non-Latin scan (2026-10-13 owner
+# decision 19fa08f9defd): a literal IOC/console string the prose tells
+# defenders to grep for (`ARTEX-自主渗透测试控制台`, the day-6 red driver) is
+# code, not prose bleed. Each span is blanked to equal-length spaces before
+# CJK_RE runs (matching backtick delimiters, ``double`` too), so hit offsets
+# and the context snippet stay aligned; non-Latin prose OUTSIDE a span still
+# fails.
+CODE_SPAN_RE = re.compile(r"(`+)([^`]+?)\1")
+
 
 def load_all_stories(data_dir):
     out = {}
@@ -234,7 +243,8 @@ def language_scan(data_dir, max_files=800):
     """Non-Latin script bleed (CJK/Cyrillic/Arabic) in published English
     prose — the 2026-08-23 'Chinese characters in an analysis' catch, made
     deterministic instead of luck-of-the-sample. Accented Latin and emoji are
-    not flagged."""
+    not flagged. Backticked code spans are exempt (2026-10-13 owner decision):
+    CJK inside `…`/```…``` passes, CJK in prose still fails."""
     hits = []
     for pat in ("analysis/*.md", "digests/*.md"):
         for f in glob.glob(os.path.join(data_dir, pat))[:max_files]:
@@ -242,9 +252,10 @@ def language_scan(data_dir, max_files=800):
                 text = open(f, encoding="utf-8", errors="ignore").read()
             except Exception:
                 continue
-            m = CJK_RE.search(text)
+            scrubbed = CODE_SPAN_RE.sub(lambda m: " " * len(m.group(0)), text)
+            m = CJK_RE.search(scrubbed)
             if m:
-                ctx = text[max(0, m.start() - 20):m.end() + 20].replace("\n", " ")
+                ctx = scrubbed[max(0, m.start() - 20):m.end() + 20].replace("\n", " ")
                 hits.append(f"{os.path.relpath(f, data_dir)}: …{ctx}…")
     return hits
 
