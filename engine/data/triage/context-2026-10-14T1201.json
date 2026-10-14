@@ -1,0 +1,780 @@
+{
+ "date": "2026-10-14",
+ "decisions_path": "engine/data/triage/decisions-2026-10-14T1201.json",
+ "instructions": "For every new event decide: (1) keep or drop \u2014 keep only stories worth covering (real security events, vulnerabilities, attacks, breaches, advisories with substance); drop press releases, vendor marketing, generic explainers, and anything duplicating an existing story. (2) If keep, assign the event to the RIGHT story: an existing candidate story id if it belongs there (this FIXES mechanical clustering \u2014 e.g. different outlets' Patch Tuesday roundups are ONE story), or NEW with a clean story_title. (3) merges: list candidate stories that are really the same story (from = fragment, into = the most complete one). (4) For every kept event that names CVEs, optionally assess exploitation: exploited = the event reports OBSERVED in-the-wild exploitation (implants, victim counts, campaigns, CISA KEV confirmation); suspected = public exploit code/PoC or likely-but-unconfirmed. Attribute ONLY the CVEs you can tie to the claim \u2014 a bulletin's blanket 'actively exploited' does NOT flag all its CVEs. Omit the exploitation field when the event makes no claim.\n(5) LOW-TRUST events (\"low_trust\": true \u2014 AI-drafted aggregator reposts, late and overstated): treat as unverified leads. When the text attributes the claim to a named primary source (a researcher firm like watchTowr, a vendor advisory, CISA, a major outlet) and attribution_urls or a web search (/home/ubuntu/repos/cronman/bin/web-search.sh \"query\") locate that primary source CONFIRMING the claim, include a provenance object in the decision: {\"url\": <primary url>, \"source\": <domain>, \"evidence\": <one line>, \"verified\": true}. VERIFIED provenance lets the event mint a story (credited to the primary source) and count as a development; without it, a low-trust event can only attach to an EXISTING story, never mint. If you cannot verify, keep/drop on normal merit and omit provenance.\n\nWrite decisions as JSON with EXACTLY this shape:\n{\n  \"decisions\": [\n    {\"event_id\": \"<id>\", \"action\": \"keep\", \"story\": \"<existing candidate story id>\", \"reason\": \"...\"},\n    {\"event_id\": \"<id>\", \"action\": \"keep\", \"story\": \"NEW\", \"story_title\": \"<clean title>\", \"reason\": \"...\"},\n    {\"event_id\": \"<id>\", \"action\": \"drop\", \"reason\": \"...\"}\n  ],\n  \"merges\": [{\"from\": \"<fragment story id>\", \"into\": \"<canonical story id>\"}]\n}\nFor events marked \"low_trust\" (AI-drafted aggregator reposts) a decision\nmay carry an optional \"provenance\" object when you VERIFIED the claim at\nthe named primary source: {\"event_id\": ..., \"action\": \"keep\", ...}\n  \"provenance\": {\"url\": \"<primary source url>\", \"source\": \"<domain>\", \"evidence\": \"<one line>\"}\nOnly include provenance when the primary source (vendor advisory, CISA,\nthe named researcher/outlet) really carries the claim \u2014 verified\nprovenance lets a low-trust event mint a story and set freshness; without\nit the event can only amplify an existing story.\nSTRICT KEY NAMES: the array key is \"decisions\" (never \"events\"); the story\nkey is \"story\" (never \"story_id\"); \"story\" holds a candidate_stories id\nverbatim or the literal string \"NEW\". Optional per-event field\n\"exploitation\": {\"CVE-...\": {\"status\": \"exploited|suspected\", \"evidence\": \"1-2 sentences\"}}.",
+ "new_events": [
+  {
+   "id": "rss:d51b7077b6c7a0fc",
+   "title": "Windows: Record Patch Tuesday fixes flaw already under attack",
+   "source": "malware.news",
+   "published_at": "2026-10-14T11:55:39Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Microsoft\u2019s October Patch Tuesday release addresses a record-breaking 1,413 vulnerabilities , including an actively exploited Windows Shell zero-day and two other publicly disclosed flaws. Just when you thought a previou"
+  },
+  {
+   "id": "rss:71c2a9f4bd0c6385",
+   "title": "Hirudo Android malware replaces banking apps to evade security checks",
+   "source": "bleepingcomputer.com",
+   "published_at": "2026-10-14T11:41:20Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "A new Android malware called Hirudo steals bank account credentials by replacing legitimate banking apps with modified versions that disable security checks. [...] "
+  },
+  {
+   "id": "rss:2b311750e0e7f852",
+   "title": "Fake Calendly \u201cMeta Careers\u201d pages steal Facebook and Google logins",
+   "source": "malware.news",
+   "published_at": "2026-10-14T11:25:39Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "We found a wave of websites posing as Calendly booking pages for job interviews at Meta. Visitors pick a slot for a 30-minute phone call with a recruiter, fill in their details, and pass what looks like a CAPTCHA. Then t"
+  },
+  {
+   "id": "rss:7c9b2f92eb3afcb7",
+   "title": "The 2026 Infostealer Index: How 34 Threat Intelligence Vendors Stack Up",
+   "source": "malware.news",
+   "published_at": "2026-10-14T11:21:16Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "The 2026 Infostealer Index An independent, deep-dive analysis of Hudson Rock\u2019s benchmark threat intelligence evaluations. Ranking 34 vendors across 9 critical vectors. As infostealer malware continues to dominate the cyb"
+  },
+  {
+   "id": "rss:c49086f6f36d07ed",
+   "title": "Trust What Ships: Your Repository Is Now Your First Defense",
+   "source": "malware.news",
+   "published_at": "2026-10-14T11:15:39Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "The first defense for trustworthy software is deciding what enters the build. Article Link: Trust What Ships: Your Repository Is Now Your First Defense "
+  },
+  {
+   "id": "rss:43bb9592e6a3c636",
+   "title": "US Arrests Two in Crackdown on North Korean IT Worker Laptop Farms",
+   "source": "securityweek.com",
+   "published_at": "2026-10-14T10:55:21Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Two US nationals were arrested in a new law enforcement operation targeting fraudulent North Korean IT worker schemes. The suspects, Michael James Bostelle of Pennsylvania and Juan Cecilio Pena Carrillo of Texas, alleged"
+  },
+  {
+   "id": "masto:117438677195587866",
+   "title": "\ud83c\udd95 Faster search: very common words, text in screenshots and nameserver wildcards return in seconds, and scan results, screenshots and previe",
+   "source": "scanmalware.com",
+   "published_at": "2026-10-14T10:00:02.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "\ud83c\udd95 Faster search: very common words, text in screenshots and nameserver wildcards return in seconds, and scan results, screenshots and previe  via Mastodon https://scanmalware.com/search "
+  },
+  {
+   "id": "masto:117438649521144890",
+   "title": "\ud83d\udd10 **Build Your Future in Cyber Security with NearLearn!** Protect the digital world while building in-demand technical skills. \ud83d\udee1\ufe0f Explore cy",
+   "source": "nearlearn.com",
+   "published_at": "2026-10-14T09:53:00.831Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "\ud83d\udd10 **Build Your Future in Cyber Security with NearLearn!** Protect the digital world while building in-demand technical skills. \ud83d\udee1\ufe0f Explore cy  via Mastodon https://nearlearn.com/cyber-security-training-institute-in-bangal"
+  },
+  {
+   "id": "masto:117438624803073345",
+   "title": "https://www. adobe.com/trust/security/produ cts/coldfusion/apsb26-144.html # ColdFusion # CyberSecurity # CodeInjection # CriticalVulnerabil",
+   "source": "www.adobe.com",
+   "published_at": "2026-10-14T09:46:43.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "https://www. adobe.com/trust/security/produ cts/coldfusion/apsb26-144.html # ColdFusion # CyberSecurity # CodeInjection # CriticalVulnerabil  via Mastodon https://www.adobe.com/trust/security/products/coldfusion/apsb26-1"
+  },
+  {
+   "id": "masto:117438587433713639",
+   "title": "Gli AI Worm stanno arrivando! La fine del mondo inizier\u00e0 dai dispositivi IoT? \ud83d\udccc Link all'articolo : https://www. redhotcyber.com/post/gli-ai",
+   "source": "www.redhotcyber.com",
+   "published_at": "2026-10-14T09:37:09.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Gli AI Worm stanno arrivando! La fine del mondo inizier\u00e0 dai dispositivi IoT? \ud83d\udccc Link all'articolo : https://www. redhotcyber.com/post/gli-ai  via Mastodon https://www.redhotcyber.com/post/gli-ai-worm-stanno-arrivando-la-"
+  },
+  {
+   "id": "masto:117438575232850657",
+   "title": "GitLab-Sicherheitsl\u00fccke CVE-2026-97229: PoC-Exploit ver\u00f6ffentlicht Zur GitLab-Schwachstelle CVE-2026-97229 sind technische Details und ein P",
+   "source": "www.all-about-security.de",
+   "published_at": "2026-10-14T09:34:07.283Z",
+   "cves": [
+    "CVE-2026-97229"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "GitLab-Sicherheitsl\u00fccke CVE-2026-97229: PoC-Exploit ver\u00f6ffentlicht Zur GitLab-Schwachstelle CVE-2026-97229 sind technische Details und ein P  via Mastodon https://www.all-about-security.de/gitlab-sicherheitsluecke-cve-20"
+  },
+  {
+   "id": "masto:117438564002380108",
+   "title": "Today: Guocai Wang shows how blur type, not blur alone, drives licence plate enhancement decisions; iVe analysis of a 2026 Hyundai Kona dist",
+   "source": "www.forensicfocus.com",
+   "published_at": "2026-10-14T09:31:15.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Today: Guocai Wang shows how blur type, not blur alone, drives licence plate enhancement decisions; iVe analysis of a 2026 Hyundai Kona dist  via Mastodon https://www.forensicfocus.com/news/headlines/dfir-news-14-oct-202"
+  },
+  {
+   "id": "masto:117438563419188135",
+   "title": "EU\u2019s cyber unit turns to AI to fend off \u2018high-risk\u2019 hacks https://www.politico.eu/article/eus-cyber-unit-turns-to-ai-to-fend-off-high-risk-h",
+   "source": "www.politico.eu",
+   "published_at": "2026-10-14T09:31:03.047Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "EU\u2019s cyber unit turns to AI to fend off \u2018high-risk\u2019 hacks https://www.politico.eu/article/eus-cyber-unit-turns-to-ai-to-fend-off-high-risk-h  via Mastodon https://www.politico.eu/article/eus-cyber-unit-turns-to-ai-to-fen"
+  },
+  {
+   "id": "masto:117438544075663483",
+   "title": "(diesec.com) Critical SonicWall SMA1000 SSRF Vulnerability Under Active Exploitation: Third Max-Severity Flaw in Three Months In brief - Thi",
+   "source": "diesec.com",
+   "published_at": "2026-10-14T09:26:10.000Z",
+   "cves": [
+    "CVE-2026-102255",
+    "CVE-2026-102256"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "(diesec.com) Critical SonicWall SMA1000 SSRF Vulnerability Under Active Exploitation: Third Max-Severity Flaw in Three Months In brief - Thi  via Mastodon https://diesec.com/2026/10/sonicwall-sma1000-ssrf-vulnerability-c"
+  },
+  {
+   "id": "masto:117438531735899293",
+   "title": "The IASME portal must be one of the worst UX experiences I have had recently https:// portal.iasme.co.uk/ The login page has the default act",
+   "source": "portal.iasme.co.uk",
+   "published_at": "2026-10-14T09:23:03.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "The IASME portal must be one of the worst UX experiences I have had recently https:// portal.iasme.co.uk/ The login page has the default act  via Mastodon https://portal.iasme.co.uk/ "
+  },
+  {
+   "id": "masto:117438529335451205",
+   "title": "Daily Digest | 14 October 2026 Your daily dose of Privacy, Data Protection, AI & Cybersecurity news. 5 stories you should not miss. Read mor",
+   "source": "www.nicfab.eu",
+   "published_at": "2026-10-14T09:22:25.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Daily Digest | 14 October 2026 Your daily dose of Privacy, Data Protection, AI & Cybersecurity news. 5 stories you should not miss. Read mor  via Mastodon https://www.nicfab.eu/daily-digest/ "
+  },
+  {
+   "id": "masto:117438503611976790",
+   "title": "\ud83d\udd12 Security News Digest - 2026-10-14 \ud83d\udcca 10 updates from 5 sources: \ud83d\udd39 The Hacker News: Microsoft Patches Record 1,413 Flaws, Including Exploite",
+   "source": "thehackernews.com",
+   "published_at": "2026-10-14T09:15:54.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "\ud83d\udd12 Security News Digest - 2026-10-14 \ud83d\udcca 10 updates from 5 sources: \ud83d\udd39 The Hacker News: Microsoft Patches Record 1,413 Flaws, Including Exploite  via Mastodon https://thehackernews.com/2026/10/microsoft-patches-record-1413-f"
+  },
+  {
+   "id": "masto:117438464620479653",
+   "title": "\ud83c\udfa3 Phishing Spotlight sigma-loop-vault-7voqn3al1t[.]s3[.]eu-central-1[.]amazonaws[.]com \ud83d\udd17 https:// beesint.com/pulse/49a8fc13-308 b-4e64-9efe",
+   "source": "beesint.com",
+   "published_at": "2026-10-14T09:05:59.469Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Phishing Spotlight: sigma-loop-vault-7voqn3al1t[.]s3[.]eu-central-1[.]amazonaws[.]com  via Mastodon https://beesint.com/pulse/49a8fc13-308b-4e64-9efe-1bfb80b62b0e "
+  },
+  {
+   "id": "masto:117438448294844147",
+   "title": "SAP Security Patch Day October 2026 Fixes Critical Vulnerabilities SAP released 22 security fixes for October 2026, addressing four critical",
+   "source": "beyondmachines.net",
+   "published_at": "2026-10-14T09:01:48.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "SAP Security Patch Day October 2026 Fixes Critical Vulnerabilities SAP released 22 security fixes for October 2026, addressing four critical  via Mastodon https://beyondmachines.net/event_details/sap-security-patch-day-o"
+  },
+  {
+   "id": "masto:117438447675055836",
+   "title": "If a ransomware gang or other cyber criminal group said they were building a self-replicating worm to target smart devices and just let it o",
+   "source": "www.theguardian.com",
+   "published_at": "2026-10-14T09:01:40.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "If a ransomware gang or other cyber criminal group said they were building a self-replicating worm to target smart devices and just let it o  via Mastodon https://www.theguardian.com/technology/2026/oct/13/anthropic-ai-r"
+  },
+  {
+   "id": "masto:117438447336482638",
+   "title": "1 in 10 phishing emails now comes from a legitimate platform. Your allow list is their superhighway. # SecurityAwareness # Phishing # Cybers",
+   "source": "blog.knowbe4.com",
+   "published_at": "2026-10-14T09:01:33.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "1 in 10 phishing emails now comes from a legitimate platform. Your allow list is their superhighway. # SecurityAwareness # Phishing # Cybers  via Mastodon https://blog.knowbe4.com/the-rise-of-legitimate-service-phishing-"
+  },
+  {
+   "id": "masto:117438442933399146",
+   "title": "CVE-2026-14851 (CRITICAL, CVSS 9.2): Copart billing service leaks PII & financial data via unauthenticated PDF invoice endpoints. Some URLs ",
+   "source": "radar.offseq.com",
+   "published_at": "2026-10-14T09:00:26.000Z",
+   "cves": [
+    "CVE-2026-14851"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "CVE-2026-14851 (CRITICAL, CVSS 9.2): Copart billing service leaks PII & financial data via unauthenticated PDF invoice endpoints. Some URLs   via Mastodon https://radar.offseq.com/threat/cve-2026-14851-cwe-200-exposure-o"
+  },
+  {
+   "id": "masto:117438455422301323",
+   "title": "The Feelings of the Punching Bag: Relax, Your AI Model Doesn\u2019t Care How You Speak The IT industry, particularly in matters surrounding AI, i",
+   "source": "www.anthropic.com",
+   "published_at": "2026-10-14T09:00:00.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "The Feelings of the Punching Bag: Relax, Your AI Model Doesn\u2019t Care How You Speak The IT industry, particularly in matters surrounding AI, i  via Mastodon https://www.anthropic.com/news/2026-usage-policy-update "
+  },
+  {
+   "id": "masto:117438401866880819",
+   "title": "CVE-2025-21391 is an actively exploited Microsoft Windows Storage Link Following Vulnerability. Defensive takeaway: Disable unused SMB proto",
+   "source": "cybertop.ai",
+   "published_at": "2026-10-14T08:50:01.927Z",
+   "cves": [
+    "CVE-2025-21391"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "CVE-2025-21391 is an actively exploited Microsoft Windows Storage Link Following Vulnerability. Defensive takeaway: Disable unused SMB proto  via Mastodon https://cybertop.ai/t/cve-2025-21391-microsoft-windows-storage-li"
+  },
+  {
+   "id": "masto:117438401851864185",
+   "title": "CVE-2025-21418: Microsoft Windows Ancillary Function Driver for WinSock Heap-Based Buffer Overflow Vulnerability actively exploited. Defense",
+   "source": "cybertop.ai",
+   "published_at": "2026-10-14T08:50:01.696Z",
+   "cves": [
+    "CVE-2025-21418"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "CVE-2025-21418: Microsoft Windows Ancillary Function Driver for WinSock Heap-Based Buffer Overflow Vulnerability actively exploited. Defense  via Mastodon https://cybertop.ai/t/cve-2025-21418-microsoft-windows-ancillary-"
+  },
+  {
+   "id": "masto:117438510592312949",
+   "title": "FBI arrests Saudi OpenAI engineer over alleged office bugging https:// fed.brid.gy/r/https://dailytim es.com.pk/1567099/fbi-arrests-saudi-op",
+   "source": "fed.brid.gy",
+   "published_at": "2026-10-14T07:35:23.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "FBI arrests Saudi OpenAI engineer over alleged office bugging https:// fed.brid.gy/r/https://dailytim es.com.pk/1567099/fbi-arrests-saudi-op  via Mastodon https://fed.brid.gy/r/https://dailytimes.com.pk/1567099/fbi-arres"
+  },
+  {
+   "id": "rss:a5b621ef82b6b9a5",
+   "title": "The Threat of AI-Driven Autonomous Penetration Testing, as Examined by ARTEX",
+   "source": "asec.ahnlab.com",
+   "published_at": "2026-10-13T15:00:00Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Overview AI is being used for various tasks that were previously performed manually by humans, such as research, document writing, and code analysis. A 2026 corporate survey also showed that the scope of AI adoption amon"
+  }
+ ],
+ "candidate_stories": [
+  {
+   "id": "windows-record-patch-tuesday-fixes-flaw-already-under-attack",
+   "title": "Windows: Record Patch Tuesday fixes flaw already under attack",
+   "n_events": 1,
+   "last_seen": "2026-10-14T11:55:39Z",
+   "first_event_title": "Windows: Record Patch Tuesday fixes flaw already under attack"
+  },
+  {
+   "id": "hirudo-android-malware-replaces-banking-apps-to-evade-security-c",
+   "title": "Hirudo Android malware replaces banking apps to evade security checks",
+   "n_events": 1,
+   "last_seen": "2026-10-14T11:41:20Z",
+   "first_event_title": "Hirudo Android malware replaces banking apps to evade security checks"
+  },
+  {
+   "id": "fake-calendly-meta-careers-pages-steal-facebook-and-google-login",
+   "title": "Fake Calendly \u201cMeta Careers\u201d pages steal Facebook and Google logins",
+   "n_events": 1,
+   "last_seen": "2026-10-14T11:25:39Z",
+   "first_event_title": "Fake Calendly \u201cMeta Careers\u201d pages steal Facebook and Google logins"
+  },
+  {
+   "id": "the-2026-infostealer-index-how-34-threat-intelligence-vendors-st",
+   "title": "The 2026 Infostealer Index: How 34 Threat Intelligence Vendors Stack Up",
+   "n_events": 1,
+   "last_seen": "2026-10-14T11:21:16Z",
+   "first_event_title": "The 2026 Infostealer Index: How 34 Threat Intelligence Vendors Stack Up"
+  },
+  {
+   "id": "trust-what-ships-your-repository-is-now-your-first-defense",
+   "title": "Trust What Ships: Your Repository Is Now Your First Defense",
+   "n_events": 1,
+   "last_seen": "2026-10-14T11:15:39Z",
+   "first_event_title": "Trust What Ships: Your Repository Is Now Your First Defense"
+  },
+  {
+   "id": "us-arrests-two-in-crackdown-on-north-korean-it-worker-laptop-far",
+   "title": "US Arrests Two in Crackdown on North Korean IT Worker Laptop Farms",
+   "n_events": 1,
+   "last_seen": "2026-10-14T10:55:21Z",
+   "first_event_title": "US Arrests Two in Crackdown on North Korean IT Worker Laptop Farms"
+  },
+  {
+   "id": "hackers-use-compromised-credentials-to-infiltrate-european-bank",
+   "title": "Hackers Use Compromised Credentials to Infiltrate European Bank Through VPN",
+   "n_events": 1,
+   "last_seen": "2026-10-14T10:52:29Z",
+   "first_event_title": "Hackers Use Compromised Credentials to Infiltrate European Bank Through VPN"
+  },
+  {
+   "id": "beware-of-phishing-emails-disguised-as-quote-requests",
+   "title": "Beware of phishing emails disguised as quote requests",
+   "n_events": 4,
+   "last_seen": "2026-10-14T10:51:48Z",
+   "first_event_title": "Beware of phishing emails disguised as quote requests"
+  },
+  {
+   "id": "case-of-agenttesla-malware-distribution-disguised-as-a-business",
+   "title": "Case of AgentTesla Malware Distribution Disguised as a Business Proposal Email",
+   "n_events": 2,
+   "last_seen": "2026-10-14T10:51:21Z",
+   "first_event_title": "Case of AgentTesla Malware Distribution Disguised as a Business Proposal Email"
+  },
+  {
+   "id": "police-receive-fake-murder-tip-from-anthropic-s-claude-ai",
+   "title": "Police receive fake murder tip from Anthropic\u2019s Claude AI",
+   "n_events": 0,
+   "last_seen": "2026-10-14T10:50:41Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "microsoft-october-2026-patch-tuesday-fixes-1-411-flaws-3-zero-da",
+   "title": "Microsoft October 2026 Patch Tuesday fixes 1,411 flaws, 3 zero-days",
+   "n_events": 33,
+   "last_seen": "2026-10-14T10:48:09Z",
+   "first_event_title": "Microsoft October 2026 Patch Tuesday fixes 1,411 flaws, 3 zero-days"
+  },
+  {
+   "id": "hudson-rock-partners-with-trm-labs-as-a-launch-data-partner-for",
+   "title": "Hudson Rock Partners with TRM Labs as a Launch Data Partner for Ardence, the New AI Investigation Platform",
+   "n_events": 0,
+   "last_seen": "2026-10-14T10:46:14Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "linux-vhost-vulnerability-cve-2026-74580-vghost-poc-released",
+   "title": "Linux vhost Vulnerability CVE-2026-74580 (Vghost) PoC Released",
+   "n_events": 2,
+   "last_seen": "2026-10-14T10:42:55.000Z",
+   "first_event_title": "Technical details and PoC exploit code for CVE-2026-74580 (Vghost), an 8.8-severity Linux vhost vulnerability allowing root LPE and VM escap"
+  },
+  {
+   "id": "ledger-confirms-spy-chip-implant-behind-wallet-crypto-thefts",
+   "title": "Ledger confirms spy chip implant behind wallet crypto thefts",
+   "n_events": 6,
+   "last_seen": "2026-10-14T10:42:37.000Z",
+   "first_event_title": "Ledger confirms spy chip implant behind wallet crypto thefts"
+  },
+  {
+   "id": "ransomware-gangs-embrace-physical-threats-and-family-stalking",
+   "title": "Ransomware Gangs Embrace Physical Threats and Family Stalking",
+   "n_events": 1,
+   "last_seen": "2026-10-14T10:40:02.856Z",
+   "first_event_title": "\ud83d\uddde Ransomware Gangs Embrace Physical Threats, Family Stalking? via Dark Reading https://www. darkreading.com/cybersecurity- analytics/ransomw"
+  },
+  {
+   "id": "looking-for-folks-to-test-open-source-cve-feed-and-prioritisatio",
+   "title": "Looking for folks to test open-source CVE feed and prioritisation tool",
+   "n_events": 0,
+   "last_seen": "2026-10-14T10:38:23Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "apple-patches-coregraphics-out-of-bounds-write-cve-2026-86950",
+   "title": "Apple patches CoreGraphics out-of-bounds write CVE-2026-86950",
+   "n_events": 35,
+   "last_seen": "2026-10-14T10:20:05.000Z",
+   "first_event_title": "\ud83e\udd16 Apple patched CVE-2026-86950, an out-of-bounds write in CoreGraphics affecting older iOS/iPadOS/macOS versions. Processing a maliciously c"
+  },
+  {
+   "id": "windows-server-zero-day-flaw-lets-attackers-crash-servers-with-a",
+   "title": "Windows Server Zero-Day Flaw Lets Attackers Crash Servers With a Single Malicious Packet",
+   "n_events": 1,
+   "last_seen": "2026-10-14T10:17:18Z",
+   "first_event_title": "Windows Server Zero-Day Flaw Lets Attackers Crash Servers With a Single Malicious Packet"
+  },
+  {
+   "id": "check-point-reports-litellm-flaws-enabling-admin-takeover",
+   "title": "Check Point Reports LiteLLM Flaws Enabling Admin Takeover",
+   "n_events": 1,
+   "last_seen": "2026-10-14T10:09:20.000Z",
+   "first_event_title": "Check Point Research reports two LiteLLM flaws that could let low-privilege authenticated users take over admin accounts, access internal fi"
+  },
+  {
+   "id": "chrome-155-update-patches-247-vulnerabilities",
+   "title": "Chrome 155 Update Patches 247 Vulnerabilities",
+   "n_events": 4,
+   "last_seen": "2026-10-14T10:06:59Z",
+   "first_event_title": "Chrome 155 Update Patches 247 Vulnerabilities"
+  },
+  {
+   "id": "the-detection-gap-mitre-att-ck-t1490",
+   "title": "The Detection Gap: MITRE ATT&CK T1490",
+   "n_events": 0,
+   "last_seen": "2026-10-14T10:05:38Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "ivanti-connect-secure-cve-2026-104935-active-exploitation",
+   "title": "Ivanti Connect Secure CVE-2026-104935 Active Exploitation",
+   "n_events": 33,
+   "last_seen": "2026-10-14T10:01:51.000Z",
+   "first_event_title": "Ivanti Connect Secure zero-day CVE-2026-104935 We are aware of exploitation in the wild affecting a limited number of customers at the time "
+  },
+  {
+   "id": "fake-watchguard-vpn-site-steals-credentials-then-delivers-legiti",
+   "title": "Fake WatchGuard VPN Site Steals Credentials Then Delivers Legitimate Signed Installer",
+   "n_events": 1,
+   "last_seen": "2026-10-14T09:53:42Z",
+   "first_event_title": "Fake WatchGuard VPN Site Steals Credentials Then Delivers Legitimate Signed Installer"
+  },
+  {
+   "id": "sonicwall-sma1000-two-zero-day-flaws-under-active-exploitation-c",
+   "title": "SonicWall SMA1000 \u2014 Two Zero-Day Flaws Under Active Exploitation, CVSS 10.0, Added to CISA KEV",
+   "n_events": 58,
+   "last_seen": "2026-10-14T09:34:07.283Z",
+   "first_event_title": "SonicWall SMA1000 \u2014 Two Zero-Day Flaws Under Active Exploitation, CVSS 10.0, Added to CISA KEV"
+  },
+  {
+   "id": "which-malware-analysis-platforms-use-ml-ai-driven-detection",
+   "title": "Which Malware Analysis Platforms Use ML/AI-Driven Detection",
+   "n_events": 0,
+   "last_seen": "2026-10-14T09:25:38Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "windows-bitlocker-vulnerabilities-could-allow-attackers-to-bypas",
+   "title": "Windows BitLocker Vulnerabilities Could Allow Attackers to Bypass Security Protections and Escalate Privileges",
+   "n_events": 1,
+   "last_seen": "2026-10-14T09:01:53Z",
+   "first_event_title": "Windows BitLocker Vulnerabilities Could Allow Attackers to Bypass Security Protections and Escalate Privileges"
+  },
+  {
+   "id": "anthropic-warns-ai-models-could-soon-self-replicate-across-smart",
+   "title": "Anthropic Warns AI Models Could Soon Self-Replicate Across Smart TVs and IoT Devices",
+   "n_events": 8,
+   "last_seen": "2026-10-14T09:01:40.000Z",
+   "first_event_title": "Anthropic Warns AI Models Could Soon Self-Replicate Across Smart TVs and IoT Devices"
+  },
+  {
+   "id": "hirudo-from-fake-updates-to-patched-banking-apps",
+   "title": "Hirudo: From Fake Updates to Patched Banking Apps",
+   "n_events": 1,
+   "last_seen": "2026-10-14T08:55:38Z",
+   "first_event_title": "Hirudo: From Fake Updates to Patched Banking Apps"
+  },
+  {
+   "id": "customer-data-breach-at-japanese-sushi-delivery-operator-2",
+   "title": "Customer Data Breach at Japanese Sushi Delivery Operator",
+   "n_events": 3,
+   "last_seen": "2026-10-14T08:47:01.076Z",
+   "first_event_title": "https://www. alojapan.com/1553272/customer- data-breach-suspected-at-sushi-delivery-operator/ Customer data breach suspected at sushi delive"
+  },
+  {
+   "id": "tendances-ransomware-semaine-38-2026-269-revendications-cette-se",
+   "title": "Tendances ransomware \u2013 Semaine 38/2026 \ud83d\udcc8 269 revendications cette semaine (+80, +42.3% par rapport \u00e0 S37) P\u00e9riode : 14.09.2026 au 20.09.20",
+   "n_events": 0,
+   "last_seen": "2026-10-14T08:30:04.000Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "zoom-certificate-validation-vulnerability-allows-attackers-to-ac",
+   "title": "Zoom Certificate Validation Vulnerability Allows Attackers to Access Sensitive Information",
+   "n_events": 1,
+   "last_seen": "2026-10-14T08:29:56Z",
+   "first_event_title": "Zoom Certificate Validation Vulnerability Allows Attackers to Access Sensitive Information"
+  },
+  {
+   "id": "docker-hub-flaw-let-attackers-impersonate-users-tamper-with-imag",
+   "title": "Docker Hub flaw let attackers impersonate users, tamper with images",
+   "n_events": 7,
+   "last_seen": "2026-10-14T08:21:11Z",
+   "first_event_title": "Docker Hub flaw let attackers impersonate users, tamper with images"
+  },
+  {
+   "id": "meta-removes-3-7-million-scam-accounts-as-28-arrested-in-global",
+   "title": "Meta Removes 3.7 Million Scam Accounts as 28 Arrested in Global Crackdown",
+   "n_events": 2,
+   "last_seen": "2026-10-14T07:57:39Z",
+   "first_event_title": "Meta Removes 3.7 Million Scam Accounts as 28 Arrested in Global Crackdown"
+  },
+  {
+   "id": "gitlab-cve-2026-97229-critical-unauthenticated-arbitrary-code-ex",
+   "title": "GitLab CVE-2026-97229 Critical Unauthenticated Arbitrary Code Execution (CVSS 10.0)",
+   "n_events": 21,
+   "last_seen": "2026-10-14T07:42:54.000Z",
+   "first_event_title": "A GitLab critical vulnerability, CVE-2026-97229 (CVSS 10.0), allows unauthenticated arbitrary code execution. Upgrade to GitLab 19.4.2 now. "
+  },
+  {
+   "id": "chrome-150-and-firefox-152-critical-vulnerabilities-patched",
+   "title": "Chrome 150 and Firefox 152 \u2014 Critical Vulnerabilities Patched",
+   "n_events": 11,
+   "last_seen": "2026-10-14T07:38:51Z",
+   "first_event_title": "Chrome 150 and Firefox 152 \u2014 Critical Vulnerabilities Patched"
+  },
+  {
+   "id": "xworm-leaked-builder-turns-remote-access-trojan-into-surveillanc",
+   "title": "XWorm Leaked Builder Turns Remote Access Trojan Into Surveillance Kit",
+   "n_events": 1,
+   "last_seen": "2026-10-14T07:36:11.000Z",
+   "first_event_title": "How a leaked builder of XWorm turned a remote access trojan into a surveillance kit"
+  },
+  {
+   "id": "ibm-websphere-liberty-four-security-flaws-including-cvss-9-1",
+   "title": "IBM WebSphere Liberty: Four Security Flaws Including CVSS 9.1",
+   "n_events": 1,
+   "last_seen": "2026-10-14T07:36:06.464Z",
+   "first_event_title": "IBM WebSphere Liberty: Four security flaws including CVSS 9.1"
+  },
+  {
+   "id": "cve-2026-89310-critical-sql-injection-in-jtl-wms",
+   "title": "CVE-2026-89310 Critical SQL Injection in JTL-WMS",
+   "n_events": 1,
+   "last_seen": "2026-10-14T07:30:25.000Z",
+   "first_event_title": "CVE-2026-89310: CRITICAL SQL injection in JTL-WMS ( https:// radar.offseq.com/threat/cve-20 26-89310-cwe-89-improper-neutralization-of-speci"
+  },
+  {
+   "id": "citrix-fortinet-ivanti-patch-29-vulnerabilities-across-their-pro",
+   "title": "Citrix, Fortinet, Ivanti Patch 29 Vulnerabilities Across Their Products",
+   "n_events": 4,
+   "last_seen": "2026-10-14T07:26:35Z",
+   "first_event_title": "Citrix, Fortinet, Ivanti Patch 29 Vulnerabilities Across Their Products"
+  },
+  {
+   "id": "cve-2026-70035-net-wpf-remote-code-execution",
+   "title": "CVE-2026-70035 .NET WPF Remote Code Execution",
+   "n_events": 1,
+   "last_seen": "2026-10-14T07:16:30.000Z",
+   "first_event_title": "CVE-2026-70035 is a remote code execution flaw in Microsoft .NET Windows Desktop Runtime (WPF), from unsafe deserialization and URI handling"
+  },
+  {
+   "id": "2026-11869",
+   "title": "[\uc77c\ubcf8 \uc560\ub2c8\uba54\uc774\uc158]\u7121\u8077\u8ee2\u751f\u2172 \uff5e\u7570\u4e16\u754c\u884c\u3063\u305f\u3089\u672c\u6c17\u3060\u3059\uff5e\ubb34\uc9c1\uc804\uc0dd \u2172~\uc774\uc138\uacc4\uc5d0 \uac14\uc73c\uba74 \ucd5c\uc120\uc744 \ub2e4\ud55c\ub2e4~(2026)",
+   "n_events": 0,
+   "last_seen": "2026-10-08T15:11:19Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "adobe-security-advisory-av26-808",
+   "title": "Adobe security advisory (AV26-808)",
+   "n_events": 2,
+   "last_seen": "2026-08-13T08:12:33Z",
+   "first_event_title": "Adobe security advisory (AV26-808)"
+  },
+  {
+   "id": "adobe-security-advisory-av26-888",
+   "title": "Adobe security advisory (AV26-888)",
+   "n_events": 3,
+   "last_seen": "2026-09-09T00:35:01.000Z",
+   "first_event_title": "Adobe security advisory (AV26-888)"
+  },
+  {
+   "id": "amd-security-advisory-av26-1014",
+   "title": "AMD security advisory (AV26-1014)",
+   "n_events": 1,
+   "last_seen": "2026-10-07T17:55:39Z",
+   "first_event_title": "AMD security advisory (AV26-1014)"
+  },
+  {
+   "id": "apple-security-advisory-av26-823",
+   "title": "Apple security advisory (AV26-823)",
+   "n_events": 1,
+   "last_seen": "2026-08-17T15:35:39Z",
+   "first_event_title": "Apple security advisory (AV26-823)"
+  },
+  {
+   "id": "arista-networks-security-advisory-av26-1015",
+   "title": "Arista Networks security advisory (AV26-1015)",
+   "n_events": 1,
+   "last_seen": "2026-10-07T18:25:40Z",
+   "first_event_title": "Arista Networks security advisory (AV26-1015)"
+  },
+  {
+   "id": "citrix-security-advisory-av26-1034",
+   "title": "Citrix security advisory (AV26-1034)",
+   "n_events": 1,
+   "last_seen": "2026-10-13T19:15:43Z",
+   "first_event_title": "Citrix security advisory (AV26-1034)"
+  },
+  {
+   "id": "citrix-security-advisory-av26-833",
+   "title": "Citrix security advisory (AV26-833)",
+   "n_events": 1,
+   "last_seen": "2026-08-19T18:45:45Z",
+   "first_event_title": "Citrix security advisory (AV26-833)"
+  },
+  {
+   "id": "commvault-security-advisory-av26-1033",
+   "title": "Commvault security advisory (AV26-1033)",
+   "n_events": 1,
+   "last_seen": "2026-10-13T19:00:47Z",
+   "first_event_title": "Commvault security advisory (AV26-1033)"
+  },
+  {
+   "id": "commvault-security-advisory-av26-799",
+   "title": "Commvault security advisory (AV26-799)",
+   "n_events": 1,
+   "last_seen": "2026-08-11T17:46:10Z",
+   "first_event_title": "Commvault security advisory (AV26-799)"
+  },
+  {
+   "id": "control-systems-johnson-controls-security-advisory-av26-1010",
+   "title": "[Control Systems] Johnson Controls security advisory (AV26-1010)",
+   "n_events": 1,
+   "last_seen": "2026-10-07T15:45:39Z",
+   "first_event_title": "[Control Systems] Johnson Controls security advisory (AV26-1010)"
+  },
+  {
+   "id": "control-systems-moxa-security-advisory-av26-995",
+   "title": "[Control Systems] Moxa security advisory (AV26-995)",
+   "n_events": 1,
+   "last_seen": "2026-10-02T18:10:42Z",
+   "first_event_title": "[Control Systems] Moxa security advisory (AV26-995)"
+  },
+  {
+   "id": "control-systems-siemens-security-advisory-av26-890",
+   "title": "[Control Systems] Siemens security advisory (AV26-890)",
+   "n_events": 3,
+   "last_seen": "2026-09-23T08:01:13.000Z",
+   "first_event_title": "[Control Systems] Siemens security advisory (AV26-890)"
+  },
+  {
+   "id": "dell-security-advisory-av26-1027",
+   "title": "Dell security advisory (AV26-1027)",
+   "n_events": 1,
+   "last_seen": "2026-10-13T13:00:42Z",
+   "first_event_title": "Dell security advisory (AV26-1027)"
+  },
+  {
+   "id": "dell-security-advisory-av26-863",
+   "title": "Dell security advisory (AV26-863)",
+   "n_events": 3,
+   "last_seen": "2026-10-12T17:37:08.000Z",
+   "first_event_title": "Dell security advisory (AV26-863)"
+  },
+  {
+   "id": "erlang-security-advisory-av26-948",
+   "title": "Erlang security advisory (AV26-948)",
+   "n_events": 1,
+   "last_seen": "2026-09-22T18:25:40Z",
+   "first_event_title": "Erlang security advisory (AV26-948)"
+  },
+  {
+   "id": "freepbx-security-advisory-av26-818",
+   "title": "FreePBX security advisory (AV26-818)",
+   "n_events": 1,
+   "last_seen": "2026-08-14T16:10:48Z",
+   "first_event_title": "FreePBX security advisory (AV26-818)"
+  },
+  {
+   "id": "github-security-advisory-av26-1007",
+   "title": "GitHub security advisory (AV26-1007)",
+   "n_events": 1,
+   "last_seen": "2026-10-07T14:40:40Z",
+   "first_event_title": "GitHub security advisory (AV26-1007)"
+  },
+  {
+   "id": "gitlab-security-advisory-av26-814",
+   "title": "GitLab security advisory (AV26-814)",
+   "n_events": 1,
+   "last_seen": "2026-08-13T14:00:38Z",
+   "first_event_title": "GitLab security advisory (AV26-814)"
+  },
+  {
+   "id": "google-security-advisory-av26-1006",
+   "title": "Google security advisory (AV26-1006)",
+   "n_events": 1,
+   "last_seen": "2026-10-07T14:05:40Z",
+   "first_event_title": "Google security advisory (AV26-1006)"
+  },
+  {
+   "id": "the-threat-of-ai-driven-autonomous-penetration-testing-as-examin",
+   "title": "The Threat of AI-Driven Autonomous Penetration Testing, as Examined by ARTEX",
+   "n_events": 1,
+   "last_seen": "2026-10-13T15:00:00Z",
+   "first_event_title": "The Threat of AI-Driven Autonomous Penetration Testing, as Examined by ARTEX"
+  },
+  {
+   "id": "sap-security-patch-day-october-2026-fixes-four-critical-vulnerab",
+   "title": "SAP Security Patch Day October 2026 fixes four critical vulnerabilities",
+   "n_events": 3,
+   "last_seen": "2026-10-13T13:14:43Z",
+   "first_event_title": "SAP Security Patch Day October 2026 fixes four critical vulnerabilities, including a CVSS 10.0 Cloud SDK flaw and 9.9 bugs in Visual Compose"
+  },
+  {
+   "id": "security-news-digest-2026-09-14-8-updates-from-5-sources-the-hac",
+   "title": "Security News Digest - 2026-09-14 \ud83d\udcca 8 updates from 5 sources: \ud83d\udd39 The Hacker News: Telegram Desktop Flaw Lets Hidden JavaScript Exfiltrate M",
+   "n_events": 0,
+   "last_seen": "2026-09-14T22:56:31.000Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "7-zip-26-02-rce-via-heap-based-buffer-overflow-in-xz-decompressi",
+   "title": "7-Zip 26.02 \u2014 RCE via Heap-Based Buffer Overflow in XZ Decompression",
+   "n_events": 4,
+   "last_seen": "2026-07-19T00:00:00Z",
+   "first_event_title": "7-Zip 26.02 \u2014 RCE via Heap-Based Buffer Overflow in XZ Decompression"
+  },
+  {
+   "id": "fbi-disrupts-north-korean-laptop-farm-used-to-infiltrate-us-comp",
+   "title": "FBI disrupts North Korean \u2018laptop farm\u2019 used to infiltrate US companies",
+   "n_events": 12,
+   "last_seen": "2026-10-14T04:09:51.421Z",
+   "first_event_title": "FBI disrupts North Korean \u2018laptop farm\u2019 used to infiltrate US companies"
+  },
+  {
+   "id": "windows-ntfs-heap-buffer-overflow-cve-2025-24993-actively-exploi",
+   "title": "Windows NTFS Heap Buffer Overflow CVE-2025-24993 Actively Exploited",
+   "n_events": 4,
+   "last_seen": "2026-10-10T08:50:01.885Z",
+   "first_event_title": "CVE-2025-24993 is an NTFS heap-based buffer overflow vulnerability in Microsoft Windows, actively exploited. Defensive takeaway: Update to t"
+  },
+  {
+   "id": "security-news-digest-2026-09-08-6-updates-from-4-sources-the-hac",
+   "title": "Security News Digest - 2026-09-08 \ud83d\udcca 6 updates from 4 sources: \ud83d\udd39 The Hacker News: Slim Spider Steals Crypto Custody Secrets From Brazilian",
+   "n_events": 0,
+   "last_seen": "2026-09-08T19:15:06.000Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "north-korean-it-worker-scheme-targets-dozens-of-organizations-ac",
+   "title": "North Korean IT Worker Scheme Targets Dozens of Organizations Across Critical U.S. Sectors",
+   "n_events": 1,
+   "last_seen": "2026-10-14T05:39:03Z",
+   "first_event_title": "North Korean IT Worker Scheme Targets Dozens of Organizations Across Critical U.S. Sectors"
+  },
+  {
+   "id": "manic-android-malware-family-targets-169-apps-with-banking-fraud",
+   "title": "Manic Android malware family targets 169 apps with banking fraud and Wi-Fi mesh exfiltration",
+   "n_events": 2,
+   "last_seen": "2026-08-21T06:54:57Z",
+   "first_event_title": "Manic Android Malware Targets 169 Apps, Steals PINs and Exfiltrates Data via Wi-Fi Mesh"
+  },
+  {
+   "id": "security-news-digest-2026-09-08-23-updates-from-7-sources-the-ha",
+   "title": "Security News Digest - 2026-09-08 \ud83d\udcca 23 updates from 7 sources: \ud83d\udd39 The Hacker News: BengalSEO Poisons Bing Search Results to Deliver MayaBot",
+   "n_events": 0,
+   "last_seen": "2026-09-08T15:56:20.000Z",
+   "first_event_title": ""
+  }
+ ]
+}
