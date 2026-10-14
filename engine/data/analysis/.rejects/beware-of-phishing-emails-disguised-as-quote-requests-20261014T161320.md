@@ -1,0 +1,3 @@
+AhnLab ASEC identified a phishing campaign using emails disguised as project quote requests. The messages impersonate specific Korean company employees and prompt recipients to download a compressed file for verification. A related update describes malicious XLS attachments disguised as project material purchase request forms. The payload delivery relies on social engineering rather than technical exploits.
+
+This is an active, targeted phishing operation against Korean business targets. Defenders should train staff to verify quote and purchase request emails through independent channels, inspect compressed attachments, and treat unsolicited project-related attachments with suspicion. No CVE is tied to this campaign; the threat is purely social-engineering based.

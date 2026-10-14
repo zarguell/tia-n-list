@@ -1,0 +1,3 @@
+Check Point reported two critical LiteLLM vulnerabilities: CVE-2026-35029 and CVE-2026-59823. Both allow low-privilege authenticated users to escalate to admin accounts, access internal files, and steal API keys. The flaws affect LiteLLM's authorization and API access controls, turning limited access into full server takeover.
+
+Organizations using LiteLLM should apply available patches immediately and review admin access logs for unexpected privilege escalation. The risk is high for any deployment where authenticated users include contractors or less-trusted accounts. No in-the-wild exploitation count is cited; treat as a preemptive hardening priority.
