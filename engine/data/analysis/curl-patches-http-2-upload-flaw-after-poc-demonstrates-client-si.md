@@ -1,0 +1,3 @@
+curl has patched an HTTP/2 upload flaw after a proof of concept showed it could be used for client-side code execution. Public detail so far is thin, with the report surfacing via r/cybersecurity, but a working PoC for code execution through a ubiquitous transfer tool is enough to take seriously.
+
+curl ships everywhere, from developer laptops to embedded update pipelines, so even a client-side trigger can have wide reach wherever malicious servers or intercepted uploads come into play. Watch for the CVE assignment and fixed version numbers, then check vendored and statically linked copies, which tend to lag behind upstream releases.

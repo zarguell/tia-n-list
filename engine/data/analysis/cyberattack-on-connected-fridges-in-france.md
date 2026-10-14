@@ -1,0 +1,3 @@
+Attackers seized control of Danfoss refrigeration controllers used by supermarkets in France, overriding normal overnight defrost cycles and forcing some units to heat to around 50C and stay hot. Danfoss said the affected units were older models whose security software could not be updated against a risk the company had already identified.
+
+Reuters found at least 4,500 Danfoss interfaces still reachable, and EuroNews reports thousands of supermarket fridges remain exposed after the attack. The exposure count is the part that matters now: unpatchable, internet-facing controllers cannot be fixed in place, only replaced or firewalled off. Watch for copycat targeting of similar building-automation gear and for retailer disclosures about spoiled stock or food-safety impact.
