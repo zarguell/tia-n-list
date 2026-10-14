@@ -1,0 +1,5 @@
+The Canadian Centre for Cyber Security mirrors a Cisco advisory for CVE-2026-76519, an arbitrary file write vulnerability in Cisco Secure Email Gateway and Secure Email and Web Manager. Affected builds are AsyncOS for Secure Email Gateway 15.5 prior to 15.5.5-014 and 16.5 prior to 16.5.0-780, plus Secure Email and Web Manager 15.5 prior to 15.5.5-006 and 16.5 prior to 16.5.0-429. The advisory also points to Cisco hardening guidance from the September 2026 release.
+
+What elevates this above a routine patch is the exploitation note: the Centre states Cisco has indicated CVE-2026-76519 is being exploited in the wild. Email gateways sit directly in the mail path, so file write there can lead to configuration tampering or deeper compromise.
+
+Administrators running the affected AsyncOS trains should patch to the listed fixed builds and apply the hardening guidance promptly. Watch for Cisco to confirm exploitation scope and for any CISA KEV addition.

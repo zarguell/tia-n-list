@@ -1,0 +1,5 @@
+Palo Alto Networks issued a batch of 13 fixes, tracked in the Canadian Centre advisory AV26-1041. The listed products are PAN-OS branches 12.2, 12.1, 11.2, 11.1 and 10.2 plus Prisma Browser prior to 152.8.5.83. Named items include CVE-2026-0322, an authenticated remote code execution flaw in the PAN-OS management interface under PAN-SA-2026-0013, and the October Chromium monthly update.
+
+The earlier July reporting on this batch noted no critical CVEs and no active exploitation indicators at that time. That makes this a routine hardening round rather than an emergency. The management interface RCE still deserves attention from exposed shops, since authenticated flaws in that surface tend to get chained.
+
+Operators on the affected PAN-OS trains should move to the fixed versions the advisory lists, including 12.2.4 and the patched 12.1 and 11.2 hotfix builds, and update Prisma Browser. Watch for any change in severity or exploitation status on CVE-2026-0322.
