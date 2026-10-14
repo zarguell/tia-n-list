@@ -9,7 +9,11 @@ is a coverage-delta brief, not a "today's articles" dump:
 - EVOLVED — live stories with a genuine development since the last digest,
   ranked by score.
 - UNCOVERED — hot stories (score >= ANALYSIS_GATE) not covered in the last
-  COVERAGE_WINDOW digests (never covered, or not since).
+  COVERAGE_WINDOW digests (never covered, or not since), PLUS the top-N
+  never-covered stories by score regardless of hot (2026-10-13 owner
+  decision): a never-covered story whose development ages can decay below
+  the hot gate and silently drop off the slate (the MCP Python SDK OAuth
+  story missed the Oct 5-11 digests with a 9-day-stale development at ~3.0).
 
 WHAT COUNTS AS A DEVELOPMENT (the "is this actually new?" check):
 
@@ -77,6 +81,7 @@ CATCHUP_DAYS = 2     # newest genuine development >= N days before the digest da
 BENCH_MAX = 12         # wildcard discovery slate cap
 BENCH_SCORE_FLOOR = 1.0  # below this a non-slate story is noise, not a near-miss
 NEAR_GATE = 0.7         # fraction of ANALYSIS_GATE that counts as a near-miss on the bench
+UNCOVERED_NEVER_MAX = 10  # top-N never-covered stories (by score) on the uncovered slate regardless of hot
 
 STORY_LINK_RE = re.compile(r"stories/([a-z0-9][a-z0-9-]*)/?")
 CVE_RE = re.compile(r"^CVE-\d{4}-\d{4,7}$")
@@ -304,6 +309,26 @@ def build_rows(stories, events, kev_map, coverage, canonical, since, recent_cuto
     return rows
 
 
+def select_uncovered(by_score):
+    """The uncovered slate: hot-but-not-recently-covered ∪ top-N never-covered.
+
+    The hot gate alone drops stories whose development aged and whose score
+    decayed below ANALYSIS_GATE even though they were NEVER covered — the
+    MCP Python SDK OAuth story missed the Oct 5-11 digests exactly this way
+    (2026-10-13 owner decision 38f1c57703dd, option a): development 9 days
+    stale, score decayed to ~3.0, never covered, invisible to both the hot
+    rule and yesterday's-coverage. Include the top-UNCOVERED_NEVER_MAX
+    never-covered stories by score regardless of hot (by_score must be
+    score-desc); eventless ghosts are excluded so a pile of emptied shells
+    can't fill the cap. Pure: rows in, rows out (already score-desc)."""
+    never = [r for r in by_score
+             if r["last_covered"] is None and r["n_events"]][:UNCOVERED_NEVER_MAX]
+    never_slugs = {r["slug"] for r in never}
+    return [r for r in by_score
+            if (r["hot"] and not r["covered_recently"])
+            or r["slug"] in never_slugs]
+
+
 def build_bench(rows, slate, stories, events):
     """Wildcard discovery bench: live stories OUTSIDE the deterministic slate
     (not evolved, not hot-uncovered, not in yesterday's coverage) that carry
@@ -372,7 +397,7 @@ def main():
                       since, recent_cutoff, today, last_digest)
     by_score = sorted(rows, key=lambda r: -r["score"])
     evolved = [r for r in by_score if r["evolved"]]
-    uncovered = [r for r in by_score if r["hot"] and not r["covered_recently"]]
+    uncovered = select_uncovered(by_score)
     yesterday_rows = sorted(
         (r for r in rows if r["slug"] in yesterday), key=lambda r: -r["score"])
     slate = ({r["slug"] for r in evolved} | {r["slug"] for r in uncovered} | yesterday)
@@ -416,7 +441,7 @@ def main():
         print(" " + fmt(r) + flag(r) + f" — {r['title'][:70]}")
     print()
 
-    print(f"HOT & UNCOVERED ({len(uncovered)}) — score >= {ANALYSIS_GATE}, not covered since {recent_cutoff}")
+    print(f"HOT & UNCOVERED ({len(uncovered)}) — score >= {ANALYSIS_GATE} or never covered (top {UNCOVERED_NEVER_MAX} by score), not covered since {recent_cutoff}")
     for r in uncovered:
         print(" " + fmt(r) + flag(r) + f" — {r['title'][:70]}")
 

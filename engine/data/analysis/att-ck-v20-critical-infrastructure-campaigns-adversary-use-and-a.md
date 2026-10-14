@@ -1,0 +1,3 @@
+MITRE has released ATT&CK version 20, announced through its October 2026 update page and accompanying blog post. The release continues the framework's role as the shared language for describing adversary tactics and techniques. Coverage themes for this version include critical infrastructure campaigns, adversary use and abuse of AI, and Iranian cyber operations.
+
+For defenders, new ATT&CK versions are mainly useful as mapping updates: detection engineering and threat intel teams should check what changed in techniques and campaign references before the next round of coverage reviews. Watch for vendor and community content adopting the v20 identifiers in the coming weeks.

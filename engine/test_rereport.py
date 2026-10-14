@@ -149,6 +149,51 @@ check("genuine development still evolves the story", r["evolved"], True)
 check("development date comes from the real dev",
       r["newest_development_at"], dev["published_at"][:10])
 
+# ── 4. re-report caps for outlet re-reports (2026-10-13 owner decision
+# fc3f6e00a8d9): the min_gap_h burst skip is age-gated (first-day stories
+# only) and the canonical story headline is an identity of its own. ─────────
+
+# first-day: a pickup mimicking the canonical headline is legitimate burst
+# velocity — the burst protection still applies while the story is young.
+d1 = ev("d1", "Let's Encrypt cuts default certificate validity to 64 days", iso(6))
+d2 = ev("d2", "Let's Encrypt cuts default certificate validity to 64 days", iso(5))
+check("day-1 pickup of the canonical headline is burst velocity, not an echo",
+      score.is_rereport(d2, [d1]), False)
+
+# day-2: the SAME pickup shape lands within 24h of yesterday's re-tell of
+# covered material — no longer skipped, it matches and caps the clock.
+o1 = ev("o1", "Let's Encrypt cuts default certificate validity to 64 days", iso(50))
+o2 = ev("o2", "Let's Encrypt reduces certificate lifetime to 64 days", iso(30))
+o3 = ev("o3", "Let's Encrypt reduces certificate lifetime to 64 days", iso(20))
+check("day-2 pickup matching only the close (yesterday) re-tell is a re-report",
+      score.is_rereport(o3, [o1, o2]), True)
+
+# canonical-headline echo: a reworded re-tell that overlaps the STORY title
+# (what the coverage actually says) but no single prior event.
+c1 = ev("c1", "The Gentlemen post new healthcare claims on leak site", iso(70))
+c2 = ev("c2", "MoneyGram and Sant Pau records listed in hospital ransomware claim",
+        iso(20))
+STORY_T = "Hospital ransomware claim lists MoneyGram and Sant Pau records"
+check("reworded re-tell alone does not match the priors (back-compat)",
+      score.is_rereport(c2, [c1]), False)
+check("...but the canonical story headline identifies it as covered material",
+      score.is_rereport(c2, [c1], story_title=STORY_T), True)
+c3 = ev("c3", "Hospital ransomware claim lists MoneyGram records", iso(20),
+        ["CVE-2026-5678"])
+check("a NEW CVE stays a development even against the canonical headline",
+      score.is_rereport(c3, [c1], story_title=STORY_T), False)
+
+# hot_score level: story_title comes from the story itself, so an echo-only
+# day-2 bump adds no velocity and the decay anchor stays on the development.
+hd = [ev("h1", "Denmark CPR data breach exposed 8.8 million records", iso(60)),
+      ev("h2", "Denmark CPR data breach exposed 8.8 million records, report says",
+         iso(4))]
+sch = _score(hd)
+check("echo-only day-2 bump adds no velocity (hot_score)", sch["velocity"], 0.0)
+check("echo-only day-2 bump counted as re-report", sch["rereports"], 1)
+check("decay anchors to the genuine development (60h, not 4h)",
+      sch["recency"] < 0.2, True)
+
 print()
 if failures:
     print(f"FAILED: {len(failures)} check(s): {failures}")

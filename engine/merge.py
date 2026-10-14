@@ -444,14 +444,39 @@ def _social_revive_blocked(ev, s):
     return cold > gap
 
 
-def _attach_event(eid, ev, s):
+def event_owner(stories, eid, exclude=None):
+    """The ACTIVE story already referencing event id `eid` (other than
+    `exclude`), or None. The write-time double-reference guard (2026-10-13
+    owner decision 3937e99cf1aa): the merge/backfill writers used to append a
+    ref after checking only the TARGET story, so a stale queue entry or a
+    sidecar URL collision could put one event into two active stories — the
+    dedup_invariants multi-ref class repair_dedupe cleans up after the fact.
+    Merged-away shells are not active owners (their refs belong to the
+    canonical story); repair_dedupe stays the historical cleanup path."""
+    for sid, s in stories.items():
+        if sid == exclude or s.get("merged_into"):
+            continue
+        if any(r.get("event_id") == eid for r in s.get("events", [])):
+            return sid
+    return None
+
+
+def _attach_event(eid, ev, s, stories=None):
     """Merge an event into an existing story as an update. Shared by the
     new-event queue and the social-pending replay (identical semantics:
     never touch kind of an already-placed event). Returns False when the
-    event was already in the story or is a cold-story social revival."""
+    event was already in the story, is a cold-story social revival, or —
+    when `stories` is passed (the hourly does) — another ACTIVE story
+    already references it (write-time double-reference guard)."""
     refs = [r["event_id"] for r in s["events"]]
     if eid in refs:                      # already processed — never touch kind
         return False
+    if stories is not None:
+        owner = event_owner(stories, eid, exclude=s["id"])
+        if owner:
+            print(f"  WARN: attach rejected: {eid} already referenced by "
+                  f"story {owner} (double-reference guard)")
+            return False
     if _social_revive_blocked(ev, s):
         return False
     ev["kind"] = "update"
@@ -516,7 +541,7 @@ def main():
         target = match_story(ev, stories)
         if target in frozen:
             target = None       # still frozen = weak similarity: park, don't thaw
-        if target and _attach_event(eid, ev, stories[target]):
+        if target and _attach_event(eid, ev, stories[target], stories):
             merged += 1
             day = ev["published_at"][:10]
             manifest.setdefault("stories_per_day", {}).setdefault(day, [])
@@ -539,7 +564,7 @@ def main():
             target = None
         day = ev["published_at"][:10]
         if target:
-            if not _attach_event(eid, ev, stories[target]):
+            if not _attach_event(eid, ev, stories[target], stories):
                 continue
             merged += 1
         elif eid.startswith(SOCIAL_PREFIXES):
@@ -563,6 +588,14 @@ def main():
             # provenance (primary source confirmed by triage) exempts.
             continue
         else:
+            owner = event_owner(stories, eid)
+            if owner:
+                # write-time guard: the event already lives in an active
+                # story (stale queue entry / earlier placement) — never mint
+                # a second story around it.
+                print(f"  WARN: mint rejected: {eid} already referenced by "
+                      f"story {owner} (double-reference guard)")
+                continue
             ev["kind"] = "original"
             slug = build_slug(ev["title"], stories)
             s = {"id": slug, "title": clean_title(ev["title"]),
