@@ -59,6 +59,28 @@ SIGNALS = [
 ]
 SIGNAL_CAP = 1.5
 
+# ── high-impact weights (2026-10-13 owner decision fc3f6e00a8d9, audit Rec 2)
+# The digest agent's recurring "score under-ranks high-impact" promotes (35
+# overrides, 13 since Oct 1) name two classes the proxy lets drift: confirmed
+# in-the-wild exploitation and unpatched CVSS >= 9.0 flaws. Both get explicit
+# extra weight in severity (outside SIGNAL_CAP so the shared signal bucket
+# can't absorb them). CVSS stated in the coverage text counts too: the local
+# NVD store misses research CVEs, and the underrank class is exactly that —
+# erlang/OTP "CVSS 10" scored sev 1.0 from the store and landed at 2.8.
+CVSS_TEXT_RE = re.compile(
+    r"cvss(?:\s*v(?:3(?:\.1)?)?)?\s*[: ]?\s*(\d{1,2}(?:\.\d)?)", re.I)
+IN_WILD_RE = re.compile(
+    r"\b(?:in-the-wild|in the wild|actively exploited|being exploited|"
+    r"exploited in the wild|exploitation (?:has been|is being|was) "
+    r"(?:observed|confirmed|detected))\b", re.I)
+UNPATCHED_RE = re.compile(
+    r"\bunpatched\b|\bno (?:patch|fix)(?:es)?\b|"
+    r"\b(?:patch|fix)(?:es)? (?:is |are )?not (?:yet )?(?:available|out)\b|"
+    r"\bwithout (?:a |an )?(?:patch|fix)\b|"
+    r"\b(?:awaiting|pending) (?:a )?(?:patch|fix)\b", re.I)
+IMPACT_IN_WILD = 0.4        # weight for confirmed in-the-wild exploitation
+IMPACT_UNPATCHED_9 = 0.4    # weight for an unpatched CVSS >= 9.0 flaw
+
 # Keys the SSG "Why this score" template renders from a score breakdown.
 # A story missing any of these raises a jinja UndefinedError that aborts the
 # whole site build, so the store writers (merge / repair_dedupe / triage)
@@ -156,6 +178,22 @@ def _load_cve_store():
     return store
 
 
+def _cvss_band(best):
+    """Severity band for a CVSS base score (0.5-4.5 of the 0-5 severity
+    factor). Factored out of _cvss_severity so hot_score can apply the SAME
+    band to a CVSS the coverage text states but the local store lacks
+    (2026-10-13 decision fc3f6e00a8d9 — see CVSS_TEXT_RE)."""
+    if best >= 9.0:
+        return 4.5
+    if best >= 7.0:
+        return 3.5
+    if best >= 4.0:
+        return 2.5
+    if best > 0:
+        return 1.5
+    return 1.0            # CVE present but not in the local store
+
+
 def _cvss_severity(cves):
     """(cvss-band score, kev flag, epss bonus) across the story's CVEs.
 
@@ -178,22 +216,12 @@ def _cvss_severity(cves):
             e = info.get("epss")
             if isinstance(e, (int, float)):
                 epss = max(epss, e)
-    if best >= 9.0:
-        s = 4.5
-    elif best >= 7.0:
-        s = 3.5
-    elif best >= 4.0:
-        s = 2.5
-    elif best > 0:
-        s = 1.5
-    else:
-        s = 1.0            # CVE present but not in the local store
     bonus = 0.4 if epss >= 0.5 else (0.2 if epss >= 0.1 else 0.0)
-    return s, kev, bonus
+    return _cvss_band(best), kev, bonus
 
 
 def is_rereport(event, prior_events, *, low_jaccard=0.25, high_jaccard=0.55,
-                min_gap_h=24):
+                min_gap_h=24, story_title=None):
     """True when `event` re-reports coverage the story already carries.
 
     Two identity signals, combined to fit the two echo shapes:
@@ -220,7 +248,20 @@ def is_rereport(event, prior_events, *, low_jaccard=0.25, high_jaccard=0.55,
     ~340 digest demote overrides (8 slugs overridden >= 3 times) — echoes
     reset the decay clock (merge stamps last_seen on every attach) and add
     48h velocity, so echo-only stories stayed on the slate until demoted by
-    hand. Pure: both arguments are event dicts; tokenization reuses merge's
+    hand. Still dominant on 2026-10-13 (235 re-report/no-delta demotes, 77
+    since Oct 1), so two legs were added (owner decision fc3f6e00a8d9):
+      - the min_gap_h skip now protects ONLY first-day stories: while the
+        story's own non-backfill material is younger than min_gap_h the
+        burst rule works as before; once it is older, priors within 24h of
+        the event are evaluated like any other (a day-2 pickup no longer
+        dodges the identity floors just because it landed within 24h of
+        yesterday's re-tell),
+      - `story_title`: the canonical STORY headline is also an identity — a
+        reworded outlet re-tell overlapping it (>= 2 shared discriminators,
+        >= high_jaccard) is an echo of covered material even when no single
+        prior matches. Off unless the caller passes it (hot_score does;
+        digest_candidates keeps its EVOLVED semantics unchanged).
+    Pure: both arguments are event dicts; tokenization reuses merge's
     discriminator sets (lazy import — merge imports this module).
     """
     if not prior_events:
@@ -245,6 +286,24 @@ def is_rereport(event, prior_events, *, low_jaccard=0.25, high_jaccard=0.55,
     disc = title_discriminators(event.get("title") or "")
     if len(disc) < min_shared:
         return False
+    # First-day burst protection: priors within min_gap_h are skipped ONLY
+    # while the story's own founding material (desk backfills excluded — a
+    # June backfill must not age a day-old story past the window) is younger
+    # than min_gap_h. An old story gets no skip: day-2+ pickups of covered
+    # material must clear the identity floors below.
+    young = False
+    if ev_dt is not None:
+        founding = []
+        for p in prior_events:
+            if p.get("kind") == "backfill":
+                continue
+            try:
+                founding.append(datetime.fromisoformat(
+                    (p.get("published_at") or "").replace("Z", "+00:00")))
+            except ValueError:
+                continue
+        if founding:
+            young = (ev_dt - min(founding)).total_seconds() < min_gap_h * 3600
     for p in prior_events:
         if ev_dt is not None:
             try:
@@ -252,7 +311,9 @@ def is_rereport(event, prior_events, *, low_jaccard=0.25, high_jaccard=0.55,
                     (p.get("published_at") or "").replace("Z", "+00:00"))
             except ValueError:
                 p_dt = None
-            if p_dt is None or (ev_dt - p_dt).total_seconds() < min_gap_h * 3600:
+            if p_dt is None:
+                continue
+            if young and (ev_dt - p_dt).total_seconds() < min_gap_h * 3600:
                 continue          # same-day burst: legitimate velocity
         pdisc = title_discriminators(p.get("title") or "")
         shared = disc & pdisc
@@ -267,6 +328,15 @@ def is_rereport(event, prior_events, *, low_jaccard=0.25, high_jaccard=0.55,
         union = disc | pdisc
         if union and len(shared) / len(union) >= floor:
             return True
+    # Canonical-headline echo leg (old stories only — a first-day pickup
+    # that resembles the canonical headline is normal coverage).
+    if story_title and ev_dt is not None and not young and not new_cves:
+        std = title_discriminators(story_title)
+        if std:
+            shared_t = disc & std
+            if len(shared_t) >= 2 \
+                    and len(shared_t) / len(disc | std) >= high_jaccard:
+                return True
     return False
 
 
@@ -290,9 +360,24 @@ def hot_score(story, events, reddit_posts, now=None):
     title = (story.get("title") or "").lower()
     body_text = " ".join(events.get(r["event_id"], {}).get("content_md", "") for r in story.get("events", []))[:4000].lower()
     text = title + " " + body_text
+    # CVSS the coverage states but the local NVD store lacks (research CVEs
+    # missing from kevrichment/nvd-info) — same band, so an "unpatched CVSS
+    # 10" story can no longer sit at sev 1.0 and under-rank (2026-10-13).
+    text_cvss = max((float(m) for m in CVSS_TEXT_RE.findall(text)), default=0.0)
+    if text_cvss:
+        sev = max(sev, _cvss_band(text_cvss))
     signals = sum(w for rx, w in SIGNALS if rx.search(text))
+    # high-impact weights (2026-10-13 owner decision fc3f6e00a8d9): explicit
+    # extra weight for confirmed in-the-wild exploitation and unpatched
+    # CVSS >= 9.0 flaws — the classes the digest agent keeps hand-promoting
+    # as "score under-ranks high-impact" (35 overrides, 13 since Oct 1).
+    impact = 0.0
+    if kev or IN_WILD_RE.search(text):
+        impact += IMPACT_IN_WILD
+    if sev >= 4.5 and UNPATCHED_RE.search(text):
+        impact += IMPACT_UNPATCHED_9
     severity = min(5.0, sev + (0.5 if kev else 0.0) + min(SIGNAL_CAP, signals)
-                   + epss_bonus)
+                   + epss_bonus + impact)
 
     # velocity (events in last 48h) + the decay clock: RE-REPORT events
     # don't count (2026-10-03). Outlet echoes of already-carried coverage
@@ -309,7 +394,7 @@ def hot_score(story, events, reddit_posts, now=None):
     for ref in refs:
         e = events[ref["event_id"]]
         dt = parse(e["published_at"])
-        if is_rereport(e, prior):
+        if is_rereport(e, prior, story_title=story.get("title")):
             n_rereports += 1
         else:
             dev_dts.append(dt)
