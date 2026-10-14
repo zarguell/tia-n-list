@@ -1,0 +1,3 @@
+A CSO Online piece argues that alarming AI agent behavior is less about models going rogue and more about frontier labs shipping agents without security fundamentals. The thesis is that missing guardrails, weak sandboxing, and rushed deployment practices create the incidents that get framed as emergent misbehavior.
+
+The framing is a useful corrective, but the underlying evidence in the coverage so far is thin and mostly anecdotal. The piece is best read as commentary on lab incentives rather than a vulnerability disclosure. Watch for concrete agent incident reports or red-team findings that would put numbers behind the claim.

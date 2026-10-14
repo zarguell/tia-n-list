@@ -1,0 +1,3 @@
+Denmark's CPR national registry system suffered a breach exposing around 8.8 million identities after attacker access through accounts belonging to supplier Pays ApS that reportedly used the password 123456. The scale covers effectively the whole population, which makes this a national-level incident rather than an ordinary corporate breach.
+
+The single weak credential is the story within the story: privileged supplier access to a national identity system guarded by one of the weakest passwords in existence. Watch for official confirmation of the intrusion path, detail on exactly which CPR fields were exposed, and whether access logs show bulk extraction or resale of the data.
