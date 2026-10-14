@@ -1,0 +1,1 @@
+ASEC Blog publishes Ransom & Dark Web Issues Week 3, October 2026 n0n Ransomware Attacks on 12 South Korean Port and Logistics Companies Cyberattack Targets Refrigeration Systems at Major French Supermarket Chains Payment and Transaction Data Leak Claimed at a Saudi Fintech Company
