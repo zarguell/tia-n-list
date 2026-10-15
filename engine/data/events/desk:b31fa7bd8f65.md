@@ -1,0 +1,1 @@
+Assigned a 9.9 critical severity rating. The advisory describes an authenticated command-injection vulnerability via the stdio transport in Langflow. Successful exploitation can lead to complete host takeover of the server hosting the Langflow instance.

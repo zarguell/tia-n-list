@@ -1,0 +1,1 @@
+The Bhutan Computer Incident Response Team published advisory 20261013009 on October 14, 2026. The flaw allows any authenticated Langflow user to run arbitrary operating-system commands on the server hosting Langflow via the MCP stdio transport, tracked as CVE-2026-105740.

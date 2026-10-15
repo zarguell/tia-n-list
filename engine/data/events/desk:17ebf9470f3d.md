@@ -1,0 +1,1 @@
+NIST lists CVE-2026-105740 for Langflow. Prior to version 1.9.0, any authenticated Langflow user can achieve remote code execution through the MCP stdio transport. The entry assigns CVSS 9.9 severity.
