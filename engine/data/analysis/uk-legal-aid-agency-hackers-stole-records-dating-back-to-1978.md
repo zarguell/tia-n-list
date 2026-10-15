@@ -1,0 +1,5 @@
+The UK Legal Aid Agency (LAA) disclosed that attackers who breached its systems in April 2025 stole records dating back to 1978. The agency employs around 1,250 staff, oversees billions in legal funding, and works with roughly 2,000 legal providers across England and Wales. The initial disclosure in May 2025 warned that payment data for providers might be compromised.
+
+A follow-up analysis published this week expanded the scope: stolen records include contact details, dates of birth, national ID numbers, criminal history, employment status, contribution amounts, debts, payments, provider contracts, office locations, financial information, and LAA Online Portal credentials. The breach affects applications, claims, and payments from January 2007 through May 2025, with some records reaching back almost five decades.
+
+What to watch: whether the LAA releases technical indicators or a threat actor attribution, and whether providers face downstream fraud using the stolen portal credentials and identity data. The 18-month gap between intrusion and full disclosure remains a significant operational security concern.

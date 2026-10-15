@@ -1,0 +1,43 @@
+title: Web Server Spawning Ghostscript on Uploaded PDF (CVE-2026-39919)
+id: c891e4b4-3349-4b24-a451-0fadb3b5deea
+status: experimental
+description: >
+    Detects a web or document-conversion process spawning the Ghostscript
+    interpreter on a PDF file, the exploitation shape of CVE-2026-39919: a
+    heap-based buffer overflow in Ghostscript's JPEG 2000 output adapter
+    (sjpx_openjpeg.c) reachable through crafted PDFs. In WordPress this is
+    reached via the PHP Imagick extension calling ImageMagick, which launches
+    Ghostscript when generating thumbnails or previews.
+references:
+    - https://www.bleepingcomputer.com/news/security/ghostscript-flaw-lets-hackers-hijack-servers-via-pdf-uploads/
+    - https://gbhackers.com/ghostscript-vulnerability/
+    - https://securityonline.info/ghostscript-vulnerability-cve-2026-39919/
+author: Tia N. List
+date: 2026-10-15
+tags:
+    - attack.t1190
+    - attack.t1059
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection_parent:
+        ParentImage|contains:
+            - 'php-fpm'
+            - 'apache2'
+            - 'httpd'
+            - 'nginx'
+            - 'php'
+    selection_ghostscript:
+        Image|endswith:
+            - '/gs'
+            - '/gsc'
+            - '/gxps'
+    selection_pdf:
+        CommandLine|contains:
+            - '.pdf'
+            - '-sDEVICE='
+    condition: selection_parent and selection_ghostscript and selection_pdf
+falsepositives:
+    - Legitimate document, thumbnail, or print pipelines that render user-supplied PDFs with Ghostscript
+level: medium

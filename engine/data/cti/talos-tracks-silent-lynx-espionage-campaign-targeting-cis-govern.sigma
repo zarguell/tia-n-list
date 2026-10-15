@@ -1,0 +1,45 @@
+title: Office Document Spawning PowerShell Loader (Silent Lynx Espionage)
+id: 4f406e72-b04b-4237-a9a9-b2a5e24652a5
+status: experimental
+description: >
+    Detects macro-enabled Office documents spawning PowerShell in the
+    Kazakhstan-nexus Silent Lynx (UAT-6275 / TAG-193) espionage campaign
+    targeting government organizations across Central Asia and the CIS.
+    The group's infection chains use macro-enabled documents and PS2EXE
+    downloaders that fetch GitHub-hosted PowerShell and deliver custom
+    reverse shells for interactive remote access.
+references:
+    - https://blog.talosintelligence.com/break-the-silence-kazakhstan-nexus-uat-6275-targets-cis-government-organizations/
+    - https://www.recordedfuture.com/blog/tag193-regional-espionage-operations
+author: Tia N. List
+date: 2026-10-15
+tags:
+    - attack.t1566
+    - attack.t1204
+    - attack.t1059
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_parent:
+        ParentImage|endswith:
+            - '\WINWORD.EXE'
+            - '\EXCEL.EXE'
+            - '\POWERPNT.EXE'
+    selection_child:
+        Image|endswith:
+            - '\powershell.exe'
+            - '\pwsh.exe'
+            - '\cmd.exe'
+    selection_suspicious:
+        CommandLine|contains:
+            - 'ps2exe'
+            - 'Invoke-WebRequest'
+            - 'DownloadString'
+            - 'FromBase64String'
+            - '-EncodedCommand'
+    condition: selection_parent and selection_child and selection_suspicious
+falsepositives:
+    - Legitimate macro-driven automation or document workflows that invoke PowerShell
+    - Signed enterprise macros that download or decode content on open
+level: high
