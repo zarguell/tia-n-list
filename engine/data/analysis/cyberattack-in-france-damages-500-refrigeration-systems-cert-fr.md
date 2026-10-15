@@ -1,0 +1,3 @@
+A French cyberattack reset refrigeration systems in approximately 500 stores, pushing temperatures to 50°C and creating defrost cycles lasting between 1 hour and 8 hours. CERT-FR confirmed the physical damage and fire risk. The incident stemmed from poor security in connected refrigeration controllers, as reported by Ars Technica. The attack demonstrates how operational technology weaknesses in supply-chain cooling systems can translate directly into food spoilage and safety hazards.
+
+This event aligns with the broader trend of attackers targeting OT infrastructure with tangible physical outcomes. Monitoring should focus on remote access to refrigeration controllers and segmentation of store-level OT networks from broader IT systems.
