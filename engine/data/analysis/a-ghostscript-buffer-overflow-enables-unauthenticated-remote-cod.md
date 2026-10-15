@@ -1,3 +1,3 @@
-A Ghostscript buffer overflow enables unauthenticated remote code execution. Patch this Ghostscript buffer overflow flaw (CVE-2026-39919) im. Analysis covers events through 2026-10-14T20:30:03.000Z. Watch for further exploitation or vendor patches.
+Ghostscript CVE-2026-39919 is a 9.8-rated critical remote code execution vulnerability triggered when Ghostscript converts PDFs to thumbnails. Wordfence's Argus AI detected the flaw pre-exploitation. The vulnerability is unauthenticated, meaning any service that uses Ghostscript for image processing is at risk without user interaction.
 
-Grounded in event content; no invented claims. Monitor primary sources for updates.
+Patch deployment is urgent for web applications, content management systems, and email gateways that process PDF attachments. The event file references the Wordfence blog and CVE-2026-39919 directly. Monitor for exploitation attempts against thumbnail-generation endpoints.

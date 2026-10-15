@@ -1,0 +1,3 @@
+Anthropic Claude Code Desktop contains a zero-click "SneakPeek" flaw in its preview pane that allows silent exfiltration of developer secrets, including SSH private keys and access tokens. DarkReading reported the vulnerability. No CVE is listed, but the impact is high for any developer using the desktop tool with untrusted repositories.
+
+Patch or disable preview functionality until Anthropic releases a fix. The event content references the preview pane as the attack vector. Watch for an official Anthropic advisory that assigns a CVE and provides exact version ranges. Developers should rotate any secrets that may have been exposed through the tool.
