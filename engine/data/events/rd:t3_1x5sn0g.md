@@ -1,0 +1,3 @@
+I'm a reporter with the Hechinger Report and have spent the last several months investigating ThriveDX/IronCircle. (In that time, I've heard from many of you and appreciate all those who reached out and shared their experiences!) My article on the company ran today: https://hechingerreport.org/a-university-branded-boot-camp-promised-tech-jobs-it-delivered-only-debt/ Would love to hear your thoughts and if anyone has any tips on other cybersecurity training related stories I should look into, you can always reach me at [ butrymowicz@hechingerreport.org ](mailto: butrymowicz@hechingerreport.org ) or [ hechingertips@proton.me ](mailto: hechingertips@proton.me ) submitted by /u/Hechinger_Sarah [link] [comments]
+
+via reddit r/cybersecurity: article on ThriveDX/IronCircle
