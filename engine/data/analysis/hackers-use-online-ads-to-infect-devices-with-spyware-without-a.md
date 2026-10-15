@@ -1,0 +1,3 @@
+AdFection represents the first confirmed zero-click mercenary spyware delivered through targeted online ads. Citizen Lab verified the technique, which used Candiru spyware delivered via ads bought by the Israeli firm Discover-Tech, hitting devices at Al Jazeera. The method exploits real-time ad auctions and requires no user interaction, making it more dangerous than traditional drive-by downloads.
+
+The attack matters for high-value targets in media and civil society, since it bypasses user awareness entirely. Security teams should treat targeted ad networks as potential delivery vectors for zero-click implants. Watch for additional disclosures linking Discover-Tech or Candiru to new targets, and for defensive measures in mobile ad filtering.

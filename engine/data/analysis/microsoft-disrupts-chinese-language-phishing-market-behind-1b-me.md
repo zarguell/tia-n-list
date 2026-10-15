@@ -1,3 +1,3 @@
-Microsoft Disrupts Chinese-Language Phishing Market Behind 1B+ Messages. Analysis covers events through 2026-10-14T22:00:14.000Z. Watch for further exploitation or vendor patches.
+Microsoft, Health-ISAC, and partners disrupted a Chinese-language phishing marketplace responsible for over one billion malicious messages since January 2026. The operation targeted 75,000 organizations across 150 countries, primarily through services named YAM Store, CoGUI, and Iron Man. The action was based on a US District Court order for the Southern District of Florida, and Microsoft disabled over 20,000 accounts and blocked more than 100,000 domains.
 
-Grounded in event content; no invented claims. Monitor primary sources for updates.
+The disruption is significant because it targets the supply side of phishing rather than individual campaigns. More than 750 million messages targeted Microsoft customers, with healthcare, finance, logistics, and IT sectors as primary targets. Watch for follow-up reports on whether Storm-2990 or related clusters adapt infrastructure quickly, and for additional civil actions against remaining components of the marketplace.

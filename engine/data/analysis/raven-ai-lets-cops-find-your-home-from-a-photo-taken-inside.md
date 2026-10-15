@@ -1,0 +1,3 @@
+Malwarebytes reported Raven AI, a tool that allows law enforcement to identify a person's home from a photo taken inside the residence. The technology connects interior images to geolocation data, which raises serious privacy concerns about surveillance capabilities without a warrant. The report links to Malwarebytes privacy coverage and does not name a specific CVE or vendor advisory.
+
+The issue matters because it demonstrates how AI-driven image analysis can erode location privacy at scale. There is no vulnerability to patch, but the capability should inform debates on surveillance regulation and on-device image analysis limits. Watch for legislative responses or vendor disclosures about similar AI location-inference tools.

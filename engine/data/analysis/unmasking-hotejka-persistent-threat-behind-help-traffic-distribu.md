@@ -1,0 +1,3 @@
+Infoblox identified Hotejka as the persistent threat behind a Help Traffic Distribution System used for tech support scams. The operators originally hosted content on the notorious King Servers and later moved operations to Cloudflare Pages, using predictive detection to maintain uptime. The analysis connects the TDS to ongoing tech support fraud campaigns targeting vulnerable users.
+
+The finding is significant for threat hunters tracking scam infrastructure, since it links a named actor to a specific hosting migration and detection-evasion technique. Defenders should monitor for Cloudflare Pages-based TDS behavior and update threat intelligence feeds with the Infoblox indicators. There is no CVE, but the report provides actionable IOCs for security operations.

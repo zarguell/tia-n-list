@@ -1,0 +1,3 @@
+The Vibetech database exposure is a real breach of scale: 13.7 million records from an unprotected repository linked to the India-based AI firm, accessible without authentication. Researcher Jeremiah Fowler found credentials and sensitive material drawn from older breaches including AT&T and Casio data. The database was reported via malware.news and hackread.com, with the primary reporting coming from ExpressVPN.
+
+The exposure matters because it aggregates prior breach data rather than originating it, making it a secondary data dump. Organizations should treat any credentials appearing in the set as compromised and rotate them. There is no CVE assigned, but the incident highlights persistent cloud misconfiguration risk in AI-service supply chains.
