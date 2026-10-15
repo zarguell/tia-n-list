@@ -1,0 +1,1 @@
+TheHackerWire lists CVE-2026-102182 as a new critical vulnerability disclosed on October 14, 2026. It describes a stack-based buffer overflow in the kmd component of Junos OS on MX Series that allows an unauthenticated network attacker to execute code as root via specific IKE certificate handling.

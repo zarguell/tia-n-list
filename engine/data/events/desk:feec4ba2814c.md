@@ -1,0 +1,1 @@
+The advisory reports Juniper released patches for critical Junos OS RCE vulnerabilities, specifically naming CVE-2026-102182 and CVE-2026-101954. It notes the vendor bulletin was published on October 14, 2026, one day before the story's first_seen timestamp of October 15, 2026.
