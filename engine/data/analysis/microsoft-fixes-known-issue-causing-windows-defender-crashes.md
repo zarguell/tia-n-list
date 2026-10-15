@@ -1,0 +1,3 @@
+Microsoft resolved a known Windows 11 issue that caused black screens, desktop loading failures, and Explorer crashes after updates released since August. The bug primarily hit Azure Virtual Desktop hosts using FSLogix. Microsoft fixed it in cumulative updates released October 13, 2026, and advised users to install the latest update rather than rely on a temporary workaround that involved manually launching explorer.exe from Task Manager.
+
+While not a vulnerability, this is a reliability failure with operational impact for virtual desktop environments. Organizations running AVD with FSLogix should confirm the October updates are deployed to prevent desktop session failures. Monitor for any remaining reports after patch rollout.

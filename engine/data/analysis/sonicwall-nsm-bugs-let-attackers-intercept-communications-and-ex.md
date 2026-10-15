@@ -1,0 +1,3 @@
+SonicWall disclosed two high-severity vulnerabilities in its on-premises Network Security Manager, tracked in advisory SNWLID-2026-0018 published October 14, 2026. The highest CVSS v3 score is 8.8. Authenticated attackers can escalate privileges, intercept other users' communications, and execute operating system commands through the NSM platform.
+
+This is a serious exposure for organizations managing firewall policies through SonicWall NSM. The combination of privilege escalation, communication interception, and OS command execution gives an attacker broad control. Apply the advisory updates promptly and audit NSM access logs for any unauthorized administrative activity.
