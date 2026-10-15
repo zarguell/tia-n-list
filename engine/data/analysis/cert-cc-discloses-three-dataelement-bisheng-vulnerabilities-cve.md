@@ -1,0 +1,5 @@
+CERT/CC disclosed three vulnerabilities in DataElement Bisheng: CVE-2026-96679, CVE-2026-96681, and CVE-2026-100156. The disclosure indicates unauthenticated administrative access is possible, which implies severe impact for any exposed instance. Only a single source (securityonline.info via Mastodon) reports the disclosure, giving the story a narrow evidence base and a low score of 3.4.
+
+Because no patch timeline or vendor statement is present in the event content, the priority is verification. Organizations running DataElement Bisheng should check for vendor updates and restrict network exposure until patch details are confirmed. The CVE list is concrete and the claim comes from CERT/CC, so the disclosure itself is credible, but the absence of exploitation indicators or patch guidance limits its urgency.
+
+This is a lean new story with a single event and a modest score. Monitor for follow-up advisories that include fix versions or CISA KEV addition, either of which would justify raising the analysis score and refreshing the write-up.

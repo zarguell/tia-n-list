@@ -1,1 +1,1 @@
-먼저 이번 악성코드는 삼성전자에서 정식으로 제조하고 유통하는 갤럭시 스마트폰의 펌웨어에서 발견된 것이 아닙니다.보고서에 등장하는 갤럭시 S24 Ultra, S25 Ultra 등의 모델명은 해당 이름을 도용한 저가형 모조품에서 .. Article Link: 모조품 삼성 갤럭시 S25 울트라 등 안드로이드 펌웨어에 설치된 Midnight Mimosa 악성코드 주의
+Note: This malware is not found in firmware officially manufactured and distributed by Samsung Electronics. The Galaxy S24 Ultra, S25 Ultra, and other model names mentioned in the report are low-cost counterfeit devices that borrow those names... Article Link: Midnight Mimosa malware installed in counterfeit Samsung Galaxy S25 Ultra Android firmware warning.
