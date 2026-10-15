@@ -1,0 +1,3 @@
+CERT Polska reported three vulnerabilities found in Slican telephone exchanges: CVE-2026-35088, CVE-2026-63314, and CVE-2026-63315. The advisory notes hardcoded keys, SQL injection, and plaintext password risks. These are critical vulnerabilities in telecommunication infrastructure that can expose call data, user credentials, and system access to attackers with network access to the exchanges.
+
+Telephony exchanges are often overlooked in security inventories but provide direct access to voice and signaling data. Organizations operating Slican equipment should review the CERT Polska advisory, confirm firmware or software updates are available, and audit configurations for hardcoded credentials or unpatched SQL interfaces.
