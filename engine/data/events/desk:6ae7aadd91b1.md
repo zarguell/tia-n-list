@@ -1,0 +1,1 @@
+Lumen's Black Lotus Labs published findings on February 7, 2024 documenting KV-botnet, a China-linked SOHO router botnet used for covert data transfer. The report establishes the precursor infrastructure that later evolved into the expanded JDY network.
