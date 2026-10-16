@@ -1,0 +1,1 @@
+CISO AI brief reports the Linux kernel networking flaw CVE-2026-99999 (PwnEscape) with a CVSS 9.3 rating. The vulnerability was discovered through Vercel's sandbox challenge and allows a guest VM to read memory on its host through a VirtIO checksum offloader issue in the kernel networking stack.

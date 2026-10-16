@@ -1,0 +1,1 @@
+Vercel published findings from its $1 million Sandbox security challenge, describing the discovery of CVE-2026-99999. The article notes the challenge was announced August 18, 2026, and details how a malformed packet through VirtIO could corrupt host kernel network headers for arbitrary code execution.
