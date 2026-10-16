@@ -1,0 +1,1 @@
+TIGR Threat Watch reports that Cisco published advisory cisco-sa-esa-afw-zqYJkjxp on October 14, 2026, disclosing CVE-2026-76519 (CVSS 3.1 9.8, CWE-23). The advisory covers a critical arbitrary file write vulnerability in the Advanced Malware Protection feature of Cisco Secure Email Gateway.

@@ -1,0 +1,1 @@
+CISA added CVE-2026-76519 to the Known Exploited Vulnerabilities catalog on October 14, 2026, confirming active exploitation of the Cisco Secure Email Gateway arbitrary file write vulnerability. The entry links directly to the Cisco advisory cisco-sa-esa-afw-zqYJkjxp.

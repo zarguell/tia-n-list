@@ -1,0 +1,1 @@
+TheHackerWire notes the vulnerability was publicly disclosed on October 14, 2026. It is actively listed in the CISA KEV catalog, confirming real-world exploitation. The flaw is a relative path traversal in Cisco Secure Email Gateway that allows arbitrary file writes.
