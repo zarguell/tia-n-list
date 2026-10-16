@@ -1,3 +1,3 @@
-Burger King Japan confirmed a data breach exposing 11.18 million app member records, including emails, phone numbers, dates of birth and additional data. The scale makes it a significant consumer exposure event in the quick-service and loyalty-app sector.
+Burger King Japan disclosed a data breach affecting 11.18 million members of its mobile app, exposing emails, phone numbers, and dates of birth. The incident was reported across multiple outlets, confirming the scale of the affected customer base.
 
-Affected customers should expect targeted phishing and credential stuffing attempts using the leaked fields. The company should clarify what data classes were exposed, whether payment data was involved, and what remediation is offered. Organizations with similar loyalty programs should review tokenized storage and access controls.
+The breach is limited to app member data rather than payment card details based on current reporting, but 11.18 million records of contact and birthdate data create phishing and identity-fraud risk for affected users. Watch for BK Japan guidance on password resets, notification scope, and whether additional data types were involved.
