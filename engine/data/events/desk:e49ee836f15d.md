@@ -1,0 +1,1 @@
+GBHackers reports the Chrome 155 update published on October 15, 2026 fixes a critical use-after-free in Prerender tracked as CVE-2026-110922, plus nine additional bugs. Google does not report any in-the-wild exploitation for this CVE. Stable builds are 155.0.8059.84/.85 (Windows/Mac) and 155.0.8059.84 (Linux).
