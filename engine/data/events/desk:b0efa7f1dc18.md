@@ -1,0 +1,1 @@
+A suspected China-linked espionage group exploited a critical BeyondTrust Remote Support vulnerability as a zero-day in late August 2026, weeks before BeyondTrust disclosed it on October 15. The attackers used the flaw to upload a file and escalate from an unprivileged web service account to root access.
