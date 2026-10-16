@@ -1,0 +1,5 @@
+Windows Server 2022 reached the end of mainstream support on October 13, 2026, transitioning to extended support that runs through October 14, 2031. Microsoft states the October 2026 security update is the last mainstream update; extended support continues monthly security updates at no additional cost. Hotpatching for the Datacenter: Azure Edition extends to October 2027.
+
+The change is operational rather than a vulnerability disclosure, but it affects patching expectations and feature availability for organizations still running Windows Server 2022. Microsoft advises planning an upgrade to Windows Server 2025, the current LTSC release, for full mainstream support.
+
+Watch the upgrade timeline carefully because extended support still delivers security fixes, but non-security improvements and hotpatching beyond the Azure Edition window will end on the stated dates.

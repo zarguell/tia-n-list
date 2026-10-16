@@ -1,0 +1,5 @@
+UNC7017, a threat group tracked by Google, tampered with AOMEI Backupper's update infrastructure in three short bursts between May and July 2026. Each window lasted roughly 5 to 10 minutes; any copy of AOMEI Backupper that polled for updates during one of those windows pulled a backdoored installer onto Windows hosts.
+
+The technique is supply-chain compromise by timing rather than by persistent takeover, complicating detection because the malicious payload only existed on the legitimate update path for minutes at a time. Defenders should verify the integrity of AOMEI Backupper installations that updated in that window and review outbound connections from affected hosts.
+
+Watch for Google's full investigation and any IoCs or detection rules published for the backdoored payload, plus guidance from AOMEI on installer verification.

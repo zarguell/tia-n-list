@@ -1,0 +1,5 @@
+Unit 42 reports the top five initial access vectors adversaries used to breach organizations in September 2026, led by exploitation of external edge devices, credential abuse, and phishing. The writeup frames the current threat landscape around externally reachable entry points rather than malware delivery alone.
+
+The substance is strategic rather than a single CVE disclosure, so it is useful as a prioritization lens for defenders: harden internet-facing edges, tighten identity and MFA, and maintain phishing-resistant authentication. The key takeaway is that edge exploitation and identity compromise continue to outrank endpoint-focused controls.
+
+Watch for follow-up posts detailing specific CVEs and victim counts behind each vector, plus any KEV additions tied to edge products named in the companion analysis.
