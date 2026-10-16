@@ -1,5 +1,3 @@
-Citizen Lab documented the first public case of zero-click mercenary spyware delivered via targeted online ads, dubbed "AdFection." Ads bought by Israeli ad-tech firm Discover-Tech carried Candiru spyware to Al Jazeera devices through real-time ad auctions, requiring no user interaction.
+AdFection describes a zero-click spyware delivery campaign that used targeted online advertisements to infect devices at Al Jazeera Media Network. The attacks required only rendering the malicious ads on the victim device, with Candiru spyware delivered without any user interaction, per Citizen Lab researchers.
 
-The technique expands the threat surface for mobile devices because malvertising can reach targets through normal browsing. Defenders should review ad-block hardening, mobile threat defense, and isolation for high-risk users.
-
-Watch for further vendor and researcher disclosures, IOCs for Discover-Tech ad chains, and platform responses from ad networks. Expect CISA or regional advisories if the technique is found more broadly.
+The significance is the lack of required interaction and the use of legitimate ad networks as a delivery channel, which complicates blocking at the user level. Defenders should prioritize mobile and browser-level ad and network controls, treat high-value media and government users as priority targets, and monitor for Candiru indicators reported in the coverage. Because delivery is passive, traditional user awareness offers limited protection.
