@@ -1,0 +1,3 @@
+pfSense CE through 2.9.0 has 7 newly disclosed CVEs, with 6 being OS command injection flaws affecting QinQ, OpenVPN, gateway, Virtual IP, Advanced Admin Access, and Captive Portal. The event names CVE-2026-111214 and CVE-2026-111231 among the cluster and describes network-exploitable command injection paths in firewall services.
+
+Firewall command injection is high-impact because it grants attackers network-level control over the security perimeter. Operators running pfSense CE should review the threataft disclosure, verify version exposure, and apply vendor patches promptly. Monitor for any follow-up reports confirming active exploitation or proof-of-concept releases against these injection points.
