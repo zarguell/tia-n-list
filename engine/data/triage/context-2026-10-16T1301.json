@@ -1,0 +1,814 @@
+{
+ "date": "2026-10-16",
+ "decisions_path": "engine/data/triage/decisions-2026-10-16T1301.json",
+ "instructions": "For every new event decide: (1) keep or drop \u2014 keep only stories worth covering (real security events, vulnerabilities, attacks, breaches, advisories with substance); drop press releases, vendor marketing, generic explainers, and anything duplicating an existing story. (2) If keep, assign the event to the RIGHT story: an existing candidate story id if it belongs there (this FIXES mechanical clustering \u2014 e.g. different outlets' Patch Tuesday roundups are ONE story), or NEW with a clean story_title. (3) merges: list candidate stories that are really the same story (from = fragment, into = the most complete one). (4) For every kept event that names CVEs, optionally assess exploitation: exploited = the event reports OBSERVED in-the-wild exploitation (implants, victim counts, campaigns, CISA KEV confirmation); suspected = public exploit code/PoC or likely-but-unconfirmed. Attribute ONLY the CVEs you can tie to the claim \u2014 a bulletin's blanket 'actively exploited' does NOT flag all its CVEs. Omit the exploitation field when the event makes no claim.\n(5) LOW-TRUST events (\"low_trust\": true \u2014 AI-drafted aggregator reposts, late and overstated): treat as unverified leads. When the text attributes the claim to a named primary source (a researcher firm like watchTowr, a vendor advisory, CISA, a major outlet) and attribution_urls or a web search (/home/ubuntu/repos/cronman/bin/web-search.sh \"query\") locate that primary source CONFIRMING the claim, include a provenance object in the decision: {\"url\": <primary url>, \"source\": <domain>, \"evidence\": <one line>, \"verified\": true}. VERIFIED provenance lets the event mint a story (credited to the primary source) and count as a development; without it, a low-trust event can only attach to an EXISTING story, never mint. If you cannot verify, keep/drop on normal merit and omit provenance.\n\nWrite decisions as JSON with EXACTLY this shape:\n{\n  \"decisions\": [\n    {\"event_id\": \"<id>\", \"action\": \"keep\", \"story\": \"<existing candidate story id>\", \"reason\": \"...\"},\n    {\"event_id\": \"<id>\", \"action\": \"keep\", \"story\": \"NEW\", \"story_title\": \"<clean title>\", \"reason\": \"...\"},\n    {\"event_id\": \"<id>\", \"action\": \"drop\", \"reason\": \"...\"}\n  ],\n  \"merges\": [{\"from\": \"<fragment story id>\", \"into\": \"<canonical story id>\"}]\n}\nFor events marked \"low_trust\" (AI-drafted aggregator reposts) a decision\nmay carry an optional \"provenance\" object when you VERIFIED the claim at\nthe named primary source: {\"event_id\": ..., \"action\": \"keep\", ...}\n  \"provenance\": {\"url\": \"<primary source url>\", \"source\": \"<domain>\", \"evidence\": \"<one line>\"}\nOnly include provenance when the primary source (vendor advisory, CISA,\nthe named researcher/outlet) really carries the claim \u2014 verified\nprovenance lets a low-trust event mint a story and set freshness; without\nit the event can only amplify an existing story.\nSTRICT KEY NAMES: the array key is \"decisions\" (never \"events\"); the story\nkey is \"story\" (never \"story_id\"); \"story\" holds a candidate_stories id\nverbatim or the literal string \"NEW\". Optional per-event field\n\"exploitation\": {\"CVE-...\": {\"status\": \"exploited|suspected\", \"evidence\": \"1-2 sentences\"}}.",
+ "new_events": [
+  {
+   "id": "rss:451cebccdcd12bc6",
+   "title": "MITRE ATT&CK v20 Adds New AI Attack Techniques for Prompt Injection and Data Theft",
+   "source": "gbhackers.com",
+   "published_at": "2026-10-16T12:56:46Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "MITRE released ATT&CK v20 on October 13, 2026. It adds the first Enterprise techniques for direct and indirect prompt injection, AI-enabled exfiltration and AI result poisoning. MITRE ATT&CK v20 Adds New AI Attack Techni"
+  },
+  {
+   "id": "rss:0ab9d8016049ea92",
+   "title": "Google Chrome 155 Patches Critical Use-After-Free Flaw and Nine Additional Security Bugs",
+   "source": "gbhackers.com",
+   "published_at": "2026-10-16T12:36:42Z",
+   "cves": [
+    "CVE-2026-110922"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Google has released Chrome 155 to the Stable channel with 10 security fixes. One is rated Critical: a use-after-free in Prerender, tracked as CVE-2026-110922. The update was published on October 15, 2026. The Stable chan"
+  },
+  {
+   "id": "rss:5d95cd96f4c9ebae",
+   "title": "CVE-2026-102764: Critical BeyondTrust Remote Support Zero-Day Exploited by China-Linked Hackers",
+   "source": "socprime.com",
+   "published_at": "2026-10-16T12:33:43Z",
+   "cves": [
+    "CVE-2026-102764"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "BeyondTrust has disclosed CVE-2026-102764, a critical vulnerability in Remote Support (RS) that was exploited as a zero-day by a suspected China-nexus cyber espionage actor. The flaw carries a CVSS 4.0 score of 9.3 and c"
+  },
+  {
+   "id": "masto:117450604154800025",
+   "title": "(malwarebytes.com) AI-Assisted Job Hunting and the Rising Threat of Recruitment Scams: How to Stay Safe In brief - This article warns jobsee",
+   "source": "www.malwarebytes.com",
+   "published_at": "2026-10-16T12:33:12.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "(malwarebytes.com) AI-Assisted Job Hunting and the Rising Threat of Recruitment Scams: How to Stay Safe In brief - This article warns jobsee  via Mastodon https://www.malwarebytes.com/blog/news/2026/10/spray-and-pray-job"
+  },
+  {
+   "id": "masto:117450594197832025",
+   "title": "A practical design for emergency access that remains independent, time-bounded, observable, testable, and difficult to normalize into an ord",
+   "source": "secdoc.tech",
+   "published_at": "2026-10-16T12:30:42.139Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "A practical design for emergency access that remains independent, time-bounded, observable, testable, and difficult to normalize into an ord  via Mastodon https://secdoc.tech/break-glass-access-that-does-not-quietly-beco"
+  },
+  {
+   "id": "masto:117450591952813758",
+   "title": "Vulnerability Watch, October 16, 2026: 12 critical CVEs and 88 new vendor and CERT advisories 12 critical CVEs \u00b7 88 advisories \u00b7 NIST NVD, C",
+   "source": "techupscale.com",
+   "published_at": "2026-10-16T12:30:07.876Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Vulnerability Watch, October 16, 2026: 12 critical CVEs and 88 new vendor and CERT advisories 12 critical CVEs \u00b7 88 advisories \u00b7 NIST NVD, C  via Mastodon https://techupscale.com/vulnerability-watch-october-16-2026-12-cr"
+  },
+  {
+   "id": "masto:117450591916580475",
+   "title": "Ransomware-Angriff: Bauunternehmen # Ransomware # Einbruch # Datendiebstahl # TeamInfoSec # cyberangriff https://www. security-incidents.de/",
+   "source": "www.security-incidents.de",
+   "published_at": "2026-10-16T12:30:06.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Ransomware-Angriff: Bauunternehmen # Ransomware # Einbruch # Datendiebstahl # TeamInfoSec # cyberangriff https://www. security-incidents.de/  via Mastodon https://www.security-incidents.de/sicherheitsvorfaelle/ransomware"
+  },
+  {
+   "id": "rss:115494e2a2c8e6ee",
+   "title": "CVE-2026-99999: Critical PwnEscape Linux Kernel Flaw Enables Guest-to-Host Escape",
+   "source": "socprime.com",
+   "published_at": "2026-10-16T12:27:45Z",
+   "cves": [
+    "CVE-2026-99999"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "A critical Linux kernel vulnerability tracked as CVE-2026-99999, dubbed PwnEscape, can break the isolation boundary between virtual machines and their underlying hosts. The flaw resides in the Linux networking stack and "
+  },
+  {
+   "id": "masto:117450578970325907",
+   "title": "Commercial zero-click spyware is being delivered on an industrial scale via targeted ads, according to a new report by Citizen Lab. https://",
+   "source": "www.computing.co.uk",
+   "published_at": "2026-10-16T12:26:49.778Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Commercial zero-click spyware is being delivered on an industrial scale via targeted ads, according to a new report by Citizen Lab. https://  via Mastodon https://www.computing.co.uk/news/2026/security/zero-click-spyware"
+  },
+  {
+   "id": "masto:117450578852493489",
+   "title": "poc.py exploits CVE-2026-97229 through GitLab's public CI lint endpoint. An attacker with permission to push to a public project supplies a ",
+   "source": "github.com",
+   "published_at": "2026-10-16T12:26:47.000Z",
+   "cves": [
+    "CVE-2026-97229"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "poc.py exploits CVE-2026-97229 through GitLab's public CI lint endpoint. An attacker with permission to push to a public project supplies a   via Mastodon https://github.com/jburgess-r7/CVE-2026-97229-PoC "
+  },
+  {
+   "id": "rss:c862967ea137ca59",
+   "title": "\u201cSpray and pray\u201d job applications could make it harder for you to spot a scam",
+   "source": "malware.news",
+   "published_at": "2026-10-16T12:25:39Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "AI can help you send more job applications. But when you lose track of where you\u2019ve applied, a fake recruiter\u2019s message can start to look like the reply you\u2019ve been waiting for. Job hunting can feel like shouting into th"
+  },
+  {
+   "id": "masto:117450568137257857",
+   "title": "Ransomware-Angriff: Umweltdienstleister # Ransomware # Einbruch # Datendiebstahl # TeamInfoSec # cyberangriff https://www. security-incident",
+   "source": "www.security-incidents.de",
+   "published_at": "2026-10-16T12:24:04.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Ransomware-Angriff: Umweltdienstleister # Ransomware # Einbruch # Datendiebstahl # TeamInfoSec # cyberangriff https://www. security-incident  via Mastodon https://www.security-incidents.de/sicherheitsvorfaelle/ransomware"
+  },
+  {
+   "id": "masto:117450540544968223",
+   "title": "\ud83d\uddde 519 ransomware victims claimed in 2026-10. Top crews: N0n, Qilin, TheGentlemen. Predictive report + methodology. https:// ninjalabz.io/int",
+   "source": "ninjalabz.io",
+   "published_at": "2026-10-16T12:17:03.455Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "\ud83d\uddde 519 ransomware victims claimed in 2026-10. Top crews: N0n, Qilin, TheGentlemen. Predictive report + methodology. https:// ninjalabz.io/int  via Mastodon https://ninjalabz.io/intel-report/ "
+  },
+  {
+   "id": "masto:117450519028624925",
+   "title": "\ud83d\udee1\ufe0f secdb-cli 0.7.0 is out. It's the open source command-line client for ZEN SecDB: CVE lookup, SSVC, and auditing of packages, SBOMs, depend",
+   "source": "github.com",
+   "published_at": "2026-10-16T12:11:35.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "\ud83d\udee1\ufe0f secdb-cli 0.7.0 is out. It's the open source command-line client for ZEN SecDB: CVE lookup, SSVC, and auditing of packages, SBOMs, depend  via Mastodon https://github.com/giterlizzi/secdb-cli/releases/tag/v0.7.0 "
+  },
+  {
+   "id": "masto:117450514276982402",
+   "title": "AI Decision Models Transform Alert Triage in Cybersecurity The game-changing arrival of decision-only AI models is revolutionizing alert tri",
+   "source": "osintsights.com",
+   "published_at": "2026-10-16T12:10:22.639Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "AI Decision Models Transform Alert Triage in Cybersecurity The game-changing arrival of decision-only AI models is revolutionizing alert tri  via Mastodon https://osintsights.com/ai-decision-models-transform-alert-triage"
+  },
+  {
+   "id": "masto:117450513020985219",
+   "title": "\ud83c\udd95 The pivot graph now shows each site once, offers tree, radial, concentric, circle and grid layouts, and keeps large graphs readable https:",
+   "source": "scanmalware.com",
+   "published_at": "2026-10-16T12:10:02.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "\ud83c\udd95 The pivot graph now shows each site once, offers tree, radial, concentric, circle and grid layouts, and keeps large graphs readable https:  via Mastodon https://scanmalware.com/graph "
+  },
+  {
+   "id": "masto:117450507814717937",
+   "title": "\ud83d\udee1 THREAT INTEL | Amity University Dubai \ud83d\udfe2 Actor \"blacknevas\" claims Undisclosed Allegedly exposed (+3 more) \u2022 Phone numbers \u2022 Physical addre",
+   "source": "www.yazoul.net",
+   "published_at": "2026-10-16T12:08:44.037Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "\ud83d\udee1 THREAT INTEL | Amity University Dubai \ud83d\udfe2 Actor \"blacknevas\" claims Undisclosed Allegedly exposed (+3 more) \u2022 Phone numbers \u2022 Physical addre  via Mastodon https://www.yazoul.net/intel/claim/2026-10-15-amity-university-du"
+  },
+  {
+   "id": "masto:117450507894555773",
+   "title": "\ud83d\udee1 THREAT INTEL | Amity University Dubai \ud83d\udfe2 Actor \"blacknevas\" claims Undisclosed Allegedly exposed (+3 more) \u2022 Phone numbers \u2022 Physical addre",
+   "source": "www.yazoul.net",
+   "published_at": "2026-10-16T12:08:44.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "\ud83d\udee1 THREAT INTEL | Amity University Dubai \ud83d\udfe2 Actor \"blacknevas\" claims Undisclosed Allegedly exposed (+3 more) \u2022 Phone numbers \u2022 Physical addre  via Mastodon https://www.yazoul.net/intel/claim/2026-10-15-amity-university-du"
+  },
+  {
+   "id": "masto:117450492457671931",
+   "title": "(rt-solar.ru) HypeAgent: A Modern RAT with Retro Ambitions and Extensive Capabilities In brief - This article analyzes HypeAgent, a comprehe",
+   "source": "rt-solar.ru",
+   "published_at": "2026-10-16T12:04:45.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "(rt-solar.ru) HypeAgent: A Modern RAT with Retro Ambitions and Extensive Capabilities In brief - This article analyzes HypeAgent, a comprehe  via Mastodon https://rt-solar.ru/solar-4rays/blog/7135/ "
+  },
+  {
+   "id": "masto:117450488265324194",
+   "title": "A supermarket cyberattack can spoil more than data: a French incident reportedly wiped out millions of dollars\u2019 worth of food inventory by e",
+   "source": "www.cryovex.com",
+   "published_at": "2026-10-16T12:03:44.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "A supermarket cyberattack can spoil more than data: a French incident reportedly wiped out millions of dollars\u2019 worth of food inventory by e  via Mastodon https://www.cryovex.com/retail-cybersecurity-french-supermarket-c"
+  },
+  {
+   "id": "masto:117450485141006577",
+   "title": "Privacy & security, Fri, Oct 16: \u2022 Online ads weaponised to deliver \u2018zero-click\u2019 spyware, researchers say https://www. theguardian.com/techn",
+   "source": "www.theguardian.com",
+   "published_at": "2026-10-16T12:02:58.059Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Privacy & security, Fri, Oct 16: \u2022 Online ads weaponised to deliver \u2018zero-click\u2019 spyware, researchers say https://www. theguardian.com/techn  via Mastodon https://www.theguardian.com/technology/2026/oct/15/israeli-firm-d"
+  },
+  {
+   "id": "masto:117450480872135896",
+   "title": "Magna Hospitality Group Discloses Ransomware Breach Exposing 385 GB of Data Magna Hospitality Group suffered a ransomware attack by the Qili",
+   "source": "beyondmachines.net",
+   "published_at": "2026-10-16T12:01:49.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Magna Hospitality Group Discloses Ransomware Breach Exposing 385 GB of Data Magna Hospitality Group suffered a ransomware attack by the Qili  via Mastodon https://beyondmachines.net/event_details/magna-hospitality-group-"
+  },
+  {
+   "id": "rss:e41491135fc08422",
+   "title": "Burger King Japan data breach exposes 11 million customer records",
+   "source": "bleepingcomputer.com",
+   "published_at": "2026-10-16T12:01:29Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Burger King Japan, the Japanese subsidiary of global fast-food giant Burger King, disclosed a major data breach after attackers accessed a server containing 11.18 million customer records. Founded in 1953 in Florida, Bur"
+  },
+  {
+   "id": "masto:117450478150533315",
+   "title": "\ud83d\uddb2\ufe0f # Cybersecurity # Ciberseguridad # Ciberseguranca # Security # Seguridad # Seguranca # News # Noticia # Noticias # Tecnologia # Technolog",
+   "source": "www.darkreading.com",
+   "published_at": "2026-10-16T12:01:11.392Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "\ud83d\uddb2\ufe0f # Cybersecurity # Ciberseguridad # Ciberseguranca # Security # Seguridad # Seguranca # News # Noticia # Noticias # Tecnologia # Technolog  via Mastodon https://www.darkreading.com/threat-intelligence/f-secure-launches"
+  },
+  {
+   "id": "masto:117450477551918029",
+   "title": "\u029e\u0254\u1d09\u05df\u0254 \u0250 \u0287no\u0265\u0287\u1d09\u028d \u01dd\u0279\u0250\u028d\u028eds n\u0279\u1d09pu\u0250\u0254 p\u01dd\u0279\u01dd\u028c\u1d09\u05df\u01ddp sp\u0250 p\u01dd\u0287\u01dd\u0183\u0279\u0250\u0287 \u028e\u0250s s\u0279\u01dd\u0265\u0254\u0279\u0250\u01dds\u01dd\u0279 \ud83d\ude43 \ud83d\udea8 https:// cyberinsider.com/online-ads-in fected-targets-with-candi",
+   "source": "cyberinsider.com",
+   "published_at": "2026-10-16T12:01:01.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "\u029e\u0254\u1d09\u05df\u0254 \u0250 \u0287no\u0265\u0287\u1d09\u028d \u01dd\u0279\u0250\u028d\u028eds n\u0279\u1d09pu\u0250\u0254 p\u01dd\u0279\u01dd\u028c\u1d09\u05df\u01ddp sp\u0250 p\u01dd\u0287\u01dd\u0183\u0279\u0250\u0287 \u028e\u0250s s\u0279\u01dd\u0265\u0254\u0279\u0250\u01dds\u01dd\u0279 \ud83d\ude43 \ud83d\udea8 https:// cyberinsider.com/online-ads-in fected-targets-with-candi  via Mastodon https://cyberinsider.com/online-ads-infected-targets-with-candiru"
+  },
+  {
+   "id": "masto:117450477071114090",
+   "title": "\ud83d\udea8 Lambda Watchdog CVE Report \ud83d\udea8 Latest AWS Lambda image scan detected 111 CVEs across 27 images: \u2022 \ud83d\udd34 Critical: 1 \u2022 \ud83d\udfe0 High: 47 \u2022 \ud83d\udfe1 Medium: 55 ",
+   "source": "lambdawatchdog.com",
+   "published_at": "2026-10-16T12:00:54.927Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "\ud83d\udea8 Lambda Watchdog CVE Report \ud83d\udea8 Latest AWS Lambda image scan detected 111 CVEs across 27 images: \u2022 \ud83d\udd34 Critical: 1 \u2022 \ud83d\udfe0 High: 47 \u2022 \ud83d\udfe1 Medium: 55   via Mastodon https://lambdawatchdog.com/ "
+  },
+  {
+   "id": "masto:117450477092663185",
+   "title": "\ud83d\udea8 Lambda Watchdog CVE Report \ud83d\udea8 Latest AWS Lambda image scan detected 111 CVEs across 27 images: \u2022 \ud83d\udd34 Critical: 1 \u2022 \ud83d\udfe0 High: 47 \u2022 \ud83d\udfe1 Medium: 55 ",
+   "source": "lambdawatchdog.com",
+   "published_at": "2026-10-16T12:00:54.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "\ud83d\udea8 Lambda Watchdog CVE Report \ud83d\udea8 Latest AWS Lambda image scan detected 111 CVEs across 27 images: \u2022 \ud83d\udd34 Critical: 1 \u2022 \ud83d\udfe0 High: 47 \u2022 \ud83d\udfe1 Medium: 55   via Mastodon https://lambdawatchdog.com/ "
+  },
+  {
+   "id": "masto:117450477147577807",
+   "title": "\ud83d\udea8 Lambda Watchdog CVE Report \ud83d\udea8 Latest AWS Lambda image scan detected 111 CVEs across 27 images: \u2022 \ud83d\udd34 Critical: 1 \u2022 \ud83d\udfe0 High: 47 \u2022 \ud83d\udfe1 Medium: 55 ",
+   "source": "lambdawatchdog.com",
+   "published_at": "2026-10-16T12:00:54.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "\ud83d\udea8 Lambda Watchdog CVE Report \ud83d\udea8 Latest AWS Lambda image scan detected 111 CVEs across 27 images: \u2022 \ud83d\udd34 Critical: 1 \u2022 \ud83d\udfe0 High: 47 \u2022 \ud83d\udfe1 Medium: 55   via Mastodon https://lambdawatchdog.com/ "
+  },
+  {
+   "id": "masto:117450442164601795",
+   "title": "(bridewell.com) Infostealer Malware Targeting UK Critical National Infrastructure: A Quarter of Escalating Threats and Credential Compromise",
+   "source": "www.bridewell.com",
+   "published_at": "2026-10-16T11:52:00.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "(bridewell.com) Infostealer Malware Targeting UK Critical National Infrastructure: A Quarter of Escalating Threats and Credential Compromise  via Mastodon https://www.bridewell.com/insights/blogs/detail/uk-cni-infosteale"
+  },
+  {
+   "id": "masto:117450434754048840",
+   "title": "# ThreatIntel # Ddosia # NoName * https:// witha.name/data/2026-10-16_13- 50-08_DDoSia-target-list-full.json * https:// witha.name/data/2026",
+   "source": "witha.name",
+   "published_at": "2026-10-16T11:50:09.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "# ThreatIntel # Ddosia # NoName * https:// witha.name/data/2026-10-16_13- 50-08_DDoSia-target-list-full.json * https:// witha.name/data/2026  via Mastodon https://witha.name/data/2026-10-16_13-50-08_DDoSia-target-list-fu"
+  }
+ ],
+ "candidate_stories": [
+  {
+   "id": "mitre-att-ck-v20-adds-new-ai-attack-techniques-for-prompt-inject",
+   "title": "MITRE ATT&CK v20 Adds New AI Attack Techniques for Prompt Injection and Data Theft",
+   "n_events": 1,
+   "last_seen": "2026-10-16T12:56:46Z",
+   "first_event_title": "MITRE ATT&CK v20 Adds New AI Attack Techniques for Prompt Injection and Data Theft"
+  },
+  {
+   "id": "chrome-critical-cve-2026-110922-use-after-free-patch-155-0-8059",
+   "title": "Chrome Critical CVE-2026-110922 Use-After-Free (Patch 155.0.8059.84)",
+   "n_events": 3,
+   "last_seen": "2026-10-16T12:36:42Z",
+   "first_event_title": "CVE-2026-110922: CRITICAL use-after-free in Chrome Prerender enables remote code execution via crafted HTML. Patch to 155.0.8059.84+ immedia"
+  },
+  {
+   "id": "ai-powered-espionage-campaign-targets-government-linux-infrastru",
+   "title": "AI-Powered Espionage Campaign Targets Government Linux Infrastructure",
+   "n_events": 4,
+   "last_seen": "2026-10-16T12:33:43Z",
+   "first_event_title": "AI-Powered Espionage Campaign Targets Government Linux Infrastructure"
+  },
+  {
+   "id": "ransomware-angriff-diakoniewerk-apolda-ransomware-einbruch-daten",
+   "title": "Ransomware-Angriff: Diakoniewerk Apolda # Ransomware # Einbruch # Datendiebstahl # TeamInfoSec # cyberangriff https://www. security-incident",
+   "n_events": 10,
+   "last_seen": "2026-10-16T12:30:06.000Z",
+   "first_event_title": "Ransomware Attack: Diakoniewerk Apolda # Ransomware # Intrusion # Data Theft # TeamInfoSec # Cyberattack"
+  },
+  {
+   "id": "critical-pwnescape-linux-kernel-vulnerability-lets-guest-vms-rea",
+   "title": "Critical PwnEscape Linux Kernel Vulnerability Lets Guest VMs Read Host Memory",
+   "n_events": 7,
+   "last_seen": "2026-10-16T12:27:45Z",
+   "first_event_title": "Critical PwnEscape Linux Kernel Vulnerability Lets Guest VMs Read Host Memory https:// lemy.lol/post/72874565"
+  },
+  {
+   "id": "gitlab-cve-2026-97229-critical-unauthenticated-arbitrary-code-ex",
+   "title": "GitLab CVE-2026-97229 Critical Unauthenticated Arbitrary Code Execution (CVSS 10.0)",
+   "n_events": 24,
+   "last_seen": "2026-10-16T12:26:47.000Z",
+   "first_event_title": "A GitLab critical vulnerability, CVE-2026-97229 (CVSS 10.0), allows unauthenticated arbitrary code execution. Upgrade to GitLab 19.4.2 now. "
+  },
+  {
+   "id": "spray-and-pray-job-applications-could-make-it-harder-for-you-to",
+   "title": "\u201cSpray and pray\u201d job applications could make it harder for you to spot a scam",
+   "n_events": 1,
+   "last_seen": "2026-10-16T12:25:39Z",
+   "first_event_title": "\u201cSpray and pray\u201d job applications could make it harder for you to spot a scam"
+  },
+  {
+   "id": "the-gentlemen-ransomware-targets-australian-ses-unit",
+   "title": "The Gentlemen ransomware targets Australian SES unit",
+   "n_events": 2,
+   "last_seen": "2026-10-16T12:17:03.455Z",
+   "first_event_title": "The Gentlemen are at it again, and this time - instead of going after Aussie students - the group is targeting one of our SES units. The uni"
+  },
+  {
+   "id": "hackers-use-online-ads-to-infect-devices-with-spyware-without-a",
+   "title": "AdFection: Zero-Click Spyware Delivered via Targeted Ads",
+   "n_events": 12,
+   "last_seen": "2026-10-16T12:02:58.059Z",
+   "first_event_title": "Hackers Use Online Ads to Infect Devices With Spyware Without a Single Click"
+  },
+  {
+   "id": "burger-king-japan-data-breach-exposes-11-18-million-app-member-r",
+   "title": "Burger King Japan data breach exposes 11.18 million app member records",
+   "n_events": 3,
+   "last_seen": "2026-10-16T12:01:29Z",
+   "first_event_title": "\u26a0\ufe0f\ud83d\udce2 Burger King Japan confirms a data breach exposed 11.18 million app member records, including emails, phone numbers, dates of birth and m"
+  },
+  {
+   "id": "lambda-watchdog-cve-report-latest-aws-lambda-image-scan-detected",
+   "title": "Lambda Watchdog CVE Report \ud83d\udea8 Latest AWS Lambda image scan detected 46 CVEs across 25 images: \u2022 \ud83d\udd34 Critical: 2 \u2022 \ud83d\udfe0 High: 17 \u2022 \ud83d\udfe1 Medium: 23 \u2022",
+   "n_events": 38,
+   "last_seen": "2026-10-16T12:00:54.927Z",
+   "first_event_title": "\ud83d\udea8 Lambda Watchdog CVE Report \ud83d\udea8 Latest AWS Lambda image scan detected 46 CVEs across 25 images: \u2022 \ud83d\udd34 Critical: 2 \u2022 \ud83d\udfe0 High: 17 \u2022 \ud83d\udfe1 Medium: 23 \u2022"
+  },
+  {
+   "id": "threatintel-ddosia-noname-https-witha-name-data-2026-09-09-08-06",
+   "title": "# ThreatIntel # Ddosia # NoName * https:// witha.name/data/2026-09-09_08- 06-08_DDoSia-target-list-full.json * https:// witha.name/data/2026",
+   "n_events": 5,
+   "last_seen": "2026-10-16T11:50:09.000Z",
+   "first_event_title": "gruppenkonto.spiegel.de # ThreatIntel # Ddosia # NoName * https:// witha.name/data/2026-09-15_08- 06-06_DDoSia-target-list-full.json * https"
+  },
+  {
+   "id": "bae-systems-cyberattack-disrupts-us-federal-court-operations",
+   "title": "BAE Systems cyberattack disrupts US federal court operations",
+   "n_events": 6,
+   "last_seen": "2026-10-16T11:46:40Z",
+   "first_event_title": "BAE Systems cyberattack disrupts US federal court operations"
+  },
+  {
+   "id": "dora-tlpt-requirements-explained-where-threat-intelligence-fits",
+   "title": "DORA TLPT Requirements Explained: Where Threat Intelligence Fits",
+   "n_events": 0,
+   "last_seen": "2026-10-16T11:40:39Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "sonicwall-sma1000-two-zero-day-flaws-under-active-exploitation-c",
+   "title": "SonicWall SMA1000 \u2014 Two Zero-Day Flaws Under Active Exploitation, CVSS 10.0, Added to CISA KEV",
+   "n_events": 60,
+   "last_seen": "2026-10-16T11:05:35.000Z",
+   "first_event_title": "SonicWall SMA1000 \u2014 Two Zero-Day Flaws Under Active Exploitation, CVSS 10.0, Added to CISA KEV"
+  },
+  {
+   "id": "backdooring-open-weight-ai-models",
+   "title": "Backdooring Open-Weight AI Models",
+   "n_events": 1,
+   "last_seen": "2026-10-16T11:04:53Z",
+   "first_event_title": "Backdooring Open-Weight AI Models"
+  },
+  {
+   "id": "openai-sued-over-children-safety-and-data-use",
+   "title": "OpenAI sued over children safety and data use",
+   "n_events": 1,
+   "last_seen": "2026-10-16T10:55:38Z",
+   "first_event_title": "OpenAI sued over children safety and data use"
+  },
+  {
+   "id": "beyondtrust-remote-support-zero-day-cve-2026-102769-active-explo",
+   "title": "BeyondTrust Remote Support Zero-Day CVE-2026-102769 Active Exploitation",
+   "n_events": 13,
+   "last_seen": "2026-10-16T10:53:22Z",
+   "first_event_title": "BeyondTrust doing their darnedest not to explicitly say that there's an exploited zero-day vulnerability in their Remote Support product. CV"
+  },
+  {
+   "id": "smishing-a-tema-multe-sms-fraudolenti-sfruttano-il-nome-della-po",
+   "title": "Smishing a tema multe: SMS fraudolenti sfruttano il nome della Polizia di Stato per richiedere pagamenti urgenti",
+   "n_events": 1,
+   "last_seen": "2026-10-16T10:50:40Z",
+   "first_event_title": "Smishing a tema multe: SMS fraudolenti sfruttano il nome della Polizia di Stato per richiedere pagamenti urgenti"
+  },
+  {
+   "id": "ivanti-connect-secure-cve-2026-104935-active-exploitation",
+   "title": "Ivanti Connect Secure CVE-2026-104935 Active Exploitation",
+   "n_events": 52,
+   "last_seen": "2026-10-16T10:50:19.942Z",
+   "first_event_title": "Ivanti Connect Secure zero-day CVE-2026-104935 We are aware of exploitation in the wild affecting a limited number of customers at the time "
+  },
+  {
+   "id": "cert-in-confirms-ai-agents-breached-indian-firms-operated-undete",
+   "title": "CERT-In confirms AI agents breached Indian firms, operated undetected for days",
+   "n_events": 1,
+   "last_seen": "2026-10-16T10:42:41Z",
+   "first_event_title": "CERT-In confirms AI agents breached Indian firms, operated undetected for days"
+  },
+  {
+   "id": "openai-models-hacked-data-portals-raided-a-crypto-wallet-to-fini",
+   "title": "OpenAI Models Hacked Data Portals, Raided a Crypto Wallet to Finish Tasks",
+   "n_events": 1,
+   "last_seen": "2026-10-16T10:32:11Z",
+   "first_event_title": "OpenAI Models Hacked Data Portals, Raided a Crypto Wallet to Finish Tasks"
+  },
+  {
+   "id": "vulnerability-in-nordvpn-software",
+   "title": "Vulnerability in NordVPN software",
+   "n_events": 2,
+   "last_seen": "2026-10-16T10:29:02.000Z",
+   "first_event_title": "Vulnerability in NordVPN software"
+  },
+  {
+   "id": "silent-push-joins-singapore-s-imda-spark-programme",
+   "title": "Silent Push Joins Singapore's IMDA Spark Programme",
+   "n_events": 1,
+   "last_seen": "2026-10-16T10:20:39Z",
+   "first_event_title": "Silent Push Joins Singapore's IMDA Spark Programme"
+  },
+  {
+   "id": "google-android-flags-5-million-suspected-scam-calls-and-texts-mo",
+   "title": "Google Android Flags 5 Million Suspected Scam Calls and Texts Monthly",
+   "n_events": 1,
+   "last_seen": "2026-10-16T10:13:41Z",
+   "first_event_title": "Google Android Flags 5 Million Suspected Scam Calls and Texts Monthly"
+  },
+  {
+   "id": "meta-github-repositories-accessed-with-stolen-employee-token-150",
+   "title": "Meta GitHub repositories accessed with stolen employee token, 1500 notified",
+   "n_events": 1,
+   "last_seen": "2026-10-16T10:12:08.104Z",
+   "first_event_title": "CW: Incidens r\u00e9szletek A Meta t\u00f6bb GitHub-adatt\u00e1r\u00e1hoz egy ellopott alkalmazotti hiteles\u00edt\u0151vel f\u00e9rtek hozz\u00e1; ~1500 embert \u00e9rtes\u00edtenek. A megs"
+  },
+  {
+   "id": "new-event-added-bsidesbloomington-oct-2-3-2026-bloomington-in-ht",
+   "title": "event added: \ud83d\udccc BSidesBloomington \ud83d\udcc5 Oct 2-3, 2026 \ud83d\udccd Bloomington (IN) \ud83c\uddfa\ud83c\uddf8 \ud83d\udd17 https:// bsidesbloomington.org/ # infosec # cybersecurity # c",
+   "n_events": 0,
+   "last_seen": "2026-10-16T10:02:03.000Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "burnaby-school-district-confirms-cyberattack-and-potential-data",
+   "title": "Burnaby School District Confirms Cyberattack and Potential Data Leak",
+   "n_events": 2,
+   "last_seen": "2026-10-16T10:01:49.000Z",
+   "first_event_title": "Burnaby school district says cyberattack may have leaked student, parent info https:// fed.brid.gy/r/https://globalne ws.ca/news/12103465/bu"
+  },
+  {
+   "id": "remote-access-trojans-rats-major-rat-families-how-they-work-and",
+   "title": "Remote Access Trojans (RATs) | Major RAT Families, How They Work and How to Detect Them",
+   "n_events": 0,
+   "last_seen": "2026-10-16T10:00:44Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "juniper-networks-security-advisory-av26-1043",
+   "title": "Juniper Networks security advisory (AV26-1043)",
+   "n_events": 4,
+   "last_seen": "2026-10-16T09:54:34Z",
+   "first_event_title": "Juniper Networks security advisory (AV26-1043)"
+  },
+  {
+   "id": "researchers-uncover-20-000-malicious-cloudflare-pages-domains-us",
+   "title": "Researchers Uncover 20,000 Malicious Cloudflare Pages Domains Used in Tech Support Scams",
+   "n_events": 1,
+   "last_seen": "2026-10-16T09:40:31Z",
+   "first_event_title": "Researchers Uncover 20,000 Malicious Cloudflare Pages Domains Used in Tech Support Scams"
+  },
+  {
+   "id": "keeping-pace-with-e-evidence-new-report-examines-europe-s-digita",
+   "title": "Keeping pace with e-evidence: New report examines Europe\u2019s digital forensic capabilities",
+   "n_events": 0,
+   "last_seen": "2026-10-16T09:20:38Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "nextcloud-collabora-online-active-exploitation-cve-2026-110447-c-2",
+   "title": "Nextcloud Collabora Online Active Exploitation (CVE-2026-110447, CVSS 9.2)",
+   "n_events": 9,
+   "last_seen": "2026-10-16T09:19:50Z",
+   "first_event_title": "CVE-2026-110447 (CRITICAL, CVSS 9.2) allows RCE via OS command injection in Collabora Online Built-in CODE Server https:// radar.offseq.com/"
+  },
+  {
+   "id": "hackers-use-hundreds-of-ai-agents-to-exploit-papercut-servers-an",
+   "title": "Hackers Use Hundreds of AI Agents to Exploit PaperCut Servers and Steal Windows Credentials",
+   "n_events": 1,
+   "last_seen": "2026-10-16T09:10:51Z",
+   "first_event_title": "Hackers Use Hundreds of AI Agents to Exploit PaperCut Servers and Steal Windows Credentials"
+  },
+  {
+   "id": "wordpress-plugin-cves-mass-disclosure",
+   "title": "WordPress Plugin CVEs Mass Disclosure",
+   "n_events": 2,
+   "last_seen": "2026-10-16T09:10:13.000Z",
+   "first_event_title": "5 WordPress plugin CVEs today \u2014 and the root causes are a masterclass in what not to do: \ud83d\udd34 CVE-2026-104732 \u2014 2FA bypass because step-1 auth "
+  },
+  {
+   "id": "unit-42-uncovers-peerstitch-a-stealthy-fortigate-implant",
+   "title": "Unit 42 Uncovers PEERSTITCH, a Stealthy FortiGate Implant",
+   "n_events": 4,
+   "last_seen": "2026-10-16T09:10:06.000Z",
+   "first_event_title": "Unit 42 Uncovers PEERSTITCH, a Stealthy FortiGate Implant"
+  },
+  {
+   "id": "microsoft-disrupts-cogui-phishing-kit-linked-to-over-100-million",
+   "title": "Microsoft Disrupts CoGUI Phishing Kit Linked to Over 100 Million Malicious Emails a Month",
+   "n_events": 1,
+   "last_seen": "2026-10-16T08:54:34Z",
+   "first_event_title": "Microsoft Disrupts CoGUI Phishing Kit Linked to Over 100 Million Malicious Emails a Month"
+  },
+  {
+   "id": "whatsapp-patches-file-spoofing-cve-2026-23863-and-arbitrary-url",
+   "title": "WhatsApp patches file spoofing (CVE-2026-23863) and arbitrary URL scheme (CVE-2026-23866) vulnerabilities",
+   "n_events": 2,
+   "last_seen": "2026-10-16T08:21:54Z",
+   "first_event_title": "WhatsApp patches file spoofing (CVE-2026-23863) and arbitrary URL scheme (CVE-2026-23866) vulnerabilities"
+  },
+  {
+   "id": "12-best-aws-security-tools-compared-2026-features-pricing",
+   "title": "12 Best AWS Security Tools Compared (2026): Features & Pricing",
+   "n_events": 0,
+   "last_seen": "2026-10-16T08:00:42Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "microsoft-patches-two-dozen-rce-flaws-in-office",
+   "title": "Microsoft Patches Two Dozen RCE Flaws in Office",
+   "n_events": 1,
+   "last_seen": "2026-10-16T07:55:06Z",
+   "first_event_title": "Microsoft Patches Two Dozen RCE Flaws in Office"
+  },
+  {
+   "id": "adobe-security-advisory-av26-1039",
+   "title": "Adobe security advisory (AV26-1039)",
+   "n_events": 6,
+   "last_seen": "2026-10-14T18:11:55Z",
+   "first_event_title": "Adobe security advisory (AV26-1039)"
+  },
+  {
+   "id": "adobe-security-advisory-av26-808",
+   "title": "Adobe security advisory (AV26-808)",
+   "n_events": 2,
+   "last_seen": "2026-08-13T08:12:33Z",
+   "first_event_title": "Adobe security advisory (AV26-808)"
+  },
+  {
+   "id": "adobe-security-advisory-av26-888",
+   "title": "Adobe security advisory (AV26-888)",
+   "n_events": 3,
+   "last_seen": "2026-09-09T00:35:01.000Z",
+   "first_event_title": "Adobe security advisory (AV26-888)"
+  },
+  {
+   "id": "apple-security-advisory-av26-823",
+   "title": "Apple security advisory (AV26-823)",
+   "n_events": 1,
+   "last_seen": "2026-08-17T15:35:39Z",
+   "first_event_title": "Apple security advisory (AV26-823)"
+  },
+  {
+   "id": "citrix-security-advisory-av26-1034",
+   "title": "Citrix security advisory (AV26-1034)",
+   "n_events": 1,
+   "last_seen": "2026-10-13T19:15:43Z",
+   "first_event_title": "Citrix security advisory (AV26-1034)"
+  },
+  {
+   "id": "citrix-security-advisory-av26-833",
+   "title": "Citrix security advisory (AV26-833)",
+   "n_events": 1,
+   "last_seen": "2026-08-19T18:45:45Z",
+   "first_event_title": "Citrix security advisory (AV26-833)"
+  },
+  {
+   "id": "commvault-security-advisory-av26-1033",
+   "title": "Commvault security advisory (AV26-1033)",
+   "n_events": 1,
+   "last_seen": "2026-10-13T19:00:47Z",
+   "first_event_title": "Commvault security advisory (AV26-1033)"
+  },
+  {
+   "id": "commvault-security-advisory-av26-799",
+   "title": "Commvault security advisory (AV26-799)",
+   "n_events": 1,
+   "last_seen": "2026-08-11T17:46:10Z",
+   "first_event_title": "Commvault security advisory (AV26-799)"
+  },
+  {
+   "id": "control-systems-johnson-controls-security-advisory-av26-1052",
+   "title": "[Control systems] Johnson Controls security advisory (AV26-1052)",
+   "n_events": 0,
+   "last_seen": "2026-10-15T19:35:40Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "control-systems-moxa-security-advisory-av26-995",
+   "title": "[Control Systems] Moxa security advisory (AV26-995)",
+   "n_events": 1,
+   "last_seen": "2026-10-02T18:10:42Z",
+   "first_event_title": "[Control Systems] Moxa security advisory (AV26-995)"
+  },
+  {
+   "id": "control-systems-schneider-electric-security-advisory-av26-1051",
+   "title": "[Control systems] Schneider Electric security advisory (AV26-1051)",
+   "n_events": 0,
+   "last_seen": "2026-10-15T19:20:43Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "control-systems-siemens-security-advisory-av26-890",
+   "title": "[Control Systems] Siemens security advisory (AV26-890)",
+   "n_events": 3,
+   "last_seen": "2026-09-23T08:01:13.000Z",
+   "first_event_title": "[Control Systems] Siemens security advisory (AV26-890)"
+  },
+  {
+   "id": "dell-security-advisory-av26-1027",
+   "title": "Dell security advisory (AV26-1027)",
+   "n_events": 1,
+   "last_seen": "2026-10-13T13:00:42Z",
+   "first_event_title": "Dell security advisory (AV26-1027)"
+  },
+  {
+   "id": "dell-security-advisory-av26-863",
+   "title": "Dell security advisory (AV26-863)",
+   "n_events": 3,
+   "last_seen": "2026-10-12T17:37:08.000Z",
+   "first_event_title": "Dell security advisory (AV26-863)"
+  },
+  {
+   "id": "erlang-security-advisory-av26-948",
+   "title": "Erlang security advisory (AV26-948)",
+   "n_events": 1,
+   "last_seen": "2026-09-22T18:25:40Z",
+   "first_event_title": "Erlang security advisory (AV26-948)"
+  },
+  {
+   "id": "f5-security-advisory-av26-1049",
+   "title": "F5 security advisory (AV26-1049)",
+   "n_events": 1,
+   "last_seen": "2026-10-15T18:25:42Z",
+   "first_event_title": "F5 security advisory (AV26-1049)"
+  },
+  {
+   "id": "freepbx-security-advisory-av26-818",
+   "title": "FreePBX security advisory (AV26-818)",
+   "n_events": 1,
+   "last_seen": "2026-08-14T16:10:48Z",
+   "first_event_title": "FreePBX security advisory (AV26-818)"
+  },
+  {
+   "id": "gitlab-security-advisory-av26-814",
+   "title": "GitLab security advisory (AV26-814)",
+   "n_events": 1,
+   "last_seen": "2026-08-13T14:00:38Z",
+   "first_event_title": "GitLab security advisory (AV26-814)"
+  },
+  {
+   "id": "google-security-advisory-av26-904",
+   "title": "Google security advisory (AV26-904)",
+   "n_events": 2,
+   "last_seen": "2026-09-09T20:49:30Z",
+   "first_event_title": "Google security advisory (AV26-904)"
+  },
+  {
+   "id": "grafana-security-advisory-av26-796",
+   "title": "Grafana security advisory (AV26-796)",
+   "n_events": 1,
+   "last_seen": "2026-08-11T13:30:40Z",
+   "first_event_title": "Grafana security advisory (AV26-796)"
+  },
+  {
+   "id": "the-wordpress-click2shell-vulnerability-enables-remote-code-exec",
+   "title": "WordPress Click2Shell RCE via Theme Preview Injection",
+   "n_events": 4,
+   "last_seen": "2026-10-15T21:54:01Z",
+   "first_event_title": "The WordPress Click2Shell vulnerability enables remote code execution via theme preview injection. Learn how this flaw works and update to v"
+  },
+  {
+   "id": "a-critical-kvm-guest-escape-cve-2026-89775-enables-an-lpe-to-gai",
+   "title": "A critical KVM guest escape (CVE-2026-89775) enables an LPE to gain root on Linux hosts. Patch this KVM guest escape vulnerability now. # KV",
+   "n_events": 7,
+   "last_seen": "2026-09-28T00:06:00.000Z",
+   "first_event_title": "A critical KVM guest escape (CVE-2026-89775) enables an LPE to gain root on Linux hosts. Patch this KVM guest escape vulnerability now. # KV"
+  },
+  {
+   "id": "cve-2026-43499-ghostlock-15-year-old-linux-kernel-flaw-enables-r",
+   "title": "CVE-2026-43499 \"GhostLock\": 15-Year-Old Linux Kernel Flaw Enables Root and Container Escape",
+   "n_events": 2,
+   "last_seen": "2026-07-10T00:00:00Z",
+   "first_event_title": "CVE-2026-43499 \"GhostLock\": 15-Year-Old Linux Kernel Flaw Enables Root and Container Escape"
+  },
+  {
+   "id": "cisa-adds-cve-2022-0492-to-kev-linux-kernel-cgroup-v1-container",
+   "title": "CISA Adds CVE-2022-0492 to KEV \u2014 Linux Kernel cgroup-v1 Container Escape Actively Exploited",
+   "n_events": 4,
+   "last_seen": "2026-06-04T00:00:00Z",
+   "first_event_title": "CISA Adds CVE-2022-0492 to KEV \u2014 Linux Kernel cgroup-v1 Container Escape Actively Exploited"
+  },
+  {
+   "id": "cve-2026-110165-critical-use-after-free-in-chrome-android",
+   "title": "CVE-2026-110165 critical use-after-free in Chrome Android",
+   "n_events": 1,
+   "last_seen": "2026-10-14T00:00:34.000Z",
+   "first_event_title": "CVE-2026-110165 \u2014 CRITICAL use-after-free in Chrome Core for Android https:// radar.offseq.com/threat/cve-20 26-110165-use-after-free-in-goo"
+  },
+  {
+   "id": "eol-radar-sep-8-google-chrome-152-reaches-end-of-life-today-http",
+   "title": "Google Chrome 152 reaches end of life",
+   "n_events": 2,
+   "last_seen": "2026-09-23T17:55:58Z",
+   "first_event_title": "\u23f3 EOL radar \u00b7 Sep 8 \ud83d\udd34 Google Chrome 152 reaches end of life TODAY https:// endoflife.ai/chrome \ud83d\udd34 freedesktop SDK 24.08 reaches end of life T"
+  },
+  {
+   "id": "fbi-disables-china-linked-hacking-tools-used-against-us-agencies",
+   "title": "FBI disables China-linked hacking tools used against US agencies",
+   "n_events": 6,
+   "last_seen": "2026-08-27T09:40:57Z",
+   "first_event_title": "FBI disables China-linked hacking tools used against US agencies"
+  },
+  {
+   "id": "153-million-that-is-the-number-on-the-wire-tonight-idscan-exists",
+   "title": "IDScan Data Breach Exposes 153 Million Records",
+   "n_events": 2,
+   "last_seen": "2026-09-17T12:25:06.000Z",
+   "first_event_title": "153 million. That is the number on the wire tonight. IDScan exists to prove documents are real and people are who they claim to be, but they"
+  },
+  {
+   "id": "agentcorruption-patched-aws-bedrock-agentcore-prompt-injection-f",
+   "title": "AgentCorruption: patched AWS Bedrock AgentCore prompt-injection flaw",
+   "n_events": 4,
+   "last_seen": "2026-10-10T08:02:41.146Z",
+   "first_event_title": "\ud83e\udd16 \"AgentCorruption\": now-patched flaw in AWS Bedrock AgentCore. A single prompt through one AI chatbot could let an attacker take over an or"
+  },
+  {
+   "id": "cve-2026-89481-linux-kernel-nvme-tcp-host-memory-disclosure-a-ma",
+   "title": "Linux Kernel nvme-tcp Host Memory Disclosure CVE-2026-89481",
+   "n_events": 1,
+   "last_seen": "2026-09-15T11:20:01.325Z",
+   "first_event_title": "CVE-2026-89481 Linux kernel nvme-tcp host memory disclosure: a malicious controller can send an R2T for a READ and the host returns the read"
+  },
+  {
+   "id": "ride-on-express-investigates-potential-data-breach-affecting-up",
+   "title": "Ride On Express Investigates Potential Data Breach Affecting Up to 6.5 Million Customer Records",
+   "n_events": 1,
+   "last_seen": "2026-10-14T14:01:50.000Z",
+   "first_event_title": "Ride On Express Investigates Potential Data Breach Affecting Up to 6.5 Million Customer Records Ride On Express Holdings is investigating a "
+  }
+ ]
+}
