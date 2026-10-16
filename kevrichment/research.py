@@ -63,6 +63,8 @@ class ResearchEngine:
             "public_poc_urls": [],
             "vendor_advisory_url": "",
             "exploit_complexity_notes": "",
+            "operational_notes": None,
+            "operational_notes_urls": [],
             "kevrichment_summary": "",
             "delivery_mechanism": None,
         }

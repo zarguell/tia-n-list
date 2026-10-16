@@ -82,10 +82,25 @@ For each CVE:
 4. **Default enablement** — if `vulnerable_component_enabled_by_default` is
    `"unknown"` and the component is ≥3 chars, search
    `'"<component>" "enabled by default"'`.
-5. **Sources** — merge all new URLs into `research_meta.sources_consulted`
+5. **Operational notes (patch breaking-change check)** — patching a CVE
+   ships the whole cumulative update, including unrelated behavior changes
+   (2026-10-13: KB5127648 fixed CVE-2026-96951 AND flipped BlockNtlmv1SSO
+   Audit→Enforce, breaking 802.1X PEAP Wi-Fi). Blind `"<CVE> breaking
+   changes"` searches miss these — they are properties of the KB, not the
+   CVE. So: resolve the CVE to its fixing KB(s) from the advisory (MSRC
+   update-guide / CVRF API list KBs), READ the KB release-notes page
+   (Highlights / Improvements / Known Issues), and run one targeted search
+   per KB (`"<KB> known issues breaks enforcement"`). Write 1–3 sentences
+   to `operational_notes` (what breaks, who is affected, vendor workaround
+   incl. registry key when documented) + KB/support URLs to
+   `operational_notes_urls`, scope-labeled `caused-by-fix` vs
+   `co-shipped-in-patch`. Set `operational_notes_source` to `"agent"` on
+   every research — `null` notes + `"agent"` means "checked, nothing
+   found"; a missing source means the step was skipped.
+6. **Sources** — merge all new URLs into `research_meta.sources_consulted`
    (deduplicated; target ≥4 sources). Set `research.preconditions_source`
    and `research.hunting_hypothesis_source` to `"agent"`.
-6. Save the full record back to `kevrichment/data/cves/<CVE_ID>.json` (write
+7. Save the full record back to `kevrichment/data/cves/<CVE_ID>.json` (write
    the whole file with `json.dumps(record, indent=2)` — never chain
    field-level patches; they corrupt JSON).
 
@@ -163,8 +178,9 @@ git diff --cached --stat        # file count should match your batch + index + r
      network requirements; cross-check UI/PR against the CVSS vector.
    - `kevrichment_summary`: 2–4 sentences (type, component, impact, status).
    - `last_researched` (top-level) == `research_meta.timestamp`.
-   - `cwe` deduplicated; `research_meta.sources_consulted` ≥ 4; both
-     `*_source` fields == `"agent"`.
+   - `cwe` deduplicated; `research_meta.sources_consulted` ≥ 4; all three
+     `*_source` fields (`preconditions_source`, `hunting_hypothesis_source`,
+     `operational_notes_source`) == `"agent"`.
    - Stale `qc_notes` cleared when enrichment resolved the flagged issue
      (checks `component_extraction`, `advisory_fallback`,
      `precondition_contradiction` are stale once fields are fixed).

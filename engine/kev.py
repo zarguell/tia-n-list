@@ -415,6 +415,10 @@ def cve_view(rec, mentioned, tia_timeline=None):
         "component_source": src_tag(research.get("vulnerable_component_source")),
         "preconditions": research.get("preconditions_for_exploit", ""),
         "preconditions_source": src_tag(research.get("preconditions_source")),
+        "operational_notes": research.get("operational_notes") or "",
+        "operational_notes_source": src_tag(research.get("operational_notes_source")),
+        "operational_notes_urls": [u for u in (research.get("operational_notes_urls") or [])
+                                      if isinstance(u, str) and safe_url(u)],
         "delivery": research.get("delivery_mechanism", ""),
         "poc": label(research.get("public_poc_exists"), _POC_LABEL),
         "poc_urls": poc_urls,

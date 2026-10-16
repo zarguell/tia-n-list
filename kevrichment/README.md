@@ -92,6 +92,9 @@ The full record includes KEV fields, NVD data (description, CWE, CVSS, CPE), Vul
 | `public_poc_urls` | string[] | URLs to identified PoC repositories |
 | `vendor_advisory_url` | string | Link to vendor security advisory or patch notes |
 | `exploit_complexity_notes` | string | Notes on exploitation difficulty, PoC availability, CVSS attack complexity |
+| `operational_notes` | string or null | Patch breaking-change notes: behavior changes shipping with the fix (what breaks, who is affected, workaround), scope-labeled `caused-by-fix` vs `co-shipped-in-patch`; null = KB-first read found nothing |
+| `operational_notes_source` | `"agent"` or absent | Set to `"agent"` when the KB-first patch-notes read was attempted; absent when skipped (legacy) |
+| `operational_notes_urls` | string[] | KB / patch release-notes URLs behind the operational notes |
 | `kevrichment_summary` | string | One-line summary combining all findings |
 | `hunting_hypothesis` | string | Specific attacker behavior or TTP to monitor for (AI-generated via agent, or deterministic fallback) |
 | `hunting_hypothesis_source` | `"agent"` or absent | Set to `"agent"` when AI-generated; absent when deterministic |
