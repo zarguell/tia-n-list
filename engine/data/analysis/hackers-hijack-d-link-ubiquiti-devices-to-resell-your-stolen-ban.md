@@ -1,1 +1,5 @@
-Multiple router and access-point devices from D-Link and Ubiquiti have been hijacked by attackers who resell access on the stolen hardware. The event cites observed device takeovers and resale marketplace links. Monitor for firmware-level persistence, credential rotation for affected admins, and vendor advisory updates.
+Attackers are hijacking D-Link and Ubiquiti devices to resell victims' stolen bandwidth, turning compromised consumer and small-business routers into proxy infrastructure. Reports describe the operation as an ongoing campaign.
+
+Compromised routers can expose internal networks and be used for further abuse, while owners may not notice beyond degraded performance. Firmware updates and credential changes are the primary mitigations.
+
+Watch for vendor advisories naming affected models and firmware versions, and for indicators of compromise such as unexpected proxy or tunneling activity on edge devices.
