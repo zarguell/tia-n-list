@@ -1,1 +1,5 @@
-BAE Systems suffered a cyberattack that disrupted US federal court operations. The event feed includes updates tracking the disruption and recovery efforts. No specific CVEs are listed, but the impact on federal infrastructure makes this a notable supply-chain or service-provider security event. Watch for official attribution, whether the attacker gains access to sensitive court data, and whether the incident prompts broader federal contractor security reviews.
+A cyberattack linked to BAE Systems disrupted U.S. federal court and bankruptcy court operations, with the judiciary confirming the incident. External posts relayed the official notice of the cybersecurity incident affecting court functions.
+
+The disruption highlights risks to government legal infrastructure and third-party IT providers supporting courts. Agencies and law firms relying on court systems may face availability and confidentiality concerns until services are restored.
+
+Watch for updates on restoration timelines, scope of data affected, and any attribution. Monitor judiciary communications for remediation status and future advisories.
