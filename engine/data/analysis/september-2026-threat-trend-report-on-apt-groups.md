@@ -1,0 +1,3 @@
+The September 2026 APT trend report notes attacks evolved to exploit developer ecosystems, cloud services, and network management infrastructure as trust layers. Supply chain targets included legitimate software installers, GitHub repositories, Microsoft 365, OneDrive, Telegram, Nostr, routers, and authentication servers. The event content lists these layers but does not assign specific actor names, CVEs, or victim counts to the September batch.
+
+Without a named primary source confirming a specific campaign, treat this as a thematic overview rather than a discrete incident. It aligns with broader reporting on supply chain and cloud-targeted espionage in 2026. Monitor for follow-up advisories that tie these trends to named APT groups or specific CVEs.
