@@ -1,0 +1,606 @@
+{
+ "date": "2026-10-16",
+ "decisions_path": "engine/data/triage/decisions-2026-10-16T0801.json",
+ "instructions": "For every new event decide: (1) keep or drop \u2014 keep only stories worth covering (real security events, vulnerabilities, attacks, breaches, advisories with substance); drop press releases, vendor marketing, generic explainers, and anything duplicating an existing story. (2) If keep, assign the event to the RIGHT story: an existing candidate story id if it belongs there (this FIXES mechanical clustering \u2014 e.g. different outlets' Patch Tuesday roundups are ONE story), or NEW with a clean story_title. (3) merges: list candidate stories that are really the same story (from = fragment, into = the most complete one). (4) For every kept event that names CVEs, optionally assess exploitation: exploited = the event reports OBSERVED in-the-wild exploitation (implants, victim counts, campaigns, CISA KEV confirmation); suspected = public exploit code/PoC or likely-but-unconfirmed. Attribute ONLY the CVEs you can tie to the claim \u2014 a bulletin's blanket 'actively exploited' does NOT flag all its CVEs. Omit the exploitation field when the event makes no claim.\n(5) LOW-TRUST events (\"low_trust\": true \u2014 AI-drafted aggregator reposts, late and overstated): treat as unverified leads. When the text attributes the claim to a named primary source (a researcher firm like watchTowr, a vendor advisory, CISA, a major outlet) and attribution_urls or a web search (/home/ubuntu/repos/cronman/bin/web-search.sh \"query\") locate that primary source CONFIRMING the claim, include a provenance object in the decision: {\"url\": <primary url>, \"source\": <domain>, \"evidence\": <one line>, \"verified\": true}. VERIFIED provenance lets the event mint a story (credited to the primary source) and count as a development; without it, a low-trust event can only attach to an EXISTING story, never mint. If you cannot verify, keep/drop on normal merit and omit provenance.\n\nWrite decisions as JSON with EXACTLY this shape:\n{\n  \"decisions\": [\n    {\"event_id\": \"<id>\", \"action\": \"keep\", \"story\": \"<existing candidate story id>\", \"reason\": \"...\"},\n    {\"event_id\": \"<id>\", \"action\": \"keep\", \"story\": \"NEW\", \"story_title\": \"<clean title>\", \"reason\": \"...\"},\n    {\"event_id\": \"<id>\", \"action\": \"drop\", \"reason\": \"...\"}\n  ],\n  \"merges\": [{\"from\": \"<fragment story id>\", \"into\": \"<canonical story id>\"}]\n}\nFor events marked \"low_trust\" (AI-drafted aggregator reposts) a decision\nmay carry an optional \"provenance\" object when you VERIFIED the claim at\nthe named primary source: {\"event_id\": ..., \"action\": \"keep\", ...}\n  \"provenance\": {\"url\": \"<primary source url>\", \"source\": \"<domain>\", \"evidence\": \"<one line>\"}\nOnly include provenance when the primary source (vendor advisory, CISA,\nthe named researcher/outlet) really carries the claim \u2014 verified\nprovenance lets a low-trust event mint a story and set freshness; without\nit the event can only amplify an existing story.\nSTRICT KEY NAMES: the array key is \"decisions\" (never \"events\"); the story\nkey is \"story\" (never \"story_id\"); \"story\" holds a candidate_stories id\nverbatim or the literal string \"NEW\". Optional per-event field\n\"exploitation\": {\"CVE-...\": {\"status\": \"exploited|suspected\", \"evidence\": \"1-2 sentences\"}}.",
+ "new_events": [
+  {
+   "id": "rss:42b61b2fdd4ee384",
+   "title": "Microsoft Patches Two Dozen RCE Flaws in Office",
+   "source": "securityweek.com",
+   "published_at": "2026-10-16T07:55:06Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Hot on the heels of its record Patch Tuesday rollout, Microsoft on Thursday announced patches for over 30 new vulnerabilities. Most of the new fixes address security defects in the Office suite. Two dozen of them patch h"
+  },
+  {
+   "id": "rd:t3_1x7a55w",
+   "title": "Github repos compromised",
+   "source": "thehackernews.com",
+   "published_at": "2026-10-16T07:52:34Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Around 30000 repos were compromised with a supply chain attack https://thehackernews.com/2026/10/ghostaction-compromises-about-1900.html?m=1 submitted by /u/sbify [link] [comments]  via reddit r/cybersecurity: Github rep"
+  },
+  {
+   "id": "rss:d0fd7da892d3f2d0",
+   "title": "BAE Systems cyberattack disrupts US federal court operations",
+   "source": "bleepingcomputer.com",
+   "published_at": "2026-10-16T07:37:35Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "The Administrative Office of the US Courts says a cyberattack on government contractor BAE Systems has taken down the notice system used by federal bankruptcy courts. In a Thursday press release, the Administrative Offic"
+  },
+  {
+   "id": "rss:009e72751ba32631",
+   "title": "Proofpoint Inks $6.3 Billion All-Cash Deal to Acquire Varonis",
+   "source": "securityweek.com",
+   "published_at": "2026-10-16T07:12:51Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Proofpoint has agreed to acquire data and AI security firm Varonis in an all-cash deal valued at roughly $6.3 billion, the two companies announced on Thursday. The deal is the largest cybersecurity acquisition announced "
+  },
+  {
+   "id": "rss:1bc3c126381d6609",
+   "title": "Group Claiming to be ShinyHunters Posts Fake Breaches",
+   "source": "malware.news",
+   "published_at": "2026-10-16T07:10:41Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Since then, at least one leader of the rival factions claiming the brand, Saif Al-Din Khader, also known as \u201cRey,\u201d has been arrested. Together, these developments have caused a degree of chaos and a surge in impersonator"
+  },
+  {
+   "id": "rss:2d1cadc6e9d08c2c",
+   "title": "WP2Shell Exploit Chain: Anatomy of a Sophisticated WordPress Attack",
+   "source": "malware.news",
+   "published_at": "2026-10-16T07:00:41Z",
+   "cves": [
+    "CVE-2026-60137",
+    "CVE-2026-63030"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "WP2Shell is a critical WordPress Core exploit chain disclosed in July 2026 that can enables pre-authentication remote code execution (RCE) on vulnerable WordPress installations. The chain is particularly significant from"
+  },
+  {
+   "id": "rss:7d461d01cda03944",
+   "title": "Hackers Target Claude, ChatGPT and Cursor Credentials Using Aoki Infostealer",
+   "source": "gbhackers.com",
+   "published_at": "2026-10-16T06:15:40Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "The Aoki infostealer, also known as Aokigahara, has expanded its collection capabilities to steal credentials and session files from AI coding assistants, putting developer identities and connected infrastructure at risk"
+  },
+  {
+   "id": "masto:117448792834025794",
+   "title": "The perimeter is dead. What happens when malware executes before the Linux kernel starts? UEFI Bootkits like Bootkitty infect SPI flash & me",
+   "source": "www.irexta.com",
+   "published_at": "2026-10-16T04:52:35.503Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "The perimeter is dead. What happens when malware executes before the Linux kernel starts? UEFI Bootkits like Bootkitty infect SPI flash & me  via Mastodon https://www.irexta.com/tutorials/stop-hardware-bootkits-tpm2-fwup"
+  },
+  {
+   "id": "masto:117448778539776881",
+   "title": "ChatGPT GitHub Flaw Reportedly Exposes Private Repository Secrets A researcher says a prompt-injection chain involving ChatGPT and GitHub co",
+   "source": "cyberupdates365.com",
+   "published_at": "2026-10-16T04:48:57.388Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "ChatGPT GitHub Flaw Reportedly Exposes Private Repository Secrets A researcher says a prompt-injection chain involving ChatGPT and GitHub co  via Mastodon https://cyberupdates365.com/chatgpt-github-flaw-private-repositor"
+  }
+ ],
+ "candidate_stories": [
+  {
+   "id": "microsoft-patches-two-dozen-rce-flaws-in-office",
+   "title": "Microsoft Patches Two Dozen RCE Flaws in Office",
+   "n_events": 1,
+   "last_seen": "2026-10-16T07:55:06Z",
+   "first_event_title": "Microsoft Patches Two Dozen RCE Flaws in Office"
+  },
+  {
+   "id": "github-repos-compromised",
+   "title": "Github repos compromised",
+   "n_events": 1,
+   "last_seen": "2026-10-16T07:52:34Z",
+   "first_event_title": "Github repos compromised"
+  },
+  {
+   "id": "bae-systems-cyberattack-disrupts-us-federal-court-operations",
+   "title": "BAE Systems cyberattack disrupts US federal court operations",
+   "n_events": 1,
+   "last_seen": "2026-10-16T07:37:35Z",
+   "first_event_title": "BAE Systems cyberattack disrupts US federal court operations"
+  },
+  {
+   "id": "proofpoint-to-buy-varonis-for-6-3-billion",
+   "title": "Proofpoint to buy Varonis for $6.3 billion",
+   "n_events": 1,
+   "last_seen": "2026-10-16T07:12:51Z",
+   "first_event_title": "Proofpoint Inks $6.3 Billion All-Cash Deal to Acquire Varonis"
+  },
+  {
+   "id": "group-claiming-to-be-shinyhunters-posts-fake-breaches",
+   "title": "Group Claiming to be ShinyHunters Posts Fake Breaches",
+   "n_events": 1,
+   "last_seen": "2026-10-16T07:10:41Z",
+   "first_event_title": "Group Claiming to be ShinyHunters Posts Fake Breaches"
+  },
+  {
+   "id": "tiktouk-wordpress-toolkit-could-enable-aws-smtp-and-api-credenti",
+   "title": "TIKTOUK WordPress Toolkit Could Enable AWS, SMTP and API Credential Theft Attacks",
+   "n_events": 8,
+   "last_seen": "2026-10-16T07:00:41Z",
+   "first_event_title": "TIKTOUK WordPress Toolkit Could Enable AWS, SMTP and API Credential Theft Attacks"
+  },
+  {
+   "id": "stop-letting-users-paste-raw-credentials-into-teams-slack-we-bui",
+   "title": "Stop Letting Users Paste Raw Credentials into Teams/Slack. We Built a Zero-Clipboard One-Time Sharing Utility.",
+   "n_events": 0,
+   "last_seen": "2026-10-16T06:42:48Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "hirudo-from-fake-updates-to-patched-banking-apps",
+   "title": "Hirudo: From Fake Updates to Patched Banking Apps",
+   "n_events": 8,
+   "last_seen": "2026-10-16T06:41:19.000Z",
+   "first_event_title": "Hirudo: From Fake Updates to Patched Banking Apps"
+  },
+  {
+   "id": "beyondtrust-remote-support-zero-day-cve-2026-102769-active-explo",
+   "title": "BeyondTrust Remote Support Zero-Day CVE-2026-102769 Active Exploitation",
+   "n_events": 6,
+   "last_seen": "2026-10-16T06:40:02.250Z",
+   "first_event_title": "BeyondTrust doing their darnedest not to explicitly say that there's an exploited zero-day vulnerability in their Remote Support product. CV"
+  },
+  {
+   "id": "hackers-target-claude-chatgpt-and-cursor-credentials-using-aoki",
+   "title": "Hackers Target Claude, ChatGPT and Cursor Credentials Using Aoki Infostealer",
+   "n_events": 1,
+   "last_seen": "2026-10-16T06:15:40Z",
+   "first_event_title": "Hackers Target Claude, ChatGPT and Cursor Credentials Using Aoki Infostealer"
+  },
+  {
+   "id": "xbow-researchers-build-full-chain-chrome-exploit-with-ai-assista",
+   "title": "XBOW Researchers Build Full-Chain Chrome Exploit with AI Assistance",
+   "n_events": 5,
+   "last_seen": "2026-10-16T06:08:32.000Z",
+   "first_event_title": "XBOW researchers spent six days and $40,000 in OpenAI API fees to build a full-chain Chrome exploit. They chained three flaws to achieve an "
+  },
+  {
+   "id": "cve-2026-103768-in-elex-wordpress-helpdesk-unrestricted-upload",
+   "title": "CVE-2026-103768 in ELEX WordPress HelpDesk Unrestricted Upload",
+   "n_events": 1,
+   "last_seen": "2026-10-16T06:00:28.000Z",
+   "first_event_title": "CRITICAL: CVE-2026-103768 in ELEX WordPress HelpDesk ( https:// radar.offseq.com/threat/cve-20 26-103768-cwe-434-unrestricted-upload-of-file"
+  },
+  {
+   "id": "proxyjacking-campaign-exploits-network-device-flaws-to-build-ste",
+   "title": "Proxyjacking Campaign Exploits Network Device Flaws to Build Stealthy Proxy Infrastructure",
+   "n_events": 1,
+   "last_seen": "2026-10-16T05:54:28Z",
+   "first_event_title": "Proxyjacking Campaign Exploits Network Device Flaws to Build Stealthy Proxy Infrastructure"
+  },
+  {
+   "id": "nextcloud-collabora-online-active-exploitation-cve-2026-110447-c-2",
+   "title": "Nextcloud Collabora Online Active Exploitation (CVE-2026-110447, CVSS 9.2)",
+   "n_events": 8,
+   "last_seen": "2026-10-16T05:32:58.000Z",
+   "first_event_title": "CVE-2026-110447 (CRITICAL, CVSS 9.2) allows RCE via OS command injection in Collabora Online Built-in CODE Server https:// radar.offseq.com/"
+  },
+  {
+   "id": "funnelkit-woocommerce-plugin-cve-2026-107746-unauthenticated-pii",
+   "title": "FunnelKit WooCommerce Plugin CVE-2026-107746 Unauthenticated PII Exposure",
+   "n_events": 1,
+   "last_seen": "2026-10-16T04:59:42.000Z",
+   "first_event_title": "FunnelKit, a WooCommerce plugin on 30,000+ stores, has a flaw that lets anyone with no login read the billing name, address, email and phone"
+  },
+  {
+   "id": "cve-2026-111312-unauthenticated-medical-record-access-in-openhea",
+   "title": "CVE-2026-111312: Unauthenticated Medical Record Access in OpenHealthForAll",
+   "n_events": 1,
+   "last_seen": "2026-10-16T04:30:25.000Z",
+   "first_event_title": "CVE-2026-111312 (CRITICAL): OpenHealthForAll OpenHealth \u22640.2.0 lets unauthenticated users access, change, or delete any medical record via /"
+  },
+  {
+   "id": "hackers-use-online-ads-to-infect-devices-with-spyware-without-a",
+   "title": "AdFection: Zero-Click Spyware Delivered via Targeted Ads",
+   "n_events": 11,
+   "last_seen": "2026-10-16T04:20:57Z",
+   "first_event_title": "Hackers Use Online Ads to Infect Devices With Spyware Without a Single Click"
+  },
+  {
+   "id": "chrome-critical-cve-2026-110922-use-after-free-patch-155-0-8059",
+   "title": "Chrome Critical CVE-2026-110922 Use-After-Free (Patch 155.0.8059.84)",
+   "n_events": 2,
+   "last_seen": "2026-10-16T04:19:49.000Z",
+   "first_event_title": "CVE-2026-110922: CRITICAL use-after-free in Chrome Prerender enables remote code execution via crafted HTML. Patch to 155.0.8059.84+ immedia"
+  },
+  {
+   "id": "pfsense-ce-7-cves-disclosed-including-os-command-injection",
+   "title": "pfSense CE 7 CVEs Disclosed Including OS Command Injection",
+   "n_events": 1,
+   "last_seen": "2026-10-16T04:12:20.000Z",
+   "first_event_title": "pfSense CE through 2.9.0 \u2014 7 CVEs disclosed today. 6\u00d7 OS command injection: QinQ, OpenVPN, gateway, Virtual IP, Advanced Admin Access, Capti"
+  },
+  {
+   "id": "critical-pwnescape-linux-kernel-vulnerability-lets-guest-vms-rea",
+   "title": "Critical PwnEscape Linux Kernel Vulnerability Lets Guest VMs Read Host Memory",
+   "n_events": 1,
+   "last_seen": "2026-10-16T03:21:08.305Z",
+   "first_event_title": "Critical PwnEscape Linux Kernel Vulnerability Lets Guest VMs Read Host Memory https:// lemy.lol/post/72874565"
+  },
+  {
+   "id": "september-2026-threat-trend-report-on-apt-groups",
+   "title": "September 2026 Threat Trend Report on APT Groups",
+   "n_events": 2,
+   "last_seen": "2026-10-16T02:36:17Z",
+   "first_event_title": "September 2026 Threat Trend Report on APT Groups"
+  },
+  {
+   "id": "isc-stormcast-for-friday-october-16th-2026-https-isc-sans-edu-po",
+   "title": "ISC Stormcast For Friday, October 16th, 2026 https://isc.sans.edu/podcastdetail/10140, (Fri, Oct 16th)",
+   "n_events": 0,
+   "last_seen": "2026-10-16T02:05:40Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "fake-yay-packages-found-in-arch-linux-aur",
+   "title": "Fake yay packages found in Arch Linux AUR",
+   "n_events": 6,
+   "last_seen": "2026-10-16T01:28:12.000Z",
+   "first_event_title": "\ud83d\udea8 Fake yay packages found in the Arch Linux AUR 15+ fake copies of Arch's popular AUR helper reportedly contain malicious install scripts. O"
+  },
+  {
+   "id": "mitsubishi-electric-iconics-suite-vulnerabilities-cve-2026-16436",
+   "title": "Mitsubishi Electric ICONICS Suite Vulnerabilities CVE-2026-16436 CVE-2026-16438",
+   "n_events": 1,
+   "last_seen": "2026-10-16T01:26:12.000Z",
+   "first_event_title": "Review the Mitsubishi Electric security advisory fixing critical ICONICS Suite vulnerabilities, including CVE-2026-16438 and CVE-2026-16436."
+  },
+  {
+   "id": "heber-city-utah-government-network-cyberattack",
+   "title": "Heber City Utah Government Network Cyberattack",
+   "n_events": 1,
+   "last_seen": "2026-10-16T01:25:24.000Z",
+   "first_event_title": "Cyberattack breaches Heber City government network in Utah # Cyberattack # LocalGovernment # Utah # ForensicInvestigation # FBI # cybersecur"
+  },
+  {
+   "id": "progress-115-cves-90-unpatched-and-4-exploits-on-cisa-kev-moveit",
+   "title": "Progress: 115 CVEs, 90% unpatched, and 4 exploits on CISA KEV. MOVEit breaches show the cost. Trust Score D. With CVSS up to 10 and +7 CVEs",
+   "n_events": 2,
+   "last_seen": "2026-10-16T01:06:13.000Z",
+   "first_event_title": "Progress: 115 CVEs, 90% unpatched, and 4 exploits on CISA KEV. MOVEit breaches show the cost. Trust Score D. With CVSS up to 10 and +7 CVEs "
+  },
+  {
+   "id": "backuply-wordpress-plugin-cve-2026-93953-sql-injection",
+   "title": "Backuply WordPress Plugin CVE-2026-93953 SQL Injection",
+   "n_events": 1,
+   "last_seen": "2026-10-16T00:51:12.000Z",
+   "first_event_title": "Update the Backuply WordPress plugin to 1.5.9 to fix CVE-2026-93953, a high-severity SQL injection vulnerability impacting 600,000 sites. # "
+  },
+  {
+   "id": "small-agents-smaller-blast-radius-controlling-what-ai-can-do-fri",
+   "title": "Small Agents, Smaller Blast Radius: Controlling What AI Can Do, (Fri, Oct 16th)",
+   "n_events": 0,
+   "last_seen": "2026-10-16T00:50:39Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "quartzline-malware-deceptive-pdf-viewer-with-hidden-backdoor",
+   "title": "QuartzLine Malware: Deceptive PDF Viewer with Hidden Backdoor",
+   "n_events": 1,
+   "last_seen": "2026-10-16T00:46:24.000Z",
+   "first_event_title": "(expel.com) QuartzLine: The Deceptive PDF Viewer with a Hidden Backdoor and Multi-Stage Malware Delivery In brief - This article describes Q"
+  },
+  {
+   "id": "amazon-neptune-critical-vulnerability-cve-2026-110812-cvss-9-9",
+   "title": "Amazon Neptune Critical Vulnerability CVE-2026-110812 (CVSS 9.9)",
+   "n_events": 1,
+   "last_seen": "2026-10-16T00:46:09.000Z",
+   "first_event_title": "Upgrade your DB cluster to fix CVE-2026-110812, a critical 9.9 CVSS Amazon Neptune vulnerability in Apache TinkerPop Gremlin. # AWS # Amazon"
+  },
+  {
+   "id": "317-live-phpmyadmin-panels-exposed-in-open-database-index",
+   "title": "317 Live phpMyAdmin Panels Exposed in Open Database Index",
+   "n_events": 1,
+   "last_seen": "2026-10-15T23:47:49.210Z",
+   "first_event_title": "Somebody left the database door wide open. cl0q's index holds 317 live phpMyAdmin login pages, each one a database admin panel waiting on a "
+  },
+  {
+   "id": "ghostaction-campaign-evolves-with-infostealer-hidden-in-fake-fon",
+   "title": "GhostAction Campaign Evolves with Infostealer Hidden in Fake Font Files",
+   "n_events": 2,
+   "last_seen": "2026-10-15T23:16:43.000Z",
+   "first_event_title": "(opensourcemalware.com) GhostAction Campaign Evolves with PolinRider-Inspired Infostealer Hidden in Fake Font Files In brief - This article "
+  },
+  {
+   "id": "cyber-incident-halts-u-s-bankruptcy-court-notices-nationwide",
+   "title": "Cyber Incident Halts U.S. Bankruptcy Court Notices Nationwide",
+   "n_events": 1,
+   "last_seen": "2026-10-15T22:59:49.000Z",
+   "first_event_title": "Cyber incident halts U.S. bankruptcy court notices nationwide # CyberIncident # USCourts # Bankruptcy # BAESystems # NewYork # cybersecurity"
+  },
+  {
+   "id": "ivanti-connect-secure-cve-2026-104935-active-exploitation",
+   "title": "Ivanti Connect Secure CVE-2026-104935 Active Exploitation",
+   "n_events": 49,
+   "last_seen": "2026-10-15T22:27:33.000Z",
+   "first_event_title": "Ivanti Connect Secure zero-day CVE-2026-104935 We are aware of exploitation in the wild affecting a limited number of customers at the time "
+  },
+  {
+   "id": "we-had-a-hard-enough-time-stopping-computer-worms-when-they-coul",
+   "title": "We Had a Hard Enough Time Stopping Computer Worms When They Couldn\u2019t Think",
+   "n_events": 0,
+   "last_seen": "2026-10-15T22:21:56Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "ai-powered-espionage-campaign-targets-government-linux-infrastru",
+   "title": "AI-Powered Espionage Campaign Targets Government Linux Infrastructure",
+   "n_events": 3,
+   "last_seen": "2026-10-15T22:14:54.000Z",
+   "first_event_title": "AI-Powered Espionage Campaign Targets Government Linux Infrastructure"
+  },
+  {
+   "id": "curl-cve-2026-92392-enables-remote-code-execution-during-http-2",
+   "title": "cURL CVE-2026-92392 Enables Remote Code Execution During HTTP/2 Uploads",
+   "n_events": 3,
+   "last_seen": "2026-10-15T22:03:54.000Z",
+   "first_event_title": "The cURL CVE-2026-92392 vulnerability enables remote code execution during HTTP/2 uploads. Update to cURL 8.23.0 or disable HTTP/2 to protec"
+  },
+  {
+   "id": "japan-data-leaks-hit-times-car-jr-east-and-softbank-millions",
+   "title": "Japan Data Leaks Hit Times Car JR East and SoftBank Millions",
+   "n_events": 2,
+   "last_seen": "2026-10-15T22:00:23.000Z",
+   "first_event_title": "Japan steps up cyber warnings as data leaks hit millions of customers The cyberattacks in Japan have hit Times Car, JR East and a SoftBank c"
+  },
+  {
+   "id": "the-wordpress-click2shell-vulnerability-enables-remote-code-exec",
+   "title": "WordPress Click2Shell RCE via Theme Preview Injection",
+   "n_events": 4,
+   "last_seen": "2026-10-15T21:54:01Z",
+   "first_event_title": "The WordPress Click2Shell vulnerability enables remote code execution via theme preview injection. Learn how this flaw works and update to v"
+  },
+  {
+   "id": "unit-42-uncovers-peerstitch-a-stealthy-fortigate-implant",
+   "title": "Unit 42 Uncovers PEERSTITCH, a Stealthy FortiGate Implant",
+   "n_events": 3,
+   "last_seen": "2026-10-15T21:05:45.000Z",
+   "first_event_title": "Unit 42 Uncovers PEERSTITCH, a Stealthy FortiGate Implant"
+  },
+  {
+   "id": "adobe-security-advisory-av26-1039",
+   "title": "Adobe security advisory (AV26-1039)",
+   "n_events": 6,
+   "last_seen": "2026-10-14T18:11:55Z",
+   "first_event_title": "Adobe security advisory (AV26-1039)"
+  },
+  {
+   "id": "adobe-security-advisory-av26-808",
+   "title": "Adobe security advisory (AV26-808)",
+   "n_events": 2,
+   "last_seen": "2026-08-13T08:12:33Z",
+   "first_event_title": "Adobe security advisory (AV26-808)"
+  },
+  {
+   "id": "adobe-security-advisory-av26-888",
+   "title": "Adobe security advisory (AV26-888)",
+   "n_events": 3,
+   "last_seen": "2026-09-09T00:35:01.000Z",
+   "first_event_title": "Adobe security advisory (AV26-888)"
+  },
+  {
+   "id": "apple-security-advisory-av26-823",
+   "title": "Apple security advisory (AV26-823)",
+   "n_events": 1,
+   "last_seen": "2026-08-17T15:35:39Z",
+   "first_event_title": "Apple security advisory (AV26-823)"
+  },
+  {
+   "id": "citrix-security-advisory-av26-1034",
+   "title": "Citrix security advisory (AV26-1034)",
+   "n_events": 1,
+   "last_seen": "2026-10-13T19:15:43Z",
+   "first_event_title": "Citrix security advisory (AV26-1034)"
+  },
+  {
+   "id": "citrix-security-advisory-av26-833",
+   "title": "Citrix security advisory (AV26-833)",
+   "n_events": 1,
+   "last_seen": "2026-08-19T18:45:45Z",
+   "first_event_title": "Citrix security advisory (AV26-833)"
+  },
+  {
+   "id": "commvault-security-advisory-av26-1033",
+   "title": "Commvault security advisory (AV26-1033)",
+   "n_events": 1,
+   "last_seen": "2026-10-13T19:00:47Z",
+   "first_event_title": "Commvault security advisory (AV26-1033)"
+  },
+  {
+   "id": "commvault-security-advisory-av26-799",
+   "title": "Commvault security advisory (AV26-799)",
+   "n_events": 1,
+   "last_seen": "2026-08-11T17:46:10Z",
+   "first_event_title": "Commvault security advisory (AV26-799)"
+  },
+  {
+   "id": "control-systems-johnson-controls-security-advisory-av26-1052",
+   "title": "[Control systems] Johnson Controls security advisory (AV26-1052)",
+   "n_events": 0,
+   "last_seen": "2026-10-15T19:35:40Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "control-systems-moxa-security-advisory-av26-995",
+   "title": "[Control Systems] Moxa security advisory (AV26-995)",
+   "n_events": 1,
+   "last_seen": "2026-10-02T18:10:42Z",
+   "first_event_title": "[Control Systems] Moxa security advisory (AV26-995)"
+  },
+  {
+   "id": "control-systems-schneider-electric-security-advisory-av26-1051",
+   "title": "[Control systems] Schneider Electric security advisory (AV26-1051)",
+   "n_events": 0,
+   "last_seen": "2026-10-15T19:20:43Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "control-systems-siemens-security-advisory-av26-890",
+   "title": "[Control Systems] Siemens security advisory (AV26-890)",
+   "n_events": 3,
+   "last_seen": "2026-09-23T08:01:13.000Z",
+   "first_event_title": "[Control Systems] Siemens security advisory (AV26-890)"
+  },
+  {
+   "id": "dell-security-advisory-av26-1027",
+   "title": "Dell security advisory (AV26-1027)",
+   "n_events": 1,
+   "last_seen": "2026-10-13T13:00:42Z",
+   "first_event_title": "Dell security advisory (AV26-1027)"
+  },
+  {
+   "id": "dell-security-advisory-av26-863",
+   "title": "Dell security advisory (AV26-863)",
+   "n_events": 3,
+   "last_seen": "2026-10-12T17:37:08.000Z",
+   "first_event_title": "Dell security advisory (AV26-863)"
+  },
+  {
+   "id": "erlang-security-advisory-av26-948",
+   "title": "Erlang security advisory (AV26-948)",
+   "n_events": 1,
+   "last_seen": "2026-09-22T18:25:40Z",
+   "first_event_title": "Erlang security advisory (AV26-948)"
+  },
+  {
+   "id": "f5-security-advisory-av26-1049",
+   "title": "F5 security advisory (AV26-1049)",
+   "n_events": 1,
+   "last_seen": "2026-10-15T18:25:42Z",
+   "first_event_title": "F5 security advisory (AV26-1049)"
+  },
+  {
+   "id": "freepbx-security-advisory-av26-818",
+   "title": "FreePBX security advisory (AV26-818)",
+   "n_events": 1,
+   "last_seen": "2026-08-14T16:10:48Z",
+   "first_event_title": "FreePBX security advisory (AV26-818)"
+  },
+  {
+   "id": "gitlab-security-advisory-av26-814",
+   "title": "GitLab security advisory (AV26-814)",
+   "n_events": 1,
+   "last_seen": "2026-08-13T14:00:38Z",
+   "first_event_title": "GitLab security advisory (AV26-814)"
+  },
+  {
+   "id": "google-security-advisory-av26-904",
+   "title": "Google security advisory (AV26-904)",
+   "n_events": 2,
+   "last_seen": "2026-09-09T20:49:30Z",
+   "first_event_title": "Google security advisory (AV26-904)"
+  },
+  {
+   "id": "grafana-security-advisory-av26-796",
+   "title": "Grafana security advisory (AV26-796)",
+   "n_events": 1,
+   "last_seen": "2026-08-11T13:30:40Z",
+   "first_event_title": "Grafana security advisory (AV26-796)"
+  },
+  {
+   "id": "wp2shell-cisa-adds-to-kev-wiz-details-webshell-installation-at-s",
+   "title": "wp2shell \u2014 CISA Adds to KEV; Wiz Details Webshell Installation at Scale",
+   "n_events": 11,
+   "last_seen": "2026-09-27T21:16:35.000Z",
+   "first_event_title": "wp2shell \u2014 CISA Adds to KEV; Wiz Details Webshell Installation at Scale"
+  },
+  {
+   "id": "north-korea-infects-thousands-of-devices-worldwide-through-fake",
+   "title": "North Korea infects thousands of devices worldwide through fake job offers",
+   "n_events": 7,
+   "last_seen": "2026-09-23T20:30:03.000Z",
+   "first_event_title": "North Korea infects thousands of devices worldwide through fake job offers"
+  },
+  {
+   "id": "aoki-infostealer-targets-ai-coding-assistant-credentials",
+   "title": "Aoki: Infostealer Targets AI Coding Assistant Credentials",
+   "n_events": 1,
+   "last_seen": "2026-10-15T10:05:40Z",
+   "first_event_title": "Aoki: Infostealer Targets AI Coding Assistant Credentials"
+  },
+  {
+   "id": "microsoft-october-2026-patch-tuesday-fixes-1-411-flaws-3-zero-da",
+   "title": "Microsoft October 2026 Patch Tuesday fixes 1,411 flaws, 3 zero-days",
+   "n_events": 43,
+   "last_seen": "2026-10-15T08:21:47.000Z",
+   "first_event_title": "Microsoft October 2026 Patch Tuesday fixes 1,411 flaws, 3 zero-days"
+  },
+  {
+   "id": "what-s-new-in-microsoft-security-august-2026",
+   "title": "What\u2019s new in Microsoft Security: August 2026",
+   "n_events": 0,
+   "last_seen": "2026-09-24T16:00:00Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "city-of-vicksburg-ransomware-attack-disrupts-municipal-systems",
+   "title": "City of Vicksburg ransomware attack disrupts municipal systems",
+   "n_events": 1,
+   "last_seen": "2026-10-02T10:01:12.000Z",
+   "first_event_title": "City of Vicksburg Ransomware Attack Disrupts Municipal Systems The City of Vicksburg, Mississippi, disclosed a ransomware attack that forced"
+  },
+  {
+   "id": "click2shell-exploit-chain-grants-rce-on-wordpress-via-malicious",
+   "title": "WordPress 7.1.1 patches Click2Shell RCE exploit chain and 10 other flaws",
+   "n_events": 4,
+   "last_seen": "2026-09-22T10:22:27Z",
+   "first_event_title": "Click2Shell Exploit Chain Grants RCE on WordPress via Malicious Links WordPress 7.1.1 patches 11 security flaws, including the \"Click2Shell\""
+  },
+  {
+   "id": "microsoft-pauses-kb5002907-update-after-office-license-deactivat",
+   "title": "Microsoft pauses KB5002907 update after Office license deactivations",
+   "n_events": 1,
+   "last_seen": "2026-09-27T02:20:05.227Z",
+   "first_event_title": "Microsoft pauses KB5002907 update after Office license deactivations Source: BleepingComputer Read: https://www. bleepingcomputer.com/news/m"
+  },
+  {
+   "id": "shinyhunters",
+   "title": "ShinyHunters \ud574\ucee4 \uc9d1\ub2e8\uacfc \uc5f0\uad00\ub41c \uac83\uc73c\ub85c \uc54c\ub824\uc9c4 \uc0ac\uac74\uacfc \uad00\ub828\ud574 \uc0ac\uc774\ubc84 \ubcf4\uc548 \uae30\uc5c5 \uc784\uc6d0 \uccb4\ud3ec",
+   "n_events": 0,
+   "last_seen": "2026-10-14T15:06:21Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "cisco-patches-a-dozen-critical-vulnerabilities",
+   "title": "Cisco Patches a Dozen Critical Vulnerabilities",
+   "n_events": 13,
+   "last_seen": "2026-10-09T16:00:02.000Z",
+   "first_event_title": "Cisco Patches a Dozen Critical Vulnerabilities"
+  },
+  {
+   "id": "fakegit-campaign-7-600-malicious-github-repos-pushing-smartloade",
+   "title": "FakeGit Campaign: 7,600 Malicious GitHub Repos Pushing SmartLoader/StealC Malware",
+   "n_events": 11,
+   "last_seen": "2026-10-10T13:14:12.000Z",
+   "first_event_title": "FakeGit Campaign: 7,600 Malicious GitHub Repos Pushing SmartLoader/StealC Malware"
+  },
+  {
+   "id": "microsoft-exchange-2016-2019-security-updates-end-in-october",
+   "title": "Microsoft Exchange 2016/2019 \u2014 Security Updates End in October",
+   "n_events": 7,
+   "last_seen": "2026-09-01T06:48:24Z",
+   "first_event_title": "Microsoft Exchange 2016/2019 \u2014 Security Updates End in October"
+  }
+ ]
+}
