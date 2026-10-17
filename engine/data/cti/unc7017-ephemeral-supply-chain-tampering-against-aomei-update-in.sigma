@@ -1,0 +1,31 @@
+title: AOMEI Update Tampering - Suspicious upgrade-now.exe Execution (UNC7017)
+id: 63e76dca-c263-4f04-96fe-77133246c13d
+status: experimental
+description: >-
+    Detects execution of upgrade-now.exe, the payload delivery step of
+    UNC7017's short-burst tampering of AOMEI Backupper update infrastructure.
+    Between May and July 2026 the actor briefly modified down_html.ini and
+    Notifycfg.ini on AOMEI origin servers to redirect Backupper clients to a
+    malicious upgrade-now.zip carrying the CROSSROAD downloader and the
+    SHINYROAD backdoor; the injected dummy-config bloat forced clients to run
+    upgrade-now.exe from the local html directory.
+references:
+    - https://cloud.google.com/blog/topics/threat-intelligence/investigating-ephemeral-supply-chain-tampering/
+    - https://thehackernews.com/2026/10/attackers-tampered-with-aomei.html
+    - https://cyberworldops.eu/en/attackers-used-brief-aomei-backupper-update-windows-to-deploy
+author: Tia N. List
+date: 2026-10-17
+tags:
+    - attack.t1195
+    - attack.t1105
+    - attack.t1036
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\upgrade-now.exe'
+    condition: selection
+falsepositives:
+    - Legitimate AOMEI Backupper upgrade binaries named upgrade-now.exe delivered by the vendor's own update channel
+level: high
