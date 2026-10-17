@@ -81,6 +81,23 @@ UNPATCHED_RE = re.compile(
 IMPACT_IN_WILD = 0.4        # weight for confirmed in-the-wild exploitation
 IMPACT_UNPATCHED_9 = 0.4    # weight for an unpatched CVSS >= 9.0 flaw
 
+# ── novelty floor for corroborated no-CVE TTP coverage (2026-10-17 owner
+# decision f5f2bc09664a, audit Rec 3): the proxy scores every no-CVE story
+# at the 0.5 severity floor, so multi-source first-of-kind technique/tool
+# coverage (pwn2own results, C2 loaders, signed-driver abuse) ranks WITH
+# routine patch-release traction until a digest agent hand-promotes it —
+# all three recent wildcards (pwn2own-ireland-2026, fake-lastpass
+# authenticator, avisloader) sat at the floor. Corroboration (n_sources
+# >= 2) + attacker-TTP vocabulary = genuine novelty, worth half a severity
+# step outside the shared signal bucket. Traction-only stories carry no TTP
+# terms, so the 2026-08-13 traction contract is untouched.
+NOVELTY_TTP_RE = re.compile(
+    r"\b(pwn2own|command[\s-]?and[\s-]?control|\bc2\b|loader|stealer|"\
+    r"infostealer|dropper|clipper|signed[\s-]?driver|edr[\s-]?"\
+    r"(killer|bypass|evasion)|defense evasion|privilege escalation|"\
+    r"living[\s-]?off[\s-]?the[\s-]?land)\b", re.I)
+NOVELTY_MULTI_SOURCE = 0.5  # severity bonus for corroborated no-CVE novelty
+
 # Keys the SSG "Why this score" template renders from a score breakdown.
 # A story missing any of these raises a jinja UndefinedError that aborts the
 # whole site build, so the store writers (merge / repair_dedupe / triage)
@@ -266,7 +283,7 @@ def is_rereport(event, prior_events, *, low_jaccard=0.25, high_jaccard=0.55,
     """
     if not prior_events:
         return False
-    from merge import title_discriminators, CVE_RE
+    from merge import title_discriminators, CVE_RE, ACTOR_TOKENS, _actor_norm
     try:
         ev_dt = datetime.fromisoformat(
             (event.get("published_at") or "").replace("Z", "+00:00"))
@@ -286,6 +303,24 @@ def is_rereport(event, prior_events, *, low_jaccard=0.25, high_jaccard=0.55,
     disc = title_discriminators(event.get("title") or "")
     if len(disc) < min_shared:
         return False
+    if ev_cves and not new_cves:
+        # No-new-delta echo condition (2026-10-17 owner decision f5f2bc09664a,
+        # audit Rec 2 re-report leg): a same-CVE disclosure is an echo ONLY
+        # when it brings no new CVE, no new actor attribution, and no new
+        # exploitation confirmation. Attribution or in-the-wild proof
+        # emerging days later is a development the dev-clock must not erase;
+        # a reworded outlet re-tell with none of the three stays an echo.
+        prior_actors = set()
+        for p in prior_events:
+            prior_actors |= (_actor_norm(
+                title_discriminators(p.get("title") or "")) & ACTOR_TOKENS)
+        if (_actor_norm(disc) & ACTOR_TOKENS) - prior_actors:
+            return False          # new actor attribution: a development
+        ev_title = event.get("title") or ""
+        if IN_WILD_RE.search(ev_title) and not any(
+                IN_WILD_RE.search(p.get("title") or "")
+                for p in prior_events):
+            return False          # fresh exploitation confirmation: ditto
     # First-day burst protection: priors within min_gap_h are skipped ONLY
     # while the story's own founding material (desk backfills excluded — a
     # June backfill must not age a day-old story past the window) is younger
@@ -376,8 +411,14 @@ def hot_score(story, events, reddit_posts, now=None):
         impact += IMPACT_IN_WILD
     if sev >= 4.5 and UNPATCHED_RE.search(text):
         impact += IMPACT_UNPATCHED_9
+    # corroborated no-CVE novelty floor (2026-10-17, audit Rec 3 — see
+    # NOVELTY_TTP_RE): outside SIGNAL_CAP so the shared signal bucket can't
+    # absorb it, inside the 5.0 severity cap like every other weight.
+    novelty = (NOVELTY_MULTI_SOURCE
+               if (not cves and story.get("n_sources", 0) >= 2
+                   and NOVELTY_TTP_RE.search(text)) else 0.0)
     severity = min(5.0, sev + (0.5 if kev else 0.0) + min(SIGNAL_CAP, signals)
-                   + epss_bonus + impact)
+                   + epss_bonus + impact + novelty)
 
     # velocity (events in last 48h) + the decay clock: RE-REPORT events
     # don't count (2026-10-03). Outlet echoes of already-carried coverage
@@ -453,6 +494,7 @@ def hot_score(story, events, reddit_posts, now=None):
         "pickup": round(pickup, 2),
         "recency": round(recency, 2),
         "rereports": n_rereports,
+        "novelty": round(novelty, 2),
         "reddit": round(reddit, 2),
         "kev": kev,
         "epss": round(epss_bonus, 2),

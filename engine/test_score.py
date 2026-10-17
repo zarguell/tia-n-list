@@ -187,6 +187,44 @@ def main():
                 score.hot_score(s_severe, {e["event_id"]: e for e in evs_severe},
                                 [], now=base)["severity"] <= 5.0, True)
 
+    # --- corroborated no-CVE novelty (2026-10-17 owner decision f5f2bc09664a)
+    # audit Rec 3: multi-source first-of-kind TTP coverage with no CVE sat
+    # at the 0.5 floor beside routine traction. Two sources + TTP terms
+    # earns half a severity step; every control below must stay floored.
+    nov_ev = [ev("v1", iso(3), "tox-c2 loader drops the payload"),
+              ev("v2", iso(2), "researchers detail the c2 loader")]
+    s_nov = story("nov", ["example.com", "example.org"], [],
+                  "Avisloader Windows Malware Uses Tox C2 to Survive Takedown",
+                  nov_ev, iso(2))
+    rnov = score.hot_score(s_nov, {e["event_id"]: e for e in nov_ev}, [],
+                           now=base)
+    ok &= check("corroborated no-CVE TTP earns the novelty bonus",
+                (rnov["novelty"], rnov["severity"]), (0.5, 1.0))
+    plain_ev = [ev("p1", iso(3), "routine patch release notes"),
+                ev("p2", iso(2), "vendor posts the update")]
+    rplain = score.hot_score(
+        story("plain", ["example.com", "example.org"], [],
+              "Vendor Releases Routine Security Update", plain_ev, iso(2)),
+        {e["event_id"]: e for e in plain_ev}, [], now=base)
+    ok &= check("multi-source traction without TTP terms earns nothing",
+                (rplain["novelty"], rplain["severity"]), (0.0, 0.5))
+    solo = score.hot_score(
+        story("solo", ["example.com"], [],
+              "Avisloader Windows Malware Uses Tox C2 to Survive Takedown",
+              [ev("v1", iso(3), "tox-c2 loader drops the payload")], iso(3)),
+        {"v1": ev("v1", iso(3), "tox-c2 loader drops the payload")},
+        [], now=base)
+    ok &= check("single-source TTP earns nothing (uncorroborated)",
+                (solo["novelty"], solo["severity"]), (0.0, 0.5))
+    cve_tt = score.hot_score(
+        story("cvett", ["example.com", "example.org"], ["CVE-2026-99999"],
+              "Tox C2 Loader Exploits CVE-2026-99999", nov_ev, iso(2)),
+        {e["event_id"]: e for e in nov_ev}, [], now=base)
+    ok &= check("CVE-carrying TTP earns nothing (severity already prices it)",
+                cve_tt["novelty"], 0.0)
+    ok &= check("traction-only still floored with novelty live",
+                r1["severity"], 0.5)
+
     # --- A4: engine NVD cache merges into the CVE store (kev stays kev-only)
     saved_store = score._cve_store
     score._cve_store = None

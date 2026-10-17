@@ -183,6 +183,35 @@ c3 = ev("c3", "Hospital ransomware claim lists MoneyGram records", iso(20),
 check("a NEW CVE stays a development even against the canonical headline",
       score.is_rereport(c3, [c1], story_title=STORY_T), False)
 
+# ── 5. no-new-delta echo condition (2026-10-17 owner decision f5f2bc09664a,
+# audit Rec 2 re-report leg): a same-CVE disclosure is an echo ONLY with no
+# new CVE, no new actor attribution, and no new exploitation confirmation.
+# Attribution or in-the-wild proof emerging later is a development. ─────────
+
+a1 = ev("a1", "FortiMail zero-day used to hack government mail servers",
+         iso(72), ["CVE-2026-1234"])
+a2 = ev("a2", "LockBit claims the FortiMail zero-day in government attacks",
+         iso(24), ["CVE-2026-1234"])
+check("same-CVE event naming a NEW actor is a development, not an echo",
+      score.is_rereport(a2, [a1]), False)
+a3 = ev("a3", "FortiMail zero-day fallout spreads, LockBit link unconfirmed",
+         iso(12), ["CVE-2026-1234"])
+check("same actor already in priors stays an echo",
+      score.is_rereport(a3, [a1, a2]), True)
+
+w1 = ev("w1", "FortiMail zero-day used to hack government mail servers",
+         iso(72), ["CVE-2026-1234"])
+w2 = ev("w2", "FortiMail zero-day now actively exploited in the wild",
+         iso(24), ["CVE-2026-1234"])
+check("same-CVE event with FRESH in-the-wild confirmation is a development",
+      score.is_rereport(w2, [w1]), False)
+w3 = ev("w3", "more FortiMail zero-day exploitation in the wild reported",
+         iso(12), ["CVE-2026-1234"])
+check("in-the-wild already in priors stays an echo",
+      score.is_rereport(w3, [w1, w2]), True)
+check("plain reworded re-tell still an echo (no-delta control)",
+      score.is_rereport(echo, [orig]), True)
+
 # hot_score level: story_title comes from the story itself, so an echo-only
 # day-2 bump adds no velocity and the decay anchor stays on the development.
 hd = [ev("h1", "Denmark CPR data breach exposed 8.8 million records", iso(60)),
