@@ -41,6 +41,28 @@ def check(name, got, want):
         failures.append(name)
 
 
+_stubs = []
+
+
+def _stub(mod, name, value):
+    """Install a temporary module attribute override, remembering the original.
+
+    Module attributes are process-global, so an override left in place leaks
+    into every later test module pytest collects in the same process
+    (2026-10-17: engine/test_rereport.py died on test_triage's 3-arg
+    score.hot_score lambda — "<lambda>() got an unexpected keyword argument
+    'now'"). Every stubbing block MUST call _restore_stubs() in its finally.
+    """
+    _stubs.append((mod, name, getattr(mod, name)))
+    setattr(mod, name, value)
+
+
+def _restore_stubs():
+    while _stubs:
+        mod, name, orig = _stubs.pop()
+        setattr(mod, name, orig)
+
+
 import triage  # noqa: E402
 
 # ── 1. normalize: documented schema + drift variants ─────────────────────────
@@ -137,11 +159,11 @@ try:
 
     # stub the heavy store/score rescore tail with real-module equivalents
     import store as store_mod
-    store_mod.load_events = lambda: {
-        e["id"]: e for e in (json.load(open(os.path.join(tmp, "events", f"{e}.json")))
-                             for e in ("e1", "e2", "e9"))}
     import score as score_mod
-    score_mod.hot_score = lambda s, ev, rd: {"score": 5.0}
+    _stub(store_mod, "load_events", lambda: {
+        e["id"]: e for e in (json.load(open(os.path.join(tmp, "events", f"{e}.json")))
+                             for e in ("e1", "e2", "e9"))})
+    _stub(score_mod, "hot_score", lambda s, ev, rd: {"score": 5.0})
 
     triage.apply(decfile)
 
@@ -163,6 +185,7 @@ try:
           sorted(r["event_id"] for r in st["existing"]["events"]),
           ["e1", "e2", "e9", "e_stale"])
 finally:
+    _restore_stubs()
     shutil.rmtree(tmp)
 
 # ── 5. hallucinated story ids: one mint, every keep consolidates into it ────
@@ -199,11 +222,11 @@ try:
         "merges": []}, open(decfile, "w"))
 
     import store as store_mod
-    store_mod.load_events = lambda: {
-        e["id"]: e for e in (json.load(open(os.path.join(tmp, "events", f"{e}.json")))
-                             for e in ("o1", "o2", "o3"))}
     import score as score_mod
-    score_mod.hot_score = lambda s, ev, rd: {"score": 5.0}
+    _stub(store_mod, "load_events", lambda: {
+        e["id"]: e for e in (json.load(open(os.path.join(tmp, "events", f"{e}.json")))
+                             for e in ("o1", "o2", "o3"))})
+    _stub(score_mod, "hot_score", lambda s, ev, rd: {"score": 5.0})
 
     triage.apply(decfile)
 
@@ -215,6 +238,7 @@ try:
     check("all three events landed in the one minted story",
           sorted(r["event_id"] for r in minted["events"]), ["o1", "o2", "o3"])
 finally:
+    _restore_stubs()
     shutil.rmtree(tmp)
 
 # ── 6. collect(): affinity candidates beat the recency top-40 ───────────────
@@ -267,7 +291,7 @@ try:
                            "cves": [], "excluded": False},
     }
     import store as store_mod
-    store_mod.load_events = lambda: events
+    _stub(store_mod, "load_events", lambda: events)
     triage.collect()
 
     ctx_path = os.path.join(tmp, "triage", f"context-{triage.RUN_TAG}.json")
@@ -281,6 +305,7 @@ try:
           sorted(e["id"] for e in ctx["new_events"]),
           ["new-cve-event", "new-zeta-event"])
 finally:
+    _restore_stubs()
     shutil.rmtree(tmp)
 
 # ── 7. empty input is NOT a schema mismatch (2026-09-26/27 audits) ──────────
@@ -302,9 +327,9 @@ try:
     setattr(triage, "DATA", tmp)
 
     import store as store_mod
-    store_mod.load_events = lambda: {}
     import score as score_mod
-    score_mod.hot_score = lambda s, ev, rd: {"score": 0.0}
+    _stub(store_mod, "load_events", lambda: {})
+    _stub(score_mod, "hot_score", lambda s, ev, rd: {"score": 0.0})
 
     decfile = os.path.join(tmp, "decisions.json")
     json.dump({"decisions": [], "merges": []}, open(decfile, "w"))
@@ -328,6 +353,7 @@ try:
     check("real schema mismatch still WARNs",
           "no keep/drop decisions recognized" in buf.getvalue(), True)
 finally:
+    _restore_stubs()
     shutil.rmtree(tmp)
 
 print()

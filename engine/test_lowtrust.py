@@ -32,6 +32,28 @@ def check(name, got, want):
         failures.append(name)
 
 
+_stubs = []
+
+
+def _stub(mod, name, value):
+    """Install a temporary module attribute override, remembering the original.
+
+    Module attributes are process-global, so an override left in place leaks
+    into every later test module pytest collects in the same process
+    (2026-10-17: engine/test_rereport.py died on test_lowtrust's 3-arg
+    score.hot_score lambda — "<lambda>() got an unexpected keyword argument
+    'now'"). Every stubbing block MUST call _restore_stubs() in its finally.
+    """
+    _stubs.append((mod, name, getattr(mod, name)))
+    setattr(mod, name, value)
+
+
+def _restore_stubs():
+    while _stubs:
+        mod, name, orig = _stubs.pop()
+        setattr(mod, name, orig)
+
+
 import triage  # noqa: E402
 import digest_candidates  # noqa: E402
 
@@ -70,11 +92,11 @@ try:
               open(os.path.join(tmp, "stories", "existing.json"), "w"))
 
     import store as store_mod
-    store_mod.load_events = lambda: {
-        "e_lt": json.load(open(os.path.join(tmp, "events", "e_lt.json"))),
-        "e_real": json.load(open(os.path.join(tmp, "events", "e_real.json")))}
     import score as score_mod
-    score_mod.hot_score = lambda s, ev, rd: {"score": 5.0}
+    _stub(store_mod, "load_events", lambda: {
+        "e_lt": json.load(open(os.path.join(tmp, "events", "e_lt.json"))),
+        "e_real": json.load(open(os.path.join(tmp, "events", "e_real.json")))})
+    _stub(score_mod, "hot_score", lambda s, ev, rd: {"score": 5.0})
 
     decfile = os.path.join(tmp, "decisions.json")
     json.dump({"decisions": [
@@ -92,6 +114,7 @@ try:
     ev = json.load(open(os.path.join(tmp, "events", "e_lt.json")))
     check("low-trust tag survives apply", ev.get("low_trust"), True)
 finally:
+    _restore_stubs()
     shutil.rmtree(tmp)
 
 
@@ -161,10 +184,10 @@ try:
               open(os.path.join(tmp, "events", "e_prov.json"), "w"))
 
     import store as store_mod2
-    store_mod2.load_events = lambda: {
-        "e_prov": json.load(open(os.path.join(tmp, "events", "e_prov.json")))}
     import score as score_mod2
-    score_mod2.hot_score = lambda s, ev, rd: {"score": 5.0}
+    _stub(store_mod2, "load_events", lambda: {
+        "e_prov": json.load(open(os.path.join(tmp, "events", "e_prov.json")))})
+    _stub(score_mod2, "hot_score", lambda s, ev, rd: {"score": 5.0})
 
     decfile = os.path.join(tmp, "decisions.json")
     json.dump({"decisions": [{
@@ -185,6 +208,7 @@ try:
     check("provenance kept original event url", ev["url"],
           "https://intel.threadlinqs.com/threat/TL-9")
 finally:
+    _restore_stubs()
     shutil.rmtree(tmp)
 
 # provenance carry-through in normalization (drift tolerance: unknown keys
