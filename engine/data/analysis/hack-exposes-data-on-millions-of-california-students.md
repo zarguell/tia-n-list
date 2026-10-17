@@ -1,0 +1,3 @@
+A new development covers the California student data breach through both an LA Times article and an ETS disclosure. The ETS breach exposed records of millions of students after a hack at the testing service. The event adds corroborating sources to the existing student-data exposure cluster rather than minting a separate fragment.
+
+The key numbers are the millions of records and the ETS attribution. Watch whether state regulators require notification timelines and whether other testing vendors face similar audits. This remains a substantial breach with real privacy impact, not a routine advisory.

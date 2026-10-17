@@ -1,5 +1,3 @@
-A cyberattack linked to BAE Systems disrupted U.S. federal court and bankruptcy court operations, with the judiciary confirming the incident. External posts relayed the official notice of the cybersecurity incident affecting court functions.
+The US Administrative Office of the Courts reports that a cyberattack on government contractor BAE Systems has taken down the bankruptcy notice system (BNC), including bnc.uscourts.gov and related sites. The incident halted production and distribution of bankruptcy notices. BAE Systems is Europe's largest defense contractor and a major government IT provider.
 
-The disruption highlights risks to government legal infrastructure and third-party IT providers supporting courts. Agencies and law firms relying on court systems may face availability and confidentiality concerns until services are restored.
-
-Watch for updates on restoration timelines, scope of data affected, and any attribution. Monitor judiciary communications for remediation status and future advisories.
+This is a confirmed operational disruption, not a speculative report. Watch for restoration timelines from BAE, whether any data was accessed beyond the notice system, and potential CISA guidance. The new event reinforces the existing BAE cluster rather than creating a duplicate story.
