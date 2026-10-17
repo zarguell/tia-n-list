@@ -216,6 +216,7 @@ def distinct_series_codes(a, b):
 MONTH_PERIOD_RE = re.compile(
     r"\b(january|february|april|june|july|august|september|october|november|"
     r"december|q[1-4]|h1|h2|week[- ]?\d+)\b", re.I)
+WEEK_N_RE = re.compile(r"week[- ]?(\d+)", re.I)
 
 
 def period_tokens(title):
@@ -235,9 +236,19 @@ def distinct_periods(a, b):
     duplicate-suspects probe flagged the pair; the auditor dismissed it as a
     month-token artifact both days. Period tokens are the exception to that
     stripping: when present on BOTH sides they discriminate, exactly like
-    distinct_series_codes."""
+    distinct_series_codes.
+
+    Week numbers discriminate even when the coarser period is shared
+    (2026-10-17 owner decision 84991a8ec82c): 'Ransom & Dark Web Week 3,
+    October 2026' vs '... Week 2, October 2026' share 'october', so the
+    set-disjoint test above passes them — but different week numbers of one
+    recurring series are different installments, never one story."""
     pa, pb = period_tokens(a), period_tokens(b)
-    return bool(pa and pb and not (pa & pb))
+    if pa and pb and not (pa & pb):
+        return True
+    wa = {m.group(1) for m in WEEK_N_RE.finditer(a or "")}
+    wb = {m.group(1) for m in WEEK_N_RE.finditer(b or "")}
+    return bool(wa and wb and not (wa & wb))
 
 
 def _advisory_id_codes(story_id):

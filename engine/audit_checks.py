@@ -18,7 +18,8 @@ from datetime import datetime, timedelta, timezone
 
 from merge import (title_jaccard, distinct_series_codes,
                    distinct_advisory_ids, distinct_periods, period_tokens,
-                   title_discriminators)
+                   title_discriminators, ACTOR_TOKENS, _actor_norm,
+                   _series_codes)
 
 CJK_RE = re.compile(r"[\u0400-\u04FF\u4E00-\u9FFF\u3040-\u30FF\uAC00-\uD7AF\u0600-\u06FF]")
 
@@ -42,6 +43,34 @@ SUSPECT_GENERIC = frozenset({"remote", "code", "execution", "critical",
 # and the context snippet stay aligned; non-Latin prose OUTSIDE a span still
 # fails.
 CODE_SPAN_RE = re.compile(r"(`+)([^`]+?)\1")
+
+# Capitalized word in an original (case-preserving) title: a named product,
+# vendor, actor, or victim the headline bothers to name. Lowercase tokens
+# are phrasing; hyphen-compound fragments ("Use-After-Free") are phrasing
+# too. Used by duplicate_suspects' distinctive-entity exoneration.
+ENTITY_WORD_RE = re.compile(r"[A-Za-z0-9]+")
+
+
+def _distinctive_entities(title, tokens):
+    """Named entities one side of a suspect pair brings that live in `tokens`
+    (that side's distinctive discriminator set): capitalized words of the
+    original title, skipping hyphen-compound fragments and short tokens.
+    'pfSense' counts (internal capitals); 'Free' in 'Use-After-Free' does
+    not (hyphen-adjacent); 'severity'/'phone' do not (lowercase)."""
+    out = set()
+    t = title or ""
+    for m in ENTITY_WORD_RE.finditer(t):
+        w = m.group(0)
+        if len(w) < 3:
+            continue
+        if not (w[0].isupper() or any(c.isupper() for c in w[1:])):
+            continue
+        s, e = m.span()
+        if (s > 0 and t[s - 1] == "-") or (e < len(t) and t[e] == "-"):
+            continue                     # hyphen-compound fragment: phrasing
+        if w.lower() in tokens:
+            out.add(w.lower())
+    return out
 
 
 def load_all_stories(data_dir):
@@ -202,7 +231,25 @@ def duplicate_suspects(stories, now, max_out=10, max_age_days=45, min_jaccard=0.
     below makes the probe require product-specific signal), distinct advisory
     codes exonerated, actor-only matches (1 shared token) excluded. Recent
     stories only. Output is for the LLM to adjudicate (merge via a triage
-    decisions file), never automatic."""
+    decisions file), never automatic.
+
+    Identity-anchor redesign (2026-10-17 owner decision 84991a8ec82c — the
+    10-13 gate still surfaced 10 unrelated pairs on 10-17, all manually
+    dismissed: Ivanti-vs-Citrix/Fortinet, AiSOC-vs-pfSense, CISA batches,
+    PAN-OS advisory vs catch-all, two kernel CVEs, Ampath-vs-AdaptHealth,
+    EU CRA-vs-router, OpenPanel-vs-TeamViewer). A pair now surfaces only
+    with an incident anchor or no evidence it is two incidents:
+      - shared event ids surface unconditionally (a certain same incident —
+        the dedup multi-ref class; e.g. the pre-merge GhostAction pair),
+      - CVE-asymmetric pairs are exonerated (one side's CVE set is empty
+        or disjoint from the other's: different disclosures, never a
+        missed merge),
+      - otherwise an anchor (shared story CVE, shared title series code,
+        shared named actor) keeps the pair; without one, both sides
+        bringing their own named entities (products/vendors/victims the
+        other side never names) exonerates it as two incidents sharing
+        boilerplate.
+    """
     cutoff = (now - timedelta(days=max_age_days)).strftime("%Y-%m-%dT%H:%M:%S")
     pool = [s for s in stories.values()
             if not s.get("merged_into") and s.get("events")
@@ -216,6 +263,10 @@ def duplicate_suspects(stories, now, max_out=10, max_age_days=45, min_jaccard=0.
     # over the discriminator sets, shared = |A n B|.
     titles = [s.get("title", "") for s in pool]
     disc = [title_discriminators(t) for t in titles]
+    story_cves = [{str(c).upper() for c in (s.get("cves") or [])}
+                  for s in pool]
+    story_events = [{r.get("event_id") for r in s.get("events", [])}
+                    for s in pool]
     out = []
     for i in range(len(pool)):
         A, ia, ta = disc[i], len(disc[i]), titles[i]
@@ -223,15 +274,49 @@ def duplicate_suspects(stories, now, max_out=10, max_age_days=45, min_jaccard=0.
             continue
         for j in range(i + 1, len(pool)):
             B = disc[j]
+            tb = titles[j]
+            if story_events[i] & story_events[j]:
+                # shared event = certain same incident (the dedup
+                # multi-ref class repair_dedupe heals): surfaces even when
+                # the titles were reworded past the similarity gates.
+                jj = (len(A & B) / len(A | B)) if B else 0.0
+                out.append({"a": pool[i]["id"], "b": pool[j]["id"],
+                            "jaccard": round(jj, 2),
+                            "title_a": ta[:70], "title_b": tb[:70],
+                            "shared_events": True})
+                continue
             inter = len(A & B) if B else 0   # == len(shared)
             if not inter:                    # == title_jaccard 0.0 gate
                 continue
             j_ = inter / (ia + len(B) - inter)
-            tb = titles[j]
             if j_ < min_jaccard or distinct_series_codes(ta, tb) \
                     or distinct_periods(ta, tb) \
                     or len((A & B) - SUSPECT_GENERIC) < 2:
                 continue
+            ca, cb = story_cves[i], story_cves[j]
+            if (ca | cb) and not (ca & cb):
+                # CVE-asymmetric: one side carries incident identity (CVEs)
+                # the other lacks, or disjoint CVE sets — different
+                # disclosures (Ivanti-vs-Citrix/Fortinet, AiSOC-vs-pfSense,
+                # kernel CVE pairs, CISA batches, PAN-OS AV26-905 vs the
+                # CVE-2026-0322 catch-all, OpenPanel-vs-TeamViewer).
+                continue
+            anchored = bool(ca & cb) or bool(
+                _series_codes(ta) & _series_codes(tb)) or bool(
+                (_actor_norm(A) & ACTOR_TOKENS)
+                & (_actor_norm(B) & ACTOR_TOKENS))
+            if not anchored:
+                # No incident anchor: exonerate when both sides bring their
+                # own named entities (Ampath-vs-AdaptHealth victims,
+                # EU-resilience-vs-router, Apache-vs-Next.js) — two
+                # incidents sharing boilerplate. One-sided attribution
+                # (Midnight-Mimosa reporter credit) still surfaces.
+                ent_a = _distinctive_entities(
+                    ta, (A - B) - SUSPECT_GENERIC)
+                ent_b = _distinctive_entities(
+                    tb, (B - A) - SUSPECT_GENERIC)
+                if ent_a and ent_b:
+                    continue
             out.append({"a": pool[i]["id"], "b": pool[j]["id"],
                         "jaccard": round(j_, 2),
                         "title_a": ta[:70], "title_b": tb[:70]})
