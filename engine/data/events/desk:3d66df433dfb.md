@@ -1,0 +1,1 @@
+The threat-intel database records CVE-2026-111823 for Mage OSS through 0.9.80 before commit 76c4f46, describing an issue where session creation continues upon encountering an unknown OAuth provider. No original researcher name or vendor advisory URL is linked; the record appears derived from the CVE Database V5 feed and the radar.offseq.com analysis published the same day.
