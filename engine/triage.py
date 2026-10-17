@@ -644,6 +644,19 @@ def apply(decisions_path):
         # An event lives in exactly ONE story: strip stale references the
         # mechanical merge left behind; emptied shells redirect to the story
         # that owns the event now.
+        wrest = sorted(
+            sid for sid, s in stories.items()
+            if sid != target and not s.get("merged_into")
+            and any(r.get("event_id") == eid for r in s.get("events", [])))
+        if wrest:
+            # Write-time double-reference telemetry (2026-10-17 owner
+            # decision fa382e852c97): merge.py and desk_queue.py REJECT this
+            # shape via event_owner, but a triage keep is an editorial
+            # placement — the event is auto-reassigned to the target below
+            # and the wrest is logged so recurring wrest patterns (a queue
+            # entry fighting the mechanical merge) stay visible in the log.
+            print(f"  WARN: keep {eid} -> {target} wrests event from "
+                  f"active {wrest} (double-reference guard: auto-reassign)")
         for sid in _strip_event_refs(stories, eid, target):
             stories[sid]["merged_into"] = target
 

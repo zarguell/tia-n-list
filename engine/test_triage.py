@@ -330,6 +330,66 @@ try:
 finally:
     shutil.rmtree(tmp)
 
+# 8. write-time double-reference guard (2026-10-17 owner decision fa382e852c97)
+# merge.py and desk_queue.py REJECT a double-referenced event id via
+# merge.event_owner; triage keeps are editorial placements, so apply()
+# auto-reassigns (strip + redirect) and must WARN the wrest. Seed the
+# double-reference: event w1 already lives in owner-a, the keep places it
+# in owner-b. Contract: WARN names both sides, and afterward exactly one
+# active story references w1 (repair_dedupe stays historical cleanup only).
+tmp = tempfile.mkdtemp()
+try:
+    for var, sub in [("EVENTS", "events"), ("STORIES", "stories"),
+                     ("ANALYSIS", "analysis"), ("TRIAGE", "triage")]:
+        d = os.path.join(tmp, sub)
+        os.makedirs(d)
+        setattr(triage, var, d)
+    setattr(triage, "STATE", os.path.join(tmp, "triage", "state.json"))
+    setattr(triage, "NEEDS", os.path.join(tmp, "needs-analysis.json"))
+    setattr(triage, "DATA", tmp)
+
+    json.dump({"id": "w1", "title": "Wrested event", "source": "x",
+               "url": "https://x.test/w1",
+               "published_at": "2026-10-16T10:00:00Z", "cves": [],
+               "kind": "original"},
+              open(os.path.join(tmp, "events", "w1.json"), "w"))
+    for sid, evs in [("owner-a", ["w1"]), ("owner-b", [])]:
+        json.dump({"id": sid, "title": f"Story {sid}",
+                   "first_seen": "2026-10-16T10:00:00Z",
+                   "last_seen": "2026-10-16T10:00:00Z",
+                   "sources": ["x"], "n_sources": 1, "cves": [],
+                   "score": 5.0, "reddit_signal": {"posts": 0, "best_score": 0},
+                   "events": [{"event_id": e, "label": "original"} for e in evs]},
+                  open(os.path.join(tmp, "stories", f"{sid}.json"), "w"))
+
+    import store as store_mod
+    store_mod.load_events = lambda: {"w1": json.load(
+        open(os.path.join(tmp, "events", "w1.json")))}
+    import score as score_mod
+    score_mod.hot_score = lambda s, ev, rd: {"score": 5.0}
+
+    decfile = os.path.join(tmp, "decisions.json")
+    json.dump({"decisions": [{"event_id": "w1", "action": "keep",
+                                "story": "owner-b"}],
+               "merges": []}, open(decfile, "w"))
+    buf = io.StringIO()
+    with contextlib.redirect_stdout(buf):
+        triage.apply(decfile)
+    check("wrest WARN names the event and both stories",
+          ("w1" in buf.getvalue() and "owner-a" in buf.getvalue()
+           and "owner-b" in buf.getvalue()), True)
+    sta = json.load(open(os.path.join(tmp, "stories", "owner-a.json")))
+    stb = json.load(open(os.path.join(tmp, "stories", "owner-b.json")))
+    owners = [sid for sid, s in (("owner-a", sta), ("owner-b", stb))
+              if not s.get("merged_into")
+              and any(r["event_id"] == "w1" for r in s.get("events", []))]
+    check("exactly one active story references the event after apply",
+          owners, ["owner-b"])
+    check("emptied owner redirects to the new canonical story",
+          sta.get("merged_into"), "owner-b")
+finally:
+    shutil.rmtree(tmp)
+
 print()
 if failures:
     print(f"FAIL: {len(failures)} triage checks failed")
