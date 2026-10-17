@@ -227,6 +227,37 @@ def _entry_id(feed_url, e):
     return "rss:" + hashlib.sha1(raw.encode()).hexdigest()[:16]
 
 
+def _canonical_gbhackers_url(url):
+    """Canonical article URL for gbhackers.com links, or None to drop.
+
+    cti-pass ref-liveness (2026-10-17 owner decision e8c64d8b78e0): ~36% of
+    tracked gbhackers refs are dead vs ~9% overall — feed/host variants
+    (www.) and non-article paths keep entering citations as corroboration.
+    WordPress article permalinks are exactly one path segment on the bare
+    host with a trailing slash, so: other hosts pass through untouched, the
+    www variant canonicalizes to bare, and anything that is not a
+    single-segment article path (feed/paging/taxonomy/author links, ?p=
+    stubs, queries, fragments) is dropped before it can become an event.
+    Pure: string in, string-or-None out (no network, no liveness check)."""
+    from urllib.parse import urlsplit
+    try:
+        p = urlsplit((url or "").strip())
+    except ValueError:
+        return None
+    if p.netloc.lower() not in ("gbhackers.com", "www.gbhackers.com"):
+        return url                      # not ours — untouched
+    segs = [s for s in p.path.split("/") if s]
+    if len(segs) != 1 or p.query or p.fragment:
+        return None                     # non-article path: drop
+    # functional endpoints share the single-segment shape (/feed/ is the
+    # feed index itself) — never article slugs.
+    if segs[0].lower() in ("feed", "comments", "search", "author",
+                            "category", "tag", "page", "wp-json",
+                            "xmlrpc", "wp-admin", "login"):
+        return None
+    return f"https://gbhackers.com/{segs[0]}/"
+
+
 def _fetch_full_text(url):
     """Readability-lite for the two ex-crawler hosts: join article <p> text.
     Best-effort — None on any failure, caller falls back to RSS content."""
@@ -273,6 +304,7 @@ def ingest_rss(st, hours):
     cutoff = datetime.fromisoformat(st["rss_cutover_ts"].replace("Z", "+00:00"))
 
     new_ids, errors, candidates = [], [], []
+    dropped_noncanonical = 0
     with ThreadPoolExecutor(max_workers=FETCH_WORKERS) as pool:
         results = pool.map(lambda u: _poll_feed(u, hours), [f for f, _ in feeds])
         for (feed_url, _t), (entries, err) in zip(feeds, results):
@@ -292,7 +324,10 @@ def ingest_rss(st, hours):
         if dt is not None and dt < cutoff:
             continue                       # pre-cutover backlog — never re-ingest
         title = clean_title(e["title"] or "")
-        url = e["link"] or ""
+        url = _canonical_gbhackers_url(e["link"] or "")
+        if url is None:
+            dropped_noncanonical += 1
+            continue                # non-article gbhackers path — never an event
         content = e["content"] or ""
         host = domain_of(url).lower()
         if url and any(h in host for h in FULL_TEXT_HOSTS):
@@ -319,6 +354,9 @@ def ingest_rss(st, hours):
     if errors:
         print(f"rss fetch errors ({len(errors)}): " + "; ".join(errors[:3]),
               file=sys.stderr)
+    if dropped_noncanonical:
+        print(f"rss dropped {dropped_noncanonical} non-canonical "
+              f"gbhackers links", file=sys.stderr)
     return new_ids
 
 
