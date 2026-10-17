@@ -399,6 +399,84 @@ with tempfile.TemporaryDirectory() as td:
               "CVE-2026-0000 is bad, versions 1.2.3 affected. Payload 1<img src=x> runs.")))
     log.clear()
 
+# --- 7: internal triage bookkeeping = DISTINCT WARN, never a hard fail -----
+# (2026-10-17 audit Issue 2 / Rec 4b. The two shipped analyses below leaked
+# pipeline bookkeeping into published prose and "pass the soft lint, which
+# only WARNs" — this rule makes the leak visible per occurrence without
+# quarantining the 27 stored analyses that use the same phrasing.)
+BLOCKSTRAP_ANALYSIS = (
+    "CVE-2026-103849, named BlockStrap, is a maximum-severity remote code "
+    "execution vulnerability in Adobe Commerce and Magento through version "
+    "2.4.9. The flaw allows template-engine directive injection. The event "
+    "references BleepingComputer coverage and attaches to the existing "
+    "critical Magento story.\n\n"
+    "This is a serious server-side vulnerability for a widely deployed "
+    "e-commerce platform. Adobe shipped the APSB26-153 fix on October 13, so "
+    "apply the patched release and watch for reports of in-the-wild "
+    "exploitation. Do not treat this as routine maintenance: the maximum "
+    "severity and broad version range demand rapid response.")
+FASTAPIADMIN_ANALYSIS = (
+    "CVE-2026-111641 is an authentication bypass in FastapiAdmin through "
+    "version 30, allowing unauthenticated access according to the event "
+    "reference to radar.offseq.com. The event is the original mint for this "
+    "new story. The vulnerability affects an administration interface for a "
+    "Python web framework, which increases the risk for deployed "
+    "instances.\n\n"
+    "The claim is tied to a named vulnerability and a primary source URL. "
+    "Watch for detailed advisory publication, proof-of-concept releases, and "
+    "whether the project issues an immediate patch. The new story is "
+    "appropriate because no existing cluster covers this CVE.")
+
+check("BlockStrap analysis is grounded/clean on the hard gate (WARN-only leak)",
+      prose_lint.lint_analysis(BLOCKSTRAP_ANALYSIS) == [])
+check("FastapiAdmin analysis is grounded/clean on the hard gate (WARN-only leak)",
+      prose_lint.lint_analysis(FASTAPIADMIN_ANALYSIS) == [])
+bs_hits = prose_lint.triage_bookkeeping_hits(BLOCKSTRAP_ANALYSIS)
+fa_hits = prose_lint.triage_bookkeeping_hits(FASTAPIADMIN_ANALYSIS)
+check("BlockStrap bookkeeping flagged per occurrence (2)", len(bs_hits) == 2)
+check("BlockStrap flags 'The event references' + 'attaches to the existing'",
+      any("'The event references'" in m for m in bs_hits)
+      and any("'attaches to the existing'" in m for m in bs_hits))
+check("FastapiAdmin bookkeeping flagged per occurrence (4)", len(fa_hits) == 4)
+check("FastapiAdmin flags reference/mint/cluster + 'new story' bookkeeping",
+      any("the event reference" in m for m in fa_hits)
+      and any("is the original mint" in m for m in fa_hits)
+      and any("no existing cluster covers" in m for m in fa_hits)
+      and any("The new story is appropriate" in m for m in fa_hits))
+check("clean grounded analysis has no bookkeeping hits",
+      prose_lint.triage_bookkeeping_hits(GOOD) == [])
+check("bookkeeping rule is case-insensitive",
+      prose_lint.triage_bookkeeping_hits(
+          GOOD + " THE EVENT REFERENCES a wire report.") != [])
+# The exact ship-blocking case: a bookkeeping-leaking analysis must NOT
+# quarantine (that is the whole point of WARN vs a hard rule).
+with tempfile.TemporaryDirectory() as td:
+    stories_dir = os.path.join(td, "stories")
+    analysis_dir = os.path.join(td, "analysis")
+    os.makedirs(stories_dir)
+    os.makedirs(analysis_dir)
+    log = []
+    json.dump({"id": "leak-story", "title": "BlockStrap Magento RCE",
+               "analysis": {"updated_at": "z"}},
+              open(os.path.join(stories_dir, "leak-story.json"), "w"))
+    open(os.path.join(analysis_dir, "leak-story.md"), "w").write(
+        BLOCKSTRAP_ANALYSIS)
+    v = prose_lint.quarantine_analysis(stories_dir, analysis_dir,
+                                       {"id": "leak-story"}, log=log.append)
+    check("bookkeeping leak does NOT quarantine (no hard violations)",
+          v == [] and os.path.exists(
+              os.path.join(analysis_dir, "leak-story.md"))
+          and not os.path.exists(os.path.join(analysis_dir, ".rejects")))
+    check("bookkeeping leak logged as a distinct WARN (not 'soft')",
+          len(log) == 1 and "triage-bookkeeping (kept)" in log[0]
+          and "leak-story" in log[0])
+    check("bookkeeping WARN is per occurrence",
+          log[0].count("internal triage bookkeeping") == 2)
+    check("story json analysis marker untouched by the WARN",
+          "analysis" in json.load(
+              open(os.path.join(stories_dir, "leak-story.json"))))
+    log.clear()
+
 print()
 if FAILS:
     print(f"FAILED: {len(FAILS)} check(s): {', '.join(FAILS)}")
