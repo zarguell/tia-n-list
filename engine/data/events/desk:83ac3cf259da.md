@@ -1,0 +1,1 @@
+GalaxyWarden documented the ETS breach on October 16, noting that ETS notified families of unauthorized access to an SFTP site used by the California Department of Education. The breach exposed records spanning millions of students, including personal and disability information. The post confirms the incident involved a contractor rather than a direct CDE system compromise.
