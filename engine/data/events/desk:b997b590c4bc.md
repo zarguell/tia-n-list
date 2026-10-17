@@ -1,0 +1,1 @@
+GitHub issue #3294 (CVE-2025-60470) from 2025-07-14 reports an out-of-bounds read in the AC-4 parser, part of the same disclosure batch covering CVE-2025-60469, 60470, 60476, and 60480. All four were filed on 14 July 2025 and resolved in commit e02d1fd.
