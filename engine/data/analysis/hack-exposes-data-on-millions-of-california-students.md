@@ -1,0 +1,3 @@
+Hackers stole records of millions of current and former California public school students through a breach at testing provider ETS. The exposed data includes names, addresses, demographic details and disability status, affecting students enrolled over the past three school years. The original event references a compromised login used against an ETS secure file transfer site.
+
+The incident involves a third-party vendor (ETS) serving public education data, which increases downstream risk for families across the state. No CVEs are assigned; the story score is 3.1. Monitor for official ETS disclosure, state education department notifications, and any legal action regarding the disability-status exposure.
