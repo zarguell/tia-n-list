@@ -1,0 +1,3 @@
+GPAC MP4Box AC-4 parser carries a heap buffer overflow tracked as CVE-2025-60480. The advisory covers the AC-4 Alternative Info Parsing path in the open-source GPAC media framework; a heap buffer overflow can allow arbitrary code execution through a malicious media file. The event names no active exploitation, so treat it as a patch-required vulnerability rather than an in-the-wild campaign.
+
+Because GPAC underpins multiple media-processing pipelines, a remote attacker who can supply crafted AC-4 content could reach the vulnerable parser. Watch for vendor integrations that bundle GPAC and for any future GitHub releases that close the issue. Update GPAC when the fix lands.
