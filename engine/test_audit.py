@@ -201,6 +201,86 @@ mimosa = {
         title="Midnight Mimosa: ad-fraud malware preinstalled in cheap Android phone firmware"),
 }
 s_mimosa = jc.duplicate_suspects(mimosa, NOW)
+# 2d. identity-anchor redesign (2026-10-17 owner decision 84991a8ec82c):
+# the 10-13 generic-token gate still surfaced 10 unrelated pairs on 10-17
+# (all manually dismissed). Replicas of the false classes must stay out;
+# anchored genuine pairs (shared CVE, shared event) must surface.
+def _cstory(sid, evs, title, cves=()):
+    s = story(sid, evs, title=title)
+    s["cves"] = list(cves)
+    return s
+
+
+false_pairs = {
+    # Ivanti-vs-Citrix/Fortinet (must not surface per the card): outlet
+    # roundup shares the vendor token, CVE sets are asymmetric.
+    "ivanti-a": _cstory("ivanti-a", ["e40"],
+                          title="Ivanti Patches Critical Flaws Across Enterprise Security Products"),
+    "ivanti-b": _cstory("ivanti-b", ["e41"],
+                          title="Citrix, Fortinet, Ivanti Patch 29 Vulnerabilities Across Their Products",
+                          cves=["CVE-2026-104935", "CVE-2026-106173"]),
+    # Ampath-vs-AdaptHealth: different victims, CVE-empty both sides.
+    "ampath": _cstory("ampath", ["e42"],
+                        title="Ampath Patient Records Data Breach"),
+    "adapt": _cstory("adapt", ["e43"],
+                       title="AdaptHealth Breach Exposes 4.1M Patient Records"),
+    # Apache-vs-Next.js: different products, CVE-empty both sides.
+    "apache": _cstory("apache", ["e44"],
+                        title="Apache HTTP Server Flaws Enable Remote Code Execution and Denial-of-Service Attacks"),
+    "nextjs": _cstory("nextjs", ["e45"],
+                        title="Next.js Patches Critical Remote Code Execution and Denial of Service Flaws"),
+    # kernel CVE pair: disjoint CVE sets, same subsystem phrasing.
+    "kern-a": _cstory("kern-a", ["e46"],
+                        title="CVE-2026-89521 Linux Kernel Core Scheduling Race Condition",
+                        cves=["CVE-2026-89521"]),
+    "kern-b": _cstory("kern-b", ["e47"],
+                        title="Linux Kernel Race Condition in net/smc Subsystem",
+                        cves=["CVE-2026-80980"]),
+}
+s_false = jc.duplicate_suspects(false_pairs, NOW)
+pairs_false = {frozenset((x["a"], x["b"])) for x in s_false}
+check("Ivanti-vs-Citrix/Fortinet must not surface",
+      frozenset(("ivanti-a", "ivanti-b")) in pairs_false, False)
+check("Ampath-vs-AdaptHealth must not surface",
+      frozenset(("ampath", "adapt")) in pairs_false, False)
+check("Apache-vs-Next.js must not surface",
+      frozenset(("apache", "nextjs")) in pairs_false, False)
+check("disjoint-CVE kernel pair must not surface",
+      frozenset(("kern-a", "kern-b")) in pairs_false, False)
+
+genuine = {
+    # GhostAction class: pre-merge pair sharing an event surfaces even
+    # when the headlines were reworded past the similarity gates.
+    "ghost-a": _cstory("ghost-a", ["e50"],
+                         title="GhostAction breach claim hits hospital extranet"),
+    "ghost-b": _cstory("ghost-b", ["e50", "e51"],
+                         title="Unrelated phrasing on an infrastructure outage report"),
+    # same-CVE pair with matching titles: the shared CVE anchors it.
+    "cve-a": _cstory("cve-a", ["e52"],
+                       title="Acme router CVE-2026-1234 remote code flaw",
+                       cves=["CVE-2026-1234"]),
+    "cve-b": _cstory("cve-b", ["e53"],
+                       title="Acme router CVE-2026-1234 remote code bug fix",
+                       cves=["CVE-2026-1234"]),
+}
+s_gen = jc.duplicate_suspects(genuine, NOW)
+pairs_gen = {frozenset((x["a"], x["b"])) for x in s_gen}
+check("shared-event pair surfaces despite reworded titles",
+      frozenset(("ghost-a", "ghost-b")) in pairs_gen, True)
+check("shared-CVE pair with matching titles surfaces",
+      frozenset(("cve-a", "cve-b")) in pairs_gen, True)
+row = next(x for x in s_gen
+           if frozenset((x["a"], x["b"])) == frozenset(("ghost-a", "ghost-b")))
+check("shared-event row is flagged", row.get("shared_events"), True)
+
+# week-number installments discriminate even when the month is shared
+# (Ransom Week 2 vs Week 3, October 2026: jaccard 1.0, no anchor).
+check("distinct week numbers exonerate (shared month)",
+      jc.distinct_periods("Ransom & Dark Web Issues Week 3, October 2026",
+                          "Ransom & Dark Web Issues Week 2, October 2026"), True)
+check("same week number is not distinct",
+      jc.distinct_periods("Ransom & Dark Web Issues Week 3, October 2026",
+                          "Ransom Week 3 roundup, October 2026"), False)
 check("genuine same-story pair (Midnight Mimosa pre-merge) still surfaces",
       {frozenset((x["a"], x["b"])) for x in s_mimosa},
       {frozenset(("bitdefender-mimosa", "mimosa-android"))})
