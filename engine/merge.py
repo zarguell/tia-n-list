@@ -111,6 +111,12 @@ DATE_STOP = {"january", "february", "march", "april", "may", "june", "july", "au
              "september", "october", "november", "december", "monday", "tuesday",
              "wednesday", "thursday", "friday", "saturday", "sunday"}
 SERIES_RE = re.compile(r"\b[A-Za-z]+[0-9]*-\d{2,6}(?:-\d{2,7})?\b")   # AV26-797, CVE-2026-1234, Storm-0324
+# Vendor advisory ids proper (AV26-905) — CVE ids match SERIES_RE too, so the
+# catch-all guard below keys on the AV prefix specifically.
+AV_CODE_RE = re.compile(r"\bAV\d{2}-\d+\b", re.I)
+# "Patches 13 Vulnerabilities" catch-all shape: a roundup headline counting
+# vulns. Focused single-advisory disclosures must never absorb into one.
+CATCHALL_RE = re.compile(r"\bpatches?\b.{0,20}\b\d+\s+vulnerabilit", re.I)
 
 # URL params that carry feed/campaign tracking, never article identity.
 TRACKING_PARAM_RE = re.compile(
@@ -313,6 +319,20 @@ def match_scores(ev, story):
         if not (ev_codes and st_codes and not (ev_codes & st_codes)):
             if ev_cves & set(story["cves"]):
                 return 50.0
+    # Advisory-code catch-all guard (2026-10-17 owner decision 584241d6a901):
+    # a focused single-advisory disclosure (exactly one AV id, CVEs disjoint
+    # from the story's) never absorbs into a "patches N vulnerabilities"
+    # catch-all — the PAN-OS AV26-905/CVE-2026-0310 story must not merge into
+    # the CVE-2026-0322 catch-all. Genuine multi-advisory roundups (several
+    # AV ids, or CVEs overlapping the story's) still merge, as does a
+    # same-CVE focused event (handled by the 50.0 path above).
+    ev_av = {m.group(0).upper() for m in AV_CODE_RE.finditer(ev["title"])}
+    if len(ev_av) == 1 and CATCHALL_RE.search(story.get("title", "")):
+        st_av = ({m.group(0).upper()
+                  for m in AV_CODE_RE.finditer(story.get("title", ""))}
+                 | _advisory_id_codes(story.get("id", "")))
+        if not (ev_av & st_av) and not (ev_cves & set(story.get("cves") or [])):
+            return 0.0
     ev_disc = _norm_tokens(ev["title"]) - GENERIC - DATE_STOP
     st_disc = _norm_tokens(story.get("title", "")) - GENERIC - DATE_STOP
     if len(ev_disc) >= 2 and len(st_disc) >= 2:
