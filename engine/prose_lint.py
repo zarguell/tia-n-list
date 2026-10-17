@@ -24,6 +24,18 @@ only), the digest fails the build closed — the digest is the flagship
 artifact and daily_digest's recover sweep would republish a bad one in a
 loop; a failed publish records telemetry and pages via autodiag instead of
 shipping slop.
+
+A third, DISTINCT class is WARN-only: internal triage bookkeeping in
+analysis prose (TRIAGE_BOOKKEEPING / triage_bookkeeping_hits). It narrates
+the ingest object ("The event references …", "attaches to the existing
+story", "is the original mint", "no existing cluster covers this CVE")
+instead of the real-world subject a reader sees. 2026-10-17 audit Issue 2
+flagged the newest analyses leaking exactly this for the desk; Rec 4b asked
+for a lint rule to catch recurrence. It is a distinct WARN, NOT a hard
+violation, because the family is wide (100+ stored analyses say "the event
+…") and the re-analysis prompt does not ban the phrasing — quarantining on
+it would pull every affected live card and requeue against a prompt that
+reproduces it until the retry cap, for prose a reader still understands.
 """
 import glob
 import json
@@ -50,6 +62,31 @@ SLOP = [
     "testament to",
     "rapidly evolving landscape",
 ]
+
+# Internal triage bookkeeping (2026-10-17 audit Issue 2 / Rec 4b). Published
+# analysis prose narrates the STORY a reader sees, never the ingest object:
+# "The event references BleepingComputer coverage and attaches to the
+# existing critical Magento story", "The event is the original mint for this
+# new story", "no existing cluster covers this CVE". These are meta-sentences
+# about the pipeline's own triage (references / cluster minting), and the soft
+# paragraph rule never saw them. WARN-only (see triage_bookkeeping_hits):
+# reported per occurrence, but NOT a hard violation, because the family is
+# broad and the analysis prompt does not ban the wording — see the module
+# docstring. One pattern per observed construction; deliberately
+# high-precision.
+TRIAGE_BOOKKEEPING = (
+    # "The event references …", "the event reference to …"
+    r"\bthe event (?:reference|references|referenced|referencing)\b",
+    # "attaches to the existing critical Magento story"
+    r"\battaches? to the existing\b",
+    # "The event is the original mint for this new story"
+    r"\bis the original mint\b",
+    # "no existing cluster covers this CVE"
+    r"\bno existing cluster covers\b",
+    # FastapiAdmin's other bookkeeping sentence: "The new story is
+    # appropriate because …"
+    r"\bthe new story is appropriate\b",
+)
 
 # Structure contract: prompts/tia-hourly.md promises "2-4 short plain
 # paragraphs", no headings. Length bounds keep auto-extracted stubs (too
@@ -142,6 +179,28 @@ def _names_subject(text, title):
     return matched >= min(2, len(toks))
 
 
+def triage_bookkeeping_hits(text):
+    """DISTINCT WARN: internal triage bookkeeping in published analysis
+    prose, one message per occurrence (2026-10-17 audit Issue 2 / Rec 4b).
+
+    Unlike raw_html_hits this is deliberately NOT fed into lint_analysis:
+    the phrasing is prose-quality, not a factual contradiction, and the
+    family is broad enough that a hard rule would quarantine 100+ live
+    cards and requeue them against a prompt that does not ban the wording
+    (see TRIAGE_BOOKKEEPING + the module docstring). quarantine_analysis
+    logs these as WARN and keeps the file; the audit/desk acts on them.
+    Curly apostrophes normalize to straight ones first, mirroring
+    _banned_hits."""
+    low = (text or "").replace("\u2019", "'")
+    out = []
+    for pat in TRIAGE_BOOKKEEPING:
+        for m in re.finditer(pat, low, re.IGNORECASE):
+            out.append(f"internal triage bookkeeping {m.group(0)!r} "
+                       f"(published prose narrates the story, not the "
+                       f"ingest/triage state)")
+    return out
+
+
 def raw_html_hits(text):
     """Literal HTML in agent prose that breaks the rendered site.
 
@@ -224,8 +283,11 @@ def quarantine_analysis(stories_dir, analysis_dir, story, now=None, log=print):
     never call this for a story without a card (orphan/frozen files stay).
 
     Returns the violation list (empty = clean, or no analysis file — nothing
-    to lint). On violations: the file is moved (os.replace, never deleted)
-    to <analysis_dir>/.rejects/<id>-<UTC timestamp>.md and the story json's
+    to lint). A distinct WARN line is logged for internal triage bookkeeping
+    (triage_bookkeeping_hits) whether or not the file is later quarantined —
+    that rule never affects the return value. On violations: the file is moved
+    (os.replace, never deleted) to <analysis_dir>/.rejects/<id>-<UTC
+    timestamp>.md and the story json's
     "analysis" key is cleared (stale updated_at marker gone with it), which
     re-queues the story via merge.emit_needs (queues on a missing analysis
     file). Writes the json back only when the key existed — no churn on
@@ -241,6 +303,14 @@ def quarantine_analysis(stories_dir, analysis_dir, story, now=None, log=print):
                                subject_title=(story.get("title") or "")
                                if isinstance(story, dict) else None)
     soft = soft_paras(text)
+    triage = triage_bookkeeping_hits(text)
+    if triage:
+        # Distinct WARN (2026-10-17 audit Issue 2 / Rec 4b): kept, never a
+        # hard violation — see TRIAGE_BOOKKEEPING. Logged before the
+        # quarantine branch so a bookkeeping-leaking analysis that ALSO
+        # hard-fails still records it for the desk.
+        log(f"WARN analysis/{sid}.md: triage-bookkeeping (kept): "
+            f"{'; '.join(triage)}")
     if not violations:
         if soft:
             log(f"WARN analysis/{sid}.md: soft (kept): {'; '.join(soft)}")
