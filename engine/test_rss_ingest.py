@@ -227,6 +227,31 @@ def test_malformed_date_does_not_crash():
     assert ingest.norm_dt("2026-10-01T12:00:00Z").endswith("Z")
 
 
+def test_gbhackers_canonical_gate():
+    # 2026-10-17 owner decision e8c64d8b78e0: gbhackers refs rot (~36%
+    # dead) on host variants and non-article paths — ingestion keeps only
+    # canonical single-segment article URLs on the bare host.
+    canon = ingest._canonical_gbhackers_url
+    assert canon("https://gbhackers.com/some-article/") == \
+        "https://gbhackers.com/some-article/"
+    assert canon("https://gbhackers.com/some-article") == \
+        "https://gbhackers.com/some-article/", "missing slash canonicalized"
+    assert canon("https://www.gbhackers.com/some-article/") == \
+        "https://gbhackers.com/some-article/", "www canonicalized to bare"
+    for bad in ("https://gbhackers.com/feed/",                       # feed index
+                "https://gbhackers.com/page/2/",                     # paging
+                "https://gbhackers.com/category/ransomware/",         # taxonomy
+                "https://gbhackers.com/author/admin/",                # author
+                "https://gbhackers.com/?p=203657",                    # id stub
+                "https://gbhackers.com/some-article/?utm_source=x",  # tracking
+                "https://gbhackers.com/some-article#comments",        # fragment
+                "https://gbhackers.com/"):                            # homepage
+        assert canon(bad) is None, f"non-article path must drop: {bad}"
+    # other hosts pass through untouched (blast radius: gbhackers only)
+    assert canon("https://example.com/a/b?x=1") == "https://example.com/a/b?x=1"
+    assert canon("") == ""
+
+
 def test_opml_missing_feeds_loud():
     with _Tmp() as tmp:
         empty = os.path.join(tmp.dir, "empty.opml")
