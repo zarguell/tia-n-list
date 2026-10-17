@@ -57,14 +57,45 @@ PLACEHOLDER_DOMAINS = {"example.com", "example.org", "example.net", "domain.com"
                        "fake.com", "demo.com", "mydomain.com", "sub.example.net",
                        "google.com", "microsoft.com", "apple.com", "amazon.com",
                        "facebook.com", "twitter.com", "wikipedia.org", "github.com"}
-# our own outlet set — source hosts, never IOCs
+# our own outlet set — source hosts, never IOCs. Extended with vendor
+# blogs, press, and aggregators that coverage names bare (no scheme, so the
+# URL-strip below never sees them): they are sources, not observables
+# (2026-10-17 owner decision 5c38b45fb464 — news.ycombinator.com,
+# talos/trailofbits blogs and the like dominated the candidate pool).
 OUTLET_DOMAINS = {"securityweek.com", "thehackernews.com", "bleepingcomputer.com",
                   "theregister.com", "gbhackers.com", "malware.news", "darkreading.com",
                   "cyberscoop.com", "reuters.com", "krebsonsecurity.com", "wired.com",
                   "arstechnica.com", "apnews.com", "bbc.com", "bloomberg.com",
                   "nvd.nist.gov", "cisa.gov", "cert.pl", "recordedfuture.com",
                   "thedfirreport.com", "sofx.com", "ipurple.team", "cyberpress.org",
-                  "tenable.com", "microsoft.com", "bleepingcomputer.com", "thehackernews.com"}
+                  "tenable.com", "microsoft.com", "bleepingcomputer.com", "thehackernews.com",
+                  "news.ycombinator.com", "redhotcyber.com", "cnet.com",
+                  "applebulteni.com", "tech-insider.org", "cfptime.org",
+                  "talosintelligence.com", "trailofbits.com", "previdian.com",
+                  "welivesecurity.com", "threatdown.com", "opensourcemalware.com",
+                  "radar.offseq.com", "go.rodtrent.com", "eth.llamarpc.com",
+                  "cti.fyi", "openssh.org",
+                  # repost farms / aggregators / press / vendor blogs by
+                  # observed candidate frequency (each >= 6 hits, never an
+                  # IOC — full-corpus census 2026-10-17, base-domain match
+                  # covers subdomains like labs.hackthebox.com).
+                  "beaconbeagle.com", "jobicy.com", "cybersecurefox.com",
+                  "europesays.com", "cromwell-intl.com", "valtersit.com",
+                  "securebulletin.com", "malwarebytes.com", "alobbs.com",
+                  "diesec.com", "getsiteaiaudit.com", "byteseu.com",
+                  "ewsnetwork.com", "gizmodo.com", "theguardian.com",
+                  "techcrunch.com", "rapid7.com", "theperimetersite.com",
+                  "bugstoday.com", "medium.com", "huntress.com",
+                  "zscaler.com", "hackthebox.com", "beesint.com",
+                  "picussecurity.com", "martincid.com", "engadget.com",
+                  "cyberunit.com", "anchore.com", "paloaltonetworks.com",
+                  "undercodenews.com", "truesec.com", "schneier.com",
+                  "secburg.com", "osintsights.com", "bitdefender.com",
+                  "androidauthority.com", "theverge.com", "watchtowr.com",
+                  "cisco.com", "onmicrosoft.com", "midasolutions.com",
+                  "third-party.com", "dumbpasswordrules.com",
+                  "wordpress.org", "asp.net",
+                  "malware-traffic-analysis.net", "ransomware.live"}
 
 # takedown signals: a same-event match flips the IOC to revoked
 TAKEDOWN_SIGNALS = ["sinkhol", "taken down", "seized", "dismantled", "revoked",
@@ -84,7 +115,8 @@ def _is_private_ip(s):
 def _is_placeholder_domain(d):
     low = d.lower()
     tld = low.rsplit(".", 1)[-1]
-    if tld in RESERVED_TLDS or tld in FILE_EXT_TLDS:
+    if tld in RESERVED_TLDS or tld in FILE_EXT_TLDS \
+            or tld in EXTRA_FILE_EXT_TLDS:
         return True
     for blocked in (*PLACEHOLDER_DOMAINS, *OUTLET_DOMAINS, *ECOSYSTEM_DOMAINS):
         if low == blocked or low.endswith("." + blocked):
@@ -92,17 +124,97 @@ def _is_placeholder_domain(d):
     return False
 
 
+# File/tech extensions that masquerade as TLDs in prose — extended with
+# installer/config/script suffixes observed in the candidate pool
+# (2026-10-17: "installer-3.9.2-lts.dmg", "page.aspx", "run.cgi").
+EXTRA_FILE_EXT_TLDS = {"php", "asp", "aspx", "jsp", "cgi", "dmg",
+                         "lnk", "msc"}
+
+# Defang markers the extractor refangs: evil[.]com, 1[.]2[.]3[.]4, hxxp://.
+# A defanged observable is an explicit IOC assertion, so Tier-A matches
+# below always emit (no version gate, no URL-strip): the 2026-10-17 audit
+# found genuine defanged C2s present in events never emitted.
+DEFANG_DOT_RES = (re.compile(r"\[\.\]"), re.compile(r"\(\.\)"),
+                  re.compile(r"\{\.\}"))
+HXXP_RE = re.compile(r"\bhxxps?(?=://)", re.I)
+DEFANGED_HOST_RE = re.compile(
+    r"\b((?:[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?"
+    r"(?:\[\.\]|\(\.\)|\{\.\})"
+    r")+[A-Za-z]{2,63})\b")
+DEFANGED_IP_RE = re.compile(
+    r"\b(\d{1,3}(?:\[\.\]|\(\.\)|\{\.\})"
+    r"\d{1,3}(?:\[\.\]|\(\.\)|\{\.\})"
+    r"\d{1,3}(?:\[\.\]|\(\.\)|\{\.\})\d{1,3})\b")
+HXXP_HOST_RE = re.compile(r"\bhxxps?://([^\s\"'<>/?#:]+)", re.I)
+# Markdown inline links [text](url): the TEXT half yields domain-lookalike
+# fragments ("news.ycombinator" from [news.ycombinator](https://...))
+# while the URL half is stripped as a link anyway — drop the whole link.
+MD_LINK_RE = re.compile(r"\[[^\]]*\]\(\s*https?://[^)\s]+\s*\)")
+# Version-shaped IPv4: "version 8.4.0.2", "Prior to 11.1.0.2" — never
+# IOCs (the version-number FP class dominating the candidate pool).
+VERSION_PREFIX_RE = re.compile(
+    r"(?:version|ver\.?|\bv\b|build|prior to|before|after|up to|"
+    r"fixed in)\s*$", re.I)
+
+
+def _refang_dots(s):
+    for rx in DEFANG_DOT_RES:
+        s = rx.sub(".", s)
+    return s
+
+
+def _tier_a_defanged(text):
+    """Observables explicitly defanged in `text` (Tier-A: always IOCs)."""
+    out = {}
+    for m in DEFANGED_HOST_RE.finditer(text or ""):
+        d = _refang_dots(m.group(1)).rstrip(".").lower()
+        d = re.sub(r"^www\.", "", d)
+        labels = d.split(".")
+        if (len(labels[-1]) >= 3
+                and any(len(lbl) >= 3 for lbl in labels[:-1])
+                and labels[-1] not in FILE_EXT_TLDS
+                and labels[-1] not in EXTRA_FILE_EXT_TLDS
+                and not _is_placeholder_domain(d)):
+            out[d] = "domain"
+    for m in DEFANGED_IP_RE.finditer(text or ""):
+        ip = _refang_dots(m.group(1))
+        if not _is_private_ip(ip):
+            out[ip] = "ipv4"
+    for m in HXXP_HOST_RE.finditer(text or ""):
+        d = _refang_dots(m.group(1)).rstrip(".").lower()
+        d = re.sub(r"^www\.", "", d)
+        labels = d.split(".")
+        if (len(labels) >= 2 and len(labels[-1]) >= 3
+                and not _is_placeholder_domain(d)):
+            out[d] = "domain"
+    return out
+
+
 def extract_from_text(text):
     """Return {value: type} observables found in article text, precision-filtered."""
     out = {}
     if not text:
         return out
+    # Tier-A first: defanged observables are explicit IOC assertions and
+    # must survive the URL-strip/normalization below (an hxxp URL is not an
+    # http link; a [.] host is not bare prose).
+    out.update(_tier_a_defanged(text))
+    # Markdown link labels masquerade as domains — drop whole links; then
+    # refang the residue so surviving markers cannot fragment matches.
+    text = MD_LINK_RE.sub(" ", text)
+    text = _refang_dots(text)
+    text = HXXP_RE.sub("http", text)
     # URL hosts are the article's own links, not IOCs — strip them first
     text = re.sub(r"\bhttps?://[^\s]+", " ", text)
     for m in IP_RE.finditer(text):
         ip = m.group(0)
-        if not _is_private_ip(ip):
-            out[ip] = "ipv4"
+        if _is_private_ip(ip):
+            continue
+        # version-shaped IPv4 ("Prior to 11.1.0.2") is never an IOC — the
+        # version-number class dominating the candidate pool (2026-10-17).
+        if VERSION_PREFIX_RE.search(text[max(0, m.start() - 32):m.start()]):
+            continue
+        out[ip] = "ipv4"
     for m in DOMAIN_RE.finditer(text):
         d = m.group(0).rstrip(".").lower()
         d = re.sub(r"^www\.", "", d)
