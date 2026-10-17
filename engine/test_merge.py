@@ -114,6 +114,36 @@ check("HashiCorp AV26-797 vs AV26-791 distinct codes -> 0.0",
       merge.match_scores(ev("z", "HashiCorp security advisory (AV26-797)"),
                          story("h", "HashiCorp security advisory (AV26-791)")), 0.0)
 
+print("== advisory-code catch-all guard (2026-10-17 decision 584241d6a901) ==")
+# A focused single-advisory disclosure (one AV id, CVEs disjoint from the
+# story's) never absorbs into a "patches N vulnerabilities" catch-all —
+# the PAN-OS AV26-905/CVE-2026-0310 story must not merge into the
+# CVE-2026-0322 catch-all. A genuine multi-advisory roundup still merges.
+catchall = story("palo-alto-networks-patches-13-vulnerabilities",
+                 "Palo Alto Networks Patches 13 Vulnerabilities",
+                 cves=["CVE-2026-0322"])
+focused = ev("z", "Palo Alto Networks security advisory (AV26-905)",
+               )
+focused["cves"] = ["CVE-2026-0310"]
+check("focused AV26-905 disclosure vs CVE-2026-0322 catch-all -> 0.0",
+      merge.match_scores(focused, catchall), 0.0)
+own = story("palo-alto-networks-security-advisory-av26-905-cve-2026-0310-buff",
+             "Palo Alto Networks Security Advisory AV26-905: CVE-2026-0310 Buffer Overflow in PAN-OS",
+             cves=["CVE-2026-0310"])
+check("focused disclosure still matches its own advisory story -> 50.0",
+      merge.match_scores(focused, own), 50.0)
+roundup = ev("z", "Palo Alto Networks security advisories (AV26-1041) (AV26-1056)")
+roundup["cves"] = ["CVE-2026-0322"]
+check("multi-advisory roundup on the catch-all CVE still merges -> 50.0",
+      merge.match_scores(roundup, catchall), 50.0)
+same_cve = ev("z", "CVE-2026-0322: Actively Exploited PAN-OS RCE Flaw Enables Root Access")
+same_cve["cves"] = ["CVE-2026-0322"]
+check("same-CVE focused event still merges into the catch-all -> 50.0",
+      merge.match_scores(same_cve, catchall), 50.0)
+plain = story("plain", "Palo Alto Networks PAN-OS update released")
+check("guard is catch-all-shaped only: plain story unaffected",
+      merge.match_scores(focused, plain) > 0.0, True)
+
 print("== normalized URL identity (2026-09-16 cspusep2026 class) ==")
 # feed republishing mutates URLs: scheme, www., utm params, fragments,
 # trailing slash — all one article, all one story
