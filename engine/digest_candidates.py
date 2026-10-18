@@ -200,7 +200,11 @@ def build_rows(stories, events, kev_map, coverage, canonical, since, recent_cuto
 
         ev_dates = []   # raw article publish dates (display)
         dev_dates = []  # genuine development dates (recaps collapsed to the KEV add)
-        newest_feed_dev = None   # newest non-social event (echo-rule baseline)
+        newest_feed_dev = None   # newest non-social event (echo-rule
+        # baseline). `rd:` Reddit link-post stubs count as SOCIAL here
+        # (2026-10-18 owner decision 64afd59af45e, audit Issue 1): a stub dated
+        # today would otherwise lift the baseline and let a stale social echo
+        # clear the revive gap, re-developing a cold story.
         # feed re-reports (2026-10-03): outlet echoes of already-carried
         # coverage (no new CVEs, reworded same headline) count for n_events
         # display but never set the development clock — the same rule
@@ -220,7 +224,8 @@ def build_rows(stories, events, kev_map, coverage, canonical, since, recent_cuto
             e = events.get(ref["event_id"])
             if not e or not e.get("published_at"):
                 continue
-            if not str(e.get("id", "")).startswith(("masto:", "x:", "bsky:")):
+            if not str(e.get("id", "")).startswith(
+                    ("masto:", "x:", "bsky:", "rd:")):
                 try:
                     d = parse_utc(e["published_at"])
                 except ValueError:

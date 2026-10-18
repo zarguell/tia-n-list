@@ -498,6 +498,25 @@ check("flood entrant flagged",
       any(x.startswith("flood entrant flood.example") for x in p), True)
 check("info tables present", len(info["sources"]) > 0 and len(info["authors"]) > 0, True)
 
+# 2026-10-18 decision 64afd59af45e (audit Issue 1): `rd:` Reddit link-post
+# stubs are content-free BY CONSTRUCTION, and their `source` is
+# domain_of(article_url) — so the LINKED host (bleepingcomputer.com in the
+# live FAIL) was being blamed for Reddit's boilerplate. They stay decisions,
+# but never count as kept-stubs.
+rd_events = {f"rd:t3_{i:02d}": {"source": "bleepingcomputer.com",
+                                "published_at": "2026-08-01T00:00:00Z",
+                                "md_len": 150} for i in range(12)}
+rd_decs = {"2026-09-16T1100": [{"event_id": e, "action": "keep"}
+                               for e in rd_events]}
+_mk_noise_dir(os.path.join(tmp, "rdstubs"), rd_events, rd_decs)
+p3, info3 = jc.ingest_noise(os.path.join(tmp, "rdstubs"), NOW2)
+check("rd: link-post stubs are not counted as kept-stubs",
+      any(x.startswith("kept-stub source bleepingcomputer.com") for x in p3),
+      False)
+check("...and the source's kept-stub rate reads 0",
+      [r for r in info3["sources"]
+       if r["name"] == "bleepingcomputer.com"][0]["kept_stub_pct"], 0)
+
 clean_events = {f"g{i}": {"source": "fine.example",
                           "published_at": "2026-08-01T00:00:00Z"}
                 for i in range(30)}

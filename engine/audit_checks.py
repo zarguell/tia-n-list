@@ -516,9 +516,10 @@ def ingest_noise(data_dir, now, *, raw_glob=None, window_days=2,
          signal, raw_glob) holding >= share of attributed decisions at a
          drop rate >= share_drop: crowds the 30-event/hour triage cap and
          delays real articles (gamefan: 45% share, 94% dropped).
-      3. kept-stub source — kept events whose .md is < 200c: the agent
-         writes "grounded" analyses from nothing (securityweek: 62% stubs
-         kept at 81%).
+      3. kept-stub source — kept events whose .md is < 200c (excluding
+         `rd:` Reddit link-post stubs, content-free by construction:
+         2026-10-18 decision 64afd59af45e). securityweek: 62% stubs kept
+         at 81%.
       4. flood entrant — source that minted >= flood_min events in the last
          flood_days AND >= flood_share of its lifetime presence in that
          window — a brand-new firehose even when triage keeps it
@@ -581,7 +582,19 @@ def ingest_noise(data_dir, now, *, raw_glob=None, window_days=2,
             ps[0] += 1
             if action == "drop":
                 ps[1] += 1
-            elif events.get(eid, ("", "", 0))[2] < 200:
+            elif not eid.startswith("rd:") \
+                    and events.get(eid, ("", "", 0))[2] < 200:
+                # `rd:` Reddit link-post stubs are content-free BY
+                # CONSTRUCTION (134-138c of "submitted by /u/… [link]
+                # [comments]" boilerplate) and their `source` is
+                # domain_of(article_url), so the LINKED host was blamed for
+                # Reddit's wrapper — bleepingcomputer.com read as a junk
+                # source on stubs whose full article is also ingested with
+                # 1500c+ via RSS/Mastodon, and the standing skip policy would
+                # have put a high-value outlet on the skip list. They stay in
+                # the decision/drop counters above (the route is still
+                # audited); only the kept-stub statistic skips them
+                # (2026-10-18 owner decision 64afd59af45e, audit Issue 1).
                 ps[2] += 1
             raw_id = eid.split(":", 1)[1] if ":" in eid else None
             author = author_of.get(raw_id)
