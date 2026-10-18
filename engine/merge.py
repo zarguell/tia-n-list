@@ -492,6 +492,77 @@ def event_owner(stories, eid, exclude=None):
     return None
 
 
+# ── story-title hygiene (2026-10-18 owner decision 6cb97b2fc92b, audit
+# Issue 3 / Rec 5). A story's title was pinned to the FOUNDING event's raw
+# headline, so `we-ve-just-released-freerdp-3-32-0-…` rendered — on the story
+# page AND its CTI case page — as "We've just released # FreeRDP 3.32.0 …
+# Check it out at https:// fre" while the story's newer threataft.com event
+# carried a clean, specific title. Raw debris never renders as a story title
+# when a clean candidate exists.
+TITLE_URL_DEBRIS_RE = re.compile(r"https?://\s*\S*")        # URL / cut-off URL
+TITLE_HASHTAG_DEBRIS_RE = re.compile(r"(?<![A-Za-z0-9])#\s*(?=\w)")
+# clean_title's emoji strip can leave zero-width residue behind: the
+# FreeRDP toot's "\U0001F5A5\uFE0F" is a pictograph + U+FE0F and only the
+# pictograph matches EMOJI_RE. A published title must not start with an
+# invisible variation selector.
+TITLE_ZW_RESIDUE = "\ufe0f\u200b\u200c\u200d\u2060\ufeff"
+
+
+def strip_title_debris(title):
+    """Remove raw toot/aggregator debris from a headline: `#` hashtag MARKERS
+    (the word stays — dropping it mangles the headline, "a huge # feature"
+    must not become "a huge") and `https://` fragments, including the
+    truncated `https:// fre` shape a cut-off toot leaves."""
+    t = TITLE_URL_DEBRIS_RE.sub("", title or "")
+    t = TITLE_HASHTAG_DEBRIS_RE.sub("", t)
+    return re.sub(r"\s+", " ", t).strip()
+
+
+def _display_title(title):
+    """A story title fit to publish: emoji/marker-stripped, debris-stripped,
+    no leading/trailing zero-width residue."""
+    return clean_title(strip_title_debris(title)).strip(TITLE_ZW_RESIDUE).strip()
+
+
+def _raw_title(title):
+    """True when a headline carries raw toot/aggregator debris (a hashtag
+    marker or a URL / truncated-URL fragment) — see strip_title_debris."""
+    t = title or ""
+    return bool(TITLE_URL_DEBRIS_RE.search(t)
+                or TITLE_HASHTAG_DEBRIS_RE.search(t))
+
+
+def preferred_title(story, events_by_id=None):
+    """The story's display title after an event attaches, or None to keep it.
+
+    Deterministic rule (2026-10-18 owner decision 6cb97b2fc92b, audit Issue 3 /
+    Rec 5): a CLEAN story title — including triage's analyst-set
+    `story_title` — is never touched. When the story title is a raw founding
+    toot/aggregator headline, prefer the newest clean event title, non-social
+    routes first (an outlet's clean headline beats a social repost of it); if
+    no event has a clean title, strip the raw debris so it never renders.
+    """
+    if events_by_id is None:
+        events_by_id = globals().get("events") or {}
+    cur = (story.get("title") or "").strip()
+    if not cur or not _raw_title(cur):
+        return None
+    cands = [events_by_id[r["event_id"]]
+             for r in story.get("events", [])
+             if r.get("event_id") in events_by_id
+             and (events_by_id[r["event_id"]].get("title") or "").strip()]
+    cands.sort(key=lambda e: e.get("published_at") or "", reverse=True)
+    for e in cands:                       # newest non-social clean title
+        if not str(e.get("id", "")).startswith(SOCIAL_PREFIXES) \
+                and not _raw_title(e.get("title")):
+            return _display_title(e["title"])
+    for e in cands:                       # then any route's clean title
+        if not _raw_title(e.get("title")):
+            return _display_title(e["title"])
+    t = _display_title(cur)
+    return t if t and t != cur else None
+
+
 def _attach_event(eid, ev, s, stories=None):
     """Merge an event into an existing story as an update. Shared by the
     new-event queue and the social-pending replay (identical semantics:
@@ -526,6 +597,14 @@ def _attach_event(eid, ev, s, stories=None):
     s["first_seen"] = min(s.get("first_seen", ev["published_at"]), ev["published_at"])
     if ev["url"]:
         story_url_cache.setdefault(s["id"], set()).add(norm_url(ev["url"]))
+    # Title hygiene (2026-10-18 owner decision 6cb97b2fc92b, audit Issue 3 /
+    # Rec 5): the story title was pinned to the FOUNDING event's headline, so
+    # `we-ve-just-released-freerdp-3-32-0-…` rendered — on the story page and
+    # its CTI case page — as "We've just released # FreeRDP 3.32.0 … Check it
+    # out at https:// fre" while a newer event carried a clean title.
+    t = preferred_title(s)
+    if t:
+        s["title"] = t
     return True
 
 
@@ -629,7 +708,7 @@ def main():
                 continue
             ev["kind"] = "original"
             slug = build_slug(ev["title"], stories)
-            s = {"id": slug, "title": clean_title(ev["title"]),
+            s = {"id": slug, "title": _display_title(ev["title"]),
                  "first_seen": ev["published_at"], "last_seen": ev["published_at"],
                  "sources": [domain_of(ev["url"])] if ev["url"] else [],
                  "n_sources": 1 if ev["url"] else 0,
