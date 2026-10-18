@@ -9,9 +9,9 @@ verify gate; this suite pins the prose twin:
 
   1. the literal filler FAILS lint_analysis (the specificity check is the
      filler-killer: no CVE, no 2+ digit number, no version token);
-  2. structure + banned strings: an em dash, a heading, a single paragraph,
-     a >6000-char body and AI-slop phrases (case-insensitive, curly
-     apostrophes included) each fail;
+  2. structure + banned strings: an em dash, a heading, an over-long
+     paragraph count, a >6000-char body and AI-slop phrases (case-
+     insensitive, curly apostrophes included) each fail;
   3. a GOOD grounded analysis (CVE ids, numbers, 3 paragraphs, no banned
      strings) passes clean, at every legal paragraph count;
   4. lint_digest: a digest without a stories/ link fails, banned strings
@@ -108,8 +108,15 @@ one = GOOD.split("\n\n")[0]
 v = prose_lint.lint_analysis(one)
 check("1-paragraph analysis has NO hard violations (grounded, clean)",
       v == [])
-check("1-paragraph analysis is SOFT-flagged instead",
-      any("1 paragraph" in m for m in prose_lint.soft_paras(one)))
+# 2026-10-18 audit (decision 7925e9ba91b6): the 1-paragraph WARN was pure
+# log flood (325/day) with no editorial consequence — it is no longer
+# emitted, but a REAL prose-lint error in a 1-paragraph body still fails.
+check("1-paragraph analysis is no longer SOFT-flagged (log-flood fix)",
+      prose_lint.soft_paras(one) == [])
+check("1-paragraph analysis with a real lint error STILL fails hard",
+      any("em dash" in m for m in prose_lint.lint_analysis(
+          one.replace("September 12", "September\u201412")))
+      and prose_lint.soft_paras(one) == [])
 
 five = "\n\n".join(
     [para(f"Point {i}: the count reached 4,100 hosts on day {i}.", 35)

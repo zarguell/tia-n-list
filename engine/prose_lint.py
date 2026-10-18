@@ -96,7 +96,12 @@ TRIAGE_BOOKKEEPING = (
 # paragraph notes — mostly grounded, house-style writing. Enforcing 2-4 as
 # hard would quarantine 86% of the store for structure alone and flood the
 # re-analysis queue; the hard floor that actually separates filler from
-# analysis is MIN_LEN + grounding.
+# analysis is MIN_LEN + grounding. 2026-10-18 audit (decision 7925e9ba91b6):
+# even as a WARN the under-minimum arm flooded the logs (325 WARNs in one
+# cronman run, 25 in the digest log, every day) with zero editorial
+# consequence, so 1-paragraph notes are no longer reported at all — only an
+# OVER-LONG body (> MAX_PARAS) is soft-flagged. Hard prose errors still
+# fail via lint_analysis, unchanged.
 MIN_PARAS, MAX_PARAS = 2, 4
 MIN_LEN, MAX_LEN = 200, 6000
 
@@ -255,10 +260,13 @@ def lint_analysis(text, story=None, subject_title=None):
 
 def soft_paras(text):
     """SOFT violations: paragraph-count drift from the prompts' 2-4 promise.
-    Reported as WARNs, never quarantines (see the PARAGRAPH COUNT IS SOFT
-    note above — 86% of the real store is dense single-paragraph notes)."""
+    Reported as WARNs, never quarantines. Only an OVER-LONG body is reported
+    (2026-10-18 decision 7925e9ba91b6): the under-minimum arm was pure log
+    flood (1-paragraph notes are the house style — see the PARAGRAPH COUNT
+    IS SOFT note above), so routine short analyses no longer WARN. A real
+    prose-lint error still fails hard through lint_analysis."""
     paras = [p for p in re.split(r"\n\s*\n", text.strip()) if p.strip()]
-    if MIN_PARAS <= len(paras) <= MAX_PARAS:
+    if len(paras) <= MAX_PARAS:
         return []
     return [f"{len(paras)} paragraph(s) (prompts promise "
             f"{MIN_PARAS}-{MAX_PARAS} short plain paragraphs)"]
