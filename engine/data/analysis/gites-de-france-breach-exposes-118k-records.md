@@ -1,0 +1,3 @@
+Gites de France, a vacation-rental platform, disclosed a breach affecting approximately 118,000 user records. The exposed data includes email addresses, names, phone numbers, and booking details. A social report from yazoul.net corroborates the scale, while an earlier beesint.com entry marked the incident as verified. The breach appears tied to the platform's own infrastructure rather than a named third-party vendor.
+
+No CVEs are linked. Watch for any follow-on reports confirming attacker access timelines or whether payment details were in scope. The incident is verified but lacks technical detail on the initial vector.
