@@ -1,0 +1,3 @@
+SANS ISC noted orphaned VBA macro projects embedded inside AutoCAD DWG drawing files. The original diary entry warned that .dwg files can carry hidden VBA code, and the follow-up provided a YARA detection rule. There is no named CVE or observed exploitation campaign; the concern is a persistent file-format abuse vector for malware delivery. Architects and engineering teams should treat untrusted DWG files as potential carriers, not just design assets.
+
+This is a narrow, defensive-technical story rather than an active breach. The YARA rule gives defenders a concrete detection mechanism. Watch for any future reports linking DWG-hosted VBA to actual incident response findings or vendor patches from Autodesk.
