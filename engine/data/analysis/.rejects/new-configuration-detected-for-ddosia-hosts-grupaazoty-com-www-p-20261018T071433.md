@@ -1,0 +1,3 @@
+DDosia configuration updates continue, with a new target list adding hosts including nerigroup.net, interportopd.it, arcospedizioni.it, and cittametropolitanacagliari. The event comes from witha.name, a DDosia tracking feed, and updates the existing story. There are no CVEs; this is DDoS infrastructure tracking rather than a vulnerability.
+
+What matters: DDosia remains active with fresh targets in Italy and elsewhere. The story has low authority (two sources) and low score, but the update confirms ongoing campaign operation. Monitor for larger target expansions or coordination with other attack campaigns.

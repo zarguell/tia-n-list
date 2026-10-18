@@ -1,3 +1,0 @@
-A new DDosia configuration detected on October 11 targets Polish organizations including grupaazoty.com, powiatzary.pl, pwe.pzu.pl, inpzu.pl, zaloguj.netia.pl, and bondspot. The list updates an ongoing campaign tracked since September. DDosia is a volunteer-driven DDoS tool used primarily against European targets. The configuration includes both government-related and commercial hosts in Poland.
-
-No victim reports or downtime confirmations accompany the new host list in the event text. The event is a target list update rather than an incident report. Monitor for actual service disruptions in Poland linked to these domains. The source is witha.name, which tracks DDosia configurations.

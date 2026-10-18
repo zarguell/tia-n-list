@@ -1,0 +1,3 @@
+The event describes original research showing how AI log-reading filters can be bypassed by log content that leaks secrets, with 30+ bypasses demonstrated across three models. The source is jl3-cloud.site, a personal blog. There is no CVE and no named vendor advisory. The claim is technical and specific.
+
+What matters: this is primary security research with reproducible results, not an aggregator repost. It highlights a new attack surface at the intersection of AI and log processing. The single-source status limits authority, but the substance justifies tracking. Watch for peer review, vendor responses, or follow-up reports confirming the findings.
