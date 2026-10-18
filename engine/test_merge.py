@@ -346,6 +346,74 @@ try:
 finally:
     merge.STORIES, merge.MANIFEST, merge.QUEUE = _orig_stories, _orig_manifest, _orig_queue
 
+print("== story-title hygiene (2026-10-18 decisions batch 6cb97b2fc92b) ==")
+# The FreeRDP regression (audit Issue 3 / Rec 5): the story title stayed
+# pinned to the FOUNDING toot's raw headline while the story's newer
+# threataft.com event carried a clean title. A raw toot/aggregator title is
+# replaced by the newest clean event title; a clean (analyst-set) title is
+# never touched.
+RAW = ("We've just released # FreeRDP 3.32.0 This one is a huge # feature "
+       "and # CVE release, update highly recommended! Check it out at "
+       "https:// fre")
+CLEAN = "FreeRDP 3.32.0 fixes CVE-2026-111380 (8.8) in macOS/iOS"
+check("raw toot debris detected", merge._raw_title(RAW), True)
+check("a clean headline is not raw", merge._raw_title(CLEAN), False)
+check("hashtag markers stripped, words kept",
+      merge.strip_title_debris("a huge # feature and #CVE fix"),
+      "a huge feature and CVE fix")
+check("truncated https:// fragment stripped",
+      merge.strip_title_debris("Update now https:// fre"), "Update now")
+check("full URL stripped",
+      merge.strip_title_debris("Advisory at https://example.com/a"),
+      "Advisory at")
+check("emoji-strip residue never leads a published title",
+      merge._display_title("\U0001F5A5\uFE0F FreeRDP 3.32.0"), "FreeRDP 3.32.0")
+
+_t_events = {
+    "masto:old": {"id": "masto:old", "title": RAW,
+                  "published_at": "2026-09-23T07:51:53Z",
+                  "url": "https://freerdp.com/"},
+    "masto:new": {"id": "masto:new", "title": CLEAN,
+                  "published_at": "2026-10-17T12:35:58Z",
+                  "url": "https://threataft.com/articles/freerdp-cluster"},
+}
+_t_story = {"id": "freerdp", "title": RAW, "cves": [], "n_sources": 1,
+            "sources": ["freerdp.com"], "first_seen": "2026-09-23T07:51:53Z",
+            "last_seen": "2026-10-17T12:35:58Z",
+            "events": [{"event_id": "masto:old", "label": "original"},
+                       {"event_id": "masto:new", "label": "update"}]}
+check("raw founding title replaced by the newest clean event title",
+      merge.preferred_title(_t_story, _t_events), CLEAN)
+check("clean (analyst-set) title is never touched",
+      merge.preferred_title(dict(_t_story, title="Analyst picked this"),
+                            _t_events) is None, True)
+check("no clean candidate -> debris stripped from the current title",
+      merge.preferred_title(
+          dict(_t_story, events=[{"event_id": "masto:old"}]), _t_events),
+      ("We've just released FreeRDP 3.32.0 This one is a huge feature and "
+       "CVE release, update highly recommended! Check it out at"))
+_social_newer = dict(_t_events,
+                     **{"rss:later": {"id": "rss:later",
+                                      "title": CLEAN,
+                                      "published_at": "2026-10-18T10:00:00Z"}})
+check("newest clean title wins across routes",
+      merge.preferred_title(_t_story, _social_newer), CLEAN)
+
+# the attach seam applies the rule (the FreeRDP story heals on its next
+# event); the global events map is what _attach_event already uses elsewhere
+_orig_events = globals().get("merge").events if hasattr(merge, "events") else None
+merge.events = _t_events
+merge.story_url_cache = {}
+_attach_story = {"id": "freerdp", "title": RAW, "events": [], "sources": [],
+                 "n_sources": 0, "cves": [],
+                 "first_seen": "2026-09-23T07:51:53Z",
+                 "last_seen": "2026-09-23T07:51:53Z"}
+_attached = merge._attach_event("masto:new", dict(_t_events["masto:new"],
+                                                  cves=[]), _attach_story)
+check("attach refreshes a raw story title",
+      (_attached, _attach_story["title"]), (True, CLEAN))
+merge.events = _orig_events if _orig_events is not None else {}
+
 print()
 if failures:
     print(f"FAILED: {len(failures)}: {failures}")
