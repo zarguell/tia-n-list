@@ -98,6 +98,28 @@ NOVELTY_TTP_RE = re.compile(
     r"living[\s-]?off[\s-]?the[\s-]?land)\b", re.I)
 NOVELTY_MULTI_SOURCE = 0.5  # severity bonus for corroborated no-CVE novelty
 
+# ── zero-delta repost stubs (2026-10-18 owner decision 6aad368c1a1b, audit
+# Rec 1a). `rd:` Reddit link-posts are content-free stubs: 134-138c of
+# "submitted by /u/… [link] [comments]" boilerplate wrapped around the
+# outlet's headline (the stub's `source` is domain_of(article_url), so a link
+# post to a BleepingComputer article was even scored against
+# bleepingcomputer.com). They keep landing as the NEWEST event on already
+# covered stories — 26/26 of the 2026-10-18 digest demotes, 18/18 the day
+# before — and resurfaced those stories on the slate. A repost stub is a
+# development ONLY when it carries a new CVE (settled by is_rereport before
+# this leg), a new actor attribution, a new victim count, or a new IOC;
+# otherwise it scores as ZERO-DELTA: no velocity, no recency, no pickup, no
+# novelty, no rank promotion.
+REPOST_STUB_RE = re.compile(r"^rd:")
+# "victim count" = a number attached to a victim-bearing noun. Same shape as
+# SIGNALS' breach-scale rule, widened to the nouns real breach coverage names
+# ("2,500+ organizations", "8.8 million records", "4,100 victims").
+VICTIM_COUNT_RE = re.compile(
+    r"\b\d[\d,.]*\+?\s*(?:million|billion|thousand)?\s*"
+    r"(?:records?|accounts?|users?|customers?|patients?|employees?|"
+    r"organizations?|organisations?|companies?|victims?|hosts?|devices?|"
+    r"members?|subscribers?|people)\b", re.I)
+
 # Keys the SSG "Why this score" template renders from a score breakdown.
 # A story missing any of these raises a jinja UndefinedError that aborts the
 # whole site build, so the store writers (merge / repair_dedupe / triage)
@@ -237,6 +259,54 @@ def _cvss_severity(cves):
     return _cvss_band(best), kev, bonus
 
 
+def _victim_counts(text):
+    """Normalized victim-count phrases in a text (a set, for delta compare)."""
+    return {re.sub(r"\s+", " ", m.group(0).lower().strip())
+            for m in VICTIM_COUNT_RE.finditer(text or "")}
+
+
+def _ioc_values(text):
+    """IOC values named in a text (public IPs / hosts / hashes, precision-
+    filtered by engine/ioc). Lazy import: score is imported by merge and
+    triage, so it must not grow a module-level dependency of its own."""
+    if not text:
+        return set()
+    import ioc
+    return set(ioc.extract_from_text(text))
+
+
+def _actor_tokens(disc):
+    """The title's discriminators that name a known threat actor."""
+    from merge import ACTOR_TOKENS, _actor_norm
+    return _actor_norm(disc) & ACTOR_TOKENS
+
+
+def _prior_actor_tokens(prior_events):
+    """Actor tokens named by the story's prior event titles."""
+    from merge import title_discriminators, ACTOR_TOKENS, _actor_norm
+    out = set()
+    for p in prior_events:
+        out |= (_actor_norm(title_discriminators(p.get("title") or ""))
+                & ACTOR_TOKENS)
+    return out
+
+
+def _repost_delta(event, prior_events, disc):
+    """True when a repost stub still carries a genuine new development: a new
+    actor attribution, a new victim count, or a new IOC. A new CVE is settled
+    by is_rereport before this runs. False = zero-delta echo (see
+    REPOST_STUB_RE)."""
+    if _actor_tokens(disc) - _prior_actor_tokens(prior_events):
+        return True
+    text = (event.get("title") or "") + " " + (event.get("content_md") or "")
+    prior_text = " ".join((p.get("title") or "") + " "
+                          + (p.get("content_md") or "")
+                          for p in prior_events)
+    if _victim_counts(text) - _victim_counts(prior_text):
+        return True               # a new victim count
+    return bool(_ioc_values(text) - _ioc_values(prior_text))
+
+
 def is_rereport(event, prior_events, *, low_jaccard=0.25, high_jaccard=0.55,
                 min_gap_h=24, story_title=None):
     """True when `event` re-reports coverage the story already carries.
@@ -278,12 +348,18 @@ def is_rereport(event, prior_events, *, low_jaccard=0.25, high_jaccard=0.55,
         >= high_jaccard) is an echo of covered material even when no single
         prior matches. Off unless the caller passes it (hot_score does;
         digest_candidates keeps its EVOLVED semantics unchanged).
+    Plus the zero-delta repost leg (2026-10-18 owner decision 6aad368c1a1b,
+    audit Rec 1a): an `rd:` Reddit link-post is judged on the DELTA it
+    carries, never on title overlap — its content is boilerplate, so how its
+    headline tokenizes says nothing about whether the story developed. A stub
+    with no new CVE, actor, victim count, or IOC is a zero-delta echo.
+
     Pure: both arguments are event dicts; tokenization reuses merge's
     discriminator sets (lazy import — merge imports this module).
     """
     if not prior_events:
         return False
-    from merge import title_discriminators, CVE_RE, ACTOR_TOKENS, _actor_norm
+    from merge import title_discriminators, CVE_RE
     try:
         ev_dt = datetime.fromisoformat(
             (event.get("published_at") or "").replace("Z", "+00:00"))
@@ -298,9 +374,17 @@ def is_rereport(event, prior_events, *, low_jaccard=0.25, high_jaccard=0.55,
     new_cves = ev_cves - prior_cves
     if ev_cves and new_cves:
         return False              # brings a new CVE: a development, not an echo
+    disc = title_discriminators(event.get("title") or "")
+    # Zero-delta repost stub leg (2026-10-18 owner decision 6aad368c1a1b — see
+    # REPOST_STUB_RE). Placed before the title floors on purpose: the stub is
+    # content-free, so it must not earn velocity/pickup/recency by resembling
+    # anything, and it must not dodge the rule by tokenizing thinly either.
+    if REPOST_STUB_RE.match(event.get("id") or event.get("event_id") or ""):
+        if _repost_delta(event, prior_events, disc):
+            return False          # a genuine delta: a development
+        return True               # content-free stub, no delta: zero-delta echo
     floor = low_jaccard if ev_cves else high_jaccard
     min_shared = 1 if ev_cves else 2
-    disc = title_discriminators(event.get("title") or "")
     if len(disc) < min_shared:
         return False
     if ev_cves and not new_cves:
@@ -310,11 +394,7 @@ def is_rereport(event, prior_events, *, low_jaccard=0.25, high_jaccard=0.55,
         # exploitation confirmation. Attribution or in-the-wild proof
         # emerging days later is a development the dev-clock must not erase;
         # a reworded outlet re-tell with none of the three stays an echo.
-        prior_actors = set()
-        for p in prior_events:
-            prior_actors |= (_actor_norm(
-                title_discriminators(p.get("title") or "")) & ACTOR_TOKENS)
-        if (_actor_norm(disc) & ACTOR_TOKENS) - prior_actors:
+        if _actor_tokens(disc) - _prior_actor_tokens(prior_events):
             return False          # new actor attribution: a development
         ev_title = event.get("title") or ""
         if IN_WILD_RE.search(ev_title) and not any(
@@ -393,7 +473,14 @@ def hot_score(story, events, reddit_posts, now=None):
     cves = story.get("cves", [])
     sev, kev, epss_bonus = _cvss_severity(cves)
     title = (story.get("title") or "").lower()
-    body_text = " ".join(events.get(r["event_id"], {}).get("content_md", "") for r in story.get("events", []))[:4000].lower()
+    # Repost stubs are excluded from the scoring text (2026-10-18 decision
+    # 6aad368c1a1b): their "content" is the outlet headline wrapped in Reddit
+    # boilerplate, so it must not mint severity signals or the corroborated-
+    # novelty bonus for a story the stub did not develop.
+    body_text = " ".join(
+        events.get(r["event_id"], {}).get("content_md", "")
+        for r in story.get("events", [])
+        if not REPOST_STUB_RE.match(r["event_id"] or ""))[:4000].lower()
     text = title + " " + body_text
     # CVSS the coverage states but the local NVD store lacks (research CVEs
     # missing from kevrichment/nvd-info) — same band, so an "unpatched CVSS
@@ -444,10 +531,12 @@ def hot_score(story, events, reddit_posts, now=None):
         prior.append(e)
     velocity = min(2.0, 0.5 * n48)
 
-    # pickup speed: hours between the first and second event
+    # pickup speed: hours between the first and second GENUINE development —
+    # echo events earn no pickup (2026-10-18 decision 6aad368c1a1b: a
+    # zero-delta repost must never promote the rank), matching the velocity
+    # and decay-anchor semantics above.
     pickup = 0.0
-    ts = sorted(parse(events[ref["event_id"]]["published_at"])
-                for ref in story.get("events", []) if ref["event_id"] in events)
+    ts = sorted(dev_dts)
     if len(ts) >= 2:
         gap_h = max(0.0, (ts[1] - ts[0]).total_seconds() / 3600)
         pickup = 0.6 * (2.718 ** (-gap_h / 24))
