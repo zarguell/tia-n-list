@@ -9,7 +9,9 @@ overridden >= 3 times to this single class. The contracts pinned here:
 
   1. score.is_rereport: founding events are never echoes; same-CVE reworded
      headlines are; events bringing a NEW CVE are developments even when the
-     headline is near-identical; CVE-less stories classify on title overlap.
+     headline is near-identical; CVE-less stories classify on title overlap;
+     `rd:` repost stubs classify on the DELTA they carry (a new CVE, actor,
+     victim count, or IOC) and are otherwise zero-delta echoes.
   2. score.hot_score: echoes count zero velocity and never move the decay
      anchor — a story bumped only by echoes decays from its last genuine
      development; one genuine development re-warms it.
@@ -222,6 +224,96 @@ check("echo-only day-2 bump adds no velocity (hot_score)", sch["velocity"], 0.0)
 check("echo-only day-2 bump counted as re-report", sch["rereports"], 1)
 check("decay anchors to the genuine development (60h, not 4h)",
       sch["recency"] < 0.2, True)
+
+# ── 6. zero-delta repost stubs (2026-10-18 owner decision 6aad368c1a1b,
+# audit Rec 1a): an `rd:` Reddit link-post is 134-138c of boilerplate around
+# the outlet headline and must not promote a story's rank unless it brings a
+# new CVE, actor, victim count, or IOC. ────────────────────────────────────
+
+
+def rd(eid, title, published, cves=(), body=""):
+    """An `rd:` Reddit link-post stub: real headline, boilerplate content."""
+    return {"id": eid, "title": title, "published_at": published,
+            "cves": list(cves),
+            "url": f"https://www.bleepingcomputer.com/{eid}",
+            "source": "bleepingcomputer.com", "kind": "update", "lang": "en",
+            "content_md": ("submitted by /u/someone [link] [comments]\n\n"
+                           f"via reddit r/cybersecurity: {title}\n{body}")}
+
+
+rbase = ev("rb1", "Candiru spyware campaign hit Middle East journalists",
+           iso(60))
+rstub = rd("rd:t3_a",
+           "Targeted ads installed Candiru spyware in zero-click attacks",
+           iso(2))
+check("repost stub with no delta is a re-report (echo)",
+      score.is_rereport(rstub, [rbase]), True)
+sc_plain = _score([rbase])
+sc_stub = _score([rbase, rstub])
+check("a story whose only new event is an rd: stub does not gain rank",
+      sc_stub["score"], sc_plain["score"])
+check("...the stub adds zero velocity", sc_stub["velocity"], 0.0)
+check("...the decay anchor stays on the genuine development",
+      sc_stub["recency"], sc_plain["recency"])
+check("...and the stub earns no pickup", sc_stub["pickup"], 0.0)
+
+# the same stub WITH a genuine delta is a development and re-warms the story
+rlock = rd("rd:t3_b", "LockBit claims the Candiru spyware campaign", iso(2))
+check("...but the same stub naming a NEW actor is a development",
+      score.is_rereport(rlock, [rbase]), False)
+check("a stub with a new actor DOES promote the rank",
+      _score([rbase, rlock])["score"] > sc_plain["score"], True)
+rcve = rd("rd:t3_c", "Candiru spyware zero-day tracked as CVE-2026-4242",
+          iso(2), ["CVE-2026-4242"])
+check("a stub carrying a NEW CVE is a development",
+      score.is_rereport(rcve, [rbase]), False)
+
+# victim count: a grown count is a development, the same count is an echo
+vprior = ev("rv1", "Candiru spyware campaign linked to 900 victims", iso(30))
+vmore = rd("rd:t3_d", "Candiru spyware campaign linked to 4,100 victims",
+           iso(2))
+check("a stub carrying a NEW victim count is a development (count grew)",
+      score.is_rereport(vmore, [vprior]), False)
+vsame = rd("rd:t3_e", "Ads pushed Candiru spyware to 900 victims", iso(2))
+check("a victim count already in the priors stays an echo (reworded stub)",
+      score.is_rereport(vsame, [vprior]), True)
+
+# IOC: a new observable is a development, a known one is an echo
+iprior = ev("ri1", "Candiru spyware C2 server found at 45.153.160.10",
+            iso(30))
+inew = rd("rd:t3_f", "Candiru spyware C2 server found at 91.219.236.77",
+          iso(2))
+check("a stub naming a NEW IOC is a development (different C2 IP)",
+      score.is_rereport(inew, [iprior]), False)
+isame = rd("rd:t3_g",
+           "Candiru spyware drops second-stage loader from 45.153.160.10",
+           iso(2))
+check("an IOC already in the priors stays an echo",
+      score.is_rereport(isame, [iprior]), True)
+
+# novelty: an rd: stub's boilerplate-wrapped headline must never mint the
+# corroborated-novelty bonus for a story it did not develop.
+nov_prior = ev("nz1", "Fake LastPass authenticator pushes malware at users",
+               iso(20))
+nov_stub = rd("rd:t3_h", "Tox C2 loader dropper used by the stealer", iso(2))
+
+
+def _nov_story(events):
+    s = _story(events)
+    s["sources"] = ["example.com", "example.org"]
+    s["n_sources"] = 2
+    return s
+
+
+sc_nov = score.hot_score(_nov_story([nov_prior, nov_stub]),
+                         {e["id"]: e for e in [nov_prior, nov_stub]},
+                         [], now=BASE)
+check("an rd: stub never mints the corroborated-novelty bonus",
+      sc_nov["novelty"], 0.0)
+nov_dev = ev("nz2", "Tox C2 loader dropper used by the stealer", iso(20))
+check("a genuine TTP development still earns novelty (control)",
+      score.hot_score(_nov_story([nov_dev]), {"nz2": nov_dev}, [],
+                      now=BASE)["novelty"], 0.5)
 
 print()
 if failures:
