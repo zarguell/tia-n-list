@@ -324,6 +324,36 @@ def test_never_covered_decayed_story_lands_on_uncovered_slate():
     fx.close()
 
 
+def test_rd_stub_does_not_set_the_feed_baseline():
+    """2026-10-18 decision 64afd59af45e (audit Issue 1): an `rd:` Reddit
+    link-post stub is a SOCIAL route and must not count as the newest FEED
+    event. Dated today, a stub otherwise lifts the social-revive baseline
+    past the 3-day gap and lets a stale Mastodon echo re-develop a cold
+    story (the Cisco SD-WAN revival class the gap exists to stop)."""
+    fx = Fixture()
+    fx.digest("2026-08-12", ["cold"])
+    fx.digest("2026-08-13", ["cold"])
+    evs = [
+        fx.event("rss:old", "2026-05-01T10:00:00Z",
+                 "Zephyrquill spyware infected 4,100 payment kiosks"),
+        fx.event("masto:echo", "2026-08-13T09:00:00Z",
+                 "Retail kiosks still compromised three months later"),
+        fx.event("rd:t3_new", "2026-08-14T08:00:00Z",
+                 "Zephyrquill spyware infected 4,100 payment kiosks, "
+                 "report says"),
+    ]
+    fx.story("cold", evs, cves=["CVE-2026-77777"])
+    r = row(fx, "cold")
+    assert r["newest_development_at"] == "2026-05-01", \
+        ("the rd: stub and the gated social echo must not extend the "
+         f"development clock (got {r['newest_development_at']})")
+    assert r["evolved"] is False, \
+        "a cold story is not re-developed by an rd: stub or a stale social echo"
+    assert r["catchup"] is True
+    assert r["n_events"] == 3, "rd: events stay in the store/display"
+    fx.close()
+
+
 def main():
     tests = [v for k, v in sorted(globals().items())
              if k.startswith("test_") and callable(v)]
