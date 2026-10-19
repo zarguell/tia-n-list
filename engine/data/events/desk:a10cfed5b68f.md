@@ -1,0 +1,1 @@
+Patchstack confirmed the campaign and extended the observed scope, noting the commands were correctly signed with genuine dashboard keys and that affected releases 1.26.11 and 2.26.11.26 were impacted. They advised deleting UpdraftCentral keys as the effective mitigation because no plugin update stopped the attack at publication.

@@ -1,0 +1,1 @@
+Nethemba discovered the campaign on their own infrastructure and published the first technical analysis, including indicators of compromise and a read-only checking script. They reported the issue to TeamUpdraft after finding that attackers used valid UpdraftCentral connection keys to upload backdoor plugins to connected WordPress sites.
