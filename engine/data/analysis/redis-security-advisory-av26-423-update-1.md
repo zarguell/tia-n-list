@@ -1,0 +1,3 @@
+The Canadian Cyber Centre updated Redis advisory AV26-423 on October 19, confirming open-source reports that CVE-2026-25243 is being exploited in the wild. The advisory covers Redis Software and Redis OSS/CE releases affected by multiple vulnerabilities (CVE-2026-23479, CVE-2026-25243, CVE-2026-25588, CVE-2026-25589, CVE-2026-23631). Users should apply updates promptly.
+
+Active exploitation of CVE-2026-25243 raises urgency. The advisory does not detail victim scope or attack method; treat all affected Redis instances as high-risk. Monitor for follow-up reports linking the exploitation to specific campaigns.

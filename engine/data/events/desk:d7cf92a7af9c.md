@@ -1,0 +1,1 @@
+Huntress confirmed a compromised ConnectWise Cloud Backup API secret (formerly SkyKick) was used to gain unauthorized access to customer Microsoft 365 tenants. The credential abuse began around October 14-15, 2026, with unauthorized sign-ins confirmed across 173 M365 partner and customer tenants by October 17, 2026. Huntress published technical details and IOCs for defenders.

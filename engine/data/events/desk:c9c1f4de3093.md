@@ -1,0 +1,1 @@
+ConnectWise disabled seven application identities at 07:00 UTC on October 17, 2026, and revoked certificates for affected connections. The advisory notes that since implementing mitigations the vendor has not observed successful threat activity in monitored environments. Technical guidance includes the disabled identities and recommendations for reviewing M365 sign-in logs.

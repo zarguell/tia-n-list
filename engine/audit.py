@@ -296,6 +296,11 @@ EXTRA = {
     # consecutive digests whose newest event adds no new CVE/actor/victim
     # count/IOC. Informational for the desk; nothing auto-merges/rewrites.
     "stale_demoted": jc.stale_demoted_stories(DATA, _all_stories, NOW),
+    # 2026-10-19 owner decision 44e6933152d1 (audit Issue 4 / Rec 3):
+    # report-only aggregator-series and same-disclosure probes. Informational
+    # for the desk; never merged, never a check failure.
+    "aggregator_series": jc.aggregator_series_suspects(_all_stories),
+    "same_disclosure": jc.same_disclosure_suspects(DATA, _all_stories, NOW),
     "digest_overrides": jc.digest_overrides(DATA),
     "samples": jc.sampling_targets(DATA),
     "trends": jc.store_trends(DATA, _all_stories, NOW),
