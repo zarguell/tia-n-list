@@ -414,6 +414,57 @@ check("attach refreshes a raw story title",
       (_attached, _attach_story["title"]), (True, CLEAN))
 merge.events = _orig_events if _orig_events is not None else {}
 
+# ── retroactive title heal (2026-10-19 owner decision ad4c5d039830,
+# completing 6cb97b2fc92b). The 2026-10-18 rule ran only inside
+# _attach_event, so a story that received no new event stayed raw forever
+# (the Chrome 153 driver). heal_raw_titles() reconciles every live story —
+# and its CTI record title — after scoring.
+print("== retroactive title heal ==")
+_h_dir = tempfile.mkdtemp()
+_h_events = {
+    "he:1": {"id": "he:1",
+             "title": "A clean event headline about the FreeRDP release",
+             "published_at": "2026-10-17T10:00:00Z"},
+    "he:2": {"id": "he:2", "title": "raw # debris https:// example.com trunca",
+             "published_at": "2026-10-18T10:00:00Z"},
+}
+_h_stories = {
+    "healed": {"id": "healed", "title": "raw founding # toot https:// example.com",
+               "events": [{"event_id": "he:1"}, {"event_id": "he:2"}],
+               "sources": [], "cves": [], "last_seen": "2026-10-18T10:00:00Z"},
+    "already-clean": {"id": "already-clean",
+                      "title": "Analyst picked this headline",
+                      "events": [{"event_id": "he:1"}],
+                      "sources": [], "cves": []},
+    "shell": {"id": "shell", "title": "raw # shell debris https:// x.y",
+              "events": [], "merged_into": "healed"},
+}
+os.makedirs(os.path.join(_h_dir, "cti"), exist_ok=True)
+json.dump({"story_id": "healed", "title": "raw # debris https:// x.y",
+           "references": []},
+          open(os.path.join(_h_dir, "cti", "healed.json"), "w"))
+json.dump({"story_id": "already-clean", "title": "Analyst case title",
+           "references": []},
+          open(os.path.join(_h_dir, "cti", "already-clean.json"), "w"))
+_h_n, _h_c = merge.heal_raw_titles(_h_stories, _h_events, stories_dir=_h_dir,
+                                   cti_dir=os.path.join(_h_dir, "cti"))
+check("raw live story healed; clean title untouched",
+      (_h_stories["healed"]["title"], _h_stories["already-clean"]["title"]),
+      ("A clean event headline about the FreeRDP release",
+       "Analyst picked this headline"))
+check("merged redirect shell is not healed",
+      _h_stories["shell"]["title"], "raw # shell debris https:// x.y")
+check("heal counts stories and cti records", (_h_n, _h_c), (1, 1))
+check("raw CTI record title healed to the story title",
+      json.load(open(os.path.join(_h_dir, "cti", "healed.json")))["title"],
+      "A clean event headline about the FreeRDP release")
+check("clean CTI record title untouched",
+      json.load(open(os.path.join(_h_dir, "cti", "already-clean.json")))["title"],
+      "Analyst case title")
+check("heal is idempotent (second pass heals nothing)",
+      merge.heal_raw_titles(_h_stories, _h_events, stories_dir=_h_dir,
+                            cti_dir=os.path.join(_h_dir, "cti")), (0, 0))
+
 print()
 if failures:
     print(f"FAILED: {len(failures)}: {failures}")

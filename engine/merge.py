@@ -29,6 +29,7 @@ QUEUE = os.path.join(DATA, "new-events.json")
 MANIFEST = os.path.join(DATA, "manifest.json")
 ANALYSIS_DIR = os.path.join(DATA, "analysis")
 NEEDS = os.path.join(DATA, "needs-analysis.json")
+CTI_DIR = os.path.join(DATA, "cti")
 HOT_THRESHOLD = 3.3      # analysis-queue gate on the 0-10 scale (was 2.0 on 0-6); deliberately below the display 5.0 for coverage
 CVE_RE = re.compile(r"CVE-\d{4}-\d{4,7}", re.IGNORECASE)
 
@@ -563,6 +564,51 @@ def preferred_title(story, events_by_id=None):
     return t if t and t != cur else None
 
 
+def heal_raw_titles(stories, events_by_id=None, stories_dir=None, cti_dir=None):
+    """Retroactive title heal for stories that predate the attach-time rule
+    (2026-10-19 owner decision ad4c5d039830, completing 6cb97b2fc92b): the
+    2026-10-18 title rule ran ONLY inside _attach_event, so a story that
+    received no new event after it landed (e.g. the Chrome 153 story, newest
+    event 2026-10-18T02:19Z, before the 14:40Z merge) kept its raw founding
+    toot headline forever — the audit's 236 live debris titles on 10-19.
+
+    `preferred_title` is applied to EVERY live story here, not only at attach
+    time (a clean or analyst-set title returns None and is never touched),
+    and the healed title is written back to the story json. For a story that
+    has a CTI record, a record title that is itself raw debris is healed to
+    the story's title: the CTI case page renders the record title verbatim,
+    so leaving it would keep the debris published. Returns
+    (stories_healed, cti_records_healed); pure except for the file writes.
+    """
+    if events_by_id is None:
+        events_by_id = globals().get("events") or {}
+    stories_dir = stories_dir or STORIES
+    if cti_dir is None:
+        cti_dir = CTI_DIR
+    healed = cti_healed = 0
+    for s in stories.values():
+        if s.get("merged_into"):
+            continue               # redirect shells render nothing to heal
+        t = preferred_title(s, events_by_id)
+        if t:
+            s["title"] = t
+            json.dump(s, open(os.path.join(stories_dir, s["id"] + ".json"), "w"),
+                      indent=1)
+            healed += 1
+        p = os.path.join(cti_dir, s["id"] + ".json")
+        if not os.path.exists(p):
+            continue
+        try:
+            r = json.load(open(p))
+        except (json.JSONDecodeError, ValueError, OSError):
+            continue
+        if _raw_title(r.get("title")):
+            r["title"] = s["title"]
+            json.dump(r, open(p, "w"), indent=1)
+            cti_healed += 1
+    return healed, cti_healed
+
+
 def _attach_event(eid, ev, s, stories=None):
     """Merge an event into an existing story as an update. Shared by the
     new-event queue and the social-pending replay (identical semantics:
@@ -745,6 +791,15 @@ def main():
         backfill_score_breakdown(s)
         s.setdefault("score", 0.0)
         json.dump(s, open(os.path.join(STORIES, s["id"] + ".json"), "w"), indent=1)
+
+    # Retroactive title heal (2026-10-19 owner decision ad4c5d039830):
+    # reconcile EVERY live story (and its CTI record title) after scoring, so
+    # a story that received no new event since the 2026-10-18 rule landed
+    # still heals and no raw toot/aggregator debris renders. Idempotent —
+    # preferred_title returns None for an already-clean title.
+    _healed, _cti_healed = heal_raw_titles(stories, events)
+    if _healed or _cti_healed:
+        print(f"title heal: {_healed} stories, {_cti_healed} CTI records")
 
     _save_pending(pending)
     json.dump(manifest, open(MANIFEST, "w"), indent=1)
