@@ -1,0 +1,3 @@
+OpenCode disclosed on October 17 that an intruder accessed a legacy system and potentially exposed provider API keys saved in OpenCode Console. The response guidance advises users to revoke keys directly in the provider's dashboard (not via email links), generate new keys, review usage back to October 17, and set rotation intervals. The breach affects legacy infrastructure rather than current production systems, but exposed API keys can grant persistent access to connected services.
+
+This is an incident-response and supply-chain hygiene story rather than a vulnerability disclosure. Organizations using OpenCode should audit legacy key exposure and enforce rotation. No CVE is assigned; the priority is containment through key revocation and usage auditing.

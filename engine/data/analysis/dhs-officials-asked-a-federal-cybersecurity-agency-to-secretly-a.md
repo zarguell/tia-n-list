@@ -1,0 +1,3 @@
+A ProPublica report states that DHS appointees made an unusual request of CISA: secretly acquire a voting machine and attempt to hack it. The request ties to election-security concerns and reflects tensions around how federal cybersecurity agencies test voting infrastructure. The event was shared via Mastodon linking to the original ProPublica article.
+
+This is a policy and institutional-integrity story rather than a technical vulnerability. It raises questions about the scope and transparency of federal election-security testing. No CVE or technical exploitation claim is involved; watch for official CISA or DHS responses clarifying authorization and oversight.
