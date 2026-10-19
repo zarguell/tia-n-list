@@ -291,6 +291,11 @@ check("ingest_noise", not _noise_p, "; ".join(_noise_p[:4]) or "sources clean")
 
 EXTRA = {
     "duplicate_suspects": jc.duplicate_suspects(_all_stories, NOW),
+    # 2026-10-19 owner decision 1ba8f94ae822 (audit Issue 2 / Rec 4):
+    # report-only stale-story lifecycle signal — live stories demoted on
+    # consecutive digests whose newest event adds no new CVE/actor/victim
+    # count/IOC. Informational for the desk; nothing auto-merges/rewrites.
+    "stale_demoted": jc.stale_demoted_stories(DATA, _all_stories, NOW),
     "digest_overrides": jc.digest_overrides(DATA),
     "samples": jc.sampling_targets(DATA),
     "trends": jc.store_trends(DATA, _all_stories, NOW),

@@ -19,7 +19,8 @@ from datetime import datetime, timedelta, timezone
 from merge import (title_jaccard, distinct_series_codes,
                    distinct_advisory_ids, distinct_periods, period_tokens,
                    title_discriminators, ACTOR_TOKENS, _actor_norm,
-                   _series_codes)
+                   _series_codes, _norm_tokens, CVE_RE)
+import ioc as ioc_mod
 
 CJK_RE = re.compile(r"[\u0400-\u04FF\u4E00-\u9FFF\u3040-\u30FF\uAC00-\uD7AF\u0600-\u06FF]")
 
@@ -321,6 +322,130 @@ def duplicate_suspects(stories, now, max_out=10, max_age_days=45, min_jaccard=0.
                         "jaccard": round(j_, 2),
                         "title_a": ta[:70], "title_b": tb[:70]})
     out.sort(key=lambda x: -x["jaccard"])
+    return out[:max_out]
+
+
+# ── stale-story lifecycle signal (2026-10-19 owner decision 1ba8f94ae822,
+# audit Issue 2 / Rec 4). A digest DEMOTE only keeps a story off that day's
+# slate — the story page and card stay live and stale. The 2026-10-19 audit's
+# driver: `chrome-153-...` (score 3.3) was demoted on 2026-10-18 and
+# 2026-10-19 for presenting September Chrome 153 counts as current while its
+# newest 2026-10-13/14 material was the Chrome 155 37-flaw batch, and no new
+# CVE/actor/victim-count/IOC arrived with the newest event. This probe
+# surfaces that lifecycle state to the desk every run; it NEVER merges,
+# rewrites, or fails a check.
+
+# Victim-count phrasing: "173 tenants", "30,000 devices", "4.1M records"
+# (the comma form; the bare-number form is matched too).
+VICTIM_COUNT_RE = re.compile(
+    r"\b(\d[\d,]{2,})\s+(victims?|users?|customers?|devices?|accounts?|"
+    r"tenants?|companies|organizations?|orgs?|servers?|hosts?|records?|"
+    r"patients?|employees?|staff|schools?|endpoints?|machines?|"
+    r"individuals?|businesses?|firms?|subscribers?)\b", re.I)
+
+
+def _event_facts(events_dir, eid):
+    """The observable facts an event contributes: (cves, actors, victim
+    counts, iocs). Title facts always; content facts from the .md sidecar
+    (bounded read). Used only to answer 'does the newest event add anything
+    the story did not already have?'."""
+    try:
+        ev = json.load(open(os.path.join(events_dir, eid + ".json")))
+    except Exception:
+        return set(), set(), set(), set()
+    title = ev.get("title") or ""
+    try:
+        text = open(os.path.join(events_dir, eid + ".md"), encoding="utf-8",
+                    errors="replace").read()[:4000]
+    except OSError:
+        text = ""
+    cves = {c.upper() for c in (ev.get("cves") or [])}
+    cves |= {c.upper() for c in CVE_RE.findall(title)}
+    actors = _actor_norm(_norm_tokens(title)) & ACTOR_TOKENS
+    counts = {f"{m.group(1).replace(',', '')} {m.group(2).lower()}"
+              for m in VICTIM_COUNT_RE.finditer(title + "\n" + text)}
+    iocs = set()
+    if text:
+        try:
+            iocs = set(ioc_mod.extract_from_text(text).keys())
+        except Exception:
+            iocs = set()
+    return cves, actors, counts, iocs
+
+
+def _demote_streak(overrides, slug):
+    """(streak, dates) of the most recent unbroken run of digest override
+    lists that demote `slug` — a story demoted in two or more consecutive
+    digests is being kept off the slate every day, not adjudicated.
+    `overrides` maps digest date -> its override entries."""
+    streak, dates = 0, []
+    for d in sorted(overrides, reverse=True):
+        if any(o.get("action") == "demote" and o.get("slug") == slug
+               for o in overrides[d]):
+            streak += 1
+            dates.append(d)
+        else:
+            break
+    return streak, dates
+
+
+def stale_demoted_stories(data_dir, stories, now, min_consecutive=2,
+                          max_out=10):
+    """Report-only: LIVE stories demoted in >= min_consecutive consecutive
+    digest override lists whose newest event adds NO new CVE, actor, victim
+    count, or IOC versus the story's prior events — the stale-story lifecycle
+    state that a demote alone leaves invisible (page and card stay live).
+
+    'Consecutive' is anchored on the most recent digest: a story demoted on
+    the latest two runs is still being pushed down, which is the actionable
+    state. Adding any new fact with the newest event clears the story — it is
+    re-reporting/threshold material, not staleness. Informational only: the
+    desk rewrites or supersedes; nothing is auto-merged or auto-rewritten.
+    """
+    overrides = {}
+    for f in glob.glob(os.path.join(data_dir, "digests", "*.json")):
+        d = os.path.splitext(os.path.basename(f))[0]
+        try:
+            overrides[d] = json.load(open(f)).get("overrides", []) or []
+        except Exception:
+            continue
+    events_dir = os.path.join(data_dir, "events")
+    out = []
+    for s in stories.values():
+        if s.get("merged_into") or not s.get("events"):
+            continue
+        streak, demoted = _demote_streak(overrides, s["id"])
+        if streak < min_consecutive:
+            continue
+        refs = [r.get("event_id") for r in s.get("events", [])
+                if r.get("event_id")]
+        newest, newest_ts = None, ""
+        for eid in refs:
+            try:
+                ts = json.load(open(os.path.join(events_dir, eid + ".json"))).get(
+                    "published_at") or ""
+            except Exception:
+                ts = ""
+            if newest is None or ts > newest_ts:
+                newest, newest_ts = eid, ts
+        if newest is None:
+            continue
+        newest_facts = _event_facts(events_dir, newest)
+        prior = (set(), set(), set(), set())
+        for eid in refs:
+            if eid == newest:
+                continue
+            prior = tuple(p | q for p, q in zip(prior, _event_facts(events_dir, eid)))
+        added = [sorted(n - p) for n, p in zip(newest_facts, prior)]
+        if any(added):
+            continue                  # the newest event did add something
+        out.append({"id": s["id"], "title": (s.get("title") or "")[:70],
+                    "score": s.get("score"), "demote_streak": streak,
+                    "demoted": demoted, "newest_event": newest,
+                    "newest_published_at": newest_ts[:19],
+                    "newest_adds": {"cves": added[0], "actors": added[1],
+                                    "victim_counts": added[2], "iocs": added[3]}})
+    out.sort(key=lambda x: (-x["demote_streak"], x["id"]))
     return out[:max_out]
 
 

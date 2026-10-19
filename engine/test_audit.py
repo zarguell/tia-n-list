@@ -285,6 +285,93 @@ check("genuine same-story pair (Midnight Mimosa pre-merge) still surfaces",
       {frozenset((x["a"], x["b"])) for x in s_mimosa},
       {frozenset(("bitdefender-mimosa", "mimosa-android"))})
 
+# ── 2f. stale-story lifecycle signal (2026-10-19 owner decision 1ba8f94ae822,
+# audit Issue 2 / Rec 4). A demote only keeps a story off the slate; the page
+# stays live and stale. The chrome-153 driver: demoted 2026-10-18 AND
+# 2026-10-19 while its newest event added no CVE/actor/victim count/IOC.
+sd3 = tempfile.mkdtemp()
+os.makedirs(os.path.join(sd3, "events"))
+os.makedirs(os.path.join(sd3, "digests"))
+
+
+def _deve(sd, eid, title, published, cves=(), md=""):
+    json.dump({"id": eid, "title": title, "published_at": published,
+               "cves": list(cves)},
+              open(os.path.join(sd, "events", eid + ".json"), "w"))
+    if md:
+        open(os.path.join(sd, "events", eid + ".md"), "w").write(md)
+
+
+_deve(sd3, "e1", "Chrome 153 fixes 230 vulnerabilities including 5 critical",
+      "2026-09-14T07:05:03Z", ["CVE-2026-0001"])
+_deve(sd3, "e2", "Update Google Chrome to the latest version",
+      "2026-10-18T02:19:21Z", ["CVE-2026-0001"])
+_deve(sd3, "e3", "Re-report of the same patched flaw", "2026-10-18T00:00:00Z",
+      ["CVE-2026-0001"])
+_deve(sd3, "e4", "Same flaw now tracked as CVE-2026-9999",
+      "2026-10-18T01:00:00Z", ["CVE-2026-9999"])
+_deve(sd3, "e5a", "One-off demoted story", "2026-10-17T00:00:00Z",
+      ["CVE-2026-0002"])
+_deve(sd3, "e5b", "One-off demoted story update", "2026-10-18T00:00:00Z",
+      ["CVE-2026-0002"])
+_deve(sd3, "e6a", "Breach details emerge", "2026-10-17T00:00:00Z",
+      ["CVE-2026-0003"])
+_deve(sd3, "e6b", "Breach now affects 20000 customers",
+      "2026-10-18T00:00:00Z", ["CVE-2026-0003"])
+
+
+def _digest(sd, date, slugs):
+    json.dump({"overrides": [{"action": "demote", "slug": s, "why": "stale"}
+                             for s in slugs]},
+              open(os.path.join(sd, "digests", date + ".json"), "w"))
+
+
+_digest(sd3, "2026-10-18", ["chrome-153-stale", "new-cve", "new-count",
+                             "one-demote"])
+_digest(sd3, "2026-10-19", ["chrome-153-stale", "new-cve", "new-count"])
+
+stale3 = {
+    "chrome-153-stale": story(
+        "chrome-153-stale", ["e1", "e2"],
+        title="Chrome 153: Google fixes 230 vulnerabilities, including 5 critical",
+        last_seen="2026-10-18T02:19:21Z"),
+    "new-cve": story("new-cve", ["e3", "e4"],
+                     title="Re-report of the same patched flaw",
+                     last_seen="2026-10-18T01:00:00Z"),
+    "new-count": story("new-count", ["e6a", "e6b"],
+                       title="Breach details emerge",
+                       last_seen="2026-10-18T00:00:00Z"),
+    "one-demote": story("one-demote", ["e5a", "e5b"],
+                        title="One-off demoted story",
+                        last_seen="2026-10-18T00:00:00Z"),
+}
+sig = jc.stale_demoted_stories(sd3, stale3, NOW)
+sig_ids = [r["id"] for r in sig]
+check("live story demoted on consecutive digests with no new facts flagged",
+      "chrome-153-stale" in sig_ids, True)
+check("newest event adding a CVE clears the story",
+      "new-cve" in sig_ids, False)
+check("newest event adding a victim count clears the story",
+      "new-count" in sig_ids, False)
+check("demoted in only one consecutive list not flagged",
+      "one-demote" in sig_ids, False)
+sig_row = next(r for r in sig if r["id"] == "chrome-153-stale")
+check("stale row reports the streak and an empty adds map",
+      (sig_row["demote_streak"], sig_row["newest_adds"]),
+      (2, {"cves": [], "actors": [], "victim_counts": [], "iocs": []}))
+check("_demote_streak counts consecutive latest demotes",
+      jc._demote_streak({
+          "2026-10-17": [{"action": "demote", "slug": "x"}],
+          "2026-10-18": [{"action": "demote", "slug": "x"}],
+          "2026-10-19": [{"action": "demote", "slug": "x"}]}, "x"),
+      (3, ["2026-10-19", "2026-10-18", "2026-10-17"]))
+check("_demote_streak stops at a non-demoted digest",
+      jc._demote_streak({
+          "2026-10-17": [{"action": "demote", "slug": "x"}],
+          "2026-10-18": [{"action": "promote", "slug": "x"}],
+          "2026-10-19": [{"action": "demote", "slug": "x"}]}, "x"),
+      (1, ["2026-10-19"]))
+
 # ── 1b. roundup_family (fragmentation classifier) ────────────────────────────
 check("dedicated Microsoft PT roundup",
       jc.roundup_family("Microsoft's September 2026 Patch Tuesday fixes two zero-day flaws"),
