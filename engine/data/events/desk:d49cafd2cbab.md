@@ -1,0 +1,1 @@
+SecurityOnline.info reported on October 14, 2026, that Japan's JPCERT/CC warned of confirmed in-the-wild exploitation of CVE-2026-106931 in SiteGuard Server Edition. The article describes the vulnerability as an OS command injection flaw that grants root or SYSTEM access and notes the vendor's recommendation to update to Ver8.00.

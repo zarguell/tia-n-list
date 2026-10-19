@@ -1,0 +1,1 @@
+Strix.ai rates CVE-2026-108983 at CVSS 9.8 / 10 critical and describes it as affecting the GV-ASManager web server on default connection ports. The profile does not list active exploitation but highlights the network-accessible command-injection surface.

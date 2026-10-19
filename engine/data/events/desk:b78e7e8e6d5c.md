@@ -1,0 +1,1 @@
+VulDB lists the vulnerability as confirmed with an advisory from geovision.com.tw and recommends upgrading to GV-ASManager 6.4.0. The timeline shows the CVE reserved on 10/12/2026, advisory disclosed and VulDB entry created both on 10/19/2026, with no active exploitation flag.

@@ -1,0 +1,1 @@
+A forum report notes that CVE-2026-106931 was privately disclosed to support-contract customers on September 29, 2026, and publicly disclosed on October 14, 2026. The post emphasizes that exploitation grants arbitrary command execution with elevated privileges and urges evidence preservation before applying patches.

@@ -1,0 +1,1 @@
+The CVE entry records reservation on 2026-10-12 and publication on 2026-10-19, assigning a critical CVSS 3.1 score of 9.8 (AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H). The vulnerability affects GeoVision GV-ASManager through the GeoWebServer.exe process on default web ports, mapped to CWE-78 (OS command injection).
