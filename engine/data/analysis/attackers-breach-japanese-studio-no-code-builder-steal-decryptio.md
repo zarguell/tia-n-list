@@ -1,0 +1,3 @@
+Attackers breached Studio, a Japanese no-code website builder, and stole the decryption key that protected customer data, exposing contact form submissions and API keys. The breach was reported by Japan Cyber Watch and affects customers whose data relied on the stolen key. The exposure of API keys adds secondary risk if those keys are reused across services.
+
+The main concern is the scope of affected customers and whether Studio has rotated or revoked exposed API keys. Watch for a vendor advisory confirming the number of impacted accounts and any follow-on reports of abuse of the stolen keys in other environments.
