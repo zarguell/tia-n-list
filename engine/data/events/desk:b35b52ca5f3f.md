@@ -1,0 +1,1 @@
+Bloomberg reported on October 5, 2026 that a 2025 cyberattack on Oracle Health's legacy Cerner systems compromised personal and medical information of nearly 20 million people, citing a Texas attorney general filing. The figure exceeds earlier breach disclosures. Oracle declined to comment to Bloomberg.

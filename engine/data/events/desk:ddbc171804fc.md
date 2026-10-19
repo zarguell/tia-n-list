@@ -1,0 +1,1 @@
+A Texas filing puts the 2025 Oracle Health legacy Cerner breach at nearly 20 million people, with about 3 million Texas residents affected, according to a report published October 7, 2026. Unauthorized access began on or about January 22, 2025 and was identified around February 20, 2025. The filing notes notification was delayed at federal law enforcement request.
