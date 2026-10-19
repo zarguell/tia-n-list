@@ -1,0 +1,1 @@
+OpenCode disclosed a security breach affecting 1.4% of its Console users, warning that third-party provider API keys saved in affected workspaces may have been exposed. The intrusion targeted a legacy system the company was already decommissioning. The vendor statement is dated October 17, 2026.
