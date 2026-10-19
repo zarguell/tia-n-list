@@ -1,0 +1,1 @@
+The Themefic team published release v3.5.51 on 16 September 2026. The release notes list a fix for a multistep file validation issue and a signature addon security vulnerability, directly addressing the unrestricted upload class affecting the plugin. This vendor patch predates the first seen event by three days and confirms the vulnerability existed in versions through 3.5.50.
