@@ -291,6 +291,11 @@ check("ingest_noise", not _noise_p, "; ".join(_noise_p[:4]) or "sources clean")
 
 EXTRA = {
     "duplicate_suspects": jc.duplicate_suspects(_all_stories, NOW),
+    # 2026-10-19 owner decision 44e6933152d1 (audit Issue 4 / Rec 3):
+    # report-only aggregator-series and same-disclosure probes. Informational
+    # for the desk; never merged, never a check failure.
+    "aggregator_series": jc.aggregator_series_suspects(_all_stories),
+    "same_disclosure": jc.same_disclosure_suspects(DATA, _all_stories, NOW),
     "digest_overrides": jc.digest_overrides(DATA),
     "samples": jc.sampling_targets(DATA),
     "trends": jc.store_trends(DATA, _all_stories, NOW),

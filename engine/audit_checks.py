@@ -19,7 +19,7 @@ from datetime import datetime, timedelta, timezone
 from merge import (title_jaccard, distinct_series_codes,
                    distinct_advisory_ids, distinct_periods, period_tokens,
                    title_discriminators, ACTOR_TOKENS, _actor_norm,
-                   _series_codes)
+                   _series_codes, SERIES_RE)
 
 CJK_RE = re.compile(r"[\u0400-\u04FF\u4E00-\u9FFF\u3040-\u30FF\uAC00-\uD7AF\u0600-\u06FF]")
 
@@ -321,6 +321,202 @@ def duplicate_suspects(stories, now, max_out=10, max_age_days=45, min_jaccard=0.
                         "jaccard": round(j_, 2),
                         "title_a": ta[:70], "title_b": tb[:70]})
     out.sort(key=lambda x: -x["jaccard"])
+    return out[:max_out]
+
+
+# ── report-only aggregate/split probes (2026-10-19 owner decision
+# 44e6933152d1, audit Issue 4 / Rec 3). The 2026-09-17 story
+# `1-basic-information-original-title-bragjack-technical-overview-h`
+# over-merged five unrelated dev.to posts under the shared aggregator
+# boilerplate prefix `1. Basic Information Original Title:` while the
+# BragJack disclosure itself was split across two live stories — neither
+# fragmentation's Patch-Tuesday-only classifier nor duplicate_suspects'
+# title-jaccard gate sees either class. These probes surface both on every
+# audit for desk judgment; they NEVER merge, rewrite, or fail a check.
+
+def _prefix_tokens(title, max_tokens=40):
+    """Boilerplate-prefix tokens for the aggregator-series probe: lowercase,
+    URLs and advisory/vuln series markers (CVE-2026-1234, AV26-905,
+    chrome-153) removed, punctuation collapsed to single spaces, first
+    `max_tokens` tokens kept."""
+    t = (title or "").lower()
+    t = re.sub(r"https?://\S+", " ", t)
+    t = SERIES_RE.sub(" ", t)
+    t = re.sub(r"[^a-z0-9]+", " ", t)
+    return t.split()[:max_tokens]
+
+
+def _common_prefix(a, b):
+    """Length of the shared leading-token run of two token lists."""
+    n = 0
+    for x, y in zip(a, b):
+        if x != y:
+            break
+        n += 1
+    return n
+
+
+def aggregator_series_suspects(stories, max_out=10, min_prefix=5,
+                               max_tokens=40):
+    """Report-only: live stories whose titles share a >= min_prefix-token
+    boilerplate opening AND a source host or threat-actor series.
+
+    The 2026-09-17 over-merge clustered five unrelated dev.to posts under
+    the literal `1. Basic Information Original Title:` prefix; the recurring
+    `# Cybersecurity news & tips across the # fediverse` family is the same
+    class. The opening is compared after punctuation/series-marker strip, so
+    differing advisory numbers or post numbers do not split the prefix. The
+    host/actor gate keeps the probe honest: unrelated products that merely
+    start with the same generic word do not share an outlet or an actor.
+    Pairs are informational only (the desk decides); never merged.
+
+    Buckets by the first two prefix tokens so prefix >= min_prefix implies
+    the same bucket — bounded work even on the full store.
+    """
+    pool = [s for s in stories.values()
+            if not s.get("merged_into") and s.get("events")]
+    pref = [_prefix_tokens(s.get("title") or "", max_tokens) for s in pool]
+    hosts = [{str(d).lower() for d in (s.get("sources") or []) if d}
+             for s in pool]
+    actors = [_actor_norm(title_discriminators(s.get("title") or ""))
+              & ACTOR_TOKENS for s in pool]
+    buckets = {}
+    for i, toks in enumerate(pref):
+        if len(toks) >= 2:
+            buckets.setdefault(tuple(toks[:2]), []).append(i)
+    out = []
+    for idxs in buckets.values():
+        for a in range(len(idxs)):
+            i = idxs[a]
+            for b in range(a + 1, len(idxs)):
+                j = idxs[b]
+                n = _common_prefix(pref[i], pref[j])
+                if n < min_prefix:
+                    continue
+                shared_hosts = sorted(hosts[i] & hosts[j])
+                shared_actors = sorted(actors[i] & actors[j])
+                if not (shared_hosts or shared_actors):
+                    continue
+                out.append({"a": pool[i]["id"], "b": pool[j]["id"],
+                            "prefix_tokens": n,
+                            "prefix": " ".join(pref[i][:n])[:80],
+                            "shared_hosts": shared_hosts,
+                            "shared_actors": shared_actors,
+                            "title_a": (pool[i].get("title") or "")[:70],
+                            "title_b": (pool[j].get("title") or "")[:70]})
+    out.sort(key=lambda x: (-x["prefix_tokens"], x["a"], x["b"]))
+    return out[:max_out]
+
+
+def _load_event_titles(data_dir):
+    """{event_id: title} for the same-disclosure probe (metadata only)."""
+    out = {}
+    for f in glob.glob(os.path.join(data_dir, "events", "*.json")):
+        try:
+            out[os.path.splitext(os.path.basename(f))[0]] = \
+                json.load(open(f)).get("title") or ""
+        except Exception:
+            pass
+    return out
+
+
+def _days_apart(a, b):
+    try:
+        da = datetime.fromisoformat(str(a).replace("Z", "+00:00"))
+        db = datetime.fromisoformat(str(b).replace("Z", "+00:00"))
+        return abs((da - db).days)
+    except Exception:
+        return 10 ** 6
+
+
+def same_disclosure_suspects(data_dir, stories, now, window_days=7,
+                             min_shared=3, max_out=10, max_age_days=45,
+                             max_df=150):
+    """Report-only: live story pairs in the same `window_days` window that
+    together carry an event pair from different stories sharing >= min_shared
+    non-generic title discriminators — one incident disclosed twice.
+
+    The 2026-10-14 split (`multiple-flaws-chrome-155-...`, 1 event, versus
+    the stale Chrome mega-story holding the 37-flaw events) has almost no
+    story-to-story title overlap, so title jaccard misses it. Comparing at
+    the EVENT level is what makes it a same-disclosure signal: an outlet's
+    headline for the incident matches another outlet's headline for the same
+    incident. Aggregate-over-story-titles was tried and drowned in boilerplate
+    columns shared by unrelated vendor roundups, hence per-event tokens with
+    the same generic/`SUSPECT_GENERIC` strip duplicate_suspects uses. A shared
+    event id is the dedup multi-ref class (repair_dedupe heals those), not a
+    split, and is excluded. Distinct advisory/vuln series codes and distinct
+    report periods exonerate recurring-series false positives. Informational
+    only: the desk decides; nothing is merged or rewritten.
+    """
+    cutoff = (now - timedelta(days=max_age_days)).strftime("%Y-%m-%dT%H:%M:%S")
+    pool = [s for s in stories.values()
+            if not s.get("merged_into") and s.get("events")
+            and s.get("last_seen", "") >= cutoff]
+    event_titles = _load_event_titles(data_dir)
+    last, titles, evs = [], [], []
+    for s in pool:
+        last.append(s.get("last_seen", ""))
+        titles.append(s.get("title") or "")
+        per = []
+        for r in s.get("events", []):
+            eid = r.get("event_id")
+            raw = event_titles.get(eid, "")
+            toks = title_discriminators(raw) - SUSPECT_GENERIC
+            if toks:
+                per.append((eid, toks, _distinctive_entities(raw, toks),
+                            _series_codes(raw)))
+        evs.append(per)
+    index = {}
+    for i, per in enumerate(evs):
+        for k, (eid, toks, _ents, _codes) in enumerate(per):
+            for t in toks:
+                index.setdefault(t, []).append((i, k))
+    evpair = {}
+    for t, entries in index.items():
+        if len(entries) > max_df:
+            continue                       # too common to discriminate
+        for a in range(len(entries)):
+            i, k = entries[a]
+            for b in range(a + 1, len(entries)):
+                j, m = entries[b]
+                if i == j:
+                    continue
+                key = ((i, k), (j, m)) if (i, k) < (j, m) else ((j, m), (i, k))
+                evpair[key] = evpair.get(key, 0) + 1
+    storypair = {}
+    for key, n in evpair.items():
+        if n < min_shared:
+            continue
+        (i, k), (j, m) = key
+        pair = (i, j) if i < j else (j, i)
+        if n > storypair.get(pair, (0,))[0]:
+            storypair[pair] = (n, k, m)
+    out = []
+    for (i, j), (n, k, m) in storypair.items():
+        eid_i, eid_j = evs[i][k][0], evs[j][m][0]
+        if eid_i == eid_j:
+            continue                       # shared event: multi-ref, not a split
+        # Identity anchor (same policy as duplicate_suspects, owner decision
+        # 84991a8ec82c): a pair built only from generic advisory language
+        # (acces/affects/impact/systems columns) is two unrelated disclosures,
+        # never one incident; a shared named entity or advisory/series code is
+        # the anchor that makes "same disclosure" mean something.
+        if not (evs[i][k][2] & evs[j][m][2]
+                or evs[i][k][3] & evs[j][m][3]):
+            continue
+        if _days_apart(last[i], last[j]) > window_days:
+            continue
+        if distinct_series_codes(titles[i], titles[j]) \
+                or distinct_periods(titles[i], titles[j]):
+            continue
+        out.append({"a": pool[i]["id"], "b": pool[j]["id"], "shared": n,
+                    "event_a": eid_i, "event_b": eid_j,
+                    "shared_tokens": sorted(evs[i][k][1] & evs[j][m][1])[:8],
+                    "shared_entities": sorted(evs[i][k][2] & evs[j][m][2])[:6],
+                    "last_seen_a": last[i][:16], "last_seen_b": last[j][:16],
+                    "title_a": titles[i][:70], "title_b": titles[j][:70]})
+    out.sort(key=lambda x: (-x["shared"], x["a"], x["b"]))
     return out[:max_out]
 
 

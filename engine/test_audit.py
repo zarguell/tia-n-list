@@ -285,6 +285,93 @@ check("genuine same-story pair (Midnight Mimosa pre-merge) still surfaces",
       {frozenset((x["a"], x["b"])) for x in s_mimosa},
       {frozenset(("bitdefender-mimosa", "mimosa-android"))})
 
+# ── 2e. report-only aggregate/split probes (2026-10-19 owner decision
+# 44e6933152d1, audit Issue 4 / Rec 3). The 2026-09-17 aggregator over-merge
+# (`1. Basic Information Original Title:` clustered five unrelated dev.to
+# posts) and the split BragJack/Chrome-155 disclosure must surface every run
+# for the desk, without auto-merging or failing a check.
+def _hstory(sid, title, events, sources, last_seen="2026-08-24T00:00:00Z"):
+    s = story(sid, events, title=title, last_seen=last_seen)
+    s["sources"] = list(sources)
+    return s
+
+
+agg = {
+    "series-devto": _hstory(
+        "series-devto",
+        "1. Basic Information Original Title: VectraRAT An Undocumented Fully Featured RAT",
+        ["e60"], ["dev.to"]),
+    "series-devto-2": _hstory(
+        "series-devto-2",
+        "1. Basic Information Original Title: BragJack Technical Overview Browser Agent Abuse",
+        ["e61", "e62"], ["dev.to"]),
+    "unrelated-prefix": _hstory(
+        "unrelated-prefix",
+        "1. Basic Information Original Title: Totally Different Vendor Advisory",
+        ["e63"], ["vendor.example"]),
+}
+agg_pairs = {frozenset((x["a"], x["b"]))
+             for x in jc.aggregator_series_suspects(agg)}
+check("aggregator boilerplate prefix + shared host flagged",
+      frozenset(("series-devto", "series-devto-2")) in agg_pairs, True)
+row = next(x for x in jc.aggregator_series_suspects(agg)
+           if frozenset((x["a"], x["b"])) == frozenset(("series-devto", "series-devto-2")))
+check("aggregator row names the shared host and prefix",
+      (row["shared_hosts"], row["prefix_tokens"]), (["dev.to"], 5))
+check("same boilerplate prefix but different host/actor is not flagged",
+      frozenset(("series-devto", "unrelated-prefix")) in agg_pairs, False)
+check("series markers are stripped before the prefix compare",
+      jc._common_prefix(jc._prefix_tokens("Chrome-153 security update fixes flaws"),
+                        jc._prefix_tokens("Chrome-155 security update fixes flaws")), 4)
+
+sd_dir = tempfile.mkdtemp()
+os.makedirs(os.path.join(sd_dir, "events"))
+for eid, title in {
+    "e70": "Multiple Chrome Flaws Including Seven Browser Defects Critical",
+    "e71": "Chrome Update Fixes Security Flaws Including Seven Browser Defects",
+    "e72": "Chrome Release Patches Flaws Including Seven Browser Defects Google",
+    "e80": "Acme router command injection flaw exploited",
+    "e81": "Globex CRM SQL hole under active attack",
+    "e90": "BragJack AV26-791 browser extension hijack",
+    "e91": "BragJack AV26-797 browser extension hijack",
+}.items():
+    json.dump({"id": eid, "title": title, "published_at": "2026-08-20T00:00:00Z"},
+              open(os.path.join(sd_dir, "events", eid + ".json"), "w"))
+split = {
+    "chrome-split-micro": _hstory(
+        "chrome-split-micro",
+        "Chrome Update Patches Flaws Including Seven Browser Defects Critical",
+        ["e70"], ["cyberupdates365.com"], last_seen="2026-08-24T00:00:00Z"),
+    "chrome-mega": _hstory(
+        "chrome-mega",
+        "Chrome Update Fixes Flaws Including Seven Browser Defects Google Says",
+        ["e71", "e72"], ["malware.news"], last_seen="2026-08-23T00:00:00Z"),
+    "chrome-shared-event": _hstory(
+        "chrome-shared-event",
+        "Chrome Update Patches Flaws Including Seven Browser Defects Critical",
+        ["e70"], ["cyberupdates365.com"], last_seen="2026-08-24T00:00:00Z"),
+    "acme-router": _hstory("acme-router", "Acme router command injection flaw exploited",
+                           ["e80"], ["a.example"]),
+    "globex-crm": _hstory("globex-crm", "Globex CRM SQL hole under active attack",
+                          ["e81"], ["b.example"]),
+    "bragjack-791": _hstory("bragjack-791",
+                            "BragJack AV26-791 browser extension hijack",
+                            ["e90"], ["x.example"]),
+    "bragjack-797": _hstory("bragjack-797",
+                            "BragJack AV26-797 browser extension hijack",
+                            ["e91"], ["y.example"]),
+}
+sd = jc.same_disclosure_suspects(sd_dir, split, NOW)
+sd_pairs = {frozenset((x["a"], x["b"])) for x in sd}
+check("same-incident split (micro-story vs mega-story) surfaced",
+      frozenset(("chrome-split-micro", "chrome-mega")) in sd_pairs, True)
+check("shared-event pair is the multi-ref class, not a split",
+      frozenset(("chrome-split-micro", "chrome-shared-event")) in sd_pairs, False)
+check("unrelated same-window stories below the shared-token bar not surfaced",
+      frozenset(("acme-router", "globex-crm")) in sd_pairs, False)
+check("distinct advisory series codes exonerate",
+      frozenset(("bragjack-791", "bragjack-797")) in sd_pairs, False)
+
 # ── 1b. roundup_family (fragmentation classifier) ────────────────────────────
 check("dedicated Microsoft PT roundup",
       jc.roundup_family("Microsoft's September 2026 Patch Tuesday fixes two zero-day flaws"),
