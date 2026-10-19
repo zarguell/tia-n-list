@@ -1,0 +1,1 @@
+On September 1, 2026 Plex published a security advisory asking server owners to update to 1.43.3 without disclosing specific CVEs. The article highlights the operational trap of multiple 1.43.3 builds and notes the vendor emailed customers directly about severity, confirming the patch was urgent before the October exploitation wave.

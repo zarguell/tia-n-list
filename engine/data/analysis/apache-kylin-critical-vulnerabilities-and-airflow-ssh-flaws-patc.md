@@ -1,0 +1,3 @@
+Apache fixed 12 Kylin vulnerabilities, including critical CVE-2026-64959, and patched SSH-related flaws in Apache Airflow. The advisory recommends upgrading Kylin to version 5.0.5 immediately. The event notes multiple vulnerabilities rather than a single CVE, which raises the risk that partial patching could leave remaining exposure.
+
+Airflow SSH flaws are mentioned but not detailed in the event content, so the analysis should focus on the confirmed Kylin critical fix as the priority. Organizations running Kylin should treat this as an urgent patch cycle and verify that Airflow instances are also covered by the same maintenance window.
