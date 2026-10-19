@@ -1,0 +1,3 @@
+In addition to ConnectWise Cloud Backup, Updraft Cloud Backup was also compromised on the 17th/18th. Much like with CW, the vendor's advice to customers would indicate that the platform itself wasn't the primary target, but rather the attacker is utilizing the dataset stored in the backup systems to get into customer environments instead. No evidence that the two attacks are related, but it would be a hell of a coincidence. https://teamupdraft.com/blog/security-incident-october-2026/ If you manage a WordPress site that uses Updraft, follow the remediation guidance ASAP. It appears that the attacker(s) are creating new admin accounts in WordPress sites. submitted by /u/MikeTalonNYC [link] [comments]
+
+via reddit r/cybersecurity: Updraft (WordPress Backup) compromised
