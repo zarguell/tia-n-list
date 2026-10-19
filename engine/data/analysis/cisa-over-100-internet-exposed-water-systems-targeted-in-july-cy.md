@@ -1,0 +1,5 @@
+CISA confirmed that hackers targeted more than 100 internet-exposed systems in the US water and wastewater sector during July 2026. The new social reference links back to this existing CISA advisory. The agency also disclosed breaches at two small Colorado water utilities in late August, where attackers changed equipment settings, disabled remote access and alarms, and affected systems serving under 200 people each. The July figure is the first time the federal government has put a number on these intrusions, amid suspected Iran-linked activity targeting critical infrastructure.
+
+This remains relevant because water systems continue to face exposure: over 100 targeted systems in one month shows sustained interest from state-linked actors. The Colorado breaches confirm that even small, privately owned utilities are in scope and that attackers are moving beyond reconnaissance to equipment manipulation. There are no CVEs attached; the risk is operational exposure rather than a specific software flaw.
+
+Watch for any CISA KEV additions tied to water-sector PLCs or cellular modems, and whether the suspected Iran-linked activity produces confirmed attribution.
