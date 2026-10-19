@@ -1,0 +1,1 @@
+CySecurity News reported on October 17, 2026 that attackers accessed a legacy system to steal credentials linked to Anthropic, OpenAI, and Google, leaving some users with unauthorized bills. The article describes the breach as tied to a large-scale distillation attack impacting OpenCode Console users who linked external AI providers.

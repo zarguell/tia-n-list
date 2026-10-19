@@ -1,0 +1,1 @@
+Cyera's October 17, 2026 analysis confirms OpenCode disclosed a breach affecting 1.4% of Console users with linked external providers, attributing it to a legacy console system being retired. The post advises rotation of exposed AI provider API keys and outlines defender actions.

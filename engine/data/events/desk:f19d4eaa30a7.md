@@ -1,0 +1,1 @@
+The Hacker News reported on October 18, 2026 that OpenCode says a Console breach may have exposed AI provider keys belonging to 1.4% of users. The article notes the incident involved unauthorized access and prompted revocation notices for affected external-provider accounts.
