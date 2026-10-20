@@ -1,0 +1,1 @@
+Florian Roth posted that an RCE vulnerability existed in PHP core with a CVSS score of 10.0 and that further details were scheduled for release on October 20, 2026. He also stated that only PHP 8 would receive patches, since other versions had reached end of life.

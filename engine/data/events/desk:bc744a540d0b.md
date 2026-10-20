@@ -1,0 +1,1 @@
+Kevin Beaumont posted that PHP would release patches the next day for CVE-2026-109618 and CVE-2026-109619, listing fixed versions 8.5.12, 8.4.27, 8.3.36, and 8.2.35. He added that all other versions are end of life but remain vulnerable and that the flaws date back to versions from 2004 onward.
