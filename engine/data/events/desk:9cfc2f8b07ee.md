@@ -1,0 +1,1 @@
+Strix AI lists CVE-2026-77932 as a critical 9.8 vulnerability in DB-GPT through 0.8.2. The flaw is an unauthenticated remote code execution issue in which the react-agent endpoint trusts a mock authentication header that assigns the admin role to all callers. Attackers can invoke unsandboxed interpreter tools and reach the bundled database.
