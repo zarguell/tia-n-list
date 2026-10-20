@@ -1,0 +1,1 @@
+The Hacker News reported CISA's addition of CVE-2026-58644 (CVSS 9.8) to the KEV catalog, a critical deserialization flaw in on-premises SharePoint Server. Microsoft revised its bulletin to clarify that CVE-2026-58644 was exploited in the wild as a zero-day prior to fixes becoming available. Attackers targeted Internet-facing SharePoint instances for remote code execution.
