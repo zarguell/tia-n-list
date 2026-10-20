@@ -1,0 +1,32 @@
+title: UpdraftCentral RPC Request From Client Without UpdraftPlus User-Agent
+id: 2b59774c-ccc0-486b-b71e-b7d6b52ce5c6
+status: experimental
+description: >
+    Detects requests to the UpdraftCentral RPC endpoint (class-udrpc.php)
+    that do not carry the UpdraftPlus client User-Agent. Attackers who stole
+    UpdraftCentral connection keys sent signed remote commands from their own
+    tooling to upload and activate backdoor plugins on connected WordPress
+    sites, and those requests did not come from the plugin's own client.
+references:
+    - https://teamupdraft.com/blog/security-incident-october-2026/
+    - https://nethemba.com/updraftcentral-backdoor-analysis/
+    - https://patchstack.com/articles/updraftcentral-key-compromise-wordpress-backdoors/
+author: Tia N. List
+date: 2026/10/20
+tags:
+    - attack.t1078
+    - attack.t1505
+    - attack.t1199
+logsource:
+    category: webserver
+    product: linux
+detection:
+    selection:
+        cs-uri|contains: 'class-udrpc.php'
+    filter_ua:
+        cs-user-agent|contains: 'UpdraftPlus'
+    condition: selection and not filter_ua
+falsepositives:
+    - Monitoring or backup automation that calls class-udrpc.php with a custom User-Agent
+    - Older or third-party UpdraftCentral clients whose User-Agent does not contain UpdraftPlus
+level: high
