@@ -1,0 +1,1 @@
+The official Go release history lists go1.27.3 as released on 2026-10-19, containing the security fix to crypto/x509 that filters out the eight compromised eMudhra intermediate CA certificates. Go 1.26.10 was released the same day with the same fix.

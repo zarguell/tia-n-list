@@ -1,0 +1,1 @@
+On Saturday, October 17, 2026 at 18:05 UTC the Chrome Root Program received a report from a security researcher that private keys associated with eight eMudhra intermediate certificates had been compromised. The message confirms the same eight intermediates later blocked by Go, Mozilla, and Chrome.
