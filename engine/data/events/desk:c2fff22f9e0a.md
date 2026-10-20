@@ -1,0 +1,1 @@
+On 19 October 2026 between 12:47 and 13:12 UTC, an attacker replaced release binaries of five OVHcloud CLI versions (v0.11.0 to v0.15.0) through the compromised GitHub contributor account HassenBF. The malicious binary was a secret-stealing build compiled from a dirty local checkout (commit 5ead8ef) rather than through the project's GoReleaser pipeline.
