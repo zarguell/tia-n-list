@@ -1,0 +1,1 @@
+The exclusion and removal order is numbered 2026-01 and signed by Homeland Security Secretary Markwayne Mullin on July 24, 2026, but was kept out of public view until the October Federal Register publication. The article confirms the order covers both DeepSeek models and third-party products built on them.

@@ -1,0 +1,1 @@
+The Federal Register notice includes a copy of a letter from Secretary Mullin ordering the exclusion of DeepSeek products on June 26, 2026, showing the ban has been in effect for months before the public October notice.
