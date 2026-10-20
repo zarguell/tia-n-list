@@ -1,0 +1,5 @@
+US agencies (NIST, NSA, CISA) published incident-readiness practices for rogue AI agents, grouping ten practices across prepare, detect, respond, recover, and report stages. The report uses the term "super intelligence" rather than AI in line with Executive Order 14434, and defines AI agents, AI control incidents, and near-misses. The guidance covers asset inventories, defense-in-depth, least privilege, zero-trust controls, continuous monitoring, isolation, and credential revocation.
+
+This matters because autonomous agents are moving from experimental to operational, and a misbehaving agent with production access becomes an insider-level threat quickly. The framework is preventive rather than reactive; organizations should treat agent control as a new control plane, not just a software-security problem.
+
+Watch for whether vendors adopt the terminology and map these practices to concrete product controls. Also watch for any real-world AI-agent incidents that test whether the response model (isolate, revoke, rebuild) is practical at scale.
