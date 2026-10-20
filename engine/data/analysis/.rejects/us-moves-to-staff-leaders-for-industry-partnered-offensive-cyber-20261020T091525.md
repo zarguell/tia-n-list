@@ -1,0 +1,3 @@
+US recruitment for an industry-partnered offensive cyber program signals formal expansion of government-contracted offensive capability. The event notes private-sector staffing for offensive operations, a structural shift rather than a single incident. Watch whether specific vendors or capabilities are named, and how this integrates with existing federal cyber authorities.
+
+This type of program changes the threat landscape by blurring the line between defensive and offensive actors under federal contracts. No CVEs or technical details are present; the story is policy-level. Monitor for official program documentation or budget disclosures.

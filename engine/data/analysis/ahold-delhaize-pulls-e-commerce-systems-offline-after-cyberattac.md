@@ -1,0 +1,3 @@
+Ahold Delhaize pulled e-commerce systems offline across US and European brands after confirming a cyberattack. The outage started around October 12; by October 20, the company confirmed it was an attack but reported no data theft and noted that physical stores remained open. The Albert Heijn app returned as the outage ended.
+
+This is a confirmed operational disruption with limited technical detail in the event content. The story is corroborated by multiple updates from the company newsroom and security outlets. Monitor for a post-incident report identifying entry vector, scope, and whether customer or employee data was accessed.
