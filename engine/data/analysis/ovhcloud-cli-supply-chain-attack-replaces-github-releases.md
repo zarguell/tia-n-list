@@ -1,0 +1,3 @@
+A hijacked contributor account replaced GitHub release archives for the OVHcloud CLI across versions v0.11.0 to v0.15.0 for up to 94 minutes on October 19. The replacement binary was secret-stealing. The supply chain attack was first noted in reports on October 19 and additional updates on October 20 confirmed the affected versions. The original release files have been restored and the contributor account has been addressed by the project maintainers.
+
+What to watch: users who downloaded releases v0.11.0 through v0.15.0 during the 94-minute window should treat their installations as compromised. Look for additional supply chain attacks against CLI tools and verify checksums for any downloaded binaries from this repository.

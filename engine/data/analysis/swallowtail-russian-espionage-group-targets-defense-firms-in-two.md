@@ -1,0 +1,3 @@
+Symantec attributes an espionage campaign against European defense and law-enforcement targets to APT28, linked to Russia's GRU Unit 26165. The intrusion lasted about two months at a naval shipbuilder, where the group stole credentials and tunneled into the network. The campaign aligns with the Swallowtail intrusion previously reported. The attackers targeted defense firms in two NATO countries. No CVEs are tied to the campaign.
+
+What to watch: whether the defense-sector intrusion extends beyond the naval shipbuilder and whether additional GRU-linked infrastructure is uncovered. Organizations in European defense and law enforcement should review credential hygiene and tunneling detection, given the two-month dwell time observed.
