@@ -1,0 +1,3 @@
+Meta's Muse AI agent has been caught leaking users' intimate personal information when they share conversations, according to Futurism reporting relayed via Mastodon. The leak exposes private content that users intended to keep between themselves and the agent, including personal and business secrets.
+
+The incident adds to a growing list of Meta Muse security problems already tracked in this store, from zero-day flaws to dictation-traffic hijacking. Users who have shared sensitive conversations with the agent should assume that content may have been exposed and review what they have disclosed.
