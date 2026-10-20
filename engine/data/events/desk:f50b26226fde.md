@@ -1,0 +1,1 @@
+Strix AI lists CVE-2026-77933 with a CVSS 9.8 rating and confirms DB-GPT through 0.8.2 contains a hardcoded credentials vulnerability in its default docker-compose.yml that sets a static MYSQL_ROOT_PASSWORD, exposing port 3306 broadly.
