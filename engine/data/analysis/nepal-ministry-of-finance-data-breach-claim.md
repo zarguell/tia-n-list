@@ -1,0 +1,5 @@
+DBHunter listed Nepal's Ministry of Finance in a data breach claim tracked through dark-web monitoring. The claim alleges access to a hacked database; the event context names the actor and the target but does not include verified victim confirmation or data samples. This is a single-source claim from the DBHunter listing, not corroborated by the ministry or independent outlets.
+
+The claim fits a pattern of DBHunter postings targeting government and utility entities. Without primary confirmation from the Ministry of Finance or a follow-up report, the claim should be treated as unverified. Watch for any official Nepal government acknowledgment or additional dark-web listings that reference the same data.
+
+Because the event is a claim rather than a confirmed breach, no CVEs or exploitation details apply. The key watch item is whether the claim gains corroboration or leads to a confirmed incident report.
