@@ -1,0 +1,5 @@
+NightSpire, a ransomware group, claimed an attack on Colorado County, Texas (co.colorado.tx.us), a local government entity, with the incident reported on October 14, 2026. The attackers threatened to expose sensitive data unless their demands are met, and the county separately reported a disruption affecting government systems. The claim is tracked across three sources, including Dysruption Hub and Beyond Machines, with Malware.news carrying the NightSpire listing.
+
+This is a claims-based ransomware incident rather than a confirmed breach: the only evidence so far is the threat actor's statement and a reported service disruption, with no disclosed scope of data exfiltration, no CVE, and no official confirmation of compromise. The group's "data is not available now" message suggests the leak site entry may be staged or incomplete.
+
+Watch for the county's official incident statement, confirmation of which systems were affected, any published data sample from NightSpire, and whether recovery restores services without payment. Given the limited verification so far, treat the data-exposure threat as unconfirmed.
