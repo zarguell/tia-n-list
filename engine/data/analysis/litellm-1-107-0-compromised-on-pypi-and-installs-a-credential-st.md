@@ -1,0 +1,5 @@
+LiteLLM 1.107.0 was compromised on PyPI and installs a credential stealer and backdoor. The payload runs on every Python startup on the host, not only when LiteLLM is imported, so IDEs, pip, and CI jobs running Python on an affected machine are all exposed. It steals SSH keys, AWS credentials, browser passwords, shell history, and AI coding tool configs. A backdoor daemon executes whatever code the attacker's server returns every hour. The recommended remediation is to pin to 1.106.2.
+
+Aikido and JFrog both reported the compromise, with JFrog framing it as a supply chain attack targeting AI development environments and noting injection via PyPI and Docker Hub. Three sources corroborate the event, which indicates a real, multi-vector supply chain incident rather than a single-report anomaly.
+
+Watch for scope expansion: the payload executes on every Python interpreter start, so any host that installed 1.107.0 and ran Python afterward is potentially compromised, not just projects importing LiteLLM. Teams should audit installed versions, rotate exposed credentials, and check for the hourly backdoor daemon.
