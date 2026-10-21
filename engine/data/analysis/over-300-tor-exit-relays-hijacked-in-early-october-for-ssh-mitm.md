@@ -1,0 +1,3 @@
+Over 300 Tor exit relays were hijacked in early October and used to perform man-in-the-middle attacks on SSH connections, redirecting password logins to attacker-controlled servers. The event is sourced from The Hacker News and reported through Mastodon with a direct link to the primary article.
+
+This is a network-level infrastructure attack targeting anonymity infrastructure rather than a single vendor product. The scale (300+ relays) and the targeted interception of SSH authentication traffic make it a notable operational security event for users relying on Tor for secure remote access. There is no CVE assigned; the threat is operational hijacking rather than a software vulnerability.
