@@ -1,0 +1,1 @@
+The Vulners CVE list entry for CVE-2026-92262 reports a 16 Oct 2026 16:25:46 UTC timestamp, describing the MariaDB #mysql50# prefix bypass that allows file access, crashes, data corruption, or remote code execution. The entry references the cve.org source and notes affected MariaDB versions from 10.6.1 through 13.0.2.
