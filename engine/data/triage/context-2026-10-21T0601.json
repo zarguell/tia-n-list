@@ -1,0 +1,466 @@
+{
+ "date": "2026-10-21",
+ "decisions_path": "engine/data/triage/decisions-2026-10-21T0601.json",
+ "instructions": "For every new event decide: (1) keep or drop \u2014 keep only stories worth covering (real security events, vulnerabilities, attacks, breaches, advisories with substance); drop press releases, vendor marketing, generic explainers, and anything duplicating an existing story. (2) If keep, assign the event to the RIGHT story: an existing candidate story id if it belongs there (this FIXES mechanical clustering \u2014 e.g. different outlets' Patch Tuesday roundups are ONE story), or NEW with a clean story_title. (3) merges: list candidate stories that are really the same story (from = fragment, into = the most complete one). (4) For every kept event that names CVEs, optionally assess exploitation: exploited = the event reports OBSERVED in-the-wild exploitation (implants, victim counts, campaigns, CISA KEV confirmation); suspected = public exploit code/PoC or likely-but-unconfirmed. Attribute ONLY the CVEs you can tie to the claim \u2014 a bulletin's blanket 'actively exploited' does NOT flag all its CVEs. Omit the exploitation field when the event makes no claim.\n(5) LOW-TRUST events (\"low_trust\": true \u2014 AI-drafted aggregator reposts, late and overstated): treat as unverified leads. When the text attributes the claim to a named primary source (a researcher firm like watchTowr, a vendor advisory, CISA, a major outlet) and attribution_urls or a web search (/home/ubuntu/repos/cronman/bin/web-search.sh \"query\") locate that primary source CONFIRMING the claim, include a provenance object in the decision: {\"url\": <primary url>, \"source\": <domain>, \"evidence\": <one line>, \"verified\": true}. VERIFIED provenance lets the event mint a story (credited to the primary source) and count as a development; without it, a low-trust event can only attach to an EXISTING story, never mint. If you cannot verify, keep/drop on normal merit and omit provenance.\n\nWrite decisions as JSON with EXACTLY this shape:\n{\n  \"decisions\": [\n    {\"event_id\": \"<id>\", \"action\": \"keep\", \"story\": \"<existing candidate story id>\", \"reason\": \"...\"},\n    {\"event_id\": \"<id>\", \"action\": \"keep\", \"story\": \"NEW\", \"story_title\": \"<clean title>\", \"reason\": \"...\"},\n    {\"event_id\": \"<id>\", \"action\": \"drop\", \"reason\": \"...\"}\n  ],\n  \"merges\": [{\"from\": \"<fragment story id>\", \"into\": \"<canonical story id>\"}]\n}\nFor events marked \"low_trust\" (AI-drafted aggregator reposts) a decision\nmay carry an optional \"provenance\" object when you VERIFIED the claim at\nthe named primary source: {\"event_id\": ..., \"action\": \"keep\", ...}\n  \"provenance\": {\"url\": \"<primary source url>\", \"source\": \"<domain>\", \"evidence\": \"<one line>\"}\nOnly include provenance when the primary source (vendor advisory, CISA,\nthe named researcher/outlet) really carries the claim \u2014 verified\nprovenance lets a low-trust event mint a story and set freshness; without\nit the event can only amplify an existing story.\nSTRICT KEY NAMES: the array key is \"decisions\" (never \"events\"); the story\nkey is \"story\" (never \"story_id\"); \"story\" holds a candidate_stories id\nverbatim or the literal string \"NEW\". Optional per-event field\n\"exploitation\": {\"CVE-...\": {\"status\": \"exploited|suspected\", \"evidence\": \"1-2 sentences\"}}.",
+ "new_events": [
+  {
+   "id": "rss:9d89c452fa2b0e30",
+   "title": "INC Ransomware Hackers Use Claude AI, Expose 8,257 Messages and 46 Malware Builds",
+   "source": "gbhackers.com",
+   "published_at": "2026-10-21T05:57:08Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Ransomware affiliates associated with INC and The Gentlemen exposed an intrusion ecosystem after leaving operational servers publicly accessible. The investigation began in late September 2026 with open directories on 45"
+  },
+  {
+   "id": "rss:2482baa152de1610",
+   "title": "Microsoft Introduces New Bug Bounty Rules That Could Affect Security Researchers\u2019 Rewards",
+   "source": "gbhackers.com",
+   "published_at": "2026-10-21T05:32:06Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Microsoft has introduced new rules for assessing reports in its bug bounty programs, tying submission completeness more directly to potential rewards. Announced by the Microsoft Security Response Center (MSRC) on October"
+  },
+  {
+   "id": "rss:d9373c18479fe8f3",
+   "title": "Hackers Exploit Compromised UpdraftCentral Keys to Install Malicious Plugins on WordPress Sites",
+   "source": "gbhackers.com",
+   "published_at": "2026-10-21T05:10:32Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Attackers exploited compromised UpdraftCentral connection keys to send trusted remote-management commands to WordPress sites, ultimately installing malicious plugins that could provide unauthorized access to these websit"
+  }
+ ],
+ "candidate_stories": [
+  {
+   "id": "inc-ransomware-hackers-use-claude-ai-expose-8-257-messages-and-4",
+   "title": "INC Ransomware Hackers Use Claude AI, Expose 8,257 Messages and 46 Malware Builds",
+   "n_events": 1,
+   "last_seen": "2026-10-21T05:57:08Z",
+   "first_event_title": "INC Ransomware Hackers Use Claude AI, Expose 8,257 Messages and 46 Malware Builds"
+  },
+  {
+   "id": "microsoft-introduces-new-bug-bounty-rules-that-could-affect-secu",
+   "title": "Microsoft Introduces New Bug Bounty Rules That Could Affect Security Researchers\u2019 Rewards",
+   "n_events": 1,
+   "last_seen": "2026-10-21T05:32:06Z",
+   "first_event_title": "Microsoft Introduces New Bug Bounty Rules That Could Affect Security Researchers\u2019 Rewards"
+  },
+  {
+   "id": "stolen-updraftcentral-keys-used-to-backdoor-wordpress-sites",
+   "title": "Stolen UpdraftCentral keys used to backdoor WordPress sites",
+   "n_events": 3,
+   "last_seen": "2026-10-21T05:10:32Z",
+   "first_event_title": "Stolen UpdraftCentral keys used to backdoor WordPress sites"
+  },
+  {
+   "id": "the-internet-goes-on-high-alert-after-discovery-of-8-compromised",
+   "title": "The Internet goes on high alert after discovery of 8 compromised TLS certs",
+   "n_events": 18,
+   "last_seen": "2026-10-21T04:55:58Z",
+   "first_event_title": "The Internet goes on high alert after discovery of 8 compromised TLS certs"
+  },
+  {
+   "id": "php-warns-admins-of-two-critical-flaws-emergency-patches-coming",
+   "title": "PHP warns admins of two critical flaws, emergency patches coming tomorrow",
+   "n_events": 30,
+   "last_seen": "2026-10-21T04:47:49Z",
+   "first_event_title": "PHP warns admins of two critical flaws, emergency patches coming tomorrow"
+  },
+  {
+   "id": "cve-2026-114108-critical-missing-auth-in-hkuds-vibe-trading",
+   "title": "CVE-2026-114108: Critical Missing Auth in HKUDS Vibe-Trading",
+   "n_events": 1,
+   "last_seen": "2026-10-21T04:30:26.000Z",
+   "first_event_title": "CVE-2026-114108: CRITICAL vuln in HKUDS Vibe-Trading \u22640.1.6 \u2013 missing auth enables root shell commands, script uploads, session leaks. Set A"
+  },
+  {
+   "id": "autonomous-ai-agents-compromise-over-100-organizations-at-low-co",
+   "title": "Autonomous AI agents compromise over 100 organizations at low cost",
+   "n_events": 2,
+   "last_seen": "2026-10-21T04:24:52.562Z",
+   "first_event_title": "Five days, a single attacker, and more than 100 compromised organizations, made possible by autonomous AI agents at a cost of about 5 per target."
+  },
+  {
+   "id": "accenture-dragos-sans-launch-10m-initiative-to-defend-small-us-u",
+   "title": "Accenture, Dragos, SANS Launch $10M Initiative to Defend Small US Utilities",
+   "n_events": 1,
+   "last_seen": "2026-10-21T04:22:11Z",
+   "first_event_title": "Accenture, Dragos, SANS Launch $10M Initiative to Defend Small US Utilities"
+  },
+  {
+   "id": "microsoft-october-2026-patch-tuesday-fixes-1-411-flaws-3-zero-da",
+   "title": "Microsoft October 2026 Patch Tuesday fixes 1,411 flaws, 3 zero-days",
+   "n_events": 49,
+   "last_seen": "2026-10-21T04:17:41.093Z",
+   "first_event_title": "Microsoft October 2026 Patch Tuesday fixes 1,411 flaws, 3 zero-days"
+  },
+  {
+   "id": "operation-flashhole-lazarus-group-s-evolved-malware-targets-sout",
+   "title": "Operation FlashHole: Lazarus Group's Evolved Malware Targets South Korea",
+   "n_events": 2,
+   "last_seen": "2026-10-21T04:00:10.000Z",
+   "first_event_title": "(securelist.com) Operation FlashHole: Lazarus Group's Evolved Malware Arsenal Targets South Korean Sectors In brief - This article details '"
+  },
+  {
+   "id": "apache-couchdb-3-5-3-fixes-six-vulnerabilities-including-cvss-9",
+   "title": "Apache CouchDB 3.5.3 Fixes Six Vulnerabilities Including CVSS 9.3 CVE-2026-86471",
+   "n_events": 4,
+   "last_seen": "2026-10-21T03:59:13.000Z",
+   "first_event_title": "Six Apache CouchDB vulnerabilities, including CVSS 9.3 CVE-2026-86471, are fixed in 3.5.3. Retired Apache Cocoon gets four unpatched flaws. "
+  },
+  {
+   "id": "pan-os-cve-2026-0257-cisa-kev-globalprotect-authentication-bypas",
+   "title": "PAN-OS CVE-2026-0257 CISA KEV \u2014 GlobalProtect Authentication Bypass Actively Exploited, Rapid7 Confirms Two Attack Waves",
+   "n_events": 23,
+   "last_seen": "2026-10-21T03:46:11.000Z",
+   "first_event_title": "PAN-OS CVE-2026-0257 CISA KEV \u2014 GlobalProtect Authentication Bypass Actively Exploited, Rapid7 Confirms Two Attack Waves"
+  },
+  {
+   "id": "cisa-advisory-aa26-293a-safepay-ransomware-targets-businesses",
+   "title": "CISA Advisory AA26-293a: SafePay Ransomware Targets Businesses",
+   "n_events": 1,
+   "last_seen": "2026-10-21T03:20:17.881Z",
+   "first_event_title": "A new type of malicious software called SafePay is targeting businesses to lock their files and demand payment. Source: CISA Read: https://w"
+  },
+  {
+   "id": "millions-of-routers-can-be-hijacked-over-wi-fi-thanks-to-a-16-ye",
+   "title": "Millions of routers can be hijacked over Wi-Fi thanks to a 16-year-old bug",
+   "n_events": 0,
+   "last_seen": "2026-10-21T03:13:08Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "cve-2026-105941-red-hat-streams-for-apache-kafka-3-unvalidated-v",
+   "title": "CVE-2026-105941: Red Hat Streams for Apache Kafka 3 \u2014 Unvalidated vaultName in Kroxylicious Azure Key Vault KMS",
+   "n_events": 1,
+   "last_seen": "2026-10-21T03:02:35.000Z",
+   "first_event_title": "CVE-2026-105941 affects Red Hat Streams for Apache Kafka 3. The Kroxylicious Azure Key Vault KMS provider accepts an unvalidated vaultName, "
+  },
+  {
+   "id": "claude-building-a-mac-s-monitoring-temperature-app-for-a-vibecod",
+   "title": "Claude Building A Mac\u2019s Monitoring Temperature App For A Vibecoder Uncovered A Cryptominer Using All 12 CPU Cores And Hitting 112\u00b0C",
+   "n_events": 0,
+   "last_seen": "2026-10-21T03:01:25Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "cve-2026-113744-critical-stack-buffer-overflow-in-tenda-ac19-v16",
+   "title": "CVE-2026-113744: Critical Stack Buffer Overflow in Tenda AC19 (v16.03.10.07)",
+   "n_events": 1,
+   "last_seen": "2026-10-21T03:00:26.000Z",
+   "first_event_title": "CRITICAL: CVE-2026-113744 impacts Tenda AC19 (v16.03.10.07) via stack-based buffer overflow in /goform/SetFirewallCfg. Remote, unauthenticat"
+  },
+  {
+   "id": "feds-suspect-ransom-negotiator-ran-shinyhunters-extortion-site",
+   "title": "Feds Suspect Ransom Negotiator Ran ShinyHunters Extortion Site",
+   "n_events": 11,
+   "last_seen": "2026-10-21T02:45:55.000Z",
+   "first_event_title": "Feds Suspect Ransom Negotiator Ran ShinyHunters Extortion Site"
+  },
+  {
+   "id": "github-package-firewall-public-preview-for-enterprise-cloud",
+   "title": "GitHub Package Firewall Public Preview for Enterprise Cloud",
+   "n_events": 1,
+   "last_seen": "2026-10-21T02:41:15.000Z",
+   "first_event_title": "GitHub says its new package firewall, in public preview for Enterprise Cloud only, screens npm packages for malware at install time. GitHub'"
+  },
+  {
+   "id": "tor-relay-hijacking-333-exit-nodes-redirect-ssh",
+   "title": "Tor Relay Hijacking: 333 Exit Nodes Redirect SSH",
+   "n_events": 1,
+   "last_seen": "2026-10-21T02:29:54.000Z",
+   "first_event_title": "Tor's advisory on hijacked relays gives no count or cause. Researcher Kaba counted 333 of about 3,000 exits redirecting SSH to interception "
+  },
+  {
+   "id": "exploiting-three-critical-v8-vulnerabilities-in-chrome",
+   "title": "Exploiting Three Critical V8 Vulnerabilities in Chrome",
+   "n_events": 1,
+   "last_seen": "2026-10-21T02:19:21.000Z",
+   "first_event_title": "(depthfirst.com) From JavaScript to Renderer Code Execution: Exploiting Three Critical V8 Vulnerabilities in Chrome In brief - This article "
+  },
+  {
+   "id": "recent-ai-assisted-cyber-attacks-in-japan-investigating-attack-i",
+   "title": "Recent AI-Assisted Cyber Attacks in Japan: Investigating Attack Infrastructure and Techniques",
+   "n_events": 1,
+   "last_seen": "2026-10-21T02:06:16Z",
+   "first_event_title": "Recent AI-Assisted Cyber Attacks in Japan: Investigating Attack Infrastructure and Techniques"
+  },
+  {
+   "id": "isc-stormcast-for-wednesday-october-21st-2026-https-isc-sans-edu",
+   "title": "ISC Stormcast For Wednesday, October 21st, 2026 (Wed, Oct 21st)",
+   "n_events": 0,
+   "last_seen": "2026-10-21T02:05:39Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "the-gentlemen-ransomware-a-comprehensive-analysis-of-a-prolific",
+   "title": "The Gentlemen Ransomware: A Comprehensive Analysis of a Prolific RaaS",
+   "n_events": 1,
+   "last_seen": "2026-10-21T01:52:24.000Z",
+   "first_event_title": "(acronis.com) The Gentlemen Ransomware: A Comprehensive Analysis of a Prolific RaaS Operation and Its Sophisticated Tactics In brief - This "
+  },
+  {
+   "id": "chrome-156-security-update-fixes-critical-vulnerabilities",
+   "title": "Chrome 156 Security Update Fixes Critical Vulnerabilities",
+   "n_events": 2,
+   "last_seen": "2026-10-21T01:44:57.000Z",
+   "first_event_title": "The Chrome 156 security update fixes 353 flaws, including six critical vulnerabilities such as CVE-2026-113341. Update to 156.0.8078.47. # C"
+  },
+  {
+   "id": "fortinet-october-2026-advisories-patch-fortisandbox-and-fortisie",
+   "title": "Fortinet October 2026 advisories patch FortiSandbox and FortiSIEM flaws",
+   "n_events": 12,
+   "last_seen": "2026-10-21T01:43:55.000Z",
+   "first_event_title": "Thirteen Fortinet vulnerabilities are now fixed, including a CVSS 9.6 FortiSandbox authentication bypass and a 9.4 FortiSIEM flaw. Patch now"
+  },
+  {
+   "id": "apache-tomcat-fixes-eight-vulnerabilities-including-jndirealm-au",
+   "title": "Apache Tomcat Fixes Eight Vulnerabilities Including JNDIRealm Auth Bypass",
+   "n_events": 1,
+   "last_seen": "2026-10-21T01:38:44.000Z",
+   "first_event_title": "Eight Apache Tomcat vulnerabilities, including a JNDIRealm authentication bypass, are fixed in 11.0.27, 10.1.61 and 9.0.123. Upgrade now. # "
+  },
+  {
+   "id": "ransomware-attack-on-petersburg-alaska-utility-billing-software",
+   "title": "Ransomware Attack on Petersburg Alaska Utility Billing Software",
+   "n_events": 1,
+   "last_seen": "2026-10-21T01:30:52.000Z",
+   "first_event_title": "A ransomware attack affected utility billing software at Petersburg Borough in Alaska after a July 11 network intrusion. Officials disclosed"
+  },
+  {
+   "id": "cve-2026-114119-hard-coded-credentials-in-bp-premier",
+   "title": "CVE-2026-114119: Hard-Coded Credentials in Bp Premier",
+   "n_events": 1,
+   "last_seen": "2026-10-21T01:30:25.000Z",
+   "first_event_title": "CVE-2026-114119: CRITICAL in Bp Premier https:// radar.offseq.com/threat/cve-20 26-114119-use-of-hard-coded-credentials-in-best-practice-sof"
+  },
+  {
+   "id": "columbia-south-carolina-network-security-incident-disrupts-servi",
+   "title": "Columbia South Carolina Network Security Incident Disrupts Services",
+   "n_events": 1,
+   "last_seen": "2026-10-21T01:27:45.000Z",
+   "first_event_title": "Columbia, South Carolina's online service requests, business licensing and permitting were disrupted by a network security incident, city of"
+  },
+  {
+   "id": "auto-tech-startup-claims-it-traced-hack-attempt-back-to-comma-ai",
+   "title": "Auto tech startup claims it traced hack attempt back to Comma.ai's IP address",
+   "n_events": 0,
+   "last_seen": "2026-10-21T01:21:48Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "hirudo-android-banking-rat-independent-investigation",
+   "title": "Hirudo Android Banking RAT: Independent Investigation",
+   "n_events": 1,
+   "last_seen": "2026-10-21T01:14:28.000Z",
+   "first_event_title": "I\u2019ve published an independent technical investigation into Hirudo, an Android banking RAT, focusing on its Indonesian banking-app replacemen"
+  },
+  {
+   "id": "cybersecurity-experts-what-are-your-thoughts-on-the-review-given",
+   "title": "Cybersecurity experts, what are your thoughts on the review given by METR on Anthropic\u2019s Security Report?",
+   "n_events": 0,
+   "last_seen": "2026-10-21T01:09:23Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "mariadb-critical-vulnerabilities-including-cve-2026-92262-cvss-9",
+   "title": "MariaDB critical vulnerabilities including CVE-2026-92262 (CVSS 9.9) risk remote code execution",
+   "n_events": 5,
+   "last_seen": "2026-10-21T00:40:56.000Z",
+   "first_event_title": "MariaDB critical vulnerabilities, including CVE-2026-92262 (CVSS 9.9), risk remote code execution. Upgrade to the October 2026 releases. # M"
+  },
+  {
+   "id": "advantech-adam-3600-vulnerabilities-including-cve-2026-43836-all",
+   "title": "Advantech ADAM-3600 vulnerabilities including CVE-2026-43836 allow remote code execution and auth bypass",
+   "n_events": 1,
+   "last_seen": "2026-10-21T00:06:05.000Z",
+   "first_event_title": "30 Advantech ADAM-3600 vulnerabilities, including CVE-2026-43836, allow remote code execution and auth bypass. Update EdgeLink to 2.8.5.0. #"
+  },
+  {
+   "id": "nginx-releases-1-31-7-and-1-30-6-fixing-five-security-flaws",
+   "title": "NGINX Releases 1.31.7 and 1.30.6 Fixing Five Security Flaws",
+   "n_events": 10,
+   "last_seen": "2026-10-21T00:00:49.000Z",
+   "first_event_title": "NGINX Vulnerabilities Let Remote Attackers Crash Servers and Risk Code Execution NGINX has released versions 1.31.7 and 1.30.6 to fix five s"
+  },
+  {
+   "id": "cve-2026-28763-critical-stack-buffer-overflow-in-totolink-x2000r",
+   "title": "CVE-2026-28763 critical stack buffer overflow in TOTOLINK X2000R allows code execution",
+   "n_events": 1,
+   "last_seen": "2026-10-21T00:00:38.000Z",
+   "first_event_title": "CVE-2026-28763: CRITICAL stack buffer overflow in TOTOLINK X2000R (V1.0.0-B20250421.1327). Authenticated attacker can trigger code execution"
+  },
+  {
+   "id": "google-pixel-zero-day-attacks-hit-some-owners",
+   "title": "Google Pixel zero-day attacks hit some owners",
+   "n_events": 1,
+   "last_seen": "2026-10-20T23:50:25.563Z",
+   "first_event_title": "Google says some Pixel phone owners were hacked in zero-day attacks The Pixel phone maker said there are indications that a bug in the phone"
+  },
+  {
+   "id": "philippines-based-american-pleads-guilty-to-running-expansive-fr",
+   "title": "Philippines-based American pleads guilty to running expansive fraud scheme targeting US servicemembers",
+   "n_events": 1,
+   "last_seen": "2026-10-20T23:36:10Z",
+   "first_event_title": "Philippines-based American pleads guilty to running expansive fraud scheme targeting US servicemembers"
+  },
+  {
+   "id": "oracle-august-2026-monthly-cspu-patches-925-cves-154-critical",
+   "title": "Oracle August 2026 Monthly CSPU Patches 925 CVEs, 154 Critical",
+   "n_events": 8,
+   "last_seen": "2026-10-20T22:50:02.000Z",
+   "first_event_title": "Oracle August 2026 Critical Security Patch Update Addresses 925 CVEs"
+  },
+  {
+   "id": "adobe-security-advisory-av26-1039",
+   "title": "Adobe security advisory (AV26-1039)",
+   "n_events": 8,
+   "last_seen": "2026-10-16T21:51:30.000Z",
+   "first_event_title": "Adobe security advisory (AV26-1039)"
+  },
+  {
+   "id": "adobe-security-advisory-av26-808",
+   "title": "Adobe security advisory (AV26-808)",
+   "n_events": 2,
+   "last_seen": "2026-08-13T08:12:33Z",
+   "first_event_title": "Adobe security advisory (AV26-808)"
+  },
+  {
+   "id": "adobe-security-advisory-av26-888",
+   "title": "Adobe security advisory (AV26-888)",
+   "n_events": 3,
+   "last_seen": "2026-09-09T00:35:01.000Z",
+   "first_event_title": "Adobe security advisory (AV26-888)"
+  },
+  {
+   "id": "ai",
+   "title": "\uc548\ub4dc\ub85c\uc774\ub4dc \uba54\uc2dc\uc9c0 \uc0ac\uae30 \ubc0f \uac00\uc9dc \uc804\ud654\uc5d0 \ub300\uc751\ud558\ub294 ai \ubc29\uc5b4 \uae30\ub2a5 \ub3c4\uc785",
+   "n_events": 0,
+   "last_seen": "2026-10-19T17:06:22Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "apple-security-advisory-av26-823",
+   "title": "Apple security advisory (AV26-823)",
+   "n_events": 1,
+   "last_seen": "2026-08-17T15:35:39Z",
+   "first_event_title": "Apple security advisory (AV26-823)"
+  },
+  {
+   "id": "citrix-security-advisory-av26-1034",
+   "title": "Citrix security advisory (AV26-1034)",
+   "n_events": 1,
+   "last_seen": "2026-10-13T19:15:43Z",
+   "first_event_title": "Citrix security advisory (AV26-1034)"
+  },
+  {
+   "id": "citrix-security-advisory-av26-833",
+   "title": "Citrix security advisory (AV26-833)",
+   "n_events": 1,
+   "last_seen": "2026-08-19T18:45:45Z",
+   "first_event_title": "Citrix security advisory (AV26-833)"
+  },
+  {
+   "id": "commvault-security-advisory-av26-799",
+   "title": "Commvault security advisory (AV26-799)",
+   "n_events": 1,
+   "last_seen": "2026-08-11T17:46:10Z",
+   "first_event_title": "Commvault security advisory (AV26-799)"
+  },
+  {
+   "id": "control-systems-advantech-security-advisory-av26-1065",
+   "title": "[Control systems] Advantech security advisory (AV26-1065)",
+   "n_events": 1,
+   "last_seen": "2026-10-20T13:25:43Z",
+   "first_event_title": "[Control systems] Advantech security advisory (AV26-1065)"
+  },
+  {
+   "id": "control-systems-geovision-security-advisory-av26-1066",
+   "title": "[Control systems] GeoVision security advisory (AV26-1066)",
+   "n_events": 1,
+   "last_seen": "2026-10-20T13:35:43Z",
+   "first_event_title": "[Control systems] GeoVision security advisory (AV26-1066)"
+  },
+  {
+   "id": "control-systems-johnson-controls-security-advisory-av26-1052",
+   "title": "[Control systems] Johnson Controls security advisory (AV26-1052)",
+   "n_events": 0,
+   "last_seen": "2026-10-15T19:35:40Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "control-systems-moxa-security-advisory-av26-1055",
+   "title": "[Control Systems] Moxa security advisory (AV26-1055)",
+   "n_events": 1,
+   "last_seen": "2026-10-16T13:25:41Z",
+   "first_event_title": "[Control Systems] Moxa security advisory (AV26-1055)"
+  },
+  {
+   "id": "control-systems-moxa-security-advisory-av26-995",
+   "title": "[Control Systems] Moxa security advisory (AV26-995)",
+   "n_events": 1,
+   "last_seen": "2026-10-02T18:10:42Z",
+   "first_event_title": "[Control Systems] Moxa security advisory (AV26-995)"
+  },
+  {
+   "id": "control-systems-schneider-electric-security-advisory-av26-1051",
+   "title": "[Control systems] Schneider Electric security advisory (AV26-1051)",
+   "n_events": 0,
+   "last_seen": "2026-10-15T19:20:43Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "control-systems-siemens-security-advisory-av26-890",
+   "title": "[Control Systems] Siemens security advisory (AV26-890)",
+   "n_events": 3,
+   "last_seen": "2026-09-23T08:01:13.000Z",
+   "first_event_title": "[Control Systems] Siemens security advisory (AV26-890)"
+  },
+  {
+   "id": "dell-security-advisory-av26-863",
+   "title": "Dell security advisory (AV26-863)",
+   "n_events": 3,
+   "last_seen": "2026-10-12T17:37:08.000Z",
+   "first_event_title": "Dell security advisory (AV26-863)"
+  },
+  {
+   "id": "erlang-security-advisory-av26-948",
+   "title": "Erlang security advisory (AV26-948)",
+   "n_events": 1,
+   "last_seen": "2026-09-22T18:25:40Z",
+   "first_event_title": "Erlang security advisory (AV26-948)"
+  },
+  {
+   "id": "f5-security-advisory-av26-1049",
+   "title": "F5 security advisory (AV26-1049)",
+   "n_events": 1,
+   "last_seen": "2026-10-15T18:25:42Z",
+   "first_event_title": "F5 security advisory (AV26-1049)"
+  },
+  {
+   "id": "freepbx-security-advisory-av26-818",
+   "title": "FreePBX security advisory (AV26-818)",
+   "n_events": 1,
+   "last_seen": "2026-08-14T16:10:48Z",
+   "first_event_title": "FreePBX security advisory (AV26-818)"
+  },
+  {
+   "id": "gitlab-security-advisory-av26-814",
+   "title": "GitLab security advisory (AV26-814)",
+   "n_events": 1,
+   "last_seen": "2026-08-13T14:00:38Z",
+   "first_event_title": "GitLab security advisory (AV26-814)"
+  },
+  {
+   "id": "malicious-admin-menu-editor-pro-plugin-backdoors-1-500-wordpress",
+   "title": "Malicious Admin Menu Editor Pro plugin backdoors 1,500 WordPress sites",
+   "n_events": 3,
+   "last_seen": "2026-09-16T19:30:00.000Z",
+   "first_event_title": "Malcious Admin Menu Editor Pro plugin backdoors 1,500 WordPress sites https:// bleepingcomputer.com/news/security/ malcious-admin-menu-edito"
+  }
+ ]
+}
