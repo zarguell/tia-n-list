@@ -1,0 +1,3 @@
+Hi why is this guy saying cyber security engineer is not one job but a category with several subspecialties? He says detection engineer is a type of cyber security engineer: https://youtu.be/shgKU-zjOmw?is=t\_ZXjPsYWRMiZPv0 he also lists appsec engineers, cloudsec engineers, automation engineers, etc in there. The reason I ask is people in the HTB Discord say detection engineer does not equal cyber sec engineer. They list cybersecurity engineer as its own specific position. submitted by /u/notburneddown [link] [comments]
+
+via reddit r/cybersecurity: Why does UnixGuy’s definition of cybersecurity engineer differ from that if the HTB Discord?
