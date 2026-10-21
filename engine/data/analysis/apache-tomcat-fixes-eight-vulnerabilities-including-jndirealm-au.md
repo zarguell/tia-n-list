@@ -1,0 +1,3 @@
+Apache Tomcat released fixes for eight vulnerabilities, including a JNDIRealm authentication bypass, across versions 11.0.27, 10.1.61, and 9.0.123. The authentication bypass allows attackers to circumvent security checks by crafting malicious requests that exploit JNDI realm lookup behavior. Multiple CVSS scores accompany the batch, making this a high-priority upgrade for any Tomcat deployment.
+
+The fixes also address other security flaws affecting authentication and data exposure. Organizations running Tomcat should apply patches immediately, since the authentication bypass offers a direct path to unauthorized access. The release covers both long-term and current branch versions, reducing the excuse for deferred maintenance.
