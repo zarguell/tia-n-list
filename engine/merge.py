@@ -471,8 +471,30 @@ def digest_referenced_slugs(digest_dir=None):
     return out
 
 
+def load_sweep_exclusions(path=None):
+    """Pair exclusions the unattended score-0 sweep must honor (set of
+    frozenset slugs).
+
+    Committed code-side (engine/sweep_exclusions.json), so it survives data
+    churn: each entry is a pair a daily audit DISMISSED — e.g. the DDoSia
+    witha.name host-list releases are successive installments of one actor
+    feed, not one story. Without this, an unattended sweep re-litigates the
+    auditor's adjudication and merges what a human rejected three times.
+    The audit followup appends on each new dismissal, so dismissals become
+    durable automatically. Missing/corrupt file = no exclusions.
+    """
+    path = path or os.path.join(ENGINE, "sweep_exclusions.json")
+    raw = _load_json_or_default(path, [])
+    out = set()
+    for x in raw if isinstance(raw, list) else []:
+        if isinstance(x, dict) and x.get("a") and x.get("b"):
+            out.add(frozenset((str(x["a"]), str(x["b"]))))
+    return out
+
+
 def score0_sweep_candidates(stories, *, analysis_dir=None, digest_dir=None,
-                            max_age_days=SCORE0_SWEEP_MAX_AGE_DAYS, now=None):
+                            max_age_days=SCORE0_SWEEP_MAX_AGE_DAYS, now=None,
+                            exclusions=None):
     """Score-0.0 duplicate pairs meeting EVERY sweep predicate, merge-ready.
 
     Pool: LIVE stories (not merged_into, have events) whose current score is
@@ -491,6 +513,8 @@ def score0_sweep_candidates(stories, *, analysis_dir=None, digest_dir=None,
     """
     from audit_checks import SUSPECT_GENERIC   # lazy: audit_checks imports merge
     now = now or datetime.now(timezone.utc)
+    if exclusions is None:
+        exclusions = load_sweep_exclusions()
     cutoff = (now - timedelta(days=max_age_days)).strftime("%Y-%m-%dT%H:%M:%S")
     analysis_dir = analysis_dir or ANALYSIS_DIR
     referenced = digest_referenced_slugs(digest_dir)
@@ -532,6 +556,8 @@ def score0_sweep_candidates(stories, *, analysis_dir=None, digest_dir=None,
                 continue
             if len((disc[i] & disc[j]) - SUSPECT_GENERIC) < 2:
                 continue              # boilerplate-only overlap, no real signal
+            if frozenset((pool[i]["id"], pool[j]["id"])) in exclusions:
+                continue              # audit-dismissed pair (sweep_exclusions)
             out.append({"a": pool[i]["id"], "b": pool[j]["id"],
                         "jaccard": round(jj, 2)})
     out.sort(key=lambda x: (-x["jaccard"], x["a"], x["b"]))
@@ -541,7 +567,7 @@ def score0_sweep_candidates(stories, *, analysis_dir=None, digest_dir=None,
 def sweep_score0_merges(stories, events=None, *, stories_dir=None,
                         analysis_dir=None, digest_dir=None,
                         cap=SCORE0_SWEEP_CAP, reddit_posts=None,
-                        now=None, log=None):
+                        now=None, log=None, exclusions=None):
     """Unattended, bounded, idempotent merge sweep for the score-0 duplicate
     backlog (2026-10-20 owner decision eda9f1100d5d, audit Rec 3). Merges at
     most `cap` candidate pairs (see score0_sweep_candidates) via the SAME
@@ -558,7 +584,8 @@ def sweep_score0_merges(stories, events=None, *, stories_dir=None,
     events = load_events() if events is None else events
     stories_dir = stories_dir or STORIES
     candidates = score0_sweep_candidates(
-        stories, analysis_dir=analysis_dir, digest_dir=digest_dir, now=now)
+        stories, analysis_dir=analysis_dir, digest_dir=digest_dir, now=now,
+        exclusions=exclusions)
     for c in candidates:
         if len(log) >= cap:
             break

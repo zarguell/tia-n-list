@@ -10,7 +10,9 @@ by any published digest (md slate links + json stories/overrides); no distinct
 CVE sets. Merges go through repair_dedupe's mechanical path (the loser keeps
 its json with merged_into + empty events so the old URL redirects, the winner
 absorbs the events), then the derived-fields sweep and a rescore run on the
-winners. Capped (10 merges/invocation) and idempotent — a second run
+winners. Pairs recorded in engine/sweep_exclusions.json (audit-dismissed,
+e.g. the DDoSia witha.name release installments) are never candidates.
+Capped (10 merges/invocation) and idempotent — a second run
 immediately after merges nothing.
 
 The daily audit (audit.py) invokes the sweep before its adjudication section;

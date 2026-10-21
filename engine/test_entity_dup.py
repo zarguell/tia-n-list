@@ -357,8 +357,37 @@ check("cap limits merges to 2", len([l for l in log7 if l.startswith("merge ")])
 merged_cnt = sum(1 for s in st7.values() if s.get("merged_into"))
 check("exactly 2 shells after capped run", merged_cnt, 2)
 
+print("8. sweep exclusions honored (audit dismissals are durable)")
+# The 2026-10-20 audit dismissed the DDoSia witha.name release pairs three
+# times; sweep_exclusions.json must keep the unattended sweep from merging
+# them (owner decision eda9f1100d5d + the dismissal adjudications).
+# real-world titles (the pair the audit dismissed 3x; jj = 0.5 live)
+EX = {"ex-a": ("DDoSia botnet targets Ukrainian critical infrastructure "
+               "with updated target list", 0.0, 5),
+      "ex-b": ("DDoSia botnet releases DDoS target list including Italian "
+               "infrastructure and Ukrainian SCADA", 0.0, 5)}
+root8, st8, ev8 = sweep_env(EX)
+excl = {frozenset(("ex-a", "ex-b"))}
+cands8 = merge.score0_sweep_candidates(st8, analysis_dir=os.path.join(root8, "analysis"),
+                                       digest_dir=os.path.join(root8, "digests"),
+                                       now=NOW, exclusions=excl)
+check("excluded pair absent from candidates", cands8, [])
+cands8b = merge.score0_sweep_candidates(st8, analysis_dir=os.path.join(root8, "analysis"),
+                                        digest_dir=os.path.join(root8, "digests"),
+                                        now=NOW, exclusions=set())
+check("same pair surfaces without the exclusion", len(cands8b), 1)
+log8 = merge.sweep_score0_merges(st8, ev8, stories_dir=os.path.join(root8, "stories"),
+                                 analysis_dir=os.path.join(root8, "analysis"),
+                                 digest_dir=os.path.join(root8, "digests"),
+                                 reddit_posts=[], now=NOW, exclusions=excl)
+check("sweep merges nothing when the pair is excluded",
+      [l for l in log8 if l.startswith("merge ")], [])
+loaded = merge.load_sweep_exclusions(
+    path=os.path.join(root8, "sweep_exclusions.json"))
+check("loader returns empty set for missing file", loaded, set())
+
 for d in (root, root2, root2b, root3, root3b, root3c, root4, root4b, root5,
-          root5b, root7):
+          root5b, root7, root8):
     shutil.rmtree(d, ignore_errors=True)
 
 print()
