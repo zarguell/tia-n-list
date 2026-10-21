@@ -1,0 +1,1 @@
+Researcher Wayne signed a message with each compromised key to prove possession. A disclosure site published by Dennis Jackson provides certificates, public keys, and signatures for independent verification of the eight compromised intermediate CA keys.

@@ -1,0 +1,1 @@
+On October 19, 2026 at approximately 17:00 UTC, Cloudflare became aware that private keys for eight eMudhra intermediate certificates were compromised. The certificates were widely trusted and could allow an attacker to forge browser- and app-trusted credentials for arbitrary domains.

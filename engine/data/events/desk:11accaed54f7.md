@@ -1,0 +1,1 @@
+The researcher credited as Wayne demonstrated access by signing messages with each of the eight weak keys and notifying root programs. Apple blocked the certificates on October 19, Microsoft on October 20, and Go released emergency updates blocking them on October 19.
