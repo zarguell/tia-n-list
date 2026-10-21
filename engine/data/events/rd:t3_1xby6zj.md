@@ -1,0 +1,3 @@
+Getting pre-auth RCE working across WordPress, Drupal and Joomla through the PHP engine itself is some serious work from Wiz. A lot of companies have PHP buried in older containers and internal services without even knowing which version is running. Updating the CMS won't fix the underlying runtime. Rebuilding a base image won't help either if the old containers are still serving traffic. Good luck patching PHP deployments you don't even know exist. submitted by /u/Wild-Turn7693 [link] [comments]
+
+via reddit r/cybersecurity: Wiz got pre-auth RCE on WordPress, Drupal and Joomla through vulnerabilities in PHP itself
