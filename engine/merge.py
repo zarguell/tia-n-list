@@ -480,9 +480,14 @@ def score0_sweep_candidates(stories, *, analysis_dir=None, digest_dir=None,
     duplicate_suspects). A pair is a candidate only when title jaccard >= 0.5,
     NEITHER side has an analysis file (data/analysis/<id>.md), NEITHER is
     referenced by any published digest (see digest_referenced_slugs), the CVE
-    sets are not distinct (both empty or intersecting), and the recurring-
-    series guards (distinct series codes / report periods / slug advisory
-    ids) do not fire. Returns [{a, b, jaccard}] sorted by (-jaccard, a, b).
+    sets are not distinct (both empty or intersecting), BOTH sides share a
+    victim/actor entity anchor (the entity probe's strong/loose token sets or
+    a known actor token — without it, unrelated victims collide on
+    boilerplate at exactly the 0.5 floor: the DDoSia host-list releases,
+    Adapthealth-vs-Ampath), the recurring-series guards (distinct series
+    codes / report periods / slug advisory ids) do not fire, and >= 2 shared
+    distinctive (non-generic) tokens overlap. Returns [{a, b, jaccard}]
+    sorted by (-jaccard, a, b).
     """
     from audit_checks import SUSPECT_GENERIC   # lazy: audit_checks imports merge
     now = now or datetime.now(timezone.utc)
@@ -505,6 +510,7 @@ def score0_sweep_candidates(stories, *, analysis_dir=None, digest_dir=None,
     pool.sort(key=lambda s: s["id"])
     titles = [s.get("title", "") for s in pool]
     disc = [title_discriminators(t) for t in titles]
+    ents = [_entity_tokens(t, GENERIC | SUSPECT_GENERIC) for t in titles]
     cves = [{str(c).upper() for c in (s.get("cves") or [])} for s in pool]
     out = []
     for i in range(len(pool)):
@@ -514,6 +520,10 @@ def score0_sweep_candidates(stories, *, analysis_dir=None, digest_dir=None,
             jj = inter / union if union else 0.0
             if jj < 0.5:
                 continue
+            if not ((ents[i][0] & ents[j][1]) or (ents[i][1] & ents[j][0])) \
+                    and not ((_actor_norm(disc[i]) & ACTOR_TOKENS)
+                             & (_actor_norm(disc[j]) & ACTOR_TOKENS)):
+                continue              # no shared victim/actor entity anchor
             if (cves[i] | cves[j]) and not (cves[i] & cves[j]):
                 continue              # distinct CVE sets: different disclosures
             ta, tb = titles[i], titles[j]

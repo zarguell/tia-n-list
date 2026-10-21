@@ -302,6 +302,18 @@ log5 = merge.sweep_score0_merges(st5, ev5, stories_dir=os.path.join(root5, "stor
                                  digest_dir=os.path.join(root5, "digests"),
                                  reddit_posts=[], now=NOW)
 check("distinct CVE sets refuse", [l for l in log5 if l.startswith("merge ")], [])
+# no shared victim/actor entity: different victims on boilerplate at 0.5
+NOSTAR = {
+    "adapthealth-br": ("Adapthealth data breach exposes personal and health "
+                       "info of 4.1M patients", 0.0, 2),
+    "ampath-br": ("Ampath patient records data breach exposes 4.1M people",
+                  0.0, 2),
+}
+root5b, st5b, ev5b = sweep_env(NOSTAR)
+check("no entity anchor -> no candidates",
+      merge.score0_sweep_candidates(st5b, analysis_dir=os.path.join(root5b, "analysis"),
+                                    digest_dir=os.path.join(root5b, "digests"),
+                                    now=NOW), [])
 
 print("6. sweep idempotence: immediate second run merges nothing")
 win_path = os.path.join(root, "stories", "trezor-a.json")
@@ -346,7 +358,7 @@ merged_cnt = sum(1 for s in st7.values() if s.get("merged_into"))
 check("exactly 2 shells after capped run", merged_cnt, 2)
 
 for d in (root, root2, root2b, root3, root3b, root3c, root4, root4b, root5,
-          root7):
+          root5b, root7):
     shutil.rmtree(d, ignore_errors=True)
 
 print()
