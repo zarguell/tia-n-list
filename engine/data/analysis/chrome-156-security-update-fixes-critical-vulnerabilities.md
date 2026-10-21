@@ -1,3 +1,1 @@
-Chrome 156 includes 353 security fixes, including six critical vulnerabilities such as CVE-2026-113341. The release updates to version 156.0.8078.47. The scale of fixes indicates an active vulnerability management cycle at Google, with critical bugs receiving priority attention.
-
-Users and enterprises should deploy Chrome 156 as soon as feasible. The presence of multiple critical CVEs suggests active exploitation risk and reinforces the importance of rapid browser update cycles.
+Google released Chrome 156 stable on October 20, 2026, fixing 353 vulnerabilities, six rated critical. The update covers memory corruption, use-after-free, and input validation flaws across browser components. Deployment is rolling out over the coming days. No active exploitation is reported in the advisory, but the volume and critical count make prompt patching advisable. CVE-2026-113341 is listed among the fixed issues.
