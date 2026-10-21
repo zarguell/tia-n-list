@@ -21,6 +21,15 @@ Factors:
   pickup    0-0.6    how fast the second source arrived (exp decay on hours)
   recency   temporal multiplier (half-life 36h)
   reddit    community, added post-multiplier (0.3/0.4, cap 1.5)
+
+Zero-delta demotion (2026-10-20 owner decision ed6b7366c2ec, audit Rec 1):
+when a story's only recent movement is outlet re-reports that add no new
+CVE, actor, victim count, or IOC — and it has no genuine development inside
+the 48h window — the score is halved and the breakdown says so (`zero_delta`
++ `zero_delta_penalty`). Re-report events already earn no velocity/recency
+(2026-10-03); the demotion closes the residual slate ride (a big story's
+decayed base still crossed the digest's 3.3 gate with a reddit bump) and
+makes the demotion explainable instead of a daily hand-override.
 """
 import glob
 import json
@@ -119,6 +128,33 @@ VICTIM_COUNT_RE = re.compile(
     r"(?:records?|accounts?|users?|customers?|patients?|employees?|"
     r"organizations?|organisations?|companies?|victims?|hosts?|devices?|"
     r"members?|subscribers?|people)\b", re.I)
+
+# ── zero-delta demotion (2026-10-20 owner decision ed6b7366c2ec, audit
+# Rec 1). The 2026-10-03 re-report leg stopped echoes EARNING velocity and
+# recency, but a big story's decayed base still rode the digest slate (the
+# hot gate sits at 3.3 and the decaying base + reddit bump crossed it for
+# days) — 544 of 657 all-time digest overrides are demotes and the dominant
+# reason is still "new events restate covered facts", demoted BY HAND every
+# day. So: when the story's only recent movement is outlet re-reports that
+# carry no delta (the _repost_delta test — new actor / new victim count /
+# new IOC; a new CVE is settled by is_rereport) and there is NO genuine
+# development inside the recent window, the score is halved:
+# ZERO_DELTA_FACTOR is applied on top of the 36h decay, so a stale echo-only
+# story lands at most ~1.5 (its recency is already <= e**(-48/36) ~= 0.26)
+# — under the digest's hot gate, under the bench's near-gate flag, and
+# visible in the breakdown as zero_delta + zero_delta_penalty instead of a
+# daily hand-override.
+# Conservative by construction: any genuine development inside the window
+# (a non-re-report event — new CVE, new angle, anything is_rereport does
+# not flag) leaves the story untouched; a re-report that still carries a
+# delta (new actor/victim/IOC) leaves it untouched too; and rd: repost
+# stubs stay exactly as pinned by 6aad368c1a1b — neutral plumbing that
+# neither gains nor triggers rank (a stub-only story's score is unchanged).
+# Founding events are never re-reports, so a story is always at least half
+# a window old before this can fire.
+VELOCITY_WINDOW_H = 48      # the velocity factor's window == the recent
+                            # window the demotion trigger draws from
+ZERO_DELTA_FACTOR = 0.5     # keep half the (already decayed) score
 
 # Keys the SSG "Why this score" template renders from a score breakdown.
 # A story missing any of these raises a jinja UndefinedError that aborts the
@@ -305,6 +341,22 @@ def _repost_delta(event, prior_events, disc):
     if _victim_counts(text) - _victim_counts(prior_text):
         return True               # a new victim count
     return bool(_ioc_values(text) - _ioc_values(prior_text))
+
+
+def _echo_is_zero_delta(event, prior_events):
+    """True when a re-report event adds NOTHING the story doesn't carry.
+
+    is_rereport() has already settled identity (the event re-tells covered
+    material); this is the delta question, answered by _repost_delta — the
+    exact test the rd: stub leg uses, generalized to EVERY outlet re-report
+    (2026-10-20 owner decision ed6b7366c2ec). One delta engine, two
+    application points: new actor attribution, new victim count, or new IOC
+    means the echo still carries a development; a new CVE is settled before
+    this runs (is_rereport returns False for new-CVE events).
+    """
+    from merge import title_discriminators
+    disc = title_discriminators(event.get("title") or "")
+    return not _repost_delta(event, prior_events, disc)
 
 
 def is_rereport(event, prior_events, *, low_jaccard=0.25, high_jaccard=0.55,
@@ -518,18 +570,41 @@ def hot_score(story, events, reddit_posts, now=None):
         (r for r in story.get("events", []) if r["event_id"] in events),
         key=lambda r: events[r["event_id"]].get("published_at") or "")
     dev_dts, n_rereports, n48 = [], 0, 0
+    zd48 = False       # a zero-delta outlet echo inside the window
+    zd_only = True     # every in-window re-report so far carried no delta
     prior = []
     for ref in refs:
         e = events[ref["event_id"]]
         dt = parse(e["published_at"])
         if is_rereport(e, prior, story_title=story.get("title")):
             n_rereports += 1
+            in48 = (now - dt).total_seconds() < VELOCITY_WINDOW_H * 3600
+            if in48:
+                if REPOST_STUB_RE.match(e.get("id") or e.get("event_id") or ""):
+                    pass    # stubs are neutral: pinned to neither gain nor
+                            # trigger rank (6aad368c1a1b) — no delta by
+                            # construction (is_rereport settled it)
+                elif _echo_is_zero_delta(e, prior):
+                    zd48 = True   # an outlet echo restating covered facts
+                else:
+                    zd_only = False   # a re-report still carrying a real
+                                      # delta: leave the story alone
         else:
             dev_dts.append(dt)
-            if (now - dt).total_seconds() < 172800:
+            if (now - dt).total_seconds() < VELOCITY_WINDOW_H * 3600:
                 n48 += 1
         prior.append(e)
     velocity = min(2.0, 0.5 * n48)
+
+    # zero-delta demotion (2026-10-20 owner decision ed6b7366c2ec — see
+    # ZERO_DELTA_FACTOR): the story's only recent movement is delta-free
+    # outlet echoes and nothing genuine happened inside the window, so the
+    # decayed base no longer rides the slate at full weight. The trigger is
+    # the n48==0 check; zd48 requires an echo to demote FOR; zd_only keeps
+    # delta-carrying re-reports out of the trigger. n_rereports (above)
+    # already counts every echo, zero-delta ones included — the breakdown
+    # tells the whole story: rereports N, zero_delta true, penalty X.
+    zero_delta = zd48 and zd_only and n48 == 0
 
     # pickup speed: hours between the first and second GENUINE development —
     # echo events earn no pickup (2026-10-18 decision 6aad368c1a1b: a
@@ -572,7 +647,12 @@ def hot_score(story, events, reddit_posts, now=None):
                 break
     reddit = min(1.5, rmatch)
 
-    score = round(min(10.0, base * recency + reddit), 1)
+    pre = min(10.0, base * recency + reddit)
+    score = round(pre, 1)
+    zero_delta_penalty = 0.0
+    if zero_delta:
+        zero_delta_penalty = round(pre * (1.0 - ZERO_DELTA_FACTOR), 2)
+        score = round(pre * ZERO_DELTA_FACTOR, 1)
     return {
         "score": score,
         "base": round(base, 2),
@@ -583,6 +663,8 @@ def hot_score(story, events, reddit_posts, now=None):
         "pickup": round(pickup, 2),
         "recency": round(recency, 2),
         "rereports": n_rereports,
+        "zero_delta": zero_delta,
+        "zero_delta_penalty": zero_delta_penalty,
         "novelty": round(novelty, 2),
         "reddit": round(reddit, 2),
         "kev": kev,
