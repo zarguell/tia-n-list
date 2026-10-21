@@ -289,8 +289,36 @@ _noise_p, _noise_info = jc.ingest_noise(
     raw_glob=os.path.join(STATE_ROOT, "social-collector", "raw", "toots-*.jsonl"))
 check("ingest_noise", not _noise_p, "; ".join(_noise_p[:4]) or "sources clean")
 
+# ── score-0 duplicate backlog sweep (2026-10-20 owner decision eda9f1100d5d,
+# audit Rec 3): explicit, logged step run BEFORE the LLM adjudication section.
+# It deterministically merges predicate-meeting score-0 pairs (jaccard >= 0.5,
+# no analysis file, no digest reference, no distinct CVE sets; capped at 10,
+# idempotent — see merge.sweep_score0_merges), so the duplicate suspects below
+# show the post-sweep residual. Runs only here, never in the hourly pipeline.
+import merge as merge_mod  # noqa: E402
+
+_score0_log = []
+try:
+    merge_mod.sweep_score0_merges(_all_stories, log=_score0_log)
+    check("score0_sweep", True,
+          "; ".join(_score0_log)
+          if _score0_log else "no score-0 pair met the sweep predicate")
+except Exception as e:
+    check("score0_sweep", False, f"sweep error: {e}")
+
+_dup_suspects = jc.duplicate_suspects(_all_stories, NOW)
 EXTRA = {
-    "duplicate_suspects": jc.duplicate_suspects(_all_stories, NOW),
+    "duplicate_suspects": _dup_suspects,
+    # 2026-10-20 owner decision eda9f1100d5d (audit Issue 3 / Rec 2):
+    # report-only ENTITY-based duplicate probe appended to the same
+    # adjudication flow — pairs the title-jaccard probe cannot see because the
+    # headlines were reworded past it. Never merges; pairs the title probe
+    # already surfaced are skipped so each pair is adjudicated once.
+    "entity_dup_suspects": merge_mod.entity_dup_suspects(
+        _all_stories, NOW,
+        exclude={frozenset((x["a"], x["b"])) for x in _dup_suspects}),
+    # what the pre-adjudication sweep merged this run (see score0_sweep check)
+    "score0_sweep": {"merged": _score0_log, "count": len(_score0_log)},
     # 2026-10-19 owner decision 1ba8f94ae822 (audit Issue 2 / Rec 4):
     # report-only stale-story lifecycle signal — live stories demoted on
     # consecutive digests whose newest event adds no new CVE/actor/victim

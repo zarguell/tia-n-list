@@ -168,6 +168,39 @@ def heal_orphan_shells(stories, events, log):
         log.append(f"orphan shell {sid} -> live (recovered {recovered} events)")
 
 
+def recompute_derived_fields(stories, events, only=None):
+    """(0c) derived-fields sweep: absorb unions last_seen/cves/sources in, but
+    the drift incident stripped events without rolling them back — dead
+    stories stayed "hot" on timestamps (and CVEs) of events they no longer
+    hold. Recompute from current events for every live story — or, when `only`
+    is a set of story ids (the score-0 sweep passes just its winners), that
+    subset only. Returns the count of stories whose derived fields changed."""
+    recomputed = 0
+    for sid, s in stories.items():
+        if only is not None and sid not in only:
+            continue
+        if s.get("merged_into") or not s.get("events"):
+            continue
+        last, cves, sources = "", set(), []
+        for r in s["events"]:
+            e = events.get(r["event_id"])
+            if not e:
+                continue
+            last = max(last, e.get("published_at", "") or "")
+            cves |= set(e.get("cves") or [])
+            d = domain_of(e["url"]) if e.get("url") else ""
+            if d and d not in sources:
+                sources.append(d)
+        if (s.get("last_seen") != (last or s.get("last_seen", ""))
+                or set(s.get("cves", [])) != cves or s.get("sources") != sources):
+            s["last_seen"] = last or s.get("last_seen", "")
+            s["cves"] = sorted(cves)
+            s["sources"] = sources
+            s["n_sources"] = len(sources)
+            recomputed += 1
+    return recomputed
+
+
 def main():
     dry = "--dry-run" in sys.argv
     stories = load_stories()
@@ -252,31 +285,10 @@ def main():
     # 3. remaining double-referenced events -> single owner
     strip_double_refs(stories, events, log)
 
-    # 0c. derived-fields sweep: absorb unions last_seen/cves/sources in, but
-    # the drift incident stripped events without rolling them back — dead
-    # stories stayed "hot" on timestamps (and CVEs) of events they no longer
-    # hold. Recompute from current events for every live story.
-    recomputed = 0
-    for s in stories.values():
-        if s.get("merged_into") or not s.get("events"):
-            continue
-        last, cves, sources = "", set(), []
-        for r in s["events"]:
-            e = events.get(r["event_id"])
-            if not e:
-                continue
-            last = max(last, e.get("published_at", "") or "")
-            cves |= set(e.get("cves") or [])
-            d = domain_of(e["url"]) if e.get("url") else ""
-            if d and d not in sources:
-                sources.append(d)
-        if (s.get("last_seen") != (last or s.get("last_seen", ""))
-                or set(s.get("cves", [])) != cves or s.get("sources") != sources):
-            s["last_seen"] = last or s.get("last_seen", "")
-            s["cves"] = sorted(cves)
-            s["sources"] = sources
-            s["n_sources"] = len(sources)
-            recomputed += 1
+    # 0c. derived-fields sweep (see recompute_derived_fields): full-store pass
+    # on the repair path; the score-0 sweep calls the same function scoped to
+    # its winners.
+    recomputed = recompute_derived_fields(stories, events)
     if recomputed:
         log.append(f"derived fields recomputed on {recomputed} stories "
                    f"(stale last_seen/cves/sources rolled back)")

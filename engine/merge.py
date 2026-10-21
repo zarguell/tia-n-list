@@ -16,7 +16,8 @@ import re
 import sys
 from datetime import datetime, timedelta, timezone
 
-from build_registry import clean_title, tokens, domain_of
+from build_registry import (clean_title, tokens, domain_of,
+                            STOP as BR_STOP, CYBER_STOP as BR_CYBER_STOP)
 from score import (hot_score, SB_DEFAULTS as _SB_DEFAULTS,
                    backfill_score_breakdown, update_peak)
 import lifecycle
@@ -91,6 +92,8 @@ def story_event_urls(story):
 
 # Tokens that recur in many titles without discriminating the story (template
 # boilerplate). A token match must share at least one NON-generic token.
+# BR_STOP/BR_CYBER_STOP (build_registry) are the tokenizer-side stop lists;
+# the entity dup probe strips them from capitalized-word candidates.
 GENERIC = {"cisa", "urges", "immediate", "patching", "patch", "patches", "added",
            "kev", "actively", "critical", "zero", "day", "days", "flaws", "flaw",
            "bugs", "bug", "vulnerability", "vulnerabilities", "advisory",
@@ -250,6 +253,350 @@ def distinct_periods(a, b):
     wa = {m.group(1) for m in WEEK_N_RE.finditer(a or "")}
     wb = {m.group(1) for m in WEEK_N_RE.finditer(b or "")}
     return bool(wa and wb and not (wa & wb))
+
+
+# ── entity-based duplicate probe + score-0 backlog sweep (2026-10-20 owner
+# decision eda9f1100d5d, audit Issue 3 / Recs 2 & 3). The title-jaccard probe
+# (audit_checks.duplicate_suspects, floor 0.5) cannot see reworded headlines:
+# the live residual pairs OpenCode (jaccard 0.17–0.25), AOMEI, Ahold Delhaize
+# and NightmareStresser are real duplicates it misses. entity_dup_suspects
+# surfaces them REPORT-ONLY for the daily adjudication; sweep_score0_merges
+# drains the score-0.0 backlog (Trezor / BambooToken / NightmareStresser)
+# through the same mechanical merge path repair_dedupe uses. Neither runs in
+# the hourly pipeline.
+
+# Entity candidates come in two strengths. STRONG: internal-capital compounds
+# and acronyms (NightmareStresser, BambooToken, AOMEI, API) — real incident
+# identity in any headline case — plus every capitalized word in a
+# SENTENCE-CASE headline, where capitalization marks proper nouns only
+# ("Ahold Delhaize discloses...", "Trezor: 347,000 users targeted...").
+# LOOSE: every capitalized word — title-case headlines ("Ahold Delhaize
+# Pulls E-Commerce Systems Offline...") capitalize phrasing too, so their
+# plain-capitalized words are phrasing, not entities. A pair shares an entity
+# only on a word that is capitalized on BOTH sides and STRONG on at least
+# one: the Ahold pair matches on the sentence-case side's proper nouns, while
+# two title-case headlines sharing only "Authentication Bypass" never match.
+_ENTITY_WORD_RE = re.compile(r"[A-Za-z0-9]+")
+
+# Day ordinals that differ across both titles ("October 5th" vs "7th",
+# "week ending October 18th" vs "11th") mark different installments of a
+# recurring series — the daily-podcast/weekly-newsletter class the auditor
+# keeps dismissing. Probe-local twin of merge.distinct_periods' logic, which
+# only sees month/week tokens and not day-of-month ones.
+_DAY_ORDINAL_RE = re.compile(r"\b(\d{1,2})(?:st|nd|rd|th)\b", re.I)
+
+# Acronyms/words that survive the capitalization rules but are metric,
+# protocol, technique or ecosystem vocabulary — never incident identity.
+# 'Eclipse Jetty: 82 CVEs, 92% unpatched' would otherwise pair unrelated
+# advisories on 'cves'; two stories sharing only 'Linux' (or 'Google') are
+# two different stories. Products (NightmareStresser, AOMEI, Drupal) and
+# victims (Ahold Delhaize) stay.
+ENTITY_BOILERPLATE = frozenset("""
+    cve cves cvss kev ioc iocs poc rce ddos dos tls ssl vpn mfa llm ssh av
+    linux windows android apple google microsoft macos ios
+    group post blog info full supply chain
+""".split())
+
+
+def _entity_tokens(title, extra_stop=frozenset()):
+    """(strong, loose) entity candidate sets for a headline (entity dup probe).
+
+    Capitalized words of the ORIGINAL title (len >= 3, hyphen-adjacent
+    fragments excluded — same shape rule as audit_checks._distinctive_entities),
+    lowercased, boilerplate-stripped (STOP/CYBER_STOP/GENERIC/DATE_STOP/
+    FILLER + ENTITY_BOILERPLATE + the caller's `extra_stop`, the probe's
+    SUSPECT_GENERIC). See the strength comments above `_ENTITY_WORD_RE`.
+
+    Unlike tokens() there is NO length-4 floor: 'API' survives, and that
+    shared token is what lifts the reworded OpenCode pair ('...API keys...'
+    vs 'API Key Breach Response Guidance') to the 2-distinctive-token bar."""
+    strong, loose = set(), set()
+    t = title or ""
+    stop = (BR_STOP | BR_CYBER_STOP | GENERIC | DATE_STOP | FILLER
+            | ENTITY_BOILERPLATE | extra_stop)
+    words = _ENTITY_WORD_RE.findall(t)
+    alpha = [w for w in words if w.isalpha() and len(w) >= 3]
+    sentence_case = bool(alpha) and (
+        sum(1 for w in alpha if w[0].isupper()) / len(alpha)) <= 0.5
+    for m in _ENTITY_WORD_RE.finditer(t):
+        w = m.group(0)
+        if len(w) < 3:
+            continue
+        s, e = m.span()
+        if (s > 0 and t[s - 1] == "-") or (e < len(t) and t[e] == "-"):
+            continue                     # hyphen-compound fragment: phrasing
+        if not w[0].isupper():
+            continue
+        lw = w.lower()
+        if lw in stop:
+            continue
+        loose.add(lw)
+        if (w[0].isupper() and any(c.isupper() for c in w[1:])) or w.isupper() \
+                or sentence_case:
+            strong.add(lw)
+    return strong, loose
+
+
+def entity_dup_suspects(stories, now, *, exclude=None, max_out=10,
+                        max_age_days=45, window_days=10):
+    """Entity-based near-duplicate LIVE story pairs, REPORT-ONLY (2026-10-20
+    owner decision eda9f1100d5d, audit Issue 3 / Rec 2): the pairs the
+    title-jaccard probe (duplicate_suspects, floor 0.5) cannot see because the
+    headlines were reworded past it. It NEVER merges anything.
+
+    A pair surfaces only when ALL hold (the audit's Rec 2 predicate):
+      - both stories LIVE (not merged_into, have events) and recently active
+        (last_seen within max_age_days — the duplicate_suspects pool),
+      - they share a victim/actor entity: a named entity both headlines
+        capitalize (_entity_tokens) or a known threat-actor token
+        (ACTOR_TOKENS, leading-'the' normalized),
+      - >= 2 shared DISTINCTIVE title tokens — non-generic (the same
+        SUSPECT_GENERIC strip duplicate_suspects applies), counting
+        discriminator tokens AND shared named entities (tokens() drops
+        sub-4-char words like 'api', so the entity set is what lets the
+        reworded OpenCode pair reach the bar),
+      - first_seen within `window_days` of each other (the audit's ~10 days),
+      - NOT distinct CVE sets: both empty or intersecting. Pairs where BOTH
+        sides carry disjoint CVE sets are different disclosures, exonerated;
+      - distinct advisory/series codes or disjoint report periods exonerate
+        (the same recurring-series guards duplicate_suspects applies).
+
+    `exclude` is the set of already-surfaced pair keys (frozenset of the two
+    story ids) — audit.py passes the title probe's output so the adjudication
+    section shows each pair once. Shared-event pairs keep surfacing via
+    duplicate_suspects exactly as today."""
+    from audit_checks import SUSPECT_GENERIC   # lazy: audit_checks imports merge
+    generic_stop = GENERIC | SUSPECT_GENERIC
+    cutoff = (now - timedelta(days=max_age_days)).strftime("%Y-%m-%dT%H:%M:%S")
+    pool = sorted((s for s in stories.values()
+                   if not s.get("merged_into") and s.get("events")
+                   and s.get("last_seen", "") >= cutoff),
+                  key=lambda s: s["id"])
+    titles = [s.get("title", "") for s in pool]
+    disc = [title_discriminators(t) for t in titles]
+    ents = [_entity_tokens(t, generic_stop) for t in titles]
+    strong = [e[0] for e in ents]
+    loose = [e[1] for e in ents]
+    story_cves = [{str(c).upper() for c in (s.get("cves") or [])}
+                  for s in pool]
+    out = []
+    for i in range(len(pool)):
+        for j in range(i + 1, len(pool)):
+            if exclude and frozenset((pool[i]["id"], pool[j]["id"])) in exclude:
+                continue
+            actor = ((_actor_norm(disc[i]) & ACTOR_TOKENS)
+                     & (_actor_norm(disc[j]) & ACTOR_TOKENS))
+            # shared victim/actor entity: capitalized on BOTH sides, strong
+            # (acronym/compound or sentence-case proper noun) on at least one
+            shared_ent = ((strong[i] & loose[j]) | (loose[i] & strong[j]))
+            shared_ent = (shared_ent | actor)
+            if not shared_ent:
+                continue
+            oi = set(_DAY_ORDINAL_RE.findall(titles[i]))
+            oj = set(_DAY_ORDINAL_RE.findall(titles[j]))
+            if oi and oj and not (oi & oj):
+                continue              # recurring series, different installments
+            shared_tok = (disc[i] & disc[j]) - SUSPECT_GENERIC
+            distinctive = shared_tok | shared_ent
+            if len(distinctive) < 2:
+                continue
+            ci, cj = story_cves[i], story_cves[j]
+            if (ci | cj) and not (ci & cj):
+                continue              # both sides carry disjoint CVE sets
+            ta, tb = titles[i], titles[j]
+            if distinct_series_codes(ta, tb) or distinct_periods(ta, tb):
+                continue
+            try:
+                gap = abs((parse_utc(pool[i]["first_seen"])
+                           - parse_utc(pool[j]["first_seen"])).days)
+            except (KeyError, ValueError, TypeError):
+                continue
+            if gap > window_days:
+                continue
+            inter = len(disc[i] & disc[j])
+            jj = inter / len(disc[i] | disc[j]) if (disc[i] | disc[j]) else 0.0
+            newest = max(pool[i]["first_seen"], pool[j]["first_seen"])
+            out.append({"a": pool[i]["id"], "b": pool[j]["id"],
+                        "jaccard": round(jj, 2),
+                        "title_a": ta[:70], "title_b": tb[:70],
+                        "shared_entities": sorted(shared_ent),
+                        "shared_tokens": len(shared_tok),
+                        "first_seen_gap_days": gap,
+                        "newest_first_seen": newest})
+    # Newest pair first: the probe exists to catch reworded duplicates BEFORE
+    # the digest links them, so today's pairs outrank the deep backlog (which
+    # the score-0 sweep and the daily merge budget drain over time). Entity
+    # count breaks ties (stronger identity anchor first), then jaccard.
+    out.sort(key=lambda x: (x["newest_first_seen"],
+                            -len(x["shared_entities"]),
+                            -x["jaccard"], x["a"], x["b"]), reverse=True)
+    return out[:max_out]
+
+
+# ── score-0 duplicate backlog sweep (2026-10-20 owner decision eda9f1100d5d,
+# audit Rec 3). Trezor (3 live stories), BambooToken (3) and NightmareStresser
+# (2) are all score 0.0, flagged by the probe on consecutive days, never
+# merged because the human 2-merge/day budget goes to visible pairs. The
+# sweep auto-merges ONLY predicate-meeting pairs, is capped per invocation
+# and idempotent; the daily audit invokes it before adjudication. The hourly
+# pipeline NEVER does.
+SCORE0_SWEEP_CAP = 10
+SCORE0_SWEEP_MAX_AGE_DAYS = 45
+
+# Digest-reference scan: markdown slate links (](stories/<slug>/)) in the
+# published .md, plus the .json sidecars' `stories` (the linked slate) and
+# `overrides[].slug` (the digest agent's promote/demote edits). Anything the
+# digest machinery ever touched is off-limits to an unattended merge.
+DIGEST_LINK_RE = re.compile(r"stories/([a-z0-9-]+)/")
+
+
+def digest_referenced_slugs(digest_dir=None):
+    """Every story slug any published digest references (md links + json
+    slate/overrides). Missing/corrupt sidecars contribute nothing."""
+    digest_dir = digest_dir or os.path.join(DATA, "digests")
+    out = set()
+    for f in glob.glob(os.path.join(digest_dir, "*.md")):
+        try:
+            with open(f) as fh:
+                out |= set(DIGEST_LINK_RE.findall(fh.read()))
+        except OSError:
+            continue
+    for f in glob.glob(os.path.join(digest_dir, "*.json")):
+        d = _load_json_or_default(f, {})
+        if not isinstance(d, dict):
+            continue
+        out |= {str(x) for x in d.get("stories", []) if isinstance(x, str)}
+        out |= {str(o["slug"]) for o in d.get("overrides", [])
+                if isinstance(o, dict) and o.get("slug")}
+    return out
+
+
+def score0_sweep_candidates(stories, *, analysis_dir=None, digest_dir=None,
+                            max_age_days=SCORE0_SWEEP_MAX_AGE_DAYS, now=None):
+    """Score-0.0 duplicate pairs meeting EVERY sweep predicate, merge-ready.
+
+    Pool: LIVE stories (not merged_into, have events) whose current score is
+    0.0 and whose last_seen is recent (bounded scan, same 45-day window as
+    duplicate_suspects). A pair is a candidate only when title jaccard >= 0.5,
+    NEITHER side has an analysis file (data/analysis/<id>.md), NEITHER is
+    referenced by any published digest (see digest_referenced_slugs), the CVE
+    sets are not distinct (both empty or intersecting), and the recurring-
+    series guards (distinct series codes / report periods / slug advisory
+    ids) do not fire. Returns [{a, b, jaccard}] sorted by (-jaccard, a, b).
+    """
+    from audit_checks import SUSPECT_GENERIC   # lazy: audit_checks imports merge
+    now = now or datetime.now(timezone.utc)
+    cutoff = (now - timedelta(days=max_age_days)).strftime("%Y-%m-%dT%H:%M:%S")
+    analysis_dir = analysis_dir or ANALYSIS_DIR
+    referenced = digest_referenced_slugs(digest_dir)
+    pool = []
+    for s in stories.values():
+        if s.get("merged_into") or not s.get("events"):
+            continue
+        if float(s.get("score") or 0.0) != 0.0:
+            continue
+        if s.get("last_seen", "") < cutoff:
+            continue
+        if s["id"] in referenced:
+            continue
+        if os.path.exists(os.path.join(analysis_dir, s["id"] + ".md")):
+            continue
+        pool.append(s)
+    pool.sort(key=lambda s: s["id"])
+    titles = [s.get("title", "") for s in pool]
+    disc = [title_discriminators(t) for t in titles]
+    cves = [{str(c).upper() for c in (s.get("cves") or [])} for s in pool]
+    out = []
+    for i in range(len(pool)):
+        for j in range(i + 1, len(pool)):
+            inter = len(disc[i] & disc[j])
+            union = len(disc[i] | disc[j])
+            jj = inter / union if union else 0.0
+            if jj < 0.5:
+                continue
+            if (cves[i] | cves[j]) and not (cves[i] & cves[j]):
+                continue              # distinct CVE sets: different disclosures
+            ta, tb = titles[i], titles[j]
+            if distinct_series_codes(ta, tb) or distinct_periods(ta, tb) \
+                    or distinct_advisory_ids(pool[i]["id"], pool[j]["id"]):
+                continue
+            if len((disc[i] & disc[j]) - SUSPECT_GENERIC) < 2:
+                continue              # boilerplate-only overlap, no real signal
+            out.append({"a": pool[i]["id"], "b": pool[j]["id"],
+                        "jaccard": round(jj, 2)})
+    out.sort(key=lambda x: (-x["jaccard"], x["a"], x["b"]))
+    return out
+
+
+def sweep_score0_merges(stories, events=None, *, stories_dir=None,
+                        analysis_dir=None, digest_dir=None,
+                        cap=SCORE0_SWEEP_CAP, reddit_posts=None,
+                        now=None, log=None):
+    """Unattended, bounded, idempotent merge sweep for the score-0 duplicate
+    backlog (2026-10-20 owner decision eda9f1100d5d, audit Rec 3). Merges at
+    most `cap` candidate pairs (see score0_sweep_candidates) via the SAME
+    mechanical path repair_dedupe/triage use: the loser keeps its json with
+    merged_into + empty events so the old URL redirects, the winner absorbs
+    the events, then the derived-fields sweep (last_seen/cves/sources rolled
+    onto the current event set) and a rescore run on the winners. needs-
+    analysis is NOT re-emitted here — the next hourly run re-queues any
+    winner that crossed the analysis gate. Idempotent: merged shells drop out
+    of the candidate pool, so an immediate second run merges nothing.
+    Returns the merge log (one line per merge)."""
+    from repair_dedupe import canon, merge_story, recompute_derived_fields
+    log = log if log is not None else []
+    events = load_events() if events is None else events
+    stories_dir = stories_dir or STORIES
+    candidates = score0_sweep_candidates(
+        stories, analysis_dir=analysis_dir, digest_dir=digest_dir, now=now)
+    for c in candidates:
+        if len(log) >= cap:
+            break
+        a, b = stories.get(c["a"]), stories.get(c["b"])
+        if not a or not b:
+            continue
+        if a.get("merged_into") or b.get("merged_into"):
+            continue                  # already merged earlier in this sweep
+        ca = {str(x).upper() for x in (a.get("cves") or [])}
+        cb = {str(x).upper() for x in (b.get("cves") or [])}
+        if (ca | cb) and not (ca & cb):
+            continue                  # winner absorbed CVEs mid-sweep
+        group = canon([a, b])
+        loser = b if group["id"] == a["id"] else a
+        merge_story(stories, loser["id"], group["id"], log)
+    merged_ids = set()
+    for line in log:
+        parts = line.split()
+        if len(parts) >= 4 and parts[0] == "merge":
+            merged_ids.update((parts[1], parts[3]))
+    if not merged_ids:
+        return log
+    recomputed = recompute_derived_fields(stories, events, only=merged_ids)
+    if recomputed:
+        log.append(f"derived fields recomputed on {recomputed} swept stories")
+    if reddit_posts is None:
+        from store import load_social_posts
+        reddit_posts = load_social_posts()
+    for sid in sorted(merged_ids):
+        s = stories[sid]
+        try:
+            json.dump(s, open(os.path.join(stories_dir, sid + ".json"), "w"),
+                      indent=1)
+            if s.get("merged_into"):
+                continue              # shell: redirect json only
+            sc = hot_score(s, events, reddit_posts)
+            s["score"] = sc["score"]
+            s["score_breakdown"] = {k: v for k, v in sc.items() if k != "score"}
+        except Exception as e:
+            # One story's scoring failure must not wipe a valid breakdown or
+            # write an empty one (same fallback as the hourly merge).
+            print(f"  WARN: score {sid}: {e}")
+            s.setdefault("score", 0.0)
+        backfill_score_breakdown(s)
+        s.setdefault("score", 0.0)
+        json.dump(s, open(os.path.join(stories_dir, sid + ".json"), "w"),
+                  indent=1)
+    return log
 
 
 def _advisory_id_codes(story_id):
