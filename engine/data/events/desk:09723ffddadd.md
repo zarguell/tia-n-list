@@ -1,0 +1,1 @@
+Threat Radar lists publication 10/20/2026 04:25:10 UTC, assigns CWE-754, and describes the same RingRTC queue-saturation mechanism that lets a malicious peer block local hangup steps in Signal before version 2.72.0.

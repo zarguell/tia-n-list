@@ -1,0 +1,1 @@
+VulDB entry records the advisory disclosure on 10/20/2026, notes upgrade to RingRTC 2.72.0, and describes a peer saturating the call FSM queue to interfere with hangup teardown, affecting audio and possibly video.
