@@ -1,0 +1,1 @@
+Microsoft patched CVE-2026-33825, a local privilege escalation in Microsoft Defender, during April 2026 Patch Tuesday. Microsoft was aware of public disclosure prior to the patch, and successful exploitation leads to SYSTEM privileges. The flaw received a CVSSv3 score of 7.8 and was rated Important.

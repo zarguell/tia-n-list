@@ -1,0 +1,1 @@
+On May 13, 2026, one day after Microsoft's May Patch Tuesday, researcher Chaotic Eclipse (Nightmare-Eclipse) released proof-of-concept exploit code for YellowKey and GreenPlasma. The post explains YellowKey targets BitLocker through the Windows Recovery Environment by abusing specially crafted FsTx files and holding CTRL during reboot.
