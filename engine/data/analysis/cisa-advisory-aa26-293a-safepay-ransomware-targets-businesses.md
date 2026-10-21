@@ -1,0 +1,3 @@
+CISA advisory AA26-293a covers SafePay ransomware targeting businesses with file-locking and payment demands. The advisory notes over 600 victims since 2024 and describes SafePay as among the most active groups. A Mastodon update references the FBI assessment and the perimetersite.com report. The story is supported by cisa.gov and the perimetersite source.
+
+Watch for updated victim counts, sector targeting details, and any new CISA indicators of compromise tied to SafePay campaigns. The event content does not name specific CVEs but confirms an active ransomware group under CISA advisory status.

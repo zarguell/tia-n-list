@@ -1,0 +1,3 @@
+A hacker used a compromised OVHcloud developer GitHub account to plant a secret-stealing binary in official CLI releases. The incident occurred on October 19; affected versions are v0.11.0 through v0.15.0, with clean versions at v0.10.0 and the new v0.16.0. The binary retrieved secrets from disk and was blocked by 16:21 Paris time after a customer reported it.
+
+The root cause was GitHub release immutability not being enabled, allowing direct release file modification without CI/CD checks. The attacker replaced only common-platform builds, suggesting targeted credential harvesting. Watch for further supply-chain impact assessments and whether similar release-immaturity gaps exist in other vendors.
