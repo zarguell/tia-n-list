@@ -401,7 +401,7 @@ def entity_dup_suspects(stories, now, *, exclude=None, max_out=10,
             if len(distinctive) < 2:
                 continue
             ci, cj = story_cves[i], story_cves[j]
-            if (ci | cj) and not (ci & cj):
+            if ci and cj and not (ci & cj):
                 continue              # both sides carry disjoint CVE sets
             ta, tb = titles[i], titles[j]
             if distinct_series_codes(ta, tb) or distinct_periods(ta, tb):
