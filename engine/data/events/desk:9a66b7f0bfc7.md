@@ -1,0 +1,1 @@
+VulDB lists CVE-2026-86471 with advisory disclosure on 2026-10-20, vendor apache.org, status not defined at time of entry, and links it to the CouchDB improper authentication vulnerability affecting versions 3.5.2 and below.

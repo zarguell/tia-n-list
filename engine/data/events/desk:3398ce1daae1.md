@@ -1,0 +1,1 @@
+The official CouchDB blog announced version 3.5.3 as a maintenance release that includes fixes for several security vulnerabilities. The post mentions CVE IDs for tracking but does not detail the specific CVSS scores or exploitation status.

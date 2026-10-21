@@ -1,0 +1,3 @@
+Accenture, Dragos and SANS launched a $10 million Community Cyber Resilience Foundation aimed at under-resourced US water, electric and natural gas utilities. The first phase will cover up to 500 utilities with revenues under $100 million, providing free security tools, deployment support and ICS/OT training.
+
+The initiative responds to recent attacks on over 100 US water systems across more than a dozen states. Small utilities often lack funding, workforce and modern technology; the foundation connects them to a peer network and deploys the Dragos Platform with Accenture managing integration.

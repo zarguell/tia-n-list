@@ -1,0 +1,1 @@
+The oss-security mailing list entry from 2026/10/20 (message #11) reports CVE-2026-86471: an unvalidated runtime configuration value in Apache CouchDB 3.5.2 and below allows a server admin to run arbitrary shell commands as the CouchDB OS user. The advisory was authored by Jan Lehnardt (jan@apache.org).
