@@ -1,0 +1,5 @@
+Attackers compromised 333 Tor exit nodes, about 10% of the roughly 3,000 exit relays, to intercept SSH connections, steal credentials, and deploy the Ebury Linux backdoor. The campaign was coordinated and observed by researcher Kaba, who counted 333 exits redirecting SSH traffic. A GBHackers report published on October 20 described the same scale and impact. Tor's official advisory did not provide a count or root cause, making the researcher measurement the primary data point.
+
+This is a significant supply-chain-style compromise of the anonymity network's infrastructure. Users relying on Tor for SSH connections may have had traffic intercepted. There is no CVE associated; the issue is malicious control of exit relay servers rather than a software vulnerability.
+
+Watch for Tor Project updates on removed nodes, any attribution to a specific actor, and whether intercepted SSH credentials lead to further breaches. The event set includes both the GBHackers report and the Kaba.cx measurement, confirming the scale independently.

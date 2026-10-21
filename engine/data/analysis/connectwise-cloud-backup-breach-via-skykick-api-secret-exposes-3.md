@@ -1,0 +1,5 @@
+A compromised ConnectWise Cloud Backup credential was used to access Microsoft 365 tenants as the app itself, bypassing user MFA. The breach exposed over 300 tenants initially, with a more recent update confirming 162+ confirmed impacted tenants as of October 20. Attackers planted rogue app credentials, giving persistent access to tenant environments.
+
+This is a supply-chain-style cloud breach: the vendor's backup integration became the entry point into customer M365 environments. No CVEs are involved; the root cause is a leaked API secret and missing MFA enforcement on the service account. Organizations using ConnectWise Cloud Backup should rotate credentials, audit app registrations, and enforce MFA for service principals.
+
+Watch for confirmed tenant lists and any follow-up from ConnectWise or CISA on remediation timelines. The 162+ count is lower than the initial 300+, which may reflect confirmed versus estimated exposure. Verify whether any downstream data exfiltration occurred beyond credential access.

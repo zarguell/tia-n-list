@@ -1,0 +1,5 @@
+AhnLab identified a new infostealer disguised as cracked software, first seen in mid-August and spreading widely by September. The malware changes its execution behavior when it detects monitoring or analysis environments, which makes sandbox detection harder. It targets users who download illegal software and attempts to steal information. No specific CVEs are tied to the malware family; the threat is behavioral and relies on social engineering through pirated applications.
+
+This is a notable evolution in malware anti-analysis techniques: rather than simply avoiding execution, it alters behavior under observation, reducing the reliability of automated analysis. Organizations should remind users that cracked software remains a primary malware delivery vector and update endpoint detection rules to account for environment-aware behavior changes.
+
+Watch for AhnLab's technical report or any naming of the malware family, and check whether the infostealer targets specific browsers or cryptocurrency wallets. The event confirms the detection window (August to September) and the anti-analysis technique.
