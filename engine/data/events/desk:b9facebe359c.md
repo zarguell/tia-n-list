@@ -1,0 +1,1 @@
+The Register reported that eight eMudhra intermediate certificate private keys were compromised, including keys as weak as single-digit integers, reducing 384-bit entropy to 3-8 bits. The incident prompted emergency browser and operating system blocks and distribution updates such as Debian DSA-6572-1.

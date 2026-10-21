@@ -1,0 +1,1 @@
+eMudhra's statement, dated October 20, 2026, acknowledged the compromise of eight intermediate certificates and confirmed that Mozilla received the initial report on October 17, 2026 at 20:06 UTC. The company stated it revoked the compromised certificates and stopped issuing new certificates under its G3 root.

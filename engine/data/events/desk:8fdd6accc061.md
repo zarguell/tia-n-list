@@ -1,0 +1,1 @@
+Mozilla received a report on Saturday, October 17, 2026 at 20:06 UTC that private keys associated with eight eMudhra intermediate certificates had been compromised. The keys could allow attackers to issue fraudulent certificates, and Mozilla blocked the affected intermediates through Firefox's OneCRL.
