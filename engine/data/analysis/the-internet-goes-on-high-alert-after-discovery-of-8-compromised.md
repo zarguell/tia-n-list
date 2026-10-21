@@ -1,0 +1,3 @@
+Ars Technica reports eight TLS certificates with weak private keys have been discovered, putting security personnel on high alert. The certificates have keys weak enough that attackers could forge credentials or intercept traffic. No CVEs assigned; this is an infrastructure-trust issue rather than a software vulnerability. The discovery emphasizes how certificate hygiene remains a global risk.
+
+What matters is scale. Eight certificates is small, but each could affect many downstream systems if the weak keys are exploited. The original Ars Technica story (2026-10-20) is the canonical source; no additional outlets have corroborated further technical detail. Monitor for vendor advisories or browser-trust updates that name the affected certificates.
