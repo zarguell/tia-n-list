@@ -1,0 +1,1 @@
+The Hacker News reported that an advance notice followed a leak on October 20, when a post claimed two PHP remote code execution flaws rated CVSS 10.0 affecting PHP 5 onward would be disclosed on Thursday, October 22. The article warned site owners to prepare for emergency patches.

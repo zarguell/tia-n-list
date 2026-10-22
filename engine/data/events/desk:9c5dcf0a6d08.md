@@ -1,0 +1,1 @@
+Help Net Security reported that the PHP development team released emergency security updates on October 21, 2026 fixing PHP2Shell, two critical vulnerabilities CVE-2026-109618 and CVE-2026-109619 that could let attackers execute code remotely.
