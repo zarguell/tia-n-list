@@ -1,0 +1,3 @@
+DarkCore is a newly uncovered RAT being marketed with credential theft, hidden desktop access, and a dedicated browser designed to reuse stolen sessions while routing traffic through victims’ IP addresses. The latest research takes a closer look at the malware, including a deceptive PDF-themed shortcut, its C2 configuration, and indicators of compromise. Full analysis and IOCs here: https://www.blackfog.com/darkcore-a-data-theft-rat-with-a-session-hijacking-browser/ submitted by /u/Rebecca_BlackFog [link] [comments]
+
+via reddit r/cybersecurity: DarkCore RAT: New Research Into Credential Theft and Stolen Browser Sessions

@@ -1,0 +1,12 @@
+{
+ "id": "rss:c4a823739f0ee7cb",
+ "title": "Responding to php2shell PHP Vulnerability When You Don\u2019t Know What Secrets Are Deployed",
+ "kind": "update",
+ "source": "blog.gitguardian.com",
+ "url": "https://blog.gitguardian.com/php2shell-php-vulnerability-secrets/",
+ "published_at": "2026-10-22T14:11:50Z",
+ "cves": [],
+ "lang": "en",
+ "content_md": "TL;DR Pre-auth RCE in default PHP setups: PHP fixed php2shell on Oct. 21, 2026. It abuses how PHP handles out-of-memory fatal errors and works against Apache mod_php and PHP-FPM on common CMS, webmail, and e-commerce apps. Every secret on the host is exposed: The RCE can potentially allow attackers to read config.php and .env files using the PHP worker\u2019s existing permissions. That gives them database, SMTP, cloud, and OAuth credentials to move into systems outside PHP. What is php2shell and how does it work? The root cause is how PHP handles a fatal error when a request exceeds memory_limit. The fatal error interrupts the operation in progress and leaves it half-finished: a hash table whose counters were incremented before the new bucket was initialized, or session globals still pointing into memory that request shutdown then frees. Calif turns that stale state into code execution. Two ways to trigger the out-of-memory condition There are two ways to trigger the out-of-memory condition. Bodies that skip the size check: On Apache, a chunked HTTP/1.1 or length-less HTTP/2 multipart body is never checked against post_max_size , since PHP compares it with the declared Content-Length. Empty file parts that skip the upload count: multipart request with hundreds of file parts using filename=\"\" , which carry no data, are not counted toward max_file_uploads , and still each create six $_FILES entries, combined with nested field names. The body stays under the default 8 MiB post_max_si\n",
+ "excluded": false
+}

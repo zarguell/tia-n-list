@@ -1,0 +1,5 @@
+OffSeq reports the first exploit-shaped request against PHP2Shell hit its Mirage honeypot fleet at 21:57 UTC on 20 October, roughly 16 hours before broader disclosure. The field report tracks attacker-side activity tied to CVE-2026-109618 and CVE-2026-109619, the critical unauthenticated remote code execution flaws in PHP. This confirms in-the-wild probing within hours of public awareness, not theoretical risk.
+
+Both CVEs affect PHP versions 5 through 8 across common deployment modes (mod_php, PHP-FPM, php-cgi, LiteSpeed). OffSeq's observation of shaped requests against a honeypot indicates attackers are actively scanning and attempting exploitation, not just collecting intelligence. The timeline underlines the urgency of the October 21 emergency patches.
+
+Watch for additional exploitation reports and vendor confirmation of observed attacks. The 16-hour gap between first requests and wider disclosure is a tight window, and further evidence of active campaigns should appear quickly as defenders audit logs around October 20-21.

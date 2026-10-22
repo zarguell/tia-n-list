@@ -1,0 +1,5 @@
+Fortinet announced coordinated critical security updates for FortiOS, FortiManager, and FortiAnalyzer scheduled for October 22, 2026, addressing both critical and high-severity vulnerabilities. The company is urging customers to treat these as urgent, not routine maintenance, with priority on internet-facing systems. A Fortinet CISO announcement on October 21 preceded the release, signaling significant risk.
+
+The coordinated release across three core product lines suggests multiple serious flaws rather than a single isolated bug. Organizations running FortiGate firewalls, FortiManager centralized management, or FortiAnalyzer analytics should plan for immediate patching windows. The urgency language from the vendor is stronger than standard advisory wording.
+
+Watch for post-release technical details on CVSS scores, affected versions, and any evidence of active exploitation. Given the timing of the advisory, defenders should treat these updates as mandatory and audit logs around the release date for early scanning or intrusion attempts.

@@ -1,0 +1,5 @@
+The story frames machine-speed attacks as requiring machine-speed detection and response, with defenders noting attackers now enumerate or pull data within 15 minutes of initial access. The referenced analysis shows common defensive tools were not effective in catching rapid intrusions. The discussion links this gap to the broader challenge of matching attacker automation with real-time telemetry.
+
+Sysmon logs are highlighted as a close analog to a flight recorder for Windows endpoints, capturing process trees, command lines, hashes, network connections, DNS queries, and file and registry changes. With 12,074 Sigma rules mapped to 645 MITRE ATT&CK techniques, Sysmon data supports high-fidelity detection when properly configured and exported.
+
+For defenders, the practical takeaway is to verify Sysmon deployment, maintain tuned configurations rather than default settings, export logs promptly, and pair telemetry with faster response workflows. The 15-minute attacker timeline leaves little room for manual investigation; automated detection and containment are the only realistic countermeasures.
