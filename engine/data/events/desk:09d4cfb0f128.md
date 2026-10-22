@@ -1,0 +1,1 @@
+db8 Website Support covers CVE-2026-102785 as an unauthenticated remote code execution via the image handler fixed in YOOtheme Pro 5.0.53, released 21 October 2026. The post frames it as a patch-now item for Joomla sites running any 5.0.x build.
