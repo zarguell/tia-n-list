@@ -1,0 +1,1 @@
+Earlier reporting documents ransomware actors including Akira, Fog, and FIN7 actively exploiting prior Veeam flaws such as CVE-2024-40711 (CVSS 9.8). This establishes a persistent exploitation pattern against backup infrastructure, underscoring why CVE-2026-44963 demands immediate defensive attention before weaponization accelerates.
