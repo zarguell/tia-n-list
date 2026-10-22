@@ -1,0 +1,1 @@
+SecurityOnline.info reported on 2026-10-22 that Splunk fixed 31 vulnerabilities across Enterprise and SOAR, naming the three CVSS 9.9 flaws CVE-2026-76531, CVE-2026-76299, and CVE-2026-76302. The article links to the Splunk advisory pages but does not extend beyond the headline counts. This is the source event from which the story was queued.
