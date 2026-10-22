@@ -1,5 +1,0 @@
-Unit 42 reported an AI-powered espionage campaign (CL-UNK-1211) targeting government Linux infrastructure, observed between October 2025 and April 2026. The campaign used custom malware, web shells, and credential theft against government servers. Google Cloud's threat-intelligence blog attributes a related BeyondTrust Remote Support zero-day exploitation (CVE-2026-102764, CVSS 9.3) to a China-nexus APT called Armory Castle, with exploitation starting August 29. The BeyondTrust advisory (AV26-1054) confirms in-the-wild exploitation as of October 15, 2026. The cluster remains unattributed under Unit 42's framework.
-
-This story links AI-assisted intrusion tooling with a verified zero-day exploitation chain. CVE-2026-102764 has a CVSS of 9.3 and is confirmed actively exploited. The presence of both custom malware and a vendor zero-day in government targets raises the severity above typical espionage reporting.
-
-Watch for BeyondTrust patch timelines, additional CVEs from the same campaign, and whether the attribution shifts from UNK to a named state-backed group. Monitor CISA KEV updates for CVE-2026-102764 confirmation.
