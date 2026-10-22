@@ -1,0 +1,1 @@
+Offseq Threat Radar records CVE-2026-111813 for Apache Traffic Server experimental magick plugin with CWE-88 argument injection. Published 2026-10-21 18:20:22 UTC. Affects versions 8.0.1-8.1.11, 9.0.0-9.2.15, 10.0.0-10.1.4, and 10.2.0; fix is upgrade to 9.2.16, 10.1.5, or 10.2.1.

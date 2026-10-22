@@ -1,0 +1,1 @@
+VulDB entry confirms vendor advisory from lists.apache.org with status confirmed. The experimental magick plugin passes unfiltered client query strings to ImageMagick convert in default unsigned configuration, giving an unauthenticated attacker command argument injection at CVSS 10.0.
