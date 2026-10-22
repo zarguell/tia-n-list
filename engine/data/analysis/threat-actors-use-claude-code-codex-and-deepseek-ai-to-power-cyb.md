@@ -1,0 +1,5 @@
+A GBHackers report describes a Chinese-speaking operator combining ARTEX with Claude Code, Codex, and configurations requesting DeepSeek, GLM, and Grok to coordinate attacks worldwide. The campaign hits ministries in Vietnam, Taiwan, Indonesia, and India from a single server. Recovered prompts show a structured workflow with persistent project records and automated handoffs between AI sessions, demonstrating operational integration rather than ad hoc use.
+
+The investigation builds on earlier reporting about South Korean targets. The actor uses shared instructions across multiple models to scale reconnaissance and exploitation. This is a concrete example of AI-driven intrusion infrastructure, not just content generation.
+
+Watch for confirmation of victim counts in Southeast Asian ministries and whether the shared prompt templates appear in other campaigns. The use of multiple frontier models (Claude, DeepSeek, GLM, Grok) in a single operation suggests the actor treats AI as interchangeable infrastructure.
