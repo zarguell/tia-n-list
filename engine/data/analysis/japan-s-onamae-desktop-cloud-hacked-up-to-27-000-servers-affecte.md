@@ -1,0 +1,5 @@
+On October 20, 2026, GMO Internet confirmed unauthorized access to Onamae.com Desktop Cloud, its Japanese VPS service, with malicious programs installed across customer server environments. The company identified 26,739 potentially affected servers and progressively shut down services beginning at 04:00 local time on October 21. The provider warned that data stored on impacted systems may have been viewed, though no confirmed misuse or leakage has been reported. Payment information is unaffected, stored separately.
+
+This is a significant infrastructure breach affecting a major Japanese hosting and domain provider. The exposure of 26,739 customer servers raises supply-chain and data-integrity concerns for businesses relying on the platform, including advertised use cases like FX automated trading via MetaTrader. The progressive shutdown indicates an active containment response rather than a completed incident.
+
+Watch for GMO Internet's follow-up updates, confirmation of any data exfiltration, and whether malware samples are shared for analysis. The scale suggests potential downstream compromise of hosted applications and customer environments.

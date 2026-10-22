@@ -1,0 +1,5 @@
+Oracle released its October 2026 Critical Patch Update with 1,295 fixes covering 1,209 unique CVEs, according to Tenable analysis. The batch includes 95 critical-severity flaws and 439 high-severity issues, with Oracle Fusion Middleware leading at 206 fixes, 134 remotely exploitable without authentication. E-Business Suite (194), Siebel CRM (122), Communications (110), PeopleSoft (109), and JD Edwards (102) also received substantial patches.
+
+The scale makes this one of the larger quarterly CPUs, with broad product exposure spanning middleware, enterprise applications, databases, and supply-chain components. Oracle has not confirmed any in-the-wild exploitation of these specific CVEs but notes periodic reports of exploitation attempts against its products, which warrants prompt patching given the remote, unauthenticated attack surface.
+
+Monitor Oracle's follow-up advisories and Tenable's deeper analysis for any CVEs that receive CVSS revisions or confirmed exploitation. Fusion Middleware's remote-exploitable subset should be prioritized for self-managed instances.
