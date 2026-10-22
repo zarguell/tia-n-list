@@ -1,0 +1,1 @@
+CyberUpdates365 reports the October 21, 2026 Node.js security update addressing 10 vulnerabilities across 22.x, 24.x, and 26.x branches. It highlights the Brotli decoder flaw allowing remote code execution and lists the fixed release lines, confirming the advisory release date.

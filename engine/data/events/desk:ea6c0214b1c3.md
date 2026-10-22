@@ -1,0 +1,1 @@
+Wardio guides update to Node.js 22.23.4, 24.22.1, or 26.12.1, confirming the October 21, 2026 release. It describes the out-of-bounds write in Brotli decompression as the attack mechanism and advises restarting every Node process after upgrade.
