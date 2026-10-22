@@ -1,0 +1,1 @@
+The threat radar entry records CVE-2026-114509 as published 2026-10-21 at 21:49:29 UTC, rated CVSS 9.2 with CWE-287 improper authentication in Laravel framework. It describes the TokenGuard bypass mechanism where a non-string credential reaches the database lookup, allowing account takeover on affected MySQL or MariaDB configurations.
