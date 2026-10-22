@@ -1,0 +1,3 @@
+I’ve been going through this study by PaloAlto and IBM which coins an idea of “Platformization” which consolidates the whole Cybersecurity program under a same platform where dozens of security tools feeds, bridging the silos. https://www.ibm.com/thought-leadership/institute-business-value/en-us/report/unified-cybersecurity-platform is it really possible to build a true security platform? is there such platform currently exists which is equally useful for operators and leaders connecting every single dots? i’d love to learn your thoughts on this. submitted by /u/Grendyizar [link] [comments]
+
+via reddit r/cybersecurity: Is it possible to consolidate the whole security program
