@@ -1,0 +1,1 @@
+The Hacker News reported two CVSS 9.0 RCE flaws in Linux KSMBD disclosed on public mailing lists before mainline fixes. ZDI-CAN-33774 is a pre-authentication race condition; ZDI-CAN-33549 is an integer underflow in the SMB Direct path requiring RDMA-capable hardware. Neither had a named fix in mainline or linux-next as of publication.
