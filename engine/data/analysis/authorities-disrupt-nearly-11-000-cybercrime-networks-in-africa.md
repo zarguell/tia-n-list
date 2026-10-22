@@ -1,0 +1,3 @@
+Interpol's Operation Serengeti III disrupted 10,909 malicious networks and led to 1,462 arrests across 21 African countries. 
+
+Law enforcement recovered over $105 million in illegal funds and identified 65,929 victims with estimated losses exceeding $385 million. Notable actions include the dismantling of two transnational fraud rings in Uganda (365 arrests) and the seizure of over 2,000 cryptocurrency mining devices in Angola. A Nigerian suspect was arrested for operating a phishing and BEC campaign that harvested approximately 2.1 million email addresses. The operation also targeted malicious mobile lending applications.

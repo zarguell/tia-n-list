@@ -1,3 +1,3 @@
-CISA, FBI and partners issued joint advisory AA26-293a warning that the SafePay ransomware is targeting businesses and critical infrastructure. The advisory details tactics, techniques and mitigations for defenders.
+CISA advisory AA26-293a details SafePay ransomware, which has hit over 600 organizations. 
 
-Organizations should apply the advisory's hardening recommendations and verify backups. Watch for new victim disclosures and any updates to the SafePay TTPs as the campaign evolves.
+The malware targets backups before encryption and exploits known vulnerabilities including CVE-2020-3259, CVE-2023-20269, CVE-2023-27532, CVE-2024-40711, and CVE-2024-40766. A joint advisory from CISA, FBI, and German/UK authorities urges businesses to patch exposed vulnerabilities and maintain isolated backup systems.
