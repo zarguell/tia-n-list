@@ -1,0 +1,5 @@
+Capcom confirmed a data breach exposing 11.8 million CAPCOM ID records worldwide, with an official apology published on its investor relations page. The company warned users to consult official channels and beware of suspicious links and messages following the incident. At least 196 accounts were flagged as a notable detail in early reporting.
+
+The breach notification emails Capcom sent to customers failed DMARC authentication checks, with dmarc=fail recorded by recipients. The notices were routed through an external delivery service (cuenote.jp), raising questions about the company's email security configuration during an already sensitive incident. Users reported official-looking notices being flagged as potential phishing by email alias services.
+
+Watch whether Capcom discloses the intrusion vector, scope of compromised data beyond account counts, and whether the notification email authentication issues lead to phishing abuse of affected users. The combination of a large exposed account base and weak email authentication creates follow-on risk even after the breach itself is contained.
