@@ -1,5 +1,3 @@
-LiteLLM version 1.107.0 published to PyPI was compromised and installs a credential stealer and backdoor. The malicious payload runs on every Python process start on an affected host, not only when LiteLLM is imported, so IDEs, pip, and CI jobs are all exposed. It steals SSH keys, AWS credentials, browser passwords, shell history, and AI coding tool configs, and a daemon executes attacker-supplied code hourly.
+LiteLLM 1.107.0 on PyPI was compromised to install a credential stealer and backdoor. The payload runs on every Python process start on the host, not just on import, so IDEs, pip, and CI jobs are all affected. It steals SSH keys, AWS credentials, browser passwords, shell history, and AI coding tool configs, and runs a daemon that executes attacker-supplied code hourly.
 
-The recommended response is to pin to version 1.106.2, audit any environment that installed 1.107.0, and rotate all credentials reachable from those hosts. Treat any system that ran the affected version as fully compromised.
-
-Watch for follow-up advisories describing the full scope of stolen data and any additional affected versions or distribution channels beyond PyPI.
+The backdoor turns any host that installed the package into a persistent foothold with broad credential exposure. Pinning to 1.106.2 and auditing installs is the immediate mitigation. Watch for follow-up on scope of affected downstream packages and whether the maintainer account was compromised.
