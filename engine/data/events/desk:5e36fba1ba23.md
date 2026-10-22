@@ -1,0 +1,1 @@
+The article confirms OpenJDK 27.0.1 connects through compromised eMudhra intermediate CAs by default, while Temurin 25.0.4.1 lacks the Sectigo AAA root and connects only through eMudhra. It identifies affected versions (8u512, 11.0.33, 17.0.21, 21.0.13, 25.0.5, 27.0.1) and notes revocation checking or a patched blocked.certs file blocks the chains.
