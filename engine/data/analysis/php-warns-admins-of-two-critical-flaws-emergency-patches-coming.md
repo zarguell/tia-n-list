@@ -1,3 +1,5 @@
-The PHP security team warned administrators to prepare for emergency updates addressing two critical vulnerabilities, CVE-2026-109618 and CVE-2026-109619, after details leaked ahead of scheduled disclosure.
+PHP fixed two critical remote code execution vulnerabilities tracked as CVE-2026-109618 and CVE-2026-109619, known collectively as PHP2Shell. Both carry CVSS v4.0 scores of 9.2 and allow unauthenticated remote code execution in the PHP runtime itself, not in an application layer. Patched versions are 8.5.12, 8.4.27, 8.3.36, and 8.2.35. Amazon Threat Intelligence recorded exploitation attempts on October 17, four days before patches shipped on October 21.
 
-The leak ahead of patch availability forced a compressed response window. Watch for the official release notes and any observed exploitation.
+The event content confirms the two CVEs, their 9.2 CVSS v4 scores, the fixed PHP versions, and that Amazon observed pre-disclosure exploitation on October 17. It also notes that exploitation attempts surged after disclosure, with millions of attempts observed by Cloudflare and other sensors. Government sites in Japan, France, the Netherlands, and Finland were taken offline as a precaution. The flaws affect PHP versions from PHP 5 onward.
+
+What to watch: patch adoption across hosting providers, further exploitation reports, and whether vulnerable end-of-life versions receive backports. Because the bugs sit in the PHP interpreter, CMS-level updates do not mitigate the risk.
