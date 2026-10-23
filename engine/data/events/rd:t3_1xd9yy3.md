@@ -1,0 +1,3 @@
+api.securityheaders.com does not take new keys. the website is still there if you only want to look at a grade. curl -fsS "https://httpsornot.com/api/v1/check?domain=example.com&headersMinGrade=B" no key. 120 requests an hour per IP. GitHub Actions runners share IPs, so that limit shows up fast. a free key goes in X-API-Key if you need more. 422 means the header grade missed B. 429 means the rate limit. different things. the JSON is not the old securityheaders shape. the header grade is .securityHeaders.grade . the checker is mine. submitted by /u/EveningRegion3373 [link] [comments]
+
+via reddit r/cybersecurity: securityheaders api is dead. this is the curl i use now
