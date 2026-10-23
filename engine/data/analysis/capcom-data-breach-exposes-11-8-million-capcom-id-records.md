@@ -1,1 +1,3 @@
-Capcom confirmed a data breach exposing approximately 11.8 million CAPCOM ID records worldwide. The breach includes account details linked to the gaming platform. Affected users should change passwords and watch for phishing attempts using exposed data. The company is investigating the scope and notifying affected accounts.
+Capcom confirmed a data breach exposing 11.8 million CAPCOM ID records worldwide, including 196 accounts with payment details.
+
+Affected users should watch for Capcom notification and reset credentials. Monitor for follow-on extortion or data leak publication.

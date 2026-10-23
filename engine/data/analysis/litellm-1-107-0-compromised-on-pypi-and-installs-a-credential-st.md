@@ -1,1 +1,3 @@
-LiteLLM version 1.107.0 was compromised on PyPI and installs a credential stealer and backdoor. The malicious package targets API keys and environment secrets. Users must remove the version immediately, rotate all credentials, and audit systems that installed 1.107.0. This is a supply-chain attack against a widely used LLM proxy package.
+LiteLLM version 1.107.0 and its Docker images were compromised on PyPI, carrying a credential stealer and backdoor. Users who installed that release are advised to assume their credentials are exposed.
+
+Affected deployments should rotate all credentials, audit for persistence, and pin to a known-good version. Supply-chain monitoring for the package should continue.

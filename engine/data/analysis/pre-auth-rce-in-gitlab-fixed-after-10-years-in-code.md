@@ -1,5 +1,0 @@
-GitLab patched CVE-2026-110264, a CVSS 10 pre-authentication remote code execution flaw in the regex engine of self-managed instances. The vulnerability had been present in the codebase for roughly a decade and allowed unauthenticated attackers to execute arbitrary code. Fixes are available; administrators running self-managed GitLab should patch immediately and verify no indicators of prior exploitation.
-
-The event content names CVE-2026-110264, scores it CVSS 10, and notes it is pre-auth RCE in the regex engine affecting self-managed servers. Reports reference 12 years of releases being affected. The Register and redhotcyber.com both covered the disclosure on October 22, 2026. There is no claim of observed in-the-wild exploitation for this specific CVE, only the severity and long exposure window.
-
-Watch for follow-up vendor confirmation, exploitation reports, or CISA KEV listing. The core risk is unauthenticated remote code execution, which makes rapid patching the priority over forensics unless an organization has specific indicators.
