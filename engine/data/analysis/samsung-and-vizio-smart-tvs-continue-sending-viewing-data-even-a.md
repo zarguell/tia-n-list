@@ -1,0 +1,3 @@
+Samsung and Vizio smart TVs continued transmitting traffic consistent with automatic content recognition after researchers disabled the feature. The event notes encrypted connections prevented confirmation that transmissions contained actual viewing data or were retained by manufacturers, but the persistence of ACR-related traffic after opt-out raises concerns about privacy control reliability.
+
+This is a privacy and surveillance issue rather than an active vulnerability or breach. The key takeaway is that disabling ACR may not fully stop data transmission, making encrypted monitoring necessary to confirm actual exposure. Organizations with smart TV deployments should review privacy settings and network traffic patterns rather than relying solely on vendor controls.
