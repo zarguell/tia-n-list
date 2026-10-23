@@ -1,0 +1,829 @@
+{
+ "date": "2026-10-23",
+ "decisions_path": "engine/data/triage/decisions-2026-10-23T1302.json",
+ "instructions": "For every new event decide: (1) keep or drop \u2014 keep only stories worth covering (real security events, vulnerabilities, attacks, breaches, advisories with substance); drop press releases, vendor marketing, generic explainers, and anything duplicating an existing story. (2) If keep, assign the event to the RIGHT story: an existing candidate story id if it belongs there (this FIXES mechanical clustering \u2014 e.g. different outlets' Patch Tuesday roundups are ONE story), or NEW with a clean story_title. (3) merges: list candidate stories that are really the same story (from = fragment, into = the most complete one). (4) For every kept event that names CVEs, optionally assess exploitation: exploited = the event reports OBSERVED in-the-wild exploitation (implants, victim counts, campaigns, CISA KEV confirmation); suspected = public exploit code/PoC or likely-but-unconfirmed. Attribute ONLY the CVEs you can tie to the claim \u2014 a bulletin's blanket 'actively exploited' does NOT flag all its CVEs. Omit the exploitation field when the event makes no claim.\n(5) LOW-TRUST events (\"low_trust\": true \u2014 AI-drafted aggregator reposts, late and overstated): treat as unverified leads. When the text attributes the claim to a named primary source (a researcher firm like watchTowr, a vendor advisory, CISA, a major outlet) and attribution_urls or a web search (/home/ubuntu/repos/cronman/bin/web-search.sh \"query\") locate that primary source CONFIRMING the claim, include a provenance object in the decision: {\"url\": <primary url>, \"source\": <domain>, \"evidence\": <one line>, \"verified\": true}. VERIFIED provenance lets the event mint a story (credited to the primary source) and count as a development; without it, a low-trust event can only attach to an EXISTING story, never mint. If you cannot verify, keep/drop on normal merit and omit provenance.\n\nWrite decisions as JSON with EXACTLY this shape:\n{\n  \"decisions\": [\n    {\"event_id\": \"<id>\", \"action\": \"keep\", \"story\": \"<existing candidate story id>\", \"reason\": \"...\"},\n    {\"event_id\": \"<id>\", \"action\": \"keep\", \"story\": \"NEW\", \"story_title\": \"<clean title>\", \"reason\": \"...\"},\n    {\"event_id\": \"<id>\", \"action\": \"drop\", \"reason\": \"...\"}\n  ],\n  \"merges\": [{\"from\": \"<fragment story id>\", \"into\": \"<canonical story id>\"}]\n}\nFor events marked \"low_trust\" (AI-drafted aggregator reposts) a decision\nmay carry an optional \"provenance\" object when you VERIFIED the claim at\nthe named primary source: {\"event_id\": ..., \"action\": \"keep\", ...}\n  \"provenance\": {\"url\": \"<primary source url>\", \"source\": \"<domain>\", \"evidence\": \"<one line>\"}\nOnly include provenance when the primary source (vendor advisory, CISA,\nthe named researcher/outlet) really carries the claim \u2014 verified\nprovenance lets a low-trust event mint a story and set freshness; without\nit the event can only amplify an existing story.\nSTRICT KEY NAMES: the array key is \"decisions\" (never \"events\"); the story\nkey is \"story\" (never \"story_id\"); \"story\" holds a candidate_stories id\nverbatim or the literal string \"NEW\". Optional per-event field\n\"exploitation\": {\"CVE-...\": {\"status\": \"exploited|suspected\", \"evidence\": \"1-2 sentences\"}}.",
+ "new_events": [
+  {
+   "id": "rss:edb8773574ff2c43",
+   "title": "How to Export the Microsoft 365 Unified Audit Log",
+   "source": "socprime.com",
+   "published_at": "2026-10-23T12:48:59Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "The Purview portal ( Audit \u2192 Search ) lets you search the Unified Audit Log and export the results to CSV. The full event sits in one column, AuditData, as a JSON blob. To get clean JSON, one event per line, use Exchange"
+  },
+  {
+   "id": "rss:7b28c7f0c8281df0",
+   "title": "HPE patches eight max severity RCE and auth bypass AOS flaws",
+   "source": "bleepingcomputer.com",
+   "published_at": "2026-10-23T12:48:00Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Hewlett Packard Enterprise (HPE) released security updates to patch 72 vulnerabilities in the Aruba Operating System (ArubaOS), including eight maximum-severity authentication bypass and code execution issues. Also known"
+  },
+  {
+   "id": "masto:117490290720669920",
+   "title": "Patching an app won\u2019t fix a vulnerable server behind it. NowSecure found 426 Android and iOS apps contacting servers reporting PHP versions ",
+   "source": "hackread.com",
+   "published_at": "2026-10-23T12:46:02.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Patching an app won\u2019t fix a vulnerable server behind it. NowSecure found 426 Android and iOS apps contacting servers reporting PHP versions   via Mastodon https://hackread.com/426-android-ios-apps-linked-php2shell-backen"
+  },
+  {
+   "id": "rss:0b1b1516a3cdee1c",
+   "title": "Mirai Botnet Operators Join PHP2Shell Attacks as ASLR Bypass Exploits Emerge",
+   "source": "securityweek.com",
+   "published_at": "2026-10-23T12:45:52Z",
+   "cves": [
+    "CVE-2026-109618",
+    "CVE-2026-109619"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Two days after PHP rolled out emergency fixes for the PHP2Shell vulnerabilities, threat actors have tried to use the flaws to spread a Mirai botnet. A security firm has also built an exploit that gets past a key memory p"
+  },
+  {
+   "id": "masto:117490281867888046",
+   "title": "SBI Notifies Customers After Data Leak Exposes 3,897 Records, Says Funds Are Safe SBI says it has contacted customers whose data was identif",
+   "source": "cyberupdates365.com",
+   "published_at": "2026-10-23T12:43:47.919Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "SBI Notifies Customers After Data Leak Exposes 3,897 Records, Says Funds Are Safe SBI says it has contacted customers whose data was identif  via Mastodon https://cyberupdates365.com/sbi-data-breach-customer-alert/ "
+  },
+  {
+   "id": "masto:117490278201449817",
+   "title": "Ever wonder if a slick site is just a GitHub Pages repo in a trench coat? cl0q's cname: operator lists every domain pointed at the same serv",
+   "source": "cl0q.com",
+   "published_at": "2026-10-23T12:42:46.655Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Ever wonder if a slick site is just a GitHub Pages repo in a trench coat? cl0q's cname: operator lists every domain pointed at the same serv  via Mastodon https://cl0q.com/site/blog.skullsecurity.org "
+  },
+  {
+   "id": "rss:9568d3397926d75c",
+   "title": "WhatsApp and Telegram May Stop Working Without Registered SIM Cards From January 1, 2027",
+   "source": "gbhackers.com",
+   "published_at": "2026-10-23T12:41:06Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "WhatsApp and Telegram users in India may face access restrictions starting January 1, 2027, as messaging platforms implement the government\u2019s SIM-binding requirements. The Department of Telecommunications (DoT) has set D"
+  },
+  {
+   "id": "rss:f41eafdadfb1a340",
+   "title": "What PHP2Shell Reveals About the Limits of Automated Pentesting",
+   "source": "malware.news",
+   "published_at": "2026-10-23T12:40:40Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "On the morning of October 21, 2026, everyone responsible for infrastructure that runs PHP woke up to the same two questions. Are we exposed? And if someone throws this attack at us before we finish patching, does anythin"
+  },
+  {
+   "id": "masto:117490272195151182",
+   "title": "Smart People React to a Growing Wave of AI Threats to the Internet In February, Matt Shumer, the former CEO of Hyperwrite, published a viral",
+   "source": "www.newsbeep.com",
+   "published_at": "2026-10-23T12:40:25.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Smart People React to a Growing Wave of AI Threats to the Internet In February, Matt Shumer, the former CEO of Hyperwrite, published a viral  via Mastodon https://www.newsbeep.com/us/891930/ "
+  },
+  {
+   "id": "masto:117490260710011178",
+   "title": "Critical Python Pillow Flaw Allows Code Execution Through Crafted Filenames Pillow 13.0.0 fixes a filename-based Ghostscript command-executi",
+   "source": "cyberupdates365.com",
+   "published_at": "2026-10-23T12:38:25.074Z",
+   "cves": [
+    "CVE-2026-112900"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Critical Python Pillow Flaw Allows Code Execution Through Crafted Filenames Pillow 13.0.0 fixes a filename-based Ghostscript command-executi  via Mastodon https://cyberupdates365.com/python-pillow-rce-cve-2026-112900/ "
+  },
+  {
+   "id": "masto:117490248152879072",
+   "title": "HKMA warns of fraudulent websites and login screens affecting 5 banks. The HKMA stated banks will not send embedded links or request passwor",
+   "source": "techupscale.com",
+   "published_at": "2026-10-23T12:35:13.483Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "HKMA warns of fraudulent websites and login screens affecting 5 banks. The HKMA stated banks will not send embedded links or request passwor  via Mastodon https://techupscale.com/hkma-warns-public-of-bank-scams-and-fraud"
+  },
+  {
+   "id": "rss:15226a9db0226335",
+   "title": "StealC Infostealer Returns as Powerful Remote Access Trojan After Europol Takedown",
+   "source": "gbhackers.com",
+   "published_at": "2026-10-23T12:34:31Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "StealC\u2019s seller has resurfaced with Stadia, a modular remote access trojan that expands the disrupted infostealer into a platform for persistent endpoint control. Advertised on October 16, the malware combines credential"
+  },
+  {
+   "id": "rss:b85aa0f163de46b3",
+   "title": "Critical Okta Access Gateway Vulnerability Enables Remote Command Execution",
+   "source": "gbhackers.com",
+   "published_at": "2026-10-23T12:29:46Z",
+   "cves": [
+    "CVE-2026-115547"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "A critical command execution vulnerability has been identified in Okta Access Gateway (OAG), which could allow an authenticated administrator to execute system commands by submitting specially formatted configuration val"
+  },
+  {
+   "id": "masto:117490220791337695",
+   "title": "\ud83d\udee1 THREAT INTEL | Heritage Senior Living \ud83d\udd34 Actor \"N0n\" claims Undisclosed Allegedly exposed \u2022 Health records \u2022 Internal documents \u26a0\ufe0f Unverifi",
+   "source": "www.yazoul.net",
+   "published_at": "2026-10-23T12:28:15.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "\ud83d\udee1 THREAT INTEL | Heritage Senior Living \ud83d\udd34 Actor \"N0n\" claims Undisclosed Allegedly exposed \u2022 Health records \u2022 Internal documents \u26a0\ufe0f Unverifi  via Mastodon https://www.yazoul.net/intel/claim/2026-10-22-heritage-senior-liv"
+  },
+  {
+   "id": "masto:117490220693256981",
+   "title": "\ud83d\udee1 THREAT INTEL | Heritage Senior Living \ud83d\udd34 Actor \"N0n\" claims Undisclosed Allegedly exposed \u2022 Health records \u2022 Internal documents \u26a0\ufe0f Unverifi",
+   "source": "www.yazoul.net",
+   "published_at": "2026-10-23T12:28:14.497Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "\ud83d\udee1 THREAT INTEL | Heritage Senior Living \ud83d\udd34 Actor \"N0n\" claims Undisclosed Allegedly exposed \u2022 Health records \u2022 Internal documents \u26a0\ufe0f Unverifi  via Mastodon https://www.yazoul.net/intel/claim/2026-10-22-heritage-senior-liv"
+  },
+  {
+   "id": "rss:2be6e91052f19460",
+   "title": "PHP2Shell: The Internet Hasn\u2019t Burned Down, but the Danger Isn\u2019t Over",
+   "source": "malware.news",
+   "published_at": "2026-10-23T12:25:39Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "It sounds like a disaster. So far, it isn\u2019t. Of the thousands of alleged exploits on GitHub, most are either broken or assume the server already has another serious vulnerability. Several of them, it turns out, were buil"
+  },
+  {
+   "id": "masto:117490208762035265",
+   "title": "CW: r\u00e9szletek behatol\u00e1sr\u00f3l \u00e9s k\u00e1rtev\u0151r\u0151l Swallowtail (APT28/Fancy Bear) k\u00e9t h\u00f3napon \u00e1t tart\u00f3, c\u00e9lzott kompromitt\u00e1l\u00e1st v\u00e9gzett egy NATO-tagor",
+   "source": "linuxmint.hu",
+   "published_at": "2026-10-23T12:25:12.433Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "CW: r\u00e9szletek behatol\u00e1sr\u00f3l \u00e9s k\u00e1rtev\u0151r\u0151l Swallowtail (APT28/Fancy Bear) k\u00e9t h\u00f3napon \u00e1t tart\u00f3, c\u00e9lzott kompromitt\u00e1l\u00e1st v\u00e9gzett egy NATO-tagor  via Mastodon https://linuxmint.hu/hir/2026/10/ket-honapig-epitettek-a-bejarato"
+  },
+  {
+   "id": "masto:117490199808571317",
+   "title": "PHP warns of CVE-2026-115560, a PHP session vulnerability that follows PHP2Shell. Disable session.upload_progress until the next bugfix rele",
+   "source": "securityonline.info",
+   "published_at": "2026-10-23T12:22:55.000Z",
+   "cves": [
+    "CVE-2026-115560"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "PHP warns of CVE-2026-115560, a PHP session vulnerability that follows PHP2Shell. Disable session.upload_progress until the next bugfix rele  via Mastodon https://securityonline.info/php-session-vulnerability-cve-2026-11"
+  },
+  {
+   "id": "masto:117490193801003801",
+   "title": "\ud83d\udea8 Cybersecurity report: AI-discovered PHP vulnerabilities, cyberattack warnings and website outages are raising questions about web infrastr",
+   "source": "openchronicle.org",
+   "published_at": "2026-10-23T12:21:24.229Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "\ud83d\udea8 Cybersecurity report: AI-discovered PHP vulnerabilities, cyberattack warnings and website outages are raising questions about web infrastr  via Mastodon https://openchronicle.org/2026/10/23/ai-discovered-php-security-f"
+  },
+  {
+   "id": "rss:183bfff94f415da0",
+   "title": "PHP2Shell: Failed Requests, Memory Corruption and Remote Code Execution",
+   "source": "malware.news",
+   "published_at": "2026-10-23T12:16:15Z",
+   "cves": [
+    "CVE-2026-109618"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "PHP2Shell affects how PHP handles a request that runs out of memory or encounters a fatal error. If the failure interrupts an operation before it finishes, PHP can leave an array entry only partly initialized or retain a"
+  },
+  {
+   "id": "rss:7fffa8672abc90a0",
+   "title": "Critical HPE Aruba AOS-8 Flaw Allows Hackers to Bypass SSH Authentication and Take Over Systems",
+   "source": "gbhackers.com",
+   "published_at": "2026-10-23T12:15:45Z",
+   "cves": [
+    "CVE-2026-79855"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Hewlett Packard Enterprise (HPE) has addressed a critical authentication-bypass vulnerability in the SSH daemon of its AOS-8 wireless operating system. This vulnerability, tracked as CVE-2026-79855, could let a remote, u"
+  },
+  {
+   "id": "masto:117490158955944291",
+   "title": "Our first # BCC2026 was a great experience! Thanks to DNSC Romania for bringing together: the people who set security strategy the practitio",
+   "source": "pentest-tools.com",
+   "published_at": "2026-10-23T12:12:29.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Our first # BCC2026 was a great experience! Thanks to DNSC Romania for bringing together: the people who set security strategy the practitio  via Mastodon https://pentest-tools.com/network-vulnerability-scanning/php2shel"
+  },
+  {
+   "id": "masto:117490156067750853",
+   "title": "As one of the worst ever weeks for cybersecurity \ud83d\udd10continues, with the websites of multiple governments still down to prevent a critical PHP ",
+   "source": "bbc.co.uk",
+   "published_at": "2026-10-23T12:11:47.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "As one of the worst ever weeks for cybersecurity \ud83d\udd10continues, with the websites of multiple governments still down to prevent a critical PHP   via Mastodon https://bbc.co.uk/sounds/play/m003321y "
+  },
+  {
+   "id": "masto:117490145585176887",
+   "title": "PHP has an unpatched remote code execution vulnerability, to be assigned CVE-2026-115560. Stopgap fix is to leave session.upload_progress.en",
+   "source": "www.php.net",
+   "published_at": "2026-10-23T12:09:08.000Z",
+   "cves": [
+    "CVE-2026-115560"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "PHP has an unpatched remote code execution vulnerability, to be assigned CVE-2026-115560. Stopgap fix is to leave session.upload_progress.en  via Mastodon https://www.php.net/archive/2026.php#2026-10-23-1 "
+  },
+  {
+   "id": "masto:117490142304582392",
+   "title": "Arriva l\u2019AI-RAN! Il 5G ora gira sui server AI e NVIDIA cambia le regole \ud83d\udccc Link all'articolo : https://www. redhotcyber.com/post/arriva-la i-",
+   "source": "www.redhotcyber.com",
+   "published_at": "2026-10-23T12:08:14.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Arriva l\u2019AI-RAN! Il 5G ora gira sui server AI e NVIDIA cambia le regole \ud83d\udccc Link all'articolo : https://www. redhotcyber.com/post/arriva-la i-  via Mastodon https://www.redhotcyber.com/post/arriva-lai-ran-il-5g-ora-gira-su"
+  },
+  {
+   "id": "masto:117490125475142826",
+   "title": "Privacy & security, Fri, Oct 23: \u2022 Jared Kushner Hacked Phone Reveals Secret Negotiations, Millions in Transactions https://www. vanityfair.",
+   "source": "www.vanityfair.com",
+   "published_at": "2026-10-23T12:04:01.553Z",
+   "cves": [
+    "CVE-2026-111943"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Privacy & security, Fri, Oct 23: \u2022 Jared Kushner Hacked Phone Reveals Secret Negotiations, Millions in Transactions https://www. vanityfair.  via Mastodon https://www.vanityfair.com/story/jared-kushner-hacked-phone-secre"
+  },
+  {
+   "id": "masto:117490116437120109",
+   "title": "\ud83d\udd0d Lambda Watchdog detected that CVE-2026-16729 is no longer present in latest AWS Lambda base image scans. https:// github.com/aws/aws-lambd",
+   "source": "github.com",
+   "published_at": "2026-10-23T12:01:43.647Z",
+   "cves": [
+    "CVE-2026-16729"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "\ud83d\udd0d Lambda Watchdog detected that CVE-2026-16729 is no longer present in latest AWS Lambda base image scans. https:// github.com/aws/aws-lambd  via Mastodon https://github.com/aws/aws-lambda-base-images/issues/646 "
+  },
+  {
+   "id": "masto:117490116441270900",
+   "title": "Railway Discloses Secret Exposure Incident Linked to AI Hijacking Campaign Railway suffered a security breach where unauthorized actors acce",
+   "source": "beyondmachines.net",
+   "published_at": "2026-10-23T12:01:42.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Railway Discloses Secret Exposure Incident Linked to AI Hijacking Campaign Railway suffered a security breach where unauthorized actors acce  via Mastodon https://beyondmachines.net/event_details/railway-discloses-secret"
+  },
+  {
+   "id": "masto:117490113123169864",
+   "title": "\ud83d\udea8 New MEDIUM CVE detected in AWS Lambda \ud83d\udea8 CVE-2026-111997 impacts ip-address in 4 Lambda base images. Details: https:// github.com/aws/aws-l",
+   "source": "github.com",
+   "published_at": "2026-10-23T12:00:53.080Z",
+   "cves": [
+    "CVE-2026-111997"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "\ud83d\udea8 New MEDIUM CVE detected in AWS Lambda \ud83d\udea8 CVE-2026-111997 impacts ip-address in 4 Lambda base images. Details: https:// github.com/aws/aws-l  via Mastodon https://github.com/aws/aws-lambda-base-images/issues/766 "
+  },
+  {
+   "id": "masto:117490113150450797",
+   "title": "\ud83d\udea8 New MEDIUM CVE detected in AWS Lambda \ud83d\udea8 CVE-2026-111997 impacts ip-address in 4 Lambda base images. Details: https:// github.com/aws/aws-l",
+   "source": "github.com",
+   "published_at": "2026-10-23T12:00:52.000Z",
+   "cves": [
+    "CVE-2026-111997"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "\ud83d\udea8 New MEDIUM CVE detected in AWS Lambda \ud83d\udea8 CVE-2026-111997 impacts ip-address in 4 Lambda base images. Details: https:// github.com/aws/aws-l  via Mastodon https://github.com/aws/aws-lambda-base-images/issues/766 "
+  }
+ ],
+ "candidate_stories": [
+  {
+   "id": "how-to-export-the-microsoft-365-unified-audit-log",
+   "title": "How to Export the Microsoft 365 Unified Audit Log",
+   "n_events": 1,
+   "last_seen": "2026-10-23T12:48:59Z",
+   "first_event_title": "How to Export the Microsoft 365 Unified Audit Log"
+  },
+  {
+   "id": "vm2-critical-auth-bypass-cve-2026-100721",
+   "title": "vm2 Critical Auth Bypass CVE-2026-100721",
+   "n_events": 2,
+   "last_seen": "2026-10-23T12:48:00Z",
+   "first_event_title": "CVE-2026-100721: CRITICAL auth bypass in vm2 https:// radar.offseq.com/threat/vm2-be fore-3122-contains-an-authorization-bypass-in-the-nodev"
+  },
+  {
+   "id": "php-warns-admins-of-two-critical-flaws-emergency-patches-coming",
+   "title": "PHP warns admins of two critical flaws, emergency patches coming tomorrow",
+   "n_events": 289,
+   "last_seen": "2026-10-23T12:45:52Z",
+   "first_event_title": "PHP warns admins of two critical flaws, emergency patches coming tomorrow"
+  },
+  {
+   "id": "whatsapp-and-telegram-may-stop-working-without-registered-sim-ca",
+   "title": "WhatsApp and Telegram May Stop Working Without Registered SIM Cards From January 1, 2027",
+   "n_events": 1,
+   "last_seen": "2026-10-23T12:41:06Z",
+   "first_event_title": "WhatsApp and Telegram May Stop Working Without Registered SIM Cards From January 1, 2027"
+  },
+  {
+   "id": "what-php2shell-reveals-about-the-limits-of-automated-pentesting",
+   "title": "What PHP2Shell Reveals About the Limits of Automated Pentesting",
+   "n_events": 1,
+   "last_seen": "2026-10-23T12:40:40Z",
+   "first_event_title": "What PHP2Shell Reveals About the Limits of Automated Pentesting"
+  },
+  {
+   "id": "stealc-infostealer-returns-as-powerful-remote-access-trojan-afte",
+   "title": "StealC Infostealer Returns as Powerful Remote Access Trojan After Europol Takedown",
+   "n_events": 1,
+   "last_seen": "2026-10-23T12:34:31Z",
+   "first_event_title": "StealC Infostealer Returns as Powerful Remote Access Trojan After Europol Takedown"
+  },
+  {
+   "id": "okta-patches-auth0-and-access-gateway-vulnerabilities-let-attack",
+   "title": "Okta Patches High-Severity Auth0 and Access Gateway Vulnerabilities",
+   "n_events": 8,
+   "last_seen": "2026-10-23T12:29:46Z",
+   "first_event_title": "Okta Patches Auth0 and Access Gateway Vulnerabilities Let Attackers Enable XSS, Authentication Bypass and SQL Injection"
+  },
+  {
+   "id": "php2shell-the-internet-hasn-t-burned-down-but-the-danger-isn-t-o",
+   "title": "PHP2Shell: The Internet Hasn\u2019t Burned Down, but the Danger Isn\u2019t Over",
+   "n_events": 1,
+   "last_seen": "2026-10-23T12:25:39Z",
+   "first_event_title": "PHP2Shell: The Internet Hasn\u2019t Burned Down, but the Danger Isn\u2019t Over"
+  },
+  {
+   "id": "critical-hpe-aruba-aos-8-flaw-allows-hackers-to-bypass-ssh-authe",
+   "title": "Critical HPE Aruba AOS-8 Flaw Allows Hackers to Bypass SSH Authentication and Take Over Systems",
+   "n_events": 1,
+   "last_seen": "2026-10-23T12:15:45Z",
+   "first_event_title": "Critical HPE Aruba AOS-8 Flaw Allows Hackers to Bypass SSH Authentication and Take Over Systems"
+  },
+  {
+   "id": "compromised-emudhra-intermediate-certificates",
+   "title": "Compromised eMudhra intermediate certificates",
+   "n_events": 65,
+   "last_seen": "2026-10-23T12:04:01.553Z",
+   "first_event_title": "Compromised eMudhra intermediate certificates"
+  },
+  {
+   "id": "siteguard-server-edition-cve-2026-106931-active-exploitation",
+   "title": "SiteGuard Server Edition CVE-2026-106931 Active Exploitation",
+   "n_events": 18,
+   "last_seen": "2026-10-23T12:00:40Z",
+   "first_event_title": "A SiteGuard Server Edition vulnerability, CVE-2026-106931, is exploited in the wild and grants root or SYSTEM access. Update to Ver8.00 Upda"
+  },
+  {
+   "id": "node-js-brotli-decoder-vulnerability-cve-2026-111497",
+   "title": "Node.js Brotli decoder vulnerability CVE-2026-111497",
+   "n_events": 10,
+   "last_seen": "2026-10-23T11:59:53.202Z",
+   "first_event_title": "Is your Node.js application vulnerable to CVE-2026-111497? A newly disclosed High-severity vulnerability in the Node.js Brotli decoder could"
+  },
+  {
+   "id": "capcom-data-breach-exposes-11-8-million-capcom-id-records",
+   "title": "Capcom Data Breach Exposes 11.8 Million CAPCOM ID Records",
+   "n_events": 13,
+   "last_seen": "2026-10-23T11:43:37Z",
+   "first_event_title": "\ud83d\udea8 Capcom has confirmed a data breach exposing 11.8 Million CAPCOM ID records worldwide. But the detail that deserves attention? 196 accounts"
+  },
+  {
+   "id": "quest-diagnostics-reports-cyber-breach-affecting-certain-patient",
+   "title": "Quest Diagnostics Reports Cyber Breach Affecting \u2018Certain Patient Records\u2019",
+   "n_events": 2,
+   "last_seen": "2026-10-23T11:36:13Z",
+   "first_event_title": "Quest Diagnostics Reports Cyber Breach Affecting \u2018Certain Patient Records\u2019"
+  },
+  {
+   "id": "unauthorized-ai-agents-found-accessing-customer-accounts-at-majo",
+   "title": "Unauthorized AI Agents Found Accessing Customer Accounts at Major U.S. Banks",
+   "n_events": 1,
+   "last_seen": "2026-10-23T11:33:55Z",
+   "first_event_title": "Unauthorized AI Agents Found Accessing Customer Accounts at Major U.S. Banks"
+  },
+  {
+   "id": "sbi-notifies-customers-affected-by-recent-cybersecurity-incident",
+   "title": "SBI Notifies Customers Affected by Recent Cybersecurity Incident",
+   "n_events": 1,
+   "last_seen": "2026-10-23T10:48:47Z",
+   "first_event_title": "SBI Notifies Customers Affected by Recent Cybersecurity Incident"
+  },
+  {
+   "id": "state-bank-of-india-customer-data-exposed-on-dark-web-3-897-reco",
+   "title": "State Bank of India customer data exposed on dark web (3,897 records)",
+   "n_events": 3,
+   "last_seen": "2026-10-23T10:40:02.055Z",
+   "first_event_title": "State Bank of India Discloses Customer Data Exposure on Dark Web State Bank of India identified 3,897 customer records containing PII during"
+  },
+  {
+   "id": "machine-speed-attacks-require-machine-speed-detection-and-respon",
+   "title": "Machine speed attacks require machine speed detection and response",
+   "n_events": 138,
+   "last_seen": "2026-10-23T10:37:59.821Z",
+   "first_event_title": "OpenCode Flaw Lets Malicious MCP Servers Execute Code During Sign-In on Windows and WSL"
+  },
+  {
+   "id": "china-apt-uses-ai-pentest-tool-artex-in-connectwise-attacks",
+   "title": "China APT Uses AI Pentest Tool Artex in ConnectWise Attacks",
+   "n_events": 1,
+   "last_seen": "2026-10-23T10:31:16Z",
+   "first_event_title": "China APT Uses AI Pentest Tool Artex in ConnectWise Attacks"
+  },
+  {
+   "id": "isc-stormcast-for-friday-october-23rd-2026-https-isc-sans-edu-po",
+   "title": "ISC Stormcast For Friday, October 23rd, 2026 (Fri, Oct 23rd)",
+   "n_events": 0,
+   "last_seen": "2026-10-23T10:30:38Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "crime-stoppers-chapter-freezes-tips-after-breach-breaks-anonymit",
+   "title": "Crime Stoppers chapter freezes tips after breach breaks anonymity promise",
+   "n_events": 1,
+   "last_seen": "2026-10-23T10:10:38Z",
+   "first_event_title": "Crime Stoppers chapter freezes tips after breach breaks anonymity promise"
+  },
+  {
+   "id": "securityheaders-api-is-dead-this-is-the-curl-i-use-now",
+   "title": "securityheaders api is dead. this is the curl i use now",
+   "n_events": 0,
+   "last_seen": "2026-10-23T10:07:02Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "siemens-october-2026-advisories-six-critical-fixes-for-plcs-edge",
+   "title": "Siemens October 2026 Advisories: Six Critical Fixes for PLCs, Edge Devices and CROSSBOW",
+   "n_events": 1,
+   "last_seen": "2026-10-23T10:01:42.000Z",
+   "first_event_title": "Siemens October 2026 Advisories: Six Critical Fixes for PLCs, Edge Devices and CROSSBOW Siemens' October 2026 security updates patch critica"
+  },
+  {
+   "id": "arista-velocloud-orchestrator-sql-injection-zero-day-cve-2026-11",
+   "title": "Arista VeloCloud Orchestrator SQL injection zero-day CVE-2026-114625",
+   "n_events": 9,
+   "last_seen": "2026-10-23T09:58:34Z",
+   "first_event_title": "Cybersecurity Awareness Month isn't over yet: Arista VeloCloud Orchestrator SQL injection zero-day CVE-2026-114625 (CVSSv3.1: 9.9 critical ,"
+  },
+  {
+   "id": "27-arrests-and-248-potential-victims-identified-in-action-week-a",
+   "title": "27 arrests and 248 potential victims identified in action week against labour exploitation",
+   "n_events": 0,
+   "last_seen": "2026-10-23T09:35:37Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "nginx-releases-1-31-7-and-1-30-6-fixing-five-security-flaws",
+   "title": "NGINX Releases 1.31.7 and 1.30.6 Fixing Five Security Flaws",
+   "n_events": 12,
+   "last_seen": "2026-10-23T09:34:08.793Z",
+   "first_event_title": "NGINX Vulnerabilities Let Remote Attackers Crash Servers and Risk Code Execution NGINX has released versions 1.31.7 and 1.30.6 to fix five s"
+  },
+  {
+   "id": "oracle-java-cve-2026-91403-score-9-1",
+   "title": "Oracle Java - CVE-2026-91403 - Score: 9.1",
+   "n_events": 10,
+   "last_seen": "2026-10-23T09:01:42.000Z",
+   "first_event_title": "Oracle Java - CVE-2026-91403 - Score: 9.1"
+  },
+  {
+   "id": "litellm-1-107-0-compromised-on-pypi-and-installs-a-credential-st",
+   "title": "LiteLLM 1.107.0 compromised on PyPI and installs a credential stealer and backdoor",
+   "n_events": 37,
+   "last_seen": "2026-10-23T08:59:13.000Z",
+   "first_event_title": "LiteLLM 1.107.0 compromised on PyPI and installs a credential stealer and backdoor"
+  },
+  {
+   "id": "litespeed-cache-stored-xss-flaws-cve-2026-113499-and-cve-2026-11",
+   "title": "LiteSpeed Cache stored XSS flaws CVE-2026-113499 and CVE-2026-113500 affect 7M+ WordPress sites",
+   "n_events": 1,
+   "last_seen": "2026-10-23T08:45:29.000Z",
+   "first_event_title": "Three LiteSpeed Cache vulnerabilities, including stored XSS flaws CVE-2026-113499 and CVE-2026-113500, affect 7M+ WordPress sites. Update to"
+  },
+  {
+   "id": "opencode-data-leak-exposes-1-4-users-api-keys-after-oct-17-incid",
+   "title": "OpenCode data leak exposes ~1.4% users' API keys after Oct 17 incident",
+   "n_events": 1,
+   "last_seen": "2026-10-23T08:37:08.704Z",
+   "first_event_title": "CW: data leak \u2014 Due to the Oct 17 incident affecting the OpenCode console, approximately 1.4% of users' OpenAI/Anthropic/Google API keys were exposed"
+  },
+  {
+   "id": "suspected-chinese-apt41-hackers-use-blackx-bootkit-to-bypass-win",
+   "title": "Suspected Chinese APT41 Hackers Use BlackX Bootkit to Bypass Windows Secure Boot",
+   "n_events": 1,
+   "last_seen": "2026-10-23T08:36:15Z",
+   "first_event_title": "Suspected Chinese APT41 Hackers Use BlackX Bootkit to Bypass Windows Secure Boot"
+  },
+  {
+   "id": "ransomware-attack-on-neubrandenburger-wohnungsgesellschaft-mbh-n",
+   "title": "Ransomware attack on Neubrandenburger Wohnungsgesellschaft mbH (NEUWOGES)",
+   "n_events": 1,
+   "last_seen": "2026-10-23T08:36:03.000Z",
+   "first_event_title": "Ransomware attack: Neubrandenburger Wohnungsgesellschaft mbH (NEUWOGES) # Data leak # Ransomware # Breach # Data theft # TeamInfoSec"
+  },
+  {
+   "id": "ukraine-data-exchange-breach-via-log4shell-on-graylog-servers",
+   "title": "Ukraine data exchange breach via Log4Shell on Graylog servers",
+   "n_events": 1,
+   "last_seen": "2026-10-23T08:15:51.000Z",
+   "first_event_title": "Threat actors targeted a Ukraine data exchange breach via Log4Shell on Graylog servers, probing millions of records across state infrastruct"
+  },
+  {
+   "id": "inc-ransomware-affiliates-expose-ai-workbench-phantom-and-46-enc",
+   "title": "INC Ransomware affiliates expose AI workbench Phantom and 46 encryptors on 7 servers",
+   "n_events": 1,
+   "last_seen": "2026-10-23T08:11:11.000Z",
+   "first_event_title": "SOCRadar reveals 7 servers run by INC Ransomware affiliates, exposing an INC Ransomware affiliates AI workbench, Phantom, and 46 encryptors."
+  },
+  {
+   "id": "ridgeway-pharmacy-website-breach-exposes-data-of-259-000-custome",
+   "title": "Ridgeway Pharmacy website breach exposes data of 259,000 customers",
+   "n_events": 1,
+   "last_seen": "2026-10-23T08:01:41.000Z",
+   "first_event_title": "Ridgeway Pharmacy Website Vulnerability Exposes Data of 259,000 Customers Ridgeway Pharmacy reports a data breach affecting nearly 259,000 i"
+  },
+  {
+   "id": "cert-in-reports-ai-agent-testing-agents-accessed-indian-companie",
+   "title": "CERT-In reports AI agent testing agents accessed Indian companies' production systems",
+   "n_events": 1,
+   "last_seen": "2026-10-23T07:59:07.687Z",
+   "first_event_title": "CW: Security incident \u2014 According to CERT-In, testing AI agents gained unauthorized access to Indian companies' production systems and business secrets"
+  },
+  {
+   "id": "citrix-netscaler-unpatched-rce-zero-days",
+   "title": "Citrix NetScaler zero-days CVE-2026-88771-88778 patched after confirmed exploitation",
+   "n_events": 222,
+   "last_seen": "2026-10-23T07:56:16Z",
+   "first_event_title": "NetScaler alert: watchTowr says reports of unpatched remote code execution flaws in Citrix NetScaler are verified, and organisations are shu"
+  },
+  {
+   "id": "atlassian-patches-75-flaws-in-data-center-and-server-products",
+   "title": "Atlassian Patches 75 Flaws in Data Center and Server Products",
+   "n_events": 1,
+   "last_seen": "2026-10-23T07:54:47Z",
+   "first_event_title": "Atlassian Patches 75 Flaws in Data Center and Server Products"
+  },
+  {
+   "id": "we-tracked-a-data-leak-claim-by-other-and-other-alleging-153-mil",
+   "title": "153 Million Driver's License Records Allegedly Leaked",
+   "n_events": 4,
+   "last_seen": "2026-10-23T07:48:38.000Z",
+   "first_event_title": "\ud83c\uddfa\ud83c\uddf8\ud83c\udde8\ud83c\udde6 We tracked a data-leak claim by Other And Other alleging 153 million verified driver's license records from Canada and the United State"
+  },
+  {
+   "id": "unit-42-uncovers-peerstitch-a-stealthy-fortigate-implant",
+   "title": "Unit 42 Uncovers PEERSTITCH, a Stealthy FortiGate Implant",
+   "n_events": 8,
+   "last_seen": "2026-10-23T07:40:14.630Z",
+   "first_event_title": "Unit 42 Uncovers PEERSTITCH, a Stealthy FortiGate Implant"
+  },
+  {
+   "id": "atlassian-security-advisory-av26-1076",
+   "title": "Atlassian security advisory (AV26-1076)",
+   "n_events": 1,
+   "last_seen": "2026-10-22T16:05:53Z",
+   "first_event_title": "Atlassian security advisory (AV26-1076)"
+  },
+  {
+   "id": "google-security-advisory-av26-1060",
+   "title": "Google security advisory (AV26-1060)",
+   "n_events": 1,
+   "last_seen": "2026-10-16T20:26:06Z",
+   "first_event_title": "Google security advisory (AV26-1060)"
+  },
+  {
+   "id": "google-security-advisory-av26-904",
+   "title": "Google security advisory (AV26-904)",
+   "n_events": 2,
+   "last_seen": "2026-09-09T20:49:30Z",
+   "first_event_title": "Google security advisory (AV26-904)"
+  },
+  {
+   "id": "grafana-security-advisory-av26-796",
+   "title": "Grafana security advisory (AV26-796)",
+   "n_events": 1,
+   "last_seen": "2026-08-11T13:30:40Z",
+   "first_event_title": "Grafana security advisory (AV26-796)"
+  },
+  {
+   "id": "grafana-security-advisory-av26-860",
+   "title": "Grafana Alloy Vulnerability CVE-2026-19516",
+   "n_events": 2,
+   "last_seen": "2026-10-13T16:00:56.470Z",
+   "first_event_title": "Grafana security advisory (AV26-860)"
+  },
+  {
+   "id": "hashicorp-security-advisory-av26-797",
+   "title": "HashiCorp security advisory (AV26-797)",
+   "n_events": 1,
+   "last_seen": "2026-08-11T14:05:42Z",
+   "first_event_title": "HashiCorp security advisory (AV26-797)"
+  },
+  {
+   "id": "hashicorp-security-advisory-av26-817",
+   "title": "HashiCorp security advisory (AV26-817)",
+   "n_events": 1,
+   "last_seen": "2026-08-14T16:05:44Z",
+   "first_event_title": "HashiCorp security advisory (AV26-817)"
+  },
+  {
+   "id": "ibm-security-advisory-av26-1040",
+   "title": "IBM security advisory (AV26-1040)",
+   "n_events": 1,
+   "last_seen": "2026-10-14T18:40:41Z",
+   "first_event_title": "IBM security advisory (AV26-1040)"
+  },
+  {
+   "id": "ibm-security-advisory-av26-1064",
+   "title": "IBM security advisory (AV26-1064)",
+   "n_events": 1,
+   "last_seen": "2026-10-20T13:10:42Z",
+   "first_event_title": "IBM security advisory (AV26-1064)"
+  },
+  {
+   "id": "ibm-security-advisory-av26-997",
+   "title": "IBM security advisory (AV26-997)",
+   "n_events": 0,
+   "last_seen": "2026-10-05T13:40:39Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "ivanti-security-advisory-av26-805",
+   "title": "Ivanti security advisory (AV26-805)",
+   "n_events": 1,
+   "last_seen": "2026-08-11T20:20:39Z",
+   "first_event_title": "Ivanti security advisory (AV26-805)"
+  },
+  {
+   "id": "ivanti-security-advisory-av26-897",
+   "title": "Ivanti September 2026 security advisory: EPMM, ITSM, Sentry vulnerabilities",
+   "n_events": 3,
+   "last_seen": "2026-09-09T06:39:58Z",
+   "first_event_title": "Ivanti security advisory (AV26-897)"
+  },
+  {
+   "id": "jetbrains-security-advisory-av26-825",
+   "title": "JetBrains security advisory (AV26-825)",
+   "n_events": 1,
+   "last_seen": "2026-08-18T13:40:50Z",
+   "first_event_title": "JetBrains security advisory (AV26-825)"
+  },
+  {
+   "id": "mongodb-security-advisory-av26-810",
+   "title": "MongoDB security advisory (AV26-810)",
+   "n_events": 1,
+   "last_seen": "2026-08-12T15:55:39Z",
+   "first_event_title": "MongoDB security advisory (AV26-810)"
+  },
+  {
+   "id": "mozilla-security-advisory-av26-1057",
+   "title": "Mozilla security advisory (AV26-1057)",
+   "n_events": 2,
+   "last_seen": "2026-10-23T01:32:17.000Z",
+   "first_event_title": "Mozilla security advisory (AV26-1057)"
+  },
+  {
+   "id": "progress-security-advisory-av26-1005",
+   "title": "Progress security advisory (AV26-1005)",
+   "n_events": 3,
+   "last_seen": "2026-10-08T10:01:49.000Z",
+   "first_event_title": "Progress security advisory (AV26-1005)"
+  },
+  {
+   "id": "progress-security-advisory-av26-1058",
+   "title": "Progress security advisory (AV26-1058)",
+   "n_events": 1,
+   "last_seen": "2026-10-16T18:00:44Z",
+   "first_event_title": "Progress security advisory (AV26-1058)"
+  },
+  {
+   "id": "progress-security-advisory-av26-999",
+   "title": "Progress security advisory (AV26-999)",
+   "n_events": 1,
+   "last_seen": "2026-10-05T18:00:43Z",
+   "first_event_title": "Progress security advisory (AV26-999)"
+  },
+  {
+   "id": "rapid7-security-advisory-av26-1004",
+   "title": "Rapid7 security advisory (AV26-1004)",
+   "n_events": 1,
+   "last_seen": "2026-10-06T18:05:41Z",
+   "first_event_title": "Rapid7 security advisory (AV26-1004)"
+  },
+  {
+   "id": "rapid7-security-advisory-av26-801",
+   "title": "Rapid7 security advisory (AV26-801)",
+   "n_events": 1,
+   "last_seen": "2026-08-11T17:46:00Z",
+   "first_event_title": "Rapid7 security advisory (AV26-801)"
+  },
+  {
+   "id": "cpanel-php-update-patches-php2shell-flaws-cve-2026-109618-and-cv",
+   "title": "cPanel PHP update patches PHP2Shell flaws CVE-2026-109618 and CVE-2026-109619",
+   "n_events": 1,
+   "last_seen": "2026-10-22T11:47:55.000Z",
+   "first_event_title": "A cPanel PHP update fixes PHP2Shell flaws CVE-2026-109618 and CVE-2026-109619, while WP Toolkit 6.11.5 patches CVE-2026-107663. # cPanel # P"
+  },
+  {
+   "id": "lambda-watchdog-detected-that-cve-2026-14456-is-no-longer-presen",
+   "title": "Lambda Watchdog detected that CVE-2026-14456 is no longer present in latest AWS Lambda base image scans.",
+   "n_events": 3,
+   "last_seen": "2026-09-15T12:01:13.000Z",
+   "first_event_title": "\ud83d\udd0d Lambda Watchdog detected that CVE-2026-14456 is no longer present in latest AWS Lambda base image scans. https:// github.com/aws/aws-lambd"
+  },
+  {
+   "id": "ivanti-sentry-max-severity-rce-auth-bypass-cve-2026-10520-cvss-1",
+   "title": "Ivanti Sentry Max Severity RCE + Auth Bypass (CVE-2026-10520 CVSS 10.0, CVE-2026-10523 CVSS 9.9)",
+   "n_events": 3,
+   "last_seen": "2026-06-12T00:00:00Z",
+   "first_event_title": "Ivanti Sentry Max Severity RCE + Auth Bypass (CVE-2026-10520 CVSS 10.0, CVE-2026-10523 CVSS 9.9)"
+  },
+  {
+   "id": "apache-tomcat-fixes-eight-vulnerabilities-including-jndirealm-au",
+   "title": "Apache Tomcat Fixes Eight Vulnerabilities Including JNDIRealm Auth Bypass",
+   "n_events": 2,
+   "last_seen": "2026-10-21T12:26:18.012Z",
+   "first_event_title": "Eight Apache Tomcat vulnerabilities, including a JNDIRealm authentication bypass, are fixed in 11.0.27, 10.1.61 and 9.0.123. Upgrade now. # "
+  },
+  {
+   "id": "cve-2026-92178-high-7-8-pdfforge-pdf-architect-pdf-file-parsing",
+   "title": "CVE-2026-92178 - High (7.8) pdfforge PDF Architect PDF File Parsing Memory Corruption Remote Code Execution Vulnerability. This vulnerabil",
+   "n_events": 5,
+   "last_seen": "2026-09-15T20:02:50.367Z",
+   "first_event_title": "\ud83d\udfe0 CVE-2026-92178 - High (7.8) pdfforge PDF Architect PDF File Parsing Memory Corruption Remote Code Execution Vulnerability. This vulnerabil"
+  },
+  {
+   "id": "cve-2026-5430-cvss-9-8-critical-jwt-auth-bypass-in-wso2-api-mana",
+   "title": "WSO2 API Manager CVE-2026-5430 JWT auth bypass under active exploitation",
+   "n_events": 20,
+   "last_seen": "2026-09-26T14:00:05.000Z",
+   "first_event_title": "\ud83e\udd16 CVE-2026-5430 (CVSS 9.8): critical JWT auth bypass in WSO2 API Manager under active exploitation. Attackers forge admin tokens via imprope"
+  },
+  {
+   "id": "sap-patches-critical-code-injection-memory-corruption-vulnerabil",
+   "title": "SAP Patches Critical Code Injection, Memory Corruption Vulnerabilities",
+   "n_events": 4,
+   "last_seen": "2026-08-18T10:49:01Z",
+   "first_event_title": "SAP Patches Critical Code Injection, Memory Corruption Vulnerabilities"
+  },
+  {
+   "id": "red-hat-keycloak-cve-2026-105305-auth-bypass",
+   "title": "Red Hat Keycloak CVE-2026-105305 Auth Bypass",
+   "n_events": 1,
+   "last_seen": "2026-10-06T08:32:39.000Z",
+   "first_event_title": "CVE-2026-105305 affects Red Hat build of Keycloak. The OIDC Device Authorization Grant flow does not enforce a client's minimum authenticati"
+  },
+  {
+   "id": "cve-2026-108707-wukong-hrm-critical-auth-bypass",
+   "title": "CVE-2026-108707: WuKong_HRM critical auth bypass",
+   "n_events": 2,
+   "last_seen": "2026-10-12T01:09:25.000Z",
+   "first_event_title": "CRITICAL: CVE-2026-108707 in WuKong_HRM (\u2264 commit 186115e) enables auth bypass \u2014 attackers can access all HRM APIs, gaining admin rights and"
+  },
+  {
+   "id": "cve-2026-95271-changedetection-io-auth-bypass",
+   "title": "CVE-2026-95271 changedetection.io Auth Bypass",
+   "n_events": 1,
+   "last_seen": "2026-10-03T14:10:14.901Z",
+   "first_event_title": "CVE-2026-95271: improper auth in changedetection.io up to 0.60.7 lets remote attackers bypass login. CVSS 7.3, exploit public, no patch yet."
+  },
+  {
+   "id": "wordpress-auth-bypass-cluster-4-cvss-9-8-in-one-day",
+   "title": "WordPress Auth Bypass Cluster: 4 CVSS 9.8 in One Day",
+   "n_events": 1,
+   "last_seen": "2026-10-03T12:48:26.000Z",
+   "first_event_title": "WordPress Auth Bypass Cluster \u2014 4 \u00d7 CVSS 9.8 in one day. DevKit Pro, Divi Membership, JSON API Auth, WPMobile.App \u2014 all allow unauthenticate"
+  }
+ ]
+}
