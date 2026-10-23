@@ -1,0 +1,3 @@
+Okta released updates for high-severity vulnerabilities in Auth0 AD/LDAP Connector and Okta Access Gateway. The disclosure covers stored XSS, authorization bypass, and SQL injection, with CVE-2026-85982 scoring 9.0 for improper HTML encoding of directory search results and updater logs in the connector admin panel. A new event also references PHP2Shell and CVE-2026-115547 command execution in Access Gateway, with upgrade guidance to OAG 2026.44.0.
+
+Organizations running Auth0 directory connectors or Access Gateway should treat the update as priority. The XSS requires only authenticated directory access and a low-privileged local user could inject payloads into logs, making exploitation plausible in shared-administration environments.

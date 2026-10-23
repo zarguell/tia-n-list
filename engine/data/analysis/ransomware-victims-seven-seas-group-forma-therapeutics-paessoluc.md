@@ -1,5 +1,0 @@
-Ransomware.ninja listed seven new victims claimed by multiple crews: Fisher59 by anubis, Baker Donelson by redact, GardaWorld by qilin, BW Office World by payload, and Brünin by an unnamed group. The event is a direct update from the primary ransomware tracking source, with no additional corroboration required for the claim list itself. The groups named are established ransomware operations.
-
-This is a claim event rather than a confirmed breach with verified data samples. The value is in the victim names and group attribution, which help defenders map current ransomware campaigns. The event references previous listings for context, showing ongoing tracking of NightSpire, qilin, anubis, and other actors.
-
-Watch for confirmations from the named organizations or dark-web leak site updates that validate the claims. No CVEs or exploitation details are attached; the risk is operational awareness for security teams tracking ransomware trends.
