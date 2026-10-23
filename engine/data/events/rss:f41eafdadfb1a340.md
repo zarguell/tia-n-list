@@ -1,0 +1,1 @@
+On the morning of October 21, 2026, everyone responsible for infrastructure that runs PHP woke up to the same two questions. Are we exposed? And if someone throws this attack at us before we finish patching, does anything we own actually stop it? Article Link: What PHP2Shell Reveals About the Limits of Automated Pentesting
