@@ -1,0 +1,3 @@
+This story tracks repeated data-leak claims by the threat actor Other And Other, including an alleged 153 million verified driver's license records spanning Canada and the United States, plus separate claims naming a Kazakhstan educational platform, NATO documents, and US Air Force and Navy personnel. Each claim is an unverified dark-web post without primary confirmation from an affected organization or government agency.
+
+Because the claims are uncorroborated and come from a single threat-actor source, treat them as leads rather than confirmed breaches. Watch for official acknowledgment or independent verification from the named entities before treating any victim count or data type as confirmed.
