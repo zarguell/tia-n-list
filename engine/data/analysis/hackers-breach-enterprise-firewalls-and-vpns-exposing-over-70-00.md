@@ -1,0 +1,3 @@
+Hackers breached enterprise firewalls and VPNs, exposing over 70,000 credentials, according to a Hacker News report referenced via Reddit. The event content available is limited to the headline and link; no vendor, product, or CVE details are present in the captured material.
+
+The exposure of more than 70,000 credentials from firewall and VPN infrastructure is a significant credential-compromise risk for affected organizations. Watch for vendor advisories naming the affected products and any indicators of compromise or forced-reset guidance.

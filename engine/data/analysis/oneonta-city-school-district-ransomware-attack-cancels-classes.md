@@ -1,0 +1,3 @@
+The Oneonta City School District in New York canceled two days of classes after a ransomware attack, according to Superintendent Thomas F. Brindley, as reported by Dysruption Hub and cyber.netsecops.io. The incident affected district operations enough to suspend in-person instruction for two days.
+
+School districts remain frequent ransomware targets, and multi-day class cancellations indicate operational disruption beyond IT systems. Watch for disclosure of the ransomware family involved, any data-exfiltration claims, and whether the district restores systems from backups or pays a ransom.
