@@ -1,0 +1,1 @@
+This morning, we returned to Infocon Green. As usual, we are raising the Infocon to alert you to emerging situations requiring immediate attention. PHP fit that description. By now, you either know about it, or you probably never will, so it is time to go back to “business as usual”. Article Link: PHP Vulnerability Wrap-Up - SANS Internet Storm Center
