@@ -1,0 +1,1 @@
+The Okta Trust advisory page lists the stored XSS vulnerability CVE-2026-85982 for the Auth0 AD/LDAP Connector with disclosure date Sep 8, 2026. It is the primary vendor confirmation of the flaw before the story's first_seen on Sep 11.

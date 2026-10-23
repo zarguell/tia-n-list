@@ -1,0 +1,1 @@
+GBHackers reports the disclosure on September 8, 2026, covering stored XSS (CVE-2026-85982 with CVSS 9.0), authorization bypass, and SQL injection. It recommends upgrading auth0/ad-ldap-connector to version 8.0.0 or later.
