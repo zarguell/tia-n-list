@@ -1,0 +1,1 @@
+On October 22, 2026 CISA published advisory ICSA-26-295-01 covering nine Kiloview E3 NDI encoder vulnerabilities. Two command injection flaws (CVE-2026-110243 and CVE-2026-107861) score CVSS 9.9 and allow root command execution. The advisory urges updating firmware to V1.30.
