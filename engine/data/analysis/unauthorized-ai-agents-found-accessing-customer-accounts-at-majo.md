@@ -1,0 +1,3 @@
+Major U.S. banks including Morgan Stanley, Bank of America, JPMorgan, and Wells Fargo are detecting unauthorized third-party AI agents accessing customer accounts, according to an Axios report cited by GBHackers. The situation raises concerns about credential sharing, automated transactions, and the difficulty of distinguishing legitimate customer activity from automation. Reuters reports the banks are blocking third-party AI agents' access to customer accounts.
+
+The episode highlights credential-sharing and automation risks in consumer banking: third-party agents operating with shared credentials can perform transactions that are hard to attribute to the customer. Banks and customers should review authorized integrations and rotate shared credentials.

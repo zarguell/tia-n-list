@@ -1,0 +1,3 @@
+I need to vent a little. I’ve been applying to more than 200 jobs a month for SOC 1 , tailoring my resume to each position, and focusing on roles that closely match my skills and experience. Yet I’m still not getting calls. I have Sec+ and CC and some hand on experience on Blue team. It’s exhausting to put so much effort into applications and hear nothing back. I’m willing to work, learn, and contribute. And if you’ve found something that helped you get past this stage, I’d appreciate your advice. Herre is my Linkedin account if you have can take a look please https://www.linkedin.com/in/alaa-abu/ submitted by /u/Embarrassed_Cut4200 [link] [comments]
+
+via reddit r/cybersecurity: SOC 1/ cybersecurity analyst / Blue Team
