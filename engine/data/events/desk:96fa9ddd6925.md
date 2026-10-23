@@ -1,0 +1,1 @@
+Pillow 13.0.0 was released 16 Oct 2026. The release notes explicitly cite GHSA-w889-685w-c8fh / CVE-2026-112900: EPS filename argument injection into Ghostscript. This is the vendor patch, predating the story's first_seen of 23 Oct 2026 by one week.
