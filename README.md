@@ -27,6 +27,9 @@ page when a record exists.
   Vulnrichment enrichment, committed `data/` (index.json + per-CVE records), daily
   automation runbook. Its dashboard was ported into the Tia design system; the old
   generator (`build_site.py`) is gone.
+- `known-ref-states.md` — settled reference conditions (owner decisions) so later
+  audits stop re-raising known states as rot; currently the host-wide
+  `unreachable`-with-no-snapshot rule and the kept `cybersecuritynews.com` refs.
 
 ## Regenerate
 
