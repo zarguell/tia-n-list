@@ -31,6 +31,10 @@ MANIFEST = os.path.join(DATA, "manifest.json")
 ANALYSIS_DIR = os.path.join(DATA, "analysis")
 NEEDS = os.path.join(DATA, "needs-analysis.json")
 CTI_DIR = os.path.join(DATA, "cti")
+# Archived (absorbed) CTI records live OUTSIDE the `cti/*.json` glob — the
+# same shape as data/analysis/.rejects/, so every consumer (ssg, cti.py,
+# ioc.py, build_registry, the audit) stops seeing them without any change.
+CTI_ARCHIVE_DIR = os.path.join(CTI_DIR, ".archive")
 HOT_THRESHOLD = 3.3      # analysis-queue gate on the 0-10 scale (was 2.0 on 0-6); deliberately below the display 5.0 for coverage
 CVE_RE = re.compile(r"CVE-\d{4}-\d{4,7}", re.IGNORECASE)
 
@@ -564,6 +568,71 @@ def score0_sweep_candidates(stories, *, analysis_dir=None, digest_dir=None,
     return out
 
 
+def absorb_cti_on_merge(stories, frm, into, *, cti_dir=None,
+                        archive_dir=None, log=None):
+    """Absorb the merged-away story's CTI record into the canonical's
+    (2026-10-21 audit Rec 2 second half / owner decision 0c60f8480897).
+
+    A story merge moves the events and marks the loser shell, but a CTI
+    record is a SEPARATE authored artefact: after the merge both records
+    still render (/cti/<slug>/ each) and both are listed as cases for the
+    same techniques, for one incident.
+
+    The naive fix — repointing the loser's story_id at the canonical — is
+    UNSAFE: cti.load_records() keys records by story_id, so two records under
+    one key collapse nondeterministically (glob order decides, and the
+    10-reference record can lose to the 3-reference one).
+
+    So the helper acts only when BOTH stories own a record:
+      - the canonical (INTO) record keeps its story_id/title/actors/malware/
+        campaigns/cves/attack/victim_sectors/geography (and detections), and
+        its `references` are UNIONed with the loser's, deduped by URL in
+        canonical-first order (the canonical's evidence leads, nothing the
+        loser contributed is dropped);
+      - the loser (FROM) record is ARCHIVED — moved to cti/.archive/ — never
+        deleted and never left under cti/*.json, so the history is preserved
+        while exactly one case page survives for the incident. Every consumer
+        globs cti/*.json (non-recursive), so the archive is invisible to the
+        build without any change (same shape as data/analysis/.rejects/).
+
+    One-sided ownership is deliberately left alone (status quo): retiring a
+    lone record would take down a live /cti/<slug>/ page, which is a policy
+    decision this card does not make. Returns a log line, or None.
+    """
+    cti_dir = cti_dir or CTI_DIR
+    archive_dir = archive_dir or os.path.join(cti_dir, ".archive")
+    if frm == into:
+        return None
+    loser_path = os.path.join(cti_dir, f"{frm}.json")
+    canon_path = os.path.join(cti_dir, f"{into}.json")
+    if not (os.path.exists(loser_path) and os.path.exists(canon_path)):
+        return None                   # neither side, or one-sided: no-op
+    try:
+        loser = json.load(open(loser_path))
+        canon = json.load(open(canon_path))
+    except Exception as e:            # corrupt record: never block the merge
+        print(f"  WARN: cti absorb {frm} -> {into} skipped: {e}")
+        return None
+    if not isinstance(loser, dict) or not isinstance(canon, dict):
+        return None
+    refs, seen = [], set()
+    for u in list(canon.get("references") or []) + list(loser.get("references") or []):
+        if not isinstance(u, str) or u in seen:
+            continue
+        seen.add(u)
+        refs.append(u)
+    canon["references"] = refs
+    json.dump(canon, open(canon_path, "w"), indent=1)
+    os.makedirs(archive_dir, exist_ok=True)
+    os.replace(loser_path, os.path.join(archive_dir, f"{frm}.json"))
+    line = (f"cti {frm} absorbed into {into}: {len(refs)} references kept "
+            f"(loser record archived to {os.path.basename(archive_dir)}/)")
+    if log is not None:
+        log.append(line)
+    print(f"  {line}")
+    return line
+
+
 def sweep_score0_merges(stories, events=None, *, stories_dir=None,
                         analysis_dir=None, digest_dir=None,
                         cap=SCORE0_SWEEP_CAP, reddit_posts=None,
@@ -601,6 +670,7 @@ def sweep_score0_merges(stories, events=None, *, stories_dir=None,
         group = canon([a, b])
         loser = b if group["id"] == a["id"] else a
         merge_story(stories, loser["id"], group["id"], log)
+        absorb_cti_on_merge(stories, loser["id"], group["id"], log=log)
     merged_ids = set()
     for line in log:
         parts = line.split()

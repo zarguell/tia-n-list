@@ -41,7 +41,7 @@ import re
 import sys
 from datetime import datetime, timedelta, timezone
 
-from merge import title_jaccard, norm_url, CVE_RE
+from merge import title_jaccard, norm_url, CVE_RE, absorb_cti_on_merge
 import lifecycle
 
 ENGINE = os.path.dirname(os.path.abspath(__file__))
@@ -692,6 +692,12 @@ def apply(decisions_path):
         stories[frm]["merged_into"] = into
         stories[frm]["events"] = []
         stories[frm]["n_sources"] = 0
+        # A CTI record is a separate authored artefact: when both stories own
+        # one, absorb the loser's references into the canonical and archive
+        # the loser's record, so the incident keeps ONE case page and history
+        # is preserved (2026-10-21 audit Rec 2 / owner decision 0c60f8480897).
+        absorb_cti_on_merge(stories, frm, into,
+                            cti_dir=os.path.join(DATA, "cti"))
         _recompute_derived(stories[into])   # merged events may extend derived fields
         frozen_touched.add(into)            # explicit canonical naming = editorial
         print(f"  merged {frm} -> {into}")
