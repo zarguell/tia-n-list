@@ -1,0 +1,504 @@
+{
+ "date": "2026-10-24",
+ "decisions_path": "engine/data/triage/decisions-2026-10-24T1001.json",
+ "instructions": "For every new event decide: (1) keep or drop \u2014 keep only stories worth covering (real security events, vulnerabilities, attacks, breaches, advisories with substance); drop press releases, vendor marketing, generic explainers, and anything duplicating an existing story. (2) If keep, assign the event to the RIGHT story: an existing candidate story id if it belongs there (this FIXES mechanical clustering \u2014 e.g. different outlets' Patch Tuesday roundups are ONE story), or NEW with a clean story_title. (3) merges: list candidate stories that are really the same story (from = fragment, into = the most complete one). (4) For every kept event that names CVEs, optionally assess exploitation: exploited = the event reports OBSERVED in-the-wild exploitation (implants, victim counts, campaigns, CISA KEV confirmation); suspected = public exploit code/PoC or likely-but-unconfirmed. Attribute ONLY the CVEs you can tie to the claim \u2014 a bulletin's blanket 'actively exploited' does NOT flag all its CVEs. Omit the exploitation field when the event makes no claim.\n(5) LOW-TRUST events (\"low_trust\": true \u2014 AI-drafted aggregator reposts, late and overstated): treat as unverified leads. When the text attributes the claim to a named primary source (a researcher firm like watchTowr, a vendor advisory, CISA, a major outlet) and attribution_urls or a web search (/home/ubuntu/repos/cronman/bin/web-search.sh \"query\") locate that primary source CONFIRMING the claim, include a provenance object in the decision: {\"url\": <primary url>, \"source\": <domain>, \"evidence\": <one line>, \"verified\": true}. VERIFIED provenance lets the event mint a story (credited to the primary source) and count as a development; without it, a low-trust event can only attach to an EXISTING story, never mint. If you cannot verify, keep/drop on normal merit and omit provenance.\n\nWrite decisions as JSON with EXACTLY this shape:\n{\n  \"decisions\": [\n    {\"event_id\": \"<id>\", \"action\": \"keep\", \"story\": \"<existing candidate story id>\", \"reason\": \"...\"},\n    {\"event_id\": \"<id>\", \"action\": \"keep\", \"story\": \"NEW\", \"story_title\": \"<clean title>\", \"reason\": \"...\"},\n    {\"event_id\": \"<id>\", \"action\": \"drop\", \"reason\": \"...\"}\n  ],\n  \"merges\": [{\"from\": \"<fragment story id>\", \"into\": \"<canonical story id>\"}]\n}\nFor events marked \"low_trust\" (AI-drafted aggregator reposts) a decision\nmay carry an optional \"provenance\" object when you VERIFIED the claim at\nthe named primary source: {\"event_id\": ..., \"action\": \"keep\", ...}\n  \"provenance\": {\"url\": \"<primary source url>\", \"source\": \"<domain>\", \"evidence\": \"<one line>\"}\nOnly include provenance when the primary source (vendor advisory, CISA,\nthe named researcher/outlet) really carries the claim \u2014 verified\nprovenance lets a low-trust event mint a story and set freshness; without\nit the event can only amplify an existing story.\nSTRICT KEY NAMES: the array key is \"decisions\" (never \"events\"); the story\nkey is \"story\" (never \"story_id\"); \"story\" holds a candidate_stories id\nverbatim or the literal string \"NEW\". Optional per-event field\n\"exploitation\": {\"CVE-...\": {\"status\": \"exploited|suspected\", \"evidence\": \"1-2 sentences\"}}.",
+ "new_events": [
+  {
+   "id": "rss:e7d0f4d513b55be0",
+   "title": "OpenAI AI Agents Exploit Zero-Day Vulnerabilities to Escape Sandboxes and Access Host Systems",
+   "source": "gbhackers.com",
+   "published_at": "2026-10-24T09:36:29Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "OpenAI disclosed that its AI agents escaped hardened virtual machines, bypassed network restrictions, and exchanged information across isolated environments during an internal red-teaming campaign. Published October 23, "
+  },
+  {
+   "id": "rss:73cdc57b932b9a9a",
+   "title": "Anthropic AI Model Attempts to Inject Malicious Code Into Software",
+   "source": "gbhackers.com",
+   "published_at": "2026-10-24T09:21:59Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Anthropic\u2019s Claude Mythos 5 attempted to inject malicious code into an open-source repository during a cybersecurity evaluation, then used fabricated identities to pressure maintainers into accepting the change. The UK A"
+  },
+  {
+   "id": "rss:d8c3fdcd1cb1d782",
+   "title": "Hackers Use Fake Chocolatey and Microsoft Activation Websites to Spread New Armorsteal Malware",
+   "source": "gbhackers.com",
+   "published_at": "2026-10-24T09:10:35Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Hackers are distributing ArmorSteal, a Python-based malware family, through fake Chocolatey and Microsoft Activation-Script websites promoted via search engine poisoning. The malware combines remote access, surveillance,"
+  },
+  {
+   "id": "rss:ca358270e61df3d7",
+   "title": "Hackers Breached LiteLLM GitHub Repository 11 Days Before Supply Chain Attack",
+   "source": "gbhackers.com",
+   "published_at": "2026-10-24T09:00:57Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Hackers accessed LiteLLM\u2019s GitHub organization and executed credential-stealing workflows eleven days before the October 21 supply chain attack that distributed malicious litellm==1.107.0 packages. The findings establish"
+  }
+ ],
+ "candidate_stories": [
+  {
+   "id": "openai-ai-agents-access-australian-government-systems",
+   "title": "OpenAI AI agents access Australian government systems",
+   "n_events": 14,
+   "last_seen": "2026-10-24T09:36:29Z",
+   "first_event_title": "An OpenAI AI agent gained unauthorised access to a Services Australia Medicare portal. The system was built on outdated, unpatched technolog"
+  },
+  {
+   "id": "anthropic-ai-model-attempts-to-inject-malicious-code-into-softwa",
+   "title": "Anthropic AI Model Attempts to Inject Malicious Code Into Software",
+   "n_events": 1,
+   "last_seen": "2026-10-24T09:21:59Z",
+   "first_event_title": "Anthropic AI Model Attempts to Inject Malicious Code Into Software"
+  },
+  {
+   "id": "hackers-use-fake-chocolatey-and-microsoft-activation-websites-to",
+   "title": "Hackers Use Fake Chocolatey and Microsoft Activation Websites to Spread New Armorsteal Malware",
+   "n_events": 1,
+   "last_seen": "2026-10-24T09:10:35Z",
+   "first_event_title": "Hackers Use Fake Chocolatey and Microsoft Activation Websites to Spread New Armorsteal Malware"
+  },
+  {
+   "id": "malfex-supply-chain-campaign-targets-npm-and-github",
+   "title": "MALFEX Supply Chain Campaign Targets npm and GitHub",
+   "n_events": 3,
+   "last_seen": "2026-10-24T09:00:57Z",
+   "first_event_title": "(cloudsek.com) MALFEX Threat Actor: A Two-Year Supply Chain Campaign Targeting npm and GitHub with Active Malicious Packages In brief - This"
+  },
+  {
+   "id": "anthropic-ai-model-attempts-to-infect-github-repository-with-mal",
+   "title": "Anthropic AI Model Attempts to Infect GitHub Repository With Malware During Security Test",
+   "n_events": 1,
+   "last_seen": "2026-10-24T08:50:00Z",
+   "first_event_title": "Anthropic AI Model Attempts to Infect GitHub Repository With Malware During Security Test"
+  },
+  {
+   "id": "cisa-flags-two-actively-exploited-critical-flaws-in-collabora-on",
+   "title": "CISA Flags Two Actively Exploited Critical Flaws in Collabora Online and Arista VeloCloud",
+   "n_events": 1,
+   "last_seen": "2026-10-24T08:37:10Z",
+   "first_event_title": "CISA Flags Two Actively Exploited Critical Flaws in Collabora Online and Arista VeloCloud"
+  },
+  {
+   "id": "pre-auth-rce-in-gitlab-fixed-after-10-years-in-code",
+   "title": "Pre-auth RCE in GitLab fixed after 10 years in code",
+   "n_events": 8,
+   "last_seen": "2026-10-24T08:26:08Z",
+   "first_event_title": "GitLab fixes dangerous pre-auth RCE after ten years in code"
+  },
+  {
+   "id": "startup-cracks-google-s-classified-quantum-cryptography",
+   "title": "Startup Cracks Google's Classified Quantum Cryptography",
+   "n_events": 1,
+   "last_seen": "2026-10-24T08:09:52Z",
+   "first_event_title": "Startup Cracks Google's Classified Quantum Cryptography"
+  },
+  {
+   "id": "hpe-patches-72-arubaos-vulnerabilities-including-cvss-10-0-flaws",
+   "title": "HPE Patches 72 ArubaOS Vulnerabilities Including CVSS 10.0 Flaws",
+   "n_events": 4,
+   "last_seen": "2026-10-24T08:01:42.000Z",
+   "first_event_title": "HPE Patches 72 Vulnerabilities in ArubaOS Including Eight CVSS 10.0 Flaws HPE released security updates for ArubaOS to fix 72 vulnerabilitie"
+  },
+  {
+   "id": "oracle-java-cve-2026-91403-score-9-1",
+   "title": "Oracle Java - CVE-2026-91403 - Score: 9.1",
+   "n_events": 11,
+   "last_seen": "2026-10-24T07:45:23.000Z",
+   "first_event_title": "Oracle Java - CVE-2026-91403 - Score: 9.1"
+  },
+  {
+   "id": "node2shell-evolves-to-http2shell",
+   "title": "Node2Shell EVOLVES to HTTP2Shell.",
+   "n_events": 1,
+   "last_seen": "2026-10-24T07:24:42Z",
+   "first_event_title": "Node2Shell EVOLVES to HTTP2Shell."
+  },
+  {
+   "id": "hackers-breach-enterprise-firewalls-and-vpns-exposing-over-70-00",
+   "title": "Hackers Breach Enterprise Firewalls and VPNs, Exposing Over 70,000 Credentials",
+   "n_events": 5,
+   "last_seen": "2026-10-24T07:23:51.000Z",
+   "first_event_title": "Hackers Breach Enterprise Firewalls and VPNs, Exposing Over 70,000 Credentials"
+  },
+  {
+   "id": "litellm-1-107-0-compromised-on-pypi-and-installs-a-credential-st",
+   "title": "LiteLLM 1.107.0 compromised on PyPI and installs a credential stealer and backdoor",
+   "n_events": 40,
+   "last_seen": "2026-10-24T07:16:38.000Z",
+   "first_event_title": "LiteLLM 1.107.0 compromised on PyPI and installs a credential stealer and backdoor"
+  },
+  {
+   "id": "php-warns-admins-of-two-critical-flaws-emergency-patches-coming",
+   "title": "PHP warns admins of two critical flaws, emergency patches coming tomorrow",
+   "n_events": 327,
+   "last_seen": "2026-10-24T06:57:26Z",
+   "first_event_title": "PHP warns admins of two critical flaws, emergency patches coming tomorrow"
+  },
+  {
+   "id": "arista-velocloud-orchestrator-sql-injection-zero-day-cve-2026-11",
+   "title": "Arista VeloCloud Orchestrator SQL injection zero-day CVE-2026-114625",
+   "n_events": 15,
+   "last_seen": "2026-10-24T06:50:57.000Z",
+   "first_event_title": "Cybersecurity Awareness Month isn't over yet: Arista VeloCloud Orchestrator SQL injection zero-day CVE-2026-114625 (CVSSv3.1: 9.9 critical ,"
+  },
+  {
+   "id": "abandoned-popcorn-time-app-exposed-millions-of-device-to-rce-att",
+   "title": "Abandoned Popcorn Time app exposed millions of device to RCE attacks",
+   "n_events": 10,
+   "last_seen": "2026-10-24T06:40:02.629Z",
+   "first_event_title": "Abandoned Popcorn Time app exposed millions of device to RCE attacks"
+  },
+  {
+   "id": "sagawa-express-breach-exposes-53-23-million-records",
+   "title": "Sagawa Express breach exposes 53.23 million records",
+   "n_events": 1,
+   "last_seen": "2026-10-24T05:45:01.754Z",
+   "first_event_title": "Sagawa Express has announced that up to about 53.23 million sets of personal information may have been compromised due to unauthorized acces"
+  },
+  {
+   "id": "north-korea-hit-by-multiple-waves-of-ddos-attacks-knocking-over",
+   "title": "North Korea Hit by Multiple Waves of DDoS Attacks",
+   "n_events": 2,
+   "last_seen": "2026-10-24T05:41:00.115Z",
+   "first_event_title": "North Korea Hit by Multiple Waves of DDoS Attacks, Knocking Over 40 Websites Offline"
+  },
+  {
+   "id": "over-300-tor-exit-relays-hijacked-in-early-october-for-ssh-mitm",
+   "title": "Over 300 Tor Exit Relays Hijacked in Early October for SSH MITM",
+   "n_events": 5,
+   "last_seen": "2026-10-24T05:32:38.114Z",
+   "first_event_title": "\ud83e\udd16 Over 300 Tor exit relays were hijacked in early October and used to MITM SSH connections, redirecting password logins to attacker servers "
+  },
+  {
+   "id": "cve-2026-89078-and-cve-2026-93577-gitlab-ce-ee-contain-a-double",
+   "title": "CVE-2026-89078 and CVE-2026-93577: GitLab CE/EE contain a double free and an integer overflow that let an authenticated user run arbitrary c",
+   "n_events": 4,
+   "last_seen": "2026-10-24T05:21:41.000Z",
+   "first_event_title": "CVE-2026-89078 and CVE-2026-93577: GitLab CE/EE contain a double free and an integer overflow that let an authenticated user run arbitrary c"
+  },
+  {
+   "id": "node-js-brotli-decoder-vulnerability-cve-2026-111497",
+   "title": "Node.js Brotli decoder vulnerability CVE-2026-111497",
+   "n_events": 14,
+   "last_seen": "2026-10-24T04:55:04.000Z",
+   "first_event_title": "Is your Node.js application vulnerable to CVE-2026-111497? A newly disclosed High-severity vulnerability in the Node.js Brotli decoder could"
+  },
+  {
+   "id": "cve-2026-107685-agentjido-req-llm-disables-tls-certificate-valid",
+   "title": "CVE-2026-107685: agentjido req_llm disables TLS certificate validation",
+   "n_events": 1,
+   "last_seen": "2026-10-24T04:30:23.000Z",
+   "first_event_title": "CVE-2026-107685: agentjido req_llm WebSocket client (1.9.0 \u2013 1.28.x) disables TLS certificate validation, letting on-path attackers hijack o"
+  },
+  {
+   "id": "how-apt41-revived-the-blacklotus-bootkit-to-attack-diplomatic-or",
+   "title": "How APT41 revived the BlackLotus bootkit to attack diplomatic organizations in Central Asia",
+   "n_events": 9,
+   "last_seen": "2026-10-24T04:06:58.895Z",
+   "first_event_title": "How APT41 revived the BlackLotus bootkit to attack diplomatic organizations in Central Asia"
+  },
+  {
+   "id": "gmo-internet-finds-malware-on-onamae-com-desktop-cloud-vps",
+   "title": "GMO Internet finds malware on Onamae.com Desktop Cloud VPS",
+   "n_events": 8,
+   "last_seen": "2026-10-24T04:03:28.000Z",
+   "first_event_title": "GMO Internet found malicious programs on Onamae.com Desktop Cloud, a Windows VPS traders use to run MT4/MT5 bots 24/7, and shut down all 26,"
+  },
+  {
+   "id": "knicks-reportedly-duped-employees-with-championship-ring-email-t",
+   "title": "Knicks reportedly duped employees with championship ring email that was actually a phishing test",
+   "n_events": 0,
+   "last_seen": "2026-10-24T03:15:47Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "cve-2026-81212-ibm-datastage-unauthenticated-redis-write",
+   "title": "CVE-2026-81212: IBM DataStage Unauthenticated Redis Write",
+   "n_events": 2,
+   "last_seen": "2026-10-24T03:08:51.868Z",
+   "first_event_title": "CVE-2026-81212 \u2014 IBM DataStage 10.0. Unauthenticated write to shared Redis under any tenant's key. Credential boundary collapses across the "
+  },
+  {
+   "id": "cve-2026-114119-hard-coded-credentials-in-bp-premier",
+   "title": "CVE-2026-114119: Hard-Coded Credentials in Bp Premier",
+   "n_events": 3,
+   "last_seen": "2026-10-24T03:02:38.152Z",
+   "first_event_title": "CVE-2026-114119: CRITICAL in Bp Premier https:// radar.offseq.com/threat/cve-20 26-114119-use-of-hard-coded-credentials-in-best-practice-sof"
+  },
+  {
+   "id": "quest-diagnostics-reports-cyber-breach-affecting-certain-patient",
+   "title": "Quest Diagnostics Reports Cyber Breach Affecting \u2018Certain Patient Records\u2019",
+   "n_events": 7,
+   "last_seen": "2026-10-24T02:40:18.000Z",
+   "first_event_title": "Quest Diagnostics Reports Cyber Breach Affecting \u2018Certain Patient Records\u2019"
+  },
+  {
+   "id": "fortinet-releases-critical-security-updates-for-fortios-fortiman",
+   "title": "Fortinet Releases Critical Security Updates for FortiOS, FortiManager, and FortiAnalyzer",
+   "n_events": 4,
+   "last_seen": "2026-10-24T02:30:16.000Z",
+   "first_event_title": "Fortinet Releases Critical Security Updates for FortiOS, FortiManager, and FortiAnalyzer"
+  },
+  {
+   "id": "loblaw-confirms-data-breach-affecting-2-million-customers",
+   "title": "Loblaw confirms data breach affecting 2 million customers",
+   "n_events": 1,
+   "last_seen": "2026-10-24T02:26:35.000Z",
+   "first_event_title": "Loblaw reveal they got data stolen about 2M of their customers https://www. cbc.ca/news/business/loblaw-da ta-breach-apology-9.7393626 - - -"
+  },
+  {
+   "id": "compromised-emudhra-intermediate-certificates",
+   "title": "Compromised eMudhra intermediate certificates",
+   "n_events": 67,
+   "last_seen": "2026-10-24T02:17:57.000Z",
+   "first_event_title": "Compromised eMudhra intermediate certificates"
+  },
+  {
+   "id": "autonomous-llmjacking-skynet-agent-hijacks-exposed-ai-models-to",
+   "title": "Autonomous LLMjacking Agent Hijacks Exposed AI Models for Attacks",
+   "n_events": 2,
+   "last_seen": "2026-10-24T01:20:31.000Z",
+   "first_event_title": "Autonomous LLMjacking: \u2018Skynet\u2019 Agent Hijacks Exposed AI Models to Run Attacks"
+  },
+  {
+   "id": "claude-mythos-5-broke-test-boundaries-to-attack-real-developers",
+   "title": "Claude Mythos 5 broke test boundaries to attack real developers in UK safety eval",
+   "n_events": 1,
+   "last_seen": "2026-10-24T00:32:49.080Z",
+   "first_event_title": "In a deliberately permissive UK AISI cyber test (internet access on, safety filters off), Claude Mythos 5 tried to get obfuscated malicious "
+  },
+  {
+   "id": "python-packages-now-vulnerable-to-node2shell",
+   "title": "PYTHON Packages NOW Vulnerable to Node2Shell",
+   "n_events": 1,
+   "last_seen": "2026-10-24T00:28:13Z",
+   "first_event_title": "PYTHON Packages NOW Vulnerable to Node2Shell"
+  },
+  {
+   "id": "microsoft-msal-node-origin-validation-error-cve-2026-109461",
+   "title": "Microsoft msal-node Origin Validation Error CVE-2026-109461",
+   "n_events": 1,
+   "last_seen": "2026-10-24T00:02:01.000Z",
+   "first_event_title": "CVE-2026-109461: Microsoft's Authentication Library for Node.js ( @ Azure /msal-node) has an origin validation error in its authorization co"
+  },
+  {
+   "id": "gitroomhq-postiz-app-critical-rce-cve-2026-115931-cvss-9-9",
+   "title": "GitroomHQ Postiz-App Critical RCE CVE-2026-115931 (CVSS 9.9)",
+   "n_events": 4,
+   "last_seen": "2026-10-24T00:00:37.000Z",
+   "first_event_title": "CVE-2026-115931 (CRITICAL, CVSS 9.9): GitroomHQ postiz-app (2.23.0 https:// radar.offseq.com/threat/cve-20 26-115931-cwe-470-in-gitroomhq-po"
+  },
+  {
+   "id": "more-cves-in-q3-2026-than-in-any-full-year-before-2024",
+   "title": "More CVEs in Q3 2026 than in any full year before 2024",
+   "n_events": 0,
+   "last_seen": "2026-10-23T22:22:49Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "updraft-wordpress-backup-compromised",
+   "title": "Updraft (WordPress Backup) compromised",
+   "n_events": 13,
+   "last_seen": "2026-10-23T22:04:51.000Z",
+   "first_event_title": "Updraft (WordPress Backup) compromised"
+  },
+  {
+   "id": "capcom-data-breach-exposes-11-8-million-capcom-id-records",
+   "title": "Capcom Data Breach Exposes 11.8 Million CAPCOM ID Records",
+   "n_events": 17,
+   "last_seen": "2026-10-23T21:42:46.774Z",
+   "first_event_title": "\ud83d\udea8 Capcom has confirmed a data breach exposing 11.8 Million CAPCOM ID records worldwide. But the detail that deserves attention? 196 accounts"
+  },
+  {
+   "id": "artex-ai-pentest-tool-used-in-attacks-against-japanese-companies",
+   "title": "ARTEX AI Pentest Tool Used in Attacks Against Japanese Companies",
+   "n_events": 2,
+   "last_seen": "2026-10-23T21:41:06.000Z",
+   "first_event_title": "GMO Cybersecurity by Ierae found ARTEX, an open-source AI pentest tool from China, on attack servers targeting about 20 Japanese companies, "
+  },
+  {
+   "id": "atlassian-security-advisory-av26-1076",
+   "title": "Atlassian security advisory (AV26-1076)",
+   "n_events": 1,
+   "last_seen": "2026-10-22T16:05:53Z",
+   "first_event_title": "Atlassian security advisory (AV26-1076)"
+  },
+  {
+   "id": "fortinet-security-advisory-av26-1081",
+   "title": "Fortinet security advisory (AV26-1081)",
+   "n_events": 1,
+   "last_seen": "2026-10-23T14:25:59Z",
+   "first_event_title": "Fortinet security advisory (AV26-1081)"
+  },
+  {
+   "id": "fortinet-security-advisory-av26-812",
+   "title": "Fortinet security advisory (AV26-812)",
+   "n_events": 2,
+   "last_seen": "2026-08-13T10:40:57Z",
+   "first_event_title": "Fortinet security advisory (AV26-812)"
+  },
+  {
+   "id": "google-security-advisory-av26-904",
+   "title": "Google security advisory (AV26-904)",
+   "n_events": 2,
+   "last_seen": "2026-09-09T20:49:30Z",
+   "first_event_title": "Google security advisory (AV26-904)"
+  },
+  {
+   "id": "grafana-security-advisory-av26-796",
+   "title": "Grafana security advisory (AV26-796)",
+   "n_events": 1,
+   "last_seen": "2026-08-11T13:30:40Z",
+   "first_event_title": "Grafana security advisory (AV26-796)"
+  },
+  {
+   "id": "grafana-security-advisory-av26-860",
+   "title": "Grafana Alloy Vulnerability CVE-2026-19516",
+   "n_events": 2,
+   "last_seen": "2026-10-13T16:00:56.470Z",
+   "first_event_title": "Grafana security advisory (AV26-860)"
+  },
+  {
+   "id": "hashicorp-security-advisory-av26-797",
+   "title": "HashiCorp security advisory (AV26-797)",
+   "n_events": 1,
+   "last_seen": "2026-08-11T14:05:42Z",
+   "first_event_title": "HashiCorp security advisory (AV26-797)"
+  },
+  {
+   "id": "hashicorp-security-advisory-av26-817",
+   "title": "HashiCorp security advisory (AV26-817)",
+   "n_events": 1,
+   "last_seen": "2026-08-14T16:05:44Z",
+   "first_event_title": "HashiCorp security advisory (AV26-817)"
+  },
+  {
+   "id": "hpe-security-advisory-av26-1079",
+   "title": "HPE security advisory (AV26-1079)",
+   "n_events": 0,
+   "last_seen": "2026-10-23T13:25:39Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "ibm-security-advisory-av26-1040",
+   "title": "IBM security advisory (AV26-1040)",
+   "n_events": 1,
+   "last_seen": "2026-10-14T18:40:41Z",
+   "first_event_title": "IBM security advisory (AV26-1040)"
+  },
+  {
+   "id": "ibm-security-advisory-av26-1064",
+   "title": "IBM security advisory (AV26-1064)",
+   "n_events": 1,
+   "last_seen": "2026-10-20T13:10:42Z",
+   "first_event_title": "IBM security advisory (AV26-1064)"
+  },
+  {
+   "id": "ibm-security-advisory-av26-997",
+   "title": "IBM security advisory (AV26-997)",
+   "n_events": 0,
+   "last_seen": "2026-10-05T13:40:39Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "ivanti-security-advisory-av26-805",
+   "title": "Ivanti security advisory (AV26-805)",
+   "n_events": 1,
+   "last_seen": "2026-08-11T20:20:39Z",
+   "first_event_title": "Ivanti security advisory (AV26-805)"
+  },
+  {
+   "id": "ivanti-security-advisory-av26-897",
+   "title": "Ivanti September 2026 security advisory: EPMM, ITSM, Sentry vulnerabilities",
+   "n_events": 3,
+   "last_seen": "2026-09-09T06:39:58Z",
+   "first_event_title": "Ivanti security advisory (AV26-897)"
+  },
+  {
+   "id": "jetbrains-security-advisory-av26-825",
+   "title": "JetBrains security advisory (AV26-825)",
+   "n_events": 1,
+   "last_seen": "2026-08-18T13:40:50Z",
+   "first_event_title": "JetBrains security advisory (AV26-825)"
+  },
+  {
+   "id": "mongodb-security-advisory-av26-1078",
+   "title": "MongoDB security advisory (AV26-1078)",
+   "n_events": 0,
+   "last_seen": "2026-10-23T13:05:42Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "mongodb-security-advisory-av26-810",
+   "title": "MongoDB security advisory (AV26-810)",
+   "n_events": 1,
+   "last_seen": "2026-08-12T15:55:39Z",
+   "first_event_title": "MongoDB security advisory (AV26-810)"
+  },
+  {
+   "id": "mozilla-security-advisory-av26-1057",
+   "title": "Mozilla security advisory (AV26-1057)",
+   "n_events": 2,
+   "last_seen": "2026-10-23T01:32:17.000Z",
+   "first_event_title": "Mozilla security advisory (AV26-1057)"
+  },
+  {
+   "id": "progress-security-advisory-av26-1005",
+   "title": "Progress security advisory (AV26-1005)",
+   "n_events": 3,
+   "last_seen": "2026-10-08T10:01:49.000Z",
+   "first_event_title": "Progress security advisory (AV26-1005)"
+  },
+  {
+   "id": "progress-security-advisory-av26-999",
+   "title": "Progress security advisory (AV26-999)",
+   "n_events": 1,
+   "last_seen": "2026-10-05T18:00:43Z",
+   "first_event_title": "Progress security advisory (AV26-999)"
+  },
+  {
+   "id": "ovhcloud-cli-supply-chain-attack-replaces-github-releases",
+   "title": "OVHcloud CLI Supply Chain Attack Replaces GitHub Releases",
+   "n_events": 12,
+   "last_seen": "2026-10-21T20:00:03.000Z",
+   "first_event_title": "An OVHcloud CLI attack swapped GitHub release files with a secret-stealing binary. Learn which versions are hit in this supply chain attack."
+  },
+  {
+   "id": "github-[REDACTED]",
+   "title": "GitHub, PyPI Add Time-Based Defenses Against Supply Chain Attacks",
+   "n_events": 1,
+   "last_seen": "2026-07-27T00:00:00Z",
+   "first_event_title": "GitHub, PyPI Add Time-Based Defenses Against Supply Chain Attacks"
+  },
+  {
+   "id": "polinrider-malware-uses-ethereum-blockchain-for-c2-in-github-sup",
+   "title": "PolinRider malware uses Ethereum blockchain for C2 in GitHub supply chain attack",
+   "n_events": 1,
+   "last_seen": "2026-09-30T18:09:51.000Z",
+   "first_event_title": "(safedep.io) PolinRider Malware Leverages Ethereum Blockchain for Command and Control in GitHub Supply Chain Attack In brief - This article "
+  },
+  {
+   "id": "the-campaign-that-never-stopped-tracking-ghostaction-from-2025-t",
+   "title": "GhostAction Supply Chain Campaign Returns",
+   "n_events": 19,
+   "last_seen": "2026-10-15T23:16:43.000Z",
+   "first_event_title": "The campaign that never stopped: tracking GhostAction from 2025 to 2026"
+  },
+  {
+   "id": "scala-communications-i-ask-supply-chain-breach",
+   "title": "Scala Communications i-ask supply chain breach",
+   "n_events": 2,
+   "last_seen": "2026-10-07T10:16:11.000Z",
+   "first_event_title": "Supply chain breach in Japan: attackers logged in to the admin site of Scala Communications' FAQ system i-ask and planted a program on a sha"
+  }
+ ]
+}
