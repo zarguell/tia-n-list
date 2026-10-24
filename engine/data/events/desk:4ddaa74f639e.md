@@ -1,0 +1,1 @@
+Help Net Security reported that Broadcom released revised patches for CVE-2024-38812 and CVE-2024-38813 after the initial September fix failed to fully resolve the heap-overflow vulnerability in vCenter Server's DCERPC implementation. The article confirms a CVSS 9.8 critical rating and notes remote code execution via a specially crafted network packet.

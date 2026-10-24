@@ -1,0 +1,1 @@
+SonicWall's analysis describes CVE-2024-38812 as a critical heap-overflow vulnerability in VMware vCenter Server's DCERPC protocol implementation, allowing remote code execution. The post notes a CVSS score of 9.8 and explains the vulnerability can be triggered by sending a specially crafted network packet to the server.
