@@ -143,12 +143,46 @@ check("store_invariants", bad_refs == 0 and bad_cti == 0,
       f"{bad_refs} bad event refs, {bad_cti} cti story_id mismatches")
 
 # 4. detection validity (sigma check CLI + yara-x compile)
+#
+# 2026-10-21 audit Issue 8 + Rec 4 (owner decision d7d77d39b2fc): this block
+# shelled out `sigma check` once per rule (157 rules, serial = 4-9 minutes on
+# this store), so any bounded caller saw a FALSE audit failure (the 10-21
+# audit's 300s foreground attempt had to be re-run detached). It is now ONE
+# batched pass (same CLI, same files, ~3s). Verdict semantics are unchanged:
+# `sigma check` fails only on PARSE errors (validation issues pass by default,
+# -i/--pass-on-issues), so a clean batch means zero failing rules; when the
+# batch reports a failure the ORIGINAL per-rule loop attributes it, so the
+# reported count is exactly what the old code produced. The explicit file
+# list (not the directory) keeps the batch scope identical to the glob —
+# `sigma check <dir>` recurses with -P '*.yml' by default and would silently
+# validate nothing in a directory of *.sigma rules.
+def _sigma_failing(files):
+    """Count failing Sigma rules: one batched `sigma check`, per-rule loop
+    only to attribute a failure the batch already reported."""
+    if not files:
+        return 0
+    try:
+        r = subprocess.run(["sigma", "check", *files], capture_output=True,
+                           text=True, timeout=600)
+        if r.returncode == 0:
+            return 0
+    except Exception:
+        pass                     # timeout/crash: fall back to per-rule
+    bad = 0
+    for f in files:
+        try:
+            if subprocess.run(["sigma", "check", f], capture_output=True,
+                              text=True, timeout=25).returncode != 0:
+                bad += 1
+        except Exception:
+            bad += 1
+    return bad
+
+
 sigma_bad = 0
 if shutil.which("sigma"):
-    for f in glob.glob(os.path.join(DATA, "cti", "*.sigma")):
-        r = subprocess.run(["sigma", "check", f], capture_output=True, text=True, timeout=25)
-        if r.returncode != 0:
-            sigma_bad += 1
+    sigma_bad = _sigma_failing(sorted(
+        glob.glob(os.path.join(DATA, "cti", "*.sigma"))))
 else:
     sigma_bad = -1
 check("sigma_valid", sigma_bad == 0, "sigma-cli missing" if sigma_bad == -1 else f"{sigma_bad} failing rules")
