@@ -19,7 +19,8 @@ from datetime import datetime, timedelta, timezone
 from merge import (title_jaccard, distinct_series_codes,
                    distinct_advisory_ids, distinct_periods, period_tokens,
                    title_discriminators, ACTOR_TOKENS, _actor_norm,
-                   _series_codes, SERIES_RE, _norm_tokens, CVE_RE)
+                   _series_codes, SERIES_RE, _norm_tokens, CVE_RE,
+                   load_sweep_exclusions)
 import ioc as ioc_mod
 
 CJK_RE = re.compile(r"[\u0400-\u04FF\u4E00-\u9FFF\u3040-\u30FF\uAC00-\uD7AF\u0600-\u06FF]")
@@ -223,7 +224,8 @@ def dedup_invariants(stories):
     return not problems, detail, ghosts
 
 
-def duplicate_suspects(stories, now, max_out=10, max_age_days=45, min_jaccard=0.5):
+def duplicate_suspects(stories, now, max_out=10, max_age_days=45,
+                       min_jaccard=0.5, exclusions=None):
     """Near-duplicate ACTIVE story pairs the mechanical merge likely missed
     (different outlets, few shared tokens): title jaccard >= min_jaccard with
     >= 2 shared NON-generic discriminators (2026-10-13 owner decision
@@ -250,7 +252,20 @@ def duplicate_suspects(stories, now, max_out=10, max_age_days=45, min_jaccard=0.
         bringing their own named entities (products/vendors/victims the
         other side never names) exonerates it as two incidents sharing
         boilerplate.
+
+    `exclusions` is the audit-dismissed pair set (engine/sweep_exclusions.json,
+    loaded via merge.load_sweep_exclusions when omitted): a settled dismissal
+    stays dismissed instead of being re-litigated every audit run.
     """
+    # Audit-dismissed pairs (engine/sweep_exclusions.json) are honored here
+    # too (2026-10-21 audit Rec 1 / owner decision 3ac7a07af73b): this probe
+    # re-litigated settled dismissals every day because only the score-0
+    # sweep loaded the file. Same order-insensitive frozenset keys, loaded
+    # from the same place (merge.load_sweep_exclusions). A pair sharing a
+    # live event still surfaces (that is the dedup multi-ref class, never a
+    # dismissal).
+    if exclusions is None:
+        exclusions = load_sweep_exclusions()
     cutoff = (now - timedelta(days=max_age_days)).strftime("%Y-%m-%dT%H:%M:%S")
     pool = [s for s in stories.values()
             if not s.get("merged_into") and s.get("events")
@@ -286,6 +301,8 @@ def duplicate_suspects(stories, now, max_out=10, max_age_days=45, min_jaccard=0.
                             "title_a": ta[:70], "title_b": tb[:70],
                             "shared_events": True})
                 continue
+            if frozenset((pool[i]["id"], pool[j]["id"])) in exclusions:
+                continue              # audit-dismissed pair (sweep_exclusions)
             inter = len(A & B) if B else 0   # == len(shared)
             if not inter:                    # == title_jaccard 0.0 gate
                 continue
