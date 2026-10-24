@@ -147,6 +147,20 @@ try:
     mech["last_seen"] = "2026-08-24T23:00:00Z"
     json.dump(mech, open(os.path.join(tmp, "stories", "mech.json"), "w"))
 
+    # CTI records for both sides of the story merge ("dup" -> "existing"):
+    # the loser's record must be absorbed into the canonical and archived
+    # (2026-10-21 audit Rec 2 / owner decision 0c60f8480897)
+    cti = os.path.join(tmp, "cti")
+    os.makedirs(cti)
+    for sid, refs in [("existing", ["https://a.example/1"]),
+                      ("dup", ["https://a.example/1", "https://b.example/2"])]:
+        json.dump({"story_id": sid, "title": f"Case {sid}", "actors": [],
+                   "malware": [], "campaigns": [], "cves": [],
+                   "victim_sectors": [], "geography": [], "attack": [],
+                   "references": refs, "updated_at": "2026-10-21T00:00:00Z",
+                   "detections": {"sigma": False, "yara": False}},
+                  open(os.path.join(cti, f"{sid}.json"), "w"))
+
     # drifted decisions: top-level "events", "story_id", one NEW for an event
     # merge.py already placed, one merge for the twin
     decfile = os.path.join(tmp, "decisions.json")
@@ -184,6 +198,16 @@ try:
     check("e2 landed on the live canonical story",
           sorted(r["event_id"] for r in st["existing"]["events"]),
           ["e1", "e2", "e9", "e_stale"])
+    canon_cti = json.load(open(os.path.join(cti, "existing.json")))
+    check("merged CTI record absorbed the loser's references",
+          canon_cti["references"],
+          ["https://a.example/1", "https://b.example/2"])
+    check("loser CTI record archived out of cti/*.json",
+          sorted(f for f in os.listdir(cti) if f.endswith(".json")),
+          ["existing.json"])
+    check("archived loser CTI record is preserved, not deleted",
+          json.load(open(os.path.join(cti, ".archive", "dup.json")))["story_id"],
+          "dup")
 finally:
     _restore_stubs()
     shutil.rmtree(tmp)
