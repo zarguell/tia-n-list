@@ -491,6 +491,39 @@ check("'V8 flaws' is not a numbered Windows roundup",
 check("meta-story mentioning Windows flaws is not a roundup",
       jc.roundup_family("Expects More Security Updates From AI-Discovered Flaws"), None)
 
+# ── 2e. sweep_exclusions honored by the title probe (2026-10-21 audit Rec 1 /
+# owner decision 3ac7a07af73b): the probe re-surfaced five pairs a prior audit
+# had already dismissed (NCSC weekly summaries, Apple notifications, DDoSia
+# target lists, Debian-vs-LWN, Pi-hole-vs-Oracle CPU) because only
+# merge.sweep_score0_merges read engine/sweep_exclusions.json. An excluded
+# pair must vanish; a non-excluded pair in the same store must still surface.
+excl_store = {
+    "ncsc-18": story("ncsc-18", ["x1"],
+                     title="CTO at NCSC Summary Week Ending October 18th"),
+    "ncsc-11": story("ncsc-11", ["x2"],
+                     title="CTO at NCSC Summary Week Ending October 10th"),
+    "chrome-151-a": story("chrome-151-a", ["e1"],
+                          title="Google Chrome 151 Update Fixes 5 High Severity Flaws"),
+    "chrome-151-b": story("chrome-151-b", ["e2"],
+                          title="Google Chrome 151 Patches Critical Use-After-Free Vulnerability"),
+}
+excl = {frozenset(("ncsc-18", "ncsc-11"))}
+baseline = {frozenset((x["a"], x["b"]))
+            for x in jc.duplicate_suspects(excl_store, NOW, exclusions=set())}
+check("baseline: dismissed-series pair would surface without exclusions",
+      frozenset(("ncsc-18", "ncsc-11")) in baseline, True)
+s_excl = jc.duplicate_suspects(excl_store, NOW, exclusions=excl)
+pairs_excl = {frozenset((x["a"], x["b"])) for x in s_excl}
+check("excluded dismissed pair not suspected",
+      frozenset(("ncsc-18", "ncsc-11")) in pairs_excl, False)
+check("non-excluded near-dup still suspected with exclusions in play",
+      frozenset(("chrome-151-a", "chrome-151-b")) in pairs_excl, True)
+check("order-insensitive exclusion keys",
+      {frozenset((x["a"], x["b"])) for x in jc.duplicate_suspects(
+          excl_store, NOW,
+          exclusions={frozenset(("ncsc-11", "ncsc-18"))})} == pairs_excl,
+      True)
+
 # ── 3. language_scan ─────────────────────────────────────────────────────────
 tmp = tempfile.mkdtemp()
 os.makedirs(os.path.join(tmp, "analysis"))

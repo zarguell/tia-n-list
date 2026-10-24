@@ -297,16 +297,24 @@ check("ingest_noise", not _noise_p, "; ".join(_noise_p[:4]) or "sources clean")
 # show the post-sweep residual. Runs only here, never in the hourly pipeline.
 import merge as merge_mod  # noqa: E402
 
+# One load of the audit-dismissed pair list (engine/sweep_exclusions.json),
+# shared by the score-0 sweep and the duplicate-suspects probe below so both
+# honor the same settled dismissals (2026-10-21 audit Rec 1 / owner decision
+# 3ac7a07af73b).
+_sweep_exclusions = merge_mod.load_sweep_exclusions()
+
 _score0_log = []
 try:
-    merge_mod.sweep_score0_merges(_all_stories, log=_score0_log)
+    merge_mod.sweep_score0_merges(_all_stories, log=_score0_log,
+                                  exclusions=_sweep_exclusions)
     check("score0_sweep", True,
           "; ".join(_score0_log)
           if _score0_log else "no score-0 pair met the sweep predicate")
 except Exception as e:
     check("score0_sweep", False, f"sweep error: {e}")
 
-_dup_suspects = jc.duplicate_suspects(_all_stories, NOW)
+_dup_suspects = jc.duplicate_suspects(_all_stories, NOW,
+                                          exclusions=_sweep_exclusions)
 EXTRA = {
     "duplicate_suspects": _dup_suspects,
     # 2026-10-20 owner decision eda9f1100d5d (audit Issue 3 / Rec 2):
