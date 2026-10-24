@@ -173,14 +173,14 @@ CLAIM_VERB_RE = re.compile(
 ACTOR_WINDOW_DAYS = 14      # merge same-actor claims only into an ACTIVE series
 
 
-def _norm_tokens(title):
+def _norm_tokens(title, minlen=4):
     t = title.lower()
     t = re.sub(r"https?://\S+", "", t)         # strip URLs (junk tokens)
     t = re.sub(r"\b\d{4}\b", "", t)            # strip years (2026 shared everywhere)
     t = re.sub(r"\bnon-", "non", t)            # non-mobile != mobile
     t = re.sub(r"\bun-", "un", t)
     t = re.sub(r"\bde-", "de", t)
-    return tokens(t)
+    return tokens(t, minlen)
 
 
 def _series_codes(title):
@@ -195,9 +195,15 @@ FILLER = {"lets", "let", "gain", "gains", "using", "use", "used", "new", "via",
           "why", "what", "before", "after", "amid"}
 
 
-def title_discriminators(title):
-    """Meaningful title tokens: [REDACTED], generic/boilerplate/filler-stripped."""
-    return _norm_tokens(title) - GENERIC - DATE_STOP - FILLER
+def title_discriminators(title, minlen=4):
+    """Meaningful title tokens: [REDACTED], generic/boilerplate/filler-stripped.
+
+    `minlen` defaults to the 4-char floor every dedup/merge consumer relies on
+    (widening it would change duplicate_suspects/entity_dup recall). 3 is for
+    score.py's coherence test only, which needs 3-char product names (PHP,
+    RCE) — see score.ECHO_TOKEN_MIN.
+    """
+    return _norm_tokens(title, minlen) - GENERIC - DATE_STOP - FILLER
 
 
 def title_jaccard(a, b):

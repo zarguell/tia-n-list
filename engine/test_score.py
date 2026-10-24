@@ -309,6 +309,50 @@ def main():
     ok &= check("coherent incident scores above the penalised sink",
                 r_good["score"] > r_sink["score"], True)
 
+    # positive: a 3-CHAR PRODUCT NAME is the echo (2026-10-24 review of this
+    # PR). `php-warns-admins-of-two-critical-flaws-emergency-patches-coming`
+    # is a genuine 327-event / 153-source incident whose only repeatable token
+    # is "PHP"; the dedup tokenizer's 4-char floor deletes it, which scored
+    # the story 0.13 and dropped a real hot story 7.5 -> 4.6. ECHO_TOKEN_MIN
+    # keeps it, so the incident keeps its reward.
+    php_title = "PHP warns admins of two critical flaws, emergency patches coming tomorrow"
+    php_evs = [_evt(f"p{i}",
+                    f"PHP2Shell: PHP RCE flaws CVE-2026-109618/-109619 {i} "
+                    f"outlets report the PHP patch release", 5 + i)
+               for i in range(9)]
+    php = {"id": "php", "title": php_title,
+           "sources": [f"outlet{i}.example" for i in range(30)],
+           "n_sources": 30, "cves": ["CVE-2026-109618", "CVE-2026-109619"],
+           "events": [{"event_id": e["event_id"], "label": "update"}
+                      for e in php_evs],
+           "last_seen": iso(5),
+           "reddit_signal": {"posts": 0, "best_score": 0}}
+    r_php = score.hot_score(php, {e["event_id"]: e for e in php_evs}, [],
+                            now=base)
+    ok &= check("genuine incident echoed through a 3-char product name is not flagged",
+                (r_php["incoherent"], r_php["incoherent_penalty"]),
+                (False, 0.0))
+
+    # negative: echoing the story's CVEs must NOT rescue the sink — those
+    # advisories are absorbed INTO the sink, so a CVE-based echo test would
+    # lift it over the share floor (measured 0.02 -> 0.33) and stop firing on
+    # the story this card is about. CVEs stay out of the discriminator set.
+    cve_sink_evs = [_evt(f"c{i}",
+                         f"CVE-2026-113380 — Threat Radar {i} scanner roundup", 20 + i)
+                    for i in range(10)]
+    cve_sink = {"id": "cve-sink", "title": sink_title,
+                "sources": [f"outlet{i}.example" for i in range(12)],
+                "n_sources": 12, "cves": ["CVE-2026-113380"],
+                "events": [{"event_id": e["event_id"], "label": "update"}
+                           for e in cve_sink_evs],
+                "last_seen": iso(20),
+                "reddit_signal": {"posts": 0, "best_score": 0}}
+    r_cve_sink = score.hot_score(cve_sink,
+                                 {e["event_id"]: e for e in cve_sink_evs}, [],
+                                 now=base)
+    ok &= check("CVE echo alone does not rescue the sink",
+                r_cve_sink["incoherent"], True)
+
     # guard: a small reworded story is never flagged (below the size floor)
     small_evs = [_evt("m0", "HPE patches critical RCE flaws in AOS-CX", 3),
                  _evt("m1", "Aruba networking bug lets attackers run code", 4)]

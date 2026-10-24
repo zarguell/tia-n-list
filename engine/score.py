@@ -185,8 +185,23 @@ ZERO_DELTA_FACTOR = 0.5     # keep half the (already decayed) score
 # Tuesday 50 events = 0.84, Zimbra RCE 26 = 0.85, Chrome 156 5 = 1.0).
 # Only stories broad enough for the reward to matter are eligible
 # (INCOHERENT_MIN_EVENTS); a small reworded story never trips it.
+#
+# ECHO_TOKEN_MIN = 3 (2026-10-24 review of this PR): the merge/dup 4-char
+# floor deletes 3-char PRODUCT names, so a genuine incident drops the very
+# word its coverage repeats. `php-warns-admins-of-two-critical-flaws-
+# emergency-patches-coming` (327 events / 153 sources, CVE-2026-109618/-19/
+# -115560, ~91% of the events on-topic PHP2Shell) reduces to {admins, coming,
+# emergency, tomorrow} and scored a 0.13 echo share — i.e. the penalty would
+# have pushed the highest-scoring genuine story it touches off the 5.0 hot
+# gate (7.5 -> 4.6) while the card's own target sat at 3.9. Keeping 3-char
+# tokens lifts it to 0.76 and leaves the sink untouched at 0.02 ("machine",
+# "speed", "detection" are all >= 4 chars and its events never echo them).
+# Deliberately NOT fixed by adding story.cves to the discriminator set: those
+# CVEs are absorbed INTO the sink, so CVE echo lifts the sink to 0.33 as well
+# (measured) and the rule stops firing on the story the card is about.
 INCOHERENT_MIN_EVENTS = 8    # breadth/velocity only inflate on a pile
 INCOHERENT_MIN_SHARE = 0.25  # >= 1/4 of event titles must echo the title
+ECHO_TOKEN_MIN = 3           # keep 3-char product names (PHP, RCE) — see above
 
 # Keys the SSG "Why this score" template renders from a score breakdown.
 # A story missing any of these raises a jinja UndefinedError that aborts the
@@ -632,16 +647,17 @@ def hot_score(story, events, reddit_posts, now=None):
     # 065758633baa — see INCOHERENT_MIN_SHARE): the title must be echoed by
     # at least a quarter of the event headlines. Reuses the ONE tokenization
     # this function already pays for: title_discriminators over the story
-    # title plus each event title.
+    # title plus each event title, at ECHO_TOKEN_MIN so 3-char product names
+    # (PHP) still count.
     from merge import title_discriminators
     incoherent = False
-    std = (title_discriminators(story.get("title") or "")
+    std = (title_discriminators(story.get("title") or "", ECHO_TOKEN_MIN)
            if len(refs) >= INCOHERENT_MIN_EVENTS else set())
     if std:
         echoing = 0
         for ref in refs:
             e = events[ref["event_id"]]
-            if title_discriminators(e.get("title") or "") & std:
+            if title_discriminators(e.get("title") or "", ECHO_TOKEN_MIN) & std:
                 echoing += 1
         incoherent = (echoing / len(refs)) < INCOHERENT_MIN_SHARE
 
