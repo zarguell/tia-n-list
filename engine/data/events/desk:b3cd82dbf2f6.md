@@ -1,0 +1,1 @@
+Release v2.25.2 (published 2026-10-23) addresses the security vulnerability. The release notes reference the advisory PSA-2026-4QX1WG. This confirms the fix version (2.25.2) and provides a concrete remediation target for defenders running affected versions (>=2.23.0 <2.25.2).

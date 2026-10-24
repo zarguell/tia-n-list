@@ -1,0 +1,1 @@
+The radar entry lists CVSS 9.9 for CVE-2026-115931 (CWE-470) in postiz-app. It notes the affected version range >=2.23.0 <2.25.2, references the vendor advisory link, and records the CVE database publication date of 2026-10-23. It also notes no known exploits in the wild at the time of indexing.
