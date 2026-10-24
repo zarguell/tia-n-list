@@ -1,0 +1,1 @@
+CISA added CVE-2024-38812 to its Known Exploited Vulnerabilities catalog on November 20, 2024, confirming active exploitation of the VMware vCenter Server heap-based buffer overflow. The entry references Broadcom's updated advisory and urges immediate patching for affected versions.
