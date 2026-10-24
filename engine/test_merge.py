@@ -20,6 +20,7 @@ Wired into CI (site-deploy.yml).
 """
 import os
 import sys
+import glob
 import json
 import tempfile
 import io
@@ -464,6 +465,73 @@ check("clean CTI record title untouched",
 check("heal is idempotent (second pass heals nothing)",
       merge.heal_raw_titles(_h_stories, _h_events, stories_dir=_h_dir,
                             cti_dir=os.path.join(_h_dir, "cti")), (0, 0))
+
+# ── CTI record absorption on merge (2026-10-21 audit Rec 2 / owner decision
+# 0c60f8480897). A story merge used to leave TWO CTI records (two case pages)
+# for one incident. Repointing the loser's story_id is unsafe (cti.load_records
+# keys by story_id: the two records collapse, glob order decides), so the
+# loser's record is absorbed into the canonical and ARCHIVED, never deleted.
+print("== CTI record absorption on merge ==")
+
+
+def _cti(sid, refs, **kw):
+    rec = {"story_id": sid, "title": f"Case {sid}", "actors": [sid + "-actor"],
+           "malware": [], "campaigns": [], "cves": ["CVE-2026-111943"],
+           "victim_sectors": [], "geography": [],
+           "attack": [{"id": "T1649", "tactic": "credential-access",
+                       "name": "Steal or Forge Authentication Certificates"}],
+           "references": list(refs), "updated_at": "2026-10-21T00:00:00Z",
+           "detections": {"sigma": False, "yara": False}}
+    rec.update(kw)
+    return rec
+
+
+with tempfile.TemporaryDirectory() as td:
+    cd = os.path.join(td, "cti")
+    os.makedirs(cd)
+    json.dump(_cti("canon", ["https://a.example/1", "https://shared.example/x"]),
+              open(os.path.join(cd, "canon.json"), "w"))
+    json.dump(_cti("loser", ["https://shared.example/x", "https://b.example/2",
+                             "https://c.example/3"]),
+              open(os.path.join(cd, "loser.json"), "w"))
+    log = []
+    line = merge.absorb_cti_on_merge({}, "loser", "canon", cti_dir=cd, log=log)
+    canon = json.load(open(os.path.join(cd, "canon.json")))
+    check("absorb returns a log line", bool(line), True)
+    check("absorb logs exactly one line", len(log), 1)
+    check("canonical record keeps its identity",
+          (canon["story_id"], canon["title"], canon["actors"]),
+          ("canon", "Case canon", ["canon-actor"]))
+    check("references unioned canonical-first, deduped by URL",
+          json.dumps(canon["references"]),
+          json.dumps(["https://a.example/1", "https://shared.example/x",
+                      "https://b.example/2", "https://c.example/3"]))
+    check("loser record no longer under cti/*.json",
+          json.dumps(sorted(f[:-5] for f in os.listdir(cd)
+                            if f.endswith(".json"))), '["canon"]')
+    check("loser record ARCHIVED, not deleted (content preserved)",
+          json.load(open(os.path.join(cd, ".archive", "loser.json")))["story_id"],
+          "loser")
+    # the exact hazard the card names: two records keyed to one story_id
+    keys = {}
+    for f in glob.glob(os.path.join(cd, "*.json")):
+        r = json.load(open(f))
+        keys.setdefault(r["story_id"], []).append(os.path.basename(f))
+    check("no two records share a story_id after absorption",
+          json.dumps([k for k, v in keys.items() if len(v) > 1]), "[]")
+
+with tempfile.TemporaryDirectory() as td:
+    cd = os.path.join(td, "cti")
+    os.makedirs(cd)
+    json.dump(_cti("loser", ["https://b.example/2"]),
+              open(os.path.join(cd, "loser.json"), "w"))
+    line = merge.absorb_cti_on_merge({}, "loser", "canon", cti_dir=cd)
+    check("one-sided ownership is a no-op (never retires a live case page)",
+          json.dumps([line, os.path.exists(os.path.join(cd, "loser.json")),
+                      os.path.exists(os.path.join(cd, ".archive"))]),
+          json.dumps([None, True, False]))
+    check("no-record pair is a no-op",
+          str(merge.absorb_cti_on_merge({}, "x", "y", cti_dir=cd)), "None")
 
 print()
 if failures:
