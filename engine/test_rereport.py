@@ -315,6 +315,121 @@ check("a genuine TTP development still earns novelty (control)",
       score.hot_score(_nov_story([nov_dev]), {"nz2": nov_dev}, [],
                       now=BASE)["novelty"], 0.5)
 
+# ── 5. covered-advisory re-tells (2026-10-23 audit Recommendation 3 / owner
+# decision 2e4fa50d91a0). The 2026-10-23 demote class (Splunk, Onamae,
+# Claude-Code campaigns, Cisco UCM, Node.js, Oracle CPU, GitLab
+# CVE-2026-110264) all showed zero_delta:false because an outlet re-tell that
+# names the already-covered CVE only in its BODY — or a founding event whose
+# body names it while its title does not — was read as a NEW disclosure.
+print("== covered-advisory re-tells ==")
+
+
+def ev_body(eid, title, published, cves=(), body=""):
+    e = ev(eid, title, published, cves)
+    e["content_md"] = body
+    return e
+
+
+founding_body = ev_body(
+    "g1", "GitLab fixes dangerous pre-auth RCE after ten years in code",
+    iso(60), (), "GitLab patched CVE-2026-4321: a CVSS 10 pre-auth RCE.")
+check("founding event is never a re-report (body-named CVE too)",
+      score.is_rereport(founding_body, [], story_title="Pre-auth RCE in GitLab fixed"), False)
+
+body_echo = ev_body(
+    "g2", "Patch now: the GitLab regex engine flaw is being patched everywhere",
+    iso(20), (), "The GitLab issue is CVE-2026-4321, a CVSS 10 pre-auth RCE.")
+check("body-named COVERED cve + reworded headline is a re-report",
+      score.is_rereport(body_echo, [founding_body],
+                        story_title="Pre-auth RCE in GitLab fixed after ten years"), True)
+
+body_new = ev_body(
+    "g3", "GitLab also fixes an unrelated SSRF in the same release",
+    iso(20), (), "Separately tracked as CVE-2026-9999, an SSRF in GitLab.")
+check("body-named NEW cve is still a development",
+      score.is_rereport(body_new, [founding_body],
+                        story_title="Pre-auth RCE in GitLab fixed after ten years"), False)
+
+# story-level identity: the story itself carries the CVE, so an outlet re-tell
+# that names it later is an echo even when no single prior names it
+story_carry = ev_body(
+    "g4", "Splunk fixes 31 Splunk vulnerabilities in Enterprise and Splunk SOAR",
+    iso(26), (), "Splunk shipped SVD-2026-1001 covering CVE-2026-7777.")
+# ── 6. KEV addition is a delta, never an echo ─────────────────────────────────
+print("== KEV addition is a development ==")
+kev_prior = ev_body("k1", "Nextcloud Collabora flaw exploited in the wild",
+                    iso(120), ["CVE-2026-110447"], "Attackers exploit it.")
+kev_add = ev_body("k2", "Added to CISA's Known Exploited Vulnerabilities catalog: "
+                        "CVE-2026-110447",
+                  iso(10), ["CVE-2026-110447"], "Due date Oct 26.")
+check("a CISA KEV addition is a development, not a re-report",
+      score.is_rereport(kev_add, [kev_prior], story_title="Nextcloud Collabora Online Active Exploitation"), False)
+check("a second KEV mention IS a re-report (the development is spent)",
+      score.is_rereport(ev_body("k2b", "Added to the KEV catalog: CVE-2026-110447",
+                                iso(8), ["CVE-2026-110447"], "Due Oct 26."),
+                        [kev_prior, kev_add],
+                        story_title="Nextcloud Collabora Online Active Exploitation"), True)
+plain_echo = ev_body("k3", "Nextcloud Collabora flaw exploited in the wild, ",
+                     iso(10), ["CVE-2026-110447"], "Attackers exploit it.")
+check("control: a plain re-tell with no delta stays a re-report",
+      score.is_rereport(plain_echo, [kev_prior],
+                        story_title="Nextcloud Collabora Online Active Exploitation"), True)
+
+
+def _kev_story(evs):
+    return {"id": "kevstory", "title": "Nextcloud Collabora Online Active Exploitation",
+            "sources": ["example.com", "example.org"],
+            "n_sources": 2, "cves": ["CVE-2026-110447"],
+            "events": [{"event_id": e["id"], "label": "update"} for e in evs],
+            "last_seen": evs[-1]["published_at"],
+            "reddit_signal": {"posts": 0, "best_score": 0}}
+
+
+kev_sc = score.hot_score(_kev_story([kev_prior, kev_add]),
+                         {e["id"]: e for e in [kev_prior, kev_add]},
+                         [], now=BASE)
+check("a story bumped by a KEV addition is not demoted",
+      (kev_sc["zero_delta"], kev_sc["zero_delta_penalty"]), (False, 0.0))
+check("the KEV addition is the decay anchor (fresh recency, not the founding)",
+      kev_sc["recency"] > 0.7, True)
+check("the KEV addition still earns no echo velocity (first-hand only)",
+      kev_sc["velocity"], 0.5)
+
+# ── 7. end-to-end: a newest event that merely restates a covered advisory
+# sets zero_delta (2026-10-23 audit Rec 3, owner decision 2e4fa50d91a0) ───────
+print("== covered-advisory re-tell demotes the story ==")
+
+
+def _adv_story(evs):
+    return {"id": "adv", "title": "GitLab patches a critical regex RCE flaw",
+            "sources": ["example.com"], "n_sources": 1, "cves": [],
+            "events": [{"event_id": e["id"], "label": "update"} for e in evs],
+            "last_seen": evs[-1]["published_at"],
+            "reddit_signal": {"posts": 0, "best_score": 0}}
+
+
+adv_found = ev_body("a1", "GitLab patches a critical regex engine RCE flaw",
+                    iso(60), (), "The bug is CVE-2026-4242.")
+adv_echo = ev_body("a2", "GitLab fixes a critical regex engine RCE (much later)",
+                   iso(3), (), "Tracked as CVE-2026-4242 by GitLab.")
+check("the re-tell is classified as a re-report",
+      score.is_rereport(adv_echo, [adv_found],
+                        story_title="GitLab patches a critical regex RCE flaw"),
+      True)
+adv_sc = score.hot_score(_adv_story([adv_found, adv_echo]),
+                         {e["id"]: e for e in [adv_found, adv_echo]},
+                         [], now=BASE)
+check("...and the story is demoted zero_delta with a visible penalty",
+      (adv_sc["zero_delta"], adv_sc["zero_delta_penalty"] > 0), (True, True))
+adv_dev = ev_body("a3", "GitLab patches a critical regex engine RCE (much later)",
+                  iso(3), (), "The bug is CVE-2026-4242; CVE-2026-5252 also "
+                              "fixed in the same release.")
+adv_sc2 = score.hot_score(_adv_story([adv_found, adv_dev]),
+                          {e["id"]: e for e in [adv_found, adv_dev]},
+                          [], now=BASE)
+check("a re-tell that brings a NEW CVE keeps the story's score",
+      (adv_sc2["zero_delta"], adv_sc2["score"] > adv_sc["score"]), (False, True))
+
 print()
 if failures:
     print(f"FAILED: {len(failures)} check(s): {failures}")
