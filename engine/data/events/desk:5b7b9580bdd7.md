@@ -1,0 +1,1 @@
+Rescana reports HPE published bulletin HPESBNW05162 on 22 October 2026, fixing 72 vulnerabilities in AOS-8 and AOS-10 wireless operating systems. The headline flaw, CVE-2026-79844, is an authentication bypass in AOS-10 leading to remote code execution. Eight flaws carry CVSS 10.0.

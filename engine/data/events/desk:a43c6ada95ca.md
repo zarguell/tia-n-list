@@ -1,0 +1,1 @@
+The briefing summarizes HPE bulletin HPESBNW05162 covering 72 flaws in ArubaOS (AOS-8 and AOS-10), including eight CVSS 10.0 remote code execution bugs. It references the primary security bulletin and notes the affected wireless operating systems.
