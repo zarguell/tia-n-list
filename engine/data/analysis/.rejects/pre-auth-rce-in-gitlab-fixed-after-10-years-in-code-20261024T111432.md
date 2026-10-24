@@ -1,0 +1,1 @@
+GitLab fixed a dangerous pre-authentication remote code execution flaw that had existed in the codebase for ten years. The event references a long-running vulnerability with severe impact for self-hosted instances. Organizations running unpatched GitLab CE or EE should upgrade immediately. Monitor for in-the-wild exploitation against unpatched instances.

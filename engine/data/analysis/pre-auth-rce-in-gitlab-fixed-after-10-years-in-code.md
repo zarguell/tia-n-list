@@ -1,5 +1,0 @@
-GitLab patched CVE-2026-110264, a CVSS 10 pre-authentication remote code execution flaw that had existed in its codebase for roughly 12 years, affecting self-managed instances across more than 12 years of releases. The bug sits in the regex engine and can be triggered by an unauthenticated attacker under certain conditions. On the day of disclosure, Censys observed roughly 82,000 exposed GitLab instances, and the patch also addresses three Onigmo regex-compiler bugs that underpinned four critical GitLab RCEs (two unauthenticated, two rated 9.9).
-
-The flaw's long dwell time and maximum severity make it a priority for any organization running self-managed GitLab. Administrators should apply the fixed release immediately, audit instances for unexpected account or repository changes, and treat any instance that was internet-exposed before patching as potentially compromised.
-
-Because the same regex engine bugs affect any application compiling regular expressions with Onigmo, teams should also check whether other Ruby-based services in their environment need updates.
