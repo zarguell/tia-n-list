@@ -1,1 +1,0 @@
-Machine-speed attacks outpace human response cycles. Detection and response systems must operate at automated speed to contain threats before manual analysis completes. The focus is on reducing time-to-containment through automated detection pipelines, not new vulnerabilities. Organizations should audit detection latency and automate containment where safe.
