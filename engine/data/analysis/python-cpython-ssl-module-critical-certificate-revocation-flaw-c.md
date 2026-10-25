@@ -1,0 +1,3 @@
+CVE-2026-115557 is a critical Python ssl module flaw where the CPython ssl module accepts compromised certificates when certificate revocation is misconfigured. The event reports the vulnerability as critical with a fix in versions greater than 3.16.0. It is an improper check for certificate revocation (CWE-299). With only one source cited (radar.offseq.com) and no observed exploitation counts mentioned, this is a new vulnerability disclosure rather than an active campaign.
+
+Defenders relying on Python ssl for secure connections should plan an upgrade to versions above 3.16.0 once the fix is confirmed upstream. Watch for upstream Python releases confirming the patch and any reports of in-the-wild scanning targeting ssl configurations that rely on revocation checks.
