@@ -93,11 +93,15 @@ def provisional_score(first_seen, last_seen, sources, cves):
     return round(min(10.0, recency * breadth * q * 2 + bonus), 1)
 
 
-def tokens(title):
+def tokens(title, minlen=4):
+    """Normalized title tokens. `minlen` is the length floor: 4 by default
+    (the dedup/merge probes' floor), 3 for score.py's coherence test, which
+    must keep 3-character PRODUCT names (PHP, RCE, SQL, AWS) that a 4-char
+    floor silently deletes — see score.ECHO_TOKEN_MIN."""
     t = EMOJI_RE.sub("", title)
     t = MARKER_RE.sub("", t)
     t = re.sub(r"[^a-z0-9\s]", " ", t.lower())
-    return {w for w in t.split() if len(w) >= 4 and w not in STOP and w not in CYBER_STOP}
+    return {w for w in t.split() if len(w) >= minlen and w not in STOP and w not in CYBER_STOP}
 
 
 def jaccard(a, b):

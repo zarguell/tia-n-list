@@ -221,6 +221,18 @@ check("same-full-code event still title-matches its story",
           ev("z", "EUVD-2026-85013 Manalyze flaw exploited in attacks update"),
           story("m", "EUVD-2026-85013 Manalyze flaw exploited in attacks")) > 0, True)
 
+print("== discriminator token floor (score.py coherence consumer) ==")
+# score.py's coherence test passes minlen=3 so 3-char PRODUCT names survive;
+# every dedup/merge consumer keeps the 4-char floor (widening it would change
+# duplicate_suspects/entity_dup recall — do not let this default drift).
+check("default floor still drops 3-char tokens (dedup behaviour unchanged)",
+      tuple(sorted(merge.title_discriminators(
+          "PHP warns admins of flaws in version 9.2"))),
+      ("admins", "version"))
+check("minlen=3 keeps the 3-char product names PHP and SQL",
+      tuple(sorted(merge.title_discriminators("PHP and the SQL flaw", 3))),
+      ("php", "sql"))
+
 print("== batch convergence (the real 7-event burst) ==")
 # Simulate merge.py main(): events processed in order, one story created, the
 # rest fold into it via the actor path.

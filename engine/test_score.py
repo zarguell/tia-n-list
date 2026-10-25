@@ -236,6 +236,137 @@ def main():
                 vbs_info is None or vbs_info.get("kev"), False)
     score._cve_store = saved_store
 
+    # --- A5: incoherent event-sink penalty (2026-10-23 audit Issue 1 + Rec
+    # 2, owner decision 065758633baa). A broad pile of unrelated headlines
+    # must not be paid breadth/velocity for its size; a coherent multi-outlet
+    # incident must keep them.
+    def _evt(eid, title, hours_before, text=""):
+        return {"event_id": eid, "published_at": iso(hours_before),
+                "url": f"https://outlet.example/{eid}", "content_md": text,
+                "kind": "original", "lang": "en", "source": "example.com",
+                "title": title}
+
+    # negative: the `machine-speed-attacks-...` sink shape — the title is the
+    # founding event's headline, and the other events are unrelated stories
+    # (botnet writeup, CVE advisory, breach claim, RAT research, job ads)
+    sink_title = "Machine speed attacks require machine speed detection and response"
+    sink_evs = [_evt("s0", sink_title, 10),
+                _evt("s1", "Egyptian botnet spreads through pirated software", 20),
+                _evt("s2", "Signal RingRTC CVE-2026-113380 patched", 21),
+                _evt("s3", "GitLab security advisory AV26-1074", 22),
+                _evt("s4", "PingCAP breach claim under investigation", 23),
+                _evt("s5", "DarkCore RAT research notes", 24),
+                _evt("s6", "K0T steals FortiGate credentials", 25),
+                _evt("s7", "Senior security engineer, remote, apply now", 26),
+                _evt("s8", "Staff incident response analyst, hybrid", 27)]
+    sink = {"id": "sink", "title": sink_title,
+            "sources": [f"outlet{i}.example" for i in range(24)],
+            "n_sources": 24, "cves": [],
+            "events": [{"event_id": e["event_id"], "label": "update"}
+                       for e in sink_evs],
+            "last_seen": iso(10),
+            "reddit_signal": {"posts": 0, "best_score": 0}}
+    r_sink = score.hot_score(sink, {e["event_id"]: e for e in sink_evs}, [],
+                             now=base)
+    ok &= check("event sink is flagged incoherent", r_sink["incoherent"], True)
+    ok &= check("breadth+velocity reward is cancelled (penalty visible)",
+                r_sink["incoherent_penalty"],
+                round(r_sink["breadth"] + r_sink["velocity"], 2))
+    # same story with the size floor lifted (penalty cannot fire): the paid
+    # score must be strictly higher than the penalised one
+    saved_min = score.INCOHERENT_MIN_EVENTS
+    score.INCOHERENT_MIN_EVENTS = 999          # simulate "coherent"
+    r_paid = score.hot_score(sink, {e["event_id"]: e for e in sink_evs}, [],
+                             now=base)
+    score.INCOHERENT_MIN_EVENTS = saved_min
+    ok &= check("incoherence removes the reward (paid score is higher)",
+                (r_paid["incoherent"], r_paid["score"] > r_sink["score"]),
+                (False, True))
+    ok &= check("penalised sink drops below the hot gate",
+                r_sink["score"] < 5.0, True)
+
+    # positive: a coherent multi-outlet incident — every event headline echoes
+    # the story's own discriminators, so breadth/velocity still pay
+    good_title = "Chrome 156 Security Update Fixes Critical Vulnerabilities"
+    good_evs = [_evt(f"g{i}",
+                     f"Chrome 156 Security Update Fixes {i + 3} Critical "
+                     f"Vulnerabilities", 5 + i)
+                for i in range(10)]
+    good = {"id": "good", "title": good_title,
+            "sources": [f"outlet{i}.example" for i in range(10)],
+            "n_sources": 10, "cves": [],
+            "events": [{"event_id": e["event_id"], "label": "original"}
+                       for e in good_evs],
+            "last_seen": iso(5),
+            "reddit_signal": {"posts": 0, "best_score": 0}}
+    r_good = score.hot_score(good, {e["event_id"]: e for e in good_evs}, [],
+                             now=base)
+    ok &= check("coherent multi-outlet incident is not flagged",
+                (r_good["incoherent"], r_good["incoherent_penalty"]),
+                (False, 0.0))
+    ok &= check("coherent incident keeps its breadth/velocity reward",
+                (r_good["breadth"], r_good["velocity"]), (2.0, 2.0))
+    ok &= check("coherent incident scores above the penalised sink",
+                r_good["score"] > r_sink["score"], True)
+
+    # positive: a 3-CHAR PRODUCT NAME is the echo (2026-10-24 review of this
+    # PR). `php-warns-admins-of-two-critical-flaws-emergency-patches-coming`
+    # is a genuine 327-event / 153-source incident whose only repeatable token
+    # is "PHP"; the dedup tokenizer's 4-char floor deletes it, which scored
+    # the story 0.13 and dropped a real hot story 7.5 -> 4.6. ECHO_TOKEN_MIN
+    # keeps it, so the incident keeps its reward.
+    php_title = "PHP warns admins of two critical flaws, emergency patches coming tomorrow"
+    php_evs = [_evt(f"p{i}",
+                    f"PHP2Shell: PHP RCE flaws CVE-2026-109618/-109619 {i} "
+                    f"outlets report the PHP patch release", 5 + i)
+               for i in range(9)]
+    php = {"id": "php", "title": php_title,
+           "sources": [f"outlet{i}.example" for i in range(30)],
+           "n_sources": 30, "cves": ["CVE-2026-109618", "CVE-2026-109619"],
+           "events": [{"event_id": e["event_id"], "label": "update"}
+                      for e in php_evs],
+           "last_seen": iso(5),
+           "reddit_signal": {"posts": 0, "best_score": 0}}
+    r_php = score.hot_score(php, {e["event_id"]: e for e in php_evs}, [],
+                            now=base)
+    ok &= check("genuine incident echoed through a 3-char product name is not flagged",
+                (r_php["incoherent"], r_php["incoherent_penalty"]),
+                (False, 0.0))
+
+    # negative: echoing the story's CVEs must NOT rescue the sink — those
+    # advisories are absorbed INTO the sink, so a CVE-based echo test would
+    # lift it over the share floor (measured 0.02 -> 0.33) and stop firing on
+    # the story this card is about. CVEs stay out of the discriminator set.
+    cve_sink_evs = [_evt(f"c{i}",
+                         f"CVE-2026-113380 — Threat Radar {i} scanner roundup", 20 + i)
+                    for i in range(10)]
+    cve_sink = {"id": "cve-sink", "title": sink_title,
+                "sources": [f"outlet{i}.example" for i in range(12)],
+                "n_sources": 12, "cves": ["CVE-2026-113380"],
+                "events": [{"event_id": e["event_id"], "label": "update"}
+                           for e in cve_sink_evs],
+                "last_seen": iso(20),
+                "reddit_signal": {"posts": 0, "best_score": 0}}
+    r_cve_sink = score.hot_score(cve_sink,
+                                 {e["event_id"]: e for e in cve_sink_evs}, [],
+                                 now=base)
+    ok &= check("CVE echo alone does not rescue the sink",
+                r_cve_sink["incoherent"], True)
+
+    # guard: a small reworded story is never flagged (below the size floor)
+    small_evs = [_evt("m0", "HPE patches critical RCE flaws in AOS-CX", 3),
+                 _evt("m1", "Aruba networking bug lets attackers run code", 4)]
+    small = {"id": "small", "title": "HPE patches critical RCE vulnerabilities in AOS-CX",
+             "sources": ["example.com", "example.org"], "n_sources": 2,
+             "cves": [], "events": [{"event_id": e["event_id"], "label": "update"}
+                                    for e in small_evs],
+             "last_seen": iso(3),
+             "reddit_signal": {"posts": 0, "best_score": 0}}
+    r_small = score.hot_score(small, {e["event_id"]: e for e in small_evs}, [],
+                              now=base)
+    ok &= check("small story never trips the incoherence floor",
+                (r_small["incoherent"], r_small["incoherent_penalty"]),
+                (False, 0.0))
     # --- A6: single-source leak-site / actor-claim penalty (2026-10-23 audit
     # Rec 3, owner decision 2e4fa50d91a0, second half). The digest agent
     # demoted 5 unverified single-source leak claims by hand on 10-23; the

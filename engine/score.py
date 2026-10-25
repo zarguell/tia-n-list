@@ -30,6 +30,12 @@ the 48h window — the score is halved and the breakdown says so (`zero_delta`
 (2026-10-03); the demotion closes the residual slate ride (a big story's
 decayed base still crossed the digest's 3.3 gate with a reddit bump) and
 makes the demotion explainable instead of a daily hand-override.
+
+Coherence (2026-10-23 audit Issue 1 + Rec 2, owner decision 065758633baa):
+a title that its own event headlines never echo is a collection, not an
+incident — breadth/velocity stop paying (`incoherent` +
+`incoherent_penalty` in the breakdown), so a broad event sink cannot stay
+hot on the size of its pile.
 """
 import glob
 import json
@@ -170,6 +176,46 @@ VELOCITY_WINDOW_H = 48      # the velocity factor's window == the recent
                             # window the demotion trigger draws from
 ZERO_DELTA_FACTOR = 0.5     # keep half the (already decayed) score
 
+# ── incoherent-event-sink penalty (2026-10-23 audit Issue 1 + Rec 2, owner
+# decision 065758633baa). `machine-speed-attacks-require-machine-speed-
+# detection-and-respon` is a 138-event / 50-source score-8.7 sink where the
+# events are unrelated stories (an Egyptian botnet writeup, a Signal RingRTC
+# CVE, a GitLab advisory, a PingCAP breach claim, a DarkCore RAT research, a
+# K0T FortiGate credential-theft piece, at least three jobicy job ads). The
+# digest demoted it by hand, but the SITE still rendered it hot and SCORE
+# still paid it breadth 2.0 + velocity 2.0 for the pile — direct evidence
+# that breadth was rewarding incoherence.
+#
+# The test compares the story title with its event titles using the same
+# title_discriminators the merge/dup probes use (its _norm_tokens + generic
+# stop sets). The literal "no event title shares a discriminator" reading
+# can never fire on the very story this card names: the sink's FOUNDING
+# event carries the story headline verbatim ("Machine speed attacks require
+# machine speed detection and response"), so the overlap is 1 event in 138.
+# The rule therefore judges the event POPULATION — the breadth breadth pays
+# for — and fires when fewer than INCOHERENT_MIN_SHARE of the event titles
+# share ANY discriminator with the story title (sink: 1/138 = 0.7%; a
+# coherent multi-outlet incident sits at 0.6-1.0: Microsoft October Patch
+# Tuesday 50 events = 0.84, Zimbra RCE 26 = 0.85, Chrome 156 5 = 1.0).
+# Only stories broad enough for the reward to matter are eligible
+# (INCOHERENT_MIN_EVENTS); a small reworded story never trips it.
+#
+# ECHO_TOKEN_MIN = 3 (2026-10-24 review of this PR): the merge/dup 4-char
+# floor deletes 3-char PRODUCT names, so a genuine incident drops the very
+# word its coverage repeats. `php-warns-admins-of-two-critical-flaws-
+# emergency-patches-coming` (327 events / 153 sources, CVE-2026-109618/-19/
+# -115560, ~91% of the events on-topic PHP2Shell) reduces to {admins, coming,
+# emergency, tomorrow} and scored a 0.13 echo share — i.e. the penalty would
+# have pushed the highest-scoring genuine story it touches off the 5.0 hot
+# gate (7.5 -> 4.6) while the card's own target sat at 3.9. Keeping 3-char
+# tokens lifts it to 0.76 and leaves the sink untouched at 0.02 ("machine",
+# "speed", "detection" are all >= 4 chars and its events never echo them).
+# Deliberately NOT fixed by adding story.cves to the discriminator set: those
+# CVEs are absorbed INTO the sink, so CVE echo lifts the sink to 0.33 as well
+# (measured) and the rule stops firing on the story the card is about.
+INCOHERENT_MIN_EVENTS = 8    # breadth/velocity only inflate on a pile
+INCOHERENT_MIN_SHARE = 0.25  # >= 1/4 of event titles must echo the title
+ECHO_TOKEN_MIN = 3           # keep 3-char product names (PHP, RCE) — see above
 # ── single-source leak-site / actor-claim penalty (2026-10-23 audit
 # Recommendation 3, second half — owner decision 2e4fa50d91a0). 5 of the
 # 10-23 demotes were unverified single-source leak-site claims the digest
@@ -692,6 +738,24 @@ def hot_score(story, events, reddit_posts, now=None):
         prior.append(e)
     velocity = min(2.0, 0.5 * n48)
 
+    # incoherence (2026-10-23 audit Issue 1 + Rec 2, owner decision
+    # 065758633baa — see INCOHERENT_MIN_SHARE): the title must be echoed by
+    # at least a quarter of the event headlines. Reuses the ONE tokenization
+    # this function already pays for: title_discriminators over the story
+    # title plus each event title, at ECHO_TOKEN_MIN so 3-char product names
+    # (PHP) still count.
+    from merge import title_discriminators
+    incoherent = False
+    std = (title_discriminators(story.get("title") or "", ECHO_TOKEN_MIN)
+           if len(refs) >= INCOHERENT_MIN_EVENTS else set())
+    if std:
+        echoing = 0
+        for ref in refs:
+            e = events[ref["event_id"]]
+            if title_discriminators(e.get("title") or "", ECHO_TOKEN_MIN) & std:
+                echoing += 1
+        incoherent = (echoing / len(refs)) < INCOHERENT_MIN_SHARE
+
     # zero-delta demotion (2026-10-20 owner decision ed6b7366c2ec — see
     # ZERO_DELTA_FACTOR): the story's only recent movement is delta-free
     # outlet echoes and nothing genuine happened inside the window, so the
@@ -712,7 +776,14 @@ def hot_score(story, events, reddit_posts, now=None):
         gap_h = max(0.0, (ts[1] - ts[0]).total_seconds() / 3600)
         pickup = 0.6 * (2.718 ** (-gap_h / 24))
 
+    # Incoherence cancels the breadth/velocity REWARD (2026-10-23 audit
+    # Issue 1 + Rec 2, owner decision 065758633baa): repetition and a pile
+    # of unrelated headlines must never pay, and the amount removed is shown
+    # as incoherent_penalty instead of silently vanishing.
+    incoherent_penalty = round(breadth + velocity, 2) if incoherent else 0.0
     base = breadth + authority + severity + velocity + pickup
+    if incoherent:
+        base -= incoherent_penalty
 
     # recency temporal multiplier — anchored to the newest GENUINE
     # development, not the newest echo (2026-10-03 re-report penalty)
@@ -769,6 +840,8 @@ def hot_score(story, events, reddit_posts, now=None):
         "rereports": n_rereports,
         "zero_delta": zero_delta,
         "zero_delta_penalty": zero_delta_penalty,
+        "incoherent": incoherent,
+        "incoherent_penalty": incoherent_penalty,
         "leak_claim": leak_claim,
         "leak_claim_penalty": leak_claim_penalty,
         "novelty": round(novelty, 2),
