@@ -1,0 +1,3 @@
+BlackX is a UEFI bootkit observed in an early-2026 espionage campaign that abuses the Baton Drop flaw to bypass Secure Boot before loading a malicious payload. BleepingComputer reports the campaign details, linking BlackX to the older vulnerability rather than a new zero-day. The event adds an update to the existing BlackX story without introducing additional CVEs or observed victim counts.
+
+What to watch: whether defenders identify additional implants tied to the same campaign or if the bootkit spreads beyond the reported diplomatic targets. No CISA KEV entry or exploitation metrics are included in the current event, so the assessment relies on primary reporting from BleepingComputer and the original investigation source.
