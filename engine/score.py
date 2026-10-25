@@ -88,6 +88,20 @@ IN_WILD_RE = re.compile(
     r"\b(?:in-the-wild|in the wild|actively exploited|being exploited|"
     r"exploited in the wild|exploitation (?:has been|is being|was) "
     r"(?:observed|confirmed|detected))\b", re.I)
+# CISA KEV-addition vocabulary (2026-10-23 audit Rec 3, owner decision
+# 2e4fa50d91a0): the KEV catalog add date is the development, so an event whose
+# text announces one — and no prior event did — is never classified as an echo.
+KEV_ADD_RE = re.compile(
+    r"\b(?:known exploited vulnerabilit(?:y|ies)(?: catalog)?"
+    r"|kev (?:catalog|addition|add)|added to (?:the )?kev)\b", re.I)
+
+
+def _kev_added(title, body=None):
+    """True when the event text announces a CISA KEV catalog addition."""
+    return bool(KEV_ADD_RE.search((title or "") + " "
+                                  + (body or "")[:CVE_BODY_CHARS]))
+
+
 UNPATCHED_RE = re.compile(
     r"\bunpatched\b|\bno (?:patch|fix)(?:es)?\b|"
     r"\b(?:patch|fix)(?:es)? (?:is |are )?not (?:yet )?(?:available|out)\b|"
@@ -202,6 +216,50 @@ ZERO_DELTA_FACTOR = 0.5     # keep half the (already decayed) score
 INCOHERENT_MIN_EVENTS = 8    # breadth/velocity only inflate on a pile
 INCOHERENT_MIN_SHARE = 0.25  # >= 1/4 of event titles must echo the title
 ECHO_TOKEN_MIN = 3           # keep 3-char product names (PHP, RCE) — see above
+# ── single-source leak-site / actor-claim penalty (2026-10-23 audit
+# Recommendation 3, second half — owner decision 2e4fa50d91a0). 5 of the
+# 10-23 demotes were unverified single-source leak-site claims the digest
+# agent caught by hand (PwC/Everest 590GB, the 153M "other/other" claim,
+# CozyThemes). A claim nobody corroborated is worth less than the same
+# headline from a second outlet, so it keeps LEAK_CLAIM_FACTOR of its score,
+# shown as leak_claim + leak_claim_penalty.
+# Conservative by construction:
+#   - exactly ONE source (n_sources == 1) and no CVEs (an advisory is a
+#     verifiable artefact, not a claim);
+#   - NEVER an official primary source: government/military TLDs, CISA,
+#     NVD, MSRC, CERT/CC, CVE.org are exempt, and so is named reporting by a
+#     major outlet (authority >= SINGLE_SOURCE_SKIP_AUTHORITY) — an
+#     uncorroborated vendor/post is the class this targets;
+#   - the CLAIM must be in the headline (both a leak/extortion/dark-web term
+#     and a claim marker): "X Allegedly Leaked", "Group Claims Attack on Y".
+#     A defensive explainer whose body happens to mention extortion is not a
+#     claim and is untouched.
+LEAK_CLAIM_FACTOR = 0.75
+SINGLE_SOURCE_SKIP_AUTHORITY = 1.8
+OFFICIAL_SOURCE_RE = re.compile(
+    r"(^|\.)(gov|mil)(\.[a-z]{2})?$|^cisa\.gov$|^nvd\.nist\.gov$"
+    r"|^msrc\.microsoft\.com$|^cert\.org$|^cve\.org$", re.I)
+LEAK_VOCAB_RE = re.compile(
+    r"\b(?:leak(?:s|ed)?|extort\w*|dark[\s-]?web|ransomware|for[\s-]?sale|"
+    r"stolen|hacked)\b", re.I)
+CLAIM_VOCAB_RE = re.compile(
+    r"\b(?:alleg\w+|claim(?:s|ed)?|reportedly|purportedly|unverified)\b",
+    re.I)
+
+
+def _is_leak_claim(story, authority):
+    """True when the story is a single-source, uncorroborated leak-site /
+    actor claim (see LEAK_CLAIM_FACTOR). Pure."""
+    if story.get("n_sources") != 1 or story.get("cves"):
+        return False
+    sources = story.get("sources") or []
+    if sources and any(OFFICIAL_SOURCE_RE.search(d or "") for d in sources):
+        return False
+    if authority >= SINGLE_SOURCE_SKIP_AUTHORITY:
+        return False
+    title = story.get("title") or ""
+    return bool(LEAK_VOCAB_RE.search(title) and CLAIM_VOCAB_RE.search(title))
+
 
 # Keys the SSG "Why this score" template renders from a score breakdown.
 # A story missing any of these raises a jinja UndefinedError that aborts the
@@ -342,6 +400,30 @@ def _cvss_severity(cves):
     return _cvss_band(best), kev, bonus
 
 
+# ── disclosure identity from NAMED CVEs (2026-10-23 audit Recommendation 3,
+# owner decision 2e4fa50d91a0). is_rereport's CVE-anchored leg only looked at
+# each event's `cves` field and title, so an outlet re-tell that names the
+# already-covered CVE in its BODY — or a founding event whose body names it
+# while its title does not — was read as a NEW disclosure (GitLab
+# CVE-2026-110264, Node.js Brotli, Splunk SVD-2026-1001/1011, all seven of the
+# 2026-10-23 demote class). The identity is whatever CVEs the coverage
+# actually NAMES, in title or lede, on both sides of the comparison. Bounded
+# to the first CVE_BODY_CHARS of the body so a footer/roundup link list at the
+# end of an article cannot manufacture identity.
+CVE_BODY_CHARS = 600
+
+
+def _named_cves(ev):
+    """CVE ids an event names: its `cves` field plus CVEs in its title and the
+    lede of its body (bounded — see CVE_BODY_CHARS)."""
+    from merge import CVE_RE
+    out = {str(c).upper() for c in (ev.get("cves") or [])}
+    out |= {c.upper() for c in CVE_RE.findall(ev.get("title") or "")}
+    out |= {c.upper() for c in
+            CVE_RE.findall((ev.get("content_md") or "")[:CVE_BODY_CHARS])}
+    return out
+
+
 def _victim_counts(text):
     """Normalized victim-count phrases in a text (a set, for delta compare)."""
     return {re.sub(r"\s+", " ", m.group(0).lower().strip())
@@ -464,12 +546,14 @@ def is_rereport(event, prior_events, *, low_jaccard=0.25, high_jaccard=0.55,
             (event.get("published_at") or "").replace("Z", "+00:00"))
     except ValueError:
         ev_dt = None
-    ev_cves = {c.upper() for c in (event.get("cves") or [])}
-    ev_cves |= {c.upper() for c in CVE_RE.findall(event.get("title") or "")}
+    ev_cves = _named_cves(event)
     prior_cves = set()
     for p in prior_events:
-        prior_cves |= {c.upper() for c in (p.get("cves") or [])}
-        prior_cves |= {c.upper() for c in CVE_RE.findall(p.get("title") or "")}
+        prior_cves |= _named_cves(p)
+    # Delta question is PRIOR-based, and a story's own `cves` set is
+    # deliberately NOT the baseline: a story's CVE list also carries the CVEs
+    # of its LATER events (hot_score scrubs them onto the story), so using it
+    # would call every new disclosure "covered" and erase genuine developments.
     new_cves = ev_cves - prior_cves
     if ev_cves and new_cves:
         return False              # brings a new CVE: a development, not an echo
@@ -500,6 +584,17 @@ def is_rereport(event, prior_events, *, low_jaccard=0.25, high_jaccard=0.55,
                 IN_WILD_RE.search(p.get("title") or "")
                 for p in prior_events):
             return False          # fresh exploitation confirmation: ditto
+        # CISA KEV addition (2026-10-23 audit Rec 3, owner decision
+        # 2e4fa50d91a0): "Added to CISA's Known Exploited Vulnerabilities
+        # catalog" for a CVE the story already covers is a development, not a
+        # re-tell. Without this exemption the (correct) body-named CVE
+        # identity below swallowed the KEV-addition events of actively
+        # exploited stories and pulled their decay anchor back to the
+        # founding week.
+        if _kev_added(ev_title, event.get("content_md")) and not any(
+                _kev_added(p.get("title") or "", p.get("content_md"))
+                for p in prior_events):
+            return False          # CISA KEV addition: a development
     # First-day burst protection: priors within min_gap_h are skipped ONLY
     # while the story's own founding material (desk backfills excluded — a
     # June backfill must not age a day-old story past the window) is younger
@@ -725,6 +820,14 @@ def hot_score(story, events, reddit_posts, now=None):
     if zero_delta:
         zero_delta_penalty = round(pre * (1.0 - ZERO_DELTA_FACTOR), 2)
         score = round(pre * ZERO_DELTA_FACTOR, 1)
+    # single-source leak-site / actor claim (2026-10-23 audit Rec 3, owner
+    # decision 2e4fa50d91a0): applied to the post-factors score, after
+    # zero_delta, so an echo of an uncorroborated claim pays both.
+    leak_claim = _is_leak_claim(story, authority)
+    leak_claim_penalty = 0.0
+    if leak_claim:
+        leak_claim_penalty = round(score * (1.0 - LEAK_CLAIM_FACTOR), 2)
+        score = round(score * LEAK_CLAIM_FACTOR, 1)
     return {
         "score": score,
         "base": round(base, 2),
@@ -739,6 +842,8 @@ def hot_score(story, events, reddit_posts, now=None):
         "zero_delta_penalty": zero_delta_penalty,
         "incoherent": incoherent,
         "incoherent_penalty": incoherent_penalty,
+        "leak_claim": leak_claim,
+        "leak_claim_penalty": leak_claim_penalty,
         "novelty": round(novelty, 2),
         "reddit": round(reddit, 2),
         "kev": kev,

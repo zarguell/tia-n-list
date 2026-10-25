@@ -1,0 +1,1 @@
+Help Net Security covered the original September 17, 2024 disclosure by Broadcom (VMSA-2024-0019), describing the heap-overflow vulnerability in VMware vCenter Server that could lead to remote code execution. The story notes the issue affects the DCERPC protocol implementation and requires immediate patching.

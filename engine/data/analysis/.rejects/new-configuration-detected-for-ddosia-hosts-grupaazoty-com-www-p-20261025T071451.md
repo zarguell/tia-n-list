@@ -1,0 +1,3 @@
+A new DDosia configuration has been detected with target hosts including www.vienne.gouv.fr, www.alis.it, dogado.com, www.gers.gouv.fr, transadriatica.it, and www.s. The event references witha.name as the data source. DDosia is a distributed denial-of-service tool tracked through its target configurations. Without observed exploitation metrics or a victim count, the event serves as an indicator of updated targeting rather than a confirmed incident.
+
+Monitor the listed hosts for traffic anomalies and verify whether the targets correspond to active campaigns or routine scanning behavior. Cross-reference this configuration with any DDoS reports from the named domains to confirm impact.

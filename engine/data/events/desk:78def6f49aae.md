@@ -1,0 +1,1 @@
+Censys advisory states the original disclosure date as September 17, 2024, and the active-exploitation report date as November 18, 2024. The vulnerability is a heap-overflow in vCenter Server's DCERPC implementation, and Broadcom updated its advisory (VMSA-2024-0019.3) to confirm exploitation in the wild.

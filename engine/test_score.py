@@ -367,6 +367,63 @@ def main():
     ok &= check("small story never trips the incoherence floor",
                 (r_small["incoherent"], r_small["incoherent_penalty"]),
                 (False, 0.0))
+    # --- A6: single-source leak-site / actor-claim penalty (2026-10-23 audit
+    # Rec 3, owner decision 2e4fa50d91a0, second half). The digest agent
+    # demoted 5 unverified single-source leak claims by hand on 10-23; the
+    # score now says so, and official primary sources are never touched.
+    def _evt2(eid, title, hours_before, text=""):
+        return {"event_id": eid, "published_at": iso(hours_before),
+                "url": f"https://example.example/{eid}", "content_md": text,
+                "kind": "original", "lang": "en", "source": "example.example",
+                "title": title}
+
+    def _claim_story(title, sources, cves=(), body="", eid="lc1"):
+        e = _evt2(eid, title, 3, body)
+        s = {"id": "lc", "title": title, "sources": list(sources),
+             "n_sources": len(sources), "cves": list(cves),
+             "events": [{"event_id": eid, "label": "original"}],
+             "last_seen": iso(3),
+             "reddit_signal": {"posts": 0, "best_score": 0}}
+        return s, {eid: e}
+
+    lc_title = "153 Million Driver's License Records Allegedly Leaked"
+    st, evs = _claim_story(lc_title, ["go.darkwebsonar.io"])
+    r_lc = score.hot_score(st, evs, [], now=base)
+    ok &= check("single-source leak claim is flagged",
+                (r_lc["leak_claim"], r_lc["leak_claim_penalty"] > 0), (True, True))
+    saved = score.LEAK_CLAIM_FACTOR
+    score.LEAK_CLAIM_FACTOR = 1.0
+    r_unpenalised = score.hot_score(st, evs, [], now=base)
+    score.LEAK_CLAIM_FACTOR = saved
+    # 0.75 factor to within one 0.1 score-rounding step
+    ok &= check("the penalty trims the score (not removes it)",
+                (abs(r_lc["score"] / r_unpenalised["score"] - 0.75) < 0.05,
+                 r_lc["leak_claim_penalty"]),
+                (True, round(r_unpenalised["score"] * 0.25, 2)))
+
+    st2, evs2 = _claim_story(lc_title, ["go.darkwebsonar.io", "example.org"])
+    ok &= check("a corroborated claim (2 sources) is not penalised",
+                score.hot_score(st2, evs2, [], now=base)["leak_claim"], False)
+
+    st3, evs3 = _claim_story("Everest Ransomware Group Claims PwC Breach",
+                             ["cisa.gov"])
+    ok &= check("an official primary source is never touched (.gov)",
+                score.hot_score(st3, evs3, [], now=base)["leak_claim"], False)
+    st3b, evs3b = _claim_story("Everest Ransomware Group Claims PwC Breach",
+                               ["bleepingcomputer.com"])
+    ok &= check("named reporting by a major outlet is never touched",
+                score.hot_score(st3b, evs3b, [], now=base)["leak_claim"], False)
+
+    st4, evs4 = _claim_story("Critical RCE Allegedly Exploited in GitLab",
+                             ["vendor.example"], cves=["CVE-2026-99999"])
+    ok &= check("an advisory-backed story is not a 'claim' (has a CVE)",
+                score.hot_score(st4, evs4, [], now=base)["leak_claim"], False)
+
+    st5, evs5 = _claim_story("Dealing with AI-generated extortion: a defensive "
+                             "framework", ["recordedfuture.com"],
+                             body="Ransomware groups claim victims daily.")
+    ok &= check("a defensive explainer is not a claim (no claim in the headline)",
+                score.hot_score(st5, evs5, [], now=base)["leak_claim"], False)
 
     print("PASS" if ok else "FAIL")
     return 0 if ok else 1
