@@ -1,0 +1,5 @@
+Chinese-linked hackers compromised ConnectWise and targeted hundreds of organizations globally, according to Microsoft. The campaign involves a supply-chain-style intrusion through a widely used remote-management platform. Reuters reported the finding, citing Microsoft threat intelligence. No specific CVEs are named in the event, but the scope is significant: hundreds of targets across a global footprint suggest a coordinated espionage or intrusion operation rather than opportunistic malware.
+
+This matters because ConnectWise is embedded in many managed-service-provider environments; compromise of its infrastructure gives attackers broad access to downstream customer networks. Watch for Microsoft or ConnectWise to release IOCs, affected-version guidance, or patch timelines. The absence of CVEs in the current reporting may change as technical analysis deepens.
+
+No exploitation status or victim list is detailed in the available event text, so treat counts as preliminary. Monitor primary sources for updated attribution, actor naming, and remediation steps before assessing downstream risk.
