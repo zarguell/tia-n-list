@@ -1,0 +1,3 @@
+Like many of you, I had a giant WTF on hearing that PHP had an RCE vuln without even running application code. Alas, I found all existing explainers were either vague "it fills up memory" without detail, or the original write-up which casually assumes you know certain things about how the Zend codebase works. To solve this, I spent a couple of days on this animated explainer, my first long-form video. I've gotten some early feedback that it's the best explanation out there. Enjoy! submitted by /u/Darmani [link] [comments]
+
+via reddit r/cybersecurity: PHP2Shell Explained: How One HTTP Request Can Take Over a PHP Server
