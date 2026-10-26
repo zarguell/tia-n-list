@@ -1,0 +1,1 @@
+Security researcher Erica Windisch of Cyberdione Labs published the Tailworm report assessing Tailscale v1.104.2 and headscale v0.29.5. The testing window covered 2026-10-22 to 2026-10-24, and the site footer shows 2026-10. It describes 11 unpatched vulnerabilities, including SSH Unix-socket forwarding issues that allow a compromised device to reach root on reachable servers.
