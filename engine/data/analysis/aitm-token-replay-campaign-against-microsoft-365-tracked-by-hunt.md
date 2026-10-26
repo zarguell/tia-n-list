@@ -1,0 +1,3 @@
+Huntress tracked an adversary-in-the-middle token-replay campaign targeting Microsoft 365 between July 14 and the time of reporting. The researchers observed 497 successful sign-ins across 97 accounts distributed among 79 organizations. The campaign uses token replay techniques to maintain access after initial compromise.
+
+The scale of the campaign is significant: nearly 500 successful sign-ins across almost 100 accounts indicates widespread and persistent access rather than isolated incidents. Organizations using Microsoft 365 should review authentication logs for replay patterns, enforce session lifetime limits, and check for unrecognized device registrations that could indicate token replay activity.
