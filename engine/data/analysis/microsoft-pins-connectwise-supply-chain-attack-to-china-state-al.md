@@ -1,3 +1,1 @@
-Microsoft attributed a ConnectWise supply-chain attack to a China state actor using an AI pentest tool called Artex. The activity targeted ConnectWise environments.
-
-Defenders should review ConnectWise integrations and apply Microsoft's guidance. Monitor for the documented TTPs.
+Microsoft attributed a ConnectWise supply-chain attack to a China-state-aligned threat group. The incident highlights how managed-service platforms can be leveraged for downstream access. Organizations relying on ConnectWise should review logs for anomalous integrations and apply vendor patches promptly.
