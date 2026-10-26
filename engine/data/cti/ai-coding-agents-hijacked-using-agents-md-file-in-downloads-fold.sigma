@@ -1,0 +1,43 @@
+title: Installation Attempt of Rogue npm Package function-color
+id: c4c5dd60-1cd5-4cb6-b7c7-36a154b2c05a
+status: experimental
+description: >
+    Detects package-manager command lines that install the npm package
+    "function-color". Forever Security caught an AI coding agent being steered
+    into installing this rogue package by a malicious AGENTS.md instruction
+    file sitting in the agent's working directory (~/Downloads); the same
+    instruction-file technique was demonstrated against Claude Code to leak
+    OAuth tokens. The package has no legitimate use in normal developer
+    workflows, so any installation attempt - especially one whose parent
+    process is a coding agent or an interactive shell launched by one - is
+    worth review. Derived from our case analysis of public reporting, NOT
+    validated against a live sample.
+references:
+    - https://www.bleepingcomputer.com/news/security/ai-coding-agents-hijacked-using-agentsmd-file-in-downloads-folder/
+    - https://forever.security/blog/hijacking-ai-agents-via-downloads-folder/
+author: Tia N. List
+date: 2026/10/26
+tags:
+    - attack.t1195
+    - attack.t1204
+    - attack.t1528
+    - attack.t1059
+    - attack.initial-access
+    - attack.execution
+    - attack.credential-access
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_package:
+        CommandLine|contains: 'function-color'
+    selection_installer:
+        CommandLine|contains:
+            - 'npm'
+            - 'yarn'
+            - 'pnpm'
+    condition: selection_package and selection_installer
+falsepositives:
+    - Security research or incident-response testing that deliberately installs the package in a sandbox
+    - Unrelated third-party packages whose name merely contains the string function-color; triage the resolved package name and registry in the same command line
+level: high
