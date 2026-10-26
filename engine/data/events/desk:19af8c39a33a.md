@@ -1,0 +1,1 @@
+ZeroPath published a technical analysis dated May 7, 2026, explaining the multi-stage attack chain linking January 2026 credential theft (CVE-2026-1340) to the May RCE exploitation of CVE-2026-6973. It confirms the vulnerability is strictly limited to on-premises EPMM and notes cumulative patches also close the earlier credential-theft vector.

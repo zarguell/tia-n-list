@@ -1,0 +1,1 @@
+CISA added CVE-2026-6973 to its Known Exploited Vulnerabilities catalog on May 7, 2026, with a federal remediation due date of May 10, 2026. The entry references the vendor advisory and confirms active exploitation of the improper input validation flaw.
