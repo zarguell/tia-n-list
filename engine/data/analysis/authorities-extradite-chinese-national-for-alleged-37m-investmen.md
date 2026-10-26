@@ -1,0 +1,3 @@
+Authorities extradited a 44-year-old Chinese national from the Netherlands to face U.S. charges for an alleged cryptocurrency investment scam that tricked at least 174 U.S. residents out of nearly $37 million. Prosecutors say the ring operated from Cambodia and reached victims through social media, phone calls, texts, and dating sites, then directed them to fake trading platforms.
+
+Funds were converted to Tether and moved to a wallet in Cambodia. The co-conspirators created fake websites resembling legitimate crypto exchanges. This aligns with prior reporting on the same extradition. Key fact: 174 victims, nearly $37M, Cambodia-based ring, Deltec Bank conversion to USDT. Watch for trial developments and additional co-conspirator guilty pleas.
