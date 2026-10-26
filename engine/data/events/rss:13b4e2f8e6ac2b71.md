@@ -1,0 +1,1 @@
+Arctic Wolf has observed a recurring social engineering pattern in more than 400 incidents where threat actors have used Microsoft Teams’ external chat creation feature for impersonation scams, or to deliver malicious files. Article Link: Beyond the Inbox: How Threat Actors Abuse Microsoft Teams External Chat for Initial Access - Arctic Wolf
