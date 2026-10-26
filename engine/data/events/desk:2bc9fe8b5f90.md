@@ -1,0 +1,1 @@
+HOL guard security database records CVE-2026-114125 as a high-severity vulnerability (CVSS 8.6) affecting Storybook. It notes missing origin validation allows malicious websites to interact with the preview of a running Storybook development server and inject code, confirming earlier reporting ahead of the 26 Oct coverage.

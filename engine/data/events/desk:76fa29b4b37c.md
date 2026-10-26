@@ -1,0 +1,1 @@
+Strix AI profiles CVE-2026-114125 with a CVSS 8.6 rating (note: the securityonline.info event cites CVSS 9.4), describing high-severity code injection in Storybook. The profile notes a developer must visit a malicious website and interact with the injected interface, which can cause unauthorized changes to story files and later execution by a local runtime.

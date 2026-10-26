@@ -1,0 +1,1 @@
+Vulners indexes the OSV entry for CVE-2026-114125, dated 21 Oct 2026 17:08:12 UTC, reporting Google as the reporter. It describes missing origin validation in Storybook preview that allows code injection from malicious websites. The entry lists 10 reference links and 4 views, confirming early disclosure before the 26 Oct story.
