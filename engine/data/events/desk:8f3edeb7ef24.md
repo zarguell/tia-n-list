@@ -1,0 +1,1 @@
+On June 25, 2026, JFrog published research into CVE-2026-43503, referring to the vulnerability as DirtyClone. The vulnerability had previously been responsibly disclosed to the Linux kernel maintainers. Canonical confirms fixes are available.
