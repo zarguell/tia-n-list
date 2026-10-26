@@ -1,0 +1,3 @@
+Genesys, a Menlo Park-based customer experience provider, disclosed a breach affecting internal business systems. Attackers accessed an LMS and a CRM environment around October 19; Genesys contained the incident by October 23, including suspending the LMS. The Genesys Cloud, Genesys Engage, and Engage Cloud platforms were not compromised.
+
+Exposed data includes business and account information: names, phone numbers, business emails, job titles, company details, and customer interaction records. No CVEs are tied to the intrusion; it appears to be unauthorized access rather than a vulnerability exploit. Watch for updates on attribution and whether customer-facing platform isolation holds.
