@@ -1,0 +1,1 @@
+VulDB created its entry for CVE-2026-98532 on 2026-10-18, recording a CVSS-related assessment and linking to the kernel.org advisory. It notes the advisory was disclosed the same day and confirms affected product kernel.org.

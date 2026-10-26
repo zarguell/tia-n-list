@@ -1,0 +1,1 @@
+OSV published the advisory for CVE-2026-98532 on 2026-10-18, describing the Linux kernel ipv6_find_hdr() out-of-bounds read that can lead to a use-after-free. It references the kernel fix commits and lists Debian tracking. The entry confirms the vulnerability affects the IPv6 extension header parsing path.

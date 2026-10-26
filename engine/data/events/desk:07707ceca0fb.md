@@ -1,0 +1,1 @@
+Imperva's red team demonstrated working remote code execution against an official vulnerable Node.js 24.22.0 Linux arm64 build using crafted Brotli data, confirming CVE-2026-111497 is exploitable in practice and that fixed releases correctly reject the malicious payload.
