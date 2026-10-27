@@ -1,0 +1,1 @@
+Apple today released patches for 304 vulnerabilties. This number is still in line with prior Apple updates, and comes just about a month after the last apple update. Article Link: Apple Patches for October 2026 - SANS Internet Storm Center
