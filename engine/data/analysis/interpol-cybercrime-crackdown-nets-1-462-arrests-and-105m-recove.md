@@ -1,0 +1,3 @@
+INTERPOL's Operation Serengeti III produced 1,462 arrests and recovered over USD 105 million, dismantling roughly 11,000 malicious networks across Africa. The operation is a concrete inter-government result with specific numbers, not a policy announcement. Watch for follow-on prosecutions and whether the recovered funds translate into victim restitution. The source is Interpol's own announcement, cited directly.
+
+The crackdown spans multiple countries and targets cybercrime infrastructure rather than a single actor. The scale (1,462 arrests, 11,000 networks, $105M) indicates coordinated action rather than symbolic enforcement. No CVEs or technical IOCs are tied to this event; it is a law-enforcement development, not a vulnerability advisory.
