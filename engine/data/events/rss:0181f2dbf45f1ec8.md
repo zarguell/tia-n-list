@@ -1,0 +1,1 @@
+Find, Fix, Verify: Federal Cyber Defense Federal teams face thousands of vulnerability findings, shifting mandates and limited staff, while AI helps attackers find and chain weaknesses faster. The question that matters most is which of those findings an adversary can exploit today. Article Link: Find, Fix, Verify: Federal Cyber Defense Webinar | Picus
