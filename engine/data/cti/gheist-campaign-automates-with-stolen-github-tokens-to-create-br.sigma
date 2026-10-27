@@ -1,0 +1,30 @@
+title: Gheist Campaign Automated ci-sync Branch Creation via Stolen GitHub Tokens
+id: 27f61d2d-e4b4-491d-8cf2-faff45cdc59a
+status: experimental
+description: Detects developer-endpoint git activity consistent with the Gheist automated campaign, which abuses stolen GitHub tokens to plant ci-sync-<6 alphanumeric> branches and sync-check.yml workflows in order to extract private repository secrets from Actions logs (Wiz Research, 13,500+ branches across 850+ tokens since September 15, 2026).
+references:
+  - https://www.wiz.io/blog/gheist-attempted-scaled-abuse-of-stolen-github-tokens-stumbles
+  - https://linuxmint.hu/hir/2026/10/gheist-ellopott-github-tokenekkel-szerez-privat-repok-titkait-az-actions-naploibol
+author: Tia N. List
+date: 2026/10/27
+tags:
+  - attack.t1078
+  - attack.t1552
+  - attack.t1195
+  - attack.t1132
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection_git_branch:
+    Image|endswith:
+      - '\git.exe'
+      - '\git-remote-https.exe'
+    CommandLine|contains:
+      - 'ci-sync-'
+      - 'sync-check.yml'
+  condition: selection_git_branch
+falsepositives:
+  - Internal CI synchronisation tooling that legitimately names branches ci-sync-*
+  - Developer scripts that push the same workflow filename
+level: medium

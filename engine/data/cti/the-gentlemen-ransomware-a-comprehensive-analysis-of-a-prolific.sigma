@@ -1,0 +1,35 @@
+title: The Gentlemen Ransomware — Shadow Copy and Recovery Inhibition
+id: 29c2df20-19bf-4d1c-b6e7-d9fef2b6be71
+status: experimental
+description: Detects the pre-encryption impact commands that The Gentlemen RaaS affiliates run after disabling security tooling and backup services, per Acronis research. Affiliates delete shadow copies and disable Windows recovery with administrative tooling before deploying the cross-platform encryptor, often within one to two days of initial access.
+references:
+  - https://www.acronis.com/en/tru/posts/the-gentlemen-a-closer-look-at-a-not-so-gentle-ransomware-as-a-service-operation/
+  - https://cyberpress.org/ransomware-disables-defenses/
+author: Tia N. List
+date: 2026/10/27
+tags:
+  - attack.t1490
+  - attack.t1486
+  - attack.t1562
+  - attack.t1003
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection_shadow_delete:
+    Image|endswith:
+      - '\vssadmin.exe'
+      - '\wmic.exe'
+    CommandLine|contains|all:
+      - 'shadowcopy'
+      - 'delete'
+  selection_recovery_disable:
+    CommandLine|contains:
+      - 'recoveryenabled no'
+      - 'wbadmin delete catalog'
+      - 'wbadmin delete systemstatebackup'
+  condition: selection_shadow_delete or selection_recovery_disable
+falsepositives:
+  - Legitimate backup and disaster-recovery maintenance by administrators
+  - Imaging or re-provisioning scripts that reset the recovery environment
+level: high
