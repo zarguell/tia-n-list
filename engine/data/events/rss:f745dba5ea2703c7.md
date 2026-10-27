@@ -1,0 +1,1 @@
+Hornetsecurity by Proofpoint has launched its Ransomware Report 2027, revealing that organisations are better prepared for ransomware attacks than ever before, but confidence in existing protection measures remains limited. Article Link: Ransomware Report 2027 - Press Release
