@@ -1,0 +1,1 @@
+Palo Alto confirmed on 26 October 2026 that CVE-2026-111497, a CVSS 9.2 Brotli decoder buffer overflow, affects PAN-OS 12.2, 12.1 and 11.2. The advisory notes affected Brotli library versions (1.0.3 through 1.2.0) must be updated to 1.0.10, 1.1.1 or 1.2.1, and the company was actively investigating product impact at the time of publication.

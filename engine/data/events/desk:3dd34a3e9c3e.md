@@ -1,0 +1,1 @@
+The analysis from 11 September 2026 details the root RCE impact on PA-Series hardware and notes the vulnerability was disclosed by Palo Alto on 9 September 2026 with the company stating no malicious exploitation was known at that time. It emphasizes no special configuration is required for exposure but that management interface reachability drives real-world risk.
