@@ -1,0 +1,5 @@
+HPE released patches for 72 vulnerabilities in Aruba AOS-8 and AOS-10 wireless operating systems, with 33 rated critical and eight at maximum severity (CVE-2026-79844 through CVE-2026-79851). The flaws allow unauthenticated remote code execution, authentication bypass, arbitrary command execution, and full system compromise on mobility conductors, controllers, gateways, and access points. Fixed versions include 8.10.0.24, 8.13.3.1, 10.4.1.14, 10.7.2.7, and 10.8.1.2. The advisory also covers 31 high-severity bugs, over a dozen unauthenticated, plus eight medium and one low.
+
+These networking products are common in enterprise and campus environments, so unauthenticated RCE at max severity demands rapid patching. The breadth of affected components (hardware, controllers, access points) means exposure is not limited to edge gateways. No active exploitation is mentioned in the advisory, but the attack surface is large.
+
+Watch for follow-up reports confirming in-the-wild use, especially against public-facing Aruba controllers. Prioritize patching to the listed fixed releases and review access-point configurations for unnecessary external exposure.

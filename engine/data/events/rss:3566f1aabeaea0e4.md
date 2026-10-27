@@ -1,0 +1,1 @@
+See how agentic AI and expert analysts run security operations together, and what it means for faster investigations. Get the 2026 report from Arctic Wolf. Article Link: https://arcticwolf.com/resources/report/2026-agentic-security-operations-report/
