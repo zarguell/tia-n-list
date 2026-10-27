@@ -1,0 +1,1 @@
+AP/ABC News reported that a major New Mexico hospital network was racing to fix a cybersecurity issue that forced ambulances to other hospitals and canceled appointments at more than 30 clinics. The network operates the state's only Level 1 trauma center and handles about 900,000 outpatient visits and 100,000 emergency room visits annually.

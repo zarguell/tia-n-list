@@ -1,0 +1,1 @@
+Infosecurity Magazine reported that UNM was restoring systems after an incident claimed by the BYOD ransomware group, with VenariX noting the group listed UNM on its data leak site. The report cited claims of 36,000 compromised machines and exfiltration of sensitive data.

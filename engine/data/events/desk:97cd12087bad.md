@@ -1,0 +1,1 @@
+Help Net Security reported that UNM Health Sciences Center suffered a cyberattack temporarily disrupting hospital operations, with an extortion group claiming responsibility. The group asserted on its leak site that it compromised 36,000 machines across campus and hospital environments and exfiltrated student, employee, and patient data.

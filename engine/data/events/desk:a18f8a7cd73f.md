@@ -1,0 +1,1 @@
+Mediaite relayed the Reuters report that a hacker was actively attempting to breach the website of the US Federal Election Commission on Tuesday, one week before the midterm elections. The report described the agency taking its electronic filing system offline in response to the activity.
