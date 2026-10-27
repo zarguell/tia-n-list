@@ -1,0 +1,5 @@
+Artem Aleksandrovych Stryzhak, a 36-year-old Ukrainian national, was sentenced to 70 months in prison for ransomware attacks on hospitals, government entities, a dental practice, an oil and gas transportation company, and law firms between mid-2018 and late 2021. He joined Nefilim and Hive during the spree; those operations attacked about 1,500 victims worldwide. Attacks involving Nefilim ransomware caused millions of dollars in extortion payments and network damage.
+
+Stryzhak pleaded guilty to multiple cybercrimes in late 2025. He was arrested in Spain in June 2024 and extradited to the United States in April 2025. The Justice Department continues to seek his alleged co-conspirator, Volodymyr Tymoshchuk, with an $11 million reward for information leading to his arrest or conviction.
+
+The sentence closes one affiliate of the Nefilim and Hive ecosystems, but the broader ransomware-as-a-service model persists. Organizations should treat the case as a reminder that healthcare and critical infrastructure remain priority targets.
