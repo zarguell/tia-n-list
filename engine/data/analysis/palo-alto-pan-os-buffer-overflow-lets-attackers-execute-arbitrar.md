@@ -1,0 +1,3 @@
+Palo Alto Networks confirmed PAN-OS Brotli vulnerability CVE-2026-111497, a CVSS 9.2 buffer overflow affecting versions 12.2, 12.1, and 11.2. The flaw allows network-based attackers to execute arbitrary code with root privileges on PA-Series hardware firewalls through both management and dataplane interfaces. Palo Alto released a hotfix. The advisory also references CVE-2026-0310, an underlying XML processing issue tracked separately. With 4 sources and an 8.9 score, this remains an active high-severity firewall vulnerability requiring immediate attention.
+
+No observed in-the-wild exploitation is reported in the event content; the claim remains advisory-level. Watch for updated vendor patches and any CISA KEV additions.

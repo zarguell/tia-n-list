@@ -1,0 +1,3 @@
+The Gheist automated campaign uses stolen GitHub tokens to create branches named ci-sync-[0-9a-z]{6} and extracts private repository secrets from Actions logs. Wiz Research reports 13,500+ branches planted across 850+ compromised GitHub tokens since September 15. The campaign abuses workflow automation to scale secret extraction without direct repository access. This is active threat intelligence on supply-chain abuse via stolen tokens.
+
+Watch for additional token revocation guidance from GitHub, vendor detection updates, and whether affected repositories confirm data exfiltration. No CVEs are assigned; the risk is token hygiene and workflow auditing.
