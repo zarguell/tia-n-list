@@ -1,0 +1,1 @@
+CISA published an alert on October 21, 2026 warning that the unauthenticated remote code execution flaws known as PHP2Shell (CVE-2026-109618 and CVE-2026-109619) affect all PHP installations serving web requests, including Apache with mod_php. The advisory described both vulnerabilities and urged immediate patching.

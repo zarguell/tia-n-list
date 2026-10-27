@@ -1,0 +1,1 @@
+On October 26, 2026 CISA added both PHP2Shell CVEs to its Known Exploited Vulnerabilities Catalog and updated the PHP Alert. The entry confirms active exploitation in the wild and reinforces the urgency of patching PHP installations.
