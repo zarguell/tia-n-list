@@ -1,0 +1,3 @@
+I've recently released a blog covering how I discovered a new Kerberos delegation abuse path! By combining Elad Shamir's Reflective RBCD with James Forshaw's U2U sacrificial user technique, Constrained Delegation without Protocol Transition can now be abused against SPN-less accounts. I also had to add S4U2Proxy + U2U support to Impacket to get this working. :) Blog: https://hunio.org/security/abusing-constrained-delegation-without-protocol-transition-against-spn-less-accounts Impacket PR: https://github.com/fortra/impacket/pull/2324 submitted by /u/elohhs [link] [comments]
+
+via reddit r/cybersecurity: New Kerberos Abuse Path Discovery - Constrained Delegation without Protocol Transition against SPN-less accounts

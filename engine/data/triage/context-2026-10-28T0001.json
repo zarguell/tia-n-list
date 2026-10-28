@@ -1,0 +1,466 @@
+{
+ "date": "2026-10-28",
+ "decisions_path": "engine/data/triage/decisions-2026-10-28T0001.json",
+ "instructions": "For every new event decide: (1) keep or drop \u2014 keep only stories worth covering (real security events, vulnerabilities, attacks, breaches, advisories with substance); drop press releases, vendor marketing, generic explainers, and anything duplicating an existing story. (2) If keep, assign the event to the RIGHT story: an existing candidate story id if it belongs there (this FIXES mechanical clustering \u2014 e.g. different outlets' Patch Tuesday roundups are ONE story), or NEW with a clean story_title. (3) merges: list candidate stories that are really the same story (from = fragment, into = the most complete one). (4) For every kept event that names CVEs, optionally assess exploitation: exploited = the event reports OBSERVED in-the-wild exploitation (implants, victim counts, campaigns, CISA KEV confirmation); suspected = public exploit code/PoC or likely-but-unconfirmed. Attribute ONLY the CVEs you can tie to the claim \u2014 a bulletin's blanket 'actively exploited' does NOT flag all its CVEs. Omit the exploitation field when the event makes no claim.\n(5) LOW-TRUST events (\"low_trust\": true \u2014 AI-drafted aggregator reposts, late and overstated): treat as unverified leads. When the text attributes the claim to a named primary source (a researcher firm like watchTowr, a vendor advisory, CISA, a major outlet) and attribution_urls or a web search (/home/ubuntu/repos/cronman/bin/web-search.sh \"query\") locate that primary source CONFIRMING the claim, include a provenance object in the decision: {\"url\": <primary url>, \"source\": <domain>, \"evidence\": <one line>, \"verified\": true}. VERIFIED provenance lets the event mint a story (credited to the primary source) and count as a development; without it, a low-trust event can only attach to an EXISTING story, never mint. If you cannot verify, keep/drop on normal merit and omit provenance.\n\nWrite decisions as JSON with EXACTLY this shape:\n{\n  \"decisions\": [\n    {\"event_id\": \"<id>\", \"action\": \"keep\", \"story\": \"<existing candidate story id>\", \"reason\": \"...\"},\n    {\"event_id\": \"<id>\", \"action\": \"keep\", \"story\": \"NEW\", \"story_title\": \"<clean title>\", \"reason\": \"...\"},\n    {\"event_id\": \"<id>\", \"action\": \"drop\", \"reason\": \"...\"}\n  ],\n  \"merges\": [{\"from\": \"<fragment story id>\", \"into\": \"<canonical story id>\"}]\n}\nFor events marked \"low_trust\" (AI-drafted aggregator reposts) a decision\nmay carry an optional \"provenance\" object when you VERIFIED the claim at\nthe named primary source: {\"event_id\": ..., \"action\": \"keep\", ...}\n  \"provenance\": {\"url\": \"<primary source url>\", \"source\": \"<domain>\", \"evidence\": \"<one line>\"}\nOnly include provenance when the primary source (vendor advisory, CISA,\nthe named researcher/outlet) really carries the claim \u2014 verified\nprovenance lets a low-trust event mint a story and set freshness; without\nit the event can only amplify an existing story.\nSTRICT KEY NAMES: the array key is \"decisions\" (never \"events\"); the story\nkey is \"story\" (never \"story_id\"); \"story\" holds a candidate_stories id\nverbatim or the literal string \"NEW\". Optional per-event field\n\"exploitation\": {\"CVE-...\": {\"status\": \"exploited|suspected\", \"evidence\": \"1-2 sentences\"}}.",
+ "new_events": [
+  {
+   "id": "rss:73b7e81b63dd1005",
+   "title": "Japan's GMO urges customers to shut down PCs amid ransomware threat",
+   "source": "bleepingcomputer.com",
+   "published_at": "2026-10-27T23:35:51Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "The GMO Group has urged customers to disconnect their systems from the internet and shut down computers after a threat actor who breached the company's Onamae Desktop Cloud threatened to launch a ransomware attack today."
+  },
+  {
+   "id": "rss:bc255d040848218c",
+   "title": "Ars Technica: Code-execution flaw in UEFI firmware affects most servers on planet Earth",
+   "source": "malware.news",
+   "published_at": "2026-10-27T23:25:39Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Critical flaw in EDK2 allows attackers to execute code early in the boot process. The post Ars Technica: Code-execution flaw in UEFI firmware affects most servers on planet Earth appeared first on Eclypsium . Article Lin"
+  },
+  {
+   "id": "rd:t3_1xh7we9",
+   "title": "Kerberos Abuse Path Discovery - Constrained Delegation without Protocol Transition against SPN-less accounts",
+   "source": "hunio.org",
+   "published_at": "2026-10-27T23:10:54Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "I've recently released a blog covering how I discovered a new Kerberos delegation abuse path! By combining Elad Shamir's Reflective RBCD with James Forshaw's U2U sacrificial user technique, Constrained Delegation without"
+  }
+ ],
+ "candidate_stories": [
+  {
+   "id": "japan-s-gmo-urges-customers-to-shut-down-pcs-amid-ransomware-thr",
+   "title": "Japan's GMO urges customers to shut down PCs amid ransomware threat",
+   "n_events": 1,
+   "last_seen": "2026-10-27T23:35:51Z",
+   "first_event_title": "Japan's GMO urges customers to shut down PCs amid ransomware threat"
+  },
+  {
+   "id": "ars-technica-code-execution-flaw-in-uefi-firmware-affects-most-s",
+   "title": "Ars Technica: Code-execution flaw in UEFI firmware affects most servers on planet Earth",
+   "n_events": 1,
+   "last_seen": "2026-10-27T23:25:39Z",
+   "first_event_title": "Ars Technica: Code-execution flaw in UEFI firmware affects most servers on planet Earth"
+  },
+  {
+   "id": "kerberos-abuse-path-discovery-constrained-delegation-without-pro",
+   "title": "Kerberos Abuse Path Discovery - Constrained Delegation without Protocol Transition against SPN-less accounts",
+   "n_events": 1,
+   "last_seen": "2026-10-27T23:10:54Z",
+   "first_event_title": "Kerberos Abuse Path Discovery - Constrained Delegation without Protocol Transition against SPN-less accounts"
+  },
+  {
+   "id": "warp-discloses-breach-exposing-ai-agent-logs-user-telemetry-data",
+   "title": "Warp discloses breach exposing AI agent logs, user telemetry data",
+   "n_events": 2,
+   "last_seen": "2026-10-27T22:44:54.000Z",
+   "first_event_title": "Warp discloses breach exposing AI agent logs, user telemetry data"
+  },
+  {
+   "id": "openai-s-gpt-6-1-terra-is-safer-overall-but-shows-more-destructi",
+   "title": "OpenAI's GPT-6.1 Terra is safer overall, but shows more destructive-action flags in tests",
+   "n_events": 1,
+   "last_seen": "2026-10-27T22:43:27Z",
+   "first_event_title": "OpenAI's GPT-6.1 Terra is safer overall, but shows more destructive-action flags in tests"
+  },
+  {
+   "id": "unm-health-ransomware-attack-disrupts-patient-care-surgeries",
+   "title": "UNM Health ransomware attack disrupts patient care, surgeries",
+   "n_events": 11,
+   "last_seen": "2026-10-27T22:23:38.895Z",
+   "first_event_title": "UNM Health ransomware attack disrupts patient care, surgeries"
+  },
+  {
+   "id": "hacking-attempts-against-us-federal-election-commission-system-t",
+   "title": "Hacking attempts against US Federal Election Commission system triggered outage, email shows",
+   "n_events": 4,
+   "last_seen": "2026-10-27T22:04:50.000Z",
+   "first_event_title": "Hacking attempts against US Federal Election Commission system triggered outage, email shows"
+  },
+  {
+   "id": "php2shell-can-own-the-process-does-that-mean-it-gets-the-network",
+   "title": "PHP2Shell can own the process. Does that mean it gets the network too? Where microVM containment helps, and why patching still matters.",
+   "n_events": 0,
+   "last_seen": "2026-10-27T21:49:20Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "php-warns-admins-of-two-critical-flaws-emergency-patches-coming",
+   "title": "PHP warns admins of two critical flaws, emergency patches coming tomorrow",
+   "n_events": 404,
+   "last_seen": "2026-10-27T21:38:44.000Z",
+   "first_event_title": "PHP warns admins of two critical flaws, emergency patches coming tomorrow"
+  },
+  {
+   "id": "white-house-takes-texas-water-cybersecurity-model-to-rural-hospi",
+   "title": "White House takes Texas water cybersecurity model to rural hospitals",
+   "n_events": 0,
+   "last_seen": "2026-10-27T21:30:46Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "before-you-file-that-ai-bug-report-openai-has-some-advice",
+   "title": "Before you file that AI bug report, OpenAI has some advice",
+   "n_events": 0,
+   "last_seen": "2026-10-27T21:21:27Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "node-js-brotli-decoder-vulnerability-cve-2026-111497",
+   "title": "Node.js Brotli decoder vulnerability CVE-2026-111497",
+   "n_events": 66,
+   "last_seen": "2026-10-27T21:01:58.000Z",
+   "first_event_title": "Is your Node.js application vulnerable to CVE-2026-111497? A newly disclosed High-severity vulnerability in the Node.js Brotli decoder could"
+  },
+  {
+   "id": "navigate360-s-lack-of-transparency-is-catching-up-with-them-more",
+   "title": "Navigate360\u2019s lack of transparency is catching up with them; More organizations tell people NOT to use their tiplines",
+   "n_events": 1,
+   "last_seen": "2026-10-27T21:00:54Z",
+   "first_event_title": "Navigate360\u2019s lack of transparency is catching up with them; More organizations tell people NOT to use their tiplines"
+  },
+  {
+   "id": "hackers-hijack-convertr-analytics-script-to-steal-payment-card-d",
+   "title": "Hackers hijack Convertr analytics script to steal payment card data",
+   "n_events": 1,
+   "last_seen": "2026-10-27T20:57:25Z",
+   "first_event_title": "Hackers hijack Convertr analytics script to steal payment card data"
+  },
+  {
+   "id": "microsoft-authenticator-flaw-allows-android-apps-with-zero-permi",
+   "title": "Microsoft Authenticator Flaw Allows Android Apps With Zero Permissions to Steal Authentication Tokens",
+   "n_events": 8,
+   "last_seen": "2026-10-27T20:42:48.000Z",
+   "first_event_title": "Microsoft Authenticator Flaw Allows Android Apps With Zero Permissions to Steal Authentication Tokens"
+  },
+  {
+   "id": "cyberstrikeai-and-44-agents-what-trendai-found-in-japan",
+   "title": "CyberStrikeAI and 44 Agents: What TrendAI Found in Japan",
+   "n_events": 1,
+   "last_seen": "2026-10-27T20:41:25Z",
+   "first_event_title": "CyberStrikeAI and 44 Agents: What TrendAI Found in Japan"
+  },
+  {
+   "id": "all-the-security-risks-anthropic-is-worried-about-before-its-ipo",
+   "title": "All the security risks Anthropic is worried about before its IPO",
+   "n_events": 1,
+   "last_seen": "2026-10-27T20:41:16Z",
+   "first_event_title": "All the security risks Anthropic is worried about before its IPO"
+  },
+  {
+   "id": "tailscale-warns-of-ssh-flaws-allowing-root-privilege-escalation",
+   "title": "Tailscale warns of SSH flaws allowing root privilege escalation",
+   "n_events": 7,
+   "last_seen": "2026-10-27T20:30:05.000Z",
+   "first_event_title": "Tailscale warns of SSH flaws allowing root privilege escalation"
+  },
+  {
+   "id": "university-of-copenhagen-data-breach-exposes-data-of-525-000-people",
+   "title": "University of Copenhagen data breach exposes data of 525,000 people",
+   "n_events": 6,
+   "last_seen": "2026-10-27T20:20:42Z",
+   "first_event_title": "University of Copenhagen data breach exposes data of 525,000 people"
+  },
+  {
+   "id": "apple-patches-coregraphics-out-of-bounds-write-cve-2026-86950",
+   "title": "Apple patches CoreGraphics out-of-bounds write CVE-2026-86950",
+   "n_events": 49,
+   "last_seen": "2026-10-27T19:28:02.682Z",
+   "first_event_title": "\ud83e\udd16 Apple patched CVE-2026-86950, an out-of-bounds write in CoreGraphics affecting older iOS/iPadOS/macOS versions. Processing a maliciously c"
+  },
+  {
+   "id": "ohio-auditor-cyber-attack-on-state-server-carried-out-by-possibl",
+   "title": "Ohio auditor: Cyber attack on state server carried out by possible \u2018foreign state actors\u2019",
+   "n_events": 1,
+   "last_seen": "2026-10-27T19:20:48Z",
+   "first_event_title": "Ohio auditor: Cyber attack on state server carried out by possible \u2018foreign state actors\u2019"
+  },
+  {
+   "id": "moldova-issues-warning-about-new-cyberattacks-following-a-data-b",
+   "title": "Moldova Issues Warning About New Cyberattacks Following a Data Breach",
+   "n_events": 1,
+   "last_seen": "2026-10-27T19:20:45Z",
+   "first_event_title": "Moldova Issues Warning About New Cyberattacks Following a Data Breach"
+  },
+  {
+   "id": "omegatech-is-disrupted-and-the-pressure-on-bulletproof-hosting-k",
+   "title": "Omegatech Is Disrupted , and the Pressure on Bulletproof Hosting Keeps Building",
+   "n_events": 1,
+   "last_seen": "2026-10-27T19:20:43Z",
+   "first_event_title": "Omegatech Is Disrupted , and the Pressure on Bulletproof Hosting Keeps Building"
+  },
+  {
+   "id": "fuzzers-vs-ai-comparing-fuzzilli-and-bigsleep-on-javascript-engi",
+   "title": "Fuzzers vs. AI: Comparing Fuzzilli and BigSleep on JavaScript Engines",
+   "n_events": 0,
+   "last_seen": "2026-10-27T19:07:58Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "covered-california-agent-data-exposed-in-phishing-attack",
+   "title": "Covered California Agent Data Exposed In Phishing Attack",
+   "n_events": 1,
+   "last_seen": "2026-10-27T19:01:13Z",
+   "first_event_title": "Covered California Agent Data Exposed In Phishing Attack"
+  },
+  {
+   "id": "in-9-servers-of-bajaj-hospital-hacked-in-cyberattack-at-3-am-sen",
+   "title": "IN: 9 servers of Bajaj Hospital hacked in cyberattack at 3 am, sensitive data stolen; systems encrypted",
+   "n_events": 1,
+   "last_seen": "2026-10-27T19:01:03Z",
+   "first_event_title": "IN: 9 servers of Bajaj Hospital hacked in cyberattack at 3 am, sensitive data stolen; systems encrypted"
+  },
+  {
+   "id": "nist-report-provides-guidelines-for-transition-to-post-quantum-c",
+   "title": "NIST Report Provides Guidelines for Transition to Post-Quantum Cryptography Standards",
+   "n_events": 1,
+   "last_seen": "2026-10-27T18:55:40Z",
+   "first_event_title": "NIST issues roadmap for transition to post-quantum encryption standards"
+  },
+  {
+   "id": "three-tls-bugs-in-goahead-web-server",
+   "title": "Three TLS bugs in GoAhead web server",
+   "n_events": 1,
+   "last_seen": "2026-10-27T18:49:16.110Z",
+   "first_event_title": "Three TLS Bugs in GoAhead https:// foxio.io/blog/choose-your-back end-three-tls-bugs-in-goahead Comments: https:// news.ycombinator.com/item"
+  },
+  {
+   "id": "fbi-says-safepay-ransomware-gang-among-most-active-with-more-tha",
+   "title": "FBI says SafePay ransomware gang \u2018among most active\u2019 with more than 600 victims since 2024",
+   "n_events": 1,
+   "last_seen": "2026-10-27T18:41:27Z",
+   "first_event_title": "FBI says SafePay ransomware gang \u2018among most active\u2019 with more than 600 victims since 2024"
+  },
+  {
+   "id": "quest-diagnostics-incorporated-notifies-sec-of-incident",
+   "title": "Quest Diagnostics Incorporated notifies SEC of Incident",
+   "n_events": 1,
+   "last_seen": "2026-10-27T18:41:25Z",
+   "first_event_title": "Quest Diagnostics Incorporated notifies SEC of Incident"
+  },
+  {
+   "id": "governments-are-hacking-people-with-zero-click-spyware-by-showin",
+   "title": "Governments are hacking people with \u2018zero-click\u2019 spyware by showing them online ads",
+   "n_events": 1,
+   "last_seen": "2026-10-27T18:41:22Z",
+   "first_event_title": "Governments are hacking people with \u2018zero-click\u2019 spyware by showing them online ads"
+  },
+  {
+   "id": "gitlab-cve-2026-110264-cvss-10-0-unauthenticated-rce-in-regex-co",
+   "title": "GitLab warns of max-severity code execution vulnerability (CVE-2026-110264)",
+   "n_events": 1,
+   "last_seen": "2026-10-27T18:41:19Z",
+   "first_event_title": "GitLab warns of new max severity code execution vulnerability"
+  },
+  {
+   "id": "pentagon-ignored-cybersecurity-flaws-before-data-breach-marines",
+   "title": "Pentagon ignored cybersecurity flaws before data breach, Marines\u2019 lawsuit says",
+   "n_events": 1,
+   "last_seen": "2026-10-27T18:41:16Z",
+   "first_event_title": "Pentagon ignored cybersecurity flaws before data breach, Marines\u2019 lawsuit says"
+  },
+  {
+   "id": "sweden-blocks-chatgpt-and-claude-for-govt-workers",
+   "title": "Sweden blocks ChatGPT and Claude for govt workers",
+   "n_events": 0,
+   "last_seen": "2026-10-27T18:41:13Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "hacker-breached-capcom-id-obtained-data-from-11-million-accounts",
+   "title": "Hacker breached Capcom ID \u2013 obtained data from 11 million accounts and started changing passwords",
+   "n_events": 1,
+   "last_seen": "2026-10-27T18:41:10Z",
+   "first_event_title": "Hacker breached Capcom ID \u2013 obtained data from 11 million accounts and started changing passwords"
+  },
+  {
+   "id": "hackers-are-serving-malware-to-iphones-via-hundreds-of-infected",
+   "title": "Hackers Are Serving Malware To iPhones Via Hundreds Of Infected Websites",
+   "n_events": 1,
+   "last_seen": "2026-10-27T18:41:08Z",
+   "first_event_title": "Hackers Are Serving Malware To iPhones Via Hundreds Of Infected Websites"
+  },
+  {
+   "id": "conduent-to-pay-80m-to-settle-3rd-largest-healthcare-data-breach",
+   "title": "Conduent to pay $80M to settle 3rd-largest healthcare data breach",
+   "n_events": 1,
+   "last_seen": "2026-10-27T18:41:05Z",
+   "first_event_title": "Conduent to pay $80M to settle 3rd-largest healthcare data breach"
+  },
+  {
+   "id": "prolific-hive-and-nefilim-ransomware-affiliate-sentenced-to-70-m",
+   "title": "Prolific Hive and Nefilim ransomware affiliate sentenced to 70 months in prison",
+   "n_events": 1,
+   "last_seen": "2026-10-27T18:33:41Z",
+   "first_event_title": "Prolific Hive and Nefilim ransomware affiliate sentenced to 70 months in prison"
+  },
+  {
+   "id": "laravel-tokenguard-auth-bypass-cve-2026-114509-critical-vulnerab",
+   "title": "Laravel TokenGuard auth bypass (CVE-2026-114509) critical vulnerability",
+   "n_events": 6,
+   "last_seen": "2026-10-27T18:32:50.000Z",
+   "first_event_title": "CVE-2026-114509: Laravel TokenGuard auth bypass (CRITICAL, CVSS 9.2) impacts https:// radar.offseq.com/threat/cve-20 26-114509-cwe-287-impro"
+  },
+  {
+   "id": "energy-giant-engie-discloses-data-breach-affecting-customers",
+   "title": "Energy giant ENGIE discloses data breach affecting customers",
+   "n_events": 3,
+   "last_seen": "2026-10-27T18:30:03.000Z",
+   "first_event_title": "Energy giant ENGIE discloses data breach affecting customers"
+  },
+  {
+   "id": "2026-13482",
+   "title": "[\uc77c\ubcf8 \uc560\ub2c8\uba54\uc774\uc158]\u5e7c\u5973\u6226\u8a18\u2171(\uc720\ub140\uc804\uae30 \u2171,2026)",
+   "n_events": 0,
+   "last_seen": "2026-10-26T15:06:28Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "atlassian-security-advisory-av26-1076",
+   "title": "Atlassian security advisory (AV26-1076)",
+   "n_events": 1,
+   "last_seen": "2026-10-22T16:05:53Z",
+   "first_event_title": "Atlassian security advisory (AV26-1076)"
+  },
+  {
+   "id": "control-systems-hitachi-security-advisory-av26-1091",
+   "title": "[Control systems] Hitachi security advisory (AV26-1091)",
+   "n_events": 1,
+   "last_seen": "2026-10-27T16:35:59Z",
+   "first_event_title": "[Control systems] Hitachi security advisory (AV26-1091)"
+  },
+  {
+   "id": "control-systems-johnson-controls-security-advisory-av26-1090",
+   "title": "[Control systems] Johnson Controls security advisory (AV26-1090)",
+   "n_events": 1,
+   "last_seen": "2026-10-27T14:10:52Z",
+   "first_event_title": "[Control systems] Johnson Controls security advisory (AV26-1090)"
+  },
+  {
+   "id": "control-systems-moxa-security-advisory-av26-1089",
+   "title": "[Control Systems] Moxa security advisory (AV26-1089)",
+   "n_events": 1,
+   "last_seen": "2026-10-27T13:35:40Z",
+   "first_event_title": "[Control Systems] Moxa security advisory (AV26-1089)"
+  },
+  {
+   "id": "control-systems-siemens-security-advisory-av26-1083",
+   "title": "[Control Systems] Siemens security advisory (AV26-1083)",
+   "n_events": 1,
+   "last_seen": "2026-10-26T13:50:45Z",
+   "first_event_title": "[Control Systems] Siemens security advisory (AV26-1083)"
+  },
+  {
+   "id": "craft-cms-security-advisory-av26-1086",
+   "title": "Craft CMS security advisory (AV26-1086)",
+   "n_events": 2,
+   "last_seen": "2026-10-26T17:00:13.000Z",
+   "first_event_title": "Craft CMS security advisory (AV26-1086)"
+  },
+  {
+   "id": "enterprise-fill-assist-delivers-custom-rules-for-enhanced-autofi-13618",
+   "title": "Enterprise fill assist delivers custom rules for enhanced autofill",
+   "n_events": 0,
+   "last_seen": "2026-10-27T00:00:00Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "esri-security-advisory-av26-1088",
+   "title": "Esri security advisory (AV26-1088)",
+   "n_events": 1,
+   "last_seen": "2026-10-27T13:25:46Z",
+   "first_event_title": "Esri security advisory (AV26-1088)"
+  },
+  {
+   "id": "fortinet-security-advisory-av26-1081",
+   "title": "Fortinet security advisory (AV26-1081)",
+   "n_events": 1,
+   "last_seen": "2026-10-23T14:25:59Z",
+   "first_event_title": "Fortinet security advisory (AV26-1081)"
+  },
+  {
+   "id": "fortinet-security-advisory-av26-812",
+   "title": "Fortinet security advisory (AV26-812)",
+   "n_events": 2,
+   "last_seen": "2026-08-13T10:40:57Z",
+   "first_event_title": "Fortinet security advisory (AV26-812)"
+  },
+  {
+   "id": "google-security-advisory-av26-1085",
+   "title": "Google security advisory (AV26-1085)",
+   "n_events": 1,
+   "last_seen": "2026-10-26T14:15:45Z",
+   "first_event_title": "Google security advisory (AV26-1085)"
+  },
+  {
+   "id": "google-security-advisory-av26-904",
+   "title": "Google security advisory (AV26-904)",
+   "n_events": 2,
+   "last_seen": "2026-09-09T20:49:30Z",
+   "first_event_title": "Google security advisory (AV26-904)"
+  },
+  {
+   "id": "grafana-security-advisory-av26-860",
+   "title": "Grafana Alloy Vulnerability CVE-2026-19516",
+   "n_events": 3,
+   "last_seen": "2026-10-13T16:00:56.470Z",
+   "first_event_title": "Grafana security advisory (AV26-860)"
+  },
+  {
+   "id": "hashicorp-security-advisory-av26-1087",
+   "title": "HashiCorp security advisory (AV26-1087)",
+   "n_events": 1,
+   "last_seen": "2026-10-26T19:10:47Z",
+   "first_event_title": "HashiCorp security advisory (AV26-1087)"
+  },
+  {
+   "id": "hashicorp-security-advisory-av26-797",
+   "title": "HashiCorp security advisory (AV26-797)",
+   "n_events": 1,
+   "last_seen": "2026-08-11T14:05:42Z",
+   "first_event_title": "HashiCorp security advisory (AV26-797)"
+  },
+  {
+   "id": "hashicorp-security-advisory-av26-817",
+   "title": "HashiCorp security advisory (AV26-817)",
+   "n_events": 1,
+   "last_seen": "2026-08-14T16:05:44Z",
+   "first_event_title": "HashiCorp security advisory (AV26-817)"
+  },
+  {
+   "id": "hpe-security-advisory-av26-1079",
+   "title": "HPE security advisory (AV26-1079)",
+   "n_events": 0,
+   "last_seen": "2026-10-23T13:25:39Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "ibm-security-advisory-av26-1040",
+   "title": "IBM security advisory (AV26-1040)",
+   "n_events": 1,
+   "last_seen": "2026-10-14T18:40:41Z",
+   "first_event_title": "IBM security advisory (AV26-1040)"
+  },
+  {
+   "id": "ibm-security-advisory-av26-1082",
+   "title": "IBM security advisory (AV26-1082)",
+   "n_events": 1,
+   "last_seen": "2026-10-26T13:40:45Z",
+   "first_event_title": "IBM security advisory (AV26-1082)"
+  },
+  {
+   "id": "a-critical-secure-boot-bypass-vulnerability-via-a-uefi-shell-fla",
+   "title": "A critical Secure Boot bypass vulnerability via a UEFI Shell flaw exposes servers to code execution. Discover how CVE-2026-33197 impacts dev",
+   "n_events": 1,
+   "last_seen": "2026-09-10T01:14:10.000Z",
+   "first_event_title": "A critical Secure Boot bypass vulnerability via a UEFI Shell flaw exposes servers to code execution. Discover how CVE-2026-33197 impacts dev"
+  }
+ ]
+}
