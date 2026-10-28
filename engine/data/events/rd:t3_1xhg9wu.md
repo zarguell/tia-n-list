@@ -1,0 +1,3 @@
+Built a 3-layer firewall for an LLM bot (regex -> Gemini classifier -> output check). Wrong model name -> every API call failed -> my fail-closed code blocked everything -> "9/9 attacks caught, 6/6 false positives". Looked like a bug, was actually my code lying to me. Real numbers after fixing it: - Regex only: 2/9 attacks - + Gemini: 8/9, 0 false positives (dev) - Hidden set: 3/3, 0/7 (only 3 attacks, so weak evidence) Demo: https://prompt-injection-firewall.streamlit.app Code + changelog: https://github.com/ztsprofessionalaiid7-alt/prompt-injection-firewall How do you stop fail-closed from hiding API errors in your evals? submitted by /u/ZtasnimS75 [link] [comments]
+
+via reddit r/cybersecurity: My prompt-injection firewall showed a perfect 9/9 score. It was fake.
