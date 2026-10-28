@@ -1,0 +1,3 @@
+PHP2Shell refers to two critical remote code execution vulnerabilities in PHP that attackers exploited before patches shipped. The language powers roughly 69% of the web, including embedded management interfaces in appliances. Security vendors argue this strengthens the case for faster vulnerability discovery and remediation, but enterprises cannot patch at machine speed.
+
+The key defensive focus should shift to blast-radius reduction: limiting which service accounts, API keys, cloud roles, and tokens a compromised PHP workload can access. Watch for the emergency PHP patches and track which appliance vendors release updated firmware.

@@ -1,0 +1,3 @@
+Microsoft is urging Entra ID administrators to migrate users to phishing-resistant authentication before SMS and voice methods retire on February 1, 2027. The retirement applies to workforce tenant authentication, not Azure AD B2C or Entra External ID. Admins can use passkeys, QR codes, FIDO2 security keys, or customer-managed telecom providers (CYOT) through the Microsoft Security Store.
+
+This is a planned deprecation rather than an active threat, but failure to migrate by the retirement date will cause sign-in disruptions. Organizations should audit current SMS/voice usage and test replacement methods.
