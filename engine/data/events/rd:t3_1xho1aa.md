@@ -1,0 +1,3 @@
+CISA added CVE-2026-111497, a Brotli decompression memory-corruption vulnerability, to its Known Exploited Vulnerabilities catalog. It can potentially enable information disclosure, crashes, or remote code execution in affected applications. Node.js, .NET, and other software using vulnerable Brotli decoders may be exposed when processing attacker-controlled compressed data. Apply relevant patches and redeploy affected applications or containers. CISA's listing confirms exploitation, but doesn't establish widespread successful production compromises. submitted by /u/BTC-brother2018 [link] [comments]
+
+via reddit r/cybersecurity: CISA Confirms Active Exploitation of Node2Shell / HTTP2Shell
