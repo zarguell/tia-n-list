@@ -1,0 +1,1 @@
+CISA published advisory ICSA-26-300-01 on October 27, 2026, covering CVE-2026-114595 through CVE-2026-114598 in EPICS Base 7.0.10 and earlier. The advisory recommends updating to version 7.0.11 and notes the vulnerabilities were reported by Shubham Raj of Cipher / Causal Security.

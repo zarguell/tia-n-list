@@ -1,0 +1,1 @@
+The Register reported on October 27, 2026 that Causal Security's autonomous AI agent Cipher independently discovered and validated all four EPICS Base vulnerabilities in under four hours. The piece confirms CISA's advisory and the critical 9.8 CVSS integer overflow (CVE-2026-114595).
