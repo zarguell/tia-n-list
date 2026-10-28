@@ -1,1 +1,3 @@
-오늘은 작년에 분석한다고 내버려둬 두었다가 지금 적어보는 피싱 메일입니다.피싱 메일 내용은 간단합니다.피싱 메일 내용귀하의 daum(.)net 비밀번호는 (??? @daum (.)net) 만료되도록 설정되어 있습니다. 8/16/2025..자격 증명을 유지하려면&n.. Article Link: 다음 고객센터 사칭 피싱 메일 분석
+Today I am writing up a phishing email that I set aside to analyze last year and never got to. The phishing email content is simple. Email content: your daum.net password is set to expire on 8/16/2025 for (???@daum.net). To keep your credentials... Article Link: Analysis of a phishing email impersonating the Daum customer center
+
+Original article (Korean): https://malware.news/t/topic/126818#post_1
