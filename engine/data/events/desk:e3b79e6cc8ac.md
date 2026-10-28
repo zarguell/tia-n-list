@@ -1,0 +1,1 @@
+Rapid7's July 29, 2026 blog confirms the Broadcom advisory date and describes the three critical flaws: CVE-2026-59309 (vCenter auth bypass), CVE-2026-59310 (vCenter RCE), and CVE-2026-47876 (ESXi VM escape). The post notes exploitation requires local admin privileges in a guest for the VM escape, and provides patch guidance.
