@@ -1,0 +1,5 @@
+CVE-2026-97631 is a critical vulnerability in the EDK II PXE network boot driver that allows unauthenticated attackers to execute malicious code before the operating system loads. The flaw affects ICMP error processing during both IPv4 and IPv6 network boot, exposing firmware memory to potential writes. The advisory covers the pre-boot attack surface, meaning compromise occurs before Secure Boot verifies the OS loader.
+
+This is a supply-chain-level firmware exposure: any server or endpoint that performs network boot via PXE carries the risk, independent of the operating system. The impact is not limited to a single vendor but spans the EDK II reference implementation used across server platforms. No patch timeline or version restriction is specified in the event content.
+
+Monitor vendor firmware updates and server OEM advisories that incorporate EDK II fixes. Organizations relying on PXE boot should assess whether network boot paths can be restricted or disabled until firmware updates are validated.

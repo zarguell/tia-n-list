@@ -1,3 +1,5 @@
-Fortinet's October 2026 advisories include a CVSS 9.4 FortiSIEM path traversal (CVE-2026-106173) allowing unauthenticated remote code execution via specially crafted packets, and a CVSS 9.6 FortiSandbox authentication bypass (CVE-2026-107656). Only FortiSIEM 7.5.0 is affected; the fix is 7.5.1 with a workaround restricting tcp port 27918.
+Fortinet released October 2026 advisories addressing vulnerabilities in FortiSandbox and FortiSIEM. The event content references CVE-2026-106173 for FortiSIEM, which has a public exploit and is cited by the Canadian Cyber Centre as actively exploited as of October 26. The advisory covers authentication bypass and remote code execution paths with CVSS ratings that demand urgent patching.
 
-The new event confirms the CVE-2026-106173 exploitation claim is now in the wild. Watch for confirmation of successful compromise beyond scanning, and whether affected organizations apply the 7.5.1 upgrade promptly.
+The event also mentions a CVSS 9.6 FortiSandbox authentication bypass and a 9.4 FortiSIEM flaw in broader advisory summaries. These are not theoretical bugs: the FortiSIEM RCE has demonstrated exploitation in the wild, and the Canadian Cyber Centre's citation confirms real-world impact rather than laboratory proof-of-concept only.
+
+Administrators should apply patches for FortiSandbox and FortiSIEM immediately, restrict management interfaces, and review access logs for exploitation indicators around October 26. Monitor Fortinet's security advisory updates for any additional CVEs added to the October release cycle.
