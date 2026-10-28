@@ -1,0 +1,5 @@
+A SANS Internet Storm Center diary published October 28, 2026 documents a new ClickFix campaign that uses a fake Cloudflare verification page to trick users on both macOS and Windows. The lure presents a bogus verification prompt and instructs the victim to copy and run a command, a hallmark of ClickFix social engineering.
+
+The malware delivery chain observed in this case ran through js-static[.]cfd, with endpoints including embed.js and several API tracking calls. The researcher was unable to retrieve the final payload: on Windows the malware host returned HTTP 403, and on macOS the delivery domain did not resolve. Indicators were published, but the specific stealer or payload remains unconfirmed for this variant.
+
+The campaign is one more example of the ongoing ClickFix trend that reuses fake Cloudflare verification pages to push malicious commands, and defenders should treat clipboard-execution prompts from verification pages as hostile.

@@ -1,0 +1,3 @@
+Times Car, a Japanese car-sharing service, suffered a September data breach that leaked personal data including the driver's licenses of 1.46 million people. The company now reports a one-time loss of 5.5 billion yen tied to the incident, a figure that is prompting Japanese firms to reassess the financial exposure created by weak cybersecurity controls.
+
+The breach and its cost illustrate how data incidents at consumer services scale into material business losses. The reporting frames the Times Car case as a warning for other Japanese companies that still treat security as a low priority.
