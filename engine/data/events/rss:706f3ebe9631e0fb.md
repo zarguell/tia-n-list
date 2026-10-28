@@ -1,1 +1,2 @@
-Note: This malware is not found in firmware officially manufactured and distributed by Samsung Electronics. The Galaxy S24 Ultra, S25 Ultra, and other model names mentioned in the report are low-cost counterfeit devices that borrow those names... Article Link: Midnight Mimosa malware installed in counterfeit Samsung Galaxy S25 Ultra Android firmware warning.
+Midnight Mimosa malware installed in counterfeit Samsung Galaxy S25 Ultra Android firmware warning
+via Mastodon https://malware.news/t/s25-midnight-mimosa/126423#post_1

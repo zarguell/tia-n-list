@@ -1,1 +1,2 @@
-In the past week, CERT-AGID observed multiple phishing campaigns using compromised certified email (PEC) accounts to distribute fake payment requests under the PagoPA name. The page communicates with a server-side management panel every half second, checking for instructions to direct users toward additional screens. Among these are pages potentially dedicated to collecting payment card data and bank verification codes. Article Link: Phishing PagoPA: nuove campagne a tema multe diffuse tramite PEC compromesse – CERT-AGID
+Phishing PagoPA: new campaigns with fine-themed messages spread via compromised PEC
+via Mastodon https://malware.news/t/phishing-pagopa-nuove-campagne-a-tema-multe-diffuse-tramite-pec-compromesse/126735#post_1

@@ -1,0 +1,1 @@
+GMO's second advisory, dated October 22, 2026 at 16:54 JST, provides a follow-up to the October 21 announcement. It states that as of October 20, a malicious program had been installed by a third party in the server environments of some Onamae.com Desktop Cloud customers. The company confirms ongoing investigation into unauthorized access and potential customer data compromise.

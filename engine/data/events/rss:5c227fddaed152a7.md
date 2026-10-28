@@ -1,1 +1,2 @@
-A few days after the fixes for the critical vulnerabilities CVE-2026-109618 and CVE-2026-109619, the PHP Security Team announced on 23 October 2026 the existence of an additional issue in PHP session management. The new vulnerability, identified as CVE-2026-115560, could allow remote code execution (RCE), but requires an uncommon combination of server configuration and application behavior. Article Link: PHP, nuova vulnerabilità RCE: rischio circoscritto e mitigazione disponibile – CERT-AGID
+PHP, new RCE vulnerability: circumscribed risk and mitigation available
+via Mastodon https://malware.news/t/php-nuova-vulnerabilita-rce-rischio-circoscritto-e-mitigazione-disponibile/126696#post_1

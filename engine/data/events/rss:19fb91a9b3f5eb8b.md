@@ -1,1 +1,2 @@
-This week, CERT-AGID detected and analyzed a total of 219 malicious campaigns in its Italian reference scenario, of which 185 targeted Italy and 34 were generic but still affected Italy, making available to its accredited entities the 1,436 indicators of compromise (IoC) identified. Article Link: Sintesi riepilogativa delle campagne malevole nella settimana del 26 settembre – 2 ottobre – CERT-AGID
+CERT-AGID Weekly Threat Summary: 219 Campaigns Target Italy
+via Mastodon https://malware.news/t/sintesi-riepilogativa-delle-campagne-malevole-nella-settimana-del-26-settembre-2-ottobre/126098#post_1

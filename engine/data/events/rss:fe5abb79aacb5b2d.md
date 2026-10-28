@@ -1,1 +1,2 @@
-Rockstar Games added official age rating information to the Grand Theft Auto 6 store page. The game is rated M (adult) by the US ESRB and PEGI 18 in the UK. In Australia and New Zealand, sexual content is explicitly indicated. Article Link: GTA 6 officially rated M (adult) in Australia and New Zealand, sexual scenes explicitly indicated.
+GTA 6 officially rated M (adult) in the US
+via Mastodon https://malware.news/t/gta-6-m/126141#post_1

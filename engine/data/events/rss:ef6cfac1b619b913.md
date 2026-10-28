@@ -1,1 +1,2 @@
-As the AI industry directly drives a RAM supply crisis, a new rumor suggests the Galaxy S27 could see its RAM capacity reduced to 8GB, and some models from other Android brands could revert to 4GB. Article Link: https://...
+Galaxy S27 RAM may drop to 8GB; some Android phones could revert to 4GB
+via Mastodon https://malware.news/t/s27-ram-8gb-4gb/126647#post_1

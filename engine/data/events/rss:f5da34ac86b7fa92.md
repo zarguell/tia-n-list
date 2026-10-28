@@ -1,1 +1,2 @@
-Microsoft stated that the Windows Settings backup and restore feature is now enabled by default for all Microsoft Entra-joined or Microsoft Entra hybrid-joined enterprise systems upgraded to Windows 11 26H2. Article Link: Microsoft activates Windows settings backup by default for organizational targets
+Microsoft activates Windows Settings backup by default for organizational targets
+via Mastodon https://malware.news/t/windows/126184#post_1
