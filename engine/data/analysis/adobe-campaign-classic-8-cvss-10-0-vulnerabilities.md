@@ -1,0 +1,3 @@
+Adobe Campaign Classic has one bulletin covering eight vulnerabilities, all rated CVSS 10.0. The event notes five code injection flaws, one OS command injection, one broken authentication check, and one denial-of-service issue, all unauthenticated. This is an unusually dense critical bulletin for a marketing automation platform that often handles customer data.
+
+All eight vulnerabilities are unauthenticated and reach the maximum CVSS score, which suggests straightforward remote exploitation potential. The event does not list specific CVEs for each issue, only that they are all in the same bulletin. Watch for Adobe’s APSB reference, patch availability, and any reports of active exploitation given the platform’s exposure to external campaigns.
