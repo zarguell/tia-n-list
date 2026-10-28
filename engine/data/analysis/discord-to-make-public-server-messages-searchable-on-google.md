@@ -1,0 +1,5 @@
+Discord will allow search engines to index messages in Discoverable Servers, making public community conversations accessible on the web without an account or invitation. The change applies only to Discoverable Servers, publicly listed communities with at least 1,000 members; Discord hosts roughly 63,000 such servers. Private servers, direct messages, and non-qualifying servers are excluded.
+
+Server Web Pages will be created automatically on November 16 if admins have not created them, and the only way to avoid them is to change the server type to private before the cutoff. The December rollout will be gradual, and messages posted before the release date will be excluded. Channel administrators can exclude individual channels or disable all channel content sharing.
+
+Server operators should review privacy settings before the November 16 cutoff, especially communities handling sensitive topics. Members should be aware that messages in eligible public servers may become publicly searchable.
