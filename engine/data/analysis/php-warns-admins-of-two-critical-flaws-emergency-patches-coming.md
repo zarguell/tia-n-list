@@ -1,3 +1,0 @@
-The PHP security team warned administrators to prepare for emergency updates addressing two critical vulnerabilities, both rated 9.2 under CVSS v4.0. The flaws, designated CVE-2026-109618 and CVE-2026-109619, leaked ahead of disclosure, prompting an accelerated patch release. The vulnerabilities affect the language used in roughly 69% of web applications.
-
-Because vendors compile PHP into appliance firmware, many network devices (firewalls, VPNs, controllers) cannot be patched directly by users and must wait for vendor firmware updates. Organizations should apply the PHP updates immediately where possible and restrict management interface exposure elsewhere.
