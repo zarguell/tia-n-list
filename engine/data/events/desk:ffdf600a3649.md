@@ -1,0 +1,1 @@
+Reuters via Yonhap said three South Korean financial firms reported data breaches on Wednesday. Bithumb said its in-house mobile system had been hacked and personal information leaked, as part of a wider wave hitting the country's financial sector.

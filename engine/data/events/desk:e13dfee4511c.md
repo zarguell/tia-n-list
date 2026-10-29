@@ -1,0 +1,1 @@
+CoinTelegraph reported the breach impacted Bithumb's in-house mobile system used by employees for work and information sharing. Bithumb told Yonhap it was investigating the exact scope, including whether member information was involved, and emphasized customer virtual assets could not be accessed through this breach.

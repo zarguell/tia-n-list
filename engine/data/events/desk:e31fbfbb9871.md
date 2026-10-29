@@ -1,0 +1,1 @@
+TechPlanet reports on 28 October 2026 that over a week after Apple was notified (17 October), macOS command-line tools including git, curl, and python3 still trust the compromised certificates. The article frames the exposure as leaving developers vulnerable to man-in-the-middle attacks that could serve malicious clones or alter pushes.
