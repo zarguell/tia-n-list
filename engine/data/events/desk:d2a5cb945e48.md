@@ -1,0 +1,1 @@
+Japan Airlines reported 92,000 affected customers in a breach at Amadeus, while All Nippon Airways and Japan Transocean Air were also investigating unauthorized access to reservation records. JAL said flight operations were unaffected and credit card numbers were not compromised, and planned to contact affected customers individually with phishing warnings.
