@@ -1,0 +1,1 @@
+The Guardian reported on October 28, 2026 that a group calling itself the Department of Peace released data on more than 40,000 DHS workers via DDoSecrets. DHS called it a potential breach; Okta denied any compromise of its systems. The leak exposes contact and role details for ICE, CBP, and other component agencies.

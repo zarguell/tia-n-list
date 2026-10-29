@@ -1,0 +1,1 @@
+WIRED reported that records span DHS and seven component agencies, last updated August 19, 2026. The archive was handed to transparency nonprofit DDoSecrets and journalist maia arson crimew. The dataset includes undercover ICE agents and covers ICE, CBP, HSI, and CISA personnel.

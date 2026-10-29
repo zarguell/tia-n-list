@@ -1,0 +1,1 @@
+NPR reported on October 28, 2026 that the Department of Peace leaked data on over 40,000 DHS employees through DDoSecrets under the name Icepick. The data includes names, work emails, phone numbers, job titles, office locations, and system access records. DHS confirmed awareness and said it is actively addressing the situation.
