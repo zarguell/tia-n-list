@@ -1,0 +1,5 @@
+Talos reports UAT-11473 exploited CVE-2026-20127, an authentication bypass in Cisco SD-WAN Catalyst Controller instances, to gain unauthorized access. The actor installed KeyDrift, a custom malware framework that includes PolyFlame, a memory-resident module deployed through modified runit service paths. KeyDrift operates inside SD-WAN control-plane processes, intercepting decrypted control traffic, extracting control-session metadata and data-plane keying material, and staging transmission via encrypted records.
+
+Targeting spans space and satellite services, defense and aerospace technology, and policy research. Talos assesses with high confidence that UAT-11473's infrastructure overlaps with Volt Typhoon's Silent Train covert access network. The event names CVE-2026-20127 specifically; the story carries one source (malware.news) and one event.
+
+Watch for Cisco advisory updates on CVE-2026-20127 and any CISA KEV addition. Given the overlap with known APT infrastructure and the focus on keying material, this is a strategic threat rather than a commodity intrusion.
