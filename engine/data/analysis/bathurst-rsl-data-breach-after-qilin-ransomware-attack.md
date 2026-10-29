@@ -1,3 +1,3 @@
-Bathurst RSL in Australia reported a cyber incident contained after a Qilin ransomware attack, according to CyberDaily. The breach is one of a series of Australian targets hit by the same ransomware group within a short window. No customer fund loss was reported, but the club's internal systems were affected.
+Bathurst RSL, an Australian club, disclosed a cyber incident impacting its systems, containing the breach after Qilin ransomware involvement. The disclosure came through CyberDaily and social updates, with the club stating the incident was contained. The event fits a broader pattern of ransomware targeting regional organizations with limited security resources.
 
-Watch for Qilin's leak-site updates and any data exposure claims tied to Bathurst RSL. Australian organizations should review Qilin's recent targeting patterns.
+While the breach appears contained, ransomware incidents at small-to-medium organizations often involve data exfiltration before encryption. The club should verify whether any member or employee data was accessed and provide timely notification if personal information was involved.
