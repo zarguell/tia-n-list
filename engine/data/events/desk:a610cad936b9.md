@@ -1,0 +1,1 @@
+Microsoft released security updates on October 27 referencing CVE-2026-45494 (CVSS 5.0, navigation-handling weakness allowing cross-origin script injection reported by Orange Tsai) and CVE-2026-45492. These entries confirm vendor acknowledgment and patching of the underlying logic flaws before the public analysis appeared.

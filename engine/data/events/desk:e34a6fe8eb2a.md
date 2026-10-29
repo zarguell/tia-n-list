@@ -1,0 +1,1 @@
+Orange Tsai of DEVCORE published the full exploit method on October 28, describing how four logic bugs chained into a sandbox escape without memory corruption. The article confirms the $175,000 Pwn2Own Berlin 2026 award and notes the chain relied on universal XSS and navigation-handling weaknesses in Edge.
