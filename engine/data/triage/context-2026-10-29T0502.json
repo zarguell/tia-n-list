@@ -1,0 +1,778 @@
+{
+ "date": "2026-10-29",
+ "decisions_path": "engine/data/triage/decisions-2026-10-29T0502.json",
+ "instructions": "For every new event decide: (1) keep or drop \u2014 keep only stories worth covering (real security events, vulnerabilities, attacks, breaches, advisories with substance); drop press releases, vendor marketing, generic explainers, and anything duplicating an existing story. (2) If keep, assign the event to the RIGHT story: an existing candidate story id if it belongs there (this FIXES mechanical clustering \u2014 e.g. different outlets' Patch Tuesday roundups are ONE story), or NEW with a clean story_title. (3) merges: list candidate stories that are really the same story (from = fragment, into = the most complete one). (4) For every kept event that names CVEs, optionally assess exploitation: exploited = the event reports OBSERVED in-the-wild exploitation (implants, victim counts, campaigns, CISA KEV confirmation); suspected = public exploit code/PoC or likely-but-unconfirmed. Attribute ONLY the CVEs you can tie to the claim \u2014 a bulletin's blanket 'actively exploited' does NOT flag all its CVEs. Omit the exploitation field when the event makes no claim.\n(5) LOW-TRUST events (\"low_trust\": true \u2014 AI-drafted aggregator reposts, late and overstated): treat as unverified leads. When the text attributes the claim to a named primary source (a researcher firm like watchTowr, a vendor advisory, CISA, a major outlet) and attribution_urls or a web search (/home/ubuntu/repos/cronman/bin/web-search.sh \"query\") locate that primary source CONFIRMING the claim, include a provenance object in the decision: {\"url\": <primary url>, \"source\": <domain>, \"evidence\": <one line>, \"verified\": true}. VERIFIED provenance lets the event mint a story (credited to the primary source) and count as a development; without it, a low-trust event can only attach to an EXISTING story, never mint. If you cannot verify, keep/drop on normal merit and omit provenance.\n\nWrite decisions as JSON with EXACTLY this shape:\n{\n  \"decisions\": [\n    {\"event_id\": \"<id>\", \"action\": \"keep\", \"story\": \"<existing candidate story id>\", \"reason\": \"...\"},\n    {\"event_id\": \"<id>\", \"action\": \"keep\", \"story\": \"NEW\", \"story_title\": \"<clean title>\", \"reason\": \"...\"},\n    {\"event_id\": \"<id>\", \"action\": \"drop\", \"reason\": \"...\"}\n  ],\n  \"merges\": [{\"from\": \"<fragment story id>\", \"into\": \"<canonical story id>\"}]\n}\nFor events marked \"low_trust\" (AI-drafted aggregator reposts) a decision\nmay carry an optional \"provenance\" object when you VERIFIED the claim at\nthe named primary source: {\"event_id\": ..., \"action\": \"keep\", ...}\n  \"provenance\": {\"url\": \"<primary source url>\", \"source\": \"<domain>\", \"evidence\": \"<one line>\"}\nOnly include provenance when the primary source (vendor advisory, CISA,\nthe named researcher/outlet) really carries the claim \u2014 verified\nprovenance lets a low-trust event mint a story and set freshness; without\nit the event can only amplify an existing story.\nSTRICT KEY NAMES: the array key is \"decisions\" (never \"events\"); the story\nkey is \"story\" (never \"story_id\"); \"story\" holds a candidate_stories id\nverbatim or the literal string \"NEW\". Optional per-event field\n\"exploitation\": {\"CVE-...\": {\"status\": \"exploited|suspected\", \"evidence\": \"1-2 sentences\"}}.",
+ "new_events": [
+  {
+   "id": "rss:b2fe58e157216aab",
+   "title": "Hackers Exploit PHP2Shell Vulnerabilities to Gain Root Access on 25 Firewall Servers",
+   "source": "gbhackers.com",
+   "published_at": "2026-10-29T04:59:05Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Hackers chained PHP2Shell vulnerabilities with a Linux kernel privilege escalation flaw to gain root access on 25 servers, including three systems associated with a United States government-affiliated environment, accord"
+  },
+  {
+   "id": "masto:117522362387884218",
+   "title": "\u0427\u0451\u0440\u043d\u044b\u0439 \u043e\u043a\u0442\u044f\u0431\u0440\u044c \u0443\u044f\u0437\u0432\u0438\u043c\u043e\u0441\u0442\u0435\u0439: \u0447\u0442\u043e \u0437\u0430\u0434\u0435\u043b\u043e \u043c\u043e\u0439 \u0441\u0435\u0440\u0432\u0435\u0440, \u043a\u0430\u043a \u044f \u0437\u0430\u043a\u0440\u044b\u043b \u0434\u044b\u0440\u044b \u0438 \u043f\u043e\u0447\u0435\u043c\u0443 \u0443\u0448\u0451\u043b \u043d\u0430 \u0441\u0442\u0430\u0442\u0438\u043a\u0443 \u0431\u0435\u0437 \u0438\u043d\u043b\u0430\u0439\u043d-\u0441\u043a\u0440\u0438\u043f\u0442\u043e\u0432 \u0423 \u043c\u0435\u043d\u044f \u043a\u0440\u0443\u0433\u043b\u043e\u0441\u0443\u0442\u043e\u0447\u043d\u043e \u0440\u0430\u0431\u043e\u0442",
+   "source": "habr.com",
+   "published_at": "2026-10-29T04:42:17.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "\u0427\u0451\u0440\u043d\u044b\u0439 \u043e\u043a\u0442\u044f\u0431\u0440\u044c \u0443\u044f\u0437\u0432\u0438\u043c\u043e\u0441\u0442\u0435\u0439: \u0447\u0442\u043e \u0437\u0430\u0434\u0435\u043b\u043e \u043c\u043e\u0439 \u0441\u0435\u0440\u0432\u0435\u0440, \u043a\u0430\u043a \u044f \u0437\u0430\u043a\u0440\u044b\u043b \u0434\u044b\u0440\u044b \u0438 \u043f\u043e\u0447\u0435\u043c\u0443 \u0443\u0448\u0451\u043b \u043d\u0430 \u0441\u0442\u0430\u0442\u0438\u043a\u0443 \u0431\u0435\u0437 \u0438\u043d\u043b\u0430\u0439\u043d-\u0441\u043a\u0440\u0438\u043f\u0442\u043e\u0432 \u0423 \u043c\u0435\u043d\u044f \u043a\u0440\u0443\u0433\u043b\u043e\u0441\u0443\u0442\u043e\u0447\u043d\u043e \u0440\u0430\u0431\u043e\u0442  via Mastodon https://habr.com/ru/articles/1100918/ "
+  },
+  {
+   "id": "masto:117522292175989201",
+   "title": "Apple released iOS 18.7.11 to patch a critical CoreGraphics zero-day vulnerability for the iPhone XS and XR, protecting users from arbitrary",
+   "source": "dailytechnow.com",
+   "published_at": "2026-10-29T04:24:25.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Apple released iOS 18.7.11 to patch a critical CoreGraphics zero-day vulnerability for the iPhone XS and XR, protecting users from arbitrary  via Mastodon https://dailytechnow.com/apple-ios-18-coregraphics-security-patch"
+  },
+  {
+   "id": "masto:117522291232551438",
+   "title": "All dropped something. None of it was intentional. DHS has acknowledged the potential breach and says it is actively working to address it. ",
+   "source": "www.politico.com",
+   "published_at": "2026-10-29T04:24:11.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "All dropped something. None of it was intentional. DHS has acknowledged the potential breach and says it is actively working to address it.   via Mastodon https://www.politico.com/news/2026/10/28/dhs-data-leak-hacktivist"
+  },
+  {
+   "id": "masto:117522204536280369",
+   "title": "Discover Google Gemini 4 Carbon, the new frontier AI model offering unmatched cybersecurity, long-term task processing, and agent workflows.",
+   "source": "dailytechnow.com",
+   "published_at": "2026-10-29T04:02:08.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Discover Google Gemini 4 Carbon, the new frontier AI model offering unmatched cybersecurity, long-term task processing, and agent workflows.  via Mastodon https://dailytechnow.com/gemini-4-carbon-cybersecurity-ai/ "
+  },
+  {
+   "id": "masto:117522192562386382",
+   "title": "JFrog Introduces Zero-Touch Remediation to its Self-Healing Software Supply Chain JFrog launches Zero-Touch Remediation to automatically fix",
+   "source": "jfrog.com",
+   "published_at": "2026-10-29T03:59:06.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "JFrog Introduces Zero-Touch Remediation to its Self-Healing Software Supply Chain JFrog launches Zero-Touch Remediation to automatically fix  via Mastodon https://jfrog.com/press-room/jfrog-introduces-zero-touch-remediat"
+  },
+  {
+   "id": "masto:117522192726032853",
+   "title": "Patch CVE-2026-118264 now. This 9.1 CVSS Echo Go framework vulnerability allows a WebSocket upgrade bypass of route-level access controls. #",
+   "source": "meterpreter.org",
+   "published_at": "2026-10-29T03:57:34.000Z",
+   "cves": [
+    "CVE-2026-118264"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Patch CVE-2026-118264 now. This 9.1 CVSS Echo Go framework vulnerability allows a WebSocket upgrade bypass of route-level access controls. #  via Mastodon https://meterpreter.org/echo-go-framework-websocket-bypass-cve-20"
+  },
+  {
+   "id": "masto:117522169130216019",
+   "title": "\ud83d\uddb2\ufe0f # Cybersecurity # Ciberseguridad # Ciberseguranca # Security # Seguridad # Seguranca # News # Noticia # Noticias # Tecnologia # Technolog",
+   "source": "www.darkreading.com",
+   "published_at": "2026-10-29T03:53:08.930Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "\ud83d\uddb2\ufe0f # Cybersecurity # Ciberseguridad # Ciberseguranca # Security # Seguridad # Seguranca # News # Noticia # Noticias # Tecnologia # Technolog  via Mastodon https://www.darkreading.com/application-security/in-the-wild-atta"
+  },
+  {
+   "id": "masto:117522162782192475",
+   "title": "Biometria ser\u00e1 obrigat\u00f3ria para usu\u00e1rios de celular; veja os prazos Essa \u00e9 uma P\u00c9SSIMA not\u00edcia. Essa monstruosidade tem que cair, n\u00e3o \u00e9 poss",
+   "source": "olhardigital.com.br",
+   "published_at": "2026-10-29T03:51:17.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Biometria ser\u00e1 obrigat\u00f3ria para usu\u00e1rios de celular; veja os prazos Essa \u00e9 uma P\u00c9SSIMA not\u00edcia. Essa monstruosidade tem que cair, n\u00e3o \u00e9 poss  via Mastodon https://olhardigital.com.br/2026/10/28/seguranca/biometria-sera-o"
+  },
+  {
+   "id": "masto:117522162696595076",
+   "title": "CVE-2023-42442: A broken permission check in the JumpServer bastion host lets anyone without a login download recorded session replays. Vers",
+   "source": "github.com",
+   "published_at": "2026-10-29T03:47:34.000Z",
+   "cves": [
+    "CVE-2023-42442"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "CVE-2023-42442: A broken permission check in the JumpServer bastion host lets anyone without a login download recorded session replays. Vers  via Mastodon https://github.com/jumpserver/jumpserver/security/advisories/GHSA"
+  },
+  {
+   "id": "masto:117522144315470628",
+   "title": "Other than AI slop appearing in the Asustor's ADM, their security is broken too. Or at least the password dictionary attack block is not exa",
+   "source": "social.kernel.org",
+   "published_at": "2026-10-29T03:46:40.060Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Other than AI slop appearing in the Asustor's ADM, their security is broken too. Or at least the password dictionary attack block is not exa  via Mastodon https://social.kernel.org/tag/infosec "
+  },
+  {
+   "id": "masto:117522096872778661",
+   "title": "\u26a1 Remote Threat Detection Analyst (Japanese Speaking) at Fastly. \u2705 Apply here: https:// jobicy.com/jobs/154166-threat- detection-analyst-jap",
+   "source": "jobicy.com",
+   "published_at": "2026-10-29T03:34:46.378Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "\u26a1 Remote Threat Detection Analyst (Japanese Speaking) at Fastly. \u2705 Apply here: https:// jobicy.com/jobs/154166-threat- detection-analyst-jap  via Mastodon https://jobicy.com/jobs/154166-threat-detection-analyst-japanese-"
+  },
+  {
+   "id": "masto:117522096724400929",
+   "title": "\u26a1 Remote Senior Security Engineer (Remote, EU/CET) at Maze. \u2705 Apply here: https:// jobicy.com/jobs/154158-senior- security-engineer-remote-e",
+   "source": "jobicy.com",
+   "published_at": "2026-10-29T03:34:44.104Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "\u26a1 Remote Senior Security Engineer (Remote, EU/CET) at Maze. \u2705 Apply here: https:// jobicy.com/jobs/154158-senior- security-engineer-remote-e  via Mastodon https://jobicy.com/jobs/154158-senior-security-engineer-remote-eu"
+  },
+  {
+   "id": "masto:117522132883630754",
+   "title": "Leak website releases data on thousands of US Homeland Security employees https:// fed.brid.gy/r/https://www.rapp ler.com/technology/leak-we",
+   "source": "fed.brid.gy",
+   "published_at": "2026-10-29T03:34:03.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Leak website releases data on thousands of US Homeland Security employees https:// fed.brid.gy/r/https://www.rapp ler.com/technology/leak-we  via Mastodon https://fed.brid.gy/r/https://www.rappler.com/technology/leak-web"
+  },
+  {
+   "id": "masto:117522089307424138",
+   "title": "Black Lotus Labs and Cisco Talos describe Volt Typhoon's use of rotating chains of compromised SOHO, IoT and enterprise infrastructure. Thes",
+   "source": "www.lumen.com",
+   "published_at": "2026-10-29T03:32:50.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Black Lotus Labs and Cisco Talos describe Volt Typhoon's use of rotating chains of compromised SOHO, IoT and enterprise infrastructure. Thes  via Mastodon https://www.lumen.com/blog/en-us/silent-train-volt-typhoon-operat"
+  },
+  {
+   "id": "masto:117522066498827225",
+   "title": "Why Is This Fingerprinting Script Creating Bioweapons? The author crawled 10,000 websites to collect browser-fingerprinting canvases and inv",
+   "source": "servicepipe.tech",
+   "published_at": "2026-10-29T03:27:02.906Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Why Is This Fingerprinting Script Creating Bioweapons? The author crawled 10,000 websites to collect browser-fingerprinting canvases and inv  via Mastodon https://servicepipe.tech "
+  },
+  {
+   "id": "masto:117522049478318407",
+   "title": "Behind Gab: Andrew Torba # negativepid # digitalInvestigations # OSINT # cybersecurity # AI # tech # onlineInvestigations # robotics # cyber",
+   "source": "negativepid.blog",
+   "published_at": "2026-10-29T03:22:43.189Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Behind Gab: Andrew Torba # negativepid # digitalInvestigations # OSINT # cybersecurity # AI # tech # onlineInvestigations # robotics # cyber  via Mastodon https://negativepid.blog/behind-gab-andrew-torba/?utm_source=mast"
+  },
+  {
+   "id": "masto:117522039693566497",
+   "title": "A security flaw in Valkey software could allow unauthorized access to your system. Source: Zero Day Initiative Read: http://www. zerodayinit",
+   "source": "www.zerodayinitiative.com",
+   "published_at": "2026-10-29T03:20:13.889Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "A security flaw in Valkey software could allow unauthorized access to your system. Source: Zero Day Initiative Read: http://www. zerodayinit  via Mastodon http://www.zerodayinitiative.com/advisories/ZDI-26-833/ "
+  },
+  {
+   "id": "masto:117522013216151978",
+   "title": "Juniper JSA112183: 18 CVEs, two 9.8s. CVE-2026-103401 (8.8): root file overwrite. Mist-managed: affected. Conductor-managed: not. Same versi",
+   "source": "threataft.com",
+   "published_at": "2026-10-29T03:13:29.870Z",
+   "cves": [
+    "CVE-2026-103401",
+    "CVE-2026-103409"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Juniper JSA112183: 18 CVEs, two 9.8s. CVE-2026-103401 (8.8): root file overwrite. Mist-managed: affected. Conductor-managed: not. Same versi  via Mastodon https://threataft.com/articles/juniper-session-smart-router-condu"
+  },
+  {
+   "id": "masto:117522010320356044",
+   "title": "Juniper JSA112183: 18 CVEs in Session Smart Router, two at 9.8. The non-obvious finding: CVE-2026-103401 (8.8, arbitrary file overwrite as r",
+   "source": "threataft.com",
+   "published_at": "2026-10-29T03:12:45.000Z",
+   "cves": [
+    "CVE-2026-103401",
+    "CVE-2026-103409"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Juniper JSA112183: 18 CVEs in Session Smart Router, two at 9.8. The non-obvious finding: CVE-2026-103401 (8.8, arbitrary file overwrite as r  via Mastodon https://threataft.com/articles/juniper-session-smart-router-condu"
+  },
+  {
+   "id": "masto:117521990932807056",
+   "title": "\ud83d\udee1\ufe0f Cybersecurity Engineer II at Electrosoft \ud83d\udccd Washington, DC \ud83d\udcb0 $150k\u2013$160k a year Apply: https:// blueteamjobs.com/job/cybersecu rity-engine",
+   "source": "blueteamjobs.com",
+   "published_at": "2026-10-29T03:07:49.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "\ud83d\udee1\ufe0f Cybersecurity Engineer II at Electrosoft \ud83d\udccd Washington, DC \ud83d\udcb0 $150k\u2013$160k a year Apply: https:// blueteamjobs.com/job/cybersecu rity-engine  via Mastodon https://blueteamjobs.com/job/cybersecurity-engineer-ii-electrosof"
+  },
+  {
+   "id": "masto:117521985608535115",
+   "title": "It is eye-poppingly unprecedented how many breaches, data leaks / exposures since Trump 2.0, his corrupt sycophants, & fElon's DOGE gang beg",
+   "source": "bsky.app",
+   "published_at": "2026-10-29T03:06:25.231Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "It is eye-poppingly unprecedented how many breaches, data leaks / exposures since Trump 2.0, his corrupt sycophants, & fElon's DOGE gang beg  via Mastodon https://bsky.app/profile/did:plc:inz4fkbbp7ms3ixufw6xuvdi/post/3m"
+  },
+  {
+   "id": "masto:117521972653600164",
+   "title": "Even zombies know not to travel alone! \ud83e\udddf\u200d\u2642\ufe0f Don't face the Oct 29 hotel block deadline solo. Use # BSidesDERoomShare to find a roomie for # ",
+   "source": "www.bsidesdelaware.com",
+   "published_at": "2026-10-29T03:03:10.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Even zombies know not to travel alone! \ud83e\udddf\u200d\u2642\ufe0f Don't face the Oct 29 hotel block deadline solo. Use # BSidesDERoomShare to find a roomie for #   via Mastodon https://www.bsidesdelaware.com/venue/ "
+  },
+  {
+   "id": "masto:117521968084722468",
+   "title": "Kali Linux 2026.3 is released, and the biggest change is how you build it. \u2022 Refreshed build scripts, with builds inside Docker or Podman \u2022 ",
+   "source": "www.opensourcefeed.org",
+   "published_at": "2026-10-29T03:01:59.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Kali Linux 2026.3 is released, and the biggest change is how you build it. \u2022 Refreshed build scripts, with builds inside Docker or Podman \u2022   via Mastodon https://www.opensourcefeed.org/kali-linux-2026-3-release/ "
+  },
+  {
+   "id": "masto:117521956592516202",
+   "title": "The Alert Fatigue Trap: Why Consolidation Only Solves Half the Problem MSPs drowning in security alerts? Tool sprawl creates alert fatigue, ",
+   "source": "thehackernews.com",
+   "published_at": "2026-10-29T02:59:05.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "The Alert Fatigue Trap: Why Consolidation Only Solves Half the Problem MSPs drowning in security alerts? Tool sprawl creates alert fatigue,   via Mastodon https://thehackernews.com/expert-insights/2026/10/the-alert-fatig"
+  },
+  {
+   "id": "masto:117521936111109779",
+   "title": "US Seizes Domain of Virtualine, Top Bulletproof Hosting Provider The US has seized the domain of Virtualine, a notorious bulletproof hosting",
+   "source": "osintsights.com",
+   "published_at": "2026-10-29T02:53:53.338Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "US Seizes Domain of Virtualine, Top Bulletproof Hosting Provider The US has seized the domain of Virtualine, a notorious bulletproof hosting  via Mastodon https://osintsights.com/us-seizes-domain-of-virtualine-top-bullet"
+  },
+  {
+   "id": "masto:117521935928165824",
+   "title": "Retailers Face Surge in Cyber Threats as Peak Shopping Season Approaches As the holiday shopping season approaches, retailers are bracing fo",
+   "source": "osintsights.com",
+   "published_at": "2026-10-29T02:53:50.547Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Retailers Face Surge in Cyber Threats as Peak Shopping Season Approaches As the holiday shopping season approaches, retailers are bracing fo  via Mastodon https://osintsights.com/retailers-face-surge-in-cyber-threats-as-"
+  },
+  {
+   "id": "masto:117521931558438216",
+   "title": "https://www. bleepingcomputer.com/news/secu rity/arista-patches-new-velocloud-orchestrator-zero-day-exploited-in-attacks # ZeroDay # SQLInje",
+   "source": "www.bleepingcomputer.com",
+   "published_at": "2026-10-29T02:52:43.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "https://www. bleepingcomputer.com/news/secu rity/arista-patches-new-velocloud-orchestrator-zero-day-exploited-in-attacks # ZeroDay # SQLInje  via Mastodon https://www.bleepingcomputer.com/news/security/arista-patches-new"
+  },
+  {
+   "id": "masto:117521915680713189",
+   "title": "Two critical PHP flaws are threatening PH servers, and staying quiet doesn\u2019t mean you\u2019re safe CERT-PH warns of critical PHP flaws that could",
+   "source": "astig.ph",
+   "published_at": "2026-10-29T02:48:41.594Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Two critical PHP flaws are threatening PH servers, and staying quiet doesn\u2019t mean you\u2019re safe CERT-PH warns of critical PHP flaws that could  via Mastodon https://astig.ph/cert-ph-critical-php-flaws-warning-philippines-2"
+  },
+  {
+   "id": "masto:117521914751221102",
+   "title": "SignalWire patched 3 critical FreeSWITCH vulnerabilities: actively exploited RCE flaw CVE-2026-116779, plus CVE-2026-116785 and CVE-2026-116",
+   "source": "meterpreter.org",
+   "published_at": "2026-10-29T02:48:26.000Z",
+   "cves": [
+    "CVE-2026-116779",
+    "CVE-2026-116785",
+    "CVE-2026-116790"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "SignalWire patched 3 critical FreeSWITCH vulnerabilities: actively exploited RCE flaw CVE-2026-116779, plus CVE-2026-116785 and CVE-2026-116  via Mastodon https://meterpreter.org/freeswitch-vulnerabilities-rce-exploited-"
+  }
+ ],
+ "candidate_stories": [
+  {
+   "id": "hackers-exploit-php2shell-vulnerabilities-to-gain-root-access-on",
+   "title": "Hackers Exploit PHP2Shell Vulnerabilities to Gain Root Access on 25 Firewall Servers",
+   "n_events": 1,
+   "last_seen": "2026-10-29T04:59:05Z",
+   "first_event_title": "Hackers Exploit PHP2Shell Vulnerabilities to Gain Root Access on 25 Firewall Servers"
+  },
+  {
+   "id": "volt-typhoon-hides-zero-day-attacks-using-silent-train-framework",
+   "title": "Volt Typhoon hides zero-day attacks using 'Silent Train' framework",
+   "n_events": 7,
+   "last_seen": "2026-10-29T03:32:50.000Z",
+   "first_event_title": "Volt Typhoon hides zero-day attacks using 'Silent Train' framework"
+  },
+  {
+   "id": "isc-stormcast-for-thursday-october-29th-2026-https-isc-sans-edu",
+   "title": "ISC Stormcast For Thursday, October 29th, 2026 (Thu, Oct 29th)",
+   "n_events": 0,
+   "last_seen": "2026-10-29T03:15:42Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "officials-seize-domain-of-top-bulletproof-hosting-provider-virtu",
+   "title": "Officials seize domain of top bulletproof hosting provider Virtualine",
+   "n_events": 7,
+   "last_seen": "2026-10-29T02:53:53.338Z",
+   "first_event_title": "Officials seize domain of top bulletproof hosting provider Virtualine"
+  },
+  {
+   "id": "yet-another-clickfix-campaign-wed-oct-28th",
+   "title": "Yet Another ClickFix Campaign, (Wed, Oct 28th)",
+   "n_events": 3,
+   "last_seen": "2026-10-29T02:20:10.083Z",
+   "first_event_title": "Yet Another ClickFix Campaign, (Wed, Oct 28th)"
+  },
+  {
+   "id": "dhs-personnel-leak-exposes-contact-details-and-sensitive-job-inf",
+   "title": "DHS personnel leak exposes contact details and sensitive job information",
+   "n_events": 0,
+   "last_seen": "2026-10-29T02:16:00Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "china-linked-hackers-exploit-php2shell-to-root-firewalls",
+   "title": "China-Linked Hackers Exploit PHP2Shell to Root Firewalls",
+   "n_events": 11,
+   "last_seen": "2026-10-29T02:03:08.000Z",
+   "first_event_title": "China-Linked Hackers Exploit PHP2Shell to Root Firewalls"
+  },
+  {
+   "id": "leak-site-publishes-data-on-more-than-41-000-dhs-employees-obtai",
+   "title": "Leak site publishes data on more than 41,000 DHS employees obtained by hacktivists",
+   "n_events": 8,
+   "last_seen": "2026-10-29T01:58:07.000Z",
+   "first_event_title": "Leak site publishes data on more than 41,000 DHS employees obtained by hacktivists"
+  },
+  {
+   "id": "gitlab-cve-2026-97229-critical-unauthenticated-arbitrary-code-ex",
+   "title": "GitLab CVE-2026-97229 Critical Unauthenticated Arbitrary Code Execution (CVSS 10.0)",
+   "n_events": 45,
+   "last_seen": "2026-10-29T01:39:56.000Z",
+   "first_event_title": "A GitLab critical vulnerability, CVE-2026-97229 (CVSS 10.0), allows unauthenticated arbitrary code execution. Upgrade to GitLab 19.4.2 now. "
+  },
+  {
+   "id": "mupdf-aes-key-weakness-in-pdf-encryption",
+   "title": "MuPDF AES Key Weakness in PDF Encryption",
+   "n_events": 1,
+   "last_seen": "2026-10-29T01:37:30.000Z",
+   "first_event_title": "V12, which sells automated code security audits, reports MuPDF before 1.28.5 built PDF AES-256 file keys from a clock-seeded generator with "
+  },
+  {
+   "id": "juno-for-splunk-find-threats-hidden-in-logs-uptycs",
+   "title": "Juno for Splunk: Find Threats Hidden in Logs | Uptycs",
+   "n_events": 0,
+   "last_seen": "2026-10-29T01:20:46Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "dell-powerprotect-data-domain-critical-vulnerabilities",
+   "title": "Dell PowerProtect Data Domain Critical Vulnerabilities",
+   "n_events": 3,
+   "last_seen": "2026-10-29T00:51:22.000Z",
+   "first_event_title": "Dell fixes PowerProtect Data Domain vulnerabilities in DD OS, including four CVSS 9.8 flaws like CVE-2026-86400 allowing root command execut"
+  },
+  {
+   "id": "critical-uefi-firmware-flaw-allows-attackers-to-execute-maliciou",
+   "title": "Critical UEFI Firmware Flaw Allows Attackers to Execute Malicious Code Before OS Boots",
+   "n_events": 17,
+   "last_seen": "2026-10-29T00:41:13.000Z",
+   "first_event_title": "Critical UEFI Firmware Flaw Allows Attackers to Execute Malicious Code Before OS Boots"
+  },
+  {
+   "id": "php-warns-admins-of-two-critical-flaws-emergency-patches-coming",
+   "title": "PHP warns admins of two critical flaws, emergency patches coming tomorrow",
+   "n_events": 418,
+   "last_seen": "2026-10-29T00:34:16.224Z",
+   "first_event_title": "PHP warns admins of two critical flaws, emergency patches coming tomorrow"
+  },
+  {
+   "id": "d-link-dir-505-critical-backdoor-cve-2026-118579",
+   "title": "D-Link DIR-505 Critical Backdoor CVE-2026-118579",
+   "n_events": 2,
+   "last_seen": "2026-10-29T00:00:38.000Z",
+   "first_event_title": "CVE-2026-118579: D-Link DIR-505 v1.10B02 has a CRITICAL web management backdoor (CVSS 9.3) via /secmark1524.cgi. Public exploit code is live"
+  },
+  {
+   "id": "inside-keydrift-analyzing-historical-uat-11473-activity-on-cisco",
+   "title": "Inside KeyDrift: Analyzing historical UAT-11473 activity on Cisco SD-WAN",
+   "n_events": 4,
+   "last_seen": "2026-10-28T23:40:43Z",
+   "first_event_title": "Inside KeyDrift: Analyzing historical UAT-11473 activity on Cisco SD-WAN"
+  },
+  {
+   "id": "macos-dev-tools-trust-compromised-emudhra-intermediates",
+   "title": "macOS Dev Tools Trust Compromised eMudhra Intermediates",
+   "n_events": 1,
+   "last_seen": "2026-10-28T23:30:54.796Z",
+   "first_event_title": "macOS dev tools (git, curl, python3) reportedly still trust compromised eMudhra intermediates, so MITM can serve malicious clones, alter pus"
+  },
+  {
+   "id": "quest-diagnostics-data-breach-exposes-patient-data",
+   "title": "Quest Diagnostics data breach exposes patient data",
+   "n_events": 1,
+   "last_seen": "2026-10-28T22:35:15.000Z",
+   "first_event_title": "Patient Data Likely Accessed in Quest Diagnostics Hack ~ # cybersecurity # healthcare # data # privacy # ICYMI --- https://www. hipaajournal"
+  },
+  {
+   "id": "jpn-times-car-reporting-5-5-billion-loss-has-firms-bracing-for-d",
+   "title": "JPN: Times Car reporting \u00a55.5 billion loss has firms bracing for data breach fallout",
+   "n_events": 2,
+   "last_seen": "2026-10-28T22:04:00.973Z",
+   "first_event_title": "JPN: Times Car reporting \u00a55.5 billion loss has firms bracing for data breach fallout"
+  },
+  {
+   "id": "unm-health-ransomware-attack-disrupts-patient-care-surgeries",
+   "title": "UNM Health ransomware attack disrupts patient care, surgeries",
+   "n_events": 18,
+   "last_seen": "2026-10-28T21:55:01.000Z",
+   "first_event_title": "UNM Health ransomware attack disrupts patient care, surgeries"
+  },
+  {
+   "id": "cisco-secure-firewall-zero-day-cve-2026-76418",
+   "title": "Cisco Secure Firewall zero-day CVE-2026-76418",
+   "n_events": 5,
+   "last_seen": "2026-10-28T21:43:28.000Z",
+   "first_event_title": "Cisco zero-day: CVE-2026-76418 (8.6 high) Cisco Secure Firewall Adaptive Security Appliance and Secure Firewall Threat Defense Software Remo"
+  },
+  {
+   "id": "machine-speed-attacks-require-machine-speed-detection-and-respon",
+   "title": "Machine speed attacks require machine speed detection and response",
+   "n_events": 147,
+   "last_seen": "2026-10-28T21:36:56.000Z",
+   "first_event_title": "OpenCode Flaw Lets Malicious MCP Servers Execute Code During Sign-In on Windows and WSL"
+  },
+  {
+   "id": "japan-s-gmo-urges-customers-to-shut-down-pcs-amid-ransomware-thr",
+   "title": "Japan's GMO urges customers to shut down PCs amid ransomware threat",
+   "n_events": 13,
+   "last_seen": "2026-10-28T21:00:49.000Z",
+   "first_event_title": "Japan's GMO urges customers to shut down PCs amid ransomware threat"
+  },
+  {
+   "id": "hochul-signs-ai-chatbot-and-baby-monitor-regulations",
+   "title": "Hochul signs AI chatbot and baby monitor regulations",
+   "n_events": 1,
+   "last_seen": "2026-10-28T20:51:46Z",
+   "first_event_title": "Hochul signs AI chatbot and baby monitor regulations"
+  },
+  {
+   "id": "john-strand-s-11-core-skills-for-soc-analysts",
+   "title": "John Strand's 11 Core Skills: For SOC Analysts",
+   "n_events": 0,
+   "last_seen": "2026-10-28T20:30:59Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "if-statement-that-caused-http2shell-was-itself-undisclosed-patch",
+   "title": "If-statement that caused HTTP2Shell was itself undisclosed patch of vulnerability",
+   "n_events": 1,
+   "last_seen": "2026-10-28T20:30:11Z",
+   "first_event_title": "If-statement that caused HTTP2Shell was itself undisclosed patch of vulnerability"
+  },
+  {
+   "id": "prolific-hive-and-nefilim-ransomware-affiliate-sentenced-to-70-m",
+   "title": "Prolific Hive and Nefilim ransomware affiliate sentenced to 70 months in prison",
+   "n_events": 9,
+   "last_seen": "2026-10-28T20:30:00.000Z",
+   "first_event_title": "Prolific Hive and Nefilim ransomware affiliate sentenced to 70 months in prison"
+  },
+  {
+   "id": "we-found-two-promot-attack-policy-incidents-at-work-here-is-what",
+   "title": "we found two promot_attack policy incidents at work,here is what happened!!",
+   "n_events": 0,
+   "last_seen": "2026-10-28T20:03:34Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "long-hidden-flaws-patched-in-epics-research-facility-control-sof",
+   "title": "EPICS Base vulnerabilities patched in research facility control software (CVE-2026-114595 to 114598)",
+   "n_events": 5,
+   "last_seen": "2026-10-28T20:02:06.106Z",
+   "first_event_title": "Long-Hidden Flaws Patched in EPICS Research Facility Control Software"
+  },
+  {
+   "id": "juniper-networks-security-advisory-av26-1101",
+   "title": "Juniper Networks security advisory (AV26-1101)",
+   "n_events": 1,
+   "last_seen": "2026-10-28T19:35:53Z",
+   "first_event_title": "Juniper Networks security advisory (AV26-1101)"
+  },
+  {
+   "id": "mozilla-security-advisory-av26-1100",
+   "title": "Mozilla security advisory (AV26-1100)",
+   "n_events": 1,
+   "last_seen": "2026-10-28T19:25:55Z",
+   "first_event_title": "Mozilla security advisory (AV26-1100)"
+  },
+  {
+   "id": "apple-security-advisory-av26-1099",
+   "title": "Apple security advisory (AV26-1099)",
+   "n_events": 1,
+   "last_seen": "2026-10-28T19:16:21Z",
+   "first_event_title": "Apple security advisory (AV26-1099)"
+  },
+  {
+   "id": "tailscale-warns-of-ssh-flaws-allowing-root-privilege-escalation",
+   "title": "Tailscale warns of SSH flaws allowing root privilege escalation",
+   "n_events": 10,
+   "last_seen": "2026-10-28T19:04:13.000Z",
+   "first_event_title": "Tailscale warns of SSH flaws allowing root privilege escalation"
+  },
+  {
+   "id": "lawsuit-against-ex-overstock-ceo-tied-to-2020-election-film-fall",
+   "title": "Lawsuit against Ex-Overstock CEO tied to 2020 election film falls apart over question of \u2018actual malice\u2019",
+   "n_events": 0,
+   "last_seen": "2026-10-28T18:58:55Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "discord-to-make-public-server-messages-searchable-on-google",
+   "title": "Discord to Make Public Server Messages Searchable on Google",
+   "n_events": 2,
+   "last_seen": "2026-10-28T18:44:16Z",
+   "first_event_title": "Discord to Make Public Server Messages Searchable on Google"
+  },
+  {
+   "id": "node-js-brotli-decoder-vulnerability-cve-2026-111497",
+   "title": "Node.js Brotli decoder vulnerability CVE-2026-111497",
+   "n_events": 76,
+   "last_seen": "2026-10-28T18:16:45.801Z",
+   "first_event_title": "Is your Node.js application vulnerable to CVE-2026-111497? A newly disclosed High-severity vulnerability in the Node.js Brotli decoder could"
+  },
+  {
+   "id": "38-628-crypto-orders-10-139-ips-what-wagyu-s-alleged-leak-means",
+   "title": "38,628 Crypto Orders. 10,139 IPs. What Wagyu\u2019s Alleged Leak Means for Monero Privacy",
+   "n_events": 1,
+   "last_seen": "2026-10-28T18:01:47Z",
+   "first_event_title": "38,628 Crypto Orders. 10,139 IPs. What Wagyu\u2019s Alleged Leak Means for Monero Privacy"
+  },
+  {
+   "id": "unwrapping-retail-peak-season-cyber-threats",
+   "title": "Unwrapping Retail Peak Season Cyber Threats",
+   "n_events": 1,
+   "last_seen": "2026-10-28T18:00:10Z",
+   "first_event_title": "Unwrapping Retail Peak Season Cyber Threats"
+  },
+  {
+   "id": "fcc-commissioner-hopes-cyber-trust-mark-products-reach-shoppers",
+   "title": "FCC commissioner hopes Cyber Trust Mark products reach shoppers within a year",
+   "n_events": 0,
+   "last_seen": "2026-10-28T17:55:50Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "the-gentlemen-ransomware-a-comprehensive-analysis-of-a-prolific",
+   "title": "The Gentlemen Ransomware: A Comprehensive Analysis of a Prolific RaaS",
+   "n_events": 8,
+   "last_seen": "2026-10-28T17:41:47.000Z",
+   "first_event_title": "(acronis.com) The Gentlemen Ransomware: A Comprehensive Analysis of a Prolific RaaS Operation and Its Sophisticated Tactics In brief - This "
+  },
+  {
+   "id": "2026-13482",
+   "title": "[\uc77c\ubcf8 \uc560\ub2c8\uba54\uc774\uc158]\u5e7c\u5973\u6226\u8a18\u2171(\uc720\ub140\uc804\uae30 \u2171,2026)",
+   "n_events": 0,
+   "last_seen": "2026-10-26T15:06:28Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "adobe-security-advisory-av26-1092",
+   "title": "Adobe security advisory (AV26-1092)",
+   "n_events": 1,
+   "last_seen": "2026-10-28T14:41:13Z",
+   "first_event_title": "Adobe security advisory (AV26-1092)"
+  },
+  {
+   "id": "atlassian-security-advisory-av26-1076",
+   "title": "Atlassian security advisory (AV26-1076)",
+   "n_events": 1,
+   "last_seen": "2026-10-22T16:05:53Z",
+   "first_event_title": "Atlassian security advisory (AV26-1076)"
+  },
+  {
+   "id": "control-systems-hitachi-security-advisory-av26-1091",
+   "title": "[Control systems] Hitachi security advisory (AV26-1091)",
+   "n_events": 1,
+   "last_seen": "2026-10-27T16:35:59Z",
+   "first_event_title": "[Control systems] Hitachi security advisory (AV26-1091)"
+  },
+  {
+   "id": "control-systems-johnson-controls-security-advisory-av26-1090",
+   "title": "[Control systems] Johnson Controls security advisory (AV26-1090)",
+   "n_events": 1,
+   "last_seen": "2026-10-27T14:10:52Z",
+   "first_event_title": "[Control systems] Johnson Controls security advisory (AV26-1090)"
+  },
+  {
+   "id": "control-systems-moxa-security-advisory-av26-1089",
+   "title": "[Control Systems] Moxa security advisory (AV26-1089)",
+   "n_events": 1,
+   "last_seen": "2026-10-27T13:35:40Z",
+   "first_event_title": "[Control Systems] Moxa security advisory (AV26-1089)"
+  },
+  {
+   "id": "control-systems-siemens-security-advisory-av26-1083",
+   "title": "[Control Systems] Siemens security advisory (AV26-1083)",
+   "n_events": 1,
+   "last_seen": "2026-10-26T13:50:45Z",
+   "first_event_title": "[Control Systems] Siemens security advisory (AV26-1083)"
+  },
+  {
+   "id": "craft-cms-security-advisory-av26-1086",
+   "title": "Craft CMS security advisory (AV26-1086)",
+   "n_events": 2,
+   "last_seen": "2026-10-26T17:00:13.000Z",
+   "first_event_title": "Craft CMS security advisory (AV26-1086)"
+  },
+  {
+   "id": "enterprise-fill-assist-delivers-custom-rules-for-enhanced-autofi-13618",
+   "title": "Enterprise fill assist delivers custom rules for enhanced autofill",
+   "n_events": 0,
+   "last_seen": "2026-10-27T00:00:00Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "esri-security-advisory-av26-1088",
+   "title": "Esri security advisory (AV26-1088)",
+   "n_events": 1,
+   "last_seen": "2026-10-27T13:25:46Z",
+   "first_event_title": "Esri security advisory (AV26-1088)"
+  },
+  {
+   "id": "fortinet-security-advisory-av26-1081",
+   "title": "Fortinet security advisory (AV26-1081)",
+   "n_events": 1,
+   "last_seen": "2026-10-23T14:25:59Z",
+   "first_event_title": "Fortinet security advisory (AV26-1081)"
+  },
+  {
+   "id": "fortinet-security-advisory-av26-812",
+   "title": "Fortinet security advisory (AV26-812)",
+   "n_events": 2,
+   "last_seen": "2026-08-13T10:40:57Z",
+   "first_event_title": "Fortinet security advisory (AV26-812)"
+  },
+  {
+   "id": "google-security-advisory-av26-1085",
+   "title": "Google security advisory (AV26-1085)",
+   "n_events": 1,
+   "last_seen": "2026-10-26T14:15:45Z",
+   "first_event_title": "Google security advisory (AV26-1085)"
+  },
+  {
+   "id": "google-security-advisory-av26-904",
+   "title": "Google security advisory (AV26-904)",
+   "n_events": 2,
+   "last_seen": "2026-09-09T20:49:30Z",
+   "first_event_title": "Google security advisory (AV26-904)"
+  },
+  {
+   "id": "grafana-security-advisory-av26-860",
+   "title": "Grafana Alloy Vulnerability CVE-2026-19516",
+   "n_events": 3,
+   "last_seen": "2026-10-13T16:00:56.470Z",
+   "first_event_title": "Grafana security advisory (AV26-860)"
+  },
+  {
+   "id": "hashicorp-security-advisory-av26-1087",
+   "title": "HashiCorp security advisory (AV26-1087)",
+   "n_events": 1,
+   "last_seen": "2026-10-26T19:10:47Z",
+   "first_event_title": "HashiCorp security advisory (AV26-1087)"
+  },
+  {
+   "id": "hashicorp-security-advisory-av26-797",
+   "title": "HashiCorp security advisory (AV26-797)",
+   "n_events": 1,
+   "last_seen": "2026-08-11T14:05:42Z",
+   "first_event_title": "HashiCorp security advisory (AV26-797)"
+  },
+  {
+   "id": "hashicorp-security-advisory-av26-817",
+   "title": "HashiCorp security advisory (AV26-817)",
+   "n_events": 1,
+   "last_seen": "2026-08-14T16:05:44Z",
+   "first_event_title": "HashiCorp security advisory (AV26-817)"
+  },
+  {
+   "id": "hpe-security-advisory-av26-1079",
+   "title": "HPE security advisory (AV26-1079)",
+   "n_events": 0,
+   "last_seen": "2026-10-23T13:25:39Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "ibm-security-advisory-av26-1040",
+   "title": "IBM security advisory (AV26-1040)",
+   "n_events": 1,
+   "last_seen": "2026-10-14T18:40:41Z",
+   "first_event_title": "IBM security advisory (AV26-1040)"
+  },
+  {
+   "id": "at-the-international-ocean-film-tour-negativepid-digitalinvestig",
+   "title": "At the International Ocean Film Tour negativepid digitalInvestigations OSINT cybersecurity AI tech onlineInvestigations robo",
+   "n_events": 1,
+   "last_seen": "2026-09-09T06:48:21.491Z",
+   "first_event_title": "A map of mass surveillance programs # negativepid # digitalInvestigations # OSINT # cybersecurity # AI # tech # onlineInvestigations # robot"
+  },
+  {
+   "id": "arista-velocloud-orchestrator-sql-injection-zero-day-cve-2026-11",
+   "title": "Arista VeloCloud Orchestrator SQL injection zero-day CVE-2026-114625",
+   "n_events": 23,
+   "last_seen": "2026-10-28T13:46:46.000Z",
+   "first_event_title": "Cybersecurity Awareness Month isn't over yet: Arista VeloCloud Orchestrator SQL injection zero-day CVE-2026-114625 (CVSSv3.1: 9.9 critical ,"
+  },
+  {
+   "id": "hpe-networking-analytics-engine-flaws-let-attackers-gain-root-ac",
+   "title": "HPE Networking Analytics Engine Flaws Let Attackers Gain Root Access",
+   "n_events": 1,
+   "last_seen": "2026-09-23T12:23:10Z",
+   "first_event_title": "HPE Networking ALE Vulnerabilities Enable Authentication Bypass, Root Access and Data Exposure"
+  },
+  {
+   "id": "parallels-desktop-flaw-lets-unprivileged-mac-users-gain-root-acc-7779",
+   "title": "Parallels Desktop Flaw Lets Unprivileged Mac Users Gain Root Access",
+   "n_events": 3,
+   "last_seen": "2026-09-23T14:20:25.491Z",
+   "first_event_title": "Parallels Desktop Flaw Lets Unprivileged Mac Users Gain Root Access"
+  },
+  {
+   "id": "apple-patches-coregraphics-out-of-bounds-write-cve-2026-86950",
+   "title": "Apple patches CoreGraphics out-of-bounds write CVE-2026-86950",
+   "n_events": 52,
+   "last_seen": "2026-10-28T16:15:04.000Z",
+   "first_event_title": "\ud83e\udd16 Apple patched CVE-2026-86950, an out-of-bounds write in CoreGraphics affecting older iOS/iPadOS/macOS versions. Processing a maliciously c"
+  }
+ ]
+}
