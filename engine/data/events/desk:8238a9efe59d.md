@@ -1,0 +1,1 @@
+The Hacker News covered Anthropic's October 27 research post on October 28, 2026, noting that the unreleased model built working exploit chains for Chrome, Safari, Android, Windows, and Linux. For the Linux case it described a zero-click remote root exploit via multipath TCP using CVE-2026-98432, with all flaws already patched after coordinated disclosure.

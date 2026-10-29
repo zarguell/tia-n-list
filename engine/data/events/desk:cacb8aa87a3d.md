@@ -1,0 +1,1 @@
+The OSV record for CVE-2026-98432 was published on October 15, 2026 at 12:08:22 UTC and summarizes the issue as ipv4: free inet_opt and ireq_opt after an RCU grace period in the Linux kernel. It carries a CVSS v3 score of 9.8 with vector AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H and lists downstream packages across Amazon Linux, Debian, openSUSE, and Ubuntu.
