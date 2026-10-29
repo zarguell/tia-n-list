@@ -1,0 +1,5 @@
+The testmetest campaign hijacked 42 GitHub repositories belonging to 11 legitimate owners, combining credential theft, development-tool execution hooks, and malicious package publishing. JFrog found the worm hid 13 MB payloads from code search and planted Claude Code SessionStart hooks to run them. The operation moved beyond attacker-controlled test packages into established developers' repositories, widening the supply-chain blast radius.
+
+The SessionStart hooks mean any developer opening an affected repository in Claude Code could execute the payload, turning a routine clone or coding session into an initial access vector. Stolen credentials then feed further repository compromises and malicious npm publications, creating a self-propagating loop.
+
+Defenders should audit GitHub repositories for unexpected Claude Code hooks and oversized payloads, rotate npm and GitHub credentials for affected owners, and inspect dependency manifests for unauthorized packages. Expect the campaign to continue rotating payloads and hooks as detections improve.

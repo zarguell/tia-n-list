@@ -1,3 +1,1 @@
-Sixteen malicious Firefox extensions impersonated cryptocurrency wallets to steal recovery phrases and private keys during wallet imports, exfiltrating secrets to attacker-controlled Cloudflare Workers. Mozilla unpublished them by October 5, 2026.
-
-The campaign targets wallet users through fake portals and tools. Watch for re-uploaded variants and similar extensions on other browsers.
+Socket researchers found 16 malicious Firefox extensions impersonating Phantom, Jupiter, and Bitget crypto wallets to steal recovery phrases and private keys. The extensions transmitted secrets to attacker-controlled Cloudflare Workers. Mozilla unpublished them by October 5, 2026. Fifteen packages contain similar payloads. The story has 4 sources (GBHackers, The Hacker News, Socket, Malware.news) and a moderate score of 5.2. Users should audit installed extensions, remove any unverified wallet add-ons, and verify seed phrase storage practices.

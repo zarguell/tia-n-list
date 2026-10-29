@@ -1,0 +1,3 @@
+The story covers a new Eclypsium threat research post, Manipulating AI Models from the Hardware Up, describing an attack chain against AI compute infrastructure that enabled compromise of a model with no visible indicators of compromise. The update reported that researchers had manipulated AI hardware and rewrote a chatbot's weights during testing, after which the chatbot gave harmful advice to a user with chest pain.
+
+The thread carries no CVE and no KEV listing, and the research post framed the compromise without visible IOCs. Analysts should watch for independent replication and for any confirmed deployment of the hardware manipulation technique.
