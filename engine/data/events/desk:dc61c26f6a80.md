@@ -1,0 +1,1 @@
+Wu Blockchain reported that multiple Polymarket users described unauthorized fund transfers, with some claiming losses of hundreds of thousands of dollars. Users suspected a possible frontend compromise while the cause remained unconfirmed, and Polymarket had entered cancel-only mode and paused relayer actions.

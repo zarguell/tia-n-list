@@ -1,0 +1,1 @@
+Polymarket's official trading account confirmed it identified and fixed an issue affecting Polymarket.com, stating that one of its third-party providers was compromised and the matter was referred to law enforcement. It said affected users would be made whole and trading was temporarily halted out of an abundance of caution.
