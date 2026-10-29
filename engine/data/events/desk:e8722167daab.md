@@ -1,0 +1,1 @@
+CVE-2026-86400 is rated critical at CVSS 9.8 (AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H). The vulnerability is an improper authentication flaw in Dell PowerProtect Data Domain that allows unauthenticated remote root command execution. Affected versions span Feature Release 7.7.1.0 through 8.8 and LTS tracks through 7.13.1.0 and 8.6.1.20, with remediation in build 8.9.0.0 or later.
