@@ -1,6 +1,5 @@
-Synology fixed 8 DSM vulnerabilities, including two critical unauthenticated flaws (CVE-2026-13684, CVE-2026-13639) on DiskStation Manager. covers recent security developments. Key references include CVE-2026-13639, CVE-2026-13684. The event content notes Synology fixed 8 DSM vulnerabilities, including two critical unauthenticated flaws (CVE-2026-13684, CVE-2026-13639) on DiskStation Manager. 
+Synology's advisory SA_26_13 covers eight vulnerabilities in DiskStation Manager, including two critical unauthenticated flaws tracked as CVE-2026-13684 and CVE-2026-13639, with CVE-2024-10441 also in scope. The affected component is DSM, the operating system running on Synology NAS devices, and the critical issues allow unauthenticated access paths that are valuable to ransomware operators targeting internet-exposed storage.
 
-via Mastodon https://securityonline.info/synology-dsm-vulnerabilities-sa-26-13/?utm_source=mastodon&amp;utm_medium=jetpack_social
+The same advisory is now being cited in connection with the C3RB3R ransomware campaign, which has been encrypting Synology NAS data since October under the .L0CK3D extension with a read-me3.txt ransom note. Coverage ties the campaign to CVE-2024-10441 and CVE-2026-13639, indicating that at least some of the patched DSM flaws are being used in active attacks rather than remaining theoretical.
 
-📢 [VULN] Alerte sécurité :.
-This matters because it affects systems users rely on. Watch for patches and confirmed exploitation updates.
+Administrators should apply the DSM updates referenced in SA_26_13, remove unnecessary internet exposure of NAS management interfaces, and check for .L0CK3D files or read-me3.txt notes as indicators of compromise. Because storage devices often hold backups, a compromise can cascade into wider recovery problems.
