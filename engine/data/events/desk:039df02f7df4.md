@@ -1,0 +1,1 @@
+Rapid7 confirms Cisco disclosed CVE-2026-20127 on 25 February 2026 with a CVSS 10.0 score, noting unauthenticated attackers can gain administrative access to SD-WAN Manager and Controller components. The advisory and CISA KEV addition followed active exploitation reports spanning multiple sectors.
