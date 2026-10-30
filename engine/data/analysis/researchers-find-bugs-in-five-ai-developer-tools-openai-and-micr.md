@@ -1,0 +1,3 @@
+Researchers reported bugs in 5 AI developer tools, focusing on OpenAI and Microsoft tooling, and found flaws that remained unpatched at the time of the report. The Register covered the research and noted that the OpenAI and Microsoft issues were still unpatched.
+
+The findings concern the developer tool layer rather than the model layer, and the unpatched flaws widen the attack surface for tool level abuse in ordinary software delivery. The event record did not establish the specific bug classes, affected versions, or severity ratings. Watch for the full researcher disclosure and for vendor remediation.
