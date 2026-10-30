@@ -1,0 +1,3 @@
+SS7 and Diameter signaling attacks allow adversaries to track phones, intercept SMS codes, and impersonate numbers by abusing telecom carrier-to-carrier protocols. These attacks require no malware or phishing link; they operate inside the network layer that most users never see.
+
+The exposure is long-standing, but recent reports tie Iranian-linked actors to signaling exploitation in the Middle East, and citizens have shown live interception of SMS two-factor codes. Carriers have limited visibility into cross-network signaling traffic. Watch for CISA or telecom regulator guidance on SS7 filtering and whether carriers deploy Diameter firewall rules that actually block malicious routing messages.
