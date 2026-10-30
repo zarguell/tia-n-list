@@ -1,0 +1,1 @@
+Bloomberg reported on October 29, 2026 that Polymarket stopped trading on its international exchange after a third-party software provider was compromised. The article noted user reports of lost funds and identified the vendor compromise as the root cause. It was among the earliest news reports of the incident, published before the story's first_seen timestamp.
