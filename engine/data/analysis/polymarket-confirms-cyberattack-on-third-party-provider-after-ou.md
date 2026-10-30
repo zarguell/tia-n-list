@@ -1,0 +1,3 @@
+Polymarket confirmed a cyberattack on a third-party provider that caused a temporary trading halt. The platform stated that affected users would be made whole. The event is reported by The Record and NBC News, making it a concrete incident confirmation rather than rumor. The vendor compromise aligns with a broader trend of supply-chain disruptions affecting prediction markets and crypto services.
+
+Although the direct financial impact appears limited by the vendor's compensation commitment, organizations that rely on Polymarket or similar platforms should monitor for downstream effects such as leaked user data or altered settlement processes. The brief exposure highlights the risk of centralized vendor dependencies in decentralized market infrastructure.

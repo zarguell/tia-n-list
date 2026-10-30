@@ -1,0 +1,1 @@
+SQ Magazine states Broadcom classifies CVE-2026-41709 as insufficient logging and that a July advisory described how a malicious actor with admin access could perform certain operations without being logged. The report connects the zero-day to Warp Panda exploitation.
