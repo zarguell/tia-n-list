@@ -1,0 +1,1 @@
+VulDB records the advisory disclosure date for CVE-2026-84295 as 2026-10-29, lists the upgrade target as WS_FTP Server 2024.0.6 / 2025.0.3, and notes the CVE was reserved 2026-09-01, disclosed 2026-10-29.

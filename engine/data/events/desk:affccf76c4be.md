@@ -1,0 +1,1 @@
+Strix AI's CVE entry for CVE-2026-84295 confirms improper authentication in Progress Software WS_FTP Server versions prior to 2024.0.6 and 2025.0.3 on Windows, allowing an unauthenticated remote attacker to access sensitive information.
