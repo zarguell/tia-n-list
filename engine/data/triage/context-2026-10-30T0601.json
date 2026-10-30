@@ -1,0 +1,459 @@
+{
+ "date": "2026-10-30",
+ "decisions_path": "engine/data/triage/decisions-2026-10-30T0601.json",
+ "instructions": "For every new event decide: (1) keep or drop \u2014 keep only stories worth covering (real security events, vulnerabilities, attacks, breaches, advisories with substance); drop press releases, vendor marketing, generic explainers, and anything duplicating an existing story. (2) If keep, assign the event to the RIGHT story: an existing candidate story id if it belongs there (this FIXES mechanical clustering \u2014 e.g. different outlets' Patch Tuesday roundups are ONE story), or NEW with a clean story_title. (3) merges: list candidate stories that are really the same story (from = fragment, into = the most complete one). (4) For every kept event that names CVEs, optionally assess exploitation: exploited = the event reports OBSERVED in-the-wild exploitation (implants, victim counts, campaigns, CISA KEV confirmation); suspected = public exploit code/PoC or likely-but-unconfirmed. Attribute ONLY the CVEs you can tie to the claim \u2014 a bulletin's blanket 'actively exploited' does NOT flag all its CVEs. Omit the exploitation field when the event makes no claim.\n(5) LOW-TRUST events (\"low_trust\": true \u2014 AI-drafted aggregator reposts, late and overstated): treat as unverified leads. When the text attributes the claim to a named primary source (a researcher firm like watchTowr, a vendor advisory, CISA, a major outlet) and attribution_urls or a web search (/home/ubuntu/repos/cronman/bin/web-search.sh \"query\") locate that primary source CONFIRMING the claim, include a provenance object in the decision: {\"url\": <primary url>, \"source\": <domain>, \"evidence\": <one line>, \"verified\": true}. VERIFIED provenance lets the event mint a story (credited to the primary source) and count as a development; without it, a low-trust event can only attach to an EXISTING story, never mint. If you cannot verify, keep/drop on normal merit and omit provenance.\n\nWrite decisions as JSON with EXACTLY this shape:\n{\n  \"decisions\": [\n    {\"event_id\": \"<id>\", \"action\": \"keep\", \"story\": \"<existing candidate story id>\", \"reason\": \"...\"},\n    {\"event_id\": \"<id>\", \"action\": \"keep\", \"story\": \"NEW\", \"story_title\": \"<clean title>\", \"reason\": \"...\"},\n    {\"event_id\": \"<id>\", \"action\": \"drop\", \"reason\": \"...\"}\n  ],\n  \"merges\": [{\"from\": \"<fragment story id>\", \"into\": \"<canonical story id>\"}]\n}\nFor events marked \"low_trust\" (AI-drafted aggregator reposts) a decision\nmay carry an optional \"provenance\" object when you VERIFIED the claim at\nthe named primary source: {\"event_id\": ..., \"action\": \"keep\", ...}\n  \"provenance\": {\"url\": \"<primary source url>\", \"source\": \"<domain>\", \"evidence\": \"<one line>\"}\nOnly include provenance when the primary source (vendor advisory, CISA,\nthe named researcher/outlet) really carries the claim \u2014 verified\nprovenance lets a low-trust event mint a story and set freshness; without\nit the event can only amplify an existing story.\nSTRICT KEY NAMES: the array key is \"decisions\" (never \"events\"); the story\nkey is \"story\" (never \"story_id\"); \"story\" holds a candidate_stories id\nverbatim or the literal string \"NEW\". Optional per-event field\n\"exploitation\": {\"CVE-...\": {\"status\": \"exploited|suspected\", \"evidence\": \"1-2 sentences\"}}.",
+ "new_events": [
+  {
+   "id": "rss:d7d2ca6fa4f84baa",
+   "title": "Accenture Employee Allegedly Gave Claude Code AI Agent Administrative Access to Pentagon Systems",
+   "source": "gbhackers.com",
+   "published_at": "2026-10-30T05:47:29Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "An Accenture employee reportedly linked a personal Claude Code account to a secure Department of Defense production environment, granting the AI coding agent administrative access and potentially exposing credentials and"
+  },
+  {
+   "id": "rd:t3_1xj6zlw",
+   "title": "Cursor marketplace Powned",
+   "source": "status.x.ai",
+   "published_at": "2026-10-30T05:29:10Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "We got hit by this one today, thankfully crowstrike alerted us on the reverse shell. XAI / Cursor took down their marketplace as a result but they are trying to hide the real reason why it\u2019s down. https://status.x.ai/ su"
+  },
+  {
+   "id": "rss:da5dbed535f7b6c5",
+   "title": "Zero-Click Android Vulnerability Lets Attackers Crash Phones With a Single SMS",
+   "source": "gbhackers.com",
+   "published_at": "2026-10-30T05:08:38Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "A recently discovered Android vulnerability, referred to as SMS of Death, allows attackers to crash a phone\u2019s telephony process with just one malformed SMS, without any interaction from the victim. Researcher Mark B repo"
+  }
+ ],
+ "candidate_stories": [
+  {
+   "id": "accenture-employee-allegedly-gave-claude-code-ai-agent-administr",
+   "title": "Accenture Employee Allegedly Gave Claude Code AI Agent Administrative Access to Pentagon Systems",
+   "n_events": 1,
+   "last_seen": "2026-10-30T05:47:29Z",
+   "first_event_title": "Accenture Employee Allegedly Gave Claude Code AI Agent Administrative Access to Pentagon Systems"
+  },
+  {
+   "id": "cursor-marketplace-powned",
+   "title": "Cursor marketplace Powned",
+   "n_events": 1,
+   "last_seen": "2026-10-30T05:29:10Z",
+   "first_event_title": "Cursor marketplace Powned"
+  },
+  {
+   "id": "zero-click-android-vulnerability-lets-attackers-crash-phones-wit",
+   "title": "Zero-Click Android Vulnerability Lets Attackers Crash Phones With a Single SMS",
+   "n_events": 1,
+   "last_seen": "2026-10-30T05:08:38Z",
+   "first_event_title": "Zero-Click Android Vulnerability Lets Attackers Crash Phones With a Single SMS"
+  },
+  {
+   "id": "linux-kernel-tcp-flaw-with-9-8-cvss-score-affects-ubuntu-red-hat",
+   "title": "Linux Kernel TCP Flaw With 9.8 CVSS Score Affects Ubuntu, Red Hat and Other Distributions",
+   "n_events": 17,
+   "last_seen": "2026-10-30T04:41:49.775Z",
+   "first_event_title": "Linux Kernel TCP Flaw With 9.8 CVSS Score Affects Ubuntu, Red Hat and Other Distributions"
+  },
+  {
+   "id": "node-js-brotli-decoder-vulnerability-cve-2026-111497",
+   "title": "Node.js Brotli decoder vulnerability CVE-2026-111497",
+   "n_events": 83,
+   "last_seen": "2026-10-30T03:58:35.000Z",
+   "first_event_title": "Is your Node.js application vulnerable to CVE-2026-111497? A newly disclosed High-severity vulnerability in the Node.js Brotli decoder could"
+  },
+  {
+   "id": "ao3-security-incident-takes-site-offline-data-intact",
+   "title": "AO3 security incident takes site offline, data intact",
+   "n_events": 2,
+   "last_seen": "2026-10-30T03:48:42.000Z",
+   "first_event_title": "AO3 down due to security incident. expected restore time is 2-4 WEEKS. All data intact. do not think user info was stolen, but are not rulin"
+  },
+  {
+   "id": "ws-ftp-server-patches-15-vulnerabilities-including-cvss-10-0-cve",
+   "title": "WS_FTP Server patches 15 vulnerabilities including CVSS 10.0 CVE-2026-84295 and 9.9 CVE-2026-90868",
+   "n_events": 4,
+   "last_seen": "2026-10-30T03:37:30.000Z",
+   "first_event_title": "Patch 15 WS_FTP Server vulnerabilities now, including 10.0 CVSS flaw CVE-2026-84295 and 9.9 CVSS command injection bug CVE-2026-90868. # WSF"
+  },
+  {
+   "id": "isc-stormcast-for-friday-october-30th-2026-https-isc-sans-edu-po",
+   "title": "ISC Stormcast For Friday, October 30th, 2026 (Fri, Oct 30th)",
+   "n_events": 0,
+   "last_seen": "2026-10-30T03:35:40Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "inside-keydrift-analyzing-historical-uat-11473-activity-on-cisco",
+   "title": "Inside KeyDrift: Analyzing historical UAT-11473 activity on Cisco SD-WAN",
+   "n_events": 19,
+   "last_seen": "2026-10-30T03:35:04.000Z",
+   "first_event_title": "Inside KeyDrift: Analyzing historical UAT-11473 activity on Cisco SD-WAN"
+  },
+  {
+   "id": "wordpress-7-1-4-patches-unauthenticated-upgrade-window-rce-explo",
+   "title": "WordPress 7.1.4 Patches Unauthenticated Upgrade-Window RCE; Exploitation Attempts Detected After Release",
+   "n_events": 2,
+   "last_seen": "2026-10-30T03:32:48.000Z",
+   "first_event_title": "WordPress 7.1.4 Patches Unauthenticated Upgrade-Window RCE; Exploitation Attempts Detected After Release"
+  },
+  {
+   "id": "mlflow-security-advisory-av26-832",
+   "title": "MLflow security advisory (AV26-832)",
+   "n_events": 2,
+   "last_seen": "2026-10-30T03:20:12.964Z",
+   "first_event_title": "MLflow security advisory (AV26-832)"
+  },
+  {
+   "id": "ivanti-connect-secure-cve-2026-104935-active-exploitation",
+   "title": "Ivanti Connect Secure CVE-2026-104935 Active Exploitation",
+   "n_events": 54,
+   "last_seen": "2026-10-30T02:58:43.000Z",
+   "first_event_title": "Ivanti Connect Secure zero-day CVE-2026-104935 We are aware of exploitation in the wild affecting a limited number of customers at the time "
+  },
+  {
+   "id": "officials-seize-domain-of-top-bulletproof-hosting-provider-virtu",
+   "title": "Officials seize domain of top bulletproof hosting provider Virtualine",
+   "n_events": 11,
+   "last_seen": "2026-10-30T02:47:42.000Z",
+   "first_event_title": "Officials seize domain of top bulletproof hosting provider Virtualine"
+  },
+  {
+   "id": "servicenow-patches-critical-sandbox-escape-cve-2026-103093-and-p",
+   "title": "ServiceNow patches critical sandbox escape CVE-2026-103093 and password leak CVE-2026-103094",
+   "n_events": 1,
+   "last_seen": "2026-10-30T02:30:01.000Z",
+   "first_event_title": "Apply the latest ServiceNow vulnerabilities patch to fix three flaws, including critical sandbox escape CVE-2026-103093 and password leak CV"
+  },
+  {
+   "id": "binance-probes-potential-5-8-billion-crypto-theft-hack",
+   "title": "Binance probes potential $5.8 billion crypto-theft hack",
+   "n_events": 4,
+   "last_seen": "2026-10-30T02:20:18.204Z",
+   "first_event_title": "Binance probes potential $5.8 billion crypto-theft hack"
+  },
+  {
+   "id": "researchers-find-bugs-in-five-ai-developer-tools-openai-and-micr",
+   "title": "Researchers find bugs in five AI developer tools, OpenAI and Microsoft flaws unpatched",
+   "n_events": 1,
+   "last_seen": "2026-10-30T02:20:06.131Z",
+   "first_event_title": "Source: The Register - Security Read: https://www. theregister.com/security/2026/ 10/29/researchers-find-bugs-in-5-ai-developer-tools-with-o"
+  },
+  {
+   "id": "china-linked-hackers-exploit-php2shell-to-root-firewalls",
+   "title": "China-Linked Hackers Exploit PHP2Shell to Root Firewalls",
+   "n_events": 30,
+   "last_seen": "2026-10-30T01:42:06Z",
+   "first_event_title": "China-Linked Hackers Exploit PHP2Shell to Root Firewalls"
+  },
+  {
+   "id": "unknown-apt-uses-netamloader-to-attack-a-win10-os-customized-for",
+   "title": "Unknown APT uses NetamLoader to attack a Win10 OS customized for governments in Asia",
+   "n_events": 3,
+   "last_seen": "2026-10-30T01:26:23.000Z",
+   "first_event_title": "Unknown APT uses NetamLoader to attack a Win10 OS customized for governments in Asia"
+  },
+  {
+   "id": "pentagon-treats-august-freezer-failures-at-military-bases-as-sus",
+   "title": "Pentagon Treats August Freezer Failures at Military Bases as Suspected Cyberattack",
+   "n_events": 3,
+   "last_seen": "2026-10-30T01:15:41Z",
+   "first_event_title": "Pentagon Treats August Freezer Failures at Military Bases as Suspected Cyberattack"
+  },
+  {
+   "id": "an-exposed-workspace-shows-ahsaycbs-webshell-access-turned-into",
+   "title": "An exposed workspace shows AhsayCBS webshell access turned into SOCKS proxy tunnels with Chisel and GOST across 141 hosts, per the logs. A",
+   "n_events": 1,
+   "last_seen": "2026-10-30T01:06:12.000Z",
+   "first_event_title": "An exposed workspace shows AhsayCBS webshell access turned into SOCKS proxy tunnels with Chisel and GOST across 141 hosts, per the logs. # A"
+  },
+  {
+   "id": "tor-has-a-problem-that-should-get-the-security-community-s-atten",
+   "title": "Tor has a problem that should get the security community\u2019s attention. Researchers showed that disrupting Tor\u2019s directory protocol could co",
+   "n_events": 2,
+   "last_seen": "2026-10-30T01:00:42.107Z",
+   "first_event_title": "\ud83d\udea8 Tor has a problem that should get the security community\u2019s attention. Researchers showed that disrupting Tor\u2019s directory protocol could co"
+  },
+  {
+   "id": "composer-patches-path-traversal-and-token-leak-in-2-11-0-and-2-2",
+   "title": "Composer patches path traversal and token leak in 2.11.0 and 2.2.31",
+   "n_events": 1,
+   "last_seen": "2026-10-30T00:46:17.000Z",
+   "first_event_title": "Upgrade to Composer 2.11.0 or 2.2.31 to fix two Composer vulnerabilities: path traversal GHSA-c968-33g3-wh7p and token leak GHSA-fm2w-xgf2-f"
+  },
+  {
+   "id": "plainfield-connecticut-town-hall-systems-under-cyber-breach-inve",
+   "title": "Plainfield Connecticut town hall systems under cyber breach investigation",
+   "n_events": 1,
+   "last_seen": "2026-10-30T00:44:14.000Z",
+   "first_event_title": "Most Town Hall systems in Plainfield, Connecticut, remain operational as officials investigate a possible cybersecurity breach, First Select"
+  },
+  {
+   "id": "gitee-scan-finds-26-000-exposed-credentials-across-7-25m-repos",
+   "title": "Gitee scan finds 26,000 exposed credentials across 7.25M repos",
+   "n_events": 1,
+   "last_seen": "2026-10-30T00:41:19.000Z",
+   "first_event_title": "A security scan revealed over 26,000 Gitee exposed credentials across 7.25 million public repositories, affecting major cloud and AI platfor"
+  },
+  {
+   "id": "hugging-face-malware-campaign-returns-to-hijack-gpus-for-crypto",
+   "title": "Hugging Face malware campaign returns to hijack GPUs for crypto mining",
+   "n_events": 3,
+   "last_seen": "2026-10-30T00:26:16.000Z",
+   "first_event_title": "Hugging Face malware campaign returns to hijack GPUs for crypto mining"
+  },
+  {
+   "id": "polymarket-halts-trading-after-crypto-draining-script-breach-2-5",
+   "title": "Polymarket halts trading after crypto-draining script breach, $2.5M traced",
+   "n_events": 11,
+   "last_seen": "2026-10-30T00:26:11.000Z",
+   "first_event_title": "Polymarket halts trading after crypto-draining script breach, $2.5M traced"
+  },
+  {
+   "id": "honda-u-s-dealer-network-regains-access-after-two-day-interrupti",
+   "title": "Honda U.S. dealer network regains access after two-day interruption",
+   "n_events": 1,
+   "last_seen": "2026-10-30T00:25:48.000Z",
+   "first_event_title": "Honda dealers in the U.S. reported regaining access to the Interactive Network after a two-day interruption that disrupted financing, parts "
+  },
+  {
+   "id": "a-data-center-moratorium-awaiting-hochul-s-signature-was-the-mos",
+   "title": "A data center moratorium awaiting Hochul\u2019s signature was the most-lobbied bill lasts summer",
+   "n_events": 0,
+   "last_seen": "2026-10-30T00:24:37Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "openai-doubles-chatgpt-pro-usage-limits-after-backlash-over-plan",
+   "title": "OpenAI doubles ChatGPT Pro usage limits after backlash over planned 50% cut",
+   "n_events": 0,
+   "last_seen": "2026-10-29T23:35:52Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "tracking-ai-adoption-in-north-korean-threat-actor-tradecraft",
+   "title": "Tracking AI adoption in North Korean threat actor tradecraft",
+   "n_events": 3,
+   "last_seen": "2026-10-29T23:28:37.000Z",
+   "first_event_title": "Tracking AI adoption in North Korean threat actor tradecraft"
+  },
+  {
+   "id": "vapor-panda-uses-ai-driven-artex-to-scale-a-global-espionage-cam",
+   "title": "VAPOR PANDA Uses AI-Driven ARTEX to Scale a Global Espionage Campaign",
+   "n_events": 1,
+   "last_seen": "2026-10-29T23:05:51Z",
+   "first_event_title": "VAPOR PANDA Uses AI-Driven ARTEX to Scale a Global Espionage Campaign"
+  },
+  {
+   "id": "japan-airlines-suffers-third-party-data-breach-exposing-passenge",
+   "title": "Japan Airlines suffers third-party data breach exposing passenger info",
+   "n_events": 8,
+   "last_seen": "2026-10-29T22:31:49.000Z",
+   "first_event_title": "Japan Airlines suffers third-party data breach exposing passenger info"
+  },
+  {
+   "id": "macos-dev-tools-trust-compromised-emudhra-intermediates",
+   "title": "macOS Dev Tools Trust Compromised eMudhra Intermediates",
+   "n_events": 7,
+   "last_seen": "2026-10-29T22:28:22.939Z",
+   "first_event_title": "macOS dev tools (git, curl, python3) reportedly still trust compromised eMudhra intermediates, so MITM can serve malicious clones, alter pus"
+  },
+  {
+   "id": "extent-of-crime-stoppers-data-breach-unknown-sault-police-chief",
+   "title": "Extent of Crime Stoppers data breach unknown: Sault Police chief",
+   "n_events": 1,
+   "last_seen": "2026-10-29T22:20:41Z",
+   "first_event_title": "Extent of Crime Stoppers data breach unknown: Sault Police chief"
+  },
+  {
+   "id": "eu-satellite-imagery-delayed-over-gaza-and-parts-of-west-bank-by",
+   "title": "EU Satellite Imagery Delayed Over Gaza and Parts of West Bank by 24-hours",
+   "n_events": 0,
+   "last_seen": "2026-10-29T22:15:59Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "abliterated-models-for-blue-team-work-what-they-fix-what-they-br",
+   "title": "Abliterated models for blue-team work: what they fix, what they break, and one we\u2019re hosting",
+   "n_events": 0,
+   "last_seen": "2026-10-29T21:56:46Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "cisco-secure-firewall-zero-day-cve-2026-76418",
+   "title": "Cisco Secure Firewall zero-day CVE-2026-76418",
+   "n_events": 17,
+   "last_seen": "2026-10-29T21:02:11.000Z",
+   "first_event_title": "Cisco zero-day: CVE-2026-76418 (8.6 high) Cisco Secure Firewall Adaptive Security Appliance and Secure Firewall Threat Defense Software Remo"
+  },
+  {
+   "id": "hackers-expose-identities-of-more-than-40-000-dhs-employees",
+   "title": "Hackers Expose Identities of More Than 40,000 DHS Employees",
+   "n_events": 16,
+   "last_seen": "2026-10-29T20:58:28Z",
+   "first_event_title": "# ICE Hacked. \"Hackers expose the identities of more than 40,000 # DHS employees\" # Security # Politics # Government # Freedom # News # USA "
+  },
+  {
+   "id": "threat-intel-honda-peru-actor-panzer-claims-undisclosed-allegedl",
+   "title": "THREAT INTEL | Honda (Peru) \ud83d\udfe2 Actor \"Panzer\" claims Undisclosed Allegedly exposed \u2022 NDA documents \u26a0\ufe0f Unverified claim yazoul.",
+   "n_events": 10,
+   "last_seen": "2026-10-29T20:55:59.378Z",
+   "first_event_title": "\ud83d\udee1 THREAT INTEL | Stim \ud83d\udfe2 Actor \"Panzer\" claims Undisclosed \u26a0\ufe0f Unverified claim https://www. yazoul.net/intel/claim/2026-09 -18-stim-ransomwar"
+  },
+  {
+   "id": "what-is-iot-security-a-homeowner-s-guide-to-protecting-smart-dev",
+   "title": "What Is IoT Security? A Homeowner\u2019s Guide to Protecting Smart Devices",
+   "n_events": 0,
+   "last_seen": "2026-10-29T20:45:42Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "2026-13482",
+   "title": "[\uc77c\ubcf8 \uc560\ub2c8\uba54\uc774\uc158]\u5e7c\u5973\u6226\u8a18\u2171(\uc720\ub140\uc804\uae30 \u2171,2026)",
+   "n_events": 0,
+   "last_seen": "2026-10-26T15:06:28Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "a-brief-introduction-to-good-and-bad-insecurity-buttons-13856",
+   "title": "A brief introduction to Good and Bad \"insecurity\"-buttons",
+   "n_events": 1,
+   "last_seen": "2026-10-29T15:00:03.060849Z",
+   "first_event_title": "A brief introduction to Good and Bad \"insecurity\"-buttons"
+  },
+  {
+   "id": "a-queer-kind-of-hope-13875",
+   "title": "A Queer Kind of Hope",
+   "n_events": 1,
+   "last_seen": "2026-10-29T17:00:03.418002Z",
+   "first_event_title": "A Queer Kind of Hope"
+  },
+  {
+   "id": "adobe-security-advisory-av26-1092",
+   "title": "Adobe security advisory (AV26-1092)",
+   "n_events": 1,
+   "last_seen": "2026-10-28T14:41:13Z",
+   "first_event_title": "Adobe security advisory (AV26-1092)"
+  },
+  {
+   "id": "apple-security-advisory-av26-1099",
+   "title": "Apple security advisory (AV26-1099)",
+   "n_events": 1,
+   "last_seen": "2026-10-28T19:16:21Z",
+   "first_event_title": "Apple security advisory (AV26-1099)"
+  },
+  {
+   "id": "control-systems-hitachi-security-advisory-av26-1091",
+   "title": "[Control systems] Hitachi security advisory (AV26-1091)",
+   "n_events": 1,
+   "last_seen": "2026-10-27T16:35:59Z",
+   "first_event_title": "[Control systems] Hitachi security advisory (AV26-1091)"
+  },
+  {
+   "id": "control-systems-johnson-controls-security-advisory-av26-1090",
+   "title": "[Control systems] Johnson Controls security advisory (AV26-1090)",
+   "n_events": 1,
+   "last_seen": "2026-10-27T14:10:52Z",
+   "first_event_title": "[Control systems] Johnson Controls security advisory (AV26-1090)"
+  },
+  {
+   "id": "control-systems-moxa-security-advisory-av26-1089",
+   "title": "[Control Systems] Moxa security advisory (AV26-1089)",
+   "n_events": 1,
+   "last_seen": "2026-10-27T13:35:40Z",
+   "first_event_title": "[Control Systems] Moxa security advisory (AV26-1089)"
+  },
+  {
+   "id": "control-systems-siemens-security-advisory-av26-1083",
+   "title": "[Control Systems] Siemens security advisory (AV26-1083)",
+   "n_events": 1,
+   "last_seen": "2026-10-26T13:50:45Z",
+   "first_event_title": "[Control Systems] Siemens security advisory (AV26-1083)"
+  },
+  {
+   "id": "craft-cms-security-advisory-av26-1086",
+   "title": "Craft CMS security advisory (AV26-1086)",
+   "n_events": 2,
+   "last_seen": "2026-10-26T17:00:13.000Z",
+   "first_event_title": "Craft CMS security advisory (AV26-1086)"
+  },
+  {
+   "id": "enterprise-fill-assist-delivers-custom-rules-for-enhanced-autofi-13618",
+   "title": "Enterprise fill assist delivers custom rules for enhanced autofill",
+   "n_events": 0,
+   "last_seen": "2026-10-27T00:00:00Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "esri-security-advisory-av26-1088",
+   "title": "Esri security advisory (AV26-1088)",
+   "n_events": 1,
+   "last_seen": "2026-10-27T13:25:46Z",
+   "first_event_title": "Esri security advisory (AV26-1088)"
+  },
+  {
+   "id": "fortinet-security-advisory-av26-1081",
+   "title": "Fortinet security advisory (AV26-1081)",
+   "n_events": 1,
+   "last_seen": "2026-10-23T14:25:59Z",
+   "first_event_title": "Fortinet security advisory (AV26-1081)"
+  },
+  {
+   "id": "fortinet-security-advisory-av26-812",
+   "title": "Fortinet security advisory (AV26-812)",
+   "n_events": 2,
+   "last_seen": "2026-08-13T10:40:57Z",
+   "first_event_title": "Fortinet security advisory (AV26-812)"
+  },
+  {
+   "id": "google-security-advisory-av26-1085",
+   "title": "Google security advisory (AV26-1085)",
+   "n_events": 1,
+   "last_seen": "2026-10-26T14:15:45Z",
+   "first_event_title": "Google security advisory (AV26-1085)"
+  },
+  {
+   "id": "google-security-advisory-av26-904",
+   "title": "Google security advisory (AV26-904)",
+   "n_events": 2,
+   "last_seen": "2026-09-09T20:49:30Z",
+   "first_event_title": "Google security advisory (AV26-904)"
+  },
+  {
+   "id": "grafana-security-advisory-av26-860",
+   "title": "Grafana Alloy Vulnerability CVE-2026-19516",
+   "n_events": 3,
+   "last_seen": "2026-10-13T16:00:56.470Z",
+   "first_event_title": "Grafana security advisory (AV26-860)"
+  },
+  {
+   "id": "hashicorp-security-advisory-av26-1087",
+   "title": "HashiCorp security advisory (AV26-1087)",
+   "n_events": 1,
+   "last_seen": "2026-10-26T19:10:47Z",
+   "first_event_title": "HashiCorp security advisory (AV26-1087)"
+  },
+  {
+   "id": "hashicorp-security-advisory-av26-797",
+   "title": "HashiCorp security advisory (AV26-797)",
+   "n_events": 1,
+   "last_seen": "2026-08-11T14:05:42Z",
+   "first_event_title": "HashiCorp security advisory (AV26-797)"
+  },
+  {
+   "id": "hashicorp-security-advisory-av26-817",
+   "title": "HashiCorp security advisory (AV26-817)",
+   "n_events": 1,
+   "last_seen": "2026-08-14T16:05:44Z",
+   "first_event_title": "HashiCorp security advisory (AV26-817)"
+  }
+ ]
+}
