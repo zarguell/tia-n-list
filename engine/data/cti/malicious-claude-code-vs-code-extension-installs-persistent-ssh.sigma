@@ -1,0 +1,54 @@
+title: Developer Workstation SSH Backdoor - authorized_keys Write or Reverse Tunnel
+id: 26c1a378-95cc-42fc-8487-2edae85a630a
+status: experimental
+description: >
+    Detects the two host-level effects of the trojanized anthropic.claude-code
+    VS Code extension 2.1.313 distributed through Open VSX and the Cursor
+    extension marketplace: a shell or script interpreter appending an
+    attacker-controlled key to the user's ~/.ssh/authorized_keys, and ssh.exe
+    started with reverse-tunnel (-R) plus non-interactive (-N) arguments that
+    exposes the developer workstation through an outbound tunnel. Derived from
+    case analysis of the StepSecurity / GBHackers reporting, NOT validated
+    against live telemetry.
+references:
+    - https://gbhackers.com/malicious-claude-code-vs-code-extension/
+    - https://www.stepsecurity.io/blog/claude-code-extension-trojanized
+    - https://opensourcemalware.com/blog/trojanized-claude-code-extension-plants-persistent-ssh-backdoor
+    - https://thecybersecguru.com/news/claude-code-open-vsx-ssh-backdoor-analysis/
+author: Tia N. List
+date: 2026-10-30
+tags:
+    - attack.t1195
+    - attack.t1098
+    - attack.t1572
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_keys:
+        CommandLine|contains|all:
+            - 'authorized_keys'
+        CommandLine|contains:
+            - 'Add-Content'
+            - 'Set-Content'
+            - 'Out-File'
+            - '>>'
+            - 'echo '
+            - 'tee '
+    selection_tunnel:
+        Image|endswith:
+            - '\ssh.exe'
+            - '/ssh'
+        CommandLine|contains|all:
+            - '-R '
+            - '-N'
+    filter_platform_agent:
+        Image|endswith:
+            - '\ssh-agent.exe'
+            - '\putty.exe'
+            - '\plink.exe'
+    condition: (selection_keys or selection_tunnel) and not filter_platform_agent
+falsepositives:
+    - Developers and administrators legitimately installing their own SSH public keys through PowerShell or shell one-liners
+    - Interactive support sessions and CI helpers that use ssh -N -R for port forwarding against a jump host
+level: medium
