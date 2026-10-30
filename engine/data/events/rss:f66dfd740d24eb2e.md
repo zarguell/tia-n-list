@@ -1,0 +1,1 @@
+CERT Polska has received a report about 5 vulnerabilities (from CVE-2025-68391 to CVE-2025-68395) found in ARKETEAM Protectel software. Article Link: Vulnerabilities in ARKETEAM Protectel software | CERT Polska
