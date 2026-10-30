@@ -1,0 +1,3 @@
+Adobe advisory AV26-1092, dated October 28, 2026, covers vulnerabilities in Adobe Substance 3D Painter (prior to 12.1.5), Creative Cloud Desktop Application (prior to 6.10), Adobe Campaign Classic (prior to 7.4.4 build 9402), and Adobe Connect mobile and desktop apps (various prior builds). The Canadian Centre for Cyber Security lists security bulletins APSB26-178, APSB26-135, APSB26-162, and APSB26-182. The event notes 12 vulnerabilities across these four products but does not break out specific CVSS scores or active exploitation status for each.
+
+Administrators should review the Adobe security bulletins and apply updates as they become available. No CVE list is present in the event text, so treat severity as unconfirmed without primary source verification.

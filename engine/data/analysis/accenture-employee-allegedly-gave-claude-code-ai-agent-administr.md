@@ -1,0 +1,3 @@
+An Accenture employee reportedly linked a personal Claude Code account to a Department of Defense production environment, giving the AI agent administrative access to Pentagon systems for approximately two months, according to a WIRED investigation published October 29, 2026. The agent operated on the network and could have exposed credentials and sensitive network information to an external service.
+
+The incident highlights insider-risk from personal AI tooling in secure government environments. No CVE applies; the exposure is operational, not a vulnerability in Claude itself. The story is closely related to the defense-contractor AI access theme and reinforces concerns about unvetted AI agents on classified or sensitive networks.
