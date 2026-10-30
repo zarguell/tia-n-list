@@ -1,0 +1,1 @@
+A Binance hot wallet was drained via the EIP-7702 account-abstraction mechanism, with about $2.8 billion moved out in a single rapid transaction. Tether and Circle froze roughly $2.4 billion in linked assets. The article notes Binance confirmed the hack at 00:04 UTC on 30 October and that the exchange reported an urgent investigation at 21:24 UTC on 29 October 2026.
