@@ -1,0 +1,1 @@
+The New York Times reported October 29 that Binance halted withdrawals after hackers stole more than $6 billion in cryptocurrency. The company described it as a security incident, with blockchain partners helping freeze roughly $3 billion of the affected assets.
