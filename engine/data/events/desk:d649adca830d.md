@@ -1,0 +1,1 @@
+Cisco's advisory (version 2.1, updated October 28 2026) covers CVE-2026-20127, a maximum-severity authentication bypass affecting Catalyst SD-WAN Controller (vSmart), Manager (vManage), and Validator (vBond), including hosted and FedRAMP environments. Cisco states no workarounds exist; patching is required.

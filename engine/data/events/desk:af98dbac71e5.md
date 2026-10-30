@@ -1,0 +1,1 @@
+Talos identified UAT-11473 exploiting CVE-2026-20127 in Cisco Catalyst SD-WAN Controller, Manager, and Validator to deploy the KeyDrift implant. The malware uses a two-component design with LittleFilch hooking the vdaemon process to harvest AES-256 encryption keys. Talos released Snort rules 67387-67416 (Snort 2) and 7:44-7:73 (Snort 3) for KeyDrift C2 on October 28.
