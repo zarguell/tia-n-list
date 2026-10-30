@@ -1,0 +1,836 @@
+{
+ "date": "2026-10-30",
+ "decisions_path": "engine/data/triage/decisions-2026-10-30T1402.json",
+ "instructions": "For every new event decide: (1) keep or drop \u2014 keep only stories worth covering (real security events, vulnerabilities, attacks, breaches, advisories with substance); drop press releases, vendor marketing, generic explainers, and anything duplicating an existing story. (2) If keep, assign the event to the RIGHT story: an existing candidate story id if it belongs there (this FIXES mechanical clustering \u2014 e.g. different outlets' Patch Tuesday roundups are ONE story), or NEW with a clean story_title. (3) merges: list candidate stories that are really the same story (from = fragment, into = the most complete one). (4) For every kept event that names CVEs, optionally assess exploitation: exploited = the event reports OBSERVED in-the-wild exploitation (implants, victim counts, campaigns, CISA KEV confirmation); suspected = public exploit code/PoC or likely-but-unconfirmed. Attribute ONLY the CVEs you can tie to the claim \u2014 a bulletin's blanket 'actively exploited' does NOT flag all its CVEs. Omit the exploitation field when the event makes no claim.\n(5) LOW-TRUST events (\"low_trust\": true \u2014 AI-drafted aggregator reposts, late and overstated): treat as unverified leads. When the text attributes the claim to a named primary source (a researcher firm like watchTowr, a vendor advisory, CISA, a major outlet) and attribution_urls or a web search (/home/ubuntu/repos/cronman/bin/web-search.sh \"query\") locate that primary source CONFIRMING the claim, include a provenance object in the decision: {\"url\": <primary url>, \"source\": <domain>, \"evidence\": <one line>, \"verified\": true}. VERIFIED provenance lets the event mint a story (credited to the primary source) and count as a development; without it, a low-trust event can only attach to an EXISTING story, never mint. If you cannot verify, keep/drop on normal merit and omit provenance.\n\nWrite decisions as JSON with EXACTLY this shape:\n{\n  \"decisions\": [\n    {\"event_id\": \"<id>\", \"action\": \"keep\", \"story\": \"<existing candidate story id>\", \"reason\": \"...\"},\n    {\"event_id\": \"<id>\", \"action\": \"keep\", \"story\": \"NEW\", \"story_title\": \"<clean title>\", \"reason\": \"...\"},\n    {\"event_id\": \"<id>\", \"action\": \"drop\", \"reason\": \"...\"}\n  ],\n  \"merges\": [{\"from\": \"<fragment story id>\", \"into\": \"<canonical story id>\"}]\n}\nFor events marked \"low_trust\" (AI-drafted aggregator reposts) a decision\nmay carry an optional \"provenance\" object when you VERIFIED the claim at\nthe named primary source: {\"event_id\": ..., \"action\": \"keep\", ...}\n  \"provenance\": {\"url\": \"<primary source url>\", \"source\": \"<domain>\", \"evidence\": \"<one line>\"}\nOnly include provenance when the primary source (vendor advisory, CISA,\nthe named researcher/outlet) really carries the claim \u2014 verified\nprovenance lets a low-trust event mint a story and set freshness; without\nit the event can only amplify an existing story.\nSTRICT KEY NAMES: the array key is \"decisions\" (never \"events\"); the story\nkey is \"story\" (never \"story_id\"); \"story\" holds a candidate_stories id\nverbatim or the literal string \"NEW\". Optional per-event field\n\"exploitation\": {\"CVE-...\": {\"status\": \"exploited|suspected\", \"evidence\": \"1-2 sentences\"}}.",
+ "new_events": [
+  {
+   "id": "rss:adf984bb09cc4836",
+   "title": "\u201cA Ring Tone That I Cannot Hear\u201d \u2013 Twenty Years Later",
+   "source": "malware.news",
+   "published_at": "2026-10-30T13:56:20Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "My first post for this blog was in June 2006, 20 years ago: A Ring Tone That I Cannot Hear . Back then, I tested my hearing with Audacity, and I could hear a tone up to 14 kHz. 20 years later, I do the test again, and I "
+  },
+  {
+   "id": "rss:be97584af9566a6a",
+   "title": "Bulletproof Host Virtualine Loses Its Domain to FBI Seizure",
+   "source": "securityweek.com",
+   "published_at": "2026-10-30T13:36:12Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "The FBI has seized virtualine.net, the domain of a Russian-speaking bulletproof hosting services provider associated with various cybercriminal operations. According to court documents, Virtualine, also known as Secury, "
+  },
+  {
+   "id": "rss:b8066d3aa3a21e1d",
+   "title": "Photo ID, bank checks, face scan? The UK\u2019s age-check options",
+   "source": "malware.news",
+   "published_at": "2026-10-30T13:30:44Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "As preparation for the UK\u2019s planned social media ban, Ofcom has set out four ways social media platforms could check whether users are aged 16 or over. The government and Parliament will decide how the ban works in pract"
+  },
+  {
+   "id": "rss:1bf0599bf819f189",
+   "title": "CISA says max severity GitLab flaw now exploited in the wild",
+   "source": "bleepingcomputer.com",
+   "published_at": "2026-10-30T13:00:32Z",
+   "cves": [
+    "CVE-2026-97229"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Attackers have started exploiting a maximum-severity GitLab vulnerability patched earlier this month, according to the US Cybersecurity and Infrastructure Security Agency (CISA). Tracked as CVE-2026-97229 , this critical"
+  },
+  {
+   "id": "masto:117529739748889439",
+   "title": "Cisco SD-WAN CVE-2026-20127 (CVSS 10.0): auth bypass exploited before disclosure and after the patch. Attackers planted KeyDrift \u2014 a two-com",
+   "source": "threataft.com",
+   "published_at": "2026-10-30T11:58:27.400Z",
+   "cves": [
+    "CVE-2026-20127"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Cisco SD-WAN CVE-2026-20127 (CVSS 10.0): auth bypass exploited before disclosure and after the patch. Attackers planted KeyDrift \u2014 a two-com  via Mastodon https://threataft.com/articles/cisco-sd-wan-cve-2026-20127-volt-t"
+  },
+  {
+   "id": "masto:117529731742276936",
+   "title": "Polymarket restored trading after outages caused by a cyberattack on a third-party provider. The core platform was reportedly unaffected, ma",
+   "source": "cyberworldops.eu",
+   "published_at": "2026-10-30T11:56:24.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Polymarket restored trading after outages caused by a cyberattack on a third-party provider. The core platform was reportedly unaffected, ma  via Mastodon https://cyberworldops.eu/en/polymarket-restores-trading-after-thi"
+  },
+  {
+   "id": "masto:117529686858211649",
+   "title": "\ud83e\udd16 CVE-2026-97229 (CVSS 10.0): unauthenticated RCE in GitLab CE/EE via a crafted regex in CI/CD configuration (insufficient regex validation)",
+   "source": "nvd.nist.gov",
+   "published_at": "2026-10-30T11:44:59.000Z",
+   "cves": [
+    "CVE-2026-76418",
+    "CVE-2026-97229"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "\ud83e\udd16 CVE-2026-97229 (CVSS 10.0): unauthenticated RCE in GitLab CE/EE via a crafted regex in CI/CD configuration (insufficient regex validation)  via Mastodon https://nvd.nist.gov/vuln/detail/CVE-2026-97229 "
+  },
+  {
+   "id": "masto:117529667292417978",
+   "title": "\ud83d\uddde Drupal Commerce Core Vulnerability Exploited Against Online Stores via SecurityWeek https://www. securityweek.com/drupal-commer ce-core-vu",
+   "source": "www.securityweek.com",
+   "published_at": "2026-10-30T11:40:01.805Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "\ud83d\uddde Drupal Commerce Core Vulnerability Exploited Against Online Stores via SecurityWeek https://www. securityweek.com/drupal-commer ce-core-vu  via Mastodon https://www.securityweek.com/drupal-commerce-core-vulnerability-e"
+  },
+  {
+   "id": "masto:117529666465291640",
+   "title": "Today: Learn what to consider when preparing digital multimedia evidence for court, discover the latest innovations in Cellebrite\u2019s Autumn 2",
+   "source": "www.forensicfocus.com",
+   "published_at": "2026-10-30T11:39:48.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Today: Learn what to consider when preparing digital multimedia evidence for court, discover the latest innovations in Cellebrite\u2019s Autumn 2  via Mastodon https://www.forensicfocus.com/news/headlines/dfir-news-30-oct-202"
+  },
+  {
+   "id": "masto:117529661344840689",
+   "title": "Schluss mit Gro\u00dfbuchstaben, Sonderzeichen und Passwortfrust #Passkey #Passkeys #Cybersicherheit #Passwort #Datenschutz #DigitalSecurity #Cyb",
+   "source": "feetlove1973.de",
+   "published_at": "2026-10-30T11:38:27.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Schluss mit Gro\u00dfbuchstaben, Sonderzeichen und Passwortfrust #Passkey #Passkeys #Cybersicherheit #Passwort #Datenschutz #DigitalSecurity #Cyb  via Mastodon https://feetlove1973.de/schluss-mit-grossbuchstaben-sonderzeichen"
+  },
+  {
+   "id": "masto:117529657494092020",
+   "title": "Chcesz zadba\u0107 o bezpiecze\u0144stwo i prywatno\u015b\u0107 w sieci, ale nie wiesz, od czego zacz\u0105\u0107? Zacznij od manifestu \u2013 wyja\u015bnia, czemu \u201enie ufaj domy\u015bl",
+   "source": "distrust.pl",
+   "published_at": "2026-10-30T11:37:31.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Chcesz zadba\u0107 o bezpiecze\u0144stwo i prywatno\u015b\u0107 w sieci, ale nie wiesz, od czego zacz\u0105\u0107? Zacznij od manifestu \u2013 wyja\u015bnia, czemu \u201enie ufaj domy\u015bl  via Mastodon https://distrust.pl/ "
+  },
+  {
+   "id": "masto:117529632022160801",
+   "title": "a bot-detection script on popular sites names its functions after bioweapons not because it makes any it's a trap for AI. paste it into a mo",
+   "source": "nullpt.rs",
+   "published_at": "2026-10-30T11:31:03.624Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "a bot-detection script on popular sites names its functions after bioweapons not because it makes any it's a trap for AI. paste it into a mo  via Mastodon https://nullpt.rs/fingerprinting-bioweapons "
+  },
+  {
+   "id": "masto:117529610735998442",
+   "title": "For all my self-hosting friends using netbird: There's a Linux kernel bug being tracked as CVE-2026-98432 that can lead to unauthenticated r",
+   "source": "www.cve.org",
+   "published_at": "2026-10-30T11:25:37.000Z",
+   "cves": [
+    "CVE-2026-98432"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "For all my self-hosting friends using netbird: There's a Linux kernel bug being tracked as CVE-2026-98432 that can lead to unauthenticated r  via Mastodon https://www.cve.org/CVERecord?id=CVE-2026-98432 "
+  },
+  {
+   "id": "masto:117529581404442840",
+   "title": "\ud83d\uddb2\ufe0f # Cybersecurity # Ciberseguridad # Ciberseguranca # Security # Seguridad # Seguranca # News # Noticia # Noticias # Tecnologia # Technolog",
+   "source": "www.darkreading.com",
+   "published_at": "2026-10-30T11:18:11.259Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "\ud83d\uddb2\ufe0f # Cybersecurity # Ciberseguridad # Ciberseguranca # Security # Seguridad # Seguranca # News # Noticia # Noticias # Tecnologia # Technolog  via Mastodon https://www.darkreading.com/cyberattacks-data-breaches/anthropic-"
+  },
+  {
+   "id": "masto:117529566654498697",
+   "title": "A new version of Tails, 7.16, has been released. Tails (The Amnesic Incognito Live System) is a specialized live Linux distribution designed",
+   "source": "linuxiarze.pl",
+   "published_at": "2026-10-30T11:14:24.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "A new version of Tails, 7.16, has been released. Tails (The Amnesic Incognito Live System) is a specialized live Linux distribution designed  via Mastodon https://linuxiarze.pl/tails-7-16/ "
+  },
+  {
+   "id": "masto:117529547672085557",
+   "title": "Zosta\u0142a wydana nowa wersja Tails 7.16. Tails (The Amnesic Incognito Live System) jest specjalistyczn\u0105 dystrybucj\u0105 Linuksa typu live, s\u0142u\u017c\u0105c\u0105",
+   "source": "linuxiarze.pl",
+   "published_at": "2026-10-30T11:09:35.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Zosta\u0142a wydana nowa wersja Tails 7.16. Tails (The Amnesic Incognito Live System) jest specjalistyczn\u0105 dystrybucj\u0105 Linuksa typu live, s\u0142u\u017c\u0105c\u0105  via Mastodon https://linuxiarze.pl/tails-7-16/ "
+  },
+  {
+   "id": "masto:117529547025758079",
+   "title": "12 courses load in under 60 seconds on Null sec Cybersecurity Academy \u2013 no more hunting fragmented tutorials. Dive straight into hands\u2011on la",
+   "source": "clima-portfolio.xyz",
+   "published_at": "2026-10-30T11:09:26.681Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "12 courses load in under 60 seconds on Null sec Cybersecurity Academy \u2013 no more hunting fragmented tutorials. Dive straight into hands\u2011on la  via Mastodon https://clima-portfolio.xyz/?go=qHyHmRA "
+  },
+  {
+   "id": "masto:117529546031942278",
+   "title": "Zosta\u0142a wydana nowa wersja Tails 7.16. Tails (The Amnesic Incognito Live System) jest specjalistyczn\u0105 dystrybucj\u0105 Linuksa typu live, s\u0142u\u017c\u0105c\u0105",
+   "source": "linuxiarze.pl",
+   "published_at": "2026-10-30T11:09:11.517Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Zosta\u0142a wydana nowa wersja Tails 7.16. Tails (The Amnesic Incognito Live System) jest specjalistyczn\u0105 dystrybucj\u0105 Linuksa typu live, s\u0142u\u017c\u0105c\u0105  via Mastodon https://linuxiarze.pl/tails-7-16/ "
+  },
+  {
+   "id": "masto:117529541164288441",
+   "title": "A new zero-click denial-of-service vulnerability known as the Android SMS of Death crashes calling features via malicious WAP Push messages.",
+   "source": "dailytechnow.com",
+   "published_at": "2026-10-30T11:07:56.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "A new zero-click denial-of-service vulnerability known as the Android SMS of Death crashes calling features via malicious WAP Push messages.  via Mastodon https://dailytechnow.com/android-sms-of-death-zero-click-vulnerab"
+  },
+  {
+   "id": "masto:117529540650119508",
+   "title": "Chiche ? Qu'on rigole un peu ! \ud83d\ude08 \ud83d\ude08 \ud83d\ude08 \u22c5 Le sc\u00e9nario catastrophe d'une IA qui pirate un pays entier : \"Techniquement, rien ne l'emp\u00eache\", aler",
+   "source": "www.clubic.com",
+   "published_at": "2026-10-30T11:07:48.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Chiche ? Qu'on rigole un peu ! \ud83d\ude08 \ud83d\ude08 \ud83d\ude08 \u22c5 Le sc\u00e9nario catastrophe d'une IA qui pirate un pays entier : \"Techniquement, rien ne l'emp\u00eache\", aler  via Mastodon https://www.clubic.com/actualite-636712-le-scenario-catastrophe-d"
+  },
+  {
+   "id": "masto:117529529276829508",
+   "title": "Drei Tage it-sa 2026 in N\u00fcrnberg liegen hinter uns. Unser R\u00e9sum\u00e9: Der Markt europ\u00e4ischer Anbieter w\u00e4chst sichtbar \u2013 auch in Nischenm\u00e4rkten, ",
+   "source": "zempel-itsecurity.de",
+   "published_at": "2026-10-30T11:04:55.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Drei Tage it-sa 2026 in N\u00fcrnberg liegen hinter uns. Unser R\u00e9sum\u00e9: Der Markt europ\u00e4ischer Anbieter w\u00e4chst sichtbar \u2013 auch in Nischenm\u00e4rkten,   via Mastodon https://zempel-itsecurity.de/home/zis-blog/41-it-sa-2026-rueckbli"
+  },
+  {
+   "id": "masto:117529525547741015",
+   "title": "A Polymarket breach forced a trading halt after hackers compromised a third-party script to steal crypto. Learn how this supply chain attack",
+   "source": "dailytechnow.com",
+   "published_at": "2026-10-30T11:03:58.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "A Polymarket breach forced a trading halt after hackers compromised a third-party script to steal crypto. Learn how this supply chain attack  via Mastodon https://dailytechnow.com/polymarket-breach-halts-trading/ "
+  },
+  {
+   "id": "masto:117529523140511476",
+   "title": "The long road to quantum stability # negativepid # digitalInvestigations # OSINT # cybersecurity # AI # tech # onlineInvestigations # roboti",
+   "source": "negativepid.blog",
+   "published_at": "2026-10-30T11:03:22.222Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "The long road to quantum stability # negativepid # digitalInvestigations # OSINT # cybersecurity # AI # tech # onlineInvestigations # roboti  via Mastodon https://negativepid.blog/the-long-road-to-quantum-stability/?utm_"
+  },
+  {
+   "id": "masto:117529522106877522",
+   "title": "Kubernetes Promotes KYAML as a Safer, More Consistent Way to Work with Manifests Kubernetes introduces KYAML, a stricter YAML dialect to red",
+   "source": "www.infoq.com",
+   "published_at": "2026-10-30T11:03:06.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Kubernetes Promotes KYAML as a Safer, More Consistent Way to Work with Manifests Kubernetes introduces KYAML, a stricter YAML dialect to red  via Mastodon https://www.infoq.com/news/2026/09/kubernetes-kyaml-manifests/ "
+  },
+  {
+   "id": "masto:117529516726555317",
+   "title": "Google Patches 52 Chrome Vulnerabilities, Four Critical Google released a security update for Chrome version 156.0.8078.73/.74 to fix 52 vul",
+   "source": "beyondmachines.net",
+   "published_at": "2026-10-30T11:01:42.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Google Patches 52 Chrome Vulnerabilities, Four Critical Google released a security update for Chrome version 156.0.8078.73/.74 to fix 52 vul  via Mastodon https://beyondmachines.net/event_details/google-patches-52-chrome"
+  },
+  {
+   "id": "masto:117529511942328334",
+   "title": "Anthropic open-sources its vuln scanning tools \u2014 and the bottleneck shifts from detection to remediation. Maintainers now face a flood of re",
+   "source": "www.techtarget.com",
+   "published_at": "2026-10-30T11:00:23.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Anthropic open-sources its vuln scanning tools \u2014 and the bottleneck shifts from detection to remediation. Maintainers now face a flood of re  via Mastodon https://www.techtarget.com/news/anthropics-open-source-vuln-scans"
+  },
+  {
+   "id": "masto:117529499129769054",
+   "title": "\ud83d\uddb2\ufe0f # Cybersecurity # Ciberseguridad # Ciberseguranca # Security # Seguridad # Seguranca # News # Noticia # Noticias # Tecnologia # Technolog",
+   "source": "www.darkreading.com",
+   "published_at": "2026-10-30T10:57:15.846Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "\ud83d\uddb2\ufe0f # Cybersecurity # Ciberseguridad # Ciberseguranca # Security # Seguridad # Seguranca # News # Noticia # Noticias # Tecnologia # Technolog  via Mastodon https://www.darkreading.com/physical-security/russia-cyber-war-be"
+  },
+  {
+   "id": "masto:117529489080798774",
+   "title": "The phase-change music is already playing. Patch your Palo Alto Networks GlobalProtect VPN immediately and scan your environment for indicat",
+   "source": "hackread.com",
+   "published_at": "2026-10-30T10:54:42.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "The phase-change music is already playing. Patch your Palo Alto Networks GlobalProtect VPN immediately and scan your environment for indicat  via Mastodon https://hackread.com/qilin-inc-exploit-palo-alto-vpn-flaw-ransomw"
+  },
+  {
+   "id": "masto:117529486027849494",
+   "title": "Malware Infects 5,000 via Compromised VS Code Extension A malicious VS Code extension infected up to 5,000 users after the Cursor Marketplac",
+   "source": "osintsights.com",
+   "published_at": "2026-10-30T10:53:55.925Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Malware Infects 5,000 via Compromised VS Code Extension A malicious VS Code extension infected up to 5,000 users after the Cursor Marketplac  via Mastodon https://osintsights.com/malware-infects-5000-via-compromised-vs-c"
+  },
+  {
+   "id": "masto:117529479495286432",
+   "title": "Cryptography: from paper to silicon # negativepid # digitalInvestigations # OSINT # cybersecurity # AI # tech # onlineInvestigations # robot",
+   "source": "negativepid.blog",
+   "published_at": "2026-10-30T10:52:16.249Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Cryptography: from paper to silicon # negativepid # digitalInvestigations # OSINT # cybersecurity # AI # tech # onlineInvestigations # robot  via Mastodon https://negativepid.blog/cryptography-from-paper-to-silicon/?utm_"
+  }
+ ],
+ "candidate_stories": [
+  {
+   "id": "a-ring-tone-that-i-cannot-hear-twenty-years-later",
+   "title": "\u201cA Ring Tone That I Cannot Hear\u201d \u2013 Twenty Years Later",
+   "n_events": 1,
+   "last_seen": "2026-10-30T13:56:20Z",
+   "first_event_title": "\u201cA Ring Tone That I Cannot Hear\u201d \u2013 Twenty Years Later"
+  },
+  {
+   "id": "bulletproof-host-virtualine-loses-its-domain-to-fbi-seizure",
+   "title": "Bulletproof Host Virtualine Loses Its Domain to FBI Seizure",
+   "n_events": 1,
+   "last_seen": "2026-10-30T13:36:12Z",
+   "first_event_title": "Bulletproof Host Virtualine Loses Its Domain to FBI Seizure"
+  },
+  {
+   "id": "photo-id-bank-checks-face-scan-the-uk-s-age-check-options",
+   "title": "Photo ID, bank checks, face scan? The UK\u2019s age-check options",
+   "n_events": 1,
+   "last_seen": "2026-10-30T13:30:44Z",
+   "first_event_title": "Photo ID, bank checks, face scan? The UK\u2019s age-check options"
+  },
+  {
+   "id": "gitlab-cve-2026-97229-critical-unauthenticated-arbitrary-code-ex",
+   "title": "GitLab CVE-2026-97229 Critical Unauthenticated Arbitrary Code Execution (CVSS 10.0)",
+   "n_events": 52,
+   "last_seen": "2026-10-30T13:00:32Z",
+   "first_event_title": "A GitLab critical vulnerability, CVE-2026-97229 (CVSS 10.0), allows unauthenticated arbitrary code execution. Upgrade to GitLab 19.4.2 now. "
+  },
+  {
+   "id": "cloudflare-q3-2026-ddos-threat-report-short-burst-low-bandwidth",
+   "title": "Cloudflare Q3 2026 DDoS threat report: short-burst low-bandwidth attacks surge 208 percent",
+   "n_events": 3,
+   "last_seen": "2026-10-30T12:46:13.000Z",
+   "first_event_title": "New. \"Short-burst, low-bandwidth attacks lasting under 10 minutes and 1 Gbps surged by 208%. Conversely, hyper-volumetric attacks exceeding "
+  },
+  {
+   "id": "trezor-warns-of-suspected-spy-implant-that-could-steal-crypto-wa",
+   "title": "Trezor Warns of Suspected Spy Implant That Could Steal Crypto Wallet Recovery Phrases",
+   "n_events": 1,
+   "last_seen": "2026-10-30T12:35:20Z",
+   "first_event_title": "Trezor Warns of Suspected Spy Implant That Could Steal Crypto Wallet Recovery Phrases"
+  },
+  {
+   "id": "binance-hit-by-largest-ever-crypto-theft-with-6-3-billion-stolen",
+   "title": "Binance hit by largest-ever crypto theft, with $6.3 billion stolen",
+   "n_events": 1,
+   "last_seen": "2026-10-30T12:30:47Z",
+   "first_event_title": "Binance hit by largest-ever crypto theft, with $6.3 billion stolen"
+  },
+  {
+   "id": "malicious-claude-code-vs-code-extension-installs-persistent-ssh",
+   "title": "Malicious Claude Code VS Code Extension Installs Persistent SSH Backdoor to Give Attackers Remote Access",
+   "n_events": 7,
+   "last_seen": "2026-10-30T12:27:09.000Z",
+   "first_event_title": "Malicious Claude Code VS Code Extension Installs Persistent SSH Backdoor to Give Attackers Remote Access"
+  },
+  {
+   "id": "schr-dinger-s-cat-goes-to-court-part-one-the-cat-the-dice-and-th",
+   "title": "Schr\u00f6dinger\u2019s Cat Goes to Court, Part One: The Cat, the Dice, and the Quantum Machine",
+   "n_events": 0,
+   "last_seen": "2026-10-30T12:21:00Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "accenture-employee-allegedly-gave-claude-code-ai-agent-administr",
+   "title": "Accenture Employee Allegedly Gave Claude Code AI Agent Administrative Access to Pentagon Systems",
+   "n_events": 4,
+   "last_seen": "2026-10-30T12:20:22.000Z",
+   "first_event_title": "Accenture Employee Allegedly Gave Claude Code AI Agent Administrative Access to Pentagon Systems"
+  },
+  {
+   "id": "drupal-warns-of-fast-exploitation-risk-for-critical-core-rce-fla",
+   "title": "Drupal Warns of Fast Exploitation Risk for Critical Core RCE Flaw",
+   "n_events": 8,
+   "last_seen": "2026-10-30T12:19:06.000Z",
+   "first_event_title": "Drupal Patches Critical RCEs: CVE-2026-108097 & 108099"
+  },
+  {
+   "id": "routeros-plaintext-credentials-vulnerability-cve-2025-56566",
+   "title": "RouterOS Plaintext Credentials Vulnerability CVE-2025-56566",
+   "n_events": 1,
+   "last_seen": "2026-10-30T12:06:28.000Z",
+   "first_event_title": "Tested in the lab: CVE-2025-56566: Plaintext credentials in the flash of RouterOS 7.19.4 and 7.24.5 We have verified that credentials for ex"
+  },
+  {
+   "id": "hackers-steal-and-publish-data-on-41-000-homeland-security-worke",
+   "title": "Hackers steal and publish data on 41,000 Homeland Security workers",
+   "n_events": 1,
+   "last_seen": "2026-10-30T12:05:46Z",
+   "first_event_title": "Hackers steal and publish data on 41,000 Homeland Security workers"
+  },
+  {
+   "id": "fresh-wordpress-vulnerability-in-attackers-crosshairs",
+   "title": "Fresh WordPress Vulnerability in Attackers\u2019 Crosshairs",
+   "n_events": 1,
+   "last_seen": "2026-10-30T12:04:13Z",
+   "first_event_title": "Fresh WordPress Vulnerability in Attackers\u2019 Crosshairs"
+  },
+  {
+   "id": "crowdstrike-reports-vapor-panda-campaign-using-deepseek-llm-and",
+   "title": "CrowdStrike Reports VAPOR PANDA Campaign Using DeepSeek LLM and ARTEX",
+   "n_events": 1,
+   "last_seen": "2026-10-30T12:02:12.000Z",
+   "first_event_title": "CrowdStrike OverWatch identified a VAPOR PANDA campaign using ARTEX alongside the Chinese-developed DeepSeek large language model (LLM) and "
+  },
+  {
+   "id": "lambda-watchdog-cve-report-latest-aws-lambda-image-scan-detected",
+   "title": "Lambda Watchdog CVE Report \ud83d\udea8 Latest AWS Lambda image scan detected 46 CVEs across 25 images: \u2022 \ud83d\udd34 Critical: 2 \u2022 \ud83d\udfe0 High: 17 \u2022 \ud83d\udfe1 Medium: 23 \u2022",
+   "n_events": 68,
+   "last_seen": "2026-10-30T12:00:53.458Z",
+   "first_event_title": "\ud83d\udea8 Lambda Watchdog CVE Report \ud83d\udea8 Latest AWS Lambda image scan detected 46 CVEs across 25 images: \u2022 \ud83d\udd34 Critical: 2 \u2022 \ud83d\udfe0 High: 17 \u2022 \ud83d\udfe1 Medium: 23 \u2022"
+  },
+  {
+   "id": "vulnerabilities-in-p-atnik-software",
+   "title": "Vulnerabilities in P\u0142atnik software",
+   "n_events": 1,
+   "last_seen": "2026-10-30T12:00:50Z",
+   "first_event_title": "Vulnerabilities in P\u0142atnik software"
+  },
+  {
+   "id": "microsoft-releases-emergency-windows-updates-to-fix-rds-failures",
+   "title": "Microsoft releases emergency Windows updates to fix RDS failures",
+   "n_events": 4,
+   "last_seen": "2026-10-30T11:54:04Z",
+   "first_event_title": "Microsoft releases emergency Windows updates to fix RDS failures"
+  },
+  {
+   "id": "hackers-exploit-ivanti-connect-secure-zero-day-vulnerabilities-t",
+   "title": "Hackers Exploit Ivanti Connect Secure Zero-Day Vulnerabilities to Gain Root Access and Steal Credentials",
+   "n_events": 1,
+   "last_seen": "2026-10-30T11:46:41Z",
+   "first_event_title": "Hackers Exploit Ivanti Connect Secure Zero-Day Vulnerabilities to Gain Root Access and Steal Credentials"
+  },
+  {
+   "id": "fake-polymarket-scam-network-claims-nearly-11-million-in-cryptoc",
+   "title": "Fake Polymarket Scam Network Claims Nearly $11 Million in Cryptocurrency Deposits",
+   "n_events": 1,
+   "last_seen": "2026-10-30T11:46:35Z",
+   "first_event_title": "Fake Polymarket Scam Network Claims Nearly $11 Million in Cryptocurrency Deposits"
+  },
+  {
+   "id": "cognition-acquires-corridor",
+   "title": "Cognition acquires Corridor",
+   "n_events": 0,
+   "last_seen": "2026-10-30T11:37:23Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "linux-kernel-tcp-flaw-with-9-8-cvss-score-affects-ubuntu-red-hat",
+   "title": "Linux Kernel TCP Flaw With 9.8 CVSS Score Affects Ubuntu, Red Hat and Other Distributions",
+   "n_events": 23,
+   "last_seen": "2026-10-30T11:25:37.000Z",
+   "first_event_title": "Linux Kernel TCP Flaw With 9.8 CVSS Score Affects Ubuntu, Red Hat and Other Distributions"
+  },
+  {
+   "id": "microsoft-fixes-vpn-issues-caused-by-september-windows-updates",
+   "title": "Microsoft fixes VPN issues caused by September Windows updates",
+   "n_events": 2,
+   "last_seen": "2026-10-30T11:20:26Z",
+   "first_event_title": "Microsoft fixes VPN issues caused by September Windows updates"
+  },
+  {
+   "id": "vulnerabilities-in-arketeam-protectel-software",
+   "title": "Vulnerabilities in ARKETEAM Protectel software",
+   "n_events": 1,
+   "last_seen": "2026-10-30T11:15:42Z",
+   "first_event_title": "Vulnerabilities in ARKETEAM Protectel software"
+  },
+  {
+   "id": "i-checked-the-dmarc-policies-of-226-large-european-listed-compan",
+   "title": "I checked the DMARC policies of 226 large European listed companies (Euro Stoxx 50, DAX, CAC 40, IBEX 35, FTSE 100): 48 of them can still be spoofed",
+   "n_events": 0,
+   "last_seen": "2026-10-30T11:06:22Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "pre-siem-detection-for-financial-services",
+   "title": "Pre-SIEM Detection for Financial Services",
+   "n_events": 0,
+   "last_seen": "2026-10-30T11:05:43Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "qilin-and-inc-ransomware-operators-exploit-palo-alto-vpn-flaw",
+   "title": "Qilin and INC Ransomware Operators Exploit Palo Alto VPN Flaw",
+   "n_events": 2,
+   "last_seen": "2026-10-30T10:54:42.000Z",
+   "first_event_title": "Qilin and INC ransomware operators are exploiting a Palo Alto VPN flaw in ongoing attacks, bypassing authentication, including MFA, to acces"
+  },
+  {
+   "id": "kairos-ddos-botnet-hijacks-linux-devices-to-overwhelm-servers-wi",
+   "title": "Kairos DDoS Botnet Hijacks Linux Devices to Overwhelm Servers With Thousands of TCP Connections",
+   "n_events": 1,
+   "last_seen": "2026-10-30T10:49:33Z",
+   "first_event_title": "Kairos DDoS Botnet Hijacks Linux Devices to Overwhelm Servers With Thousands of TCP Connections"
+  },
+  {
+   "id": "darksword-ios-exploit-chain-bypasses-safari-sandbox-and-steals-a",
+   "title": "DarkSword iOS Exploit Chain Bypasses Safari Sandbox and Steals Apple Notes Data",
+   "n_events": 1,
+   "last_seen": "2026-10-30T10:23:27Z",
+   "first_event_title": "DarkSword iOS Exploit Chain Bypasses Safari Sandbox and Steals Apple Notes Data"
+  },
+  {
+   "id": "php2shell-diminuiscono-le-url-potenzialmente-vulnerabili-disponi",
+   "title": "PHP2Shell: diminuiscono le URL potenzialmente vulnerabili. Disponibili gli strumenti AgID",
+   "n_events": 1,
+   "last_seen": "2026-10-30T10:15:44Z",
+   "first_event_title": "PHP2Shell: diminuiscono le URL potenzialmente vulnerabili. Disponibili gli strumenti AgID"
+  },
+  {
+   "id": "malware-protection-the-complete-2026-guide-to-protecting-your-de",
+   "title": "Malware Protection | The Complete 2026 Guide to Protecting Your Devices, Data and Network",
+   "n_events": 0,
+   "last_seen": "2026-10-30T10:15:41Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "how-to-export-aws-cloudtrail-logs",
+   "title": "How to Export AWS CloudTrail Logs",
+   "n_events": 0,
+   "last_seen": "2026-10-30T10:14:23Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "filter-generation-in-practice-from-algorithms-to-llms",
+   "title": "Filter generation in practice: from algorithms to LLMs",
+   "n_events": 0,
+   "last_seen": "2026-10-30T10:10:41Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "taking-dlp-to-the-cloud-edge-with-kubernetes",
+   "title": "Taking DLP to the Cloud Edge with Kubernetes",
+   "n_events": 0,
+   "last_seen": "2026-10-30T10:05:39Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "cisco-secure-firewall-zero-day-cve-2026-76418",
+   "title": "Cisco Secure Firewall zero-day CVE-2026-76418",
+   "n_events": 20,
+   "last_seen": "2026-10-30T10:01:42.000Z",
+   "first_event_title": "Cisco zero-day: CVE-2026-76418 (8.6 high) Cisco Secure Firewall Adaptive Security Appliance and Secure Firewall Threat Defense Software Remo"
+  },
+  {
+   "id": "how-to-export-event-data-from-crowdstrike-falcon",
+   "title": "How to Export Event Data from CrowdStrike Falcon",
+   "n_events": 0,
+   "last_seen": "2026-10-30T09:59:10Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "secure-ai-enablement",
+   "title": "Secure AI Enablement",
+   "n_events": 0,
+   "last_seen": "2026-10-30T09:45:39Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "ai-powered-nik-c2-malware-uses-openai-api-to-help-hackers-steal",
+   "title": "AI-Powered NIK C2 Malware Uses OpenAI API to Help Hackers Steal Data and Control Windows PCs",
+   "n_events": 1,
+   "last_seen": "2026-10-30T09:45:09Z",
+   "first_event_title": "AI-Powered NIK C2 Malware Uses OpenAI API to Help Hackers Steal Data and Control Windows PCs"
+  },
+  {
+   "id": "polymarket-halts-trading-after-crypto-draining-script-breach-2-5",
+   "title": "Polymarket halts trading after crypto-draining script breach, $2.5M traced",
+   "n_events": 17,
+   "last_seen": "2026-10-30T09:41:36Z",
+   "first_event_title": "Polymarket halts trading after crypto-draining script breach, $2.5M traced"
+  },
+  {
+   "id": "five-tefaf-robbery-suspects-added-to-eu-most-wanted",
+   "title": "Five TEFAF robbery suspects added to EU Most Wanted",
+   "n_events": 0,
+   "last_seen": "2026-10-30T09:35:40Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "2026-13482",
+   "title": "[\uc77c\ubcf8 \uc560\ub2c8\uba54\uc774\uc158]\u5e7c\u5973\u6226\u8a18\u2171(\uc720\ub140\uc804\uae30 \u2171,2026)",
+   "n_events": 0,
+   "last_seen": "2026-10-26T15:06:28Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "a-brief-introduction-to-good-and-bad-insecurity-buttons-13856",
+   "title": "A brief introduction to Good and Bad \"insecurity\"-buttons",
+   "n_events": 1,
+   "last_seen": "2026-10-29T15:00:03.060849Z",
+   "first_event_title": "A brief introduction to Good and Bad \"insecurity\"-buttons"
+  },
+  {
+   "id": "a-queer-kind-of-hope-13875",
+   "title": "A Queer Kind of Hope",
+   "n_events": 1,
+   "last_seen": "2026-10-29T17:00:03.418002Z",
+   "first_event_title": "A Queer Kind of Hope"
+  },
+  {
+   "id": "adobe-security-advisory-av26-1092",
+   "title": "Adobe security advisory (AV26-1092)",
+   "n_events": 2,
+   "last_seen": "2026-10-30T08:01:42.000Z",
+   "first_event_title": "Adobe security advisory (AV26-1092)"
+  },
+  {
+   "id": "apple-security-advisory-av26-1099",
+   "title": "Apple security advisory (AV26-1099)",
+   "n_events": 1,
+   "last_seen": "2026-10-28T19:16:21Z",
+   "first_event_title": "Apple security advisory (AV26-1099)"
+  },
+  {
+   "id": "control-systems-hitachi-security-advisory-av26-1091",
+   "title": "[Control systems] Hitachi security advisory (AV26-1091)",
+   "n_events": 1,
+   "last_seen": "2026-10-27T16:35:59Z",
+   "first_event_title": "[Control systems] Hitachi security advisory (AV26-1091)"
+  },
+  {
+   "id": "control-systems-johnson-controls-security-advisory-av26-1090",
+   "title": "[Control systems] Johnson Controls security advisory (AV26-1090)",
+   "n_events": 1,
+   "last_seen": "2026-10-27T14:10:52Z",
+   "first_event_title": "[Control systems] Johnson Controls security advisory (AV26-1090)"
+  },
+  {
+   "id": "control-systems-moxa-security-advisory-av26-1089",
+   "title": "[Control Systems] Moxa security advisory (AV26-1089)",
+   "n_events": 1,
+   "last_seen": "2026-10-27T13:35:40Z",
+   "first_event_title": "[Control Systems] Moxa security advisory (AV26-1089)"
+  },
+  {
+   "id": "control-systems-siemens-security-advisory-av26-1083",
+   "title": "[Control Systems] Siemens security advisory (AV26-1083)",
+   "n_events": 1,
+   "last_seen": "2026-10-26T13:50:45Z",
+   "first_event_title": "[Control Systems] Siemens security advisory (AV26-1083)"
+  },
+  {
+   "id": "craft-cms-security-advisory-av26-1086",
+   "title": "Craft CMS security advisory (AV26-1086)",
+   "n_events": 2,
+   "last_seen": "2026-10-26T17:00:13.000Z",
+   "first_event_title": "Craft CMS security advisory (AV26-1086)"
+  },
+  {
+   "id": "enterprise-fill-assist-delivers-custom-rules-for-enhanced-autofi-13618",
+   "title": "Enterprise fill assist delivers custom rules for enhanced autofill",
+   "n_events": 0,
+   "last_seen": "2026-10-27T00:00:00Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "esri-security-advisory-av26-1088",
+   "title": "Esri security advisory (AV26-1088)",
+   "n_events": 1,
+   "last_seen": "2026-10-27T13:25:46Z",
+   "first_event_title": "Esri security advisory (AV26-1088)"
+  },
+  {
+   "id": "fortinet-security-advisory-av26-1081",
+   "title": "Fortinet security advisory (AV26-1081)",
+   "n_events": 1,
+   "last_seen": "2026-10-23T14:25:59Z",
+   "first_event_title": "Fortinet security advisory (AV26-1081)"
+  },
+  {
+   "id": "fortinet-security-advisory-av26-812",
+   "title": "Fortinet security advisory (AV26-812)",
+   "n_events": 2,
+   "last_seen": "2026-08-13T10:40:57Z",
+   "first_event_title": "Fortinet security advisory (AV26-812)"
+  },
+  {
+   "id": "google-security-advisory-av26-1085",
+   "title": "Google security advisory (AV26-1085)",
+   "n_events": 1,
+   "last_seen": "2026-10-26T14:15:45Z",
+   "first_event_title": "Google security advisory (AV26-1085)"
+  },
+  {
+   "id": "google-security-advisory-av26-904",
+   "title": "Google security advisory (AV26-904)",
+   "n_events": 2,
+   "last_seen": "2026-09-09T20:49:30Z",
+   "first_event_title": "Google security advisory (AV26-904)"
+  },
+  {
+   "id": "grafana-security-advisory-av26-860",
+   "title": "Grafana Alloy Vulnerability CVE-2026-19516",
+   "n_events": 3,
+   "last_seen": "2026-10-13T16:00:56.470Z",
+   "first_event_title": "Grafana security advisory (AV26-860)"
+  },
+  {
+   "id": "hashicorp-security-advisory-av26-1087",
+   "title": "HashiCorp security advisory (AV26-1087)",
+   "n_events": 1,
+   "last_seen": "2026-10-26T19:10:47Z",
+   "first_event_title": "HashiCorp security advisory (AV26-1087)"
+  },
+  {
+   "id": "hashicorp-security-advisory-av26-797",
+   "title": "HashiCorp security advisory (AV26-797)",
+   "n_events": 1,
+   "last_seen": "2026-08-11T14:05:42Z",
+   "first_event_title": "HashiCorp security advisory (AV26-797)"
+  },
+  {
+   "id": "hashicorp-security-advisory-av26-817",
+   "title": "HashiCorp security advisory (AV26-817)",
+   "n_events": 1,
+   "last_seen": "2026-08-14T16:05:44Z",
+   "first_event_title": "HashiCorp security advisory (AV26-817)"
+  },
+  {
+   "id": "cisco-sd-wan-manager-auth-bypass-cve-2026-76504-cvss-9-8-under-e",
+   "title": "Cisco SD-WAN Manager auth bypass CVE-2026-76504 (CVSS 9.8) under exploitation warning",
+   "n_events": 32,
+   "last_seen": "2026-10-14T14:45:04.000Z",
+   "first_event_title": "Cisco SD-WAN Manager CVE-2026-76504 \u2014 CVSS 9.8 auth bypass, active exploitation warned. Hex-encode one character in the URI (%6a instead of "
+  },
+  {
+   "id": "sonicwall-sma1000-two-zero-day-flaws-under-active-exploitation-c",
+   "title": "SonicWall SMA1000 \u2014 Two Zero-Day Flaws Under Active Exploitation, CVSS 10.0, Added to CISA KEV",
+   "n_events": 60,
+   "last_seen": "2026-10-16T11:05:35.000Z",
+   "first_event_title": "SonicWall SMA1000 \u2014 Two Zero-Day Flaws Under Active Exploitation, CVSS 10.0, Added to CISA KEV"
+  },
+  {
+   "id": "cve-2026-89078-and-cve-2026-93577-gitlab-ce-ee-contain-a-double",
+   "title": "CVE-2026-89078 and CVE-2026-93577: GitLab CE/EE contain a double free and an integer overflow that let an authenticated user run arbitrary c",
+   "n_events": 5,
+   "last_seen": "2026-10-26T15:17:30.000Z",
+   "first_event_title": "CVE-2026-89078 and CVE-2026-93577: GitLab CE/EE contain a double free and an integer overflow that let an authenticated user run arbitrary c"
+  },
+  {
+   "id": "inside-keydrift-analyzing-historical-uat-11473-activity-on-cisco",
+   "title": "Inside KeyDrift: Analyzing historical UAT-11473 activity on Cisco SD-WAN",
+   "n_events": 19,
+   "last_seen": "2026-10-30T03:35:04.000Z",
+   "first_event_title": "Inside KeyDrift: Analyzing historical UAT-11473 activity on Cisco SD-WAN"
+  },
+  {
+   "id": "php-warns-admins-of-two-critical-flaws-emergency-patches-coming",
+   "title": "PHP warns admins of two critical flaws, emergency patches coming tomorrow",
+   "n_events": 420,
+   "last_seen": "2026-10-29T18:39:23.000Z",
+   "first_event_title": "PHP warns admins of two critical flaws, emergency patches coming tomorrow"
+  },
+  {
+   "id": "at-the-international-ocean-film-tour-negativepid-digitalinvestig",
+   "title": "At the International Ocean Film Tour negativepid digitalInvestigations OSINT cybersecurity AI tech onlineInvestigations robo",
+   "n_events": 1,
+   "last_seen": "2026-09-09T06:48:21.491Z",
+   "first_event_title": "A map of mass surveillance programs # negativepid # digitalInvestigations # OSINT # cybersecurity # AI # tech # onlineInvestigations # robot"
+  },
+  {
+   "id": "cybertop-ai-detected-cve-2021-39935-a-gitlab-ssrf-flaw-actively",
+   "title": "CVE-2021-39935 GitLab SSRF Actively Exploited in the Wild",
+   "n_events": 4,
+   "last_seen": "2026-09-09T08:50:02.053Z",
+   "first_event_title": "CYBERTOP AI detected CVE-2021-39935, a GitLab SSRF flaw actively exploited. Mitigate by validating & sanitizing input, enabling application "
+  },
+  {
+   "id": "gitlab-cve-2026-110264-cvss-10-0-unauthenticated-rce-in-regex-co",
+   "title": "GitLab warns of max-severity code execution vulnerability (CVE-2026-110264)",
+   "n_events": 1,
+   "last_seen": "2026-10-27T18:41:19Z",
+   "first_event_title": "GitLab warns of new max severity code execution vulnerability"
+  },
+  {
+   "id": "eol-radar-sep-8-google-chrome-152-reaches-end-of-life-today-http",
+   "title": "Google Chrome 152 reaches end of life",
+   "n_events": 3,
+   "last_seen": "2026-10-28T15:00:54Z",
+   "first_event_title": "\u23f3 EOL radar \u00b7 Sep 8 \ud83d\udd34 Google Chrome 152 reaches end of life TODAY https:// endoflife.ai/chrome \ud83d\udd34 freedesktop SDK 24.08 reaches end of life T"
+  },
+  {
+   "id": "officials-seize-domain-of-top-bulletproof-hosting-provider-virtu",
+   "title": "Officials seize domain of top bulletproof hosting provider Virtualine",
+   "n_events": 11,
+   "last_seen": "2026-10-30T02:47:42.000Z",
+   "first_event_title": "Officials seize domain of top bulletproof hosting provider Virtualine"
+  },
+  {
+   "id": "vm2-critical-auth-bypass-cve-2026-100721",
+   "title": "vm2 Critical Auth Bypass CVE-2026-100721",
+   "n_events": 1,
+   "last_seen": "2026-09-27T06:00:23.000Z",
+   "first_event_title": "CVE-2026-100721: CRITICAL auth bypass in vm2 https:// radar.offseq.com/threat/vm2-be fore-3122-contains-an-authorization-bypass-in-the-nodev"
+  },
+  {
+   "id": "cisco-ships-two-dozen-fixes-cvss-10-0-fmc-auth-bypass-9-9-sd-wan",
+   "title": "Cisco Ships Two Dozen Fixes \u2014 CVSS 10.0 FMC Auth Bypass, 9.9 SD-WAN Trio, IOS XE Command Injection",
+   "n_events": 1,
+   "last_seen": "2026-08-06T00:00:00Z",
+   "first_event_title": "Cisco Ships Two Dozen Fixes \u2014 CVSS 10.0 FMC Auth Bypass, 9.9 SD-WAN Trio, IOS XE Command Injection"
+  },
+  {
+   "id": "google-patched-critical-google-chrome-vulnerabilities-update-now",
+   "title": "Google patched critical Google Chrome vulnerabilities. Update now to address multiple Google Chrome vulnerabilities like CVE-2026-93374 and",
+   "n_events": 1,
+   "last_seen": "2026-09-18T06:21:23.000Z",
+   "first_event_title": "Google patched critical Google Chrome vulnerabilities. Update now to address multiple Google Chrome vulnerabilities like CVE-2026-93374 and "
+  },
+  {
+   "id": "chrome-155-update-patches-247-vulnerabilities",
+   "title": "Chrome 155 Update Patches 247 Vulnerabilities",
+   "n_events": 4,
+   "last_seen": "2026-10-14T10:06:59Z",
+   "first_event_title": "Chrome 155 Update Patches 247 Vulnerabilities"
+  }
+ ]
+}
