@@ -1,0 +1,1 @@
+The New York Times reported on October 29, 2026 that Binance was grappling with a security incident that could involve roughly $6.3 billion in losses. Binance suspended withdrawals as blockchain partners worked to freeze affected assets.

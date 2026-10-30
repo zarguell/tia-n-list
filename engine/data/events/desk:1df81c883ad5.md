@@ -1,0 +1,1 @@
+The Washington Post reported on October 29, 2026 that Binance said about $6.3 billion in user funds had been affected and that roughly $3 billion had been frozen through on-chain actions by blockchain partners.
