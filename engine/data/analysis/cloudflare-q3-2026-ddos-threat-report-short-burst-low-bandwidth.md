@@ -1,0 +1,3 @@
+Cloudflare’s Q3 2026 DDoS report records 18.2 million network-layer attacks, with short-burst, low-bandwidth floods lasting under 10 minutes and below 1 Gbps surging 208 percent. Hyper-volumetric attacks exceeding high thresholds declined in proportion. DNS and UDP protocols saw a major shift in attack distribution.
+
+The trend matters because brief, low-volume floods can exhaust rate-limit policies and alerting pipelines faster than traditional volumetric defenses handle. Security teams should review threshold tuning for sub-minute events, not just peak bandwidth. The event content does not attribute a specific campaign or actor; it is a statistical report. No CVE is involved.
