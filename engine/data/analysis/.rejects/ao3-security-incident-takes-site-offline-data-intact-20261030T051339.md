@@ -1,0 +1,3 @@
+AO3 (Archive of Our Own) took its site offline due to a security incident, with an estimated restoration window of two to four weeks. The site operators stated that all user data remains intact and that they do not believe user information was stolen, though they are not ruling out that possibility. The incident was reported via the site's own status page (otwstatus.org) and spread through social channels.
+
+The outage affects a major fanfiction archive, making it a notable service disruption rather than a data breach with confirmed exfiltration. Site operators are conducting mitigation before bringing services back online. Watch for any subsequent update confirming whether user data was accessed, since the initial assessment left that open.
