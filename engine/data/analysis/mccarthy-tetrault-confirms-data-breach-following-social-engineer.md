@@ -1,0 +1,5 @@
+Canadian law firm McCarthy Tetrault confirmed a data breach that followed a social engineering attack, as reported on October 30, 2026. The available notice identifies social engineering as the cause but does not specify the data types exposed, the number of affected individuals, or whether client matters were accessed.
+
+Law firms hold privileged client communications, deal documents, and personal data, so a breach at a major firm can expose sensitive matters well beyond the firm's own records. Social engineering as the entry point indicates the attackers targeted people rather than technical vulnerabilities, which is harder to patch with a single update. The lack of detail in the initial notice leaves clients unable to assess their own exposure.
+
+Watch for McCarthy Tetrault's detailed notification naming the affected data categories, the number of individuals, and any regulatory or law-enforcement involvement. Clients and counterparties should treat communications referencing firm matters with caution until the scope is clear. The incident is a reminder that professional services firms are high-value targets for social engineering.
