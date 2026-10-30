@@ -1,0 +1,1 @@
+AI systems rely on a complex web of hardware. Compromising any one component could let adversaries change model weights. The post Cybersecurity Dive: Hackers could poison AI models by tampering with core infrastructure appeared first on Eclypsium . Article Link: Hackers could poison AI models by tampering with core infrastructure | Cybersecurity Dive
