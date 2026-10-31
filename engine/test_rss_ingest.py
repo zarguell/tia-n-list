@@ -390,6 +390,49 @@ def test_reddit_persistent_429_exhausts_budget():
                       for i in range(1, ingest.REDDIT_RETRIES)]
 
 
+def test_reddit_failed_feed_serves_cached_signal():
+    """A rate-limited feed must not blank half the signal layer. The last
+    successful posts for that sub are re-published; they are already in the
+    seen-ring, so no duplicate events are minted."""
+    with _Tmp() as tmp:
+        real_feeds, real_events, real_reddit = (
+            ingest.REDDIT_FEEDS, ingest.EVENTS, ingest.REDDIT)
+        ingest.REDDIT_FEEDS = (("cybersecurity", "https://r.example/a"),
+                               ("netsec", "https://r.example/b"))
+        ingest.EVENTS = tmp.events
+        reddit_path = os.path.join(tmp.dir, "reddit.json")
+        ingest.REDDIT = reddit_path
+        json.dump([{"id": "old-netsec", "title": "Old", "sub": "netsec",
+                    "article_url": "https://example.com/old"}],
+                  open(ingest.REDDIT, "w"))
+        sleeps = []
+
+        class Resp:
+            def read(self):
+                return ATOM_FIXTURE
+
+        def fake_open(req, timeout=30):
+            if getattr(req, "full_url", req).endswith("/b"):
+                raise urllib.error.HTTPError(
+                    "https://r.example/b", 429, "Too Many Requests", {},
+                    io.BytesIO(b""))
+            return Resp()
+
+        restore = _reddit_patch(fake_open, sleeps)
+        try:
+            st = {}
+            post_count, _ = ingest.ingest_reddit(st)
+        finally:
+            restore()
+            ingest.REDDIT_FEEDS = real_feeds
+            ingest.EVENTS = real_events
+            ingest.REDDIT = real_reddit
+        assert st["reddit_last_fetch"] == {"ok": 1, "errors": 1}
+        assert post_count == 2, "fresh cyber post + cached netsec post"
+        assert any(p["id"] == "old-netsec"
+                   for p in json.load(open(reddit_path)))
+
+
 def test_reddit_feeds_spaced_and_state_recorded():
     """The two feeds must not fire back-to-back, and a dead feed degrades
     only that feed (state records it) instead of losing the whole layer."""

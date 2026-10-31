@@ -39,8 +39,8 @@ REDDIT = os.path.join(DATA, "reddit.json")
 # outbound article link are promoted to events (queued for merge clustering
 # like miniflux entries); link-less posts stay signal-only.
 REDDIT_FEEDS = (
-    ("cybersecurity", "https://www.reddit.com/r/cybersecurity/.rss?limit=100"),
-    ("netsec", "https://www.reddit.com/r/netsec/.rss?limit=100"),
+    ("cybersecurity", "https://www.reddit.com/r/cybersecurity/.rss"),
+    ("netsec", "https://www.reddit.com/r/netsec/.rss"),
 )
 UA = "tia-storyline/1.0"
 CVE_RE = re.compile(r"CVE-\d{4}-\d{4,7}", re.IGNORECASE)
@@ -52,8 +52,11 @@ REDDIT_WINDOW = 500
 # one exponential-backoff retry on 429 keeps the second feed alive; a
 # persistent limit degrades that feed only, never the run.
 REDDIT_RETRIES = 3          # initial attempt + 2 retries
-REDDIT_BACKOFF_S = 8.0      # linear: 8s, 16s
-REDDIT_INTER_FEED_S = 2.0   # gap between the two subreddit requests
+REDDIT_BACKOFF_S = 30.0     # linear: 30s, 60s
+REDDIT_INTER_FEED_S = 60.0  # Reddit's limit is time-based: a 2s gap (and
+                            # even 15s) still 429'd the second feed while a
+                            # 60s gap fetched both clean (2026-10-31 probes).
+                            # The hourly cadence absorbs the extra minute.
 # Reddit serves 429 to the descriptive feed UA from datacenter IPs even
 # spaced out (2026-10-31 14:00 run: r/netsec retried 3x and still 429'd,
 # while the same URL answered 200 to a browser UA). The UA, not the rate
@@ -437,6 +440,14 @@ def ingest_reddit(st):
     seen_list = st.get("seen_reddit", [])
     seen_urls = set()
     fetch_errors = 0
+    failed_subs = set()
+    # Degraded mode: a rate-limited feed must not blank half the signal
+    # layer. Re-publish the last successful posts for that sub; they are
+    # already in the seen-ring, so no duplicate events are minted.
+    try:
+        cached = json.load(open(REDDIT)) if os.path.exists(REDDIT) else []
+    except (OSError, ValueError):
+        cached = []
     for idx, (sub, feed) in enumerate(REDDIT_FEEDS):
         if idx:
             time.sleep(REDDIT_INTER_FEED_S)
@@ -444,8 +455,10 @@ def ingest_reddit(st):
             root = ET.fromstring(_fetch_reddit(feed, sub))
         except Exception as e:
             fetch_errors += 1
-            print(f"reddit RSS DEGRADED ({sub}): {e} — input missing this "
-                  f"run (retried {REDDIT_RETRIES - 1}x)", file=sys.stderr)
+            failed_subs.add(sub)
+            print(f"reddit RSS DEGRADED ({sub}): {e} — serving cached signal "
+                  f"for this sub (retried {REDDIT_RETRIES - 1}x)",
+                  file=sys.stderr)
             continue
         for e in root.findall("a:entry", ns):
             title = (e.findtext("a:title", default="", namespaces=ns) or "").strip()
@@ -499,6 +512,10 @@ def ingest_reddit(st):
     if len(seen_list) > REDDIT_WINDOW:
         seen_list = seen_list[-REDDIT_WINDOW:]
         seen_set = set(seen_list)
+    if failed_subs and cached:
+        for p in cached:
+            if p.get("sub") in failed_subs:
+                posts.append(p)
     st["seen_reddit"] = seen_list
     st["reddit_last_fetch"] = {"ok": len(REDDIT_FEEDS) - fetch_errors,
                                 "errors": fetch_errors}
