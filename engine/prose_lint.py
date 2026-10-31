@@ -105,6 +105,18 @@ TRIAGE_BOOKKEEPING = (
 MIN_PARAS, MAX_PARAS = 2, 4
 MIN_LEN, MAX_LEN = 200, 6000
 
+# Significance floor (2026-10-31 audit Issue 4): a fallback model rung wrote
+# 383-475B single-paragraph analyses for score-6.0 zero-days (Ivanti ICS
+# CVE-2026-104935, 30 sources) while score-0.6 fragments got 454-578B — the
+# 200-char floor cannot tell depth from significance. Stories at/above the
+# significant score must read like an analyst note: >= 3 paragraphs and
+# >= 900 chars. The bar is hard (quarantine + requeue) because the hourly
+# agent will simply redo it; only 4 live analyses fail it today, and the
+# existing MAX_ANALYSIS_QUARANTINES cap still bounds retries.
+SIGNIFICANT_SCORE = 5.0
+SIGNIFICANT_MIN_LEN = 900
+SIGNIFICANT_MIN_PARAS = 3
+
 # Specificity (the filler-killer): a grounded analysis names a CVE, a
 # multi-digit number or a version. The literal shipped filler above has no
 # digit at all, so it fails here even before the structure checks.
@@ -272,6 +284,32 @@ def soft_paras(text):
             f"{MIN_PARAS}-{MAX_PARAS} short plain paragraphs)"]
 
 
+def depth_violations(text, score):
+    """HARD depth floor for significant stories (2026-10-31 audit Issue 4).
+
+    Score-blind length floors let a 406-char write-up ship for a 30-source
+    score-6.0 zero-day. A story at/above SIGNIFICANT_SCORE needs THREE
+    paragraphs and SIGNIFICANT_MIN_LEN chars; below the bar the analysis is
+    quarantined and re-analyzed, so the gate tracks editorial weight instead
+    of treating every story as the same size. Non-significant stories are
+    untouched (the house style is dense short notes)."""
+    try:
+        score = float(score or 0)
+    except (TypeError, ValueError):
+        score = 0.0
+    if score < SIGNIFICANT_SCORE:
+        return []
+    out = []
+    if len(text) < SIGNIFICANT_MIN_LEN:
+        out.append(f"length {len(text)} chars (score {score:.1f} needs "
+                   f">= {SIGNIFICANT_MIN_LEN} for a significant story)")
+    paras = [p for p in re.split(r"\n\s*\n", text.strip()) if p.strip()]
+    if len(paras) < SIGNIFICANT_MIN_PARAS:
+        out.append(f"{len(paras)} paragraph(s) (score {score:.1f} needs "
+                   f">= {SIGNIFICANT_MIN_PARAS} for a significant story)")
+    return out
+
+
 def lint_digest(text):
     """Violations for one daily digest (plain markdown). Banned strings only
     plus the coverage-link invariant — no length/paragraph bounds (long-form
@@ -310,6 +348,8 @@ def quarantine_analysis(stories_dir, analysis_dir, story, now=None, log=print):
     violations = lint_analysis(text, story=story,
                                subject_title=(story.get("title") or "")
                                if isinstance(story, dict) else None)
+    violations = violations + depth_violations(
+        text, story.get("score") if isinstance(story, dict) else None)
     soft = soft_paras(text)
     triage = triage_bookkeeping_hits(text)
     if triage:

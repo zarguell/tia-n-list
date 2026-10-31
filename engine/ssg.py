@@ -631,7 +631,8 @@ def run_prose_gate(cards_by_id, today=None, log=print):
         # and were quarantined 8x without one).
         prose_lint.quarantine_analysis(STORIES_DIR, ANALYSIS_DIR,
                                        {"id": cid,
-                                        "title": cards_by_id[cid].get("title", "")},
+                                        "title": cards_by_id[cid].get("title", ""),
+                                        "score": cards_by_id[cid].get("score", 0)},
                                        log=log)
     today = today or datetime.now(timezone.utc).strftime("%Y-%m-%d")
     dp = os.path.join(DIGESTS_DIR, today + ".md")

@@ -161,6 +161,28 @@ check("2 and 4 paragraphs both legal",
       prose_lint.lint_analysis(two) == []
       and prose_lint.lint_analysis(four) == [])
 
+# --- 3b: significance-aware depth floor (2026-10-31 audit Issue 4) -----------
+# The 200-char floor let a 406-char single-paragraph analysis ship for the
+# score-6.0 / 30-source Ivanti zero-day. Depth now scales with significance.
+thin = para("Attackers exploited CVE-2026-104935 in Ivanti Connect Secure, "
+            "reaching 30 sources before the vendor shipped a fixed build on "
+            "October 13.", 20)
+check("thin fixture is a 1-paragraph sub-900-char note",
+      len(thin) < prose_lint.SIGNIFICANT_MIN_LEN
+      and len(thin.split("\n\n")) == 1)
+check("significant story below the depth floor is a hard violation",
+      any("significant story" in m
+          for m in prose_lint.depth_violations(thin, 6.0)))
+check("low-score story keeps the short-note house style",
+      prose_lint.depth_violations(thin, 1.0) == [])
+check("grounded 3-paragraph significant analysis passes the depth floor",
+      len(GOOD) >= prose_lint.SIGNIFICANT_MIN_LEN
+      and prose_lint.depth_violations(GOOD, 6.0) == [])
+check("depth floor is inclusive at the score threshold",
+      prose_lint.depth_violations(thin, prose_lint.SIGNIFICANT_SCORE) != []
+      and prose_lint.depth_violations(thin,
+                                      prose_lint.SIGNIFICANT_SCORE - 0.1) == [])
+
 # --- 4: lint_digest ------------------------------------------------------------
 GOOD_DIGEST = (
     "The day's defining story is [the BIG-IP zero-day](stories/big-ip-cve/) "
@@ -244,6 +266,28 @@ with tempfile.TemporaryDirectory() as td:
                                    now=now + timedelta(seconds=1))
     twice = [n for n in os.listdir(rejects) if n.startswith("twice-story")]
     check("repeat violations land under fresh timestamps", len(twice) == 2)
+
+    # significance-aware depth floor: the same thin body is a hard violation
+    # for a score-6.0 story and a legitimate short note for a cold one.
+    open(os.path.join(analysis_dir, "thin-significant.md"), "w").write(thin)
+    json.dump({"id": "thin-significant", "score": 6.0},
+              open(os.path.join(stories_dir, "thin-significant.json"), "w"))
+    v = prose_lint.quarantine_analysis(
+        stories_dir, analysis_dir,
+        {"id": "thin-significant", "score": 6.0}, log=log.append)
+    check("thin analysis of a significant story is quarantined",
+          any("significant story" in m for m in v)
+          and not os.path.exists(os.path.join(analysis_dir,
+                                              "thin-significant.md")))
+    open(os.path.join(analysis_dir, "thin-low.md"), "w").write(thin)
+    json.dump({"id": "thin-low", "score": 1.0},
+              open(os.path.join(stories_dir, "thin-low.json"), "w"))
+    v = prose_lint.quarantine_analysis(
+        stories_dir, analysis_dir, {"id": "thin-low", "score": 1.0},
+        log=log.append)
+    check("thin analysis of a low-score story is untouched",
+          v == [] and os.path.exists(os.path.join(analysis_dir,
+                                                  "thin-low.md")))
 
 # --- 5b: subject grounding for non-CVE stories + retry cap -------------------
 # (2026-09-25: the kubernetes/GCP research disclosure has no CVE id — the
