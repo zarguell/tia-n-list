@@ -252,6 +252,25 @@ def test_gbhackers_canonical_gate():
     assert canon("") == ""
 
 
+def test_parse_tolerates_leading_blank_line_and_bom():
+    # paloaltonetworks.com/blog/prisma-cloud/feed/ answers with a newline before
+    # the XML declaration; a BOM does the same thing. Both used to raise
+    # "XML or text declaration not at start of entity" and drop the source.
+    for prefix in (b"\n", b"\r\n\n", b"\xef\xbb\xbf", b"\xef\xbb\xbf\n"):
+        entries = ingest._parse_feed(prefix + RSS_FIXTURE)
+        assert len(entries) == 3, f"prefix {prefix!r} must parse"
+        assert entries[0]["guid"] == "guid-fresh-1"
+
+
+def test_parse_tolerates_illegal_c0_controls():
+    # rapid7.com/rss.xml embeds a raw vertical tab in a <description>; XML 1.0
+    # forbids it, so ET rejects the whole document ("not well-formed").
+    dirty = RSS_FIXTURE.replace(b"Fresh CVE Drop", b"Fresh\x0b CVE Drop")
+    entries = ingest._parse_feed(dirty)
+    assert len(entries) == 3
+    assert "Fresh CVE Drop" in [e["title"] for e in entries][0]
+
+
 def test_opml_missing_feeds_loud():
     with _Tmp() as tmp:
         empty = os.path.join(tmp.dir, "empty.opml")
