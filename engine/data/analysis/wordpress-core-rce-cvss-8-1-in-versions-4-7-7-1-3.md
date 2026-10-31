@@ -1,0 +1,5 @@
+WordPress core versions 4.7 through 7.1.3 contain an unauthenticated remote code execution flaw rated CVSS 8.1. The attack path involves full-package core upgrades that unpack the installer into a predictable web-root path, allowing remote attackers to execute arbitrary code. No CVE ID has been assigned yet, but The Hacker News reports nearly 63,000 related references, suggesting widespread awareness and potential scanning activity.
+
+Why it matters: WordPress powers a significant share of public websites, and an unauthenticated RCE spanning versions from 4.7 to 7.1.3 implies a massive exposed surface. Without an assigned CVE, some patch management systems may not flag the update, which increases exposure. The predictable installer unpack path makes exploitation straightforward.
+
+What to watch: upgrade WordPress installations to the latest patched release immediately, verify that upgrade packages are not left in web-accessible directories, and monitor web server logs for unexpected POST requests or file uploads targeting the upgrade path. Watch for CVE assignment and any CISA advisory linking to active exploitation.

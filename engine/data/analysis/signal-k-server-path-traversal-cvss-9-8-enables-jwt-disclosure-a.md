@@ -1,0 +1,5 @@
+Signal K server contains a path traversal vulnerability in its resources API rated CVSS 9.8. The flaw allows unauthenticated file read, disclosure of the JWT signing secret, admin token forgery, and remote code execution. The source is radar.offseq.com, and there is no CVE assigned yet. The impact chain moves directly from file read to full application compromise through forged JWT tokens.
+
+Why it matters: a CVSS 9.8 path traversal that exposes JWT secrets and leads to RCE is critical for any environment running Signal K, especially in marine and IoT contexts where the server is deployed with network exposure. Unauthenticated access lowers the barrier for attackers significantly, and token forgery means even patched instances may need token rotation if secrets were exposed.
+
+What to watch: restrict resources API access with network-level controls, rotate JWT signing secrets immediately, upgrade Signal K when a fixed release is available, and audit logs for unexpected file read attempts against the resources endpoint or forged admin tokens.
