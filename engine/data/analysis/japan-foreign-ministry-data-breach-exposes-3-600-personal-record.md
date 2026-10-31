@@ -1,0 +1,3 @@
+Japan's Foreign Ministry said about 3,600 sets of personal information may have been compromised after unauthorized access to government networks. The breach was reported Friday, with Japan Times covering the disclosure. The exposed data appears to involve personal records rather than classified diplomatic communications, though the ministry is still determining the full scope. The incident adds to a growing series of data breaches affecting Japanese government entities, including a recent GMO Internet disclosure.
+
+The key point is that a foreign ministry breach exposes both citizen records and potential targeting patterns for state-linked actors. Watch for whether Japan links the intrusion to a specific threat actor and what categories of data are confirmed affected.
