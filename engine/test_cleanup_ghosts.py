@@ -79,6 +79,14 @@ deletable, stats = cg.find_ghosts(root, days=0, now=NOW)
 check("days=0 frees the fresh ghost too",
       [sid for _, sid in deletable], ["ghost-old", "ghost-young"])
 
+# 2026-10-31 audit Issue 5: ghosts were 46.5% of the store and growing
+# because the default retention was 90 days. The default is now 30 days;
+# the delete-safety gate (references/analysis/live) is unchanged.
+check("default retention window is 30d", cg.DEFAULT_DAYS, 30)
+deletable, _ = cg.find_ghosts(root, now=NOW)
+check("default run still deletes only the old unreferenced ghost",
+      [sid for _, sid in deletable], ["ghost-old"])
+
 check("undated story counts as old",
       cg.age_days({"first_seen": "", "last_seen": ""}, NOW) > 10 ** 5, True)
 check("age uses the newer of first/last seen",

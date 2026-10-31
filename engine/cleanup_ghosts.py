@@ -31,7 +31,12 @@ from datetime import datetime, timezone
 
 ENGINE = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(ENGINE, "data")
-DEFAULT_DAYS = 90
+# 2026-10-31 audit Issue 5: 5,403 eventless non-redirect stories (46.5% of
+# the store) and growing, 4,273 of them 30-59 days old. A ghost renders no
+# page and is only deleted when nothing points at it, so 90d was needless
+# ballast. 30d keeps a generous window for a story that was briefly live
+# while stopping the store-weight and trend-inflation accumulation.
+DEFAULT_DAYS = 30
 DIGEST_LINK_RE = re.compile(r"\]\(stories/([^/]+)/\)")
 
 
