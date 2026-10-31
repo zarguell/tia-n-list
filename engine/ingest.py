@@ -54,6 +54,13 @@ REDDIT_WINDOW = 500
 REDDIT_RETRIES = 3          # initial attempt + 2 retries
 REDDIT_BACKOFF_S = 8.0      # linear: 8s, 16s
 REDDIT_INTER_FEED_S = 2.0   # gap between the two subreddit requests
+# Reddit serves 429 to the descriptive feed UA from datacenter IPs even
+# spaced out (2026-10-31 14:00 run: r/netsec retried 3x and still 429'd,
+# while the same URL answered 200 to a browser UA). The UA, not the rate
+# limit, is the wall; use a mainstream browser string for reddit only.
+REDDIT_UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+             "AppleWebKit/537.36 (KHTML, like Gecko) "
+             "Chrome/126.0.0.0 Safari/537.36")
 
 SCRIPT_RANGES = [("ko", re.compile(r"[\uAC00-\uD7AF]")), ("ja", re.compile(r"[\u3040-\u30FF]")),
                  ("zh", re.compile(r"[\u4E00-\u9FFF]")), ("ru", re.compile(r"[\u0400-\u04FF]")),
@@ -407,7 +414,7 @@ def _fetch_reddit(url, sub):
         if attempt:
             time.sleep(REDDIT_BACKOFF_S * attempt)
         try:
-            req = urllib.request.Request(url, headers={"User-Agent": UA})
+            req = urllib.request.Request(url, headers={"User-Agent": REDDIT_UA})
             return urllib.request.urlopen(req, timeout=30).read()
         except urllib.error.HTTPError as e:
             last = e

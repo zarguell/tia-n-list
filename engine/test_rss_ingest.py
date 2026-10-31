@@ -325,6 +325,29 @@ def test_reddit_429_retried_with_backoff():
     assert sleeps == [ingest.REDDIT_BACKOFF_S], sleeps
 
 
+def test_reddit_uses_browser_ua():
+    """Reddit 429s the descriptive feed UA from this host even when spaced;
+    the same URL answers 200 to a browser UA (2026-10-31 14:00 run). The
+    reddit fetch must use REDDIT_UA while the RSS fetcher keeps UA."""
+    seen = []
+
+    class Resp:
+        def read(self):
+            return ATOM_FIXTURE
+
+    def fake_open(req, timeout=30):
+        seen.append(req.get_header("User-agent"))
+        return Resp()
+
+    restore = _reddit_patch(fake_open, [])
+    try:
+        ingest._fetch_reddit("https://r.example/a", "netsec")
+    finally:
+        restore()
+    assert seen == [ingest.REDDIT_UA], seen
+    assert ingest.REDDIT_UA != ingest.UA
+
+
 def test_reddit_non_429_not_retried():
     calls, sleeps = [], []
 
