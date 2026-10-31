@@ -174,9 +174,34 @@ def _child_text(el, localname):
     return ""
 
 
+# XML 1.0 forbids C0 controls other than tab/LF/CR outright, and a declaration
+# may not be preceded by whitespace. Real publisher feeds ship both: two
+# sources in the OPML were failing every hour on parser strictness alone, not
+# on being dead (2026-10-31 audit).
+_XML_ILLEGAL = re.compile(rb"[\x00-\x08\x0b\x0c\x0e-\x1f]")
+_XML_BOM = b"\xef\xbb\xbf"
+
+
+def _sanitize_xml(xml_bytes):
+    """Strip a leading BOM/blank lines and C0 controls ET refuses to parse.
+
+    paloaltonetworks.com/blog/prisma-cloud/feed/ answers with a literal newline
+    before its `<?xml ...?>` declaration ("XML or text declaration not at
+    start of entity: line 2, column 0") and rapid7.com/rss.xml embeds a raw
+    vertical tab inside a <description> ("not well-formed (invalid token):
+    line 384, column 37"). Both documents are otherwise well-formed, so
+    recover the source instead of dropping it.
+    """
+    if isinstance(xml_bytes, str):
+        xml_bytes = xml_bytes.encode("utf-8", "replace")
+    if xml_bytes.startswith(_XML_BOM):
+        xml_bytes = xml_bytes[len(_XML_BOM):]
+    return _XML_ILLEGAL.sub(b"", xml_bytes.lstrip(b" \t\r\n"))
+
+
 def _parse_feed(xml_bytes):
     """RSS 2.0 + Atom -> entry dicts (stdlib ET, same style as ingest_reddit)."""
-    root = ET.fromstring(xml_bytes)
+    root = ET.fromstring(_sanitize_xml(xml_bytes))
     entries = []
     for el in root.iter():
         local = el.tag.rsplit("}", 1)[-1]
