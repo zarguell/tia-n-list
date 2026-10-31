@@ -1,3 +1,5 @@
-Anne Arundel County, Maryland confirmed a data breach following claims by the Rhysida ransomware gang, which claims to have stolen 2.6TB of data. The original event reports county confirmation after Rhysida's claims, with the latest update referencing the ransomware group's claim of responsibility for the cyberattack.
+Anne Arundel County, Maryland confirmed a data breach following Rhysida ransomware claims. The county acknowledged the incident after forensic review widened the scope. Specific victim counts and data categories are part of the confirmed breach disclosure.
 
-The breach affects a U.S. county government and involves a known ransomware actor. No specific CVEs are assigned. The story score is 4.5. Monitor for official county disclosure, victim notifications, and any regulatory filings that clarify the scope of the stolen data.
+Government entities remain high-value ransomware targets because of operational disruption and public services impact. The Rhysida claim followed by county confirmation shows the standard post-attack disclosure cycle. Watch for further scope updates, recovery timelines, and any regulatory notifications about affected resident data.
+
+The event references a forensic review that widened the breach scope. The Rhysida ransomware group was named in the claim. No specific CVE or exploit mechanism is mentioned; the focus is data breach confirmation rather than initial access details.
