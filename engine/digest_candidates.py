@@ -82,6 +82,7 @@ BENCH_MAX = 12         # wildcard discovery slate cap
 BENCH_SCORE_FLOOR = 1.0  # below this a non-slate story is noise, not a near-miss
 NEAR_GATE = 0.7         # fraction of ANALYSIS_GATE that counts as a near-miss on the bench
 UNCOVERED_NEVER_MAX = 10  # top-N never-covered stories (by score) on the uncovered slate regardless of hot
+PROMOTE_POOL_MAX = 8    # affirmative under-ranked candidates shown each run
 
 STORY_LINK_RE = re.compile(r"stories/([a-z0-9][a-z0-9-]*)/?")
 CVE_RE = re.compile(r"^CVE-\d{4}-\d{4,7}$")
@@ -334,17 +335,60 @@ def select_uncovered(by_score):
             or r["slug"] in never_slugs]
 
 
-def build_bench(rows, slate, stories, events):
+def load_demote_streaks(digests_dir=DIGESTS_DIR):
+    """slug -> consecutive-demote streak, anchored on the newest digest.
+
+    The digest agent demoted the same eight slugs 4-6 times each over 18 days
+    (2026-10-31 audit Issue 1) — an adjudicated stale story should stop
+    consuming a bench slot (and a fresh demote) every day. This is the same
+    streak `audit_checks.stale_demoted_stories` reports, computed here so the
+    candidate brief can act on it without importing the audit module.
+
+    Only an UNBROKEN run counts: one digest that does not demote the slug
+    resets it to zero. A story whose newest event is a genuine development
+    lands on the EVOLVED slate regardless of this streak. Malformed/absent
+    digest json is fail-open (streak 0) — a brief must never die on history.
+    """
+    active = None
+    out = {}
+    for d in reversed(digest_dates(digests_dir)):
+        try:
+            with open(os.path.join(digests_dir, d + ".json")) as f:
+                overrides = json.load(f).get("overrides") or []
+        except (OSError, ValueError):
+            break
+        demoted = {o.get("slug") for o in overrides
+                   if isinstance(o, dict) and o.get("action") == "demote"
+                   and o.get("slug")}
+        if active is None:
+            active = set(demoted)
+            out = {s: 1 for s in active}
+        else:
+            active = active & demoted
+            for s in active:
+                out[s] = out.get(s, 0) + 1
+        if not active:
+            break
+    return out
+
+
+def build_bench(rows, slate, stories, events, demote_streaks=None):
     """Wildcard discovery bench: live stories OUTSIDE the deterministic slate
     (not evolved, not hot-uncovered, not in yesterday's coverage) that carry
     at least one weirdness flag. Slate scores are advisory priors; the bench
     is where the digest agent looks for stories the proxy score under-ranks:
     multi-outlet bursts, CVE clusters, regional (translated) scoops, near-gate
-    scores. Ranked by flag count then score, capped at BENCH_MAX."""
+    scores. Stories with an active repeat-demote streak are excluded — they
+    were already adjudicated as stale and must not re-consume the slot (the
+    audit's 8-slugs-4-to-6-demotes class). Ranked by flag count then score,
+    capped at BENCH_MAX."""
+    streaks = demote_streaks or {}
     out = []
     for r in rows:
         if r["slug"] in slate or r["score"] < BENCH_SCORE_FLOOR or not r["n_events"]:
             continue  # slate members, sub-floor noise, and emptied ghosts never bench
+        if streaks.get(r["slug"], 0) >= 2:
+            continue  # repeat-demoted stale story — already adjudicated
         flags = []
         if r["n_sources"] >= 5:
             flags.append("burst")
@@ -362,6 +406,29 @@ def build_bench(rows, slate, stories, events):
                         "last_covered": r["last_covered"]})
     out.sort(key=lambda b: (-len(b["flags"]), -b["score"]))
     return out[:BENCH_MAX]
+
+
+def build_promote_pool(rows, slate, demote_streaks=None):
+    """Affirmative promote pool: the under-ranked half of the slate.
+
+    2026-10-31 audit Issue 1: 18 consecutive digests had zero promotes or
+    wildcards while the same slugs were demoted 4-6 times each. The brief
+    only ranked high scores, so agents read every sub-gate story as demote
+    material. This pool names the opposite class explicitly: slate stories
+    BELOW the hot gate that DO carry a genuine new development this run and
+    have no recent demote streak. If one matters, the agent should include it
+    and log a promote override; if it does not, the demote is at least made
+    against an affirmative candidate rather than an invisible one.
+    """
+    streaks = demote_streaks or {}
+    out = [r for r in rows
+           if r["slug"] in slate
+           and r["score"] < ANALYSIS_GATE
+           and r["new_events_since"] > 0
+           and r["n_events"]
+           and streaks.get(r["slug"], 0) < 2]
+    out.sort(key=lambda r: (-r["new_events_since"], -r["score"]))
+    return out[:PROMOTE_POOL_MAX]
 
 
 def main():
@@ -406,7 +473,9 @@ def main():
     yesterday_rows = sorted(
         (r for r in rows if r["slug"] in yesterday), key=lambda r: -r["score"])
     slate = ({r["slug"] for r in evolved} | {r["slug"] for r in uncovered} | yesterday)
-    bench = build_bench(rows, slate, stories, events)
+    streaks = load_demote_streaks()
+    bench = build_bench(rows, slate, stories, events, demote_streaks=streaks)
+    promote_pool = build_promote_pool(rows, slate, demote_streaks=streaks)
 
     def flag(r):
         parts = []
@@ -450,9 +519,20 @@ def main():
     for r in uncovered:
         print(" " + fmt(r) + flag(r) + f" — {r['title'][:70]}")
 
+    print(f"\nPROMOTE POOL ({len(promote_pool)}) — slate stories BELOW the {ANALYSIS_GATE} "
+          f"gate with a genuine new development and no recent demote streak. "
+          f"The proxy under-ranks these; if the development is significant, "
+          f"INCLUDE it (log a promote/wildcard override) instead of demoting it "
+          f"again. Empty is a legitimate outcome only when none carries a real "
+          f"development.")
+    for r in promote_pool:
+        print(f"  {r['score']:4.1f} +{r['new_events_since']}ev cov={r['last_covered'] or 'never':<10} "
+              f"{r['slug']} — {r['title'][:60]}")
+
     print(f"\nBENCH ({len(bench)}) — outside the slate, flagged for wildcard consideration "
           f"(burst >=5 sources, cve-rich >=3 CVEs, regional = non-EN origin, near-gate score). "
-          f"Wildcard picks may also come from anywhere in the store.")
+          f"Repeat-demoted stale stories are excluded. Wildcard picks may also come from "
+          f"anywhere in the store.")
     for b in bench:
         cov = b["last_covered"] or "never"
         print(f"  {b['score']:4.1f} [{','.join(b['flags']):<24}] cov={cov:<10} "
@@ -468,6 +548,7 @@ def main():
         "yesterday": yesterday_rows,
         "evolved": evolved,
         "uncovered": uncovered,
+        "promote_pool": promote_pool,
         "bench": bench,
     }
     with open(OUT_JSON, "w") as fh:

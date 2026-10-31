@@ -74,9 +74,11 @@ class Fixture:
         write_json(os.path.join(self.stories, slug + ".json"), s)
         return s
 
-    def digest(self, date, slugs):
-        write_json(os.path.join(self.digests, date + ".json"),
-                   {"date": date, "stories": slugs})
+    def digest(self, date, slugs, overrides=None):
+        payload = {"date": date, "stories": slugs}
+        if overrides:
+            payload["overrides"] = overrides
+        write_json(os.path.join(self.digests, date + ".json"), payload)
 
     def compute(self):
         dates = dc.digest_dates(self.digests)
@@ -279,6 +281,49 @@ def test_bench_flags_and_slate_exclusion():
     # flag count then score ordering
     assert bench == sorted(bench, key=lambda b: (-len(b["flags"]), -b["score"]))
     fx.close()
+
+
+def test_demote_streak_and_promote_pool():
+    """2026-10-31 audit Issue 1: the promote/wildcard channel was dead for 18
+    digests while the same slugs were demoted 4-6 times each. Codify the
+    streak: an adjudicated repeat-demoted story no longer consumes a bench
+    slot, and the brief gets an affirmative PROMOTE POOL of sub-gate slate
+    stories that DO carry a genuine new development."""
+    fx = Fixture()
+    fx.digest("2026-08-11", [])
+    fx.digest("2026-08-12", [], overrides=[
+        {"slug": "repeat-demoted", "action": "demote", "why": "no delta"}])
+    fx.digest("2026-08-13", [], overrides=[
+        {"slug": "repeat-demoted", "action": "demote", "why": "no delta"}])
+    # adjudicated stale story: old events, burst flag, would otherwise bench
+    fx.story("repeat-demoted",
+             [fx.event("e1", "2026-08-10T10:00:00Z", "Old burst")],
+             score=2.5, n_sources=6)
+    # fresh under-ranked story with a genuine development after the boundary
+    fx.story("push-me",
+             [fx.event("e2", "2026-08-14T09:00:00Z", "Fresh development")],
+             score=2.5)
+    rows, _ = fx.compute()
+    rows = list(rows.values())
+    streaks = dc.load_demote_streaks(fx.digests)
+    assert streaks.get("repeat-demoted") == 2, streaks
+    assert rows and r_by(rows, "repeat-demoted")["evolved"] is False
+    assert r_by(rows, "push-me")["evolved"] is True
+    slate = {r["slug"] for r in rows
+             if r["evolved"] or (r["hot"] and not r["covered_recently"])}
+    stories = dc.load_stories(fx.stories)
+    events = dc.load_events(fx.events)
+    bench = dc.build_bench(rows, slate, stories, events, demote_streaks=streaks)
+    assert "repeat-demoted" not in {b["slug"] for b in bench}, \
+        "repeat-demoted stale stories must not re-consume a bench slot"
+    pool = dc.build_promote_pool(rows, slate, demote_streaks=streaks)
+    assert [r["slug"] for r in pool] == ["push-me"], pool
+    assert pool[0]["score"] < dc.ANALYSIS_GATE
+    fx.close()
+
+
+def r_by(rows, slug):
+    return [r for r in rows if r["slug"] == slug][0]
 
 
 def test_never_covered_decayed_story_lands_on_uncovered_slate():
