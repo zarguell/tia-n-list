@@ -8,10 +8,12 @@ Covers: OPML parse, RSS+Atom parsing (namespace-proof), window filtering,
 cutover semantics (pre-cutover backlog never re-ingested), seen-ring dedup,
 full-text gating to the ex-crawler hosts, malformed-date tolerance.
 """
+import io
 import json
 import os
 import sys
 import tempfile
+import urllib.error
 from datetime import datetime, timedelta, timezone
 
 ENGINE = os.path.dirname(os.path.abspath(__file__))
@@ -281,6 +283,127 @@ def test_opml_missing_feeds_loud():
             raise AssertionError("empty OPML must raise")
         except RuntimeError:
             pass
+
+
+def _reddit_patch(urlopen, sleeps):
+    """Install fake urlopen/sleep; returns a restore callable."""
+    real_open = ingest.urllib.request.urlopen
+    real_sleep = ingest.time.sleep
+    ingest.urllib.request.urlopen = urlopen
+    ingest.time.sleep = lambda s: sleeps.append(s)
+
+    def restore():
+        ingest.urllib.request.urlopen = real_open
+        ingest.time.sleep = real_sleep
+    return restore
+
+
+def test_reddit_429_retried_with_backoff():
+    # 2026-10-31 audit Issue 3: r/netsec returned 429 on 36/36 hourly runs
+    # because the two subreddit feeds were fetched back-to-back with no
+    # retry. A 429 is transient; retry it with backoff.
+    calls, sleeps = [], []
+
+    class Resp:
+        def read(self):
+            return ATOM_FIXTURE
+
+    def fake_open(req, timeout=30):
+        calls.append(getattr(req, "full_url", req))
+        if len(calls) == 1:
+            raise urllib.error.HTTPError(
+                "https://r.example/a", 429, "Too Many Requests", {}, io.BytesIO(b""))
+        return Resp()
+
+    restore = _reddit_patch(fake_open, sleeps)
+    try:
+        data = ingest._fetch_reddit("https://r.example/a", "netsec")
+    finally:
+        restore()
+    assert data == ATOM_FIXTURE
+    assert len(calls) == 2, "429 must be retried once"
+    assert sleeps == [ingest.REDDIT_BACKOFF_S], sleeps
+
+
+def test_reddit_non_429_not_retried():
+    calls, sleeps = [], []
+
+    def fake_open(req, timeout=30):
+        calls.append(1)
+        raise urllib.error.HTTPError(
+            "https://r.example/a", 403, "Forbidden", {}, io.BytesIO(b""))
+
+    restore = _reddit_patch(fake_open, sleeps)
+    try:
+        try:
+            ingest._fetch_reddit("https://r.example/a", "netsec")
+            raise AssertionError("403 must raise")
+        except urllib.error.HTTPError as e:
+            assert e.code == 403
+    finally:
+        restore()
+    assert len(calls) == 1 and sleeps == [], "only 429 is worth retrying"
+
+
+def test_reddit_persistent_429_exhausts_budget():
+    calls, sleeps = [], []
+
+    def fake_open(req, timeout=30):
+        calls.append(1)
+        raise urllib.error.HTTPError(
+            "https://r.example/a", 429, "Too Many Requests", {}, io.BytesIO(b""))
+
+    restore = _reddit_patch(fake_open, sleeps)
+    try:
+        try:
+            ingest._fetch_reddit("https://r.example/a", "netsec")
+            raise AssertionError("persistent 429 must raise")
+        except urllib.error.HTTPError as e:
+            assert e.code == 429
+    finally:
+        restore()
+    assert len(calls) == ingest.REDDIT_RETRIES
+    assert sleeps == [ingest.REDDIT_BACKOFF_S * i
+                      for i in range(1, ingest.REDDIT_RETRIES)]
+
+
+def test_reddit_feeds_spaced_and_state_recorded():
+    """The two feeds must not fire back-to-back, and a dead feed degrades
+    only that feed (state records it) instead of losing the whole layer."""
+    with _Tmp() as tmp:
+        real_feeds, real_events, real_reddit = (
+            ingest.REDDIT_FEEDS, ingest.EVENTS, ingest.REDDIT)
+        ingest.REDDIT_FEEDS = (("cybersecurity", "https://r.example/a"),
+                               ("netsec", "https://r.example/b"))
+        ingest.EVENTS = tmp.events
+        ingest.REDDIT = os.path.join(tmp.dir, "reddit.json")
+        sleeps = []
+
+        class Resp:
+            def read(self):
+                return ATOM_FIXTURE
+
+        def fake_open(req, timeout=30):
+            url = getattr(req, "full_url", req)
+            if url.endswith("/b"):
+                raise urllib.error.HTTPError(url, 403, "Forbidden", {},
+                                             io.BytesIO(b""))
+            return Resp()
+
+        restore = _reddit_patch(fake_open, sleeps)
+        try:
+            st = {}
+            posts, new_ids = ingest.ingest_reddit(st)
+        finally:
+            restore()
+            ingest.REDDIT_FEEDS = real_feeds
+            ingest.EVENTS = real_events
+            ingest.REDDIT = real_reddit
+        assert posts == 1 and new_ids == []
+        assert sleeps == [ingest.REDDIT_INTER_FEED_S], \
+            "feeds must be spaced; 403 is not retried"
+        assert st["reddit_last_fetch"] == {"ok": 1, "errors": 1}
+
 
 
 if __name__ == "__main__":

@@ -2,7 +2,7 @@
 """Tia Storyline — hourly ingest: native RSS polling + reddit RSS.
 
 Leaf A (docs/vps-migration.md): miniflux replaced by a stdlib poller over
-engine/feeds/cyber.opml (the 57 cyber feeds). Dedup = bounded seen-ring of
+engine/feeds/cyber.opml (the 53 cyber feeds). Dedup = bounded seen-ring of
 content-hashed feed+guid + a one-time cutover timestamp (the miniflux backlog
 is never re-ingested). Event ids: rss:<sha1>. The two ex-crawler hosts
 (bleepingcomputer, securityweek) still get best-effort full-article text;
@@ -21,6 +21,7 @@ import os
 import re
 import sys
 import time
+import urllib.error
 import urllib.request
 import xml.etree.ElementTree as ET
 from concurrent.futures import ThreadPoolExecutor
@@ -45,6 +46,14 @@ UA = "tia-storyline/1.0"
 CVE_RE = re.compile(r"CVE-\d{4}-\d{4,7}", re.IGNORECASE)
 LOOKBACK_H = 48
 REDDIT_WINDOW = 500
+# Reddit rate-limits back-to-back requests from one client: r/netsec (the
+# second feed) failed with HTTP 429 on 36/36 hourly runs (2026-10-31 audit
+# Issue 3) while r/cybersecurity succeeded. Polite spacing between feeds plus
+# one exponential-backoff retry on 429 keeps the second feed alive; a
+# persistent limit degrades that feed only, never the run.
+REDDIT_RETRIES = 3          # initial attempt + 2 retries
+REDDIT_BACKOFF_S = 8.0      # linear: 8s, 16s
+REDDIT_INTER_FEED_S = 2.0   # gap between the two subreddit requests
 
 SCRIPT_RANGES = [("ko", re.compile(r"[\uAC00-\uD7AF]")), ("ja", re.compile(r"[\u3040-\u30FF]")),
                  ("zh", re.compile(r"[\u4E00-\u9FFF]")), ("ru", re.compile(r"[\u0400-\u04FF]")),
@@ -140,7 +149,7 @@ FETCH_WORKERS = 8          # IO-only parallelism (AGENTS rule: never parallel pi
 FETCH_TIMEOUT = 15
 RSS_WINDOW = 2000          # seen-guid ring buffer
 # Feeds whose content miniflux historically upgraded via its crawler — keep
-# fetching best-effort full article text for just these (55/57 feeds consumed
+# fetching best-effort full article text for just these (51/53 feeds consumed
 # RSS content as-is; their scraper config: SecurityWeek div.zox-post-body,
 # BleepingComputer default readability).
 FULL_TEXT_HOSTS = ("bleepingcomputer.com", "securityweek.com")
@@ -386,6 +395,30 @@ def ingest_rss(st, hours):
 
 
 
+def _fetch_reddit(url, sub):
+    """GET one subreddit RSS with polite spacing and 429 backoff.
+
+    Raises the last error after the retry budget is spent; the caller treats
+    a dead feed as degraded input, not a run failure. Only 429 is retried —
+    a 403/404 or a DNS failure will not improve by waiting.
+    """
+    last = None
+    for attempt in range(REDDIT_RETRIES):
+        if attempt:
+            time.sleep(REDDIT_BACKOFF_S * attempt)
+        try:
+            req = urllib.request.Request(url, headers={"User-Agent": UA})
+            return urllib.request.urlopen(req, timeout=30).read()
+        except urllib.error.HTTPError as e:
+            last = e
+            if e.code != 429:
+                break
+        except Exception as e:  # noqa: BLE001 — network/DNS/timeout
+            last = e
+            break
+    raise last
+
+
 def ingest_reddit(st):
     """Fetch all reddit feeds; write data/reddit.json (signal layer) AND
     promote link-posts to events (queued for merge like miniflux entries).
@@ -396,12 +429,16 @@ def ingest_reddit(st):
     seen_set = set(st.get("seen_reddit", []))
     seen_list = st.get("seen_reddit", [])
     seen_urls = set()
-    for sub, feed in REDDIT_FEEDS:
-        req = urllib.request.Request(feed, headers={"User-Agent": UA})
+    fetch_errors = 0
+    for idx, (sub, feed) in enumerate(REDDIT_FEEDS):
+        if idx:
+            time.sleep(REDDIT_INTER_FEED_S)
         try:
-            root = ET.fromstring(urllib.request.urlopen(req, timeout=30).read())
+            root = ET.fromstring(_fetch_reddit(feed, sub))
         except Exception as e:
-            print(f"reddit RSS failed ({sub}): {e}", file=sys.stderr)
+            fetch_errors += 1
+            print(f"reddit RSS DEGRADED ({sub}): {e} — input missing this "
+                  f"run (retried {REDDIT_RETRIES - 1}x)", file=sys.stderr)
             continue
         for e in root.findall("a:entry", ns):
             title = (e.findtext("a:title", default="", namespaces=ns) or "").strip()
@@ -456,6 +493,8 @@ def ingest_reddit(st):
         seen_list = seen_list[-REDDIT_WINDOW:]
         seen_set = set(seen_list)
     st["seen_reddit"] = seen_list
+    st["reddit_last_fetch"] = {"ok": len(REDDIT_FEEDS) - fetch_errors,
+                                "errors": fetch_errors}
     json.dump(posts, open(REDDIT, "w"), indent=1)
     return len(posts), new_ids
 
