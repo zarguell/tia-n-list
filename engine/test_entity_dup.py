@@ -386,6 +386,21 @@ loaded = merge.load_sweep_exclusions(
     path=os.path.join(root8, "sweep_exclusions.json"))
 check("loader returns empty set for missing file", loaded, set())
 
+# ── 9. entity probe honors audit-dismissed pairs ────────────────────────
+print("9. entity probe honors the audit-dismissal file")
+check("entity probe pairs the fixture with no exclusions",
+      len(merge.entity_dup_suspects(REWORD, NOW)), 1)
+check("entity probe drops an adjudicated-dismissed pair",
+      merge.entity_dup_suspects(
+          REWORD, NOW,
+          exclusions={frozenset(("opencode-hack", "opencode-guidance"))}),
+      [])
+check("an unrelated exclusion leaves the pair alone",
+      len(merge.entity_dup_suspects(
+          REWORD, NOW, exclusions={frozenset(("other-a", "other-b"))})), 1)
+check("exclusions=None stays empty (no hidden file dependency)",
+      len(merge.entity_dup_suspects(REWORD, NOW, exclusions=None)), 1)
+
 for d in (root, root2, root2b, root3, root3b, root3c, root4, root4b, root5,
           root5b, root7, root8):
     shutil.rmtree(d, ignore_errors=True)
