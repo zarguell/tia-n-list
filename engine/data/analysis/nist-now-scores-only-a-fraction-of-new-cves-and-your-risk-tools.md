@@ -1,0 +1,5 @@
+Since April 2026, NIST has narrowed its scoring to CVEs under active exploitation and those affecting US government software. Everything else arrives in the NVD without a NIST severity score, and the API marks many records as Deferred while the web interface labels them Not Scheduled. That split breaks integrations that rely on website labels alone and pushes unscored records to the bottom of scanner queues.
+
+The missing-score risk is concrete. CVE-2026-6584, an authorization bypass in the SuperAGI agent framework with a public exploit, is one example that scanners could miss because it carries no NIST score. The event points to a developer guide that explains how to read vulnStatus and source severity from alternatives when NIST has not assigned one.
+
+Watch whether vendors and security teams shift to alternative scoring feeds or supplement NVD data with EPSS and CISA KEV signals. Until NIST restores broader coverage, risk-ranking pipelines that depend solely on NVD severity will systematically under-prioritize vulnerabilities that still carry real exploit potential.
