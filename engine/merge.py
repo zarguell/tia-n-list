@@ -347,8 +347,8 @@ def _entity_tokens(title, extra_stop=frozenset()):
     return strong, loose
 
 
-def entity_dup_suspects(stories, now, *, exclude=None, max_out=10,
-                        max_age_days=45, window_days=10):
+def entity_dup_suspects(stories, now, *, exclude=None, exclusions=None,
+                        max_out=10, max_age_days=45, window_days=10):
     """Entity-based near-duplicate LIVE story pairs, REPORT-ONLY (2026-10-20
     owner decision eda9f1100d5d, audit Issue 3 / Rec 2): the pairs the
     title-jaccard probe (duplicate_suspects, floor 0.5) cannot see because the
@@ -374,9 +374,16 @@ def entity_dup_suspects(stories, now, *, exclude=None, max_out=10,
     `exclude` is the set of already-surfaced pair keys (frozenset of the two
     story ids) — audit.py passes the title probe's output so the adjudication
     section shows each pair once. Shared-event pairs keep surfacing via
-    duplicate_suspects exactly as today."""
+    duplicate_suspects exactly as today.
+
+    `exclusions` is the adjudicated-dismissal set (load_sweep_exclusions):
+    a pair an earlier audit read and rejected is settled, so it must not be
+    re-reported every day (2026-11-01 audit: six pairs dismissed on 10-21,
+    10-25, 10-26, 10-31 were still in today's list because this probe
+    ignored the file the sweep honors)."""
     from audit_checks import SUSPECT_GENERIC   # lazy: audit_checks imports merge
     generic_stop = GENERIC | SUSPECT_GENERIC
+    settled = exclusions or frozenset()
     cutoff = (now - timedelta(days=max_age_days)).strftime("%Y-%m-%dT%H:%M:%S")
     pool = sorted((s for s in stories.values()
                    if not s.get("merged_into") and s.get("events")
@@ -392,7 +399,10 @@ def entity_dup_suspects(stories, now, *, exclude=None, max_out=10,
     out = []
     for i in range(len(pool)):
         for j in range(i + 1, len(pool)):
-            if exclude and frozenset((pool[i]["id"], pool[j]["id"])) in exclude:
+            pair = frozenset((pool[i]["id"], pool[j]["id"]))
+            if exclude and pair in exclude:
+                continue
+            if pair in settled:
                 continue
             actor = ((_actor_norm(disc[i]) & ACTOR_TOKENS)
                      & (_actor_norm(disc[j]) & ACTOR_TOKENS))

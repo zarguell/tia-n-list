@@ -358,7 +358,12 @@ EXTRA = {
     # already surfaced are skipped so each pair is adjudicated once.
     "entity_dup_suspects": merge_mod.entity_dup_suspects(
         _all_stories, NOW,
-        exclude={frozenset((x["a"], x["b"])) for x in _dup_suspects}),
+        exclude={frozenset((x["a"], x["b"])) for x in _dup_suspects},
+        # audit-dismissed pairs (sweep_exclusions.json) are settled: the title
+        # probe already honors them, and without passing them here the entity
+        # probe re-reported pairs dismissed on 10-21/10-25/10-26/10-31 every
+        # following day (2026-11-01 audit Issue 3).
+        exclusions=_sweep_exclusions),
     # what the pre-adjudication sweep merged this run (see score0_sweep check)
     "score0_sweep": {"merged": _score0_log, "count": len(_score0_log)},
     # 2026-10-19 owner decision 1ba8f94ae822 (audit Issue 2 / Rec 4):
