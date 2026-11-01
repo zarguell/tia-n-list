@@ -1,0 +1,3 @@
+A British intelligence agency, widely understood to be GCHQ, misplaced thousands of storage devices over years and still cannot state the exact number lost, according to a recent watchdog report. The Register reported the story on October 30, 2026, noting years of unaccounted hardware in an organization that handles highly sensitive signals intelligence.
+
+The incident is a basic physical-security and asset-management failure rather than a cyber breach, but it carries serious risk because unrecovered storage devices could contain classified or operational data. Watch for any parliamentary response or revised inventory controls.
