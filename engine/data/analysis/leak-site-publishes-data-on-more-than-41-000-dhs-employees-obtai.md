@@ -1,0 +1,5 @@
+A leak site published data covering over 41,000 Department of Homeland Security employees and contractors, obtained by hacktivists calling themselves the Department of Peace. The group said it breached an identity service using Okta single sign-on; transparency nonprofit DDoSecrets and researcher Emma Best confirmed verification of current CISA staff in the leaked database. The release targets DHS leadership tied to immigration enforcement, referencing Secretary Markwayne Mullin's July 17 comments about "turning up the heat" on ICE operations.
+
+The scope covers personnel overseeing covert operations, leaker hunts, and BlueLeaks follow-up, with records spanning years including COVID-19 planning and 2023 internal summits. This makes the leak operationally significant rather than cosmetic. Watch for DHS response, any confirmation of the Okta breach vector, and whether CISA or FBI issue advisory or attribution updates.
+
+No CVE or patch applies; the incident is a data breach with political motivation. The primary risk is exposure of undercover and sensitive personnel, not a technical vulnerability.
