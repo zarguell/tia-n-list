@@ -1,0 +1,1 @@
+VulDB lists advisory disclosure on 2026-10-31 for CVE-2026-120196 in WAVLINK WN579X3-D V250402. The entry describes remote OS command injection via manipulation of the argument Name in the port_forward function of /cgi-bin/wapi.cgi, confirming the vulnerability was named and documented before the November first-seen date.
