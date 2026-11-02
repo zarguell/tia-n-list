@@ -1,0 +1,30 @@
+title: C3RB3r Ransomware File Encryption on Synology NAS
+id: cbabeb89-d562-4a35-aba0-6db53c40a49b
+status: experimental
+description: >
+    Detects files renamed with the .L0CK3D extension used by C3RB3r (a Cerber
+    variant) during the October 2026 wave of attacks against Synology NAS
+    appliances running outdated DSM. Synology confirmed the intrusion path is
+    the SA-24:20 vulnerability cluster (CVE-2024-10441, CVE-2024-10445,
+    CVE-2024-50629) patched in December 2024, so an encryption event here means
+    the appliance was never updated and its management interface was reachable.
+references:
+    - https://www.synology.com/en-global/company/news/article/C3RB3R/Synology%20urges%20users%20to%20update%20DSM%20following%20ransomware%20attacks%20on%20outdated%20DSM%20versions
+    - https://www.bleepingcomputer.com/news/security/synology-warns-customers-of-ongoing-c3rb3r-ransomware-attacks/
+    - https://www.synology.com/en-us/security/advisory/Synology_SA_24_20
+author: Tia N. List
+date: 2026-11-02
+tags:
+    - attack.t1486
+    - attack.impact
+logsource:
+    category: file_event
+detection:
+    selection_extension:
+        TargetFilename|endswith: '.L0CK3D'
+    selection_extension_lower:
+        TargetFilename|endswith: '.l0ck3d'
+    condition: selection_extension or selection_extension_lower
+falsepositives:
+    - User files or backup archives that legitimately carry a L0CK3D suffix (rare; verify the host is a Synology NAS with outdated DSM)
+level: critical
