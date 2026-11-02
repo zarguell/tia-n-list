@@ -1,0 +1,3 @@
+Chinese hackers used ARTEX, an open-source, multi-agent AI penetration-testing framework, in attacks against more than 200 organizations across 14 countries. The reporting identifies ARTEX as the tooling behind the campaign but does not name affected sectors, specific intrusion techniques, or a confirmed attribution beyond the Chinese nexus.
+
+That breadth of targeting points to an opportunistic, scaled operation rather than a tightly scoped one. Defenders should treat ARTEX as an active component of adversary tooling and review exposure of internet-facing services; the available reporting does not include indicators of compromise or a fixed timeline for the activity.
