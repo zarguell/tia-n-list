@@ -1,0 +1,1 @@
+Startup Fortune summarized the Talos disclosure on October 31, 2026, describing how Volta feeds stolen profiles to AI models like Claude Opus 4.6 through OpenRouter to automatically profile and rank victims.
