@@ -74,8 +74,27 @@ def _load_queue():
         return {"stories": []}
 
 
-def _save_queue(q):
+def _save_queue(q, skip_if_unchanged=False):
+    """Persist the queue state.
+
+    `skip_if_unchanged` leaves the file untouched when the story list is
+    identical: `build` stamps a fresh "updated" on every run, so a no-op
+    story-desk pass (empty queue, twice an hour) used to dirty the shared
+    tia-n-list worktree with a desk-queue.json that differed only in its
+    timestamp. The publishing jobs then lost `git pull --rebase` to those
+    stray unstaged changes (2026-11-02 cti-pass git-publish-failed:
+    "cannot rebase: You have unstaged changes"). Nothing reads "updated"
+    as data, so skipping the write is safe.
+    """
+    if skip_if_unchanged:
+        try:
+            prev = json.load(open(QUEUE))
+        except (OSError, ValueError):
+            prev = None
+        if isinstance(prev, dict) and prev.get("stories") == q.get("stories"):
+            return False
     json.dump(q, open(QUEUE, "w"), indent=1)
+    return True
 
 
 def _kev_dates():
@@ -175,7 +194,7 @@ def build():
     q = {"updated": _now_iso(),
          "stories": compute_queue(_load_stories_raw(), _kev_dates(),
                                   _cve_published(), _now_iso()[:10])}
-    _save_queue(q)
+    _save_queue(q, skip_if_unchanged=True)
     by = {}
     for e in q["stories"]:
         for r in e["reasons"]:
@@ -189,6 +208,12 @@ def build():
 def take(n):
     q = _load_queue()
     batch, rest = q["stories"][:n], q["stories"][n:]
+    if not batch:
+        # Empty queue: no state change and no batch file. Writing either
+        # would leave the shared worktree dirty for the next publisher
+        # (same class as the build() no-op above).
+        print("[]")
+        return batch
     q["stories"] = rest
     _save_queue(q)
     os.makedirs(DESK_DIR, exist_ok=True)

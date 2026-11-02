@@ -217,6 +217,25 @@ with tempfile.TemporaryDirectory() as td:
           bool(st3.get("desk_reviewed_at"))
           and dq._load_queue()["stories"] == [])
 
+    # --- 7: no-op runs must not dirty the shared worktree -------------------
+    # An empty-queue desk pass used to rewrite desk-queue.json (fresh
+    # "updated" only) and drop an empty batch file. Both were uncommitted
+    # by design on that path, so the next publisher in tia-n-list lost its
+    # `git pull --rebase` to them (2026-11-02 cti-pass publish failure).
+    dq._save_queue({"updated": "2026-09-24T00:00:00Z", "stories": []})
+    stamp_before = open(dq.QUEUE).read()
+    batches_before = set(glob.glob(os.path.join(desk_dir, "batch-*.json")))
+    dq.build()
+    check("empty build leaves desk-queue.json byte-identical",
+          open(dq.QUEUE).read() == stamp_before)
+    empty_batch = dq.take(4)
+    check("empty take returns no stories", empty_batch == [])
+    check("empty take writes no batch file",
+          set(glob.glob(os.path.join(desk_dir, "batch-*.json")))
+          == batches_before)
+    check("empty take leaves desk-queue.json byte-identical",
+          open(dq.QUEUE).read() == stamp_before)
+
 print()
 if FAILS:
     print(f"FAILED: {len(FAILS)} check(s): {', '.join(FAILS)}")
