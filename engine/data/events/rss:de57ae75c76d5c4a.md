@@ -1,0 +1,1 @@
+Midsize organizations are actively shifting toward platform consolidation to reduce operational friction and maximize security value. Article Link: https://www.security.com/expert-perspectives/how-midsize-organizations-use-xdr-fight-sophisticated-threats
