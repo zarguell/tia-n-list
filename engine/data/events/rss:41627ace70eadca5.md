@@ -1,0 +1,1 @@
+According to the official release notes published on October 28, 2026, Microsoft released optional preview update KB5127936 for Windows 11 versions 25H2 and 26H2. The update introduces a redesigned and more customizable context menu. Article Link: Microsoft releases KB5127936 for Windows 11 with faster, customizable context menu.

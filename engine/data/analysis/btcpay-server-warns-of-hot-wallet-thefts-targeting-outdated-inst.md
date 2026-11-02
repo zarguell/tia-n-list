@@ -1,0 +1,3 @@
+BTCPay Server maintainers report attackers draining hot wallets from outdated instances. The attack targets versions 2.4.1 and earlier; the maintainer urges upgrading to 2.4.7. The threat actor gained administrator access to instances running older releases. A critical vulnerability found through Anthropic's Frontier OSS scanner prompted an emergency patch in version 2.4.7.
+
+The incident does not affect public-facing servers; operators were told to shut down pending investigation. Nicolas Dorier confirmed attacker clues pointed to vulnerabilities in releases before 2.4.2. Watch for further technical disclosure on the exact chain used for admin access and whether additional versions are affected.
