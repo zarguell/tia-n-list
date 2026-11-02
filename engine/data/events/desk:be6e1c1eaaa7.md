@@ -1,0 +1,1 @@
+DEV Community article from 5 Oct 2026 links CVE-2026-105697 (command injection via MCP stdio, fixed in 1.10.3) to a follow-on flaw CVE-2026-105740 affecting releases before 1.9.0, showing a repeated exposure in Langflow's MCP handling.

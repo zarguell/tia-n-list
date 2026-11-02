@@ -1,0 +1,1 @@
+Safeguard blog dated 5 Oct 2026 describes CVE-2026-105697 as a critical OS command injection in Langflow before version 1.10.3. The flaw lives in the MCP stdio transport, which launches arbitrary commands configured by a user.

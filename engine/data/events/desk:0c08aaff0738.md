@@ -1,0 +1,1 @@
+OffSeq's Threat Radar entry for CVE-2026-116692 was published 27 October 2026 and lists the vulnerability as critical with CVSS 9.8. The entry identifies affected versions as >=3.12.0rc0 and <3.17.0, notes a public PoC exists, and describes exploitation through the `/ajax-api/3.0/mlflow/scorer/invoke` endpoint by importing malicious subclasses placed in writable allowed packages.
