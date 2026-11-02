@@ -1,0 +1,3 @@
+BITTER APT is deploying PapRAT spyware using a fake ambassador's letter as a lure, with targeting aimed at government, energy, and engineering organizations. Two outlets, Infosecurity Magazine and Hackread, covered the campaign, which is the only corroboration available in the current event set.
+
+No CVEs or technical exploitation details are named in the available reporting, so defenders should treat this as an espionage-campaign indicator rather than a patchable-vulnerability story. Watch for the diplomatic-document lure and PapRAT payloads in government and energy-sector environments.
