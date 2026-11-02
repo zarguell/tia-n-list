@@ -1,0 +1,3 @@
+Researchers from Parameter disclosed a high-severity chain in ChatGPT share links that allowed attacker-controlled JavaScript to run inside a victim's signed-in session. The flaw turned an ordinary public share link into code execution within the active session. OpenAI fixed the issue on October 26 and classified it as P1; the researchers received a $5,000 bounty.
+
+The attack path relied on a sequence of linked vulnerabilities rather than a single bug. Because share links are widely distributed, the exposure surface was significant until the patch was applied. Users with active ChatGPT sessions who clicked malicious shared links were at risk of session compromise.
