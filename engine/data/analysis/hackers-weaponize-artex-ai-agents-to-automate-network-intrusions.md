@@ -1,0 +1,3 @@
+Microsoft disclosed how North Korean threat actors are using AI-enabled agents, including a tool called ARTEX, to automate intrusion and data-theft operations. The actors deploy AI to speed up reconnaissance, data analysis, and lateral movement, reducing the time between initial access and exfiltration.
+
+This aligns with broader observations that state-backed groups are integrating generative AI into operational pipelines rather than just using it for phishing content. The key defensive implication is shorter dwell-time windows: EDR and response-speed metrics matter more than traditional perimeter controls when AI accelerates attacker cycles. Watch for additional vendor reports linking ARTEX to specific campaigns.

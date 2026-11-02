@@ -1,0 +1,5 @@
+The FBI formally attributed the record Binance cryptocurrency heist of October 29, 2026, to North Korean state-sponsored hackers, identifying the group as TraderTraitor. The attack emptied hot wallets across multiple blockchains in roughly 20 minutes; Binance estimates losses at about $6.3 billion, the largest crypto theft on record.
+
+The FBI advisory, released October 31, names 608 Ethereum addresses, 19 Bitcoin addresses, and one Solana address tied to the stolen assets. Blockchain intelligence firms TRM Labs and Chainalysis linked the intrusion to TraderTraitor within hours. Binance said the intrusion may have started with a compromised DevOps laptop and pledged to cover losses.
+
+The FBI, together with the Secret Service and IRS-CI, asked crypto infrastructure operators to refuse transactions from the named addresses. This is a primary-source attribution with concrete numbers and named actors. The speed of attribution, two days after the theft, and the scale of the address list show coordinated law-enforcement tracking of blockchain flows rather than retrospective analysis.

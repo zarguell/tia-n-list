@@ -1,0 +1,3 @@
+MediaTek's November 2026 bulletin resolves critical modem vulnerabilities including CVE-2026-20499, CVE-2026-20545, and CVE-2026-20546. The flaws affect modem, video, and AI components in MediaTek chipsets. The advisory updates the previous October bulletin that covered 31 security flaws.
+
+Organizations running affected SoCs in phones and embedded devices should verify firmware versions and apply vendor patches promptly. No active exploitation confirmation accompanies this bulletin, but the CVE count and critical ratings make it a standard high-priority patch cycle item. Monitor vendor release notes for build-level patch timelines.
