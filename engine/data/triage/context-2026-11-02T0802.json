@@ -1,0 +1,460 @@
+{
+ "date": "2026-11-02",
+ "decisions_path": "engine/data/triage/decisions-2026-11-02T0802.json",
+ "instructions": "For every new event decide: (1) keep or drop \u2014 keep only stories worth covering (real security events, vulnerabilities, attacks, breaches, advisories with substance); drop press releases, vendor marketing, generic explainers, and anything duplicating an existing story. (2) If keep, assign the event to the RIGHT story: an existing candidate story id if it belongs there (this FIXES mechanical clustering \u2014 e.g. different outlets' Patch Tuesday roundups are ONE story), or NEW with a clean story_title. (3) merges: list candidate stories that are really the same story (from = fragment, into = the most complete one). (4) For every kept event that names CVEs, optionally assess exploitation: exploited = the event reports OBSERVED in-the-wild exploitation (implants, victim counts, campaigns, CISA KEV confirmation); suspected = public exploit code/PoC or likely-but-unconfirmed. Attribute ONLY the CVEs you can tie to the claim \u2014 a bulletin's blanket 'actively exploited' does NOT flag all its CVEs. Omit the exploitation field when the event makes no claim.\n(5) LOW-TRUST events (\"low_trust\": true \u2014 AI-drafted aggregator reposts, late and overstated): treat as unverified leads. When the text attributes the claim to a named primary source (a researcher firm like watchTowr, a vendor advisory, CISA, a major outlet) and attribution_urls or a web search (/home/ubuntu/repos/cronman/bin/web-search.sh \"query\") locate that primary source CONFIRMING the claim, include a provenance object in the decision: {\"url\": <primary url>, \"source\": <domain>, \"evidence\": <one line>, \"verified\": true}. VERIFIED provenance lets the event mint a story (credited to the primary source) and count as a development; without it, a low-trust event can only attach to an EXISTING story, never mint. If you cannot verify, keep/drop on normal merit and omit provenance.\n\nWrite decisions as JSON with EXACTLY this shape:\n{\n  \"decisions\": [\n    {\"event_id\": \"<id>\", \"action\": \"keep\", \"story\": \"<existing candidate story id>\", \"reason\": \"...\"},\n    {\"event_id\": \"<id>\", \"action\": \"keep\", \"story\": \"NEW\", \"story_title\": \"<clean title>\", \"reason\": \"...\"},\n    {\"event_id\": \"<id>\", \"action\": \"drop\", \"reason\": \"...\"}\n  ],\n  \"merges\": [{\"from\": \"<fragment story id>\", \"into\": \"<canonical story id>\"}]\n}\nFor events marked \"low_trust\" (AI-drafted aggregator reposts) a decision\nmay carry an optional \"provenance\" object when you VERIFIED the claim at\nthe named primary source: {\"event_id\": ..., \"action\": \"keep\", ...}\n  \"provenance\": {\"url\": \"<primary source url>\", \"source\": \"<domain>\", \"evidence\": \"<one line>\"}\nOnly include provenance when the primary source (vendor advisory, CISA,\nthe named researcher/outlet) really carries the claim \u2014 verified\nprovenance lets a low-trust event mint a story and set freshness; without\nit the event can only amplify an existing story.\nSTRICT KEY NAMES: the array key is \"decisions\" (never \"events\"); the story\nkey is \"story\" (never \"story_id\"); \"story\" holds a candidate_stories id\nverbatim or the literal string \"NEW\". Optional per-event field\n\"exploitation\": {\"CVE-...\": {\"status\": \"exploited|suspected\", \"evidence\": \"1-2 sentences\"}}.",
+ "new_events": [
+  {
+   "id": "rss:f7dbccfd6e6d3a97",
+   "title": "Ivanti Patches Two More Zero-Days Exploited in Connect Secure Attack Chain",
+   "source": "securityweek.com",
+   "published_at": "2026-11-02T07:57:49Z",
+   "cves": [
+    "CVE-2026-104935",
+    "CVE-2026-111357",
+    "CVE-2026-118527"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Ivanti has released patches for two more Connect Secure (ICS) zero-days that attackers chained with a vulnerability the company disclosed last month. The newly patched bugs are CVE-2026-111357 and CVE-2026-118527. Ivanti"
+  },
+  {
+   "id": "masto:117545380746522155",
+   "title": "At\u00e2t popula\u021bia Ucrainei,c\u00e2t & cea a Rusiei,au primit azi-noapte alerte false de atac nuclear.Aparent,aplica\u021biile oficiale ale celor dou\u0103 \u021b\u0103r",
+   "source": "biziday.ro",
+   "published_at": "2026-11-02T06:16:08.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "At\u00e2t popula\u021bia Ucrainei,c\u00e2t & cea a Rusiei,au primit azi-noapte alerte false de atac nuclear.Aparent,aplica\u021biile oficiale ale celor dou\u0103 \u021b\u0103r  via Mastodon https://biziday.ro/?p=374351 "
+  }
+ ],
+ "candidate_stories": [
+  {
+   "id": "ivanti-connect-secure-cve-2026-104935-active-exploitation",
+   "title": "Ivanti Connect Secure CVE-2026-104935 Active Exploitation",
+   "n_events": 65,
+   "last_seen": "2026-11-02T07:57:49Z",
+   "first_event_title": "Ivanti Connect Secure zero-day CVE-2026-104935 We are aware of exploitation in the wild affecting a limited number of customers at the time "
+  },
+  {
+   "id": "hackers-gain-unauthorized-access-to-ws-audiology-crm-environment",
+   "title": "Hackers Gain Unauthorized Access to WS Audiology CRM Environment and Operational IT Systems",
+   "n_events": 1,
+   "last_seen": "2026-11-02T06:19:13Z",
+   "first_event_title": "Hackers Gain Unauthorized Access to WS Audiology CRM Environment and Operational IT Systems"
+  },
+  {
+   "id": "malicious-claude-code-vs-code-extension-installs-persistent-ssh",
+   "title": "Malicious Claude Code VS Code Extension Installs Persistent SSH Backdoor to Give Attackers Remote Access",
+   "n_events": 31,
+   "last_seen": "2026-11-02T05:45:51Z",
+   "first_event_title": "Malicious Claude Code VS Code Extension Installs Persistent SSH Backdoor to Give Attackers Remote Access"
+  },
+  {
+   "id": "langflow-critical-code-injection-flaw-cve-2026-104334-cvss-9-8",
+   "title": "Langflow Critical Code Injection Flaw CVE-2026-104334 (CVSS 9.8)",
+   "n_events": 6,
+   "last_seen": "2026-11-02T05:35:19.798Z",
+   "first_event_title": "Heads up: Langflow has a critical code injection flaw, scored 9.8. Older versions are affected, so update to 1.12.3. # Cybersecurity # InfoS"
+  },
+  {
+   "id": "hackers-weaponize-artex-ai-agents-to-automate-network-intrusions",
+   "title": "Hackers Weaponize ARTEX AI Agents to Automate Network Intrusions and Steal Sensitive Data",
+   "n_events": 1,
+   "last_seen": "2026-11-02T05:32:37Z",
+   "first_event_title": "Hackers Weaponize ARTEX AI Agents to Automate Network Intrusions and Steal Sensitive Data"
+  },
+  {
+   "id": "hacktober-2026-major-cyberattacks-hit-binance-php-node-js-litell",
+   "title": "Hacktober 2026: Major Cyberattacks Hit Binance, PHP, Node.js, LiteLLM, and Pentagon",
+   "n_events": 0,
+   "last_seen": "2026-11-02T05:25:03Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "langflow-critical-security-flaw-cve-2026-105697-cvss-9-9",
+   "title": "Langflow Critical Security Flaw CVE-2026-105697 (CVSS 9.9)",
+   "n_events": 5,
+   "last_seen": "2026-11-02T05:24:55.017Z",
+   "first_event_title": "Langflow has a critical security flaw, rated 9.9. Update to 1.10.3 if you run it. Older versions are the ones affected. # Cybersecurity # In"
+  },
+  {
+   "id": "security-advisory-node-js-critical-security-patch-addressing-nod",
+   "title": "Security Advisory \u2013 Node.js Critical Security Patch: Addressing Node2Shell and eMudhra CA Compromise",
+   "n_events": 1,
+   "last_seen": "2026-11-02T05:21:15Z",
+   "first_event_title": "Security Advisory \u2013 Node.js Critical Security Patch: Addressing Node2Shell and eMudhra CA Compromise"
+  },
+  {
+   "id": "volta-infostealer-uses-claude-gemini-and-kimi-ai-to-profile-vict",
+   "title": "VOLTA Infostealer Uses Claude, Gemini, and Kimi AI to Profile Victims and Rank Stolen Data",
+   "n_events": 1,
+   "last_seen": "2026-11-02T05:08:58Z",
+   "first_event_title": "VOLTA Infostealer Uses Claude, Gemini, and Kimi AI to Profile Victims and Rank Stolen Data"
+  },
+  {
+   "id": "fbi-confirms-north-korean-hackers-stole-over-6-billion-from-bina",
+   "title": "FBI Confirms North Korean Hackers Stole Over $6 Billion From Binance in Massive Crypto Attack",
+   "n_events": 1,
+   "last_seen": "2026-11-02T05:08:20Z",
+   "first_event_title": "FBI Confirms North Korean Hackers Stole Over $6 Billion From Binance in Massive Crypto Attack"
+  },
+  {
+   "id": "netamloader-targets-custom-windows-10-builds-used-by-asian-gover",
+   "title": "NetamLoader Targets Custom Windows 10 Builds Used by Asian Government",
+   "n_events": 2,
+   "last_seen": "2026-11-02T04:59:29.000Z",
+   "first_event_title": "NetamLoader is targeting custom Windows 10 builds used by an Asian government, using .NET injection for in-memory execution and persistence."
+  },
+  {
+   "id": "canonical-lxd-and-microcloud-critical-authentication-bypass-cve",
+   "title": "Canonical LXD and MicroCloud Critical Authentication Bypass CVE-2026-112816 (CVSS 10.0)",
+   "n_events": 10,
+   "last_seen": "2026-11-02T04:58:43Z",
+   "first_event_title": "Canonical's LXD and MicroCloud had a critical authentication bypass (CVE-2026-112816, CVSS 10.0). An attacker who can reach the HTTPS API an"
+  },
+  {
+   "id": "could-this-have-been-prevented-with-a-firewall-like-opnsense",
+   "title": "Could this have been prevented with a firewall? Like opnsense?",
+   "n_events": 0,
+   "last_seen": "2026-11-02T04:48:24Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "cisco-sd-wan-cve-2026-20127-auth-bypass-with-keydrift-implant-un",
+   "title": "Cisco SD-WAN CVE-2026-20127 Auth Bypass with KeyDrift Implant Under Active Exploitation",
+   "n_events": 7,
+   "last_seen": "2026-11-02T04:26:55.000Z",
+   "first_event_title": "Cisco SD-WAN CVE-2026-20127 (CVSS 10.0): auth bypass exploited before disclosure and after the patch. Attackers planted KeyDrift \u2014 a two-com"
+  },
+  {
+   "id": "linksys-e8450-critical-stack-buffer-overflow-cve-2026-120283",
+   "title": "Linksys E8450 Critical Stack Buffer Overflow CVE-2026-120283",
+   "n_events": 5,
+   "last_seen": "2026-11-02T04:24:35.152Z",
+   "first_event_title": "CVE-2026-120283 \u2013 CRITICAL stack buffer overflow in Linksys E8450 v1.2.00.360516. Remote, unauthenticated RCE possible via /www/cgi-bin/port"
+  },
+  {
+   "id": "leak-site-publishes-data-on-more-than-41-000-dhs-employees-obtai",
+   "title": "Leak site publishes data on more than 41,000 DHS employees obtained by hacktivists",
+   "n_events": 14,
+   "last_seen": "2026-11-02T04:19:44.001Z",
+   "first_event_title": "Leak site publishes data on more than 41,000 DHS employees obtained by hacktivists"
+  },
+  {
+   "id": "linux-kernel-vulnerability-cve-2026-31419-with-public-poc-exploi",
+   "title": "Linux Kernel Vulnerability CVE-2026-31419 with Public PoC Exploit",
+   "n_events": 1,
+   "last_seen": "2026-11-02T02:40:40.000Z",
+   "first_event_title": "Details and a Linux kernel vulnerability PoC exploit are public for CVE-2026-31419. Patch this high-severity flaw to prevent local privilege"
+  },
+  {
+   "id": "litellm-critical-security-flaw-cve-2026-114612-cvss-9-9",
+   "title": "LiteLLM Critical Security Flaw CVE-2026-114612 (CVSS 9.9)",
+   "n_events": 2,
+   "last_seen": "2026-11-02T02:32:25.342Z",
+   "first_event_title": "Heads-up: LiteLLM has a critical flaw, rated 9.9. Older versions are affected, so update to 1.100.4 as soon as you can. # Cybersecurity # In"
+  },
+  {
+   "id": "critical-freepbx-vulnerabilities-including-9-3-cvss-authenticati",
+   "title": "Critical FreePBX Vulnerabilities Including 9.3 CVSS Authentication Bypass",
+   "n_events": 1,
+   "last_seen": "2026-11-02T02:25:39.000Z",
+   "first_event_title": "Apply the latest update to fix critical FreePBX vulnerabilities, including a 9.3 CVSS authentication bypass and privilege escalation in User"
+  },
+  {
+   "id": "isc-stormcast-for-monday-november-2nd-2026-https-isc-sans-edu-po",
+   "title": "ISC Stormcast For Monday, November 2nd, 2026 (Mon, Nov 2nd)",
+   "n_events": 0,
+   "last_seen": "2026-11-02T02:05:42Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "litellm-1-107-0-compromised-on-pypi-and-installs-a-credential-st",
+   "title": "LiteLLM 1.107.0 compromised on PyPI and installs a credential stealer and backdoor",
+   "n_events": 53,
+   "last_seen": "2026-11-02T01:54:47.390Z",
+   "first_event_title": "LiteLLM 1.107.0 compromised on PyPI and installs a credential stealer and backdoor"
+  },
+  {
+   "id": "pgadmin-4-vulnerabilities-fixed-in-version-9-19-including-cve-20",
+   "title": "pgAdmin 4 Vulnerabilities Fixed in Version 9.19 Including CVE-2026-116241",
+   "n_events": 1,
+   "last_seen": "2026-11-02T01:05:43.000Z",
+   "first_event_title": "The PostgreSQL project resolved 15 critical pgAdmin 4 vulnerabilities in version 9.19, fixing command injection flaw CVE-2026-116241 and cre"
+  },
+  {
+   "id": "cisco-patches-firewall-zero-day-exploited-for-dos-attacks",
+   "title": "Cisco Patches Firewall Zero-Day Exploited for DoS Attacks",
+   "n_events": 8,
+   "last_seen": "2026-11-02T01:01:42.000Z",
+   "first_event_title": "Cisco Patches Firewall Zero-Day Exploited for DoS Attacks"
+  },
+  {
+   "id": "gitlab-cve-2026-97229-critical-unauthenticated-arbitrary-code-ex",
+   "title": "GitLab CVE-2026-97229 Critical Unauthenticated Arbitrary Code Execution (CVSS 10.0)",
+   "n_events": 60,
+   "last_seen": "2026-11-02T00:54:08.000Z",
+   "first_event_title": "A GitLab critical vulnerability, CVE-2026-97229 (CVSS 10.0), allows unauthenticated arbitrary code execution. Upgrade to GitLab 19.4.2 now. "
+  },
+  {
+   "id": "accenture-employee-allegedly-gave-claude-code-ai-agent-administr",
+   "title": "Accenture Employee Allegedly Gave Claude Code AI Agent Administrative Access to Pentagon Systems",
+   "n_events": 6,
+   "last_seen": "2026-11-02T00:41:42.160Z",
+   "first_event_title": "Accenture Employee Allegedly Gave Claude Code AI Agent Administrative Access to Pentagon Systems"
+  },
+  {
+   "id": "vllm-critical-security-flaw-cve-2026-115915-cvss-9-8",
+   "title": "vLLM Critical Security Flaw CVE-2026-115915 (CVSS 9.8)",
+   "n_events": 4,
+   "last_seen": "2026-11-02T00:38:10.409Z",
+   "first_event_title": "Heads up: vLLM has a critical security flaw, rated 9.8. Older versions are affected, so update to 0.32.0. # Cybersecurity # InfoSec # CVE # "
+  },
+  {
+   "id": "cloudflare-q3-2026-ddos-threat-report-short-burst-low-bandwidth",
+   "title": "Cloudflare Q3 2026 DDoS threat report: short-burst low-bandwidth attacks surge 208 percent",
+   "n_events": 4,
+   "last_seen": "2026-11-02T00:30:06.000Z",
+   "first_event_title": "New. \"Short-burst, low-bandwidth attacks lasting under 10 minutes and 1 Gbps surged by 208%. Conversely, hyper-volumetric attacks exceeding "
+  },
+  {
+   "id": "mlflow-critical-code-injection-flaw-cve-2026-116692-cvss-9-8",
+   "title": "MLflow Critical Code Injection Flaw CVE-2026-116692 (CVSS 9.8)",
+   "n_events": 3,
+   "last_seen": "2026-11-02T00:01:06.270Z",
+   "first_event_title": "MLflow has a critical code injection flaw, rated 9.8. Older versions are affected. Update to 3.17.0 now. # Cybersecurity # InfoSec # CVE # M"
+  },
+  {
+   "id": "wavlink-wn536ax6-a-critical-os-command-injection-cve-2026-120277",
+   "title": "WAVLINK WN536AX6-A Critical OS Command Injection CVE-2026-120277",
+   "n_events": 1,
+   "last_seen": "2026-11-02T00:00:41.000Z",
+   "first_event_title": "CVE-2026-120277: CRITICAL OS command injection in WAVLINK WN536AX6-A (V260507_2.0.0). Remote attackers can execute OS commands \u2013 no patch ye"
+  },
+  {
+   "id": "hacking-attempts-against-us-federal-election-commission-system-t",
+   "title": "Hacking attempts against US Federal Election Commission system triggered outage, email shows",
+   "n_events": 9,
+   "last_seen": "2026-11-01T23:34:29.592Z",
+   "first_event_title": "Hacking attempts against US Federal Election Commission system triggered outage, email shows"
+  },
+  {
+   "id": "binance-links-6-3-billion-crypto-theft-to-compromised-devops-lap",
+   "title": "Binance links $6.3 billion crypto theft to compromised DevOps laptop",
+   "n_events": 40,
+   "last_seen": "2026-11-01T23:22:07.530Z",
+   "first_event_title": "Binance links $6.3 billion crypto theft to compromised DevOps laptop"
+  },
+  {
+   "id": "federal-court-tosses-trump-lawsuit-challenging-alaska-senate-cer",
+   "title": "Federal court tosses Trump lawsuit challenging Alaska Senate certification",
+   "n_events": 0,
+   "last_seen": "2026-11-01T22:47:26Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "apache-wicket-websocket-authorization-bypass-cve-2026-82115",
+   "title": "Apache Wicket WebSocket Authorization Bypass CVE-2026-82115",
+   "n_events": 1,
+   "last_seen": "2026-11-01T22:01:35.000Z",
+   "first_event_title": "CVE-2026-82115: Apache Wicket's native WebSocket support skips the configured authorization check for shared WebSocket resources, so any aut"
+  },
+  {
+   "id": "breaking-atlassian-multiple-products-flaw-cve-2026-21589-is-bein",
+   "title": "\ud83d\udea8 BREAKING: Atlassian Multiple Products flaw CVE-2026-21589 is being actively exploited, CISA warns CVE-2026-21589 \u00b7 CVSS 9.3 Critical \u00b7 US",
+   "n_events": 50,
+   "last_seen": "2026-11-01T20:05:16.000Z",
+   "first_event_title": "\ud83d\udea8 BREAKING: Atlassian Multiple Products flaw CVE-2026-21589 is being actively exploited, CISA warns CVE-2026-21589 \u00b7 CVSS 9.3 Critical \u00b7 US "
+  },
+  {
+   "id": "seiko-supply-chain-attack-disables-online-store-features",
+   "title": "Seiko supply chain attack disables online store features",
+   "n_events": 1,
+   "last_seen": "2026-11-01T20:01:35.000Z",
+   "first_event_title": "Seiko Disables Online Store Features Following Third-Party Supply Chain Attack Seiko suspended its online wishlist features after a compromi"
+  },
+  {
+   "id": "critical-uefi-firmware-flaw-allows-attackers-to-execute-maliciou",
+   "title": "Critical UEFI Firmware Flaw Allows Attackers to Execute Malicious Code Before OS Boots",
+   "n_events": 24,
+   "last_seen": "2026-11-01T20:00:25.000Z",
+   "first_event_title": "Critical UEFI Firmware Flaw Allows Attackers to Execute Malicious Code Before OS Boots"
+  },
+  {
+   "id": "wavlink-wn553x1-b-authenticated-command-injection-cve-2026-12023",
+   "title": "WAVLINK WN553X1-B authenticated command injection CVE-2026-120231",
+   "n_events": 1,
+   "last_seen": "2026-11-01T20:00:06.000Z",
+   "first_event_title": "WAVLINK WN553X1-B firmware V260403_2.0.0 has authenticated command injection (CVE-2026-120231). A researcher reproduced root execution in em"
+  },
+  {
+   "id": "prefab-ui-sandbox-bypass-cve-2026-120338",
+   "title": "Prefab UI sandbox bypass CVE-2026-120338",
+   "n_events": 1,
+   "last_seen": "2026-11-01T19:50:56.000Z",
+   "first_event_title": "Prefab UI's opt-in Generative UI sandbox has a bypass (CVE-2026-120338). The Pyodide/Deno boundary let caller-supplied Python read and write"
+  },
+  {
+   "id": "apple-notifications-alert-victims-in-99-countries-about-mercenar",
+   "title": "Apple notifications alert victims in 99 countries about mercenary spyware infections",
+   "n_events": 3,
+   "last_seen": "2026-11-01T18:35:52.795Z",
+   "first_event_title": "Apple notifications alert victims in 99 countries about mercenary spyware infections"
+  },
+  {
+   "id": "gsa-left-sensitive-information-in-its-google-drive-exposed-watch",
+   "title": "GSA Left Sensitive Information Exposed in Google Drive",
+   "n_events": 2,
+   "last_seen": "2026-11-01T18:30:25.000Z",
+   "first_event_title": "GSA left sensitive information in its Google Drive exposed, watchdog finds"
+  },
+  {
+   "id": "2026-13482",
+   "title": "[\uc77c\ubcf8 \uc560\ub2c8\uba54\uc774\uc158]\u5e7c\u5973\u6226\u8a18\u2171(\uc720\ub140\uc804\uae30 \u2171,2026)",
+   "n_events": 0,
+   "last_seen": "2026-10-26T15:06:28Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "adobe-security-advisory-av26-1092",
+   "title": "Adobe security advisory (AV26-1092)",
+   "n_events": 2,
+   "last_seen": "2026-10-30T08:01:42.000Z",
+   "first_event_title": "Adobe security advisory (AV26-1092)"
+  },
+  {
+   "id": "apple-security-advisory-av26-1099",
+   "title": "Apple security advisory (AV26-1099)",
+   "n_events": 1,
+   "last_seen": "2026-10-28T19:16:21Z",
+   "first_event_title": "Apple security advisory (AV26-1099)"
+  },
+  {
+   "id": "control-systems-hitachi-security-advisory-av26-1091",
+   "title": "[Control systems] Hitachi security advisory (AV26-1091)",
+   "n_events": 1,
+   "last_seen": "2026-10-27T16:35:59Z",
+   "first_event_title": "[Control systems] Hitachi security advisory (AV26-1091)"
+  },
+  {
+   "id": "control-systems-johnson-controls-security-advisory-av26-1090",
+   "title": "[Control systems] Johnson Controls security advisory (AV26-1090)",
+   "n_events": 1,
+   "last_seen": "2026-10-27T14:10:52Z",
+   "first_event_title": "[Control systems] Johnson Controls security advisory (AV26-1090)"
+  },
+  {
+   "id": "control-systems-moxa-security-advisory-av26-1089",
+   "title": "[Control Systems] Moxa security advisory (AV26-1089)",
+   "n_events": 1,
+   "last_seen": "2026-10-27T13:35:40Z",
+   "first_event_title": "[Control Systems] Moxa security advisory (AV26-1089)"
+  },
+  {
+   "id": "control-systems-siemens-security-advisory-av26-1083",
+   "title": "[Control Systems] Siemens security advisory (AV26-1083)",
+   "n_events": 1,
+   "last_seen": "2026-10-26T13:50:45Z",
+   "first_event_title": "[Control Systems] Siemens security advisory (AV26-1083)"
+  },
+  {
+   "id": "craft-cms-security-advisory-av26-1086",
+   "title": "Craft CMS security advisory (AV26-1086)",
+   "n_events": 2,
+   "last_seen": "2026-10-26T17:00:13.000Z",
+   "first_event_title": "Craft CMS security advisory (AV26-1086)"
+  },
+  {
+   "id": "esri-security-advisory-av26-1088",
+   "title": "Esri security advisory (AV26-1088)",
+   "n_events": 1,
+   "last_seen": "2026-10-27T13:25:46Z",
+   "first_event_title": "Esri security advisory (AV26-1088)"
+  },
+  {
+   "id": "fortinet-security-advisory-av26-812",
+   "title": "Fortinet security advisory (AV26-812)",
+   "n_events": 2,
+   "last_seen": "2026-08-13T10:40:57Z",
+   "first_event_title": "Fortinet security advisory (AV26-812)"
+  },
+  {
+   "id": "google-security-advisory-av26-1085",
+   "title": "Google security advisory (AV26-1085)",
+   "n_events": 1,
+   "last_seen": "2026-10-26T14:15:45Z",
+   "first_event_title": "Google security advisory (AV26-1085)"
+  },
+  {
+   "id": "google-security-advisory-av26-904",
+   "title": "Google security advisory (AV26-904)",
+   "n_events": 2,
+   "last_seen": "2026-09-09T20:49:30Z",
+   "first_event_title": "Google security advisory (AV26-904)"
+  },
+  {
+   "id": "grafana-security-advisory-av26-860",
+   "title": "Grafana Alloy Vulnerability CVE-2026-19516",
+   "n_events": 3,
+   "last_seen": "2026-10-13T16:00:56.470Z",
+   "first_event_title": "Grafana security advisory (AV26-860)"
+  },
+  {
+   "id": "hashicorp-security-advisory-av26-1087",
+   "title": "HashiCorp security advisory (AV26-1087)",
+   "n_events": 1,
+   "last_seen": "2026-10-26T19:10:47Z",
+   "first_event_title": "HashiCorp security advisory (AV26-1087)"
+  },
+  {
+   "id": "hashicorp-security-advisory-av26-1106",
+   "title": "HashiCorp security advisory (AV26-1106)",
+   "n_events": 1,
+   "last_seen": "2026-10-30T15:55:43Z",
+   "first_event_title": "HashiCorp security advisory (AV26-1106)"
+  },
+  {
+   "id": "hashicorp-security-advisory-av26-797",
+   "title": "HashiCorp security advisory (AV26-797)",
+   "n_events": 1,
+   "last_seen": "2026-08-11T14:05:42Z",
+   "first_event_title": "HashiCorp security advisory (AV26-797)"
+  },
+  {
+   "id": "hashicorp-security-advisory-av26-817",
+   "title": "HashiCorp security advisory (AV26-817)",
+   "n_events": 1,
+   "last_seen": "2026-08-14T16:05:44Z",
+   "first_event_title": "HashiCorp security advisory (AV26-817)"
+  },
+  {
+   "id": "ibm-security-advisory-av26-1040",
+   "title": "IBM security advisory (AV26-1040)",
+   "n_events": 1,
+   "last_seen": "2026-10-14T18:40:41Z",
+   "first_event_title": "IBM security advisory (AV26-1040)"
+  },
+  {
+   "id": "ibm-security-advisory-av26-1082",
+   "title": "IBM security advisory (AV26-1082)",
+   "n_events": 1,
+   "last_seen": "2026-10-26T13:40:45Z",
+   "first_event_title": "IBM security advisory (AV26-1082)"
+  },
+  {
+   "id": "ibm-security-advisory-av26-997",
+   "title": "IBM security advisory (AV26-997)",
+   "n_events": 0,
+   "last_seen": "2026-10-05T13:40:39Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "citrix-fortinet-ivanti-patch-29-vulnerabilities-across-their-pro",
+   "title": "Citrix, Fortinet, Ivanti Patch 29 Vulnerabilities Across Their Products",
+   "n_events": 7,
+   "last_seen": "2026-10-21T17:21:39.000Z",
+   "first_event_title": "Citrix, Fortinet, Ivanti Patch 29 Vulnerabilities Across Their Products"
+  }
+ ]
+}
