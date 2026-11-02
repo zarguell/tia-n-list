@@ -1,0 +1,3 @@
+German officials are investigating warnings from Apple that spyware may have targeted the iPhones of lawmakers, according to reports circulated via Apple Insider and Loopwire. The available reports describe a possible spyware hack of lawmakers' devices and an ongoing probe, but do not name the spyware family, affected individuals or confirmed compromise.
+
+Watch items include whether German authorities attribute the activity to a specific operator, how many devices are involved, and whether Apple threat notifications lead to forensic findings. Until official details emerge, the incident should be treated as an unconfirmed but plausible targeted-surveillance case rather than a verified breach.

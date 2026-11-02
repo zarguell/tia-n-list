@@ -1,0 +1,5 @@
+Abrigo took its Sageworks risk-management platform offline on October 30 after detecting "irregular activity" in its environment, disabling the application at approximately 11:25 am ET and keeping it down through the weekend. The company, which provides cloud-based software and analytics to more than 2,400 community banks and credit unions, said the outage affected Sageworks Online Portal, Analyst and API services, all of which handle sensitive borrower and loan-portfolio data.
+
+By the latest status update, most Sageworks functionality had been restored except for borrower-facing features, while Abrigo's investigation remained ongoing and the company had not disclosed the nature of the incident. The response treated the activity as a suspected cyberattack rather than confirmed breach, with services returned cautiously and customer-facing capabilities held back.
+
+Watch items include whether Abrigo confirms unauthorized access or data exposure, how long borrower-facing features stay offline, and whether community-bank customers need to reset credentials or monitor loan data for misuse.
