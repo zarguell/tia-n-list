@@ -1,0 +1,3 @@
+A couple things made me decide to put this together. I started it because I saw so many hits on a Wordpress page. I also wanted a way to show clients how bots roam online with attempts at various protocol logins. Finally I wanted a project that I can expand into MCP utilization. So, assuming its OK to link: https://observatory.theleaf.ai/ I welcome feedback constructively. I would also welcome requests for MCP access too. Long term goal is to create a downloadable image for sensors that people can deploy if they are so interested. submitted by /u/Kooky_Detective4307 [link] [comments]
+
+via reddit r/cybersecurity: Honeypot I put together
