@@ -1,0 +1,1 @@
+VulDB records an advisory disclosure on 2026-10-26 for vLLM up to 0.31.x, classifying it as critical. The entry notes the affected parse_image and fetch_image functions in the Image Media IO component and recommends upgrading to vLLM 0.32.0.
