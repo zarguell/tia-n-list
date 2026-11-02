@@ -1,0 +1,3 @@
+Kaspersky reports that attackers are abusing CyberStrikeAI, an open-source penetration-testing framework, to orchestrate network intrusions against educational organizations in Africa and Latin America. The operation is human-directed: an LLM on the command-and-control server selects tools, generates commands, interprets results, and decides subsequent actions, moving AI from attack preparation into operational decision-making. Kaspersky published the findings on November 2, 2026.
+
+What to watch: whether the technique spreads beyond the reported targets and whether defenders can detect the LLM-driven command patterns. The framework itself is legitimate open-source software, so detection will need to focus on behavior rather than tooling.
