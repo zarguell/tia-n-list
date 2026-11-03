@@ -1,0 +1,5 @@
+CPGuard / OPSSHIELD LLP disclosed a breach in which an unidentified attacker gained unauthorized access to licensing and update systems and distributed a malicious script through the cPGuard update channel. The company released cPGuard 5.88.25 to remove the backdoor and cleared infrastructure credentials. The script sent data to an endpoint on the licensing server under a compromised account.
+
+This is a supply-chain breach affecting a security product's update mechanism. The concrete artifacts include cPGuard version 5.88.25, the malicious script distributed through the update channel, and the compromised licensing server endpoint. The advisory notes that the site linked is a privacy concern, and OPSSHIELD confirmed the breach. The event updates tie to the existing breach story from the original disclosure.
+
+Organizations running cPGuard should upgrade to version 5.88.25 immediately, review server logs for the malicious script, and verify that licensing server accounts are secured. Monitor for further details about the attacker access method and affected customer scope.
