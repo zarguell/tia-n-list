@@ -1,0 +1,3 @@
+Built an interactive Global Cyber Threat Desk covering cyber incidents across critical infrastructure, finance, healthcare and AI. Includes 18 incident dossiers, evidence classifications, source links, infrastructure dependency analysis and emergency preparedness tools. Free, no registration, and designed for mobile and desktop. Research snapshot: 2 November 2026. Not a live alerting service. https://l2wl3hj.sharehtml.org/ Feedback, corrections and additional primary sources welcome. submitted by /u/AtomSmasher666 [link] [comments]
+
+via reddit r/cybersecurity: Global cyber-incident research dashboard: dated evidence, 18 case studies, sources and sector impacts
