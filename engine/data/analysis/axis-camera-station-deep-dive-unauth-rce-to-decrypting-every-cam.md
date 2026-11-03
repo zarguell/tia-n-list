@@ -1,0 +1,5 @@
+Axis Camera Station is affected by three vulnerabilities, CVE-2025-30023, CVE-2025-30026, and CVE-2026-63286, that together allow unauthenticated remote code execution and decryption of stored camera credentials. A public proof-of-concept is available, so the flaws are now within reach of any attacker who can reach an exposed instance. The original deep-dive comes from independent researcher work, with the PoC disclosure tracked by securityonline.info.
+
+Because the attack requires no authentication and yields both code execution and credential recovery, a single unpatched Camera Station server can expose every camera it manages. That is a high-impact path for physical surveillance compromise, lateral movement into the networks those cameras sit on, and reuse of recovered credentials against other systems. The public PoC removes the main barrier to exploitation.
+
+Administrators should patch to the fixed Axis release and rotate any credentials the Camera Station held. Watch for internet-exposed instances being scanned, and for whether the vulnerabilities are added to CISA's Known Exploited Vulnerabilities catalog, which would signal observed in-the-wild use.
