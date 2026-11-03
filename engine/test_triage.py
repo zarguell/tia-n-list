@@ -440,6 +440,71 @@ try:
 finally:
     shutil.rmtree(tmp)
 
+# ── 8. keeps naming a merged-away slug land on the live canonical ──────────
+# 2026-11-03: two keeps (Oracle EBS CVE-2026-101767, Teams help-desk to AD CS)
+# named shell slugs, apply() absorbed the events INTO the redirect shells, and
+# audit.py's dedup_invariants went red with `in-shell: 2` - the events rendered
+# nowhere while their shells got rescored to 4.1. Contract: a keep that names a
+# shell id resolves through the merged_into chain (multi-hop) to the live
+# canonical; the shells stay empty.
+tmp = tempfile.mkdtemp()
+try:
+    for var, sub in [("EVENTS", "events"), ("STORIES", "stories"),
+                     ("ANALYSIS", "analysis"), ("TRIAGE", "triage")]:
+        d = os.path.join(tmp, sub)
+        os.makedirs(d)
+        setattr(triage, var, d)
+    setattr(triage, "STATE", os.path.join(tmp, "triage", "state.json"))
+    setattr(triage, "NEEDS", os.path.join(tmp, "needs-analysis.json"))
+    setattr(triage, "DATA", tmp)
+
+    for eid in ("c9", "s1"):
+        json.dump({"id": eid, "title": f"Event {eid}", "source": "x",
+                   "url": f"https://x.test/{eid}",
+                   "published_at": "2026-11-03T10:00:00Z", "cves": [],
+                   "kind": "original"},
+                  open(os.path.join(tmp, "events", f"{eid}.json"), "w"))
+    for sid, evs, ptr in [("canon", ["c9"], None),
+                          ("shell-mid", [], "canon"),
+                          ("shell-old", [], "shell-mid")]:
+        s = {"id": sid, "title": f"Story {sid}",
+             "first_seen": "2026-11-03T10:00:00Z",
+             "last_seen": "2026-11-03T10:00:00Z", "sources": ["x"],
+             "n_sources": 1, "cves": [], "score": 4.1,
+             "reddit_signal": {"posts": 0, "best_score": 0},
+             "events": [{"event_id": e, "label": "original"} for e in evs]}
+        if ptr:
+            s["merged_into"] = ptr
+        json.dump(s, open(os.path.join(tmp, "stories", f"{sid}.json"), "w"))
+
+    import store as store_mod
+    import score as score_mod
+    _stub(store_mod, "load_events", lambda: {
+        e: json.load(open(os.path.join(tmp, "events", f"{e}.json")))
+        for e in ("c9", "s1")})
+    _stub(score_mod, "hot_score", lambda s, ev, rd: {"score": 4.0})
+
+    decfile = os.path.join(tmp, "decisions.json")
+    json.dump({"decisions": [{"event_id": "s1", "action": "keep",
+                                "story": "shell-old"}],
+               "merges": []}, open(decfile, "w"))
+    with contextlib.redirect_stdout(io.StringIO()):
+        triage.apply(decfile)
+
+    st = {sid: json.load(open(os.path.join(tmp, "stories", f"{sid}.json")))
+          for sid in ("canon", "shell-mid", "shell-old")}
+    check("keep naming a shell lands on the live canonical (2 hops)",
+          [r["event_id"] for r in st["canon"]["events"]], ["c9", "s1"])
+    check("event not left inside the named shell", st["shell-old"]["events"], [])
+    check("event not left inside the intermediate shell",
+          st["shell-mid"]["events"], [])
+    check("no twin story minted for the shell keep",
+          sorted(os.listdir(os.path.join(tmp, "stories"))),
+          ["canon.json", "shell-mid.json", "shell-old.json"])
+finally:
+    _restore_stubs()
+    shutil.rmtree(tmp)
+
 print()
 if failures:
     print(f"FAIL: {len(failures)} triage checks failed")
