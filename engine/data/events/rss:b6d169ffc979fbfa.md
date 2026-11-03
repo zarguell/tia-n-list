@@ -1,0 +1,1 @@
+LevelBlue has been named Editor's Choice for Managed Detection and Response (MDR) in Cyber Defense Magazine's Top InfoSec Innovators awards for 2026. The award was announced on October 20, 2026, during CyberDefenseCon 2026 in Orlando, Florida.
