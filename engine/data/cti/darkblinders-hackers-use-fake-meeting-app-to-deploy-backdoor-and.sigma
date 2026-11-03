@@ -1,0 +1,37 @@
+title: DarkBlinders RuntimeBroker Backdoor Execution from LocalAppData
+id: 23826c31-5b0c-4498-ac86-5114c8675d4a
+status: experimental
+description: >
+    Detects the DarkBlinders (UNC5795) AppDomainManager backdoor described by
+    Dream Research Labs: a legitimate signed vshost.exe renamed RuntimeBroker.exe
+    is dropped under %LOCALAPPDATA%\Microsoft\RuntimeBroker together with
+    RuntimeBroker.dll and RuntimeBrokerApi.dll. Any process launched from that
+    user-writable directory is anomalous, because the genuine Windows
+    RuntimeBroker executes from System32.
+references:
+    - https://dreamgroup.com/blog/darkblinders-inside-an-active-espionage-campaign
+    - https://thehackernews.com/2026/11/darkblinders-compromises-israeli-target.html
+    - https://gbhackers.com/darkblinders-hackers-use-fake-meeting-app/
+author: Tia N. List
+date: 2026/11/03
+tags:
+    - attack.t1036
+    - attack.t1547
+    - attack.t1102
+    - attack.t1059
+    - attack.t1027
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_image_path:
+        Image|contains:
+            - '\AppData\Local\Microsoft\RuntimeBroker\'
+    selection_backdoor_module:
+        CommandLine|contains:
+            - 'RuntimeBrokerApi.dll'
+            - 'PsProxy.dll'
+    condition: selection_image_path or selection_backdoor_module
+falsepositives:
+    - Unknown; the genuine RuntimeBroker.exe runs from C:\Windows\System32, not LocalAppData
+level: high

@@ -1,0 +1,45 @@
+title: BITTER PapRAT Scheduled Tasks and C2 Domains on Command Line
+id: 97a1e587-3a0c-4329-93b5-6996643c1904
+status: experimental
+description: >
+    Detects BITTER/TA397 PapRAT tradecraft documented by FortiGuard: scheduled
+    tasks named MicrosoftUpdates\updates11678 and BiosUpdates\update101, and
+    command lines that reference the campaign's staging files (err.log,
+    talk.log) or hardcoded PapRAT/WmRAT command-and-control domains.
+references:
+    - https://www.fortinet.com/blog/threat-research/bitter-expands-its-arsenal-with-paprat
+    - https://www.infosecurity-magazine.com/news/paprat-bitter-cyberespionage/
+    - https://gbhackers.com/paprat-malware/
+author: Tia N. List
+date: 2026/11/03
+tags:
+    - attack.t1053
+    - attack.t1036
+    - attack.t1071
+    - attack.t1105
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_scheduled_task:
+        Image|endswith: '\schtasks.exe'
+        CommandLine|contains:
+            - 'MicrosoftUpdates\updates11678'
+            - 'BiosUpdates\update101'
+    selection_c2_domain:
+        CommandLine|contains:
+            - 'goodnfortunes.com'
+            - 'techtalkhelp.com'
+            - 'rivingtonclarks.com'
+            - 'netmansrvdns.com'
+            - 'rappellingaart.com'
+            - 'gomescareerplans.com'
+            - 'chestergreenfarming.com'
+    selection_staging_file:
+        CommandLine|contains:
+            - 'C:\users\public\music\err.log'
+            - 'C:\programdata\talk.log'
+    condition: selection_scheduled_task or selection_c2_domain or selection_staging_file
+falsepositives:
+    - None expected; task names, staging paths, and C2 domains are campaign-specific
+level: high
