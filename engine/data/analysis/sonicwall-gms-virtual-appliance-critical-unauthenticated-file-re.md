@@ -1,0 +1,5 @@
+SonicWall acknowledged a critical unauthenticated file-read vulnerability in its GMS virtual appliance with a CVSSv3.1 score of 9.1, tracked as SNWLID-2026-0019. The advisory confirms the flaw allows remote attackers to read arbitrary files without authentication, which is a severe exposure for a network-management appliance.
+
+Notably, SonicWall states it will not patch the affected virtual appliance versions, which makes this an active risk rather than a standard patch-release cycle. The advisory is hosted directly on psirt.global.sonicwall.com and carries no CVE assignment in the event record, though the severity rating places it in the critical tier by any operational measure.
+
+Organizations running SonicWall GMS virtual appliances should treat this as an immediate exposure: verify whether instances are internet-facing, review file-access logs for anomalies, and plan migration or isolation since no patch is forthcoming. Watch for any follow-up advisory that updates the patch decision or assigns a CVE.
