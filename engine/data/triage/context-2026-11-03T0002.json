@@ -1,0 +1,495 @@
+{
+ "date": "2026-11-03",
+ "decisions_path": "engine/data/triage/decisions-2026-11-03T0002.json",
+ "instructions": "For every new event decide: (1) keep or drop \u2014 keep only stories worth covering (real security events, vulnerabilities, attacks, breaches, advisories with substance); drop press releases, vendor marketing, generic explainers, and anything duplicating an existing story. (2) If keep, assign the event to the RIGHT story: an existing candidate story id if it belongs there (this FIXES mechanical clustering \u2014 e.g. different outlets' Patch Tuesday roundups are ONE story), or NEW with a clean story_title. (3) merges: list candidate stories that are really the same story (from = fragment, into = the most complete one). (4) For every kept event that names CVEs, optionally assess exploitation: exploited = the event reports OBSERVED in-the-wild exploitation (implants, victim counts, campaigns, CISA KEV confirmation); suspected = public exploit code/PoC or likely-but-unconfirmed. Attribute ONLY the CVEs you can tie to the claim \u2014 a bulletin's blanket 'actively exploited' does NOT flag all its CVEs. Omit the exploitation field when the event makes no claim.\n(5) LOW-TRUST events (\"low_trust\": true \u2014 AI-drafted aggregator reposts, late and overstated): treat as unverified leads. When the text attributes the claim to a named primary source (a researcher firm like watchTowr, a vendor advisory, CISA, a major outlet) and attribution_urls or a web search (/home/ubuntu/repos/cronman/bin/web-search.sh \"query\") locate that primary source CONFIRMING the claim, include a provenance object in the decision: {\"url\": <primary url>, \"source\": <domain>, \"evidence\": <one line>, \"verified\": true}. VERIFIED provenance lets the event mint a story (credited to the primary source) and count as a development; without it, a low-trust event can only attach to an EXISTING story, never mint. If you cannot verify, keep/drop on normal merit and omit provenance.\n\nWrite decisions as JSON with EXACTLY this shape:\n{\n  \"decisions\": [\n    {\"event_id\": \"<id>\", \"action\": \"keep\", \"story\": \"<existing candidate story id>\", \"reason\": \"...\"},\n    {\"event_id\": \"<id>\", \"action\": \"keep\", \"story\": \"NEW\", \"story_title\": \"<clean title>\", \"reason\": \"...\"},\n    {\"event_id\": \"<id>\", \"action\": \"drop\", \"reason\": \"...\"}\n  ],\n  \"merges\": [{\"from\": \"<fragment story id>\", \"into\": \"<canonical story id>\"}]\n}\nFor events marked \"low_trust\" (AI-drafted aggregator reposts) a decision\nmay carry an optional \"provenance\" object when you VERIFIED the claim at\nthe named primary source: {\"event_id\": ..., \"action\": \"keep\", ...}\n  \"provenance\": {\"url\": \"<primary source url>\", \"source\": \"<domain>\", \"evidence\": \"<one line>\"}\nOnly include provenance when the primary source (vendor advisory, CISA,\nthe named researcher/outlet) really carries the claim \u2014 verified\nprovenance lets a low-trust event mint a story and set freshness; without\nit the event can only amplify an existing story.\nSTRICT KEY NAMES: the array key is \"decisions\" (never \"events\"); the story\nkey is \"story\" (never \"story_id\"); \"story\" holds a candidate_stories id\nverbatim or the literal string \"NEW\". Optional per-event field\n\"exploitation\": {\"CVE-...\": {\"status\": \"exploited|suspected\", \"evidence\": \"1-2 sentences\"}}.",
+ "new_events": [
+  {
+   "id": "rd:t3_1xmcr4e",
+   "title": "CPGuard / OPSSHIELD LLP Breach",
+   "source": "opsshield.com",
+   "published_at": "2026-11-02T23:15:36Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Had a subscription in the past with them and received the following e-mail: Doesn't look like many sites have have picked up on this: Dear cPGuard customers and partners, An unidentified attacker targeted OPSSHIELD, gain"
+  },
+  {
+   "id": "rss:d00b0d6a814f0b5d",
+   "title": "Unit 42 Threat Intelligence Highlights - Nov. 2, 2026",
+   "source": "unit42.paloaltonetworks.com",
+   "published_at": "2026-11-02T23:00:45Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Unit 42 details recent threat intelligence, highlighting cyberespionage, financial extortion, and the rapid adoption of AI across offensive workflows. The post Unit 42 Threat Intelligence Highlights - Nov. 2, 2026 appear"
+  },
+  {
+   "id": "masto:117548872003234856",
+   "title": "My @OneRSAC # infosec book of the month review: Cybersecurity Policy Guidebook 2nd Edition via @WileyTech. Authors include the all-star cast",
+   "source": "www.rsaconference.com",
+   "published_at": "2026-11-02T21:04:02.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "My @OneRSAC # infosec book of the month review: Cybersecurity Policy Guidebook 2nd Edition via @WileyTech. Authors include the all-star cast  via Mastodon https://www.rsaconference.com/library/blog/bens-book-of-the-month"
+  },
+  {
+   "id": "masto:117548810458368720",
+   "title": "Karen IT Security Response Center ( @ ksrc ) Advisory Advisory ID: KSRC-2026-11021 A # critical # authentication # bypass # vulnerability ha",
+   "source": "ksrc.karenit.net",
+   "published_at": "2026-11-02T20:48:22.000Z",
+   "cves": [
+    "CVE-2026-112816"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Karen IT Security Response Center ( @ ksrc ) Advisory Advisory ID: KSRC-2026-11021 A # critical # authentication # bypass # vulnerability ha  via Mastodon https://ksrc.karenit.net/blog/security-alert/critical-authenticat"
+  },
+  {
+   "id": "rss:ae41be9eccc5ef3e",
+   "title": "PHP2Shell: How Cisco Helps Customers Respond to AI-Accelerated Threats",
+   "source": "feedpress.me",
+   "published_at": "2026-11-02T18:24:13Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "The following resources address the coverage available for PHP2Shell today, as well as ways Cisco customers can begin to increase resilience for whatever AI-driven threat comes next. "
+  }
+ ],
+ "candidate_stories": [
+  {
+   "id": "cpguard-opsshield-llp-breach",
+   "title": "CPGuard / OPSSHIELD LLP Breach",
+   "n_events": 1,
+   "last_seen": "2026-11-02T23:15:36Z",
+   "first_event_title": "CPGuard / OPSSHIELD LLP Breach"
+  },
+  {
+   "id": "unit-42-threat-intelligence-highlights-nov-2-2026",
+   "title": "Unit 42 Threat Intelligence Highlights - Nov. 2, 2026",
+   "n_events": 1,
+   "last_seen": "2026-11-02T23:00:45Z",
+   "first_event_title": "Unit 42 Threat Intelligence Highlights - Nov. 2, 2026"
+  },
+  {
+   "id": "linux-kernel-tcp-flaw-with-9-8-cvss-score-affects-ubuntu-red-hat",
+   "title": "Linux Kernel TCP Flaw With 9.8 CVSS Score Affects Ubuntu, Red Hat and Other Distributions",
+   "n_events": 55,
+   "last_seen": "2026-11-02T22:44:46.000Z",
+   "first_event_title": "Linux Kernel TCP Flaw With 9.8 CVSS Score Affects Ubuntu, Red Hat and Other Distributions"
+  },
+  {
+   "id": "gmo-trust-login-sso-breach-exposes-45-030-records-via-public-sto",
+   "title": "GMO Trust Login SSO breach exposes 45,030 records via public storage misconfiguration",
+   "n_events": 1,
+   "last_seen": "2026-11-02T22:42:12.000Z",
+   "first_event_title": "GMO Trust Login, a single sign-on service run by GMO GlobalSign, kept files from administrators' bulk operations in the public storage area "
+  },
+  {
+   "id": "when-business-email-compromise-starts-rewriting-reality",
+   "title": "When Business Email Compromise Starts Rewriting Reality",
+   "n_events": 9,
+   "last_seen": "2026-11-02T22:42:01.000Z",
+   "first_event_title": "When Business Email Compromise Starts Rewriting Reality"
+  },
+  {
+   "id": "hacked-the-cybersecurity-blind-spot-putting-uk-supermarkets-at-r",
+   "title": "Hacked: the cybersecurity blind spot putting UK supermarkets at risk (The Grocer)",
+   "n_events": 1,
+   "last_seen": "2026-11-02T22:39:26Z",
+   "first_event_title": "Hacked: the cybersecurity blind spot putting UK supermarkets at risk (The Grocer)"
+  },
+  {
+   "id": "dhs-officials-asked-a-federal-cybersecurity-agency-to-secretly-a",
+   "title": "DHS Officials Asked Federal Cybersecurity Agency to Secretly Acquire Voting Machine",
+   "n_events": 7,
+   "last_seen": "2026-11-02T22:32:38.000Z",
+   "first_event_title": "DHS Officials Asked a Federal Cybersecurity Agency to Secretly Acquire a Voting Machine \u2014 and Hack It"
+  },
+  {
+   "id": "rancher-cve-2026-88811-forwards-session-credentials-to-allowlist",
+   "title": "Rancher CVE-2026-88811 forwards session credentials to allowlisted hosts",
+   "n_events": 1,
+   "last_seen": "2026-11-02T22:30:19.000Z",
+   "first_event_title": "Rancher CVE-2026-88811 can forward a signed-in user's Rancher session credential or API token to allowlisted third-party hosts through its m"
+  },
+  {
+   "id": "unprecedented-cyberattack-cripples-supermarket-fridges-across-eu",
+   "title": "'Unprecedented' Cyberattack cripples supermarket fridges across Europe as hackers activate automatic defrosting \u2014 delivery and store prices also impacted by incident",
+   "n_events": 89,
+   "last_seen": "2026-11-02T22:11:23.920Z",
+   "first_event_title": "'Unprecedented' Cyberattack cripples supermarket fridges across Europe as hackers activate automatic defrosting \u2014 delivery and store prices also impacted by incident"
+  },
+  {
+   "id": "german-politicians-targeted-by-iphone-spyware",
+   "title": "German Politicians Targeted by iPhone Spyware",
+   "n_events": 2,
+   "last_seen": "2026-11-02T22:02:09.419Z",
+   "first_event_title": "Apple Insider: German politicians targeted by iPhone spyware https:// appleinsider.com/articles/26/1 1/02/german-politicians-targeted-by-iph"
+  },
+  {
+   "id": "google-disrupts-videostrong-xcpe-botnet-infecting-1-3-million-se",
+   "title": "Google Disrupts Videostrong XCPE Botnet Infecting 1.3 Million Set-Top Boxes",
+   "n_events": 10,
+   "last_seen": "2026-11-02T21:58:24Z",
+   "first_event_title": "Google dismantled the Videostrong XCPE botnet infecting 1.3M set-top boxes. The XCPE botnet sold residential proxy access to cybercrime affi"
+  },
+  {
+   "id": "chinese-hackers-use-artex-ai-in-automated-attacks-against-200-or",
+   "title": "Chinese hackers use ARTEX AI in automated attacks against 200 orgs",
+   "n_events": 1,
+   "last_seen": "2026-11-02T21:40:14Z",
+   "first_event_title": "Chinese hackers use ARTEX AI in automated attacks against 200 orgs"
+  },
+  {
+   "id": "gitlab-cve-2026-97229-critical-unauthenticated-arbitrary-code-ex",
+   "title": "GitLab CVE-2026-97229 Critical Unauthenticated Arbitrary Code Execution (CVSS 10.0)",
+   "n_events": 65,
+   "last_seen": "2026-11-02T21:26:02.000Z",
+   "first_event_title": "A GitLab critical vulnerability, CVE-2026-97229 (CVSS 10.0), allows unauthenticated arbitrary code execution. Upgrade to GitLab 19.4.2 now. "
+  },
+  {
+   "id": "darkblinders-hackers-use-fake-meeting-app-to-deploy-backdoor-and",
+   "title": "DarkBlinders Hackers Use Fake Meeting App to Deploy Backdoor and Steal Government Data",
+   "n_events": 6,
+   "last_seen": "2026-11-02T21:16:32.000Z",
+   "first_event_title": "DarkBlinders Hackers Use Fake Meeting App to Deploy Backdoor and Steal Government Data"
+  },
+  {
+   "id": "quickpost-rad-pro",
+   "title": "Quickpost: Rad Pro",
+   "n_events": 0,
+   "last_seen": "2026-11-02T21:16:25Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "cisco-sd-wan-cve-2026-20127-auth-bypass-with-keydrift-implant-un",
+   "title": "Cisco SD-WAN CVE-2026-20127 Auth Bypass with KeyDrift Implant Under Active Exploitation",
+   "n_events": 8,
+   "last_seen": "2026-11-02T21:10:36.000Z",
+   "first_event_title": "Cisco SD-WAN CVE-2026-20127 (CVSS 10.0): auth bypass exploited before disclosure and after the patch. Attackers planted KeyDrift \u2014 a two-com"
+  },
+  {
+   "id": "critical-rce-in-citrix-netscaler-cve-2026-107406",
+   "title": "Critical RCE in Citrix NetScaler CVE-2026-107406",
+   "n_events": 5,
+   "last_seen": "2026-11-02T21:10:15.000Z",
+   "first_event_title": "\ud83d\udcf0 New Critical RCE Flaw Found in Patched Citrix NetScaler Appliances Citrix issues another emergency patch for a critical RCE flaw (CVE-2026"
+  },
+  {
+   "id": "fintech-platform-sageworks-taken-offline-after-suspected-cyberat",
+   "title": "Fintech platform Sageworks taken offline after suspected cyberattack",
+   "n_events": 3,
+   "last_seen": "2026-11-02T21:07:42.000Z",
+   "first_event_title": "Fintech platform Sageworks taken offline after suspected cyberattack"
+  },
+  {
+   "id": "business-groups-mount-fresh-campaign-for-long-term-renewal-of-in",
+   "title": "Business groups mount fresh campaign for long-term renewal of information sharing law",
+   "n_events": 0,
+   "last_seen": "2026-11-02T21:04:42Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "what-exploited-vulnerabilities-have-in-common-a-data-driven-anal",
+   "title": "What exploited vulnerabilities have in common: A data-driven analysis of real-world attacks",
+   "n_events": 0,
+   "last_seen": "2026-11-02T20:20:59Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "we-found-two-promot-attack-policy-incidents-at-work-here-is-what",
+   "title": "we found two promot_attack policy incidents at work,here is what happened!!",
+   "n_events": 0,
+   "last_seen": "2026-11-02T20:16:14Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "php2shell-investigation-identifies-palo-alto-firewall-compromise",
+   "title": "PHP2Shell Investigation Identifies Palo Alto Firewall Compromises",
+   "n_events": 1,
+   "last_seen": "2026-11-02T19:22:51Z",
+   "first_event_title": "PHP2Shell Investigation Identifies Palo Alto Firewall Compromises"
+  },
+  {
+   "id": "jailbreaking-my-car-s-navigation-system-just-so-i-can-change-the",
+   "title": "Jailbreaking my car's navigation system just so I can change the time",
+   "n_events": 0,
+   "last_seen": "2026-11-02T19:16:42Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "critical-goahead-web-server-flaw-allows-attackers-to-bypass-clie",
+   "title": "Critical GoAhead Web Server Flaw Allows Attackers to Bypass Client Certificate Authentication",
+   "n_events": 7,
+   "last_seen": "2026-11-02T19:05:13Z",
+   "first_event_title": "Critical GoAhead Web Server Flaw Allows Attackers to Bypass Client Certificate Authentication"
+  },
+  {
+   "id": "binance-links-6-3-billion-crypto-theft-to-compromised-devops-lap",
+   "title": "Binance links $6.3 billion crypto theft to compromised DevOps laptop",
+   "n_events": 43,
+   "last_seen": "2026-11-02T19:00:05.000Z",
+   "first_event_title": "Binance links $6.3 billion crypto theft to compromised DevOps laptop"
+  },
+  {
+   "id": "bae-says-no-data-extracted-in-incident-hitting-bankruptcy-courts",
+   "title": "BAE Says No Data Extracted in Incident Hitting Bankruptcy Courts",
+   "n_events": 2,
+   "last_seen": "2026-11-02T19:00:00.000Z",
+   "first_event_title": "BAE Says No Data Extracted in Incident Hitting Bankruptcy Courts"
+  },
+  {
+   "id": "hackers-claim-to-have-stolen-23tb-of-data-from-russian-statistic",
+   "title": "Hackers claim to have stolen 23TB of data from Russian statistics body, including Ukraine war casualty figures \u2014 Russian Federal State Statistics Service admits its servers were hit by coordinated cyberattacks",
+   "n_events": 2,
+   "last_seen": "2026-11-02T18:54:40Z",
+   "first_event_title": "Hackers claim to have stolen 23TB of data from Russian statistics body, including Ukraine war casualty figures \u2014 Russian Federal State Statistics Service admits its servers were hit by coordinated cyberattacks"
+  },
+  {
+   "id": "from-help-desk-impersonation-to-ad-cs-abuse-investigating-esc1-a",
+   "title": "From help desk impersonation to AD CS abuse: Investigating ESC1 and ESC8 intrusion paths",
+   "n_events": 3,
+   "last_seen": "2026-11-02T18:45:11.000Z",
+   "first_event_title": "From help desk impersonation to AD CS abuse: Investigating ESC1 and ESC8 intrusion paths"
+  },
+  {
+   "id": "suse-linux-security-advisory-av26-1113",
+   "title": "SUSE Linux security advisory (AV26-1113)",
+   "n_events": 1,
+   "last_seen": "2026-11-02T18:35:44Z",
+   "first_event_title": "SUSE Linux security advisory (AV26-1113)"
+  },
+  {
+   "id": "php2shell-how-cisco-helps-customers-respond-to-ai-accelerated-th",
+   "title": "PHP2Shell: How Cisco Helps Customers Respond to AI-Accelerated Threats",
+   "n_events": 1,
+   "last_seen": "2026-11-02T18:24:13Z",
+   "first_event_title": "PHP2Shell: How Cisco Helps Customers Respond to AI-Accelerated Threats"
+  },
+  {
+   "id": "critical-uefi-firmware-flaw-allows-attackers-to-execute-maliciou",
+   "title": "Critical UEFI Firmware Flaw Allows Attackers to Execute Malicious Code Before OS Boots",
+   "n_events": 25,
+   "last_seen": "2026-11-02T18:10:49.000Z",
+   "first_event_title": "Critical UEFI Firmware Flaw Allows Attackers to Execute Malicious Code Before OS Boots"
+  },
+  {
+   "id": "sony-data-breach-exposes-2-58-million-customer-records-and-54-40",
+   "title": "Sony Data Breach Exposes 2.58 Million Customer Records and 54,401 Email Credentials",
+   "n_events": 6,
+   "last_seen": "2026-11-02T18:02:35.000Z",
+   "first_event_title": "Sony Data Breach Exposes 2.58 Million Customer Records and 54,401 Email Credentials"
+  },
+  {
+   "id": "linux-kernel-cve-2026-74628-critical-flaw-cvss-9-8-no-fix-yet",
+   "title": "Linux Kernel CVE-2026-74628 Critical Flaw (CVSS 9.8, No Fix Yet)",
+   "n_events": 3,
+   "last_seen": "2026-11-02T18:01:01.405Z",
+   "first_event_title": "Heads-up: a new Linux flaw just got published. It's rated critical, score 9.8, and there's no fixed version yet. # Cybersecurity # InfoSec #"
+  },
+  {
+   "id": "northflank-security-breach-leads-to-abuse-of-customers-ai-api-ke",
+   "title": "Northflank security breach leads to abuse of customers' AI API keys",
+   "n_events": 6,
+   "last_seen": "2026-11-02T17:30:02.000Z",
+   "first_event_title": "Northflank security breach leads to abuse of customers' AI API keys"
+  },
+  {
+   "id": "lovable-many-apps-built-on-the-platform-expose-sensitive-data",
+   "title": "Lovable: Many Apps Built on the Platform Expose Sensitive Data",
+   "n_events": 1,
+   "last_seen": "2026-11-02T17:27:15Z",
+   "first_event_title": "Lovable: Many Apps Built on the Platform Expose Sensitive Data"
+  },
+  {
+   "id": "ivanti-connect-secure-cve-2026-104935-active-exploitation",
+   "title": "Ivanti Connect Secure CVE-2026-104935 Active Exploitation",
+   "n_events": 70,
+   "last_seen": "2026-11-02T17:24:33.000Z",
+   "first_event_title": "Ivanti Connect Secure zero-day CVE-2026-104935 We are aware of exploitation in the wild affecting a limited number of customers at the time "
+  },
+  {
+   "id": "hackers-weaponize-open-source-cyberstrikeai-framework-to-launch",
+   "title": "CyberStrikeAI Framework Weaponized for Network Intrusions",
+   "n_events": 2,
+   "last_seen": "2026-11-02T17:18:03.000Z",
+   "first_event_title": "Hackers Weaponize Open-Source CyberStrikeAI Framework to Launch AI-Powered Network Intrusions"
+  },
+  {
+   "id": "cve-2026-116606-barracuda-esg-auth-bypass",
+   "title": "CVE-2026-116606: Barracuda ESG Auth Bypass",
+   "n_events": 4,
+   "last_seen": "2026-11-02T16:36:31.000Z",
+   "first_event_title": "CVE-2026-116606: CRITICAL auth bypass in Barracuda ESG ( https:// radar.offseq.com/threat/cve-20 26-116606-cwe-288-authentication-bypass-usi"
+  },
+  {
+   "id": "android-sms-of-death-exploit-can-remotely-crash-unpatched-phones",
+   "title": "Android SMS of Death exploit can remotely crash unpatched phones",
+   "n_events": 10,
+   "last_seen": "2026-11-02T16:30:00.000Z",
+   "first_event_title": "Android SMS of Death exploit can remotely crash unpatched phones"
+  },
+  {
+   "id": "agent-identity-governance-the-security-gap-cisos-aren-t-seeing",
+   "title": "Agent Identity Governance: The Security Gap CISOs Aren't Seeing",
+   "n_events": 0,
+   "last_seen": "2026-11-02T16:28:26Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "adobe-security-advisory-av26-1092",
+   "title": "Adobe security advisory (AV26-1092)",
+   "n_events": 2,
+   "last_seen": "2026-10-30T08:01:42.000Z",
+   "first_event_title": "Adobe security advisory (AV26-1092)"
+  },
+  {
+   "id": "apple-security-advisory-av26-1099",
+   "title": "Apple security advisory (AV26-1099)",
+   "n_events": 1,
+   "last_seen": "2026-10-28T19:16:21Z",
+   "first_event_title": "Apple security advisory (AV26-1099)"
+  },
+  {
+   "id": "control-systems-hitachi-security-advisory-av26-1091",
+   "title": "[Control systems] Hitachi security advisory (AV26-1091)",
+   "n_events": 1,
+   "last_seen": "2026-10-27T16:35:59Z",
+   "first_event_title": "[Control systems] Hitachi security advisory (AV26-1091)"
+  },
+  {
+   "id": "control-systems-johnson-controls-security-advisory-av26-1090",
+   "title": "[Control systems] Johnson Controls security advisory (AV26-1090)",
+   "n_events": 1,
+   "last_seen": "2026-10-27T14:10:52Z",
+   "first_event_title": "[Control systems] Johnson Controls security advisory (AV26-1090)"
+  },
+  {
+   "id": "control-systems-moxa-security-advisory-av26-1089",
+   "title": "[Control Systems] Moxa security advisory (AV26-1089)",
+   "n_events": 1,
+   "last_seen": "2026-10-27T13:35:40Z",
+   "first_event_title": "[Control Systems] Moxa security advisory (AV26-1089)"
+  },
+  {
+   "id": "craft-cms-security-advisory-av26-1086",
+   "title": "Craft CMS security advisory (AV26-1086)",
+   "n_events": 2,
+   "last_seen": "2026-10-26T17:00:13.000Z",
+   "first_event_title": "Craft CMS security advisory (AV26-1086)"
+  },
+  {
+   "id": "dell-security-advisory-av26-1110",
+   "title": "Dell security advisory (AV26-1110)",
+   "n_events": 1,
+   "last_seen": "2026-11-02T14:35:44Z",
+   "first_event_title": "Dell security advisory (AV26-1110)"
+  },
+  {
+   "id": "esri-security-advisory-av26-1088",
+   "title": "Esri security advisory (AV26-1088)",
+   "n_events": 1,
+   "last_seen": "2026-10-27T13:25:46Z",
+   "first_event_title": "Esri security advisory (AV26-1088)"
+  },
+  {
+   "id": "fortinet-security-advisory-av26-812",
+   "title": "Fortinet security advisory (AV26-812)",
+   "n_events": 2,
+   "last_seen": "2026-08-13T10:40:57Z",
+   "first_event_title": "Fortinet security advisory (AV26-812)"
+  },
+  {
+   "id": "google-security-advisory-av26-904",
+   "title": "Google security advisory (AV26-904)",
+   "n_events": 2,
+   "last_seen": "2026-09-09T20:49:30Z",
+   "first_event_title": "Google security advisory (AV26-904)"
+  },
+  {
+   "id": "grafana-security-advisory-av26-860",
+   "title": "Grafana Alloy Vulnerability CVE-2026-19516",
+   "n_events": 3,
+   "last_seen": "2026-10-13T16:00:56.470Z",
+   "first_event_title": "Grafana security advisory (AV26-860)"
+  },
+  {
+   "id": "hashicorp-security-advisory-av26-1106",
+   "title": "HashiCorp security advisory (AV26-1106)",
+   "n_events": 1,
+   "last_seen": "2026-10-30T15:55:43Z",
+   "first_event_title": "HashiCorp security advisory (AV26-1106)"
+  },
+  {
+   "id": "hashicorp-security-advisory-av26-797",
+   "title": "HashiCorp security advisory (AV26-797)",
+   "n_events": 1,
+   "last_seen": "2026-08-11T14:05:42Z",
+   "first_event_title": "HashiCorp security advisory (AV26-797)"
+  },
+  {
+   "id": "hashicorp-security-advisory-av26-817",
+   "title": "HashiCorp security advisory (AV26-817)",
+   "n_events": 1,
+   "last_seen": "2026-08-14T16:05:44Z",
+   "first_event_title": "HashiCorp security advisory (AV26-817)"
+  },
+  {
+   "id": "ibm-security-advisory-av26-1040",
+   "title": "IBM security advisory (AV26-1040)",
+   "n_events": 1,
+   "last_seen": "2026-10-14T18:40:41Z",
+   "first_event_title": "IBM security advisory (AV26-1040)"
+  },
+  {
+   "id": "ibm-security-advisory-av26-997",
+   "title": "IBM security advisory (AV26-997)",
+   "n_events": 0,
+   "last_seen": "2026-10-05T13:40:39Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "ivanti-security-advisory-av26-805",
+   "title": "Ivanti security advisory (AV26-805)",
+   "n_events": 1,
+   "last_seen": "2026-08-11T20:20:39Z",
+   "first_event_title": "Ivanti security advisory (AV26-805)"
+  },
+  {
+   "id": "ivanti-security-advisory-av26-897",
+   "title": "Ivanti September 2026 security advisory: EPMM, ITSM, Sentry vulnerabilities",
+   "n_events": 3,
+   "last_seen": "2026-09-09T06:39:58Z",
+   "first_event_title": "Ivanti security advisory (AV26-897)"
+  },
+  {
+   "id": "jetbrains-security-advisory-av26-825",
+   "title": "JetBrains security advisory (AV26-825)",
+   "n_events": 1,
+   "last_seen": "2026-08-18T13:40:50Z",
+   "first_event_title": "JetBrains security advisory (AV26-825)"
+  },
+  {
+   "id": "juniper-networks-security-advisory-av26-1043",
+   "title": "Juniper Networks security advisory (AV26-1043)",
+   "n_events": 4,
+   "last_seen": "2026-10-16T09:54:34Z",
+   "first_event_title": "Juniper Networks security advisory (AV26-1043)"
+  },
+  {
+   "id": "canonical-lxd-and-microcloud-critical-authentication-bypass-cve",
+   "title": "Canonical LXD and MicroCloud Critical Authentication Bypass CVE-2026-112816 (CVSS 10.0)",
+   "n_events": 12,
+   "last_seen": "2026-11-02T15:48:35.000Z",
+   "first_event_title": "Canonical's LXD and MicroCloud had a critical authentication bypass (CVE-2026-112816, CVSS 10.0). An attacker who can reach the HTTPS API an"
+  },
+  {
+   "id": "the-gentlemen-ransomware-targets-australian-ses-unit",
+   "title": "The Gentlemen ransomware targets Australian SES unit",
+   "n_events": 2,
+   "last_seen": "2026-10-21T13:22:59.000Z",
+   "first_event_title": "The Gentlemen are at it again, and this time - instead of going after Aussie students - the group is targeting one of our SES units. The uni"
+  }
+ ]
+}
