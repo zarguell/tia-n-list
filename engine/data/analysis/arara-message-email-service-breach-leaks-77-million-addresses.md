@@ -1,0 +1,3 @@
+A breach at Japanese email service Arara Message, a subsidiary of PayCloud Holdings, leaked 77 million email addresses and affected roughly 380 companies. The service, operated by arara inc., was suspended following the incident, which has already sparked a wave of phishing attempts using the exposed addresses.
+
+The exposed dataset is large enough to fuel targeted phishing and business email compromise campaigns against the affected companies' customers and staff. Defenders at impacted organizations should treat inbound mail with heightened scrutiny and watch for credential-harvesting lures referencing Arara or PayCloud branding.
