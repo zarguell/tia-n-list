@@ -1,0 +1,3 @@
+They have informed us that there is a critical security vulnerability in its Omnissa UAG. I’m intentionally not providing any details, but think of the recent Netscaler vulnerabilities as a comparison. The latest version includes the fix. The vulnerability isn’t being discussed yet because it hasn’t been publicly disclosed, and they want to give partners time to apply the fix. I can’t provide any more information than “Trust me, bro.” Even if you don't believe me: Patching isn't a bad option. https://docs.omnissa.com/UnifiedAccessGatewayReleaseNotes-V2609/unified-access-gateway-release-notes submitted by /u/skcmlg [link] [comments]
+
+via reddit r/cybersecurity: Critical vulnerability in Omnissa UAG
