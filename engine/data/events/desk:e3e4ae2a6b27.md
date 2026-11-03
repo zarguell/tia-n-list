@@ -1,0 +1,1 @@
+VulnCheck's blog details the full CWP unauthenticated RCE chain, identifying CVE-2026-77876 as the unauthenticated command injection in the protected_directory module (CWE-78). The article notes all ten CVEs in the chain are fixed as of CWP 1.29, with partial fixes in 1.12, 1.16, 1.27, and 1.29. The blog date is 3 Nov 2026, matching the Censys event.

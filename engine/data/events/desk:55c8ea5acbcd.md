@@ -1,0 +1,1 @@
+OffSeq Threat Radar recorded a CVE-2026-58868 entry on 2 November 2026 describing remote code execution in Google Android. The entry references the Framework component out-of-bounds write and notes the vulnerability can lead to remote code execution with no additional privileges needed.
