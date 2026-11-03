@@ -1,0 +1,1 @@
+The SonicWall PSIRT advisory page for SNWLID-2026-0019 is referenced across CVE listings and search results dated 2026-11-03. It covers both an unauthenticated file-read flaw (CVE-2026-109593, CVSS 9.1) and an SQL injection (CVE-2026-109594, CVSS 6.8) in GMS 9.5.2 and earlier. The page requires JavaScript rendering; the date is confirmed by linked database entries.

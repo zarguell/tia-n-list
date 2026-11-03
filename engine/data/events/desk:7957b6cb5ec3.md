@@ -1,0 +1,1 @@
+OffSeq Threat Radar lists CVE-2026-109593 for SonicWall GMS 9.5.2 and earlier, describing an unauthenticated network attacker able to read internal GMS files. The entry carries a CVSS v3.1 score of 9.1 and references the vendor advisory at psirt.global.sonicwall.com/vuln-detail/SNWLID-2026-0019. Published 2026-11-03.
