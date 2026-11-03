@@ -1,0 +1,5 @@
+A researcher published a new variant of the golden Pass-ta-key attack against Google Password Manager (GPM) synced passkeys. Unlike earlier variants that leaked the Security Domain Secret (SDS) through Chrome debug logs, this variant extracts the SDS from CBOR buffers in Chrome process memory. Once recovered, the SDS lets an attacker decrypt all synced GPM passkeys and forge valid WebAuthn assertions entirely offline, resulting in full account takeover. A proof of concept is published at github.com/0rcruxe/pass-ta-key.
+
+The risk is that the attack is offline and silent: an attacker who can read Chrome process memory on a compromised device can recover the secret that protects every synced passkey, with no online interaction that would trigger detection. The research was posted to reddit r/netsec and r/cybersecurity, indicating public availability of the technique and code.
+
+What to watch: Google's response and any Chrome or GPM changes that prevent SDS extraction from process memory or invalidate exposed secrets, plus guidance for users on compromised endpoints whose synced passkeys should be treated as exposed.
