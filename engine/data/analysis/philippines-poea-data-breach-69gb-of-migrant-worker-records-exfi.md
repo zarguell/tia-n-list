@@ -1,0 +1,5 @@
+The event reports a breach claim against the Philippines POEA (Overseas Workers Welfare Administration), alleging that 27 SQL Server backups totaling approximately 69GB were exfiltrated within 24 minutes. The claimed data includes migrant worker case files, contracts, cashier records, and LandBank records. The source cited is www.darkreading.com, a credible security outlet.
+
+Concrete artifacts from the event are the 27 backups, the ~69GB volume, and the 24-minute exfiltration window. Watch for confirmation from the Philippine government or Dark Reading that identifies the threat actor or verifies the data categories. The event does not name a specific CVE, actor, or initial access vector.
+
+This is a collector repost pointing to Dark Reading rather than the original government disclosure, so verify the primary government statement before repeating specific record counts. Without verification of victim counts or actor attribution, treat the breach details as reported but not independently confirmed.
