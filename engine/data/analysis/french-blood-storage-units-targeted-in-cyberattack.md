@@ -1,0 +1,3 @@
+French blood-storage cold-storage facilities were targeted in an overnight cyberattack from Sunday to Monday, with units reportedly programmed to reach 110 degrees Celsius (230 F), according to Le Canard enchaîné and Anadolu Agency reports cited by DataBreaches.net. The incident affects facilities used by France’s national blood service and raises operational safety concerns for stored blood samples.
+
+No CVEs or actor attribution are mentioned in the available reports. The primary claim comes from the French weekly and the Turkish state news agency; verification against their original pages is advisable before treating victim counts or technical impact as confirmed.

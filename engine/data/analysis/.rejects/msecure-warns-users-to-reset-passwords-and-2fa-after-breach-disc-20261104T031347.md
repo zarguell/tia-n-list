@@ -1,0 +1,3 @@
+Password manager mSecure (mSeven Software) emailed current and former customers on November 3 instructing them to change passwords, reset 2FA, and remove passkeys following a breach disclosure. The event references The Hacker News coverage but provides no CVE, victim count, or technical detail about the intrusion vector.
+
+Without confirmation from mSeven’s own advisory or a regulatory filing, treat the scope (current and ex-customers) and timeline (Nov 3) as reported but unverified. Watch for an official incident report that clarifies what data was exposed and whether passkeys were actually compromised.
