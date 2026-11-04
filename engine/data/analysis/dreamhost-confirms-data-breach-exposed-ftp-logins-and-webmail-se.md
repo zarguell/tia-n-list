@@ -1,0 +1,5 @@
+DreamHost disclosed a data breach in which an unauthorized third party accessed the server running its web-based File Manager at files.dreamhost.com from approximately August 2026 to October 23, 2026, the day it was discovered. The attacker exploited a vulnerability in that software and stole FTP and SFTP usernames and passwords for customers who logged into the File Manager during the window. DreamHost says the attack appears deliberate and that staff worked to contain it.
+
+The intruder may also have accessed webmail systems, exposing session information including credentials for a limited number of users. DreamHost found no evidence that control panel login information or customer billing and payment details were accessed, since those are handled by an external provider. The company blocked the attackers' access, addressed the exploited vulnerability and stopped active sessions for potentially affected users.
+
+Customers should reset FTP, SFTP and email passwords and review account activity. The key watch item is whether DreamHost releases a full list of affected accounts or confirms the scope of webmail exposure.

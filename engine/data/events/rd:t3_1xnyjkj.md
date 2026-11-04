@@ -1,0 +1,3 @@
+Britain's National Cyber Security Centre warns that AI-enabled malware is highly likely to be used in ransomware attacks against critical infrastructure by 2028. AI could make existing attacks faster and easier to scale. Organizations need to strengthen patching, administrator access controls, monitoring and backups rather than relying on defenses against traditional malware alone. The NCSC warning. This is a forward-looking threat assessment, not confirmation that a particular AI-powered infrastructure attack has occurred. submitted by /u/BTC-brother2018 [link] [comments]
+
+via reddit r/cybersecurity: UK warned of AI cyberattacks on critical infrastructure by 2028
