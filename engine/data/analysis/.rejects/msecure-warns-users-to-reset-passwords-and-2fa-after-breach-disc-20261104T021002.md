@@ -1,0 +1,3 @@
+mSecure (mSeven Software) emailed current and former customers on November 3 urging password changes, 2FA resets, and removal of passkeys following a breach disclosure. The event is a single source from Mastodon pointing to The Hacker News. No CVEs are cited, and the scope of exposed data is not quantified in the available event text. It is a genuine breach notification from a password manager vendor, which carries user impact, but verification of the full advisory details would strengthen the assessment.
+
+Users relying on mSecure should follow the vendor guidance to rotate credentials and disable passkeys until the incident scope is clarified. The lack of additional corroborating reports limits confidence in the scale of exposure.
