@@ -1,0 +1,3 @@
+Apple has expanded spyware threat notifications to users in 99 to 110 countries, with German lawmakers and journalists among the recipients. Reports cite targeted surveillance alerts and link them to potential iPhone compromise scenarios. The coverage spans outlets including malware.news, vsx.global, and martincid.com, showing broad pickup.
+
+This continues Apple’s long-running targeted surveillance disclosure program rather than a new zero-day. The mention of German MPs aligns with the separate German-politicians-targeted-by-iphone-spyware story. Watch for confirmation of which threat actor triggered the alerts and any follow-up patches or mitigations Apple releases. The 99-country figure suggests a wider campaign than typical state-sponsored targeting of a small group.

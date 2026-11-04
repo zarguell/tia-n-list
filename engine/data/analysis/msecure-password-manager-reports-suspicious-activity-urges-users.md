@@ -1,0 +1,3 @@
+mSeven Software, developer of the mSecure password manager, emailed customers on 3 November advising them to change passwords, reset 2FA, and remove passkeys after detecting suspicious activity linked to the app. The notice provides minimal technical detail and does not specify whether credentials or stored vault data were accessed.
+
+The event is significant for a security product vendor because user trust depends on precise disclosure of scope. Without confirmation of what data, if any, was exfiltrated, users must treat all stored secrets as potentially exposed. Watch for a follow-up with CVEs, attacker attribution, or regulatory filings that clarify whether this was a breach of the backend, a third-party integration, or a localized incident.
