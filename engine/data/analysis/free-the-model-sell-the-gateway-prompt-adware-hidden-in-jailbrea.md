@@ -1,0 +1,5 @@
+Check Point Research analyzed Haiou, an OpenAI Codex jailbreak bundle that weakens model guardrails and is classified as prompt adware. It installs security-focused Skills and modifies Codex configuration files so that advertisements for the bundle author's website are injected into subsequent agent responses, funneling users toward an opaque OpenAI-compatible LLM gateway. The bundle was observed in use by a cybercrime actor alongside Cobalt Strike, the VulnClaw agent, and the Ladon framework, though Check Point does not claim it was designed for cybercrime.
+
+The business model appears to be distribution of the free jailbreak as an acquisition channel for the paid gateway service, with the ad injection baked into the configuration changes. Defenders should treat jailbreak bundles as untrusted code that alters agent configuration and can exfiltrate or redirect traffic, not merely as prompt text.
+
+Watch for wider reuse of this adware technique across other jailbreak bundles and for detection signatures on Codex configuration tampering.
