@@ -1,0 +1,1 @@
+Hundreds of Intermarche and Cooperative U shops in France were hit, with freezers forced up to 50 degrees Celsius and food discarded, and there were fears Dutch chains were also affected. This was the first wave of the campaign, three weeks before the November multi-country wave.

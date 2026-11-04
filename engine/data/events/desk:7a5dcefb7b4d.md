@@ -1,0 +1,1 @@
+Forescout Vedere Labs identified 12,976 internet-exposed refrigeration service observations across 10 product groups, represented by 6,017 distinct public IP addresses in 99 countries and territories. The French incident affected more than 700 supermarkets, and exposed management interfaces create a global cold-chain risk beyond retail.
