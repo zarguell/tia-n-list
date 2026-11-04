@@ -1,0 +1,1 @@
+Apple notified users in 110 countries who it suspects may have been targeted by spyware attacks. The report notes Apple sent these threat notifications on August 13, 2026, and that they now appear on the lock screen.

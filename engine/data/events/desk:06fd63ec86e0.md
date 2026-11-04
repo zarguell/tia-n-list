@@ -1,0 +1,1 @@
+Apple sent a fresh wave of threat notifications warning targeted users in 110 countries of mercenary spyware attacks. Published August 13, 2026, the article confirms the notifications began that week and are more visible than prior rounds.
