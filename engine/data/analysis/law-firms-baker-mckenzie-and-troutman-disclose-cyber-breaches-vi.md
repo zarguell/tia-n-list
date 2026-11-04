@@ -1,0 +1,3 @@
+Reuters reported that law firms Baker McKenzie and Troutman disclosed cyber breaches in which no attacker broke in technically: staff were socially engineered, and at Troutman an employee made a mistake that contributed to the incident. The disclosures highlight that even organizations with mature security programs can be compromised through human manipulation rather than software vulnerabilities.
+
+The available details are limited to the initial report, so the full scope, affected data, and remediation status remain unconfirmed. Law firms hold sensitive client and case material, making them attractive targets for social-engineering-driven access; the incident underscores the need for verification controls around staff requests and access changes.
