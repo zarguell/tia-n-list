@@ -1,0 +1,3 @@
+A Reddit post on r/cybersecurity points to a Hacker News article reporting a flaw in APT on Debian and Ubuntu that lets man-in-the-middle attackers swap verified packages and execute code as root. The available material is limited to that headline and a link; no CVE identifier, affected versions, or patch details are present.
+
+The claim describes a package-manager integrity failure with root-level code execution, which if confirmed would be high severity for any Debian or Ubuntu system installing packages over an untrusted network. Until the primary article is reviewed for specifics, treat this as an unverified lead requiring CVE and version confirmation before remediation planning.
