@@ -1,0 +1,1 @@
+What is the CBK Cyber and Operational Resilience Framework (CORF)? The CBK Cyber and Operational Resilience Framework, or CORF , is the cybersecurity and resilience regulation that the Central Bank of Kuwait (CBK) issued for the banks and financial institutions it supervises. Article Link: Meeting the CBK Cyber and Operational Resilience Framework (CORF) Requirements With Picus
