@@ -1,0 +1,3 @@
+The Hacker News reported Xen XSA-523, a time-of-check-to-time-of-use (TOCTOU) flaw in the grant-copy path (CVE-2026-102703 and CVE-2026-102704) that lets a malicious guest VM read or write memory belonging to other guests, including dom0. A guest with the ability to exercise the grant-copy operation could cross isolation boundaries between virtual machines on the same host.
+
+The issue affects Xen-based virtualization environments where multiple tenants or trust domains share a host. Administrators should apply the Xen project's fixes for XSA-523 and review guest privileges; systems running unpatched Xen remain exposed to cross-VM memory access.
