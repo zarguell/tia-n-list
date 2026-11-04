@@ -1,0 +1,1 @@
+Overnight on November 2, freezers in supermarkets across Sweden, Belgium, Luxembourg and Ireland climbed to around 50°C, and stores awoke to spoiled stock. This is the second wave within a month, after a similar attack on hundreds of French stores in October. No one has publicly claimed either attack, and the attack vector hasn't been confirmed.
