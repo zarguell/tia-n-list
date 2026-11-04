@@ -1,0 +1,3 @@
+mSecure (mSeven Software) disclosed a breach that prompted the company to email current and former customers on November 3, instructing them to change passwords, reset two-factor authentication, and remove passkeys. The notice comes from a password-manager vendor, so any exposure of vault data or authentication secrets carries direct user impact.
+
+The event is sourced to The Hacker News and contains no CVE assignment or technical details of the intrusion vector. Watch for follow-up disclosure on the scope of accessed data, whether encrypted vault backups were involved, and confirmation from mSeven on when the breach occurred.
