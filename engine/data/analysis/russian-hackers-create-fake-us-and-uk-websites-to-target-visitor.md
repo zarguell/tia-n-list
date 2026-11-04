@@ -1,0 +1,5 @@
+A watering-hole campaign attributed with moderate-to-high confidence to APT29 (also tracked as Midnight Blizzard, Cozy Bear and The Dukes, and widely linked to Russia's SVR foreign intelligence service) compromised sites and cloned domains to reach iOS and Android users. GBHackers reported the operation as large-scale, and Sekoia's research on the same campaign describes APT29 watering holes targeting mobile devices with n-day exploits.
+
+The campaign's mobile focus and use of n-day exploits against phones make it a notable espionage effort rather than a spray-and-pray operation: visitors to legitimate-looking sites could be profiled and exploited without interaction. Defenders should review mobile device management policies, browser and OS patch levels, and any indicators from Sekoia's research.
+
+The Sekoia write-up is the primary technical source; the GBHackers summary and a Mastodon pointer are the corroborating items in this store. Watch for follow-up reporting that names the specific n-days used and any victim organizations.
