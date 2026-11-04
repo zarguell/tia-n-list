@@ -1,0 +1,1 @@
+RuntimeWire reports that Debian published DSA-6607-1 on November 4, 2026, fixing CVE-2026-109518 in APT, a flaw discovered by Max Justicz. A man-in-the-middle attacker can replace a verified package and execute arbitrary code as root by abusing APT's handling of resumed HTTP downloads and redirects. The fix ships in APT 3.0.4 for trixie.

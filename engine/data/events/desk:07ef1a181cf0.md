@@ -1,0 +1,1 @@
+Debian LTS Advisory DLA-4880-1 fixes CVE-2026-109518 in apt for Debian 12 (bookworm), in version 2.6.2. Max Justicz discovered that APT can merge two package downloads after an HTTP redirect gives them the same URI, allowing a man-in-the-middle attacker to replace a verified package and execute arbitrary code as root. The update also addresses several out-of-bounds access issues.
