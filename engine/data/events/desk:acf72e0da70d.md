@@ -1,0 +1,1 @@
+Apple Product Security's full-disclosure message for iOS 17.5 and iPadOS 17.5 credits CVE-2024-27834 to Manfred Paul working with Trend Micro's Zero Day Initiative. The issue is a WebKit Pointer Authentication bypass that was addressed with improved checks. It affects Safari, iOS, iPadOS, macOS, tvOS, and watchOS releases prior to the fixed versions listed in the advisory.
