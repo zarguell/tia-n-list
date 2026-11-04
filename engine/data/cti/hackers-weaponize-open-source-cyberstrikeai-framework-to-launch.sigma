@@ -1,0 +1,30 @@
+title: CyberStrikeAI Implant - Masqueraded Beacon Scheduled From Temp or ProgramData
+id: 7d4c1e0a-9b52-4f6d-8e3b-2a5f9c6b41d8
+status: experimental
+description: Detects the CyberStrikeAI implant binaries reported by Kaspersky (November 2026) running from staging directories. Operators persisted the conventional C2 beacon through a scheduled task named SystemUpdate that launches masqueraded binaries such as svchosts.exe or svcmon32.exe out of C:\Windows\Temp or C:\ProgramData; all LLM orchestration stays server-side, so these host artifacts are the huntable residue.
+references:
+  - https://securelist.com/tr/cyberstrikeai-attacks/121715/
+  - https://gbhackers.com/cyberstrikeai-framework/
+  - https://www.team-cymru.com/post/tracking-cyberstrikeai-usage
+author: Tia N. List
+date: 2026-11-04
+tags:
+  - attack.t1190
+  - attack.t1053
+  - attack.t1059
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection_binary:
+    Image|endswith:
+      - '\svchosts.exe'
+      - '\svcmon32.exe'
+  selection_staging_path:
+    Image|contains:
+      - '\Windows\Temp\'
+      - '\ProgramData\'
+  condition: selection_binary and selection_staging_path
+falsepositives:
+  - Unlikely - svchosts.exe and svcmon32.exe are deliberate near-miss names for svchost.exe and no legitimate software ships them
+level: high

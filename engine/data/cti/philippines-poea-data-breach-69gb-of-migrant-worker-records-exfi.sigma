@@ -1,0 +1,28 @@
+title: POEA Backup Staging Host - Connections to Exfiltration Staging Address
+id: 2f8b6d31-4c17-4a90-b5ce-6d0a3f9e7c52
+status: experimental
+description: Detects network connections to the UpCloud Singapore host (213.163.205.35, port 80) that served the operator's open Python HTTP staging directory for the 27 SQL Server backup files taken from Philippine Overseas Employment Administration systems in September 2026. Hunt.io observed 543 requests from 76 addresses during the exposure window; the same directory held the operator's GodPotato, PowerShell stager and Impacket toolkit.
+references:
+  - https://www.darkreading.com/cyberattacks-data-breaches/philippine-migrant-worker-data-69gb-government-breach
+  - https://cyberworldops.eu/en/huntio-reports-69gb-theft-of-philippine-migrant-worker-data
+author: Tia N. List
+date: 2026-11-04
+tags:
+  - attack.t1005
+  - attack.t1074
+  - attack.t1068
+logsource:
+  category: network_connection
+detection:
+  selection_destination:
+    DestinationIp: '213.163.205.35'
+  selection_port:
+    DestinationPort: 80
+  filter_loopback:
+    SourceIp:
+      - '127.0.0.1'
+      - '::1'
+  condition: selection_destination and selection_port and not filter_loopback
+falsepositives:
+  - Unlikely - single dedicated UpCloud host used only to stage the stolen POEA backups
+level: high
