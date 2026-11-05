@@ -1,0 +1,3 @@
+Canadian Centre for Cyber Security advisory AV26-1127 (November 4, 2026) flags Cisco Unified Computing System (UCS) Central Software prior to 2.1(2c) as affected by remote code execution vulnerabilities. A social post circulating the advisory extends the scope to Cisco ISE and Unified CM and names CVE-2026-76506, CVE-2026-20241, and CVE-2026-76419, though the advisory text itself only confirms the UCS Central product and version range.
+
+Administrators running UCS Central before 2.1(2c) should review the Cisco security advisories and apply available updates. No exploitation in the wild is reported in the available material, and the three CVEs should be treated as named in secondary coverage rather than confirmed against the primary advisory text.
