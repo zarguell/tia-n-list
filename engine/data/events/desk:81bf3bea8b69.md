@@ -1,0 +1,1 @@
+cyberattaque.org reported on 3 November 2026 that freezers normally kept around minus 30 C had been programmed to reach 110 C in an intrusion against the EFS. The outlet noted the incident was first revealed by Le Canard Enchaîné and that it concerned cold-storage installations holding blood plasma. It attributed the compromise to a provider of the blood establishment.
