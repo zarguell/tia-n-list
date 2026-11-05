@@ -1,0 +1,3 @@
+I'm currently reading through the 2026 VulnCheck Exploit Intelligence Report and found the graphic on page 4 about exploited and weaponized CVEs. It talks about around 250 2025-CVEs (or CVEs with exploits?) being weaponized and around 420 2025-CVEs being exploited throughout the year 2025. Sorry for not providing a screenshot. I don't think I'm allowed to post the contents of the report directly. I can't make sense of what the difference between that should be. I'd greatly appreciate any and all ideas. Here is a link to the Reportpage: https://wwv.vulncheck.com/2026-vulncheck-exploit-intelligence-report submitted by /u/ProofImprovement984 [link] [comments]
+
+via reddit r/cybersecurity: What does "Weaponized" mean in this report?
