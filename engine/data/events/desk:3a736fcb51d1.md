@@ -1,0 +1,1 @@
+CyberInsider reported that NIKKE updated its PC launcher after attackers injected malicious scripts capable of installing remote-access malware and stealing credentials. It notes the technical report was published on November 3 by researcher MotherSphere and draws on logs and cached files from an infected machine plus analysis of the downloaded malware.
