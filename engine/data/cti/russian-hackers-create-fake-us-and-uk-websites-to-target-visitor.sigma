@@ -1,0 +1,35 @@
+title: Contact to APT29 Mobile Watering-Hole Lookalike Domains (america250.holiday, theowo.club)
+id: 1a5a42d7-37f8-44ea-b05c-c3de0ba88063
+status: experimental
+description: >
+    Detects traffic to the two lookalike domains the APT29 (Midnight Blizzard /
+    Cozy Bear) "Poisoned Source" campaign registered as adversary-in-the-middle
+    reverse proxies for america250.org and the Raffles London at The OWO hotel
+    site. Both hosts served the UltimateFingerprinter script and the
+    platform-specific n-day exploit chains to iOS and Android visitors, so any
+    request from a corporate proxy or DNS log means a device on that network was
+    steered into the exploit gate. The domains were burned after Sekoia's
+    disclosure; keep the rule for retrospective hunting in the 27 August to
+    3 September 2026 window.
+references:
+    - https://www.sekoia.com/blog/poisoned-source-apt29-watering-holes-targets-mobile-devices-with-n-day-exploits
+    - https://gbhackers.com/fake-us-and-uk-websites/
+    - https://secquill.com/articles/sekoia-links-russia-s-apt29-to-booby-trapped-websites-that-hacked-unpatched-phones/
+author: Tia N. List
+date: 2026/11/05
+tags:
+    - attack.t1189
+    - attack.t1608
+    - attack.t1557
+logsource:
+    category: network_connection
+detection:
+    selection_lookalike:
+        DestinationHostname|endswith:
+            - '.america250.holiday'
+            - '.theowo.club'
+    condition: selection_lookalike
+falsepositives:
+    - Threat-intel research, URL scanners, sandbox detonation or analyst pivots that deliberately resolve the published lookalike domains
+    - Generic name matching on a re-registered domain after the campaign infrastructure was burned - confirm the resolution date falls in the campaign window before treating a hit as compromise
+level: high

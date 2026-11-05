@@ -1,0 +1,32 @@
+title: NIKKE PC Launcher Dropping K2F Persistence DLL platform_experience_helper.dll
+id: 33b2063c-436d-44d9-98db-8d28d828bdca
+status: experimental
+description: >
+    Detects creation of platform_experience_helper.dll, the secondary Windows
+    DLL pushed by the tampered NIKKE PC launcher. Attackers modified four
+    JavaScript files on Level Infinite's CDN from 27 September 2026 and the
+    embedded CEF launcher executed them with its privileges, pulling the LuaJIT
+    insight.bundle and a K2F remote-access agent that survived launcher exit.
+    The named DLL is the documented on-disk persistence artifact and is the
+    point where a post-compromise hunt becomes concrete; correlate with the
+    string k2f_chan in the launcher's intl_service debug log.
+references:
+    - https://www.bleepingcomputer.com/news/security/nikke-pc-game-launcher-hacked-to-spread-remote-access-data-stealing-malware/
+    - https://gist.github.com/MotherSphere/d6c049a09ba8ac3085c51ee9df24a4e5
+    - https://cyberinsider.com/nikke-pc-launcher-malware-remote-access-tool/
+author: Tia N. List
+date: 2026/11/05
+tags:
+    - attack.t1195
+    - attack.t1105
+    - attack.t1555
+logsource:
+    category: file_event
+    product: windows
+detection:
+    selection_filename:
+        TargetFilename|endswith: '\platform_experience_helper.dll'
+    condition: selection_filename
+falsepositives:
+    - Any legitimate developer or publisher component that happens to reuse this generic-sounding helper name - verify the signed publisher and the parent launcher before isolating, and sweep the host for insight.bundle and the k2f_chan log string
+level: high
