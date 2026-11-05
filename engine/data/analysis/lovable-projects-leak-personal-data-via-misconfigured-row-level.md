@@ -1,0 +1,3 @@
+A study by Crissy Field scanned 159,041 Lovable projects sourced from Common Crawl and found that 7,403 sites exposed database tables containing email addresses and other personal data, traced to misconfigured row-level security in CVE-2025-48757. The exposure is a configuration failure in generated applications rather than a single vulnerable component, which makes remediation the responsibility of each project owner.
+
+Developers and owners of Lovable-generated apps should audit their row-level security policies and restrict table access. Watch for any follow-up on the scale of affected production apps and for guidance from Lovable on secure defaults.

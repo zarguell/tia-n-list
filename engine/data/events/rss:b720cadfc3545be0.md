@@ -1,0 +1,1 @@
+ASEC Blog publishes Ransom & Dark Web Issues Week 1, November 2026 FBI Seizes Domain of Bulletproof Hosting Service Virtualine Internal Data of a Saudi ERP and IT Solutions Company Offered for Sale Cyberattacks on Supermarket Refrigeration Systems Spread Across 12 European Countries OBSOFT Claims Data Extortion and Data Destruction […]
