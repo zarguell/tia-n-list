@@ -1,0 +1,1 @@
+fosslinux reported on November 5, 2026 that Alpine Linux's OpenSSH has a password bypass allowing an attacker who can reach the SSH port to log in with no password, and that fixed packages are available for every supported release back to version 3.16.

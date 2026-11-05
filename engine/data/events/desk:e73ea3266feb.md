@@ -1,0 +1,1 @@
+The Guardian reports that North Korea is the likely culprit behind the $6.3 billion Binance crypto hack, calling it potentially the largest heist in history. The article covers the FBI attribution to the DPRK and the suspension of withdrawals across multiple networks following the October 29 theft.

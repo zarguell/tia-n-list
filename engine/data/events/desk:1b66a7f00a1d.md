@@ -1,0 +1,1 @@
+TLDR reported on November 5, 2026 that OpenSSH 10.6p2 was released with a workaround for a critical vulnerability affecting Linux systems that use musl libc with PAM disabled, such as Alpine Linux. OpenSSH developer Damien Miller advised administrators of affected systems to immediately set PasswordAuthentication=no or disable SSH entirely.

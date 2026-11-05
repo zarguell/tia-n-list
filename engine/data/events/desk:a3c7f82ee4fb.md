@@ -1,0 +1,1 @@
+BleepingComputer reported on November 5, 2026 that security researcher Ozgün Kultekin of Wakefield disclosed and released details of an OpenSSH flaw dubbed *sshole that lets attackers log into password-disabled Alpine Linux and other musl-based accounts. Kultekin said the flaw has existed since 2016 and stems from how OpenSSH handles password verification errors.
