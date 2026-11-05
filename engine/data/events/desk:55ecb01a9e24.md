@@ -1,0 +1,1 @@
+BleepingComputer reported on October 16 2023 that Cisco had warned of active exploitation of CVE-2023-20198, a previously unknown zero-day in the Cisco IOS XE web UI exposed to the internet. The report described the flaw as actively exploited in attacks and rated at the maximum CVSS severity of 10.0.

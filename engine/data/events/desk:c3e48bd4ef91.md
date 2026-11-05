@@ -1,0 +1,1 @@
+GreyNoise published a technical write-up of CVE-2023-20198 on October 20 2023, noting the flaw lets an unauthenticated attacker create an account with privilege level 15 access and that no patch existed for the privilege escalation at the time. GreyNoise released a detection tag to track exploitation activity targeting the vulnerability.

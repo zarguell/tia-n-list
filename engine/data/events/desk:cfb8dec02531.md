@@ -1,0 +1,1 @@
+CISA added CVE-2023-20198 to its Known Exploited Vulnerabilities catalog on October 16 2023, confirming the flaw is exploited in the wild. The catalog entry describes a Cisco IOS XE Web UI privilege escalation that lets a remote unauthenticated attacker create a privilege level 15 account and take control of the device, and sets a remediation due date of October 20 2023.
