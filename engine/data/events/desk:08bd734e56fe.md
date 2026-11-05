@@ -1,0 +1,1 @@
+The Hacker News reported that OpenAI's AI pipeline reproduced 1,724 Linux vulnerabilities and generated 948 working local privilege escalation exploits for $1.2 million. It quoted OpenAI's statement that the mid-October 2026 run produced 291 information leak vulnerabilities and 948 working LPE exploits for a commonly used Linux distribution.

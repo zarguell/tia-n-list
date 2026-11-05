@@ -1,0 +1,1 @@
+India Today reported that OpenAI's upcoming cyber model identified 948 cyber vulnerabilities in Linux and built exploits that could give any user root access. The article noted the total cost of the process was $1.2 million.

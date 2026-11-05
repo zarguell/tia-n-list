@@ -1,0 +1,1 @@
+Interesting Engineering reported that OpenAI's pipeline identified 948 distinct Linux local privilege-escalation vulnerabilities after reproducing 1,724 candidate flaws, and that researchers found at least 10 previously undocumented exploitation techniques. The article summarized the autonomous pipeline's discovery and patching results.
