@@ -1,0 +1,3 @@
+Citrix has released security updates for XenServer 8.4 and XenServer 9 that fix several vulnerabilities, three of which a malicious privileged guest VM user could exploit to compromise or crash the underlying host. Cloud Software Group rated the bulletin High severity. The advisory was published on October 13, 2026.
+
+The risk is confined to privileged guest contexts, but a host compromise from a guest VM is a significant boundary failure in a hypervisor: a tenant or compromised VM with elevated privileges could break out to the host and affect other guests. Operators running XenServer 8.4 or 9 should apply the published updates. No CVE identifiers were provided in the reporting available, so track the Citrix advisory itself for the affected version and patch details.
