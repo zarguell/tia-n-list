@@ -27,6 +27,7 @@ import glob
 import json
 import os
 import sys
+import time
 
 import ioc as ioc_mod
 
@@ -45,10 +46,34 @@ def load_events():
     return _load()
 
 
+def _read_story(path, attempts=3):
+    """Read one story json, tolerating a torn write from a concurrent stage.
+
+    Story files are rewritten in place by the hourly, digest and desk jobs, so
+    a reader can observe a 0-byte or half-written file. On 2026-11-05 PHASE3's
+    queue refresh died with JSONDecodeError('Expecting value: line 1 column 1')
+    on one such file and the pass had to fall back to the stale PHASE1 queue.
+    Retry briefly, then return None so one racing file cannot kill the pass.
+    """
+    for i in range(attempts):
+        try:
+            with open(path) as fh:
+                return json.load(fh)
+        except (OSError, ValueError):
+            if i == attempts - 1:
+                print(f"  WARN: unreadable story {os.path.basename(path)} "
+                      f"(concurrent write?), skipped")
+                return None
+            time.sleep(0.2)
+    return None
+
+
 def load_story_cards(events=None, stories_dir=STORIES):
     cards = []
     for f in glob.glob(os.path.join(stories_dir, "*.json")):
-        s = json.load(open(f))
+        s = _read_story(f)
+        if not s or not s.get("id"):
+            continue
         cards.append({"id": s["id"], "title": s.get("title", ""),
                       "score": s.get("score", 0.0), "n_sources": s.get("n_sources", 0),
                       "events": s.get("events", [])})
