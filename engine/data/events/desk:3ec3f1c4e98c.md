@@ -1,0 +1,1 @@
+Defense One carries the Nextgov/FCW reporting dated November 2, 2026, that officials suspect Iran-linked hackers in military freezer failures at commissaries. This is the first broad news pickup of the suspected Iranian involvement, three days before the federal warning.

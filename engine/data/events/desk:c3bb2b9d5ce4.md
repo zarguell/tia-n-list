@@ -1,0 +1,1 @@
+Nextgov/FCW reports that U.S. officials suspect Iran-linked hackers in freezer malfunctions at military bases across the country, with incidents beginning around late August and roughly six commissaries affected. The Pentagon was treating the events as possible cyberattacks. This is the earliest dated disclosure of the suspected actor behind the refrigeration incidents.

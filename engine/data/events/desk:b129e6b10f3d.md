@@ -1,0 +1,1 @@
+The Guardian reports a second wave of suspected cyberattacks on supermarket refrigerators across Europe on November 2, affecting stores in Belgium, Ireland, Luxembourg and Sweden, with an ICA store in Sjoebo, Sweden, having its fridges and freezers set to 50 degrees Celsius. Days earlier, hacks forced grocery stores across eight European countries to discard spoiled food.
