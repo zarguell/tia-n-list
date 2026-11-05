@@ -382,6 +382,25 @@ def _strip_event_refs(stories, eid, keep_sid):
     return emptied
 
 
+def _live_target(stories, sid):
+    """Follow a merged_into redirect chain to the live canonical story.
+
+    Cycle-safe. Returns None when the chain never reaches a live story
+    (unknown id, dangling pointer, or a cycle) so the caller can fall back to
+    the mint/URL-attach paths. A keep that names a merged-away slug must land
+    on the canonical, never inside a redirect shell: on 2026-11-03 two keeps
+    (the Oracle EBS CVE-2026-101767 story and a Teams help-desk piece) wrote
+    their events into shells, which broke audit.py's `dedup_invariants`
+    in-shell invariant and left both events unrendered."""
+    seen = set()
+    while sid in stories and stories[sid].get("merged_into") and sid not in seen:
+        seen.add(sid)
+        sid = stories[sid]["merged_into"]
+    if sid in stories and not stories[sid].get("merged_into"):
+        return sid
+    return None
+
+
 def _sole_holder(stories, eid):
     """The active story whose ONLY event is this one (the mechanical merge's
     fresh mint). Reusing it instead of creating a twin prevents -2 slug
@@ -559,6 +578,16 @@ def apply(decisions_path):
             target = sole
             if d.get("story_title"):
                 stories[sole]["title"] = re.sub(r"\s+", " ", d["story_title"]).strip()
+        # A keep naming a merged-away slug resolves to the live canonical
+        # (same rule the merge path below already applies). Without this the
+        # event was absorbed INTO the redirect shell, where nothing renders it
+        # and audit.py's in-shell invariant fires (2026-11-03).
+        if target and target != "NEW" and target in stories \
+                and stories[target].get("merged_into"):
+            live = _live_target(stories, target)
+            print(f"  REDIRECT: keep {eid} named shell {target} -> "
+                  f"{live or 'no live target (mint path)'}")
+            target = live
         if not target or target == "NEW":
             if ev.get("low_trust") and not ev.get("provenance"):
                 # Low-trust feeds amplify, never create: a keep cannot

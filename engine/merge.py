@@ -1243,6 +1243,12 @@ def main():
     for s in stories.values():
         if s["id"] in frozen:
             continue    # frozen: score/peak stay as frozen — skips the bulk of hourly CPU
+        if s.get("merged_into"):
+            continue    # redirect shell: renders a redirect, not a story — never
+                        # score it (triage's rescore skips shells for the same
+                        # reason; a shell that kept a stray event was rescored
+                        # to 4.1 on 2026-11-03 and re-peaked on a page that
+                        # publishes nothing)
         try:
             sc = real_score(s)
             s["score"] = sc["score"]
