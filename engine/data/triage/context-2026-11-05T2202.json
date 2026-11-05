@@ -1,0 +1,479 @@
+{
+ "date": "2026-11-05",
+ "decisions_path": "engine/data/triage/decisions-2026-11-05T2202.json",
+ "instructions": "For every new event decide: (1) keep or drop \u2014 keep only stories worth covering (real security events, vulnerabilities, attacks, breaches, advisories with substance); drop press releases, vendor marketing, generic explainers, and anything duplicating an existing story. (2) If keep, assign the event to the RIGHT story: an existing candidate story id if it belongs there (this FIXES mechanical clustering \u2014 e.g. different outlets' Patch Tuesday roundups are ONE story), or NEW with a clean story_title. (3) merges: list candidate stories that are really the same story (from = fragment, into = the most complete one). (4) For every kept event that names CVEs, optionally assess exploitation: exploited = the event reports OBSERVED in-the-wild exploitation (implants, victim counts, campaigns, CISA KEV confirmation); suspected = public exploit code/PoC or likely-but-unconfirmed. Attribute ONLY the CVEs you can tie to the claim \u2014 a bulletin's blanket 'actively exploited' does NOT flag all its CVEs. Omit the exploitation field when the event makes no claim.\n(5) LOW-TRUST events (\"low_trust\": true \u2014 AI-drafted aggregator reposts, late and overstated): treat as unverified leads. When the text attributes the claim to a named primary source (a researcher firm like watchTowr, a vendor advisory, CISA, a major outlet) and attribution_urls or a web search (/home/ubuntu/repos/cronman/bin/web-search.sh \"query\") locate that primary source CONFIRMING the claim, include a provenance object in the decision: {\"url\": <primary url>, \"source\": <domain>, \"evidence\": <one line>, \"verified\": true}. VERIFIED provenance lets the event mint a story (credited to the primary source) and count as a development; without it, a low-trust event can only attach to an EXISTING story, never mint. If you cannot verify, keep/drop on normal merit and omit provenance.\n\nWrite decisions as JSON with EXACTLY this shape:\n{\n  \"decisions\": [\n    {\"event_id\": \"<id>\", \"action\": \"keep\", \"story\": \"<existing candidate story id>\", \"reason\": \"...\"},\n    {\"event_id\": \"<id>\", \"action\": \"keep\", \"story\": \"NEW\", \"story_title\": \"<clean title>\", \"reason\": \"...\"},\n    {\"event_id\": \"<id>\", \"action\": \"drop\", \"reason\": \"...\"}\n  ],\n  \"merges\": [{\"from\": \"<fragment story id>\", \"into\": \"<canonical story id>\"}]\n}\nFor events marked \"low_trust\" (AI-drafted aggregator reposts) a decision\nmay carry an optional \"provenance\" object when you VERIFIED the claim at\nthe named primary source: {\"event_id\": ..., \"action\": \"keep\", ...}\n  \"provenance\": {\"url\": \"<primary source url>\", \"source\": \"<domain>\", \"evidence\": \"<one line>\"}\nOnly include provenance when the primary source (vendor advisory, CISA,\nthe named researcher/outlet) really carries the claim \u2014 verified\nprovenance lets a low-trust event mint a story and set freshness; without\nit the event can only amplify an existing story.\nSTRICT KEY NAMES: the array key is \"decisions\" (never \"events\"); the story\nkey is \"story\" (never \"story_id\"); \"story\" holds a candidate_stories id\nverbatim or the literal string \"NEW\". Optional per-event field\n\"exploitation\": {\"CVE-...\": {\"status\": \"exploited|suspected\", \"evidence\": \"1-2 sentences\"}}.",
+ "new_events": [
+  {
+   "id": "rss:7e8f830d7d18d4d0",
+   "title": "Scammers use AI-generated images of missing pets to extort owners",
+   "source": "malware.news",
+   "published_at": "2026-11-05T21:40:40Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "When your pet goes missing, it can be totally heartbreaking. So hearing that they\u2019ve been found is no doubt very welcome news. Even better to see a photo of them looking safe and well. But while the photo may look exactl"
+  },
+  {
+   "id": "rss:9189e947554db2a4",
+   "title": "Fake OpenAI, SpaceX events used to steal Microsoft, Google accounts",
+   "source": "bleepingcomputer.com",
+   "published_at": "2026-11-05T21:30:30Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Hackers are using fake OpenAI, SpaceX, and Anthropic event invitations to lure employees into phishing attacks, using two different phishing-as-a-service platforms to steal Microsoft and Google account credentials and au"
+  },
+  {
+   "id": "rd:t3_1xouqpj",
+   "title": "Barracuda Networks is your new best friend (Barracuda Email Security Gateway Pre-Auth Remote Root RCE CVE-2026-116606 / CVE-2026-111560) - watchTowr Labs",
+   "source": "labs.watchtowr.com",
+   "published_at": "2026-11-05T21:24:03Z",
+   "cves": [
+    "CVE-2026-111560",
+    "CVE-2026-116606"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "submitted by /u/dx7r__ [link] [comments]  via reddit r/netsec: Barracuda Networks is your new best friend (Barracuda Email Security Gateway Pre-Auth Remote Root RCE CVE-2026-116606 / CVE-2026-111560) - watchTowr Labs "
+  },
+  {
+   "id": "rss:fd128ac8c470ddcc",
+   "title": "Core Skills in the Age of AI",
+   "source": "malware.news",
+   "published_at": "2026-11-05T21:05:42Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "One of the biggest questions I get whenever I\u2019m teaching anything focused on core skills\u2014whether it\u2019s network security, SOC analysis, or ecurity essentials\u2014is whether any of these classes are even necessary anymore becau"
+  }
+ ],
+ "candidate_stories": [
+  {
+   "id": "scammers-use-ai-generated-images-of-missing-pets-to-extort-owner",
+   "title": "Scammers use AI-generated images of missing pets to extort owners",
+   "n_events": 1,
+   "last_seen": "2026-11-05T21:40:40Z",
+   "first_event_title": "Scammers use AI-generated images of missing pets to extort owners"
+  },
+  {
+   "id": "fake-openai-spacex-events-used-to-steal-microsoft-google-account",
+   "title": "Fake OpenAI, SpaceX events used to steal Microsoft, Google accounts",
+   "n_events": 1,
+   "last_seen": "2026-11-05T21:30:30Z",
+   "first_event_title": "Fake OpenAI, SpaceX events used to steal Microsoft, Google accounts"
+  },
+  {
+   "id": "barracuda-warns-of-critical-flaws-allowing-root-access-to-device",
+   "title": "Barracuda warns of critical flaws allowing root access to devices",
+   "n_events": 17,
+   "last_seen": "2026-11-05T21:24:03Z",
+   "first_event_title": "Barracuda warns of critical flaws allowing root access to devices"
+  },
+  {
+   "id": "core-skills-in-the-age-of-ai",
+   "title": "Core Skills in the Age of AI",
+   "n_events": 1,
+   "last_seen": "2026-11-05T21:05:42Z",
+   "first_event_title": "Core Skills in the Age of AI"
+  },
+  {
+   "id": "anubis-ransomware-targets-u-s-organization-with-new-lindnor-back",
+   "title": "Anubis ransomware targets U.S. organization with new Lindnor backdoor",
+   "n_events": 2,
+   "last_seen": "2026-11-05T20:45:46.000Z",
+   "first_event_title": "New. \"Attackers using the Anubis ransomware targeted a U.S. organization in October 2026 using a new custom backdoor that Symantec has calle"
+  },
+  {
+   "id": "bring-a-tent-i-ve-got-the-coffee-lessons-from-it-sa",
+   "title": "Bring a tent, I've got the coffee: Lessons from it-sa",
+   "n_events": 0,
+   "last_seen": "2026-11-05T20:40:43Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "apt29-watering-hole-campaign-targets-mobile-users-via-compromise",
+   "title": "APT29 watering-hole campaign targets mobile users via compromised legitimate websites",
+   "n_events": 1,
+   "last_seen": "2026-11-05T20:40:00.000Z",
+   "first_event_title": "\ud83e\udd16 APT29 (Cozy Bear) compromises legitimate websites to serve mobile-specific watering holes, fingerprinting visitors and harvesting data onl"
+  },
+  {
+   "id": "zyxel-gs1900-switch-buffer-overflow-cve-2026-7273-added-to-cisa",
+   "title": "Zyxel GS1900 switch buffer overflow (CVE-2026-7273) added to CISA KEV",
+   "n_events": 28,
+   "last_seen": "2026-11-05T20:30:06.000Z",
+   "first_event_title": "We added CVE-2026-7273, a stack-based buffer overflow vulnerability affecting Zyxel GS1900 series switches, to the KEV Catalog. Visit https:"
+  },
+  {
+   "id": "nearly-1-5-million-exposed-secrets-targeted-in-new-revocation-pr",
+   "title": "Nearly 1.5 million exposed secrets targeted in new revocation program",
+   "n_events": 0,
+   "last_seen": "2026-11-05T20:15:08Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "air-botswana-discloses-suspected-ransomware-attack-on-internal-i",
+   "title": "Air Botswana discloses suspected ransomware attack on internal IT systems",
+   "n_events": 1,
+   "last_seen": "2026-11-05T20:01:46.000Z",
+   "first_event_title": "Air Botswana Discloses Suspected Ransomware Attack Affecting Internal IT Systems Air Botswana disclosed a suspected ransomware attack involv"
+  },
+  {
+   "id": "dreamhost-confirms-data-breach-exposed-ftp-logins-and-webmail-se",
+   "title": "DreamHost confirms data breach exposed FTP logins and webmail sessions",
+   "n_events": 13,
+   "last_seen": "2026-11-05T20:00:05.000Z",
+   "first_event_title": "DreamHost confirms data breach exposed FTP logins and webmail sessions"
+  },
+  {
+   "id": "rgbloader-multi-stage-loader-reconstructs-net-payloads-from-imag",
+   "title": "RGBLoader multi-stage loader reconstructs .NET payloads from image pixels, active in the US",
+   "n_events": 1,
+   "last_seen": "2026-11-05T19:39:24.000Z",
+   "first_event_title": "\ud83d\udea8 Active in the US: Multi-stage # RGBLoader reconstructs .NET payloads from image pixel data and executes them directly in memory. The chain"
+  },
+  {
+   "id": "french-blood-storage-units-targeted-in-cyberattack",
+   "title": "French blood storage units targeted in cyberattack",
+   "n_events": 21,
+   "last_seen": "2026-11-05T19:30:02.000Z",
+   "first_event_title": "French blood storage units targeted in cyberattack"
+  },
+  {
+   "id": "android-sms-of-death-exploit-can-remotely-crash-unpatched-phones",
+   "title": "Android SMS of Death exploit can remotely crash unpatched phones",
+   "n_events": 11,
+   "last_seen": "2026-11-05T19:26:10.418Z",
+   "first_event_title": "Android SMS of Death exploit can remotely crash unpatched phones"
+  },
+  {
+   "id": "openai-s-gpt-6-astra-silently-obstructed-safety-research-tasks",
+   "title": "OpenAI\u2019s GPT-6 Astra silently obstructed safety research tasks",
+   "n_events": 0,
+   "last_seen": "2026-11-05T19:24:26Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "air-force-cyber-official-need-to-invest-in-digital-forensics",
+   "title": "Air Force cyber official: need to invest in digital forensics",
+   "n_events": 0,
+   "last_seen": "2026-11-05T19:22:27Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "us-agencies-warn-of-refrigeration-hacks-amid-suspected-attacks-o",
+   "title": "US agencies warn of refrigeration hacks amid suspected attacks on military bases",
+   "n_events": 6,
+   "last_seen": "2026-11-05T19:11:38.263Z",
+   "first_event_title": "US agencies warn of refrigeration hacks amid suspected attacks on military bases"
+  },
+  {
+   "id": "threat-actor-gorbag-targets-ukrainian-law-enforcement-and-defens",
+   "title": "Threat Actor Gorbag Targets Ukrainian Law Enforcement and Defense Sector",
+   "n_events": 3,
+   "last_seen": "2026-11-05T19:07:05.000Z",
+   "first_event_title": "Threat actor Gorbag has been targeting Ukrainian law enforcement, local administrations, and the defense sector since February 2025. Attacks"
+  },
+  {
+   "id": "openbsd-security-advisory-av26-1130",
+   "title": "OpenBSD security advisory (AV26-1130)",
+   "n_events": 1,
+   "last_seen": "2026-11-05T19:05:42Z",
+   "first_event_title": "OpenBSD security advisory (AV26-1130)"
+  },
+  {
+   "id": "openssh-on-musl-linux-has-been-letting-people-into-password-less",
+   "title": "openssh on musl linux has been letting people into password-less accounts since 2016",
+   "n_events": 18,
+   "last_seen": "2026-11-05T19:03:48.000Z",
+   "first_event_title": "openssh on musl linux has been letting people into password-less accounts since 2016"
+  },
+  {
+   "id": "epichealth-medical-clinics-confirms-data-breach-after-gentlemen",
+   "title": "Epichealth Medical Clinics confirms data breach after Gentlemen ransomware claim",
+   "n_events": 1,
+   "last_seen": "2026-11-05T19:01:46.000Z",
+   "first_event_title": "Epichealth Medical Clinics Confirms Data Breach Following The Gentlemen Ransomware Claim Epichealth Medical Clinics confirmed a data breach "
+  },
+  {
+   "id": "wordpress-core-rce-cvss-8-1-in-versions-4-7-7-1-3",
+   "title": "WordPress Core RCE (CVSS 8.1) in versions 4.7-7.1.3",
+   "n_events": 28,
+   "last_seen": "2026-11-05T18:39:37.000Z",
+   "first_event_title": "\ud83e\udd16 WordPress Core RCE (CVSS 8.1, no CVE ID yet, versions 4.7\u20137.1.3): full-package core upgrades unpack the installer into a predictable web-r"
+  },
+  {
+   "id": "credit-mutuel-arkea-cyberattack-exposes-customer-data",
+   "title": "Credit Mutuel Arkea cyberattack exposes customer data",
+   "n_events": 2,
+   "last_seen": "2026-11-05T18:30:34.000Z",
+   "first_event_title": "European banks wake up to scale of vulnerability after cyberattack on French bank Hackers managed to steal part of Cr\u00e9dit Mutuel Ark\u00e9a's equ"
+  },
+  {
+   "id": "nikke-pc-game-launcher-hacked-to-spread-remote-access-data-steal",
+   "title": "NIKKE PC game launcher hacked to spread remote access, data-stealing malware",
+   "n_events": 10,
+   "last_seen": "2026-11-05T18:30:00.000Z",
+   "first_event_title": "NIKKE PC game launcher hacked to spread remote access, data-stealing malware"
+  },
+  {
+   "id": "stopping-remote-code-execution-rce-with-wasm-sandboxes",
+   "title": "Stopping Remote Code Execution (RCE) with Wasm Sandboxes",
+   "n_events": 0,
+   "last_seen": "2026-11-05T18:29:36Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "tibetan-centre-for-human-rights-website-hit-by-cyberattack-and-d",
+   "title": "Tibetan Centre for Human Rights website hit by cyberattack and data breach",
+   "n_events": 1,
+   "last_seen": "2026-11-05T18:27:17.240Z",
+   "first_event_title": "\"Tibetan Centre for Human Rights and Democracy (TCHRD) Director Tenzin Dawa told # Phayul that the latest cyberattack underscored what she d"
+  },
+  {
+   "id": "sogou-input-method-update-hijack-installs-darkvigil-backdoor-upd",
+   "title": "Sogou Input Method update hijack installs DarkVigil backdoor; update to 16.10 (CVE-2026-120422)",
+   "n_events": 1,
+   "last_seen": "2026-11-05T18:26:37Z",
+   "first_event_title": "Sogou Input Method update hijack installs DarkVigil backdoor; update to 16.10 (CVE-2026-120422)"
+  },
+  {
+   "id": "apple-cve-2024-27834-improper-authentication-vulnerability-added",
+   "title": "Apple CVE-2024-27834 improper authentication vulnerability added to CISA KEV",
+   "n_events": 8,
+   "last_seen": "2026-11-05T18:25:04.000Z",
+   "first_event_title": "Added to CISA's Known Exploited Vulnerabilities catalog: CVE-2024-27834 Apple Multiple Products Improper Authentication Vulnerability CVSS 5"
+  },
+  {
+   "id": "ghostmap-the-android-flaw-that-can-lock-your-phone-without-you-e",
+   "title": "GhostMap: the Android flaw that can lock your phone without you even opening the app",
+   "n_events": 1,
+   "last_seen": "2026-11-05T18:11:11.672Z",
+   "first_event_title": "GhostMap: the Android flaw that can lock your phone without you even opening the app"
+  },
+  {
+   "id": "binance-bitget-and-the-credential-playbook-that-keeps-working",
+   "title": "Binance, BitGet, and the Credential Playbook That Keeps Working",
+   "n_events": 6,
+   "last_seen": "2026-11-05T18:10:13.352Z",
+   "first_event_title": "Binance, BitGet, and the Credential Playbook That Keeps Working"
+  },
+  {
+   "id": "lpl-financial-discloses-data-breach-involving-unauthorized-advis",
+   "title": "LPL Financial discloses data breach involving unauthorized advisor portal access",
+   "n_events": 1,
+   "last_seen": "2026-11-05T18:01:46.000Z",
+   "first_event_title": "LPL Financial Discloses Data Breach Involving Unauthorized Advisor Portal Access LPL Financial disclosed a data breach after remote access s"
+  },
+  {
+   "id": "digicert-confirms-data-breach-after-security-misconfiguration-ex",
+   "title": "DigiCert Confirms Data Breach After Security Misconfiguration Exposes Customer Personal Information",
+   "n_events": 5,
+   "last_seen": "2026-11-05T18:00:29.000Z",
+   "first_event_title": "DigiCert Confirms Data Breach After Security Misconfiguration Exposes Customer Personal Information"
+  },
+  {
+   "id": "uzbekistan-investigates-hacker-claim-of-27-million-citizen-recor",
+   "title": "Uzbekistan investigates hacker claim of 27 million citizen records exposed",
+   "n_events": 1,
+   "last_seen": "2026-11-05T17:54:51.000Z",
+   "first_event_title": "Uzbekistan is investigating reports of exposed personal data as hackers claim access to records on 27 million citizens, raising fresh concer"
+  },
+  {
+   "id": "unifying-identity-posture-and-threat-detection-with-the-cortex-p",
+   "title": "Unifying Identity Posture and Threat Detection with the Cortex Platform",
+   "n_events": 0,
+   "last_seen": "2026-11-05T17:47:09Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "openai-s-new-cyber-ai-model-finds-948-linux-privilege-escalation",
+   "title": "OpenAI\u2019s New Cyber AI Model Finds 948 Linux Privilege Escalation Vulnerabilities in Just 10 Days",
+   "n_events": 14,
+   "last_seen": "2026-11-05T17:45:22.000Z",
+   "first_event_title": "OpenAI\u2019s New Cyber AI Model Finds 948 Linux Privilege Escalation Vulnerabilities in Just 10 Days"
+  },
+  {
+   "id": "hacking-on-autopilot-inside-artex-cybercrime-campaigns",
+   "title": "Hacking on Autopilot: Inside ARTEX Cybercrime Campaigns",
+   "n_events": 1,
+   "last_seen": "2026-11-05T17:35:45Z",
+   "first_event_title": "Hacking on Autopilot: Inside ARTEX Cybercrime Campaigns"
+  },
+  {
+   "id": "uk-royal-cornwall-hospitals-trust-data-breach-exposed-health-det",
+   "title": "UK: Royal Cornwall Hospitals Trust data breach exposed health details of 7,715 staff",
+   "n_events": 1,
+   "last_seen": "2026-11-05T17:31:01Z",
+   "first_event_title": "UK: Royal Cornwall Hospitals Trust data breach exposed health details of 7,715 staff"
+  },
+  {
+   "id": "ninth-circuit-breach-of-confidence-confers-standing-in-health-da",
+   "title": "Ninth Circuit: Breach Of Confidence Confers Standing In Health Data Security Case",
+   "n_events": 0,
+   "last_seen": "2026-11-05T17:30:41Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "hackers-backdoor-linux-servers-using-trojanized-cwp-web-server",
+   "title": "Hackers backdoor Linux servers using trojanized CWP web server",
+   "n_events": 3,
+   "last_seen": "2026-11-05T17:30:10.000Z",
+   "first_event_title": "Hackers backdoor Linux servers using trojanized CWP web server"
+  },
+  {
+   "id": "google-calendar-phishing-campaign-hijacks-sessions-bypasses-mfa",
+   "title": "Google Calendar phishing campaign hijacks sessions, bypasses MFA",
+   "n_events": 2,
+   "last_seen": "2026-11-05T17:12:52.886Z",
+   "first_event_title": "Google Calendar phishing campaign hijacks sessions, bypasses MFA"
+  },
+  {
+   "id": "adobe-security-advisory-av26-1092",
+   "title": "Adobe security advisory (AV26-1092)",
+   "n_events": 2,
+   "last_seen": "2026-10-30T08:01:42.000Z",
+   "first_event_title": "Adobe security advisory (AV26-1092)"
+  },
+  {
+   "id": "cisco-security-advisory-av26-1127",
+   "title": "Cisco security advisory (AV26-1127)",
+   "n_events": 2,
+   "last_seen": "2026-11-05T03:58:31.000Z",
+   "first_event_title": "Cisco security advisory (AV26-1127)"
+  },
+  {
+   "id": "control-systems-moxa-security-advisory-av26-1089",
+   "title": "[Control Systems] Moxa security advisory (AV26-1089)",
+   "n_events": 1,
+   "last_seen": "2026-10-27T13:35:40Z",
+   "first_event_title": "[Control Systems] Moxa security advisory (AV26-1089)"
+  },
+  {
+   "id": "control-systems-phoenix-contact-security-advisory-av26-1121",
+   "title": "[Control Systems] Phoenix Contact security advisory (AV26-1121)",
+   "n_events": 1,
+   "last_seen": "2026-11-04T15:10:42Z",
+   "first_event_title": "[Control Systems] Phoenix Contact security advisory (AV26-1121)"
+  },
+  {
+   "id": "craft-cms-security-advisory-av26-1086",
+   "title": "Craft CMS security advisory (AV26-1086)",
+   "n_events": 2,
+   "last_seen": "2026-10-26T17:00:13.000Z",
+   "first_event_title": "Craft CMS security advisory (AV26-1086)"
+  },
+  {
+   "id": "dell-security-advisory-av26-1110",
+   "title": "Dell security advisory (AV26-1110)",
+   "n_events": 1,
+   "last_seen": "2026-11-02T14:35:44Z",
+   "first_event_title": "Dell security advisory (AV26-1110)"
+  },
+  {
+   "id": "docker-security-advisory-av26-1123",
+   "title": "Docker security advisory (AV26-1123)",
+   "n_events": 1,
+   "last_seen": "2026-11-04T19:40:43Z",
+   "first_event_title": "Docker security advisory (AV26-1123)"
+  },
+  {
+   "id": "fortinet-security-advisory-av26-812",
+   "title": "Fortinet security advisory (AV26-812)",
+   "n_events": 2,
+   "last_seen": "2026-08-13T10:40:57Z",
+   "first_event_title": "Fortinet security advisory (AV26-812)"
+  },
+  {
+   "id": "github-security-advisory-av26-1126",
+   "title": "GitHub security advisory (AV26-1126)",
+   "n_events": 1,
+   "last_seen": "2026-11-04T19:55:39Z",
+   "first_event_title": "GitHub security advisory (AV26-1126)"
+  },
+  {
+   "id": "google-security-advisory-av26-1118",
+   "title": "Google security advisory (AV26-1118)",
+   "n_events": 1,
+   "last_seen": "2026-11-04T14:45:41Z",
+   "first_event_title": "Google security advisory (AV26-1118)"
+  },
+  {
+   "id": "google-security-advisory-av26-904",
+   "title": "Google security advisory (AV26-904)",
+   "n_events": 2,
+   "last_seen": "2026-09-09T20:49:30Z",
+   "first_event_title": "Google security advisory (AV26-904)"
+  },
+  {
+   "id": "grafana-security-advisory-av26-860",
+   "title": "Grafana Alloy Vulnerability CVE-2026-19516",
+   "n_events": 3,
+   "last_seen": "2026-10-13T16:00:56.470Z",
+   "first_event_title": "Grafana security advisory (AV26-860)"
+  },
+  {
+   "id": "hashicorp-security-advisory-av26-1106",
+   "title": "HashiCorp security advisory (AV26-1106)",
+   "n_events": 1,
+   "last_seen": "2026-10-30T15:55:43Z",
+   "first_event_title": "HashiCorp security advisory (AV26-1106)"
+  },
+  {
+   "id": "hashicorp-security-advisory-av26-797",
+   "title": "HashiCorp security advisory (AV26-797)",
+   "n_events": 1,
+   "last_seen": "2026-08-11T14:05:42Z",
+   "first_event_title": "HashiCorp security advisory (AV26-797)"
+  },
+  {
+   "id": "hashicorp-security-advisory-av26-817",
+   "title": "HashiCorp security advisory (AV26-817)",
+   "n_events": 1,
+   "last_seen": "2026-08-14T16:05:44Z",
+   "first_event_title": "HashiCorp security advisory (AV26-817)"
+  },
+  {
+   "id": "hpe-security-advisory-av26-1119",
+   "title": "HPE security advisory (AV26-1119)",
+   "n_events": 1,
+   "last_seen": "2026-11-04T14:55:41Z",
+   "first_event_title": "HPE security advisory (AV26-1119)"
+  },
+  {
+   "id": "ibm-security-advisory-av26-1040",
+   "title": "IBM security advisory (AV26-1040)",
+   "n_events": 1,
+   "last_seen": "2026-10-14T18:40:41Z",
+   "first_event_title": "IBM security advisory (AV26-1040)"
+  },
+  {
+   "id": "ivanti-security-advisory-av26-805",
+   "title": "Ivanti security advisory (AV26-805)",
+   "n_events": 1,
+   "last_seen": "2026-08-11T20:20:39Z",
+   "first_event_title": "Ivanti security advisory (AV26-805)"
+  },
+  {
+   "id": "ivanti-security-advisory-av26-897",
+   "title": "Ivanti September 2026 security advisory: EPMM, ITSM, Sentry vulnerabilities",
+   "n_events": 3,
+   "last_seen": "2026-09-09T06:39:58Z",
+   "first_event_title": "Ivanti security advisory (AV26-897)"
+  },
+  {
+   "id": "jetbrains-security-advisory-av26-825",
+   "title": "JetBrains security advisory (AV26-825)",
+   "n_events": 1,
+   "last_seen": "2026-08-18T13:40:50Z",
+   "first_event_title": "JetBrains security advisory (AV26-825)"
+  },
+  {
+   "id": "nikkei-discloses-breaches-of-employees-microsoft-google-email-ac",
+   "title": "Nikkei discloses breaches of employee Microsoft and Google email accounts",
+   "n_events": 5,
+   "last_seen": "2026-10-07T14:00:02.000Z",
+   "first_event_title": "Nikkei discloses breaches of employees\u2019 Microsoft, Google email accounts"
+  }
+ ]
+}
