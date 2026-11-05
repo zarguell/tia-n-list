@@ -1,0 +1,3 @@
+India's CERT-In has issued a warning about an active hacking campaign called Crafty Falcon, reported by Reuters on November 5. The campaign targets non-bank lenders, fintech companies, and cryptocurrency exchanges, and the attackers are reportedly using publicly available AI tools to automate parts of their operations.
+
+CERT-In identified four tools associated with the campaign: ARTEX, PentAGI, Cairn, and CyberStrikeAI. Researchers have linked at least two of the tools to China, but CERT-In has not publicly attributed the campaign to a specific country or state-sponsored group. Financial organizations in India should treat the advisory as a reminder to harden authentication and monitoring on fintech and lending platforms, and to watch for AI-assisted intrusion activity.
