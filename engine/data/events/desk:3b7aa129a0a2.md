@@ -1,0 +1,1 @@
+Heise Online reported that OpenSSH and Alpine Linux warned of a severe but niche authentication-bypass bug. OpenSSH developer Damien Miller warned users of affected systems to disable password-based login immediately via PasswordAuthentication=no and restart sshd, or disable SSH altogether. The flaw affects Linux systems using the musl C standard library without PAM.
