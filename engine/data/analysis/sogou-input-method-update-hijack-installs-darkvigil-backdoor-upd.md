@@ -1,0 +1,3 @@
+A Reddit post in r/netsec reports that the Sogou Input Method update mechanism was hijacked to install the DarkVigil backdoor, tracked as CVE-2026-120422. The post advises users to update to version 16.10. The report originates from vulnpocalypse.dev and has not been independently confirmed by a vendor advisory or security researcher.
+
+Because the claim rests on a single source, it should be treated as unverified until Sogou or a credible security vendor confirms the backdoor and the CVE assignment. Supply chain compromise of a widely used input method installer could affect many users, but the thin sourcing means no detection numbers or exploit details can be treated as fact at this time.

@@ -1,0 +1,5 @@
+OpenSSH on musl Linux without PAM has an authentication bypass affecting accounts whose /etc/shadow password field is set to asterisk. Any password between 257 and 1024 bytes authenticates successfully, meaning an attacker who can reach the SSH port can log in with no valid password. The issue was disclosed in the OpenSSH 10.6p2 release notes and tracked by Alpine Linux as a server password authentication advisory.
+
+Alpine Linux has pushed fixed packages for every supported release back to version 3.16, indicating the flaw has existed across multiple generations of the distribution. Because the bypass requires no credentials and only network access to SSH, it is a critical pre-authentication issue for any Alpine-based system running OpenSSH on musl libc without PAM.
+
+Administrators should verify their OpenSSH version and confirm whether PAM is in use. Systems with empty or disabled shadow password entries are the primary exposure, and any internet-facing SSH service on affected Alpine releases should be prioritized for patching. Fixed packages are available in OpenSSH 10.6p2 and through Alpine's package repositories.
