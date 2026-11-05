@@ -1,0 +1,5 @@
+OpenAI has built an autonomous pipeline that discovers, validates, exploits, and patches flaws in the Linux kernel. In a single run in mid-October 2026, an upcoming cybersecurity model generated 948 working local privilege escalation (LPE) exploits for a widely used Linux distribution, at a total cost of $1,213,430.
+
+The finding matters less for any single bug than for the throughput: an AI system can now produce hundreds of working kernel exploits in days, compressing the gap between vulnerability discovery and weaponization. The same pipeline also patches flaws, but the offensive capability is what defenders must plan around, since these bugs land in a kernel that sits underneath most production Linux fleets.
+
+Watch for how OpenAI scopes access to the model and how quickly the validated flaws move through vendor disclosure and patch channels. Kernel patching cadence and exposure tracking for LPE-class bugs are the practical defenses while the details of the 948 findings remain under wraps.
