@@ -1,0 +1,1 @@
+Android Authority reported on Nov. 5, 2026 that GhostMap lets a specially crafted app trigger a persistent boot loop simply by being installed. The app needs no permissions, contains no executable code, and never has to be launched. The article notes Google knew about the flaw since August and closed it as not reproducible without shipping a fix.
