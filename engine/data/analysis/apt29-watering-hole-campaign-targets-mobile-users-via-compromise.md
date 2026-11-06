@@ -1,3 +1,3 @@
-Dark Reading reported that APT29, also known as Cozy Bear, is compromising legitimate websites to serve mobile-specific watering holes that fingerprint visitors and harvest data. The coverage describes mobile-targeted intrusions served through trusted, compromised sites.
+APT29, also known as Cozy Bear, is running a watering-hole campaign that compromises legitimate websites to serve mobile-specific pages to visitors. DarkReading reports the compromised sites fingerprint visitors and harvest data, with mobile-specific targeting showing the group is focusing on phones rather than desktops.
 
-So far the store carries a single source for this reporting. Watch for corroboration from victim telemetry or additional researchers, including any exploited iOS or Android vulnerabilities and domains used in the campaign.
+Because the campaign abuses legitimate and trusted websites, blocklists give limited protection and visitors may see no visible sign of compromise. Organizations should review web-proxy telemetry for unusual connections from mobile devices to familiar sites, and treat unexpected login or behavior changes on trusted sites as suspicious until verified.
