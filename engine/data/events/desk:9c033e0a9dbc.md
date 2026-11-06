@@ -1,0 +1,1 @@
+The Register reported on November 5, 2026 that Chainalysis confirmed attackers who broke into its systems in October obtained usernames, password hashes, and live tokens. The piece notes the company's blockchain tools are routinely used to assist police investigations and that the exposure was confirmed in an update written late Wednesday evening, November 4.
