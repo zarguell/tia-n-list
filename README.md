@@ -42,3 +42,10 @@ uv venv ~/.local/venvs/tia-engine && uv pip install jinja2 markdown bleach   # o
 Generated site lands at the repo root (GitHub Pages serves `/`). CI builds it
 on every push; lint gates (link resolution, path-absolute, chips, CTI, Sigma,
 YARA) fail the build on any violation.
+
+CI publishes only the generated surface: `engine/stage_pages.py` copies it into
+`$RUNNER_TEMP/pages-site` for the Pages artifact (the repo root also holds the
+source tree and the raw event store, which are not site content — staging them
+made every deploy upload 114k files) and fails the build if a staged page
+references anything the staging missed. The deploy job retries once with the
+same artifact when GitHub's Pages sync stalls.
