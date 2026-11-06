@@ -1,0 +1,3 @@
+A vulnerability in Broadcom Wi-Fi systems allows remote code execution and has been known for 16 years, with potentially millions of vulnerable devices, according to reporting by Sekurak. The Polish report describes a flaw in Broadcom Wi-Fi chipsets enabling remote code execution and credits a security researcher for the finding; the available excerpt cuts off the researcher's surname.
+
+No CVE ID or fixed firmware version appears in the reporting, so the reach and exploitability of the flaw remain unquantified for now. Broadcom Wi-Fi is embedded in millions of devices, so a 16-year-old remote code execution flaw is worth tracking until a vendor advisory or CVE record confirms the affected models and any patches.
