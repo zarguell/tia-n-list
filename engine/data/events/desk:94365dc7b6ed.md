@@ -1,0 +1,1 @@
+The Register reports that researcher Özgün Kültekin discovered the *sshole authentication bypass, tracked as CVE-2026-123158, in OpenSSH on musl-based Linux systems such as Alpine. An attacker who can reach the SSH port can log into accounts configured to reject passwords using any password longer than 256 characters. The report was published on November 5, 2026.

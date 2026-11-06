@@ -1,0 +1,1 @@
+The GitHub Advisory Database lists CVE-2026-83844 (GHSA-2h2h-j632-qrgj) as a high-severity Windows Paint remote code execution flaw with CVSS 8.1, published October 13, 2026, crediting Microsoft as the source.
