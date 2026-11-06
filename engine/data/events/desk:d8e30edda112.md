@@ -1,0 +1,1 @@
+Calif published its PHP2Shell research on October 21, 2026, disclosing two PHP remote vulnerabilities discovered jointly by Calif, OpenAI, and Wiz. The report states both flaws were addressed in the PHP October 2026 security release and details the Zend Engine HashTable memory corruption reachable through oversized form-encoded request bodies.
