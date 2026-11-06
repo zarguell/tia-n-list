@@ -1,0 +1,3 @@
+A US Air Force official is calling for a major increase in investment in digital forensics capabilities to counter cyber threats. The reporting frames the push as a response to growing intrusions against military targets, with the Air Force seeking expanded forensic readiness for investigating attacks on its systems.
+
+The argument is that without dedicated forensics capacity, the service cannot fully determine how breaches occur or who is responsible. For defenders, the story signals continued military emphasis on incident forensics as a core cyber defense function rather than a secondary concern.

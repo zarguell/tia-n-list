@@ -1,0 +1,3 @@
+The Register reports that ransomware attackers hit the Queens Public Library in New York, disrupting public Wi-Fi, the library website, and book check-out systems. The incident is a real-world ransomware case against a municipal public-service institution, with knock-on effects for patrons who depend on library internet access.
+
+The reporting does not yet name a ransomware group or confirm whether data was stolen, so the full impact remains unclear. For the library's users and similar municipal institutions, the event highlights how ransomware can knock out basic public services even without a confirmed data breach.
