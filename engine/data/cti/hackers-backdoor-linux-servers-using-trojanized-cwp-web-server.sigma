@@ -1,0 +1,37 @@
+title: CWPdoor Trojanized cwpsrv Payload Pulled from Staging IP
+id: 5f600678-e64c-49e0-9aa1-ea62a18893e1
+status: experimental
+description: >
+    Detects the distribution step of CWPdoor, a passive backdoor embedded in a
+    recompiled cwpsrv binary (Control Web Panel 1.15.10 and 1.24.0). XLab
+    captured a script posing as the panel updater, cwpsrv_update.sh, which
+    downloads the trojanized binary from 136.0.141.71 and overwrites
+    /usr/local/cwpsrv/bin/cwpsrv, then restores file timestamps, deletes
+    temporary files and wipes the command-history log. The rule fires on the
+    updater script name or on any command line that references the staging IP,
+    both of which precede the binary swap. A hit means the CWP panel on that
+    host should be treated as compromised and rebuilt from clean media.
+references:
+    - https://www.bleepingcomputer.com/news/security/hackers-backdoor-linux-servers-using-trojanized-cwp-web-server/
+    - https://blog.xlab.qianxin.com/beware-of-cwpdoor-the-zero-detection-pas-backdoor-hiding-in-centos-websive-panel/
+author: Tia N. List
+date: 2026/11/06
+tags:
+    - attack.t1505
+    - attack.t1070
+    - attack.t1573
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection_updater:
+        CommandLine|contains:
+            - 'cwpsrv_update.sh'
+    selection_staging:
+        CommandLine|contains:
+            - '136.0.141.71'
+    condition: selection_updater or selection_staging
+falsepositives:
+    - Legitimate Control Web Panel maintenance that runs a vendor-supplied script of the same name
+    - Analysts or scanners deliberately resolving the reported staging IP during incident triage
+level: high
