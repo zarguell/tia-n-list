@@ -1,0 +1,3 @@
+Veeam warns that its Software Appliance version 13.1 and later can intermittently fail to boot on certain AMD EPYC hosts, naming the 7262, 7302, and 7F72 among the affected models. The trigger described in the collected notice involves a FIPS-related condition, with full detail in Veeam KB4960. This is a reliability advisory, not a vulnerability disclosure, and no CVE is attached.
+
+The impact is operational. A backup appliance that does not boot is a failed restore path. Administrators running the appliance on the listed EPYC hosts should check the KB before the next maintenance window, confirm whether the FIPS condition applies to them, and verify boot and recovery jobs after any update.
