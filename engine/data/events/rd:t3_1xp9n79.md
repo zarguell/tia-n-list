@@ -1,0 +1,3 @@
+Many common web frameworks like Spring and Ruby on Rails trust the Forwarded header by default, even though most proxies don't actually have any support for it. This makes apps vulnerable to request hostname or client IP address spoofing in the default configurations. I've been researching how the Forwarded header is supported across frameworks and proxies. Rails and Spring recently shipped fixes following my research. There are still other frameworks that need application configuration changes to be secure. submitted by /u/luryus [link] [comments]
+
+via reddit r/netsec: Forwarded Without Question: How Web Frameworks Overtrust the Forwarded Header

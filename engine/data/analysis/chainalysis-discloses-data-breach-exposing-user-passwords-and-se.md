@@ -1,0 +1,3 @@
+Chainalysis disclosed a data breach in which a cyberattack exposed user passwords and security tokens, with credentials for all users exposed and key services forced offline. Reporting from newisty.com and cyberworldops.eu says the company is advising security teams to assume exposure across the board.
+
+It matters because Chainalysis is a blockchain-analysis provider relied on by exchanges and investigators, so stolen passwords and security tokens can be used to impersonate accounts or hijack sessions, and the offline services show real operational impact. Watch for Chainalysis's own account of who was behind the attack, whether any tokens were abused, and whether customer data appears on leak sites.

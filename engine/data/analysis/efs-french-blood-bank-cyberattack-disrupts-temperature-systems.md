@@ -1,0 +1,3 @@
+EFS, the French blood establishment, confirmed a cybersecurity incident after a cyberattack disrupted refrigeration systems used for blood storage in France, according to reporting from linuxiarze.pl. Separate English reporting from en.killbait.com describes the same incident as an attack on French blood banks targeting temperature systems, and states the banks successfully defended against it.
+
+It matters because temperature-controlled blood storage is time-critical for hospitals, and any disruption puts the blood supply at risk. The two sources disagree on whether operations were disrupted or the attack was repelled. Watch for an official EFS statement, any effect on blood donations or distributions, and a reconciled account of what happened.
