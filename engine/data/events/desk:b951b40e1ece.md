@@ -1,0 +1,1 @@
+Mandiant and GTIG provide remediation guidance for intrusions driven by threat actors using ARTEX and similar agentic pentesting frameworks. Google Cloud characterizes ARTEX as an autonomous, multi-agent LLM-driven pentesting and offensive command-and-control platform written in Go with an embedded Next.js web console.

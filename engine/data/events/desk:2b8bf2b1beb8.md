@@ -1,0 +1,1 @@
+Engineer Li Puhua, known online as Autumn, released ARTEX on GitHub as a personal side project for organizations to test their own networks. The article describes ARTEX as an AI pentesting tool later repurposed for bank hacking, and notes that ConnectWise issued its first advisory on 16 October 2026.
