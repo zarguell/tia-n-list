@@ -1,0 +1,1 @@
+watchTowr Labs published this write-up on 1 April 2025 as tracking item WT-2025-0016. It describes CVE-2025-2748, an unauthenticated stored cross-site scripting flaw in Kentico Xperience multiple-file uploads using malicious SVG files, and shows how an unauthenticated resource-fetching handler can be chained with the XSS to reach remote code execution.

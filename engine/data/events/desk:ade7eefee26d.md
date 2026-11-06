@@ -1,0 +1,1 @@
+CISA's Known Exploited Vulnerabilities catalog lists CVE-2025-31324 with a date added of 29 April 2025, based on evidence of active exploitation. The same catalog added related Kentico Xperience authentication bypass flaws CVE-2025-2746 and CVE-2025-2747 on 20 October 2025.
