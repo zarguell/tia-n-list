@@ -1,0 +1,1 @@
+Strix rates CVE-2026-18535 critical at CVSS 9.6 and confirms IBM API Connect 10.0.8.0 through 10.0.8.12 and 12.1.0.0 through 12.1.1.2 are vulnerable to ReDoS and improper neutralisation of wildcard query operators under CWE-1333. It lists NVD analysis as pending, the CVE as not in KEV, and cites IBM advisory nodes 7291753 and 7292434 as references.
