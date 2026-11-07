@@ -1,0 +1,5 @@
+Apiiro research surfaced via The Hacker News found 104,185 public copies of Claude Code's .claude/settings.local.json on GitHub. Of those, 1,122 files hold at least one secret, totaling 1,379 exposed secrets. The exposure is tied to Claude Code's "Yes, and don't ask again" option, which can write passwords and API keys into the settings file that then gets committed to public repositories.
+
+The story matters because settings.local.json is a credential store, not a throwaway config. Over a thousand public repos with at least one secret each means active keys and passwords are reachable by anyone scanning GitHub. AI coding agents create a new shadow surface where secrets land outside normal pre-commit review or secret-scanning baselines.
+
+What to watch: whether affected secrets are revoked and the files removed, and whether similar auto-consent options in other AI coding tools produce the same class of exposure. The event names no CVE; the primary report is the The Hacker News piece linked from the event.
