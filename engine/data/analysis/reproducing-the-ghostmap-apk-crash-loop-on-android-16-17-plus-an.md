@@ -1,0 +1,3 @@
+Bitdefender has reported an Android flaw where a malformed app with no code that is never opened can trap phones in a crash loop. The issue relates to the GhostMap APK and affects Android 16 and 17. The crash stems from a ZIP parser mismatch, and researchers have developed an offline check for it.
+
+This is a notable denial-of-service vector because the malicious app does not need to be executed or even opened to trigger the crash. The mere presence of a malformed APK can destabilize the device, raising questions about how Android handles APK parsing and ZIP file validation at the system level. Users on Android 16 and 17 should be cautious about sideloading apps from untrusted sources until patches are available.
