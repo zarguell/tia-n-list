@@ -1,0 +1,3 @@
+Since i left from my temporary job and back to study my any.run account got deactivated, so i might actually need a help guys. Can you check, is this thing suspicious or not? In my opiniom it is since there wasnt any issue and the author's account in github is absolutely zero. Release InputLab v1.4.0 — a driver check for your mouse's worst gaps, every driver between your mouse and Windows, the interrupt measurement as pictures, and a fairer mouse score for fast mice · moneks1106-code/InputLab submitted by /u/DonChanSus [link] [comments]
+
+via reddit r/cybersecurity: Someone can run it out instead of me in any.run?
