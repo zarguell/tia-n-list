@@ -1,0 +1,35 @@
+title: APT29 Mobile Watering-Hole Delivery Domains
+id: 9c4b7e02-51a8-4f36-8d0e-b3f17a6c2e58
+status: experimental
+description: >
+    Detects DNS/HTTP resolution of the delivery hostnames reported in the
+    APT29 (Cozy Bear) mobile watering-hole campaign, which compromised
+    legitimate websites and the Ukrainian analytics tracker Plerdy to
+    fingerprint iOS and Android visitors and serve n-day exploit chains
+    (CVE-2025-43529, CVE-2024-27834, CVE-2026-20700, CVE-2026-3910 and
+    related flaws). A hit from a mobile user agent means the device was
+    steered toward an exploit chain, not that the chain succeeded.
+references:
+    - https://www.darkreading.com/mobile-security/apt29-watering-holes-target-mobile-users
+    - https://thehackernews.com/2026/11/apt29-linked-hackers-hijack-web.html
+    - https://www.helpnetsecurity.com/2026/11/04/apt29-watering-hole-mobile-devices-n-day-exploits/
+author: Tia N. List
+date: 2026/11/07
+tags:
+    - attack.t1189
+    - attack.t1203
+    - attack.t1608
+logsource:
+    category: network_connection
+detection:
+    selection_host:
+        DestinationHostname|endswith:
+            - 'theowo.club'
+            - 'flux-telemetry.com'
+            - 'america250.holiday'
+            - 'adsprism-stat.com'
+    condition: selection_host
+falsepositives:
+    - Sinkhole or research environments that replay the reported infrastructure
+    - Legitimate domains that later fall under the same registrable names after the campaign takedown
+level: high

@@ -1,0 +1,39 @@
+title: cwpdoor Installer Fetching Trojanized cwpsrv Binary from 136.0.141.71
+id: 6f2c1a94-3d47-4c8e-9b1a-2d5e8f0c7a31
+status: experimental
+description: >
+    Detects the delivery half of the cwpdoor passive backdoor: the installer
+    cwpsrv_update.sh (captured by QiAnXin XLab on 2026-06-29) downloads the
+    trojanized cwpsrv web server from 136.0.141.71 and overwrites
+    /usr/local/cwpsrv/bin/cwpsrv. The backdoor triggers only on requests
+    carrying X-Ngx-Integrity-Time/Data/Sig headers validated with an embedded
+    RSA key, so the replacement binary is invisible to version checks; this
+    rule catches the swap while it happens. No CVE or fixed version exists.
+references:
+    - https://blog.xlab.qianxin.com/cwpdoor-the-invisible-backdoor-living-inside-control-web-panel/
+    - https://www.bleepingcomputer.com/news/security/hackers-backdoor-linux-servers-using-trojanized-cwp-web-server/
+    - https://thehackernews.com/2026/11/hackers-hide-linux-backdoor-in-control.html
+author: Tia N. List
+date: 2026/11/07
+tags:
+    - attack.t1105
+    - attack.t1554
+    - attack.t1505
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection_installer:
+        CommandLine|contains:
+            - 'cwpsrv_update.sh'
+    selection_source_ip:
+        CommandLine|contains:
+            - '136.0.141.71'
+    selection_target_binary:
+        CommandLine|contains:
+            - '/usr/local/cwpsrv/bin/cwpsrv'
+    condition: selection_source_ip or (selection_installer and selection_target_binary)
+falsepositives:
+    - Legitimate Control Web Panel upgrades that fetch cwpsrv from the vendor's own hosts and run a similarly named updater
+    - Administrative scripts that deliberately write the absolute path /usr/local/cwpsrv/bin/cwpsrv
+level: high
