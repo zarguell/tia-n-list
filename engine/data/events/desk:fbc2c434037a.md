@@ -1,0 +1,1 @@
+KuCoin reported on November 3, 2026 that ZachXBT raised the estimate of the EU theft to more than $133 million after tracing roughly $27 million in additional transactions beyond the original November 1 alert of more than $106 million in stolen USDC and USDT.

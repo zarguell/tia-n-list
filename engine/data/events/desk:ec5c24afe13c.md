@@ -1,0 +1,1 @@
+AMBCrypto reported on November 3, 2026 that, according to ZachXBT, the attacker swapped stolen USDC and USDT into ETH, routed funds through instant exchanges WellWallet and Kyrrex, converted ETH into Monero, and bridged assets across multiple blockchains. ZachXBT stated with high confidence that North Korea's Lazarus Group was not involved.

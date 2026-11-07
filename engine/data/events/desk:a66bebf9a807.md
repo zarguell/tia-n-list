@@ -1,0 +1,1 @@
+Bitquery published an on-chain investigation on November 2, 2026 reporting that ZachXBT flagged a suspected theft of more than $106 million from an unidentified European entity across accounts at multiple centralized exchanges, with outflows beginning on Sunday, November 1. The firm traced $108.8 million of the movement and found $61.0 million still on Ethereum.
