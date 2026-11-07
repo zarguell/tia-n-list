@@ -1,0 +1,3 @@
+Ars Technica reports that a British soldier ignored an order to pull his SIM card and was subsequently blackmailed. The order to remove the SIM points to SIM-swap exposure: an attacker who takes over a phone number can intercept calls and messages and use that access for extortion. The report frames it as an individual targeted incident rather than a mass campaign.
+
+It matters because ignoring instructions to remove or secure a SIM after loss, theft, or compromise leaves the number available for takeover, and blackmail can follow once private messages or contacts are exposed. Watch for whether the case produces charges or official guidance on SIM security, and for similar reports of SIM-swap extortion targeting individuals.
