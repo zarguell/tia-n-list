@@ -1,0 +1,3 @@
+LabelFoundry: It ingests docs → generates QA/CoT → curates → exports JSONL. There’s also a reviewed sample dataset on Hugging Face (49 synthetic SOC incident descriptions: phishing + ransomware). Repo: https://github.com/CreigT/LabelFoundry I’m a cybersecurity student building this for practice data that doesn’t exist in public feeds. What’s weak? What’s missing? Does the approach actually make sense for training or class use? submitted by /u/HotboiHustles [link] [comments]
+
+via reddit r/cybersecurity: LabelFoundry is a local pipeline that generates synthetic cybersecurity question-and-answer pairs using the Meta Llama Synthetic Data Kit + Ollama + Llama 3.1 8B.
