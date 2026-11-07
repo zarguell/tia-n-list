@@ -1,0 +1,1 @@
+NVD published CVE-2026-18838 on 2026-11-07 at 05:18:59 UTC, roughly two hours before the story was first seen. The record describes improper authentication in IBM API Connect 12.1.0.0 through 12.1.1.2 allowing a remote attacker to obtain sensitive information and modify API configurations. Vuln status is Awaiting Analysis.
