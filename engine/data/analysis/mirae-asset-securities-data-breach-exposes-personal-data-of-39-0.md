@@ -1,0 +1,3 @@
+South Korean brokerage Mirae Asset Securities confirmed a data breach affecting around 39,000 customers and employees. The incident exposed customer account information, and the firm reported it publicly rather than through a third-party disclosure.
+
+The exposed population is modest by financial-sector standards, but the combination of customer account data with employee records raises the risk of targeted fraud and follow-on phishing. What to watch is whether Mirae discloses the exact data fields involved, whether South Korean regulators open an inquiry, and whether the breach traces to a vendor or internal system.
