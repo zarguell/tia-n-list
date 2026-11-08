@@ -1,0 +1,5 @@
+Plex urged users to update Plex Media Server to 1.43.3 and Plex Desktop to 1.115.0 after discovering multiple security issues affecting versions 1.43.2 and earlier of the server. The company has not disclosed technical details, severity, or exploitation conditions, and CVE identifiers have been requested but not yet assigned. Plex emailed affected users and advised manual installation on NAS devices where the updated package may not be available in the package manager.
+
+The advisory gained urgency as QNAP warned NAS owners to update Plex Media Server to 1.43 amid spreading Plex2Shell attacks, telling owners to install Plex Media Server 1.43. QNAP's notice frames the Plex update as a response to active attack activity against NAS-hosted media servers, even though Plex itself has not confirmed exploitation of the newly patched flaws.
+
+The fixed versions are the concrete artifacts: Plex Media Server 1.43.3 and Plex Desktop 1.115.0. Administrators of remotely accessible or NAS-hosted Plex instances should apply these updates promptly and verify that automatic updates have completed, since attackers may reverse-engineer the patches once details emerge.
