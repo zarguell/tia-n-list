@@ -1,0 +1,3 @@
+Truffle Security launched a program aimed at revoking nearly 1.5 million live secrets exposed on the web, targeting credentials that remain active and usable by attackers. The effort focuses on secrets such as API keys and tokens that have leaked publicly but have not yet been rotated or revoked.
+
+Developers and organizations should treat any credential that may have been exposed as compromised and rotate it promptly, then monitor for unauthorized use. Watch for follow-up reporting on how many secrets the program successfully revokes and whether exposed credentials are already being abused in the wild.

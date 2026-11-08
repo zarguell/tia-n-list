@@ -1,3 +1,3 @@
-Security.com reported that attackers using the Anubis ransomware targeted a U.S. organization in October 2026 with a new custom backdoor that Symantec has named Lindnor. A second post from the same outlet recirculated the report on November 5.
+Attackers using the Anubis ransomware targeted a U.S. organization in October 2026 with a new custom backdoor that Symantec calls Lindnor, alongside a large set of Bring Your Own Vulnerable Driver (BYOVD) tools. The chain used 13 EDR killers and 5 BYOVD drivers to disable defenses, but the attack was thwarted before the encryption phase could begin.
 
-Watch for Symantec's technical details on Lindnor, including its capabilities and any IOCs, and for further reporting on the affected U.S. organization.
+The incident shows Anubis operators investing in custom tooling to bypass endpoint detection, and the Lindnor backdoor may be reused in future campaigns. Defenders should monitor for vulnerable-driver loading, EDR tampering, and unusual kernel driver activity, and should harden systems against BYOVD-based bypass techniques. Watch for further disclosures naming the targeted organization or additional Lindnor samples.
