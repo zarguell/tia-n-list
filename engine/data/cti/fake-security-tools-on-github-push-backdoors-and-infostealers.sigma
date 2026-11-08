@@ -1,0 +1,45 @@
+title: MSBuild Pre-Build Event or Public Pictures Staging Launching Script Hosts
+id: 645f3b78-4c71-4ff2-9efa-242c36cd268a
+status: experimental
+description: Detects the build-time execution pattern used by fake "security tool" GitHub repositories that hide PowerShell in Visual Studio PreBuildEvent routines and stage an Electron-based loader named Microsoft.exe under C:\Users\Public\Pictures. Flags MSBuild spawning a script host, and any process launched from that staging directory.
+references:
+  - https://news.drweb.com/show/?c=5&i=15311&lng=en
+  - https://www.bleepingcomputer.com/news/security/fake-security-tools-on-github-push-backdoors-and-infostealers/
+author: Tia N. List
+date: 2026/11/08
+tags:
+  - attack.t1195
+  - attack.t1059
+  - attack.t1105
+  - attack.initial-access
+  - attack.execution
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection_build_parent:
+    ParentImage|endswith: '\MSBuild.exe'
+  selection_script_host:
+    Image|endswith:
+      - '\powershell.exe'
+      - '\pwsh.exe'
+      - '\cmd.exe'
+      - '\mshta.exe'
+  selection_public_pictures_cmd:
+    CommandLine|contains:
+      - '\Users\Public\Pictures\'
+      - '/Users/Public/Pictures/'
+  selection_public_pictures_img:
+    Image|contains:
+      - '\Users\Public\Pictures\'
+      - '/Users/Public/Pictures/'
+  filter_build_script_known:
+    CommandLine|contains:
+      - '\Microsoft Visual Studio\'
+      - '\MSBuild\Current\Bin\'
+      - 'dotnet msbuild'
+  condition: (selection_build_parent and selection_script_host and not filter_build_script_known) or selection_public_pictures_cmd or selection_public_pictures_img
+falsepositives:
+  - Legitimate Visual Studio projects with PreBuildEvent steps that run PowerShell for code generation or versioning
+  - Enterprise build pipelines that stage signed binaries under Public\Pictures (rare; validate the parent process and signer)
+level: high
