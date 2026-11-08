@@ -1,0 +1,3 @@
+The Hacker News reported critical flaws in Langflow, the visual framework for building LLM-powered applications, that could enable remote code execution. The report frames the flaws as critical and RCE-capable, but the event record carries no CVE identifiers, affected versions, or technical details beyond the flaw class, so the specifics remain unconfirmed.
+
+What to watch: a security advisory from Langflow or the LangChain project naming affected versions and CVE numbers, any proof-of-concept code, and whether CISA adds the flaws to its KEV catalog. Users of Langflow should check for patches and avoid exposing Langflow instances to the internet until fixes are available.
