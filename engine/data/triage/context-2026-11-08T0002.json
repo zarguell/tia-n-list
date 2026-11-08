@@ -1,0 +1,428 @@
+{
+ "date": "2026-11-08",
+ "decisions_path": "engine/data/triage/decisions-2026-11-08T0002.json",
+ "instructions": "For every new event decide: (1) keep or drop \u2014 keep only stories worth covering (real security events, vulnerabilities, attacks, breaches, advisories with substance); drop press releases, vendor marketing, generic explainers, and anything duplicating an existing story. (2) If keep, assign the event to the RIGHT story: an existing candidate story id if it belongs there (this FIXES mechanical clustering \u2014 e.g. different outlets' Patch Tuesday roundups are ONE story), or NEW with a clean story_title. (3) merges: list candidate stories that are really the same story (from = fragment, into = the most complete one). (4) For every kept event that names CVEs, optionally assess exploitation: exploited = the event reports OBSERVED in-the-wild exploitation (implants, victim counts, campaigns, CISA KEV confirmation); suspected = public exploit code/PoC or likely-but-unconfirmed. Attribute ONLY the CVEs you can tie to the claim \u2014 a bulletin's blanket 'actively exploited' does NOT flag all its CVEs. Omit the exploitation field when the event makes no claim.\n(5) LOW-TRUST events (\"low_trust\": true \u2014 AI-drafted aggregator reposts, late and overstated): treat as unverified leads. When the text attributes the claim to a named primary source (a researcher firm like watchTowr, a vendor advisory, CISA, a major outlet) and attribution_urls or a web search (/home/ubuntu/repos/cronman/bin/web-search.sh \"query\") locate that primary source CONFIRMING the claim, include a provenance object in the decision: {\"url\": <primary url>, \"source\": <domain>, \"evidence\": <one line>, \"verified\": true}. VERIFIED provenance lets the event mint a story (credited to the primary source) and count as a development; without it, a low-trust event can only attach to an EXISTING story, never mint. If you cannot verify, keep/drop on normal merit and omit provenance.\n\nWrite decisions as JSON with EXACTLY this shape:\n{\n  \"decisions\": [\n    {\"event_id\": \"<id>\", \"action\": \"keep\", \"story\": \"<existing candidate story id>\", \"reason\": \"...\"},\n    {\"event_id\": \"<id>\", \"action\": \"keep\", \"story\": \"NEW\", \"story_title\": \"<clean title>\", \"reason\": \"...\"},\n    {\"event_id\": \"<id>\", \"action\": \"drop\", \"reason\": \"...\"}\n  ],\n  \"merges\": [{\"from\": \"<fragment story id>\", \"into\": \"<canonical story id>\"}]\n}\nFor events marked \"low_trust\" (AI-drafted aggregator reposts) a decision\nmay carry an optional \"provenance\" object when you VERIFIED the claim at\nthe named primary source: {\"event_id\": ..., \"action\": \"keep\", ...}\n  \"provenance\": {\"url\": \"<primary source url>\", \"source\": \"<domain>\", \"evidence\": \"<one line>\"}\nOnly include provenance when the primary source (vendor advisory, CISA,\nthe named researcher/outlet) really carries the claim \u2014 verified\nprovenance lets a low-trust event mint a story and set freshness; without\nit the event can only amplify an existing story.\nSTRICT KEY NAMES: the array key is \"decisions\" (never \"events\"); the story\nkey is \"story\" (never \"story_id\"); \"story\" holds a candidate_stories id\nverbatim or the literal string \"NEW\". Optional per-event field\n\"exploitation\": {\"CVE-...\": {\"status\": \"exploited|suspected\", \"evidence\": \"1-2 sentences\"}}.",
+ "new_events": [],
+ "candidate_stories": [
+  {
+   "id": "japan-declares-cybersecurity-emergency-experts-nod-to-ai",
+   "title": "Japan Declares Cybersecurity Emergency, Experts Nod to AI",
+   "n_events": 10,
+   "last_seen": "2026-11-07T22:28:51.000Z",
+   "first_event_title": "Japan Declares Cybersecurity Emergency, Experts Nod to AI"
+  },
+  {
+   "id": "sonicwall-security-advisory-av26-1133",
+   "title": "SonicWall security advisory (AV26-1133)",
+   "n_events": 20,
+   "last_seen": "2026-11-07T21:34:45.000Z",
+   "first_event_title": "SonicWall security advisory (AV26-1133)"
+  },
+  {
+   "id": "metamask-says-recent-attack-didn-t-affect-wallet-infrastructure",
+   "title": "MetaMask says recent attack didn't affect wallet infrastructure",
+   "n_events": 1,
+   "last_seen": "2026-11-07T21:30:04.000Z",
+   "first_event_title": "# MetaMask says recent attack didn't affect wallet infrastructure https://www. bleepingcomputer.com/news/secu rity/metamask-says-recent-atta"
+  },
+  {
+   "id": "d-link-warns-of-multiple-zero-days-in-dgs-3130-series-switches",
+   "title": "D-Link warns of multiple zero-days in DGS-3130 Series switches",
+   "n_events": 5,
+   "last_seen": "2026-11-07T20:30:02.000Z",
+   "first_event_title": "D-Link warns of multiple zero-days in DGS-3130 Series switches"
+  },
+  {
+   "id": "microsoft-entra-device-registration-authentication-bypass-cve-20",
+   "title": "Microsoft Entra Device Registration authentication bypass CVE-2026-109469",
+   "n_events": 3,
+   "last_seen": "2026-11-07T20:19:41.000Z",
+   "first_event_title": "Microsoft Entra Device Registration faces CRITICAL CVE-2026-109469 (CVSS 10) \u2013 remote auth bypass via user-controlled key. Privilege escalat"
+  },
+  {
+   "id": "apiiro-claude-code-settings-local-json-files-with-secrets-expose",
+   "title": "Apiiro: Claude Code settings.local.json files with secrets exposed on public GitHub",
+   "n_events": 1,
+   "last_seen": "2026-11-07T20:15:31.000Z",
+   "first_event_title": "\ud83e\udd16 Apiiro: 104,185 public copies of Claude Code's .claude/settings.local.json on GitHub; 1,122 hold \u22651 secret (1,379 total). \"Yes, and don't "
+  },
+  {
+   "id": "microsoft-paint-out-of-bounds-read-cve-2026-83844",
+   "title": "Microsoft Paint out-of-bounds read (CVE-2026-83844)",
+   "n_events": 15,
+   "last_seen": "2026-11-07T20:08:42.000Z",
+   "first_event_title": "\ud83d\udea8 Breaking: CVE-2026-83844 \u2014 High 8.1 Impacted if: Microsoft Paint Out-of-bounds read \u00b7 over the network \u00b7 no login https:// ax-news.com/cve"
+  },
+  {
+   "id": "doctor-anywhere-telemedicine-breach-exposes-personal-and-financi",
+   "title": "Doctor Anywhere telemedicine breach exposes personal and financial data",
+   "n_events": 1,
+   "last_seen": "2026-11-07T20:01:46.000Z",
+   "first_event_title": "Doctor Anywhere Telemedicine Platform Reports Incident Exposing Personal and Financial Data Doctor Anywhere, a Singaporean telemedicine firm"
+  },
+  {
+   "id": "new-york-queens-public-library-battles-ransomware",
+   "title": "New York Queens Public Library Battles Ransomware",
+   "n_events": 5,
+   "last_seen": "2026-11-07T19:54:36.000Z",
+   "first_event_title": "https://www. theregister.com/cyber-crime/20 26/11/05/new-yorks-queens-public-library-battles-ransomware-crims-wi-fi-checkouts-and-website-go"
+  },
+  {
+   "id": "syrian-hacker-who-served-assad-regime-gets-42-months-in-us-priso",
+   "title": "Syrian hacker who served Assad regime gets 42 months in US prison",
+   "n_events": 4,
+   "last_seen": "2026-11-07T19:36:58.000Z",
+   "first_event_title": "Syrian hacker who served Assad regime gets 42 months in US prison"
+  },
+  {
+   "id": "chainalysis-says-breach-exposed-credentials-for-all-customers",
+   "title": "Chainalysis says breach exposed credentials for all customers",
+   "n_events": 11,
+   "last_seen": "2026-11-07T19:30:04.000Z",
+   "first_event_title": "Chainalysis says breach exposed credentials for all customers"
+  },
+  {
+   "id": "equipple-school-app-breach-exposes-data-of-50-000-users-in-north",
+   "title": "Equipple school app breach exposes data of 50,000 users in Northern Ireland",
+   "n_events": 1,
+   "last_seen": "2026-11-07T19:01:46.000Z",
+   "first_event_title": "Equipple School App Breach Exposes Data of 50,000 Users in Northern Ireland The Equipple school app suffered a data breach in Northern Irela"
+  },
+  {
+   "id": "burda-style-customer-data-exposed-after-cyberattack",
+   "title": "Burda Style customer data exposed after cyberattack",
+   "n_events": 1,
+   "last_seen": "2026-11-07T18:49:57.000Z",
+   "first_event_title": "DATA LEAK: Burda Style (fashion magazine) - customers' personal data exposed after a cyberattack https://infonewscyber.fr/info/burda-style-les-donnees-personnelles-de-ses-clients-exposees-apres-une-d8b333e482df0975"
+  },
+  {
+   "id": "china-detains-63-suspects-over-silver-fox-malware-tied-to-2-bill",
+   "title": "China detains 63 suspects over Silver Fox malware tied to 2 billion yuan in losses",
+   "n_events": 1,
+   "last_seen": "2026-11-07T18:33:26.447Z",
+   "first_event_title": "China's Ministry of Public Security says 63 people are detained or arrested over Silver Fox malware, blamed for 2bn yuan in losses at 1,000+"
+  },
+  {
+   "id": "openssh-on-musl-linux-has-been-letting-people-into-password-less",
+   "title": "openssh on musl linux has been letting people into password-less accounts since 2016",
+   "n_events": 52,
+   "last_seen": "2026-11-07T18:30:00.638Z",
+   "first_event_title": "openssh on musl linux has been letting people into password-less accounts since 2016"
+  },
+  {
+   "id": "censys-finds-roughly-815-artex-ai-pentesting-frameworks-exposed",
+   "title": "Censys finds roughly 815 ARTEX AI pentesting frameworks exposed on public web",
+   "n_events": 8,
+   "last_seen": "2026-11-07T18:22:43.000Z",
+   "first_event_title": "Censys found roughly 815 distinct deployments of ARTEX, an AI pentesting framework, exposed on the public web as of early November. The tool"
+  },
+  {
+   "id": "qilin-ransomware-group-claims-breach-of-axe-experts",
+   "title": "Qilin ransomware group claims breach of AXE-EXPERTS, a business services firm",
+   "n_events": 1,
+   "last_seen": "2026-11-07T18:14:54.000Z",
+   "first_event_title": "Qilin ransomware group claims breach of AXE-EXPERTS, a business services firm"
+  },
+  {
+   "id": "hacked-supermarket-freezers-expose-legacy-controllers-on-the-pub",
+   "title": "Hacked supermarket freezers point to exposed legacy controllers",
+   "n_events": 1,
+   "last_seen": "2026-11-07T18:10:55.204Z",
+   "first_event_title": "Hacked supermarket freezers point to exposed legacy controllers"
+  },
+  {
+   "id": "hackers-pull-off-133-million-french-bank-heist-via-service-provi",
+   "title": "Hackers pull off $133 million French bank heist via service provider",
+   "n_events": 8,
+   "last_seen": "2026-11-07T18:10:34.000Z",
+   "first_event_title": "Hackers pull off $133 million French bank heist via service provider"
+  },
+  {
+   "id": "plex-vulnerabilities-exploited-in-the-wild-to-drop-cryptominer",
+   "title": "Plex vulnerabilities exploited in the wild to drop cryptominer",
+   "n_events": 31,
+   "last_seen": "2026-11-07T18:00:05.000Z",
+   "first_event_title": "Plex vulnerabilities exploited in the wild to drop cryptominer"
+  },
+  {
+   "id": "3-charged-in-scheme-to-use-ai-to-impersonate-ceos-and-attorneys",
+   "title": "3 Charged in Scheme to Use AI to Impersonate CEOs and Attorneys to Steal $129 Million",
+   "n_events": 8,
+   "last_seen": "2026-11-07T17:47:56.000Z",
+   "first_event_title": "3 Charged in Scheme to Use AI to Impersonate CEOs and Attorneys to Steal $129 Million"
+  },
+  {
+   "id": "microsoft-edge-now-automatically-blocks-malicious-browser-notifi",
+   "title": "Microsoft Edge Now Automatically Blocks Malicious Browser Notifications Used in Scareware Attacks",
+   "n_events": 2,
+   "last_seen": "2026-11-07T17:36:58.000Z",
+   "first_event_title": "Microsoft Edge Now Automatically Blocks Malicious Browser Notifications Used in Scareware Attacks"
+  },
+  {
+   "id": "fake-security-tools-on-github-push-backdoors-and-infostealers",
+   "title": "Fake security tools on GitHub push backdoors and infostealers",
+   "n_events": 7,
+   "last_seen": "2026-11-07T17:30:03.000Z",
+   "first_event_title": "Fake security tools on GitHub push backdoors and infostealers"
+  },
+  {
+   "id": "discord-game-testing-scam-infects-systems-with-malware",
+   "title": "Discord game-testing scam infects systems with malware",
+   "n_events": 1,
+   "last_seen": "2026-11-07T17:10:56.710Z",
+   "first_event_title": "Discord scam: nonexistent game-testing invite infects computers with malware"
+  },
+  {
+   "id": "mindbloom-provider-group-data-breach-exposes-patient-health-reco",
+   "title": "Mindbloom Provider Group data breach exposes patient health records",
+   "n_events": 1,
+   "last_seen": "2026-11-07T17:01:46.000Z",
+   "first_event_title": "Mindbloom Provider Group PA Reports Data Breach Exposing Patient Health Records Mindbloom Provider Group PA reports a data breach on Novembe"
+  },
+  {
+   "id": "british-soldier-blackmailed-after-ignored-order-to-pull-sim-card",
+   "title": "British soldier blackmailed after ignored order to pull SIM card",
+   "n_events": 1,
+   "last_seen": "2026-11-07T17:00:59.000Z",
+   "first_event_title": "British Soldier Ignored Order to Pull His SIM Card, Then Got Blackmailed https:// arstechnica.com/security/2026/ 11/british-soldier-ignored-"
+  },
+  {
+   "id": "openai-s-new-cyber-ai-model-finds-948-linux-privilege-escalation",
+   "title": "OpenAI\u2019s New Cyber AI Model Finds 948 Linux Privilege Escalation Vulnerabilities in Just 10 Days",
+   "n_events": 29,
+   "last_seen": "2026-11-07T16:30:01.000Z",
+   "first_event_title": "OpenAI\u2019s New Cyber AI Model Finds 948 Linux Privilege Escalation Vulnerabilities in Just 10 Days"
+  },
+  {
+   "id": "civswitch-exploit-targets-nintendo-switch-2-accounts",
+   "title": "CivSwitch exploit targets Nintendo Switch 2 accounts",
+   "n_events": 1,
+   "last_seen": "2026-11-07T16:24:24.000Z",
+   "first_event_title": "From yesterday, though the campaign has been going on for a while. Expect Nintendo to shut this down soon. An exploit called CivSwitch \"lets"
+  },
+  {
+   "id": "firecracker-vulnerability-used-to-take-control-of-host-process",
+   "title": "Researchers demonstrate host-process takeover via Firecracker vulnerability",
+   "n_events": 1,
+   "last_seen": "2026-11-07T16:20:05.367Z",
+   "first_event_title": "Researchers demonstrate host-process takeover via Firecracker vulnerability"
+  },
+  {
+   "id": "michigan-state-university-investigates-byod-ransomware-claims",
+   "title": "Michigan State University investigates BYOD ransomware claims",
+   "n_events": 1,
+   "last_seen": "2026-11-07T16:01:46.000Z",
+   "first_event_title": "Michigan State University Investigates Ransomware Claims Michigan State University is investigating claims by the BYOD ransomware group that"
+  },
+  {
+   "id": "russia-linked-hackers-hit-ios-android-devices-with-exploit-chain",
+   "title": "Russia-Linked Hackers Hit iOS, Android Devices With Exploit Chains via Watering Holes",
+   "n_events": 6,
+   "last_seen": "2026-11-07T15:57:28Z",
+   "first_event_title": "Russia-Linked Hackers Hit iOS, Android Devices With Exploit Chains via Watering Holes"
+  },
+  {
+   "id": "coding-agents-copy-your-secrets-to-a-hidden-file-thousands-are-o",
+   "title": "Coding Agents Copy Your Secrets to a Hidden File. Thousands Are on GitHub",
+   "n_events": 2,
+   "last_seen": "2026-11-07T15:49:45.000Z",
+   "first_event_title": "Coding Agents Copy Your Secrets to a Hidden File. Thousands Are on GitHub"
+  },
+  {
+   "id": "todyl-stolen-app-credentials-used-to-reach-managed-it-providers",
+   "title": "Todyl: stolen app credentials used to reach managed IT providers' clients",
+   "n_events": 1,
+   "last_seen": "2026-11-07T15:36:19.000Z",
+   "first_event_title": "Attacker uses stolen app credentials to reach managed IT providers' clients, Todyl says Todyl reports that a single operator has used still-"
+  },
+  {
+   "id": "norad-targeted-by-cyberattack",
+   "title": "Norad targeted by cyberattack",
+   "n_events": 2,
+   "last_seen": "2026-11-07T15:25:46Z",
+   "first_event_title": "Norad targeted by cyberattack"
+  },
+  {
+   "id": "county-of-sussex-new-jersey-notice-of-data-privacy-incident",
+   "title": "County of Sussex, New Jersey Notice of Data Privacy Incident",
+   "n_events": 0,
+   "last_seen": "2026-11-07T15:25:42Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "who-gives-a-crap-confirms-customer-data-exposed-in-third-party-s",
+   "title": "Who Gives A Crap confirms customer data exposed in third-party software breach",
+   "n_events": 1,
+   "last_seen": "2026-11-07T15:10:02.000Z",
+   "first_event_title": "Who Gives A Crap confirms customer data exposed in third party software breach By Anna Cox Hackers accessed names, contact details and total"
+  },
+  {
+   "id": "claude-code-s-yes-and-don-t-ask-again-option-can-leak-passwords",
+   "title": "Claude Code\u2019s \u201cYes, and Don\u2019t Ask Again\u201d Option Can Leak Passwords and API Keys to GitHub",
+   "n_events": 3,
+   "last_seen": "2026-11-07T14:30:42Z",
+   "first_event_title": "Claude Code\u2019s \u201cYes, and Don\u2019t Ask Again\u201d Option Can Leak Passwords and API Keys to GitHub"
+  },
+  {
+   "id": "ctm360-exposes-fake-gift-card-scams-exploiting-trusted-brands",
+   "title": "CTM360 Exposes Fake Gift Card Scams Exploiting Trusted Brands",
+   "n_events": 1,
+   "last_seen": "2026-11-07T14:10:19Z",
+   "first_event_title": "CTM360 Exposes Fake Gift Card Scams Exploiting Trusted Brands"
+  },
+  {
+   "id": "runaway-ai-hacking-agent-behind-workos-breach-after-escaping-san",
+   "title": "Runaway AI hacking agent behind WorkOS breach after escaping sandbox",
+   "n_events": 17,
+   "last_seen": "2026-11-07T14:02:07.003Z",
+   "first_event_title": "Runaway AI hacking agent behind WorkOS breach after escaping sandbox"
+  },
+  {
+   "id": "wordpress-core-rce-cvss-8-1-in-versions-4-7-7-1-3",
+   "title": "WordPress Core RCE (CVSS 8.1) in versions 4.7-7.1.3",
+   "n_events": 36,
+   "last_seen": "2026-11-07T12:45:00.000Z",
+   "first_event_title": "\ud83e\udd16 WordPress Core RCE (CVSS 8.1, no CVE ID yet, versions 4.7\u20137.1.3): full-package core upgrades unpack the installer into a predictable web-r"
+  },
+  {
+   "id": "adobe-security-advisory-av26-1092",
+   "title": "Adobe security advisory (AV26-1092)",
+   "n_events": 2,
+   "last_seen": "2026-10-30T08:01:42.000Z",
+   "first_event_title": "Adobe security advisory (AV26-1092)"
+  },
+  {
+   "id": "cisco-security-advisory-av26-1127",
+   "title": "Cisco security advisory (AV26-1127)",
+   "n_events": 2,
+   "last_seen": "2026-11-05T03:58:31.000Z",
+   "first_event_title": "Cisco security advisory (AV26-1127)"
+  },
+  {
+   "id": "control-systems-moxa-security-advisory-av26-1089",
+   "title": "[Control Systems] Moxa security advisory (AV26-1089)",
+   "n_events": 1,
+   "last_seen": "2026-10-27T13:35:40Z",
+   "first_event_title": "[Control Systems] Moxa security advisory (AV26-1089)"
+  },
+  {
+   "id": "control-systems-phoenix-contact-security-advisory-av26-1121",
+   "title": "[Control Systems] Phoenix Contact security advisory (AV26-1121)",
+   "n_events": 1,
+   "last_seen": "2026-11-04T15:10:42Z",
+   "first_event_title": "[Control Systems] Phoenix Contact security advisory (AV26-1121)"
+  },
+  {
+   "id": "craft-cms-security-advisory-av26-1086",
+   "title": "Craft CMS security advisory (AV26-1086)",
+   "n_events": 2,
+   "last_seen": "2026-10-26T17:00:13.000Z",
+   "first_event_title": "Craft CMS security advisory (AV26-1086)"
+  },
+  {
+   "id": "dell-security-advisory-av26-1110",
+   "title": "Dell security advisory (AV26-1110)",
+   "n_events": 1,
+   "last_seen": "2026-11-02T14:35:44Z",
+   "first_event_title": "Dell security advisory (AV26-1110)"
+  },
+  {
+   "id": "docker-security-advisory-av26-1123",
+   "title": "Docker security advisory (AV26-1123)",
+   "n_events": 1,
+   "last_seen": "2026-11-04T19:40:43Z",
+   "first_event_title": "Docker security advisory (AV26-1123)"
+  },
+  {
+   "id": "fortinet-security-advisory-av26-812",
+   "title": "Fortinet security advisory (AV26-812)",
+   "n_events": 2,
+   "last_seen": "2026-08-13T10:40:57Z",
+   "first_event_title": "Fortinet security advisory (AV26-812)"
+  },
+  {
+   "id": "github-security-advisory-av26-1126",
+   "title": "GitHub security advisory (AV26-1126)",
+   "n_events": 1,
+   "last_seen": "2026-11-04T19:55:39Z",
+   "first_event_title": "GitHub security advisory (AV26-1126)"
+  },
+  {
+   "id": "google-security-advisory-av26-1118",
+   "title": "Google security advisory (AV26-1118)",
+   "n_events": 1,
+   "last_seen": "2026-11-04T14:45:41Z",
+   "first_event_title": "Google security advisory (AV26-1118)"
+  },
+  {
+   "id": "google-security-advisory-av26-904",
+   "title": "Google security advisory (AV26-904)",
+   "n_events": 2,
+   "last_seen": "2026-09-09T20:49:30Z",
+   "first_event_title": "Google security advisory (AV26-904)"
+  },
+  {
+   "id": "grafana-security-advisory-av26-860",
+   "title": "Grafana Alloy Vulnerability CVE-2026-19516",
+   "n_events": 3,
+   "last_seen": "2026-10-13T16:00:56.470Z",
+   "first_event_title": "Grafana security advisory (AV26-860)"
+  },
+  {
+   "id": "hashicorp-security-advisory-av26-797",
+   "title": "HashiCorp security advisory (AV26-797)",
+   "n_events": 1,
+   "last_seen": "2026-08-11T14:05:42Z",
+   "first_event_title": "HashiCorp security advisory (AV26-797)"
+  },
+  {
+   "id": "hashicorp-security-advisory-av26-817",
+   "title": "HashiCorp security advisory (AV26-817)",
+   "n_events": 1,
+   "last_seen": "2026-08-14T16:05:44Z",
+   "first_event_title": "HashiCorp security advisory (AV26-817)"
+  },
+  {
+   "id": "hpe-security-advisory-av26-1119",
+   "title": "HPE security advisory (AV26-1119)",
+   "n_events": 1,
+   "last_seen": "2026-11-04T14:55:41Z",
+   "first_event_title": "HPE security advisory (AV26-1119)"
+  },
+  {
+   "id": "ibm-security-advisory-av26-1040",
+   "title": "IBM security advisory (AV26-1040)",
+   "n_events": 1,
+   "last_seen": "2026-10-14T18:40:41Z",
+   "first_event_title": "IBM security advisory (AV26-1040)"
+  },
+  {
+   "id": "ivanti-security-advisory-av26-805",
+   "title": "Ivanti security advisory (AV26-805)",
+   "n_events": 1,
+   "last_seen": "2026-08-11T20:20:39Z",
+   "first_event_title": "Ivanti security advisory (AV26-805)"
+  },
+  {
+   "id": "ivanti-security-advisory-av26-897",
+   "title": "Ivanti September 2026 security advisory: EPMM, ITSM, Sentry vulnerabilities",
+   "n_events": 3,
+   "last_seen": "2026-09-09T06:39:58Z",
+   "first_event_title": "Ivanti security advisory (AV26-897)"
+  },
+  {
+   "id": "jetbrains-security-advisory-av26-1132",
+   "title": "JetBrains security advisory (AV26-1132)",
+   "n_events": 1,
+   "last_seen": "2026-11-06T19:35:40Z",
+   "first_event_title": "JetBrains security advisory (AV26-1132)"
+  },
+  {
+   "id": "jetbrains-security-advisory-av26-825",
+   "title": "JetBrains security advisory (AV26-825)",
+   "n_events": 1,
+   "last_seen": "2026-08-18T13:40:50Z",
+   "first_event_title": "JetBrains security advisory (AV26-825)"
+  }
+ ]
+}
