@@ -1,0 +1,3 @@
+Who Gives A Crap, the Australian toilet paper brand, confirmed a data breach originating in third-party marketing software rather than its own systems. Attackers accessed customer names, contact details and totals. The report came from ABC News (Anna Cox) and was echoed by beyondmachines.net.
+
+Because the exposure sits in a marketing vendor's platform, the company itself may have limited visibility into exactly what was taken. Customers should treat the exposed contact details as a phishing risk, and the available reporting does not state an affected count, a timeline for notification or specific remediation steps.
