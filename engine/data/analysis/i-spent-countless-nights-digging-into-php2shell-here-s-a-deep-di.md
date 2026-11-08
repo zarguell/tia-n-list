@@ -1,0 +1,5 @@
+This story is a deep dive into PHP2Shell, a PHP exploit framework, explaining how it works from memory layout to PHP internals to a real exploit. The original r/netsec post says the author spent extensive time reverse-engineering the vulnerabilities after they were announced, when little technical information was available. The only public hints were PHP_SESSION_UPLOAD_PROGRESS, an out-of-memory condition, and a video by a researcher known as Calif showing a shell running in the background.
+
+Why it matters: a Mastodon update from radar.offseq.com flags PHP use-after-free memory flaws that enable remote code execution, rated HIGH severity, with no CVE assigned and no patch available, and affected versions not yet specified. The story carries an engine score of 4.3. Exposed PHP servers therefore have no vendor fix to apply and no CVE identifier to track, so defenders cannot prioritize by advisory.
+
+What to watch: confirmation of the affected PHP versions, a CVE assignment, and any reports of in-the-wild exploitation. Until a patch or CVE exists, treat PHP2Shell-related findings as unpatched research and restrict PHP upgrade paths where feasible.
