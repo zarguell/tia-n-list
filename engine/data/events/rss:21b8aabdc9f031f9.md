@@ -1,0 +1,1 @@
+Recently I bought a Spark-class machine to start experimenting with local models. But my first adventure with it turned out to be quite different. It took me back to my early experiences with Linux in 2002, when, as a teenager, … Continue reading → Article Link: Debugging a boot loop on Acer Veriton VGN100 | hasherezade's 1001 nights
