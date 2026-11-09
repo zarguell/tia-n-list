@@ -1,0 +1,3 @@
+Remus Stealer is advertising a feature that lets operators open a compromised Gmail inbox directly from a stolen-device record, with its version 1.3.9 pitch claiming access survives password changes and session revocation. Hudson Rock investigated the claim by reviewing the announcement and questioning both the developer and a person who publicly endorsed the feature.
+
+The correspondence suggests access is established through an infected device rather than a Gmail zero-day, and the stronger claim that newly arriving mail stays readable after account recovery remains unverified. The evidence supports a mailbox-access workflow built into an infostealer service, but its mechanism and resistance to recovery are not yet confirmed.

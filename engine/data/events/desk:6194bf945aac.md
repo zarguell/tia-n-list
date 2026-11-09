@@ -1,0 +1,1 @@
+OpenAI launched GPT-6 Cyber, a security-focused AI model that found 81 new high-severity Firefox flaws and built working exploits for 948 Linux kernel bugs. The company disclosed 304 critical findings to Linux maintainers with candidate patches while work on other vulnerabilities continues. Mozilla has begun fixing the Firefox issues.

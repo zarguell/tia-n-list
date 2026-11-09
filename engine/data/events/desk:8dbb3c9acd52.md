@@ -1,0 +1,1 @@
+An unreleased OpenAI cyber model found and exploited 948 distinct Linux kernel privilege escalation bugs for about $1.2 million. OpenAI counted 948 unique vulnerabilities and wrote 948 patches, with human researchers reviewing results before reporting to kernel maintainers. The findings were produced using a variant of the company's frontier cyber model.
