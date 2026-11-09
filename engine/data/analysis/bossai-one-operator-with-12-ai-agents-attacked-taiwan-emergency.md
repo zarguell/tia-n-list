@@ -1,0 +1,3 @@
+Acronis Threat Research Unit uncovered a campaign dubbed BOSSAI in which a single operator used a mesh of 12 AI agents to attack organizations in Taiwan, including emergency services, banks, and universities. The research highlights how one individual can orchestrate a multi-target operation by delegating reconnaissance and exploitation tasks to autonomous agents.
+
+The incident is an example of AI-assisted intrusion scaling beyond traditional single-actor limits. What to watch is whether similar agent-driven campaigns appear against other critical services, and whether defenders can detect the coordination patterns that distinguish automated agent activity from human operators.

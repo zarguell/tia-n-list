@@ -1,0 +1,5 @@
+Google DeepMind reports that AI agents working under human supervision found two ways to reduce the cost of attacking 1024-bit RSA cryptosystems, research conducted with cryptographers from UC San Diego and Inria. The findings affect legacy RSA-1024 systems only; modern protocols using 2048-bit or larger keys remain secure. The first finding concerns digital signatures and padding: once an attacker controls roughly half of a signed block or more, PKCS#1 v1.5 padding adds no protection at all, which applies to the PKCS#11 signing interface of devices such as hardware security modules. In a sandboxed test, agents re-ran an earlier academic forgery attack on the same 1024-bit key, cutting CPU time 3.5-fold, from 1,380 to 391 CPU core-years.
+
+The practical takeaway is that obsolete 1024-bit RSA keys, especially those used for signing on HSMs, should be retired even though the attack remains expensive. Organizations still relying on RSA-1024 for signatures face a lowered, if still substantial, barrier to forgery.
+
+What to watch: migration away from 1024-bit RSA and review of PKCS#1 v1.5 signing configurations on cryptographic devices.
