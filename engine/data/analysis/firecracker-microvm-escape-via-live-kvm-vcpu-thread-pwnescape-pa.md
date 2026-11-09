@@ -1,0 +1,3 @@
+Researchers demonstrated a Firecracker microVM escape dubbed PwnEscape Part 2, in which a guest can turn the microVM isolation boundary into host code execution through a live KVM vCPU thread. The work was published by thecybersecguru.com and picked up by IT News Security (AU), framing Firecracker's isolation guarantees as breakable under this technique.
+
+The substance available is limited to the published summaries, with no CVE or patched version named. Defenders running Firecracker or KVM-based microVMs should treat guest-to-host escape research as a prompt to review isolation boundaries, host kernel versions, and any untrusted guest workloads. Watch for a follow-up advisory or patched Firecracker release that addresses the KVM vCPU thread handling.
