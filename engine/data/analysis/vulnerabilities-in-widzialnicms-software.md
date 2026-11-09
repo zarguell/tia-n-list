@@ -1,0 +1,5 @@
+CERT Polska coordinated disclosure of four vulnerabilities in WidzialniCMS software, tracked as CVE-2026-110468, CVE-2026-110469, CVE-2026-112204 and CVE-2026-112205. One of them, CVE-2026-110469, is classified as CWE-434, an unrestricted upload of a file with a dangerous type, which in a content management system typically allows an attacker to upload executable or script content that the server then serves or runs.
+
+The available reporting does not name affected versions, a fixed release, or any in-the-wild exploitation, so this remains an advisory-level item rather than an active exploitation case. WidzialniCMS is a Polish-language CMS, which limits the likely exposure but does not remove it for sites running the software.
+
+Administrators running WidzialniCMS should treat all four CVEs as unpatched until the vendor or CERT Polska publishes remediation guidance, and should restrict or disable file upload endpoints in the interim. Watch for a follow-up advisory naming fixed versions and any public proof-of-concept code, which would raise the risk from theoretical to practical.

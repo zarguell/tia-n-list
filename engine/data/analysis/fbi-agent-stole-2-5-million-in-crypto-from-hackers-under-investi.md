@@ -1,0 +1,3 @@
+A former FBI agent has pleaded guilty to stealing nearly $2.5 million in cryptocurrency from the wallets of fraud victims and nation-state hackers who were under investigation. The single available report gives no further detail on the agent's identity, the cases involved, or how the theft was carried out.
+
+The story is thin on substantiation, so treat it as a headline-level item pending fuller reporting. Watch for the sentencing and for any disclosure of which investigations were compromised, since the theft of evidence-wallet funds raises chain-of-custody and case-integrity questions.

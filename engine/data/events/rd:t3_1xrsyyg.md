@@ -1,0 +1,3 @@
+CAs found 17% of their own incidents in 2026 so far, down from 29% last year and 59% in 2022. Researchers, root programs, and other outsiders found the rest. That's from a dataset we built of every TLS incident in Mozilla's CA program since 2017 (1,581 as of November 7). 2026 is already the busiest year, with 338. Only 11 incidents in the whole set are critical, and eMudhra's computable keys are the only one where a CA lost control of its own keys. https://www.certkit.io/ca-report submitted by /u/certkit [link] [comments]
+
+via reddit r/netsec: Certificate authority list: every CA's incident record since 2017
