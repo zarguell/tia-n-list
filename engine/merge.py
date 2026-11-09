@@ -21,6 +21,7 @@ from build_registry import (clean_title, tokens, domain_of,
 from score import (hot_score, SB_DEFAULTS as _SB_DEFAULTS,
                    backfill_score_breakdown, update_peak)
 import lifecycle
+from store import write_json
 
 ENGINE = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(ENGINE, "data")
@@ -638,7 +639,7 @@ def absorb_cti_on_merge(stories, frm, into, *, cti_dir=None,
         seen.add(u)
         refs.append(u)
     canon["references"] = refs
-    json.dump(canon, open(canon_path, "w"), indent=1)
+    write_json(canon_path, canon)
     os.makedirs(archive_dir, exist_ok=True)
     os.replace(loser_path, os.path.join(archive_dir, f"{frm}.json"))
     line = (f"cti {frm} absorbed into {into}: {len(refs)} references kept "
@@ -703,8 +704,7 @@ def sweep_score0_merges(stories, events=None, *, stories_dir=None,
     for sid in sorted(merged_ids):
         s = stories[sid]
         try:
-            json.dump(s, open(os.path.join(stories_dir, sid + ".json"), "w"),
-                      indent=1)
+            write_json(os.path.join(stories_dir, sid + ".json"), s)
             if s.get("merged_into"):
                 continue              # shell: redirect json only
             sc = hot_score(s, events, reddit_posts)
@@ -717,8 +717,7 @@ def sweep_score0_merges(stories, events=None, *, stories_dir=None,
             s.setdefault("score", 0.0)
         backfill_score_breakdown(s)
         s.setdefault("score", 0.0)
-        json.dump(s, open(os.path.join(stories_dir, sid + ".json"), "w"),
-                  indent=1)
+        write_json(os.path.join(stories_dir, sid + ".json"), s)
     return log
 
 
@@ -900,8 +899,8 @@ def emit_needs(stories, exclude=None):
                       for ref in s.get("events", []) if ref["event_id"] in events), default="")
         if newest and parse_utc(newest) > parse_utc(marker):
             queue.append(s["id"])
-    json.dump({"updated_at": datetime.now(timezone.utc).isoformat(), "stories": queue},
-              open(NEEDS, "w"), indent=1)
+    write_json(NEEDS, {"updated_at": datetime.now(timezone.utc).isoformat(),
+                       "stories": queue})
     return len(queue)
 
 
@@ -914,7 +913,7 @@ def _load_pending():
 
 
 def _save_pending(pending):
-    json.dump(pending, open(PENDING, "w"), indent=1)
+    write_json(PENDING, pending)
 
 
 def _iso(s):
@@ -1062,8 +1061,7 @@ def heal_raw_titles(stories, events_by_id=None, stories_dir=None, cti_dir=None):
         t = preferred_title(s, events_by_id)
         if t:
             s["title"] = t
-            json.dump(s, open(os.path.join(stories_dir, s["id"] + ".json"), "w"),
-                      indent=1)
+            write_json(os.path.join(stories_dir, s["id"] + ".json"), s)
             healed += 1
         p = os.path.join(cti_dir, s["id"] + ".json")
         if not os.path.exists(p):
@@ -1074,7 +1072,7 @@ def heal_raw_titles(stories, events_by_id=None, stories_dir=None, cti_dir=None):
             continue
         if _raw_title(r.get("title")):
             r["title"] = s["title"]
-            json.dump(r, open(p, "w"), indent=1)
+            write_json(p, r)
             cti_healed += 1
     return healed, cti_healed
 
@@ -1159,8 +1157,7 @@ def main():
             ev["excluded"] = True
             ev["exclude_reason"] = (f"social: no feed corroboration "
                                     f"within {SOCIAL_TTL_H}h")
-            json.dump(ev, open(os.path.join(EVENTS, eid + ".json"), "w"),
-                      indent=1)
+            write_json(os.path.join(EVENTS, eid + ".json"), ev)
             expired += 1
             continue
         frozen -= lifecycle.unfreeze_strong(ev, stories)
@@ -1198,8 +1195,7 @@ def main():
             # The event file is still written so the triage collect window
             # can see it (an explicit LLM keep materializes the story).
             ev.setdefault("kind", "original")
-            json.dump(ev, open(os.path.join(EVENTS, eid + ".json"), "w"),
-                      indent=1)
+            write_json(os.path.join(EVENTS, eid + ".json"), ev)
             if not any(p.get("id") == eid for p in pending):
                 pending.append({"id": eid, "since": ev["published_at"]})
                 parked += 1
@@ -1234,7 +1230,7 @@ def main():
             stories[slug] = s
             story_url_cache[slug] = {norm_url(ev["url"])} if ev["url"] else set()
             created += 1
-        json.dump(ev, open(os.path.join(EVENTS, eid + ".json"), "w"), indent=1)
+        write_json(os.path.join(EVENTS, eid + ".json"), ev)
         manifest.setdefault("stories_per_day", {}).setdefault(day, [])
         target_slug = target or (next(s for s in stories.values() if s["events"] and s["events"][-1]["event_id"] == eid)["id"])
         if target_slug not in manifest["stories_per_day"][day]:
@@ -1260,7 +1256,7 @@ def main():
         # missing-key breakdown can never take down the build.
         backfill_score_breakdown(s)
         s.setdefault("score", 0.0)
-        json.dump(s, open(os.path.join(STORIES, s["id"] + ".json"), "w"), indent=1)
+        write_json(os.path.join(STORIES, s["id"] + ".json"), s)
 
     # Retroactive title heal (2026-10-19 owner decision ad4c5d039830):
     # reconcile EVERY live story (and its CTI record title) after scoring, so
@@ -1272,9 +1268,9 @@ def main():
         print(f"title heal: {_healed} stories, {_cti_healed} CTI records")
 
     _save_pending(pending)
-    json.dump(manifest, open(MANIFEST, "w"), indent=1)
+    write_json(MANIFEST, manifest)
     needs = emit_needs(stories, exclude=frozen)
-    json.dump({"date": queue.get("date", ""), "events": []}, open(QUEUE, "w"), indent=1)
+    write_json(QUEUE, {"date": queue.get("date", ""), "events": []})
     print(f"new events: {len(new_ids)} | merged: {merged} | created: {created} "
           f"| social parked: {parked} | social expired: {expired} "
           f"| needs analysis: {needs}")
