@@ -1,0 +1,1 @@
+IBM Watson Speech Services Cartridge versions 4.0.0 through 5.4.0 could allow a remote attacker to cause a denial of service due to an out-of-bounds read. The flaw is reachable remotely and NVD scores it CVSS 7.5 with high availability impact.
