@@ -31,7 +31,7 @@ from score import SB_DEFAULTS as _SB_DEFAULTS, backfill_score_breakdown
 from merge import (GENERIC, DATE_STOP, _norm_tokens, _series_codes,
                    title_jaccard as jac, distinct_series_codes,
                    distinct_advisory_ids, title_discriminators)
-from store import load_events
+from store import load_events, write_json
 
 ENGINE = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(ENGINE, "data")
@@ -305,7 +305,7 @@ def main():
     reddit_posts = load_social_posts()
     queue = []
     for s in stories.values():
-        json.dump(s, open(os.path.join(STORIES, s["id"] + ".json"), "w"), indent=1)
+        write_json(os.path.join(STORIES, s["id"] + ".json"), s)
         if s.get("merged_into"):
             continue
         try:
@@ -324,7 +324,7 @@ def main():
         # missing-key breakdown can never take down the build.
         backfill_score_breakdown(s)
         s.setdefault("score", 0.0)
-        json.dump(s, open(os.path.join(STORIES, s["id"] + ".json"), "w"), indent=1)
+        write_json(os.path.join(STORIES, s["id"] + ".json"), s)
         if s["score"] >= HOT_THRESHOLD:
             ap = os.path.join(ANALYSIS, s["id"] + ".md")
             marker = (s.get("analysis") or {}).get("updated_at", "")
@@ -335,8 +335,8 @@ def main():
                           for r in s.get("events", [])), default="")
             if newest and newest > marker:
                 queue.append(s["id"])
-    json.dump({"updated_at": datetime.now(timezone.utc).isoformat(), "stories": queue},
-              open(NEEDS, "w"), indent=1)
+    write_json(NEEDS, {"updated_at": datetime.now(timezone.utc).isoformat(),
+                       "stories": queue})
     print(f"repair: rescored, needs-analysis {len(queue)}")
 
 

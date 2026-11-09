@@ -31,6 +31,31 @@ def safe_url(url):
         return ""
 
 
+def write_json(path, obj, indent=1):
+    """Write a JSON record atomically (temp file in the same directory, then
+    os.replace).
+
+    The store is read and written concurrently all day: the hourly merge and
+    triage apply rewrite story/event json while ssg, cti_pass, audit and the
+    snapshot writer read it. A plain `json.dump(obj, open(path, "w"))`
+    truncates the file first, so a reader can observe a zero-length record and
+    die with `JSONDecodeError: Expecting value: line 1 column 1` — which
+    aborts the publishing job mid-run (`ABORT: ssg failed, not pushing`:
+    2026-11-01 cti, 2026-11-05 cti, 2026-11-09 story-desk). os.replace is
+    atomic within a filesystem, so readers see either the old record or the
+    new one, never a partial file.
+
+    fsync is deliberately skipped: the requirement here is reader
+    atomicity, not power-loss durability, and the hourly run rewrites
+    thousands of records.
+    """
+    tmp = f"{path}.tmp"
+    with open(tmp, "w") as fh:
+        json.dump(obj, fh, indent=indent)
+    os.replace(tmp, path)
+    return path
+
+
 def load_events():
     """All events as {id: {...meta, content_md, url}} — content merged from the
     .md sidecar, url scheme-filtered."""

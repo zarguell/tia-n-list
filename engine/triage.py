@@ -43,6 +43,7 @@ from datetime import datetime, timedelta, timezone
 
 from merge import title_jaccard, norm_url, CVE_RE, absorb_cti_on_merge
 import lifecycle
+from store import write_json
 
 ENGINE = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(ENGINE, "data")
@@ -97,7 +98,7 @@ def _load_state():
 
 def _save_state(st):
     os.makedirs(TRIAGE, exist_ok=True)
-    json.dump(st, open(STATE, "w"), indent=1)
+    write_json(STATE, st)
 
 
 def _load_stories():
@@ -261,7 +262,7 @@ def collect():
         } for s in cands],
     }
     path = os.path.join(TRIAGE, f"context-{RUN_TAG}.json")
-    json.dump(ctx, open(path, "w"), indent=1)
+    write_json(path, ctx)
     print(f"triage: {len(recent)} new events (48h window, capped), {len(cands)} candidate stories -> {path}")
     print(f"triage: write decisions to {ctx['decisions_path']}")
 
@@ -396,7 +397,7 @@ def _sole_holder(stories, eid):
 
 
 def _write_event(e):
-    json.dump(e, open(os.path.join(EVENTS, e["id"] + ".json"), "w"), indent=1)
+    write_json(os.path.join(EVENTS, e["id"] + ".json"), e)
 
 
 def _domain(url):
@@ -456,7 +457,7 @@ def _pending_discard(eids):
     kept = [p for p in pending
             if isinstance(p, dict) and p.get("id") not in eids]
     if len(kept) != len(pending):
-        json.dump(kept, open(PENDING, "w"), indent=1)
+        write_json(PENDING, kept)
 
 
 def _url_owner(stories):
@@ -726,7 +727,7 @@ def apply(decisions_path):
 
     # persist stories
     for s in stories.values():
-        json.dump(s, open(os.path.join(STORIES, s["id"] + ".json"), "w"), indent=1)
+        write_json(os.path.join(STORIES, s["id"] + ".json"), s)
 
     # rescore + re-emit needs-analysis
     from store import load_events
@@ -756,7 +757,7 @@ def apply(decisions_path):
         # missing-key breakdown can never take down the build.
         backfill_score_breakdown(s)
         s.setdefault("score", 0.0)
-        json.dump(s, open(os.path.join(STORIES, s["id"] + ".json"), "w"), indent=1)
+        write_json(os.path.join(STORIES, s["id"] + ".json"), s)
         if s["score"] >= HOT_THRESHOLD:
             ap = os.path.join(ANALYSIS, s["id"] + ".md")
             marker = (s.get("analysis") or {}).get("updated_at", "")
@@ -770,8 +771,7 @@ def apply(decisions_path):
                 marker = datetime.fromtimestamp(os.path.getmtime(ap), tz=timezone.utc).isoformat()
             if newest and newest > marker:
                 queue.append(s["id"])
-    json.dump({"updated_at": NOW.isoformat(), "stories": queue},
-              open(NEEDS, "w"), indent=1)
+    write_json(NEEDS, {"updated_at": NOW.isoformat(), "stories": queue})
 
     state["processed"] = sorted(processed)
     _save_state(state)
