@@ -1,0 +1,30 @@
+title: Anubis/Lindnor - Masqueraded Service Binary or Ransom Note Creation
+id: 8f4f2c1e-5b7a-4f0d-9a2b-6c1d3e8b7a54
+status: experimental
+description: Detects file creation of the Lindnor backdoor binaries Symantec documented masquerading as a Chrome component (healthcontroller64.exe) and a VMware file (svchelper.exe) on Microsoft SQL Server hosts, and of the Anubis encryption payload's ransom notes (restore files.txt / restore files.html). Derived from case analysis (Symantec) - NOT validated against a live sample.
+references:
+  - https://www.security.com/threat-intelligence/lindnor-new-backdoor-anubis-ransomware
+  - https://securityonline.info/lindnor-backdoor-anubis-ransomware-byovd/
+author: Tia N. List
+date: 2026-11-09
+tags:
+  - attack.t1036
+  - attack.t1543
+  - attack.t1486
+logsource:
+  category: file_event
+  product: windows
+detection:
+  selection_masquerade:
+    TargetFilename|endswith:
+      - '\healthcontroller64.exe'
+      - '\svchelper.exe'
+  selection_ransom_note:
+    TargetFilename|endswith:
+      - '\restore files.txt'
+      - '\restore files.html'
+  condition: selection_masquerade or selection_ransom_note
+falsepositives:
+  - Backup or recovery tooling that writes a file literally named "restore files.txt" or "restore files.html"
+  - An unrelated software package shipping a binary named healthcontroller64.exe or svchelper.exe
+level: high
