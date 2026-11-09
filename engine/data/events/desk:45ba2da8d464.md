@@ -1,0 +1,1 @@
+CISA added CVE-2025-55182, Meta's React Server Components remote code execution vulnerability, to the Known Exploited Vulnerabilities catalog on December 5, 2025. The listing confirmed in-the-wild exploitation and set a mandatory remediation deadline for federal agencies under Binding Operational Directive 22-01.

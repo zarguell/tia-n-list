@@ -1,0 +1,1 @@
+Qualys analyzed CVE-2025-55182, dubbed React2Shell, as a CVSS 10.0 flaw affecting React 19.0.0 through 19.2.0 and frameworks leveraging React Server Components. The post recommends immediate upgrades to fixed releases and provides detection guidance for affected deployments.
