@@ -1,0 +1,3 @@
+On Nov 5 about 16.5k theme extension were gone in one go for policy violation from the Google chrome store. 4,300 of them share same names batches. “bana hill” alone shows 213 times and they come from 1863 unique publisher accounts. I unpacked all of them they have no js, no permissions, nothing that runs. Just the theme manifest and images. So low risk on their own. My guess is these publishers would wait for an extension to gain a lot of followers and then push malicious changes to them and hide it in all the noise of the others.. List is here if you want it: https://malext.io/?list=themes submitted by /u/Huge-Skirt-6990 [link] [comments]
+
+via reddit r/cybersecurity: Google nuked 16,482 chrome themes extension on Nov 5

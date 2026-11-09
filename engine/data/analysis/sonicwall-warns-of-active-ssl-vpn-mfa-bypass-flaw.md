@@ -1,0 +1,5 @@
+SonicWall issued advisory SNWLID-2026-0014 covering seven vulnerabilities in SonicOS firewalls, the headline being CVE-2026-19868, an SSL-VPN authentication bypass. The flaw lets an attacker who holds valid credentials for a secondary authentication method bypass SAML authentication, including multi-factor authentication, on SonicWall SonicOS SSL-VPN services.
+
+CISA added CVE-2026-19868 to the Known Exploited Vulnerabilities catalog after evidence of real-world targeting, and SonicWall states that no temporary workarounds exist, so administrators must apply the latest firmware updates immediately. The same patches also resolve six additional weaknesses, including management interface flaws and pre-authentication buffer overflows that could let unauthenticated actors execute unauthorized tasks or trigger denial-of-service conditions.
+
+Affected deployments should be inventoried against SonicOS SSL-VPN exposure and patched without delay. Because the bypass condition requires valid alternate-method credentials, environments that reuse credentials across authentication paths face elevated risk until remediated.
