@@ -1,0 +1,1 @@
+Ostorlab reported on November 5, 2026 that GPUStack versions before 2.2.0 contain an authentication bypass (CVE-2026-102895, CVSS 9.8) through a trusted loopback source or a forged X-GPUStack-Real-IP header, granting unauthenticated administrative access on GPU worker nodes. The vendor reported exploitation in the wild against a 2.1.1 deployment. Fixed in 2.2.0.

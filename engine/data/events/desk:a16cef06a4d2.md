@@ -1,0 +1,1 @@
+SignalWire published advisory GHSA-mg63-h38w-8p9p on October 28, 2026 for CVE-2026-116779, a critical command injection in FreeSWITCH versions through 1.11.2. An inbound SIP MESSAGE can select the API chat protocol and run FreeSWITCH API and OS commands; the flaw carries CVSS 9.8 and the advisory notes exploitation in the wild. Fixed in FreeSWITCH 1.11.3.
