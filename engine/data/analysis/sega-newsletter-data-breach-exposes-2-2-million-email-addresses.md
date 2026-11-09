@@ -1,0 +1,5 @@
+SEGA disclosed a data breach at ARARA, its third-party newsletter provider, exposing the email addresses of 2.2 million newsletter subscribers across 11 SEGA and SEGA Fave newsletters. A further 92,300 records contain additional information still to be determined. SEGA says customer names, dates of birth, addresses, phone numbers, credit-card details, and account passwords were not included, and emails handled through a separate SEGA Account distribution system were not affected. SEGA has no confirmed evidence of misuse.
+
+ARARA disclosed its own breach on November 2, 2026, citing a web server vulnerability and system-environment problems that compromised 77 million email addresses from nearly 380 corporate clients. ARARA had assured SEGA on October 29 that no compromise had occurred, then reversed that on November 3 after uncovering the full extent. The exact intrusion method and timing remain under investigation.
+
+This is a single-source story from bleepingcomputer.com scoring 3.4. The main residual risk is phishing aimed at the exposed newsletter addresses.
