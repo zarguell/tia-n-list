@@ -1,0 +1,1 @@
+ASCII.jp reported that Arara disclosed approximately 77 million exfiltrated email addresses from its Arara Message service, affecting up to about 380 client companies and 97 servers. The shared-environment count was revised to 3,386,187 addresses across 61 companies, including 411,827 records with names, and about 7.13 million phishing emails were sent between October 28 and 30.

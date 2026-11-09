@@ -1,0 +1,1 @@
+Claroty Team82 disclosed multiple vulnerabilities in the Danfoss AK-SM 800A refrigeration controller web management interface, including an authentication bypass via a predictable code-of-the-day mechanism, and reported that Danfoss addressed them in new firmware.
