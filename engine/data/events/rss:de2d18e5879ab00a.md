@@ -1,0 +1,1 @@
+CISA KEVs limitations, deterministic ML, and the case for localized vulnerability predictions Article Link: https://www.security.com/expert-perspectives/security-dot-com-podcast-known-exploited-doesnt-stay-exploited
