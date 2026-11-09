@@ -1,0 +1,3 @@
+https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=-Ns8GgSjb0mZBHZC\_LesWHenimZiIGVMnrTOFzwGjCxURUlUUlNHN0ExT0c5QTUzVVk5QjE4NEpHWC4u Hi everyone, I'm currently doing an EPQ in cybersecurity. I'm collecting some primary research for my dissertation. If possible, please could you fill out the form above? It is completely anonymous and should only take about five minutes. I'm posting it here to get a wider spread of results (including from cybersecurity professionals). Thank you! submitted by /u/Consistent_Item423 [link] [comments]
+
+via reddit r/cybersecurity: EPQ in cybersecurity primary research
