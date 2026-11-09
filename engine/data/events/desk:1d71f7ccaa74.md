@@ -1,0 +1,1 @@
+The Hacker News detailed exploitation using a shell script to fetch a miner payload named x12345 from 217.60.194.116 and listed attacker IP addresses. It also noted a myawesomeproxy Linux backdoor and reverse proxy artifact. Researcher Zach Main disclosed the flaws on July 27 and they were patched in Plex Media Server 1.43.3.10861.

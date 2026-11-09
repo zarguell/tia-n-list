@@ -1,0 +1,1 @@
+Researcher Zach Main published source-level analysis of the Plex2Shell chain (CVE-2026-96652, CVE-2026-96654, CVE-2026-96655 and CVE-2026-96656) on October 16, 2026. He had disclosed all four flaws to Plex on July 27, 2026 and received a $500 bounty on August 4. The write-up describes an unauthenticated chain that ends in code execution with the privileges of the Plex service.
