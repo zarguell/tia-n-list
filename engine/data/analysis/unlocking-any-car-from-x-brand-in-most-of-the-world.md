@@ -1,5 +1,5 @@
-Shubham Shah and Sam Curry found a vulnerability chain in two automakers' ForgeRock-based customer login systems that yielded remote code execution on production SSO servers, letting them create valid sessions for any customer account.
+Shubham Shah and Sam Curry took over the login systems of two automakers' mobile apps in 2026 by finding default admin:admin credentials on their ForgeRock identity servers, reaching any customer account and the unlock and engine-start commands. The research, published on samcurry.net, shows the admin console was left at factory defaults, allowing full account takeover.
 
-From those sessions they could retrieve vehicle location and telemetry and issue remote commands including lock, unlock and engine start or stop. Both automakers fixed the issue within about two hours and rotated affected credentials; testing used US accounts and vehicles.
+The Hacker News amplified the finding. No CVEs are assigned; the issue is a configuration failure rather than a software vulnerability, so remediation is operational: change default credentials, restrict admin console exposure, and audit identity providers.
 
-The affected automakers were not named. The chain combined a ForgeRock path confusion issue with access to OpenIDM and the SSO servers, and the researchers published a disclosure timeline and technical breakdown on samcurry.net in November 2026.
+The concrete risk is remote unlock and engine start for affected customers. Owners of the two brands should treat mobile-app account security as compromised until the automakers confirm remediation, and watch for unauthorized account access. The finding is a reminder that identity-provider defaults are a recurring source of vehicle-level exposure.

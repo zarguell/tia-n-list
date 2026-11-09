@@ -1,0 +1,3 @@
+An exposed open directory revealed an autonomous AI intrusion harness that spent more than two weeks attacking a European telecom provider and 13 organizations hosted in its data centers and cloud. The campaign, reported November 8, 2026 and named Operation Snowball, used an AI agent to drive the intrusion. Researchers withheld the directory's IP address to protect victims.
+
+A Mastodon post linked to a breakdown of the attack on thecybersecguru.com. The incident illustrates autonomous AI-driven reconnaissance and exploitation against telecom infrastructure; defenders should monitor for unusual tool-driven access patterns and exposed directories.

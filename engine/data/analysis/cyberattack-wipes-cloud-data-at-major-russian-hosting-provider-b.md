@@ -1,0 +1,3 @@
+Russian cloud provider Beget suffered a data-wiping malware attack on the night of November 1, 2026, when an attacker gained access to management systems across its entire architecture and deployed malware that erased server data. Beget serves more than 200,000 customers including online stores, media, and educational services. All data in its cloud infrastructure, including VPS, S3, and Kubernetes, was lost, along with CDN settings and IP configurations.
+
+Recovery is partial: as of the latest update, 60 percent of shared hosting and 40 percent of dedicated servers have been restored. VPS binary backups were completely lost, and VPS file backups partially survived for roughly half of VPS users. The company stated it is impossible to recover all data.
