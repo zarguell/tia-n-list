@@ -1,0 +1,3 @@
+Marsalek is a free malware-as-a-service platform that disguised infostealers as game cheats and utilities for Roblox, Fortnite, Counter-Strike 2, Minecraft and Grim Dawn. It was active from mid-December 2025 to late May 2026. Researchers counted more than 1,560 registered accounts, over 400 malicious files and more than 29 distribution URLs, with a dashboard that let operators build payloads.
+
+McAfee Labs reports a dual-hook Marsalek variant that drops PureLog to steal passwords from game players. The platform's scale, combined with the PureLog follow-on payload, shows Marsalek served as a distribution hub for credential theft rather than a one-off cheat trojan.
