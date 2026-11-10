@@ -1,0 +1,1 @@
+KunalSin9h reported that Swarm Desktop v0.56.2 is malicious, noting it was published by bee-worker at 2026-11-09 00:36 UTC as an emergency patch release about 30 minutes after the compromised bee-js package. The issue links the malicious commit and SafeDep's analysis. Created at 07:00:25 UTC on 2026-11-09.

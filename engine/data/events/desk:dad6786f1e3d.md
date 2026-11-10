@@ -1,0 +1,1 @@
+Ostorlab's write-up describes the compromised @ethersphere/bee-js 13.3.0 release running a postinstall payload that targets Swarm Desktop wallets and installs remote access, and recommends removing the package and rotating keys. It cites StepSecurity's analysis and the GitHub advisory GHSA-hh7j-5m3j-23pf. Published at 07:30 UTC on 2026-11-09.

@@ -1,0 +1,1 @@
+The Hacker News reports that attackers abused Ethersphere's release workflows to distribute malicious bee-js 13.3.0 and Swarm Desktop 0.56.2 builds that steal wallet keys and install backdoors. It summarizes the supply-chain compromise and the affected versions for a general security audience. Published at 17:36 UTC on 2026-11-09.
