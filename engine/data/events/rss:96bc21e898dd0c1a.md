@@ -1,0 +1,1 @@
+See how Aurora Adaptive Threat Protection uses AI-powered, intent-based detection to stop ransomware and other advanced threats before they impact your business. Article Link: https://arcticwolf.com/resources/technical-videos/how-aurora-adaptive-threat-protection-detects-and-disrupts-attacks-in-real-time/
