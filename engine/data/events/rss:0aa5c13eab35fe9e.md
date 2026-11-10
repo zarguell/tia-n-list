@@ -1,1 +1,1 @@
-오늘은 라이트 노벨을 원작으로 하는 애니메이션인 悪役令嬢なのでラスボスを飼ってみました(악역 영애이기 때문에최종 보스를 길러보았습니다)에 대해서 글을 적어 보겠습니다.해당 애니메이션은 작가는 나가세 사라사(永瀬さらさ),삽화가는 무라사키 마이(紫真依),카도카와 빈즈 .. Article Link: [일본 애니메이션]悪役令嬢なのでラスボスを飼ってみました(악역 영애이기 때문에최종 보스를 길러보았습니다,2022)
+Today I will write about the anime "I'm the Villainess, So I'm Taming the Final Boss" (悪役令嬢なのでラスボスを飼ってみました), based on a light novel. The author is Nagase Sarasa and the illustrator is Murasaki Mai; published by Kadokawa Beans. Article link: [Japanese anime] 悪役令嬢なのでラスボスを飼ってみました (I'm the Villainess, So I'm Taming the Final Boss, 2022).
