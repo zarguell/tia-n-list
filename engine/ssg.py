@@ -1145,6 +1145,8 @@ def main():
         "reddit": c.get("reddit") or 0, "last_seen_human": c.get("last_seen_human", ""),
         "snippet": c["snippet"][:220], "sources": c["sources"], "cves": c["cves"],
         "kev_cves": c.get("kev_cves", []),
+        "mp_cves": c.get("mp_cves", []),
+        "mp_links": c.get("mp_links", []),
         "card_sources": c["card_sources"], "sources_more": c["sources_more"],
         "card_cves": c["card_cves"], "cves_more": c["cves_more"],
     } for c in cards]))
