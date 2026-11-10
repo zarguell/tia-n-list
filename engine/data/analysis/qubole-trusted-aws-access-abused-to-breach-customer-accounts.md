@@ -1,3 +1,3 @@
-Attackers abused Qubole's trusted AWS access between October 14 and October 26, 2026, reaching multiple customer accounts and stealing stored secrets and data, according to The Hacker News reporting on Wiz's findings. The abuse relied on Qubole's trusted position inside customer AWS environments.
+Attackers abused Qubole's trusted AWS access to reach multiple customer accounts between October 14 and 26, 2026, stealing stored secrets and data. The activity was reported by Wiz and covered by The Hacker News.
 
-Qubole customers should rotate any secrets stored in the affected accounts, review AWS access logs for the October 14 to 26 window, and re-evaluate the trust granted to Qubole's AWS integration. The story is sourced to thehackernews.com and scores 3.5.
+The compromise relied on Qubole's privileged cloud integration rather than a disclosed CVE, so defenders should review Qubole-connected AWS accounts, rotate any secrets that may have been exposed, and audit trust relationships and access logs for the October 14-26 window.

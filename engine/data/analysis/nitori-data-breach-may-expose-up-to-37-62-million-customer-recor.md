@@ -1,0 +1,3 @@
+Nitori Holdings, Japan's largest furniture and home goods chain, disclosed a potential data breach that may have exposed up to 37.62 million customer records. The figure makes it the fourth-largest breach disclosed in Japan this year, according to the reporting. Two outlets, japancyberwatch.com and beyondmachines.net, carried the disclosure; no technical cause or affected data types were specified.
+
+Because the disclosure is preliminary, the record count is an upper bound rather than a confirmed leak. Customers and partners should watch for follow-up from Nitori on which data categories were involved and whether notification or remediation steps are required.
