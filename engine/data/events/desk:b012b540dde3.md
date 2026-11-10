@@ -1,0 +1,1 @@
+AI Weekly covered Google DeepMind's announcement that AlphaProof Code formally verified Signal protocol guarantees, noting that DeepMind open-sourced the specification and proofs. The article framed the work as the first formal verification of a widely deployed cryptographic protocol's implementation. It appeared ahead of the story's ingestion time.

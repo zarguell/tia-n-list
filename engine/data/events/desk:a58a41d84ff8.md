@@ -1,0 +1,1 @@
+SecurityWeek reported that Google announced Gemini 4 Carbon, a frontier AI model that, according to the company, beats rival models on benchmarks for detecting, exploiting, and patching vulnerabilities. The article noted the model's initial restriction to vetted cyber defenders through Google's Fairwind Program. It represents the first news coverage of the Carbon announcement.
