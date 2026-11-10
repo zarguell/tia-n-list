@@ -1,0 +1,5 @@
+November 2026 SAP Security Patch Day fixes 38 CVEs, including nine critical vulnerabilities in SAP NetWeaver, Web Dispatcher, and Gateway rated up to CVSS 10.0, per securityonline.info. SAP's monthly patch bundles typically combine multiple components, so a single Patch Day can require updates across ABAP, Java, and gateway layers in the same estate.
+
+Critical flaws in NetWeaver, Web Dispatcher, and Gateway are high-value targets because these components often sit at the edge of SAP landscapes and mediate access to business-critical data and processes. A CVSS 10.0 rating on a gateway or dispatcher component implies unauthenticated, network-reachable impact in affected configurations, and SAP environments are frequently internet-exposed through reverse proxies and cloud connectors.
+
+SAP administrators should review the November 2026 notes, prioritize the nine critical NetWeaver, Web Dispatcher, and Gateway fixes, and validate patching in non-production before rollout. Watch for securityonline.info or SAP follow-up naming the specific CVE identifiers and affected support-package levels, and for any in-the-wild exploitation reports tied to these flaws.
