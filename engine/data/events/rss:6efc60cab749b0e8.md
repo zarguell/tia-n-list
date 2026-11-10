@@ -1,0 +1,1 @@
+Managed Security Services can give security teams greater visibility and access to specialized expertise, but finding a threat is only one part of incident response. Once an alert becomes an incident, the operating model between an internal security team and its managed security service provider (MSSP) becomes critical.
