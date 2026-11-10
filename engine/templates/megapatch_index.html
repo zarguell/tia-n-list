@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block title %}Mega Patch Tracker — Tia N. List{% endblock %}
+{% block meta %}
+<meta name="description" content="Mega patch releases tracked month by month: every CVE in a single vendor mega-patch, scored on EPSS, CVSS, KEV and SSVC-style decision points, then followed for a week.">
+<meta property="og:site_name" content="Tia N. List">
+<meta property="og:type" content="website">
+<meta property="og:url" content="{{ og_url|default(site_url('megapatch/')) }}">
+{% endblock %}
+{% block content %}
+<p class="eyebrow">Mega Patch Tracker</p>
+<h1 class="page-title">Mega patch releases</h1>
+<p class="lead">Some vendors ship a month of vulnerabilities in one shot — Microsoft's Patch Tuesday currently lands well over a thousand CVEs in a single release. This tracker compiles the whole release from the vendor's machine-readable advisory feed, scores every CVE, and follows it for a week of KEV additions, EPSS movement and news uptake.</p>
+
+{% if not months %}
+<p class="no-results">No mega-patch release has been collected yet. The tracker collects the release on Patch Tuesday as soon as Microsoft finalises the monthly advisory document.</p>
+{% else %}
+
+<div class="kev-stats">
+  <div class="kev-stat"><span class="kev-stat-value">{{ months|length }}</span><span class="kev-stat-label">Releases tracked</span></div>
+  <div class="kev-stat"><span class="kev-stat-value">{{ months[0].cvss }}</span><span class="kev-stat-label">CVEs in the latest</span></div>
+  <div class="kev-stat"><span class="kev-stat-value sev-crit">{{ months[0].critical }}</span><span class="kev-stat-label">Critical in the latest</span></div>
+  <div class="kev-stat"><span class="kev-stat-value sev-high">{{ months[0].kev }}</span><span class="kev-stat-label">On CISA KEV</span></div>
+</div>
+
+<div class="mp-trackers">
+  <article class="mp-tracker-card">
+    <header class="mp-tracker-head">
+      <div>
+        <p class="kev-label">Tracker</p>
+        <h2 class="mp-tracker-name">{{ vendor_fn }} — {{ cadence }}</h2>
+        <p class="mp-tracker-source">Source of truth: {{ source }}</p>
+      </div>
+      <div class="mp-next">
+        <span class="mp-next-label">Next planned</span>
+        <span class="mp-next-date">{{ next_human or '—' }}</span>
+        {% if next_release.label %}<span class="mp-next-sub">{{ next_release.label }} release</span>{% endif %}
+      </div>
+    </header>
+
+    <div class="table-scroll">
+      <table class="kev-table mp-table">
+        <thead>
+          <tr>
+            <th scope="col">Release</th>
+            <th scope="col">Published</th>
+            <th scope="col">CVEs</th>
+            <th scope="col">Critical</th>
+            <th scope="col">KEV</th>
+            <th scope="col">Tracking</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for m in months %}
+          <tr>
+            <td><a href="{{ m.url }}">{{ m.label }}</a></td>
+            <td>{{ m.published_human or m.published }}</td>
+            <td>{{ m.cvss }}</td>
+            <td class="sev-crit">{{ m.critical }}</td>
+            <td>{{ m.kev }}</td>
+            <td>{% if m.tracking_active %}day {{ m.tracking_day }} of {{ m.tracking_days }}{% else %}{{ m.tracking_days }}-day window closed{% endif %}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% if months[0].headline %}
+    <p class="mp-latest-line"><span class="kev-label">Latest read</span> {{ months[0].headline }} <a href="{{ latest.url }}">Full release →</a></p>
+    {% endif %}
+  </article>
+</div>
+
+<section class="mp-section">
+  <h2 class="mp-h2">Archive</h2>
+  <div class="mp-archive">
+    {% for m in months %}
+    <a class="mp-archive-card" href="{{ m.url }}">
+      <span class="mp-archive-date">{{ m.label }}</span>
+      <span class="mp-archive-count">{{ m.cvss }} CVEs</span>
+      <span class="mp-archive-sub">{{ m.critical }} critical · {{ m.kev }} KEV</span>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="mp-section" id="method">
+  <h2 class="mp-h2">How this works</h2>
+  <div class="mp-method">
+    <div>
+      <h3>Scope</h3>
+      <p>We mirror the vendor's own release document, then drop the product families with a different cadence: Azure Linux (<em>Mariner</em>) and Edge/Chromium (weekly release train). The vendor's stated total stays on every page next to our count, so the exclusion is visible, not hidden.</p>
+    </div>
+    <div>
+      <h3>Signals</h3>
+      <p>CVSS base score and vector (parsed, not just displayed), EPSS probability and percentile, CISA KEV membership, CISA Vulnrichment SSVC where published, a locally derived SSVC-style assessment where it is not, Microsoft's own exploit-status flags, and how many stories our newsroom has published on each CVE.</p>
+    </div>
+    <div>
+      <h3>Tracking</h3>
+      <p>A release is followed for seven days after publication. Each day captures KEV additions, EPSS moves of 0.02 or more, and new newsroom coverage. The score re-ranks on the refreshed signals; nothing is backdated.</p>
+    </div>
+  </div>
+  <p class="footnote">Triage score is a ranking device (0–100), not a prediction: CVSS×4, EPSS percentile×20, KEV +25, vendor exploitation flag +20, public disclosure +6, Microsoft "exploitation more likely" +6, automatable +8, technical impact total +5, media mentions +1.2 each (max 5).</p>
+</section>
+
+{% endif %}
+{% endblock %}

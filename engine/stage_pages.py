@@ -53,6 +53,7 @@ PUBLISHED_DIRS = (
     "methodology",
     "about",
     "kev",
+    "megapatch",
 )
 PUBLISHED = PUBLISHED_FILES + tuple(d + "/" for d in PUBLISHED_DIRS)
 

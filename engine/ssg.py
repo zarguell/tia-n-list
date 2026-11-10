@@ -358,8 +358,19 @@ def load_stories(events):
     # normalized membership check is exact; template renders linked chips)
     import kev as kev_mod
     kev_ids = kev_mod.kev_id_set()
+    # megapatch cross-link join: which of a story's CVEs ship in a tracked
+    # mega-patch release (CVE -> releases map written by the megapatch job).
+    # Bidirectional by design: the release page lists the same stories.
+    import megapatch as mp_mod
+    mp_map = mp_mod.cve_index()
     for c in cards:
         c["kev_cves"] = [x for x in c["cves"] if kev_mod.gate_cve(x) in kev_ids]
+        c["mp_cves"] = [x for x in c["cves"] if x in mp_map]
+        c["mp_links"] = [
+            {"cve": x, "url": mp_mod.release_url(mp_map[x][0]["slug"]) +
+                             "?cve=" + x + "#all-cves",
+             "label": mp_map[x][0].get("label", "")}
+            for x in c["mp_cves"]][:4]
         # card chip rows are trimmed for the grid: 2 outlets + "+N more";
         # KEV CVEs first, 2 shown + "+N more". Full lists stay on c["sources"]
         # / c["cves"] (story page + all-stories search keep everything).
@@ -582,10 +593,59 @@ def lint_kev_links(cards):
     return bad
 
 
-def lint_kev_chips():
-    """Chip lint scoped to /kev/ (mirror of lint_chips)."""
+def lint_megapatch_links(cards):
+    """Scoped link lint for `--megapatch` mode (mirror of lint_kev_links):
+    /megapatch/ targets must resolve on disk, stories/<slug>/ must be a
+    loaded card, base.html chrome targets are exempt (full build only)."""
+    card_ids = {c["id"] for c in cards}
     bad = []
-    kev_root = os.path.join(ROOT, "kev")
+    mp_root = os.path.join(ROOT, "megapatch")
+    if not os.path.isdir(mp_root):
+        return [("megapatch/", "(missing)", "megapatch section not built")]
+    exempt = {"", ".", "./", "index.html",
+              "stories/", "daily/", "feeds/", "cti/", "methodology/", "about/",
+              "style.css", "404.html", "robots.txt", "stories-index.json",
+              "feeds/feed-all.xml", "feeds/feed-hot.xml", "feeds/feed-daily.xml",
+              "feeds/feed-kev.xml", "feeds/feed-kev-candidates.xml", "kev/",
+              "megapatch/"}
+    for root, dirs, files in os.walk(mp_root):
+        dirs[:] = [d for d in dirs if d != ".git"]
+        for fn in sorted(files):
+            if not fn.endswith(".html"):
+                continue
+            rel = os.path.relpath(os.path.join(root, fn), ROOT)
+            content = open(os.path.join(root, fn)).read()
+            for m in re.finditer(
+                    r'(?:href|src)="([^"]+)"|fetch\(([\'"])([^\'"]+)\2\)', content):
+                url = m.group(1) or m.group(3)
+                if "'" in url or "+" in url:
+                    continue
+                if url.startswith(("http://", "https://", "mailto:", "tel:", "#", "data:")):
+                    continue
+                target = url.split("#")[0].split("?")[0]
+                if target.startswith("/"):
+                    bad.append((rel, url, "origin-absolute, not base-relative"))
+                    continue
+                if target in exempt:
+                    continue
+                sm = re.match(r"^stories/([^/]+)/?$", target)
+                if sm:
+                    if sm.group(1) not in card_ids:
+                        bad.append((rel, url, f"mentions story {sm.group(1)!r}, not in the loaded cards"))
+                    continue
+                resolved = (target.rstrip("/") + "/index.html" if (target.endswith("/") or target in (".", ""))
+                            else target)
+                if target in ("", "."):
+                    resolved = "index.html"
+                if not os.path.exists(os.path.join(ROOT, resolved)):
+                    bad.append((rel, url, f"resolves to {resolved!r}, which does not exist"))
+    return bad
+
+
+def lint_kev_chips(subdir="kev"):
+    """Chip lint scoped to one generated section (mirror of lint_chips)."""
+    bad = []
+    kev_root = os.path.join(ROOT, subdir)
     for root, dirs, files in os.walk(kev_root):
         dirs[:] = [d for d in dirs if d != ".git"]
         for fn in sorted(files):
@@ -734,6 +794,29 @@ def main():
                   file=sys.stderr)
             sys.exit(1)
         print(f"done (--kev): wrote {WROTE} files, {SKIPPED} unchanged.")
+        return
+
+    # --megapatch mode: megapatch-section-only build + scoped lints, used as
+    # the megapatch job's pre-push verify (mirror of --kev).
+    if "--megapatch" in sys.argv:
+        write("style.css", open(os.path.join(TMPL_DIR, "style.css")).read())
+        write("404.html", render("404.html", active=None))
+        write("robots.txt", open(os.path.join(TMPL_DIR, "robots.txt")).read())
+        import megapatch as mp_mod
+        mp_total = mp_mod.render_site(env, write, cards)
+        print(f"megapatch section: {mp_total} releases")
+        bad_links = lint_megapatch_links(cards)
+        for rel, url, why in bad_links:
+            print(f"MEGAPATCH LINK FAIL {rel}: href/src {url!r} {why}", file=sys.stderr)
+        bad_chips = lint_kev_chips("megapatch")
+        for rel, chip in bad_chips:
+            print(f"MEGAPATCH CHIP FAIL {rel}: full URL in chip {chip!r}", file=sys.stderr)
+        if LINT_HITS or bad_links or bad_chips:
+            print(f"MEGAPATCH LINT FAIL: {len(LINT_HITS)} path-absolute + "
+                  f"{len(bad_links)} link errors + {len(bad_chips)} chip errors — "
+                  f"fix before publishing.", file=sys.stderr)
+            sys.exit(1)
+        print(f"done (--megapatch): wrote {WROTE} files, {SKIPPED} unchanged.")
         return
 
     # --lint-only (leaf A architecture): source-level fail-closed lints for
@@ -1028,6 +1111,12 @@ def main():
     kev_total = kev_mod.render_site(env, write, cards)
     print(f"  kev section: {kev_total} CVEs")
 
+    # Mega Patch Tracker (/megapatch/) — monthly vendor mega-patch releases
+    # from committed engine/data/megapatch data (cronman megapatch job).
+    import megapatch as mp_mod
+    mp_total = mp_mod.render_site(env, write, cards)
+    print(f"  megapatch section: {mp_total} releases")
+
     write("style.css", open(os.path.join(TMPL_DIR, "style.css")).read())
     write("robots.txt", open(os.path.join(TMPL_DIR, "robots.txt")).read())
 
@@ -1141,7 +1230,8 @@ def main():
     digest_date = digest_dates[-1] if digest_dates else build_today
 
     write("sitemap.xml", render("sitemap.xml", stories=cards,
-                                kev_entries=kev_mod.kev_sitemap_entries(kev_mod.load_index())))
+                                kev_entries=kev_mod.kev_sitemap_entries(kev_mod.load_index()),
+                                megapatch_entries=mp_mod.sitemap_entries()))
 
     # feeds — MVP: all / hot / daily
     all_items = feed_all_items(cards)

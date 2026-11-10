@@ -52,7 +52,7 @@ def fake_site(root):
           "/index.html\n/style.css\n/404.html\n/deploy.json\n"
           "/robots.txt\n/stories.json\n/stories-index.json\n/sitemap.xml\n"
           "/stories/\n/daily/\n/feeds/\n/posts/\n/cti/\n/methodology/\n"
-          "/about/\n/kev/\n"
+          "/about/\n/kev/\n/megapatch/\n"
           "# source-only\n"
           "/engine/data/digest-candidates.json\n"
           "engine/tests/node_modules/\n")
@@ -74,6 +74,7 @@ def fake_site(root):
     write(os.path.join(root, "methodology", "index.html"), "<html>m</html>")
     write(os.path.join(root, "about", "index.html"), "<html>a</html>")
     write(os.path.join(root, "kev", "kev-index.json"), "{}")
+    write(os.path.join(root, "megapatch", "index.html"), "<html>mp</html>")
     write(os.path.join(root, "posts", "2026-01-01-daily-summary", "index.html"),
           "<html>p</html>")
     # source + runtime trees that must never be staged

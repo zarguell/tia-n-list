@@ -1,0 +1,343 @@
+{% extends "base.html" %}
+{% block title %}{{ rel.vendor }} {{ rel.track_label }} — {{ rel.label }} — Tia N. List{% endblock %}
+{% block meta %}
+<meta name="description" content="{{ rel.counts.total }} Microsoft CVEs in the {{ rel.label }} release: CVSS, EPSS, KEV and SSVC facts, standout factors, and one week of tracking.">
+<meta property="og:site_name" content="Tia N. List">
+<meta property="og:type" content="article">
+<meta property="og:url" content="{{ og_url|default(site_url('megapatch/')) }}">
+{% endblock %}
+{% block content %}
+<p class="eyebrow">Mega Patch Tracker · {{ rel.vendor }} {{ rel.track_label }}</p>
+<h1 class="page-title">{{ rel.label }} {{ rel.track_label }}</h1>
+{% if rel.analysis.headline %}<p class="mp-headline">{{ rel.analysis.headline }}</p>{% endif %}
+<p class="lead">{{ rel.counts.total }} Microsoft CVEs released {{ mp_fmt_date(rel.published, true) }}{% if rel.stated_total and rel.stated_total != rel.counts.total %} (Microsoft states {{ rel.stated_total }} for the release; {{ rel.excluded.get("Mariner", 0) }} Azure Linux and {{ rel.excluded.get("Browser", 0) }} Edge CVEs are tracked on a different cadence){% endif %}. Vendor document last revised {{ mp_fmt_date(rel.doc.current_release[:10]) }}. Followed for {{ rel.tracking.days }} days after publication.</p>
+{% include "_megapatch_nav.html" %}
+
+<div class="kev-stats">
+  <div class="kev-stat"><span class="kev-stat-value">{{ rel.counts.total }}</span><span class="kev-stat-label">CVEs in scope</span></div>
+  <div class="kev-stat"><span class="kev-stat-value sev-crit">{{ rel.counts.critical }}</span><span class="kev-stat-label">Critical</span></div>
+  <div class="kev-stat"><span class="kev-stat-value">{{ rel.counts.kev }}</span><span class="kev-stat-label">On CISA KEV</span></div>
+  <div class="kev-stat"><span class="kev-stat-value sev-high">{{ rel.counts.exploited }}</span><span class="kev-stat-label">Exploitation detected</span></div>
+  <div class="kev-stat"><span class="kev-stat-value">{{ rel.counts.more_likely }}</span><span class="kev-stat-label">Exploitation more likely</span></div>
+  <div class="kev-stat"><span class="kev-stat-value">{{ rel.counts.automatable }}</span><span class="kev-stat-label">Automatable</span></div>
+  <div class="kev-stat"><span class="kev-stat-value">{{ rel.counts.epss_ge_10 }}</span><span class="kev-stat-label">EPSS ≥ 90th pct</span></div>
+  <div class="kev-stat"><span class="kev-stat-value">{{ rel.counts.media }}</span><span class="kev-stat-label">With news coverage</span></div>
+</div>
+
+<section class="mp-section" id="what-matters">
+  <h2 class="mp-h2">What matters in this release</h2>
+  {% if rel.analysis.summary %}
+  <div class="mp-analysis">
+    {% for para in rel.analysis.summary %}<p>{{ para }}</p>{% endfor %}
+    {% if rel.analysis.data_vs_prose %}<p class="mp-datavprose"><strong>Data vs. prose.</strong> {{ rel.analysis.data_vs_prose }}</p>{% endif %}
+    {% if rel.analysis.patch_note %}<p class="mp-patch-note"><strong>Patch first.</strong> {{ rel.analysis.patch_note }}</p>{% endif %}
+  </div>
+  {% else %}
+  <p class="mp-muted">The editorial pass for this release has not run yet — the numbers below are complete and independently scored.</p>
+  {% endif %}
+
+  {% if rel.analysis.themes %}
+  <div class="mp-themes">
+    {% for t in rel.analysis.themes %}
+    <article class="mp-theme">
+      <h3>{{ t.title }}</h3>
+      <p>{{ t.detail }}</p>
+      {% if t.cves %}<p class="mp-theme-cves">{% for c in t.cves %}<a class="chip cve" href="{{ month.url }}?cve={{ c }}#all-cves">{{ c }}</a>{% endfor %}</p>{% endif %}
+    </article>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if rel.analysis.watchlist %}
+  <div class="mp-watch">
+    <h3 class="mp-h3">Watch this week</h3>
+    <table class="kev-table mp-table">
+      <thead><tr><th scope="col">CVE</th><th scope="col">Why</th></tr></thead>
+      <tbody>
+        {% for w in rel.analysis.watchlist %}
+        <tr><td><a href="{{ month.url }}?cve={{ w.cve }}#all-cves">{{ w.cve }}</a></td><td>{{ w.why }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+</section>
+
+{% if rel.coverage %}
+<section class="mp-section" id="coverage">
+  <h2 class="mp-h2">Our newsroom on this release</h2>
+  <p class="mp-muted">{{ rel.coverage|length }} of the {{ rel.counts.total }} CVEs have coverage on Tia. These are the same stories you find on the front page — linked here by CVE.</p>
+  <div class="mp-coverage">
+    {% for c in rel.coverage %}
+    <article class="mp-coverage-item">
+      <p class="mp-coverage-cve"><a href="{{ month.url }}?cve={{ c.cve }}#all-cves">{{ c.cve }}</a> <span class="mp-coverage-meta">{{ c.family }}{% if c.severity %} · {{ c.severity }}{% endif %}</span></p>
+      <ul class="mp-coverage-stories">
+        {% for s in c.stories %}<li><a href="{{ s.url }}">{{ s.title }}</a></li>{% endfor %}
+      </ul>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{% if rel.notable %}
+<section class="mp-section" id="notable">
+  <h2 class="mp-h2">Microsoft's own notable items</h2>
+  <p class="mp-muted">The vendor flags these CVEs in the release document. We do not editorialise them — they are Microsoft's words, kept verbatim.</p>
+  <div class="table-scroll">
+    <table class="kev-table mp-table">
+      <thead><tr><th scope="col">Flag</th><th scope="col">CVE</th><th scope="col">Title</th></tr></thead>
+      <tbody>
+        {% for n in rel.notable %}
+        <tr>
+          <td>{% for f in n.flags %}<span class="chip{% if 'Exploitation' in f %} mp-flag-exploit{% endif %}">{{ f }}</span>{% endfor %}</td>
+          <td><a href="{{ month.url }}?cve={{ n.cve }}#all-cves">{{ n.cve }}</a></td>
+          <td>{{ n.title }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endif %}
+
+<section class="mp-section" id="leaders">
+  <h2 class="mp-h2">Risk leaders</h2>
+  <p class="mp-muted">Ranked by triage score — a published weighting of CVSS, EPSS, KEV, vendor exploitation flags, automatable/technical-impact decision points and news uptake. The full table is below.</p>
+  <div class="mp-leaders">
+    {% for r in (rel.top or [])[:9] %}
+    <article class="mp-leader">
+      <div class="mp-leader-head">
+        <a class="mp-leader-cve" href="{{ month.url }}?cve={{ r.cve }}#all-cves">{{ r.cve }}</a>
+        <span class="mp-leader-score" title="Triage score">{{ "%.0f"|format(r.score) }}</span>
+      </div>
+      <p class="mp-leader-title">{{ r.title }}</p>
+      <p class="mp-leader-meta">{{ r.family }}{% if r.severity %} · <span class="{{ mp_sev_class(r.severity) }}">{{ r.severity }}</span>{% endif %}{% if r.cvss %} · CVSS {{ mp_cvss(r.cvss) }}{% endif %}{% if r.epss_pct is not none %} · EPSS {{ mp_pct(r.epss_pct) }}{% endif %}</p>
+      <p class="mp-leader-why">{% for w in r.why %}<span class="chip">{{ w }}</span>{% endfor %}</p>
+      {% if r.kbs %}<p class="mp-leader-kb">KB {% for kb in r.kbs[:3] %}{{ kb }}{% if not loop.last %}, {% endif %}{% endfor %}{% if r.kb_urls %} · <a href="{{ r.kb_urls[0] }}" target="_blank" rel="noopener noreferrer">vendor note</a>{% endif %}</p>{% endif %}
+      {% if r.products %}<p class="mp-leader-products">{{ r.products|join(' · ') }}</p>{% endif %}
+    </article>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="mp-section" id="composition">
+  <h2 class="mp-h2">Release composition</h2>
+  <div class="mp-compose">
+    <div>
+      <h3 class="mp-h3">Microsoft's family table</h3>
+      <div class="table-scroll">
+        <table class="kev-table mp-table">
+          <thead><tr><th scope="col">Product family</th><th scope="col">CVEs</th><th scope="col">Updates</th><th scope="col">Type</th></tr></thead>
+          <tbody>
+            {% for f in rel.families %}
+            <tr><td>{{ f.name }}</td><td>{{ f.count }}</td><td>{{ f.updates }}</td><td>{{ f.type }}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div>
+      <h3 class="mp-h3">Severity (scoped set)</h3>
+      <ul class="mp-bars">
+        {% if rel.counts.total %}{% for s in rel.severity %}
+        <li><span class="mp-bar-label {{ mp_sev_class(s.name) }}">{{ s.name }}</span><span class="mp-bar"><span class="mp-bar-fill {{ mp_sev_class(s.name) }}" style="width: {{ (100 * s.count / rel.counts.total)|round(1) }}%"></span></span><span class="mp-bar-n">{{ s.count }}</span></li>
+        {% endfor %}{% endif %}
+      </ul>
+      <h3 class="mp-h3">Impact</h3>
+      <ul class="mp-bars">
+        {% if rel.counts.total %}{% for i in (rel.impacts or [])[:8] %}
+        <li><span class="mp-bar-label">{{ i.name }}</span><span class="mp-bar"><span class="mp-bar-fill mp-bar-neutral" style="width: {{ (100 * i.count / rel.counts.total)|round(1) }}%"></span></span><span class="mp-bar-n">{{ i.count }}</span></li>
+        {% endfor %}{% endif %}
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="mp-section" id="tracking">
+  {% set snaps = rel.tracking.get('snapshots', []) %}
+  <h2 class="mp-h2">Tracking — {{ snaps|length }} of {{ rel.tracking.get('days', 7) }} days captured</h2>
+  {% if snaps %}
+  <ol class="mp-timeline">
+    {% for s in snaps %}
+    <li class="mp-snap">
+      <p class="mp-snap-date">Day {{ s.day }} · {{ mp_fmt_date(s.date) }}</p>
+      <p class="mp-snap-line">{{ s.kev }} on KEV{% if s.kev_added %} — new: {% for c in s.kev_added %}<a class="chip cve" href="{{ month.url }}?cve={{ c }}#all-cves">{{ c }}</a>{% endfor %}{% endif %}</p>
+      {% if s.epss_moves %}<p class="mp-snap-line">EPSS moves: {% for m in s.epss_moves %}<span class="chip">{{ m.cve }} {{ "%.3f"|format(m.from) }} → {{ "%.3f"|format(m.to) }}</span>{% endfor %}</p>{% endif %}
+      {% if s.media_new %}<p class="mp-snap-line">New coverage: {% for m in s.media_new %}<span class="chip">{{ m.cve }}</span>{% endfor %}</p>{% endif %}
+      {% if not s.kev_added and not s.epss_moves and not s.media_new %}<p class="mp-snap-line mp-muted">No material change.</p>{% endif %}
+    </li>
+    {% endfor %}
+  </ol>
+  {% else %}
+  <p class="mp-muted">No snapshot yet — the first tracking pass runs the day after publication.</p>
+  {% endif %}
+</section>
+
+<section class="mp-section" id="all-cves">
+  <h2 class="mp-h2">All {{ rel.counts.total }} CVEs</h2>
+  <div class="filters" role="search" aria-label="Filter CVEs">
+    <label class="f-search">Search
+      <input id="mp-q" type="search" placeholder="CVE, product family, title" autocomplete="off">
+    </label>
+    <button class="chip active" data-mp-filter="all" type="button">All</button>
+    <button class="chip" data-mp-filter="kev" type="button">KEV</button>
+    <button class="chip" data-mp-filter="exploited" type="button">Exploitation detected</button>
+    <button class="chip" data-mp-filter="more_likely" type="button">More likely</button>
+    <button class="chip" data-mp-filter="automatable" type="button">Automatable</button>
+    <button class="chip" data-mp-filter="critical" type="button">Critical</button>
+    <button class="chip" data-mp-filter="covered" type="button">With coverage</button>
+    <span class="f-count" id="mp-count"></span>
+  </div>
+  <div class="table-scroll">
+    <table class="kev-table mp-table" id="mp-table">
+      <thead>
+        <tr>
+          <th scope="col">Score</th>
+          <th scope="col">CVE</th>
+          <th scope="col">Title</th>
+          <th scope="col">Family</th>
+          <th scope="col">Sev</th>
+          <th scope="col">CVSS</th>
+          <th scope="col">EPSS pct</th>
+          <th scope="col">KEV</th>
+          <th scope="col">Auto</th>
+        </tr>
+      </thead>
+      <tbody id="mp-tbody"></tbody>
+    </table>
+  </div>
+  <p class="no-results" id="mp-empty" hidden>No CVEs match.</p>
+  <nav class="pager" id="mp-pager" aria-label="Pagination"></nav>
+  <p class="footnote">Full machine-readable release: <a href="megapatch/{{ rel.track }}/{{ month.slug }}.json">JSON</a> · vendor document <a href="{{ rel.doc.url }}" target="_blank" rel="noopener noreferrer">CVRF {{ rel.release }}</a>.</p>
+</section>
+
+<section class="mp-section" id="method">
+  <h2 class="mp-h2">Method and limits</h2>
+  <div class="mp-method">
+    <div>
+      <h3>Sources</h3>
+      <p>Microsoft MSRC CVRF v3.0 (scope, severity, CVSS vectors, KBs, exploit-status flags), FIRST EPSS (probability + percentile), CISA KEV catalog, CISA Vulnrichment (SSVC assessments, matched per CVE), and Tia's own story store for news uptake.</p>
+    </div>
+    <div>
+      <h3>Derived, not official</h3>
+      <p>Unless a row says <em>CISA Vulnrichment</em>, the SSVC-style decision points are derived locally from the CVSS vector: automatable = AV:N/AC:L/UI:N/PR:N or L; technical impact total = C, I and A all High. Vulnrichment is fetched for the 40 highest-CVSS CVEs per release, not all of them.</p>
+    </div>
+    <div>
+      <h3>Known limits</h3>
+      <p>EPSS is a next-30-days estimate, not proof of exploitation. Microsoft's document is revised during the week; we re-read it on each tracking pass. Scope excludes Azure Linux and Edge/Chromium families (different cadence) — the vendor's stated total stays visible above.</p>
+    </div>
+  </div>
+</section>
+
+<script>
+(function () {
+  var body = document.getElementById('mp-tbody');
+  if (!body) return;
+  var q = document.getElementById('mp-q');
+  var countEl = document.getElementById('mp-count');
+  var emptyEl = document.getElementById('mp-empty');
+  var pager = document.getElementById('mp-pager');
+  var chips = document.querySelectorAll('[data-mp-filter]');
+  var PAGE = 50;
+  var rows = [];
+  var filter = 'all';
+  var page = 0;
+
+  function num(n) { return (typeof n === 'number' && isFinite(n)) ? n : null; }
+  function pctText(n) {
+    var v = num(n);
+    if (v === null) return '—';
+    return (v * 100).toFixed(0) + '%';
+  }
+  function sevClass(s) {
+    s = String(s || '').toLowerCase();
+    if (s === 'critical') return 'sev-crit';
+    if (s === 'important') return 'sev-high';
+    if (s === 'moderate') return 'sev-med';
+    return 'sev-low';
+  }
+  function matches(r) {
+    if (filter === 'kev' && !r.kev) return false;
+    if (filter === 'exploited' && !r.exploited) return false;
+    if (filter === 'automatable' && r.automatable !== 'yes') return false;
+    if (filter === 'more_likely' && !r.more_likely) return false;
+    if (filter === 'critical' && String(r.severity).toLowerCase() !== 'critical') return false;
+    if (filter === 'covered' && !(r.media > 0)) return false;
+    var term = (q.value || '').trim().toLowerCase();
+    if (!term) return true;
+    return (String(r.cve).toLowerCase().indexOf(term) !== -1 ||
+            String(r.title).toLowerCase().indexOf(term) !== -1 ||
+            String(r.family).toLowerCase().indexOf(term) !== -1);
+  }
+  function cell(text, cls) {
+    var td = document.createElement('td');
+    if (cls) td.className = cls;
+    td.textContent = text;
+    return td;
+  }
+  function render() {
+    var list = rows.filter(matches);
+    body.textContent = '';
+    var start = page * PAGE;
+    var slice = list.slice(start, start + PAGE);
+    slice.forEach(function (r) {
+      var tr = document.createElement('tr');
+      tr.appendChild(cell(num(r.score) === null ? '—' : num(r.score).toFixed(0), 'mp-score-cell'));
+      var td = document.createElement('td');
+      var a = document.createElement('a');
+      a.href = '?cve=' + encodeURIComponent(r.cve) + '#all-cves';
+      a.textContent = r.cve;
+      td.appendChild(a);
+      tr.appendChild(td);
+      tr.appendChild(cell(r.title || ''));
+      tr.appendChild(cell(r.family || ''));
+      tr.appendChild(cell(r.severity || '—', sevClass(r.severity)));
+      tr.appendChild(cell(num(r.cvss) === null ? '—' : num(r.cvss).toFixed(1)));
+      tr.appendChild(cell(pctText(r.epss_pct)));
+      tr.appendChild(cell(r.kev ? 'yes' : '—'));
+      tr.appendChild(cell(r.automatable === 'yes' ? 'yes' : '—'));
+      body.appendChild(tr);
+    });
+    countEl.textContent = list.length + ' of ' + rows.length;
+    emptyEl.hidden = list.length !== 0;
+    pager.textContent = '';
+    var pages = Math.ceil(list.length / PAGE);
+    if (pages > 1) {
+      for (var i = 0; i < pages; i++) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'chip' + (i === page ? ' active' : '');
+        b.textContent = String(i + 1);
+        b.setAttribute('aria-label', 'Page ' + (i + 1));
+        (function (idx) { b.onclick = function () { page = idx; render(); }; })(i);
+        pager.appendChild(b);
+      }
+    }
+  }
+  chips.forEach(function (c) {
+    c.onclick = function () {
+      filter = c.getAttribute('data-mp-filter');
+      page = 0;
+      chips.forEach(function (x) { x.classList.remove('active'); });
+      c.classList.add('active');
+      render();
+    };
+  });
+  q.addEventListener('input', function () { page = 0; render(); });
+
+  var m = /[?&]cve=(CVE-\d{4}-\d{4,7})/i.exec(window.location.search || '');
+  if (m) q.value = m[1].toUpperCase();
+
+  fetch('megapatch/{{ rel.track }}/{{ month.slug }}.json').then(function (r) {
+    return r.json();
+  }).then(function (data) {
+    rows = data || [];
+    rows.sort(function (a, b) { return (num(b.score) || 0) - (num(a.score) || 0); });
+    render();
+  }).catch(function () {
+    countEl.textContent = 'table unavailable';
+  });
+})();
+</script>
+{% endblock %}
