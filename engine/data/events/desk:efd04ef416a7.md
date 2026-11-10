@@ -1,0 +1,1 @@
+Vanderbilt University posted on X that it was responding to an active cybersecurity incident that may impact university devices, systems, and cloud-based services. The university said its Information Technology team was actively investigating and working to contain the situation.

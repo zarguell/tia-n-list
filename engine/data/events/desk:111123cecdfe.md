@@ -1,0 +1,1 @@
+The Record reported that Vanderbilt announced a cyberattack on Monday morning, warning that campus devices and systems may be impacted, and that the attack emerged early Monday after BYOD added the university to its leak site. Vanderbilt serves about 14,000 students and more than 6,000 staff; ransomware expert Allan Liska said BYOD's first victim appeared on September 29.

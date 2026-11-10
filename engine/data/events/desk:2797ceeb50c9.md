@@ -1,0 +1,1 @@
+The Nashville Banner reported that Vanderbilt was hit with a cyberattack Monday affecting multiple services, confirming outages impacting devices, systems, and cloud-based services. The report noted the hospital was not affected, as Vanderbilt University and Vanderbilt Health are legally and financially separate entities.

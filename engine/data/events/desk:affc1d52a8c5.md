@@ -1,0 +1,1 @@
+VenariX reported on X that the BYOD ransomware group listed Vanderbilt University as a potential victim of a ransomware cyberattack. The post notes Vanderbilt University provides education to over 13,500 students in Nashville, Tennessee.
