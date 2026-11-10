@@ -163,17 +163,22 @@
   <h2 class="mp-h2">Tracking</h2>
   <p class="mp-muted">Tracking is disabled for this release.</p>
   {% else %}
+  {% if snaps and snaps[-1].get('day') == 0 %}
+  <h2 class="mp-h2">Tracking — day 0, refreshed {{ snaps[-1].get('updated_at', '')[:16] }} UTC</h2>
+  <p class="mp-muted">Release day. KEV additions, EPSS moves, new coverage and vendor-document revisions are folded in every hour; the daily follow-up runs day 1 through day {{ rel.tracking.get('days', 7) }}.</p>
+  {% else %}
   <h2 class="mp-h2">Tracking — {{ snaps|length }} of {{ rel.tracking.get('days', 7) }} days captured</h2>
+  {% endif %}
   {% if snaps %}
   <ol class="mp-timeline">
     {% for s in snaps %}
     <li class="mp-snap">
-      <p class="mp-snap-date">Day {{ s.day }} · {{ mp_fmt_date(s.date) }}</p>
+      <p class="mp-snap-date">Day {{ s.day }} · {{ mp_fmt_date(s.date) }}{% if s.updated_at %} · updated {{ s.updated_at[11:16] }} UTC{% endif %}</p>
       <p class="mp-snap-line">{{ s.kev }} on KEV{% if s.kev_added %} — new: {% for c in s.kev_added %}<a class="chip cve" href="{{ month.url }}?cve={{ c }}#all-cves">{{ c }}</a>{% endfor %}{% endif %}</p>
       {% if s.cves_added %}<p class="mp-snap-line">Vendor revised the document: {{ s.cves_added|length }} CVE{% if s.cves_added|length != 1 %}s{% endif %} added — {% for c in s.cves_added %}<a class="chip cve" href="{{ month.url }}?cve={{ c }}#all-cves">{{ c }}</a>{% endfor %}</p>{% endif %}
       {% if s.epss_moves %}<p class="mp-snap-line">EPSS moves: {% for m in s.epss_moves %}<span class="chip">{{ m.cve }} {{ "%.3f"|format(m.from) }} → {{ "%.3f"|format(m.to) }}</span>{% endfor %}</p>{% endif %}
       {% if s.media_new %}<p class="mp-snap-line">New coverage: {% for m in s.media_new %}<span class="chip">{{ m.cve }}</span>{% endfor %}</p>{% endif %}
-      {% if not s.kev_added and not s.epss_moves and not s.media_new and not s.cves_added %}<p class="mp-snap-line mp-muted">No material change.</p>{% endif %}
+      {% if not s.kev_added and not s.epss_moves and not s.media_new and not s.cves_added %}<p class="mp-snap-line mp-muted">No material change since the last refresh.</p>{% endif %}
     </li>
     {% endfor %}
   </ol>

@@ -226,6 +226,7 @@ def _month_row(month):
         "state": state,
         "tracking_days": days,
         "tracking_snaps": snaps,
+        "tracking_last": tracking.get("last", ""),
         "tracking_day": day,
         "tracking_active": bool(tracking.get("active")),
         "url": release_url(month.get("slug")),
