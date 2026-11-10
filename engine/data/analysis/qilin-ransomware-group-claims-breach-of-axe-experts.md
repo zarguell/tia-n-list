@@ -1,0 +1,3 @@
+The Qilin ransomware group claimed a ransomware incident against AXE-EXPERTS, a company in the business services sector. A separate item notes ransomware attacks are surging, with Qilin targeting vulnerabilities and over 311 million attacks blocked by Kaspersky.
+
+This is a single victim claim with limited detail, so treat the AXE-EXPERTS breach as unconfirmed until the group publishes proof or the victim acknowledges it. Watch for data publication on Qilin's leak site and for whether the group's targeting of business services firms continues.

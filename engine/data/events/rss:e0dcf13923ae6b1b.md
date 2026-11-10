@@ -1,0 +1,1 @@
+From Windows shortcut to Cobalt Strike Beacon: we unpack a multi-stage malware loader, revealing its hidden payloads and execution techniques. Article Link: Unpacking a Multi-Stage Loader - From Embedded Payloads to Cobalt Strike Beacon
