@@ -214,6 +214,8 @@ def _month_row(month):
         "cvss": counts.get("total", 0),
         "critical": counts.get("critical", 0),
         "kev": counts.get("kev", 0),
+        "backfilled": bool(month.get("backfilled")),
+        "tracking_enabled": tracking.get("enabled", True) is not False,
         "tracking_days": days,
         "tracking_snaps": snaps,
         "tracking_active": bool(tracking.get("active")),

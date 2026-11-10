@@ -8,9 +8,9 @@
 {% endblock %}
 {% block content %}
 <p class="eyebrow">Mega Patch Tracker · {{ rel.vendor }} {{ rel.track_label }}</p>
-<h1 class="page-title">{{ rel.label }} {{ rel.track_label }}</h1>
+<h1 class="page-title">{{ rel.label }} {{ rel.track_label }}{% if rel.backfilled %} <span class="chip mp-backfill" title="Collected from the vendor's published document after the fact — no 7-day follow-up">backfilled</span>{% endif %}</h1>
 {% if rel.analysis.headline %}<p class="mp-headline">{{ rel.analysis.headline }}</p>{% endif %}
-<p class="lead">{{ rel.counts.total }} Microsoft CVEs released {{ mp_fmt_date(rel.published, true) }}{% if rel.stated_total and rel.stated_total != rel.counts.total %} (Microsoft states {{ rel.stated_total }} for the release; {{ rel.excluded.get("Mariner", 0) }} Azure Linux and {{ rel.excluded.get("Browser", 0) }} Edge CVEs are tracked on a different cadence){% endif %}. Vendor document last revised {{ mp_fmt_date(rel.doc.current_release[:10]) }}. Followed for {{ rel.tracking.days }} days after publication.</p>
+<p class="lead">{{ rel.counts.total }} Microsoft CVEs released {{ mp_fmt_date(rel.published, true) }}{% if rel.stated_total and rel.stated_total != rel.counts.total %} (Microsoft states {{ rel.stated_total }} for the release; {{ rel.excluded.get("Mariner", 0) }} Azure Linux and {{ rel.excluded.get("Browser", 0) }} Edge CVEs are tracked on a different cadence){% endif %}. Vendor document last revised {{ mp_fmt_date(rel.doc.current_release[:10]) }}.{% if rel.backfilled %} This release was backfilled from Microsoft's published document after its tracking window had closed, so it is an archive page — there is no day-by-day follow-up to report.{% else %} Followed for {{ rel.tracking.days }} days after publication.{% endif %}</p>
 {% include "_megapatch_nav.html" %}
 
 <div class="kev-stats">
@@ -156,6 +156,13 @@
 
 <section class="mp-section" id="tracking">
   {% set snaps = rel.tracking.get('snapshots', []) %}
+  {% if rel.backfilled %}
+  <h2 class="mp-h2">Tracking</h2>
+  <p class="mp-muted">Not tracked. This release was collected from the vendor's archive document after the fact, so the seven-day KEV / EPSS / coverage follow-up does not apply — a backfilled timeline would be an artifact of when we looked, not of what changed. The record still carries the day-0 signal set (EPSS, KEV, SSVC, coverage) used by the scoring.</p>
+  {% elif rel.tracking.get('enabled', true) is sameas false %}
+  <h2 class="mp-h2">Tracking</h2>
+  <p class="mp-muted">Tracking is disabled for this release.</p>
+  {% else %}
   <h2 class="mp-h2">Tracking — {{ snaps|length }} of {{ rel.tracking.get('days', 7) }} days captured</h2>
   {% if snaps %}
   <ol class="mp-timeline">
@@ -171,6 +178,7 @@
   </ol>
   {% else %}
   <p class="mp-muted">No snapshot yet — the first tracking pass runs the day after publication.</p>
+  {% endif %}
   {% endif %}
 </section>
 

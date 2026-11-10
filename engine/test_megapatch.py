@@ -270,11 +270,39 @@ def test_render_site_end_to_end():
         assert ok
 
 
+def test_backfilled_release_is_an_archive_not_tracked():
+    """A retro-collected release must not pretend to have been followed for a
+    week: the page says it was backfilled and shows no tracking timeline."""
+    with tempfile.TemporaryDirectory() as tmp:
+        rec = _record()
+        rec["backfilled"] = True
+        rec["tracking"]["enabled"] = False
+        rec["tracking"]["snapshots"] = []
+        _write_fixture(tmp, rec)
+        old_data = mp.DATA
+        mp.DATA = tmp
+        written = {}
+        try:
+            env = jinja2.Environment(
+                loader=jinja2.FileSystemLoader(os.path.join(ENGINE, "templates")),
+                autoescape=True)
+            env.globals["site_url"] = mp.site_url
+            mp.render_site(env, lambda rel, content: written.__setitem__(rel, content), [])
+        finally:
+            mp.DATA = old_data
+        html = written["megapatch/microsoft-patch-tuesday/oct-2026/index.html"]
+        ok = check("backfilled badge", "backfilled</span>" in html, True)
+        ok &= check("says not tracked", "Not tracked." in html, True)
+        ok &= check("no tracking timeline", "Tracking — 0 of 7 days" not in html, True)
+        assert ok
+
+
 def main():
     ok = True
     for fn in (test_gate_slug, test_helpers, test_table_rows_shape_gate,
                test_cve_index_gate, test_coverage_join, test_sitemap_entries,
-               test_render_site_end_to_end):
+               test_render_site_end_to_end,
+               test_backfilled_release_is_an_archive_not_tracked):
         print(fn.__name__)
         fn()
     print("megapatch renderer: all checks passed")
