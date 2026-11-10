@@ -204,6 +204,13 @@ def _month_row(month):
     tracking = month.get("tracking") or {}
     days = int(tracking.get("days") or 0)
     snaps = int(tracking.get("snapshots") or 0)
+    # Display state comes from the job (it knows the release day); fall back to
+    # the old booleans for indexes written before `state` existed.
+    state = tracking.get("state")
+    if not state:
+        state = ("backfilled" if month.get("backfilled")
+                 else "active" if tracking.get("active") else "closed")
+    day = int(tracking.get("day") if tracking.get("day") is not None else min(snaps, days))
     return {
         "release": month.get("release", ""),
         "slug": gate_slug(month.get("slug")),
@@ -216,10 +223,11 @@ def _month_row(month):
         "kev": counts.get("kev", 0),
         "backfilled": bool(month.get("backfilled")),
         "tracking_enabled": tracking.get("enabled", True) is not False,
+        "state": state,
         "tracking_days": days,
         "tracking_snaps": snaps,
+        "tracking_day": day,
         "tracking_active": bool(tracking.get("active")),
-        "tracking_day": min(snaps, days),
         "url": release_url(month.get("slug")),
     }
 

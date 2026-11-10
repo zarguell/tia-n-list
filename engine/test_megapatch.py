@@ -212,6 +212,22 @@ def test_coverage_join():
     assert ok
 
 
+def test_month_row_tracking_states():
+    base = {"release": "2026-Nov", "slug": "nov-2026",
+            "label": "November 2026", "published": "2026-11-10", "counts": {}}
+    starts = mp._month_row(dict(base, tracking={"days": 7, "state": "starts",
+                                                "day": 0, "snapshots": 0}))
+    ok = check("release day is 'starts', not closed", starts["state"], "starts")
+    ok &= check("release day is day 0", starts["tracking_day"], 0)
+    active = mp._month_row(dict(base, tracking={"days": 7, "state": "active",
+                                                "day": 3, "snapshots": 3}))
+    ok &= check("active day from the job", (active["state"], active["tracking_day"]),
+                ("active", 3))
+    old = mp._month_row(dict(base, tracking={"days": 7, "snapshots": 0}))
+    ok &= check("legacy index falls back to closed", old["state"], "closed")
+    assert ok
+
+
 def test_sitemap_entries():
     idx = {"vendors": [{"months": [
         {"release": "2026-Oct", "slug": "oct-2026", "published": "2026-10-13"},
@@ -301,6 +317,7 @@ def main():
     ok = True
     for fn in (test_gate_slug, test_helpers, test_table_rows_shape_gate,
                test_cve_index_gate, test_coverage_join, test_sitemap_entries,
+               test_month_row_tracking_states,
                test_render_site_end_to_end,
                test_backfilled_release_is_an_archive_not_tracked):
         print(fn.__name__)
