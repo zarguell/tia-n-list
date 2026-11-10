@@ -366,10 +366,16 @@ def load_stories(events):
     for c in cards:
         c["kev_cves"] = [x for x in c["cves"] if kev_mod.gate_cve(x) in kev_ids]
         c["mp_cves"] = [x for x in c["cves"] if x in mp_map]
+        # the map entry carries its own track: a CVE can ship in more than
+        # one vendor's release (Oracle and Microsoft both fix OpenSSL etc.),
+        # and the link must stay on the vendor the CVE actually ships with
         c["mp_links"] = [
-            {"cve": x, "url": mp_mod.release_url(mp_map[x][0]["slug"]) +
-                             "?cve=" + x + "#all-cves",
-             "label": mp_map[x][0].get("label", "")}
+            {"cve": x,
+             "url": mp_mod.release_url(mp_map[x][0]["slug"],
+                                       mp_map[x][0].get("track")) +
+                    "?cve=" + x + "#all-cves",
+             "label": (f"{mp_map[x][0].get('vendor', '')} "
+                       f"{mp_map[x][0].get('label', '')}").strip()}
             for x in c["mp_cves"]][:4]
         # card chip rows are trimmed for the grid: 2 outlets + "+N more";
         # KEV CVEs first, 2 shown + "+N more". Full lists stay on c["sources"]
