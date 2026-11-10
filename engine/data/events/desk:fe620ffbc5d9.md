@@ -1,0 +1,1 @@
+Christoph Kolbicz released WQ Files 0.4, a no-jailbreak file browser and app data manager built on worse_query, on November 9, 2026. The release was tested on iOS 27.0.1 and requires sideloading with an App Group entitlement. It includes a plist editor and hex viewer for browsing and editing other apps' data.

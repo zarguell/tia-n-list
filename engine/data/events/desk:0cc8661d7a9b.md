@@ -1,0 +1,1 @@
+crypto.news reported Binance's warning that the worse_query iOS vulnerability could expose crypto wallet keys and recovery phrases. It urged users to remove untrusted apps and update. The article was published on November 10, 2026.
