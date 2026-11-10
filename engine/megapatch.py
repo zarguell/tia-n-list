@@ -36,6 +36,7 @@ TRACK = "microsoft-patch-tuesday"
 
 BASE_URL = "https://zarguell.github.io/tia-n-list"
 RELEASE_RE = re.compile(r"^\d{4}-[A-Z][a-z]{2}$")
+TRACK_RE = re.compile(r"^[a-z0-9][a-z0-9-]{2,60}$")
 SLUG_RE = re.compile(r"^[a-z]{3}-\d{4}$")
 CVE_RE = re.compile(r"^CVE-\d{4}-\d{4,7}$")
 
@@ -49,6 +50,10 @@ def sev_class(severity):
 
 def gate_slug(slug):
     return slug if isinstance(slug, str) and SLUG_RE.match(slug) else None
+
+
+def gate_track(track):
+    return track if isinstance(track, str) and TRACK_RE.match(track) else None
 
 
 def fmt_date(iso, long=False):
@@ -147,14 +152,15 @@ def release_coverage(rec, cov):
     } for r in rows]
 
 
-def load_release(slug):
+def load_release(slug, track=None):
     slug = gate_slug(slug)
-    if not slug:
+    track = gate_track(track) if track else TRACK
+    if not slug or not track:
         return None
     release = release_from_slug(slug)
     if not release or not RELEASE_RE.match(release):
         return None
-    path = os.path.join(DATA, TRACK, release + ".json")
+    path = os.path.join(DATA, track, release + ".json")
     try:
         with open(path) as f:
             rec = json.load(f)
@@ -182,7 +188,8 @@ def _release_ok(rec):
 def table_rows(rec):
     """Client-table projection: only the fields the table renders."""
     keys = ("cve", "title", "family", "severity", "cvss", "epss_pct", "kev",
-            "automatable", "exploited", "more_likely", "media", "score", "why")
+            "automatable", "exploited", "more_likely", "remote_unauth",
+            "media", "score", "why")
     out = []
     for r in rec.get("rows") or []:
         if not CVE_RE.match(str(r.get("cve") or "")):
@@ -193,12 +200,13 @@ def table_rows(rec):
     return out
 
 
-def release_url(slug):
+def release_url(slug, track=None):
     slug = gate_slug(slug)
-    return f"megapatch/{TRACK}/{slug}/" if slug else f"megapatch/{TRACK}/"
+    track = gate_track(track) if track else TRACK
+    return f"megapatch/{track}/{slug}/" if slug else f"megapatch/{track}/"
 
 
-def _month_row(month):
+def _month_row(month, track=None):
     """Normalize one index month entry for the templates."""
     counts = month.get("counts") or {}
     tracking = month.get("tracking") or {}
@@ -218,10 +226,12 @@ def _month_row(month):
         "published": month.get("published", ""),
         "published_human": fmt_date(month.get("published"), long=True),
         "headline": month.get("headline", ""),
+        "cve_count": counts.get("total", 0),
         "cvss": counts.get("total", 0),
         "critical": counts.get("critical", 0),
         "kev": counts.get("kev", 0),
         "backfilled": bool(month.get("backfilled")),
+        "channel": month.get("channel", ""),
         "tracking_enabled": tracking.get("enabled", True) is not False,
         "state": state,
         "tracking_days": days,
@@ -229,85 +239,115 @@ def _month_row(month):
         "tracking_last": tracking.get("last", ""),
         "tracking_day": day,
         "tracking_active": bool(tracking.get("active")),
-        "url": release_url(month.get("slug")),
+        "track": track or TRACK,
+        "url": release_url(month.get("slug"), track),
     }
 
 
+def _vendor_view(vendor):
+    """Normalize one index vendor entry (months, latest, next) for templates."""
+    # indexes written before multi-vendor carry no slug: they are the
+    # Microsoft tracker by definition
+    track = gate_track(vendor.get("slug")) or TRACK
+    if not track:
+        return None
+    months = [_month_row(m, track) for m in (vendor.get("months") or [])
+              if gate_slug(m.get("slug"))]
+    months.sort(key=lambda m: m["published"], reverse=True)
+    if months:
+        months = months[: span_of(months)]
+    latest = months[0] if months else None
+    nxt = vendor.get("next") or {}
+    return {
+        "track": track,
+        "vendor": vendor.get("vendor", ""),
+        "label": vendor.get("label", ""),
+        "cadence": vendor.get("cadence", ""),
+        "source": vendor.get("source", ""),
+        "severity_basis": vendor.get("severity_basis", ""),
+        "months": months,
+        "latest": latest,
+        "next": nxt,
+        "next_human": fmt_date(nxt.get("date"), long=True),
+        "next_label": nxt.get("label", ""),
+    }
+
+
+def span_of(months, limit=36):
+    """Cap the archive list (the page lists recent releases; data keeps all)."""
+    return min(len(months), limit)
+
+
 def render_site(env, write, cards=None):
-    """Render /megapatch/ pages + the per-release table JSON. Returns the
-    number of releases rendered (0 when there is no data yet)."""
+    """Render /megapatch/ pages + the per-release table JSON for every
+    tracker. Returns the number of releases rendered."""
     env.globals.setdefault("mp_sev_class", sev_class)
     env.globals.setdefault("mp_fmt_date", fmt_date)
     env.globals.setdefault("mp_pct", pct)
     env.globals.setdefault("mp_cvss", cvss_num)
 
     index = load_index()
-    vendors = index.get("vendors") if isinstance(index.get("vendors"), list) else []
-    vendor = vendors[0] if vendors else {}
-    months = [_month_row(m) for m in (vendor.get("months") or [])
-              if gate_slug(m.get("slug"))]
-    months = [m for m in months if m["slug"]]
-    months.sort(key=lambda m: m["published"], reverse=True)
-    latest = months[0] if months else None
-
+    raw = index.get("vendors") if isinstance(index.get("vendors"), list) else []
+    vendors = [v for v in (_vendor_view(x) for x in raw) if v]
     cov = coverage_map(cards)
 
     write("megapatch/index.html", env.get_template("megapatch_index.html").render(
-        active="megapatch", mp_section="index",
-        vendor_fn=vendor.get("vendor", "Microsoft"),
-        cadence=vendor.get("cadence", ""),
-        source=vendor.get("source", ""),
-        months=months, latest=latest,
-        next_release=vendor.get("next") or {},
-        next_human=fmt_date((vendor.get("next") or {}).get("date"), long=True),
+        active="megapatch", mp_section="index", vendors=vendors,
+        release_count=sum(len(v["months"]) for v in vendors),
         index_updated=index.get("updated_at", ""),
         og_url=site_url("megapatch/")))
 
     rendered = 0
-    for m in months:
-        rec = load_release(m["slug"])
-        if not rec:
-            continue
-        # the client table is fetched, never inlined (security contract S2)
-        write(f"megapatch/{TRACK}/{m['slug']}.json",
-              json.dumps(table_rows(rec), ensure_ascii=True))
-        view = dict(rec, coverage=release_coverage(rec, cov))
-        html = env.get_template("megapatch_release.html").render(
-            active="megapatch", mp_section="release",
-            rel=view, month=m, months=months, latest=latest,
-            is_latest=bool(latest and m["slug"] == latest["slug"]),
-            next_release=vendor.get("next") or {},
-            next_human=fmt_date((vendor.get("next") or {}).get("date"), long=True),
-            og_url=site_url(release_url(m["slug"])))
-        write(f"megapatch/{TRACK}/{m['slug']}/index.html", html)
-        rendered += 1
+    for v in vendors:
+        track = v["track"]
+        for m in v["months"]:
+            rec = load_release(m["slug"], track)
+            if not rec:
+                continue
+            # the client table is fetched, never inlined (security contract S2)
+            write(f"megapatch/{track}/{m['slug']}.json",
+                  json.dumps(table_rows(rec), ensure_ascii=True))
+            view = dict(rec, coverage=release_coverage(rec, cov),
+                        show_impacts=any(i.get("name") != "Unknown"
+                                         for i in rec.get("impacts") or []))
+            html = env.get_template("megapatch_release.html").render(
+                active="megapatch", mp_section="release", mp_track=track,
+                rel=view, month=m, months=v["months"], latest=v["latest"],
+                vendor=v, is_latest=bool(v["latest"] and m["slug"] == v["latest"]["slug"]),
+                next_release=v["next"], next_human=v["next_human"],
+                og_url=site_url(release_url(m["slug"], track)))
+            write(f"megapatch/{track}/{m['slug']}/index.html", html)
+            rendered += 1
 
-    if latest:
-        rec = load_release(latest["slug"])
-        if rec:
-            view = dict(rec, coverage=release_coverage(rec, cov))
-            write(f"megapatch/{TRACK}/index.html",
-                  env.get_template("megapatch_release.html").render(
-                      active="megapatch", mp_section="release",
-                      rel=view, month=latest, months=months, latest=latest,
-                      is_latest=True, next_release=vendor.get("next") or {},
-                      next_human=fmt_date((vendor.get("next") or {}).get("date"),
-                                          long=True),
-                      og_url=site_url(f"megapatch/{TRACK}/")))
+        if v["latest"]:
+            rec = load_release(v["latest"]["slug"], track)
+            if rec:
+                view = dict(rec, coverage=release_coverage(rec, cov),
+                            show_impacts=any(i.get("name") != "Unknown"
+                                             for i in rec.get("impacts") or []))
+                write(f"megapatch/{track}/index.html",
+                      env.get_template("megapatch_release.html").render(
+                          active="megapatch", mp_section="release", mp_track=track,
+                          rel=view, month=v["latest"], months=v["months"],
+                          latest=v["latest"], vendor=v, is_latest=True,
+                          next_release=v["next"], next_human=v["next_human"],
+                          og_url=site_url(f"megapatch/{track}/")))
     return rendered
 
 
 def sitemap_entries(index=None):
-    """[(path, lastmod)] for the sitemap template."""
+    """[(path, lastmod)] for the sitemap template — every tracker."""
     index = index if index is not None else load_index()
     entries = [("megapatch/", "")]
-    vendors = index.get("vendors") if isinstance(index.get("vendors"), list) else []
-    if vendors:
-        entries.append((f"megapatch/{TRACK}/", ""))
-    for m in (vendors[0].get("months") if vendors else []) or []:
-        slug = gate_slug(m.get("slug"))
-        if slug:
-            entries.append((f"megapatch/{TRACK}/{slug}/", fmt_date(m.get("published"))))
+    raw = index.get("vendors") if isinstance(index.get("vendors"), list) else []
+    for vendor in raw:
+        v = _vendor_view(vendor)
+        if not v:
+            continue
+        entries.append((f"megapatch/{v['track']}/", ""))
+        for m in v["months"]:
+            entries.append((f"megapatch/{v['track']}/{m['slug']}/",
+                            fmt_date(m["published"])))
     return entries
 
 

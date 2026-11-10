@@ -161,8 +161,8 @@ def test_table_rows_shape_gate():
     ok &= check("why capped", len(rows[1]["why"]), 5)
     ok &= check("table keys", sorted(rows[0]),
                 sorted(["cve", "title", "family", "severity", "cvss", "epss_pct",
-                        "kev", "automatable", "exploited", "more_likely", "media",
-                        "score", "why"]))
+                        "kev", "automatable", "exploited", "more_likely",
+                        "remote_unauth", "media", "score", "why"]))
     assert ok
 
 
@@ -313,11 +313,77 @@ def test_backfilled_release_is_an_archive_not_tracked():
         assert ok
 
 
+def test_multi_vendor_render():
+    """Two trackers: each gets a latest page, a month page, a table JSON and
+    a sitemap entry; the dashboard lists both."""
+    with tempfile.TemporaryDirectory() as tmp:
+        ms = _record()
+        _write_fixture(tmp, ms)
+        # second vendor (Oracle shape: channel, CVSS-derived severity)
+        ora = _record()
+        ora.update({"vendor": "Oracle", "track": "oracle-critical-patch-update",
+                    "track_label": "Critical Patch Update", "channel": "CSPU",
+                    "channel_label": "Critical Security Patch Update",
+                    "slug": "oct-2026", "release": "2026-Oct",
+                    "severity_basis": "cvss"})
+        ora["rows"] = [_row("CVE-2026-1001", remote_unauth=True,
+                            severity="High", media=0)]
+        ora["top"] = [dict(ora["rows"][0], products=[], cwes=[], kb_urls=[],
+                           media_stories=[], ssvc_source="derived")]
+        ora["counts"] = dict(ora["counts"], remote_unauth=1, kev=0, media=0)
+        ora["impacts"] = [{"name": "Unknown", "count": 1}]
+        os.makedirs(os.path.join(tmp, "oracle-critical-patch-update"))
+        with open(os.path.join(tmp, "oracle-critical-patch-update",
+                               "2026-Oct.json"), "w") as f:
+            json.dump(ora, f)
+        idx = json.load(open(os.path.join(tmp, "index.json")))
+        idx["vendors"].append({
+            "slug": "oracle-critical-patch-update", "vendor": "Oracle",
+            "label": "Critical Patch Update", "cadence": "Monthly",
+            "source": "Oracle", "severity_basis": "cvss",
+            "next": {"release": "2026-Nov", "date": "2026-11-17",
+                     "label": "November 2026"},
+            "months": [dict(idx["vendors"][0]["months"][0],
+                            slug="oct-2026", release="2026-Oct",
+                            channel="CSPU", counts=ora["counts"])],
+        })
+        with open(os.path.join(tmp, "index.json"), "w") as f:
+            json.dump(idx, f)
+
+        old_data = mp.DATA
+        mp.DATA = tmp
+        written = {}
+        try:
+            env = jinja2.Environment(
+                loader=jinja2.FileSystemLoader(os.path.join(ENGINE, "templates")),
+                autoescape=True)
+            env.globals["site_url"] = mp.site_url
+            n = mp.render_site(env, lambda rel, c: written.__setitem__(rel, c), [])
+        finally:
+            mp.DATA = old_data
+        ok = check("both releases rendered", n, 2)
+        ok &= check("oracle latest page",
+                    "megapatch/oracle-critical-patch-update/index.html" in written, True)
+        ok &= check("oracle table json",
+                    "megapatch/oracle-critical-patch-update/oct-2026.json" in written, True)
+        index = written["megapatch/index.html"]
+        ok &= check("dashboard lists both vendors",
+                    "Microsoft" in index and "Oracle" in index, True)
+        ora_html = written["megapatch/oracle-critical-patch-update/oct-2026/index.html"]
+        ok &= check("channel tag rendered", "CSPU" in ora_html, True)
+        ok &= check("cvss severity note", "CVSS-derived" in ora_html, True)
+        ok &= check("impact chart hidden when unknown",
+                    ">Impact<" not in ora_html, True)
+        ok &= check("nav points at oracle track",
+                    'href="megapatch/oracle-critical-patch-update/"' in ora_html, True)
+        assert ok
+
+
 def main():
     ok = True
     for fn in (test_gate_slug, test_helpers, test_table_rows_shape_gate,
                test_cve_index_gate, test_coverage_join, test_sitemap_entries,
-               test_month_row_tracking_states,
+               test_month_row_tracking_states, test_multi_vendor_render,
                test_render_site_end_to_end,
                test_backfilled_release_is_an_archive_not_tracked):
         print(fn.__name__)

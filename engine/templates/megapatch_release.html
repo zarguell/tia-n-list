@@ -7,10 +7,10 @@
 <meta property="og:url" content="{{ og_url|default(site_url('megapatch/')) }}">
 {% endblock %}
 {% block content %}
-<p class="eyebrow">Mega Patch Tracker · {{ rel.vendor }} {{ rel.track_label }}</p>
-<h1 class="page-title">{{ rel.label }} {{ rel.track_label }}{% if rel.backfilled %} <span class="chip mp-backfill" title="Collected from the vendor's published document after the fact — no 7-day follow-up">backfilled</span>{% endif %}</h1>
+<p class="eyebrow">Mega Patch Tracker · {{ rel.vendor }}</p>
+<h1 class="page-title">{{ rel.label }} {{ rel.channel_label or rel.track_label }}{% if rel.channel %} <span class="mp-channel-tag">{{ rel.channel }}</span>{% endif %}{% if rel.backfilled %} <span class="chip mp-backfill" title="Collected from the vendor's published document after the fact — no 7-day follow-up">backfilled</span>{% endif %}</h1>
 {% if rel.analysis.headline %}<p class="mp-headline">{{ rel.analysis.headline }}</p>{% endif %}
-<p class="lead">{{ rel.counts.total }} Microsoft CVEs released {{ mp_fmt_date(rel.published, true) }}{% if rel.stated_total and rel.stated_total != rel.counts.total %} (Microsoft states {{ rel.stated_total }} for the release; {{ rel.excluded.get("Mariner", 0) }} Azure Linux and {{ rel.excluded.get("Browser", 0) }} Edge CVEs are tracked on a different cadence){% endif %}. Vendor document last revised {{ mp_fmt_date(rel.doc.current_release[:10]) }}.{% if rel.backfilled %} This release was backfilled from Microsoft's published document after its tracking window had closed, so it is an archive page — there is no day-by-day follow-up to report.{% else %} Followed for {{ rel.tracking.days }} days after publication.{% endif %}</p>
+<p class="lead">{{ rel.counts.total }} {{ rel.vendor }} CVEs released {{ mp_fmt_date(rel.published, true) }}{% if rel.stated_total and rel.stated_total != rel.counts.total %} ({{ rel.vendor }} states {{ rel.stated_total }} security patches for the release{% if rel.excluded %}; {{ rel.excluded.get("Mariner", 0) }} Azure Linux and {{ rel.excluded.get("Browser", 0) }} Edge CVEs are tracked on a different cadence{% endif %}){% endif %}.{% if rel.doc.current_release %} Vendor document last revised {{ mp_fmt_date(rel.doc.current_release[:10]) }}.{% endif %}{% if rel.backfilled %} This release was backfilled from the vendor's published document after its tracking window had closed, so it is an archive page — there is no day-by-day follow-up to report.{% else %} Followed for {{ rel.tracking.days }} days after publication.{% endif %}</p>
 {% include "_megapatch_nav.html" %}
 
 <div class="kev-stats">
@@ -18,7 +18,8 @@
   <div class="kev-stat"><span class="kev-stat-value sev-crit">{{ rel.counts.critical }}</span><span class="kev-stat-label">Critical</span></div>
   <div class="kev-stat"><span class="kev-stat-value">{{ rel.counts.kev }}</span><span class="kev-stat-label">On CISA KEV</span></div>
   <div class="kev-stat"><span class="kev-stat-value sev-high">{{ rel.counts.exploited }}</span><span class="kev-stat-label">Exploitation detected</span></div>
-  <div class="kev-stat"><span class="kev-stat-value">{{ rel.counts.more_likely }}</span><span class="kev-stat-label">Exploitation more likely</span></div>
+  {% if rel.counts.more_likely %}<div class="kev-stat"><span class="kev-stat-value">{{ rel.counts.more_likely }}</span><span class="kev-stat-label">Exploitation more likely</span></div>{% endif %}
+  {% if rel.counts.remote_unauth %}<div class="kev-stat"><span class="kev-stat-value sev-high">{{ rel.counts.remote_unauth }}</span><span class="kev-stat-label">Remote, no credentials</span></div>{% endif %}
   <div class="kev-stat"><span class="kev-stat-value">{{ rel.counts.automatable }}</span><span class="kev-stat-label">Automatable</span></div>
   <div class="kev-stat"><span class="kev-stat-value">{{ rel.counts.epss_ge_10 }}</span><span class="kev-stat-label">EPSS ≥ 90th pct</span></div>
   <div class="kev-stat"><span class="kev-stat-value">{{ rel.counts.media }}</span><span class="kev-stat-label">With news coverage</span></div>
@@ -83,7 +84,7 @@
 {% if rel.notable %}
 <section class="mp-section" id="notable">
   <h2 class="mp-h2">Microsoft's own notable items</h2>
-  <p class="mp-muted">The vendor flags these CVEs in the release document. We do not editorialise them — they are Microsoft's words, kept verbatim.</p>
+  <p class="mp-muted">The vendor flags these CVEs in its release document. We do not editorialise them — they are the vendor's words, kept verbatim.</p>
   <div class="table-scroll">
     <table class="kev-table mp-table">
       <thead><tr><th scope="col">Flag</th><th scope="col">CVE</th><th scope="col">Title</th></tr></thead>
@@ -138,18 +139,18 @@
       </div>
     </div>
     <div>
-      <h3 class="mp-h3">Severity (scoped set)</h3>
+      <h3 class="mp-h3">Severity (scoped set{% if rel.severity_basis == 'cvss' %}, CVSS-derived{% endif %})</h3>
       <ul class="mp-bars">
         {% if rel.counts.total %}{% for s in rel.severity %}
         <li><span class="mp-bar-label {{ mp_sev_class(s.name) }}">{{ s.name }}</span><span class="mp-bar"><span class="mp-bar-fill {{ mp_sev_class(s.name) }}" style="width: {{ (100 * s.count / rel.counts.total)|round(1) }}%"></span></span><span class="mp-bar-n">{{ s.count }}</span></li>
         {% endfor %}{% endif %}
       </ul>
-      <h3 class="mp-h3">Impact</h3>
+      {% if rel.show_impacts %}<h3 class="mp-h3">Impact</h3>
       <ul class="mp-bars">
         {% if rel.counts.total %}{% for i in (rel.impacts or [])[:8] %}
         <li><span class="mp-bar-label">{{ i.name }}</span><span class="mp-bar"><span class="mp-bar-fill mp-bar-neutral" style="width: {{ (100 * i.count / rel.counts.total)|round(1) }}%"></span></span><span class="mp-bar-n">{{ i.count }}</span></li>
         {% endfor %}{% endif %}
-      </ul>
+      </ul>{% endif %}
     </div>
   </div>
 </section>
@@ -231,7 +232,7 @@
   <div class="mp-method">
     <div>
       <h3>Sources</h3>
-      <p>Microsoft MSRC CVRF v3.0 (scope, severity, CVSS vectors, KBs, exploit-status flags), FIRST EPSS (probability + percentile), CISA KEV catalog, CISA Vulnrichment (SSVC assessments, matched per CVE), and Tia's own story store for news uptake.</p>
+      <p>The vendor's advisory feed ({{ rel.source_label }} — scope, CVSS vectors, exploitability flags), FIRST EPSS (probability + percentile), CISA KEV catalog, CISA Vulnrichment (SSVC assessments, matched per CVE), and Tia's own story store for news uptake.</p>
     </div>
     <div>
       <h3>Derived, not official</h3>
@@ -239,7 +240,7 @@
     </div>
     <div>
       <h3>Known limits</h3>
-      <p>EPSS is a next-30-days estimate, not proof of exploitation. Microsoft revises the monthly document during the week; every tracking pass checks the document's revision date and folds in late CVEs, severity/CVSS changes and new exploit-status flags, and the timeline lists what appeared. Scope excludes Azure Linux and Edge/Chromium families (different cadence) — the vendor's stated total stays visible above.</p>
+      <p>EPSS is a next-30-days estimate, not proof of exploitation.{% if rel.severity_basis == 'cvss' %} {{ rel.vendor }} publishes no vendor severity ratings, so Critical/High/Medium/Low here are CVSS base-score bands.{% endif %} The vendor revises the document during the week; every tracking pass checks the document's revision date and folds in late CVEs, severity/CVSS changes and new exploit-status flags, and the timeline lists what appeared. Scope excludes Azure Linux and Edge/Chromium families (different cadence) — the vendor's stated total stays visible above.</p>
     </div>
   </div>
 </section>
