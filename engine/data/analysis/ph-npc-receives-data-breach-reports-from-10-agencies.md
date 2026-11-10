@@ -1,0 +1,3 @@
+The Philippines' National Privacy Commission said on Tuesday that it had received personal data breach notifications from 10 government agencies. The named agencies include the Bureau of Internal Revenue, the Department of Information and Communications Technology, and the Securities and Exchange Commission, with the remaining notifications spanning other executive offices.
+
+The notifications were reported by databreaches.net and corroborated by a cyber.netsecops.io post. A breach-notification roundup of this size signals multiple separate incidents across the Philippine government rather than one compromise. Watch for the NPC to publish the number of affected individuals and the cause of each notification.
