@@ -1,0 +1,1 @@
+The post outlined Fortinet's October 22, 2026 fixed builds and the planned November 10 advisory publication, providing an administrator checklist for the pre-disclosure window. It emphasized identifying FortiManager and FortiOS instances, saving configurations before upgrading, and monitoring logs for unusual administrative access.

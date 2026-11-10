@@ -1,0 +1,1 @@
+Cyber Kendra reported Fortinet released fixes for critical flaws found with frontier AI models, with CVE details withheld until November 10. It noted fixes land in FortiOS 8.0.2, 7.6.8, 7.4.13, and 7.2.14 and in FortiManager and FortiAnalyzer 8.0.2, 7.6.8, 7.4.12, and 7.2.13. No CVE identifiers or CVSS scores had been published at the time.
