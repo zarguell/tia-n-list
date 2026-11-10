@@ -1,0 +1,3 @@
+Google released an emergency update fixing CVE-2026-125350, a high-severity use-after-free vulnerability in Chrome's XML component. Google confirms an exploit exists in the wild but has not publicly disclosed the attackers or victims. This is the eighth Chrome zero-day Google has addressed this year. Updated desktop versions include 157.0.8103.50/.51 for Windows and macOS, and 157.0.8103.50 for Linux. Memory-corruption vulnerabilities can potentially allow malicious code execution. Users should open Chrome's Help - About Google Chrome page, install the available update and restart the browser. submitted by /u/BTC-brother2018 [link] [comments]
+
+via reddit r/cybersecurity: Google patches Chrome zero-day already exploited in attacks
