@@ -1,0 +1,3 @@
+Apple released updates to fix an iMessage flaw that could let a remote attacker join a group chat and receive its messages, according to a Hacker News report. The issue affects the confidentiality of group conversations, since an unauthorized party could silently receive messages intended for chat participants.
+
+Users should install the latest Apple updates across affected devices and confirm iMessage group chats are not exposing sensitive content. Watch for Apple to publish a CVE identifier and security bulletin with affected versions and CVSS details, which would clarify scope and enable automated detection.
