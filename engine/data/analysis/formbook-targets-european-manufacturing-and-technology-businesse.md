@@ -1,0 +1,5 @@
+Formbook, also tracked as XLoader, is targeting European manufacturing and technology businesses with localized order and procurement lures. ANY.RUN analyzed a November 2026 campaign aimed especially at the UK and Italy. The lures imitate purchase orders, supplier documents, and payment requests, which makes them plausible in routine business correspondence.
+
+The infection chain starts with a malicious attachment containing obfuscated JavaScript. The script launches PowerShell stages that decrypt and execute the payload in memory, then a .NET injector deploys the stealer. The malware targets browser-stored credentials.
+
+Organizations should treat unexpected order and payment attachments as high risk, inspect the JavaScript and PowerShell stages, and monitor for .NET injection and unusual browser credential access. The campaign shows how ordinary procurement workflows can be used to bypass user suspicion.

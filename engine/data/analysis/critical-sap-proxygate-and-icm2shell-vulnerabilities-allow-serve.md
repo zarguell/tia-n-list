@@ -1,0 +1,5 @@
+SAP fixed three critical vulnerabilities grouped as PROXYGATE and ICM2SHELL in its November 2026 security updates. Onapsis Research Labs disclosed the flaws on November 10, 2026. All three carry CVSS 10.0 and allow an unauthenticated attacker to take over affected SAP systems.
+
+Successful exploitation runs operating system commands as the adm user, which gives the attacker a path from the SAP application layer into the underlying host. The fixes are part of a larger SAP release that includes 42 security fixes for November 2026, with nine rated critical.
+
+The immediate action is to apply the SAP November 2026 patches, prioritize internet-facing SAP systems, and review logs for authentication anomalies or command execution as adm. The CVSS 10.0 rating and unauthenticated vector make this a high-priority patch even though no public exploit code is described.
