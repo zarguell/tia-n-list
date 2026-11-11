@@ -1,0 +1,1 @@
+First trade-press brief on the flaw, published the evening of 10 November, hours ahead of the wider pickup on 11 November. It describes a crafted cookie carrying an empty JSON object that lets remote attackers bypass authentication without valid credentials and then retrieve reusable token identifiers.
