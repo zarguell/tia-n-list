@@ -1,0 +1,7 @@
+The Rails maintainers have shipped fixes for two separate security issues in the framework. The first is a cross-site scripting flaw in Action View's strip_tags helper, which is meant to remove markup from untrusted input before rendering. When the helper mishandles certain tag content it can leave markup behind, allowing an attacker-supplied payload to reach the rendered page and execute in a victim's browser under the application's origin.
+
+The second fix addresses a medium-severity Action Pack bug in which a shared cache could serve a response in the wrong content format. Under the affected conditions a cached response generated for one format can be handed to a request expecting a different one, which is primarily a correctness and cache-poisoning-style concern rather than a direct code-execution issue. Both were treated as release-worthy patches rather than emergencies.
+
+Neither issue carries the profile of a remotely exploitable, unauthenticated server compromise, but the strip_tags XSS matters for any Rails app that runs untrusted text through that helper, and the Action Pack bug matters for deployments sitting behind a shared or caching proxy. Both are patched in the current Rails security release, so the practical step is to upgrade to the fixed version rather than attempt a workaround.
+
+Watch for the assigned CVE identifiers and affected version ranges in the official Rails security announcement, which this coverage summarizes only at a high level, before prioritizing the upgrade across a fleet.
