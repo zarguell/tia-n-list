@@ -1,0 +1,3 @@
+ISC2 published an update on November 6 about its developing AI Security Certification. A few points worth knowing: Pilot applications are closed. Selected candidates should receive notification this month. Pilot testing is planned for mid-December through January 24, 2027. ISC2 is recruiting volunteers for a 2027 workshop to help establish passing criteria. The credential is still being developed and isn't generally available. Official announcement: ISC2 November 6 update I'm interested in how experienced CISSP holders view this. Would a separate AI security certification be valuable for your work? submitted by /u/CertLynxOfficial [link] [comments]
+
+via reddit r/cybersecurity: ISC2 shares new details about its AI Security Certification pilot
