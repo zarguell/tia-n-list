@@ -362,7 +362,7 @@
   "current_release": "2026-11-08T23:59:59"
  },
  "collected_at": "2026-11-11T02:40:03Z",
- "updated_at": "2026-11-11T02:40:03Z",
+ "updated_at": "2026-11-11T02:44:30Z",
  "next": {
   "release": "2026-W46",
   "date": "2026-11-16",
@@ -34714,7 +34714,103 @@
   }
  ],
  "analysis": {
-  "source": "pending"
+  "headline": "Red Hat's critical-heavy week: kernel UAFs, regex overflows, and auth bypasses",
+  "summary": [
+   "The severity split is the story, not the volume: 564 of 1178 entries are rated critical and only 33 moderate, with zero low. That distribution reflects Red Hat's per-build rating policy across containerized products as much as real-world risk \u2014 just 3 carry KEV status and none are flagged as publicly disclosed or exploited. Where the data does discriminate is in triage: 311 entries are automatable (26%) and only 437 of 1178 have a technical writeup, so the top-30 ranking is built on the technical subset. The high end of that ranking is genuinely sharp \u2014 CVE-2026-111497 at EPSS 1.00, CVE-2026-97229 at 0.99, both KEV; FreeIPA credential theft (CVE-2026-76578) and a Satellite 6 ruby regex integer overflow (CVE-2026-97229) are both 9.8 and both unauthenticated.",
+   "Coverage is broad but imprecise. 48 CVEs in this release appear in 65 newsroom hits, yet the article-to-CVE join is keyword-driven: the CVE-2026-97229 row describes a ruby regex flaw in Satellite 6, while the headline attached to it is Ivanti Connect Secure exploitation; CVE-2026-110264 is another ruby regex overflow, tagged to a GitLab code-execution story. Treat the coverage counts as mentions, not corroboration. Conversely, several CVEs the newsroom treated as notable (OpenSSL bundles CVE-2026-63072/CVE-2026-63076/CVE-2026-18798, GitLab CVE-2026-89078/CVE-2026-93577, Tomcat CVE-2026-77791) never reach the top 30."
+  ],
+  "themes": [
+   {
+    "title": "Ruby regex overflow repeats at the top",
+    "detail": "Two integer overflows in the regular-expression compiler sit at ranks 1 and 4, both 9.8, both in Satellite 6 \u2014 the same defect class shipped through two advisories. One is KEV with near-maximal EPSS. This is a patching artifact of a shared ruby toolchain, not two independent discoveries.",
+    "cves": [
+     "CVE-2026-97229",
+     "CVE-2026-110264"
+    ]
+   },
+   {
+    "title": "Authentication and authorization bypass",
+    "detail": "Unauthenticated LDAP clients can lift administrator credentials from FreeIPA via the self-managed-token ACI; gRPC-Go accepts malformed HTTP/2 paths; Keycloak's netty codec rewrites the request authority; wildfly-core's deployer role escapes its directory. Each bypasses a trust boundary rather than corrupting memory.",
+    "cves": [
+     "CVE-2026-76578",
+     "CVE-2026-33186",
+     "CVE-2026-93569",
+     "CVE-2026-85634"
+    ]
+   },
+   {
+    "title": "Kernel memory-safety dominates the mid-ranks",
+    "detail": "The bulk of ranks 5 through 30 are kernel use-after-free and out-of-bounds fixes: a SCTP cluster, libceph OSDMap parsing, sunrpc TLS callbacks, ipvs tunnel ICMP, udp tunnel segmentation, iSCSI ISID. Ratings cluster at 8.8 with EPSS between 0.4 and 0.55 \u2014 individually modest, collectively the largest patch surface in the release.",
+    "cves": [
+     "CVE-2026-98432",
+     "CVE-2026-68159",
+     "CVE-2026-68156",
+     "CVE-2026-72222",
+     "CVE-2026-89479",
+     "CVE-2026-74752",
+     "CVE-2026-74588",
+     "CVE-2026-74705",
+     "CVE-2026-74669",
+     "CVE-2026-72083"
+    ]
+   },
+   {
+    "title": "Edge services: nginx, TLS, and browser engines",
+    "detail": "nginx sees both code execution via rewrite module and a heap overflow in HTTP/2 header handling; brotli's decoder writes out of bounds and is KEV-flagged; OpenSSL's PKCS7_verify heap UAF is not flagged automatable but scores EPSS 0.91. Chromium's bundled Skia and ANGLE libraries account for four separate entries, one KEV.",
+    "cves": [
+     "CVE-2026-9256",
+     "CVE-2026-42055",
+     "CVE-2026-111497",
+     "CVE-2026-45447",
+     "CVE-2026-3909",
+     "CVE-2025-9478",
+     "CVE-2024-7532",
+     "CVE-2026-8510"
+    ]
+   }
+  ],
+  "data_vs_prose": "The data says half this release is critical and kernel-heavy; the prose says only three CVEs are known-exploited and that most newsroom attention went to third-party products \u2014 Chrome, OpenSSL, NGINX, GitLab, BIND, Atlassian \u2014 whose fixes are bundled here rather than authored by Red Hat. The CVE-to-headline mapping also contradicts itself at the row level (Ivanti and GitLab headlines attached to ruby regex CVEs), so coverage counts overstate topical relevance, while the top-30 misses OpenSSL advisory CVEs and Tomcat CVE-2026-77791 that editors considered notable. One internal inconsistency to note: KEV is 3 while the exploited counter is 0 \u2014 trust the KEV flags.",
+  "watchlist": [
+   {
+    "cve": "CVE-2026-97229",
+    "why": "Ranks first: 9.8, KEV, automatable, EPSS 0.99. Ruby regex integer overflow in Satellite 6 \u2014 the management plane that pushes content to every registered host."
+   },
+   {
+    "cve": "CVE-2026-111497",
+    "why": "KEV with EPSS at 1.00, the only perfect score in the set. Brotli decoder out-of-bounds write reachable through HTTP content decoding on OpenShift Enterprise."
+   },
+   {
+    "cve": "CVE-2026-3909",
+    "why": "Third KEV flag. Skia out-of-bounds write in chromium-browser packages shipped through RHEL channels; usually deprioritized because it looks like a desktop issue but rides in the same errata stream."
+   },
+   {
+    "cve": "CVE-2026-76578",
+    "why": "9.8, unauthenticated, automatable: LDAP client obtains administrator credentials via the self-managed-token ACI. Full domain compromise from an unauthenticated position."
+   },
+   {
+    "cve": "CVE-2026-98432",
+    "why": "9.8 automatable kernel IPv4 fix touching inet_opt/ireq_opt lifetime; high blast radius across OpenShift Enterprise nodes, no KEV flag to force prioritization."
+   },
+   {
+    "cve": "CVE-2026-110264",
+    "why": "The second 9.8 ruby regex overflow, EPSS 0.72, automatable. Same class as the top entry, so if one instance is exploited the other is a near-certain follow-on."
+   },
+   {
+    "cve": "CVE-2026-45447",
+    "why": "OpenSSL PKCS7_verify heap UAF at EPSS 0.91, unrated as automatable and therefore easy to skip. Verification paths are reachable from mail, signing, and artifact pipelines."
+   },
+   {
+    "cve": "CVE-2026-33186",
+    "why": "gRPC-Go authorization bypass from improper HTTP/2 path validation \u2014 9.1 important, automatable, and embedded in Container Native Virtualization control paths where authz is the only barrier."
+   }
+  ],
+  "patch_note": "Start with RHEL (725 of 1178, and the home of the kernel UAF/SCTP cluster plus dnsmasq, nginx, and chromium packages) \u2014 kernel and nginx first, since node reboots and reloads gate everything downstream. Then Satellite 6 (41) for the two ruby regex 9.8s: it is the trust anchor for host content and a compromise there is upstream of every managed system. Keycloak (84) and JBoss EAP (59) next for the netty HTTP/2 authority rewrite and wildfly-core RBAC traversal \u2014 both are internet-adjacent identity surfaces. Finish with OpenShift AI and AI Inference Server (114 combined) for the MariaDB escaping SQL injection and the OpenSSL UAF, then Hardened Images (64), which need base-image rebuilds rather than in-place patching. Ignore the zero-KB count; Red Hat ships RPM errata, not knowledge-base articles.",
+  "source": "agent",
+  "kev_snapshot": [
+   "CVE-2026-111497",
+   "CVE-2026-3909",
+   "CVE-2026-97229"
+  ]
  },
  "backfilled": false,
  "tracking": {
