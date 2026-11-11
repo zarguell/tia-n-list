@@ -35,7 +35,7 @@
   "current_release": "2026-09-30T23:59:59"
  },
  "collected_at": "2026-11-11T04:56:19Z",
- "updated_at": "2026-11-11T04:56:19Z",
+ "updated_at": "2026-11-11T05:06:46Z",
  "next": {
   "release": "2026-Oct",
   "date": "2026-10-13",
@@ -7754,7 +7754,91 @@
   }
  ],
  "analysis": {
-  "source": "pending"
+  "headline": "Adobe's riskiest fixes are Campaign Classic 10.0s, not the flaws we covered",
+  "summary": [
+   "This is a patch-hygiene release, not an incident: zero KEV entries, zero disclosed exploitation, zero exploitation-likely flags across 208 CVEs. Severity is nonetheless top-heavy \u2014 77 critical, with Campaign Classic alone contributing six CVSS 10.0 code-execution flaws and an EPSS cluster near 0.70. Nothing here is being exploited yet; everything here is exploitable by anyone who reads the bulletin, which is why 15 CVEs carry the automatable flag.",
+   "The risk is concentrated in server-side marketing and application infrastructure \u2014 Campaign Classic, ColdFusion, Connect, AEM \u2014 where compromise yields outbound mail, customer data, and internal network position. Client-side families (Reader 32, Photoshop 8, Illustrator, InDesign, Animate, Premiere) carry volume but almost no triage weight. Our coverage inverted that: 8 of 11 covered CVEs sit in Connect and AEM Forms, with no story touching Campaign Classic, ColdFusion, or the 107-CVE AEM family."
+  ],
+  "themes": [
+   {
+    "title": "Campaign Classic is the actual emergency",
+    "detail": "18 CVEs, six at exactly 10.0, all flagged automatable, EPSS 0.70 \u2014 unauthenticated code execution against systems that hold customer PII and send mail on the org's behalf. Highest EPSS in the release (0.88) belongs to CVE-2026-82004, which is *not* automatable: that pattern suggests targeted, hands-on exploitation interest rather than scan-and-pwn.",
+    "cves": [
+     "CVE-2026-73369",
+     "CVE-2026-75699",
+     "CVE-2026-75721",
+     "CVE-2026-84412",
+     "CVE-2026-89275",
+     "CVE-2026-75723",
+     "CVE-2026-82004"
+    ]
+   },
+   {
+    "title": "Internet-facing middleware, second tier by count, first tier by exposure",
+    "detail": "ColdFusion (9) and Connect (9) are the classic perimeter targets: ColdFusion pairs a 9.9 code execution with an 8.6 automatable flaw at EPSS 0.58, and Connect's nine CVEs are near-uniformly 9.3\u20139.9 with privilege escalation and arbitrary file read among them. These are the flaws an external attacker reaches without a user clicking anything.",
+    "cves": [
+     "CVE-2026-76190",
+     "CVE-2026-48273",
+     "CVE-2026-75746",
+     "CVE-2026-75682",
+     "CVE-2026-75686",
+     "CVE-2026-75689",
+     "CVE-2026-34689",
+     "CVE-2026-82443"
+    ]
+   },
+   {
+    "title": "AEM's 107 CVEs are mostly invisible in triage",
+    "detail": "The largest family by a wide margin produces only three top-30 entries \u2014 two in AEM Forms and one in core AEM. Either the bulk is genuinely lower-severity, or scoring is compressing a large surface into a flat band. Treat the family count as attack-surface signal, not noise: 107 patches in one cycle means 107 version-check opportunities for an attacker.",
+    "cves": [
+     "CVE-2026-19232",
+     "CVE-2026-75745",
+     "CVE-2026-81995"
+    ]
+   },
+   {
+    "title": "Reader/Acrobat volume without triage weight",
+    "detail": "32 CVEs in Reader and Acrobat, none in the top 30 \u2014 low EPSS and low automatable share, consistent with client-side flaws requiring document interaction. Deployment footprint still makes this the largest user-facing patch population of the release, and the only Acrobat story we ran was a third-party advisory alert rather than our own analysis.",
+    "cves": [
+     "CVE-2026-81994",
+     "CVE-2026-82007"
+    ]
+   }
+  ],
+  "data_vs_prose": "The data says Campaign Classic, ColdFusion, and Connect; the prose says Connect and AEM Forms. Eight of our eleven covered CVEs come from two families that occupy nine of the release's 208 entries, while the family with six 10.0 scores got no story at all. Conversely the prose carries severity the data suppresses \u2014 CVE-2026-82007 (Photoshop, 7.8 integer overflow) drew three separate items for a mid-severity client-side bug, because it was the flaw with a ready-made advisory to quote. Three integrity problems also undercut the counts: no KB mapping at all (with_kb = 0), remote_unauth = 0 despite multiple 10.0 scores that require PR:N vectors, and EPSS buckets that cannot both be true (0 at \u226510%, 34 at \u226550%). One title field has merged two advisories, folding CVE-2026-81999 (AEM Forms SSRF, privilege escalation) into CVE-2026-82000's text, so that flaw may be under-counted rather than absent.",
+  "watchlist": [
+   {
+    "cve": "CVE-2026-82004",
+    "why": "CVSS 10.0, EPSS 0.88 \u2014 the release's highest \u2014 and the only top scorer not flagged automatable, which reads as targeted interest rather than mass scanning. Patch Campaign Classic before the weekend."
+   },
+   {
+    "cve": "CVE-2026-75703",
+    "why": "Scored 10.0 for application denial-of-service. Either a scoring error or an availability outage on send infrastructure rated correctly; verify before dismissing."
+   },
+   {
+    "cve": "CVE-2026-76190",
+    "why": "ColdFusion 8.6, automatable, EPSS 0.58 \u2014 the most exploitable combination in the release against a routinely internet-exposed service."
+   },
+   {
+    "cve": "CVE-2026-48273",
+    "why": "ColdFusion 9.9 code execution with EPSS 0.70 despite no automatable flag; same hands-on-interest pattern as 82004."
+   },
+   {
+    "cve": "CVE-2026-19232",
+    "why": "Core AEM 9.9 code execution, EPSS 0.63, no coverage \u2014 the sole AEM entry at the top of the queue."
+   },
+   {
+    "cve": "CVE-2026-75745",
+    "why": "AEM Forms 9.8, automatable, EPSS 0.68 \u2014 covered by us, which makes verifying actual patch state the next step rather than another story."
+   },
+   {
+    "cve": "CVE-2026-34689",
+    "why": "Connect arbitrary filesystem read, 8.6, automatable: read-only impact that is a clean precursor to the code-execution flaws in the same family."
+   }
+  ],
+  "patch_note": "Campaign Classic first (six 10.0s, automatable, PII-adjacent), then ColdFusion and Connect (perimeter, code execution, file read), then AEM core and AEM Forms (largest surface, 107 + 5 CVEs \u2014 inventory versions before patching), then client-side Reader/Acrobat/Photoshop/Illustrator/InDesign/Animate/Premiere via update channel. There are no KB numbers this cycle, so correlate by APSB bulletin and product version, not by OS patch ID \u2014 and expect to prove version state per host rather than trust a patch report.",
+  "source": "agent",
+  "kev_snapshot": []
  },
  "backfilled": true,
  "tracking": {
