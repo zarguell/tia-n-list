@@ -1,0 +1,5 @@
+KrebsOnSecurity traces the operator of the Qilin ransomware-as-a-service program to a 36-year-old man in St. Petersburg, Russia, after a decade of operational security mistakes. Qilin is currently the most active ransomware affiliate program, claiming at least 365 victim organizations in the past three months, and has operated since September 2022 under the handle "Haise."
+
+The group runs a double-extortion model and offers affiliates at least 80 percent of any ransom paid, which helps explain its recruitment pull. Unlike most Russia-based ransomware partnerships, Qilin works with English-speaking affiliates and its leader has claimed ties to Scattered Spider and RansomHub, widening the pool of capable operators and the sectors at risk.
+
+The identification of a single individual behind a high-volume RaaS program is the kind of lead that can support sanctions, infrastructure seizures, or affiliate disruption. Watch for follow-on indictments or takedowns, and for whether Qilin's victim count drops or its branding shifts if the operator is pressured.

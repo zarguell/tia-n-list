@@ -1,0 +1,3 @@
+Node.js released a security update fixing 17 bugs, including HTTP/2 vulnerabilities and a TLS heap leak tracked as CVE-2026-123864. Affected users should update to 26.13.1, 24.22.3, or 22.23.5.
+
+The advisory detail is limited to the version guidance, so verify the installed Node.js runtime across development and production environments and watch for follow-up notices listing the individual CVEs and affected components.
