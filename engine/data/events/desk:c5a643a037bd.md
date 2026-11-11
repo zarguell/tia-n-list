@@ -1,0 +1,1 @@
+Source commit merged into the 2.4.x branch on September 29, 2026 that hardens mod_vhost_alias ahead of the 2.4.69 release, and is the change later identified as the fix for CVE-2026-63292. Its date shows the code fix predated the public advisory by two days and the story's first-seen timestamp by three days.
