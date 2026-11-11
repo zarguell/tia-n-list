@@ -1,0 +1,3 @@
+Attackers compromised Qlik Sense servers using PowerShell reverse shells, with the attacker's server also holding exploits for ActiveMQ and Veeam, according to a report shared on r/netsec. The discovery points to active exploitation of Qlik Sense instances and follow-on tooling staged for broader infrastructure.
+
+Cynet separately reported a "ZeroQlik" campaign exploiting N-day vulnerabilities in Qlik Sense, targeting multiple companies within minutes in a pattern resembling Cactus ransomware activity. Together these reports show that unpatched Qlik Sense deployments remain actively targeted. Defenders should patch, inspect for PowerShell reverse shells, and look for staged ActiveMQ and Veeam exploit tooling.
