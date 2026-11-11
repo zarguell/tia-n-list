@@ -1,0 +1,497 @@
+{
+ "date": "2026-11-11",
+ "decisions_path": "engine/data/triage/decisions-2026-11-11T0802.json",
+ "instructions": "For every new event decide: (1) keep or drop \u2014 keep only stories worth covering (real security events, vulnerabilities, attacks, breaches, advisories with substance); drop press releases, vendor marketing, generic explainers, and anything duplicating an existing story. (2) If keep, assign the event to the RIGHT story: an existing candidate story id if it belongs there (this FIXES mechanical clustering \u2014 e.g. different outlets' Patch Tuesday roundups are ONE story), or NEW with a clean story_title. (3) merges: list candidate stories that are really the same story (from = fragment, into = the most complete one). (4) For every kept event that names CVEs, optionally assess exploitation: exploited = the event reports OBSERVED in-the-wild exploitation (implants, victim counts, campaigns, CISA KEV confirmation); suspected = public exploit code/PoC or likely-but-unconfirmed. Attribute ONLY the CVEs you can tie to the claim \u2014 a bulletin's blanket 'actively exploited' does NOT flag all its CVEs. Omit the exploitation field when the event makes no claim.\n(5) LOW-TRUST events (\"low_trust\": true \u2014 AI-drafted aggregator reposts, late and overstated): treat as unverified leads. When the text attributes the claim to a named primary source (a researcher firm like watchTowr, a vendor advisory, CISA, a major outlet) and attribution_urls or a web search (/home/ubuntu/repos/cronman/bin/web-search.sh \"query\") locate that primary source CONFIRMING the claim, include a provenance object in the decision: {\"url\": <primary url>, \"source\": <domain>, \"evidence\": <one line>, \"verified\": true}. VERIFIED provenance lets the event mint a story (credited to the primary source) and count as a development; without it, a low-trust event can only attach to an EXISTING story, never mint. If you cannot verify, keep/drop on normal merit and omit provenance.\n\nWrite decisions as JSON with EXACTLY this shape:\n{\n  \"decisions\": [\n    {\"event_id\": \"<id>\", \"action\": \"keep\", \"story\": \"<existing candidate story id>\", \"reason\": \"...\"},\n    {\"event_id\": \"<id>\", \"action\": \"keep\", \"story\": \"NEW\", \"story_title\": \"<clean title>\", \"reason\": \"...\"},\n    {\"event_id\": \"<id>\", \"action\": \"drop\", \"reason\": \"...\"}\n  ],\n  \"merges\": [{\"from\": \"<fragment story id>\", \"into\": \"<canonical story id>\"}]\n}\nFor events marked \"low_trust\" (AI-drafted aggregator reposts) a decision\nmay carry an optional \"provenance\" object when you VERIFIED the claim at\nthe named primary source: {\"event_id\": ..., \"action\": \"keep\", ...}\n  \"provenance\": {\"url\": \"<primary source url>\", \"source\": \"<domain>\", \"evidence\": \"<one line>\"}\nOnly include provenance when the primary source (vendor advisory, CISA,\nthe named researcher/outlet) really carries the claim \u2014 verified\nprovenance lets a low-trust event mint a story and set freshness; without\nit the event can only amplify an existing story.\nSTRICT KEY NAMES: the array key is \"decisions\" (never \"events\"); the story\nkey is \"story\" (never \"story_id\"); \"story\" holds a candidate_stories id\nverbatim or the literal string \"NEW\". Optional per-event field\n\"exploitation\": {\"CVE-...\": {\"status\": \"exploited|suspected\", \"evidence\": \"1-2 sentences\"}}.",
+ "new_events": [
+  {
+   "id": "rss:361060e633b2b986",
+   "title": "Recently Patched Barracuda Vulnerabilities Exploited in Attacks",
+   "source": "securityweek.com",
+   "published_at": "2026-11-11T07:53:51Z",
+   "cves": [
+    "CVE-2026-111560",
+    "CVE-2026-116606"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Threat actors have started exploiting two recently patched Barracuda vulnerabilities that could be chained to bypass authorization controls and gain root access. Tracked as CVE-2026-116606 (CVSS score of 9.3), the first "
+  },
+  {
+   "id": "rss:9e190d69fc39e977",
+   "title": "Microsoft Researchers Turn AI Agents Into Hidden Backdoors by Modifying Fewer Than 10 Neurons",
+   "source": "gbhackers.com",
+   "published_at": "2026-11-11T07:52:03Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Lazarus, a technique that turns AI agents into sleeper backdoors by modifying fewer than 10 dormant neurons without retraining. Published November 10, the research shows how a model can behave normally during standard ev"
+  },
+  {
+   "id": "rss:d68a1fa5cb6b35e3",
+   "title": "The UK announces a new AI biosecurity lab",
+   "source": "malware.news",
+   "published_at": "2026-11-11T07:30:39Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Artificial intelligence is creating new opportunities in medicine and biological research , but it may also make some biological risks harder to manage. The UK government has announced the AI Biosecurity Lab, a new organ"
+  },
+  {
+   "id": "rss:84b5e9379049213f",
+   "title": "Bluetooth, AirPlay Pairing Vulnerabilities Patched Across Apple Platforms",
+   "source": "securityweek.com",
+   "published_at": "2026-11-11T07:00:17Z",
+   "cves": [
+    "CVE-2026-113960",
+    "CVE-2026-113961",
+    "CVE-2026-113964",
+    "CVE-2026-113965",
+    "CVE-2026-113968",
+    "CVE-2026-113969",
+    "CVE-2026-113970"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Apple on Monday released security updates for iOS, iPadOS, macOS, watchOS and visionOS to patch 10 vulnerabilities, half of them related to Bluetooth and AirPlay pairing. Five of the flaws are addressed in all nine relea"
+  },
+  {
+   "id": "rd:t3_1xszgky",
+   "title": "Grok Build apps default to \"Anyone with the link\": 94.7% of live apps we tested opened without sign-in, including SpaceXSI's own sales dat",
+   "source": "arstechnica.com",
+   "published_at": "2026-11-10T21:36:19Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Author here. We opened the first page of each Grok app address once, with no account. Besides 24 SpaceXSI and X staff apps (taken down after our report), the open apps held internal data from 30 organizations we could id"
+  }
+ ],
+ "candidate_stories": [
+  {
+   "id": "barracuda-warns-of-critical-flaws-allowing-root-access-to-device",
+   "title": "Barracuda warns of critical flaws allowing root access to devices",
+   "n_events": 34,
+   "last_seen": "2026-11-11T07:53:51Z",
+   "first_event_title": "Barracuda warns of critical flaws allowing root access to devices"
+  },
+  {
+   "id": "microsoft-researchers-turn-ai-agents-into-hidden-backdoors-by-mo",
+   "title": "Microsoft Researchers Turn AI Agents Into Hidden Backdoors by Modifying Fewer Than 10 Neurons",
+   "n_events": 1,
+   "last_seen": "2026-11-11T07:52:03Z",
+   "first_event_title": "Microsoft Researchers Turn AI Agents Into Hidden Backdoors by Modifying Fewer Than 10 Neurons"
+  },
+  {
+   "id": "the-uk-announces-a-new-ai-biosecurity-lab",
+   "title": "The UK announces a new AI biosecurity lab",
+   "n_events": 1,
+   "last_seen": "2026-11-11T07:30:39Z",
+   "first_event_title": "The UK announces a new AI biosecurity lab"
+  },
+  {
+   "id": "bluetooth-airplay-pairing-vulnerabilities-patched-across-apple-p",
+   "title": "Bluetooth, AirPlay Pairing Vulnerabilities Patched Across Apple Platforms",
+   "n_events": 1,
+   "last_seen": "2026-11-11T07:00:17Z",
+   "first_event_title": "Bluetooth, AirPlay Pairing Vulnerabilities Patched Across Apple Platforms"
+  },
+  {
+   "id": "critical-react-server-components-vulnerability-allows-unauthenti",
+   "title": "Critical React Server Components Vulnerability Allows Unauthenticated Attackers to Execute Malicious Code on Servers",
+   "n_events": 8,
+   "last_seen": "2026-11-11T06:43:27.000Z",
+   "first_event_title": "Critical React Server Components Vulnerability Allows Unauthenticated Attackers to Execute Malicious Code on Servers"
+  },
+  {
+   "id": "bluephishing-proofpoint-details-entra-agent-id-attack-using-mali",
+   "title": "BluePhishing: Proofpoint details Entra Agent ID attack using malicious AI agent blueprints",
+   "n_events": 1,
+   "last_seen": "2026-11-11T06:40:46.000Z",
+   "first_event_title": "Proofpoint researchers detailed the BluePhishing attack Entra Agent ID technique, showing how malicious AI agent blueprints enable OAuth con"
+  },
+  {
+   "id": "signdrop-unpatched-windows-clfs-zero-day-with-public-proof-of-co",
+   "title": "SignDrop: unpatched Windows CLFS zero-day with public proof-of-concept",
+   "n_events": 1,
+   "last_seen": "2026-11-11T06:33:42.000Z",
+   "first_event_title": "SignDrop, an unpatched Windows CLFS zero-day, now has a public proof-of-concept exploit that gives standard users SYSTEM privileges. No patc"
+  },
+  {
+   "id": "microsoft-s-november-2026-patch-tuesday-addresses-1093-cves-cve",
+   "title": "Microsoft\u2019s November 2026 Patch Tuesday addresses 1093 CVEs (CVE-2026-124194)",
+   "n_events": 26,
+   "last_seen": "2026-11-11T06:33:13Z",
+   "first_event_title": "Microsoft\u2019s November 2026 Patch Tuesday addresses 1093 CVEs (CVE-2026-124194)"
+  },
+  {
+   "id": "cisco-broadworks-xxe-vulnerability-cve-2026-20320",
+   "title": "Cisco BroadWorks XXE Vulnerability CVE-2026-20320",
+   "n_events": 7,
+   "last_seen": "2026-11-11T06:25:04.000Z",
+   "first_event_title": "Cisco BroadWorks XXE Flaw Allows Unauthenticated Remote File Disclosure"
+  },
+  {
+   "id": "compromised-emudhra-intermediate-certificates",
+   "title": "Compromised eMudhra intermediate certificates",
+   "n_events": 86,
+   "last_seen": "2026-11-11T06:13:03.000Z",
+   "first_event_title": "Compromised eMudhra intermediate certificates"
+  },
+  {
+   "id": "ahsaycbs-hackers-plant-multiple-webshells-and-secret-crypto-mine",
+   "title": "AhsayCBS Hackers Plant Multiple Webshells and Secret Crypto Miners That Survive Security Patching",
+   "n_events": 1,
+   "last_seen": "2026-11-11T06:11:04Z",
+   "first_event_title": "AhsayCBS Hackers Plant Multiple Webshells and Secret Crypto Miners That Survive Security Patching"
+  },
+  {
+   "id": "fortinet-fixes-eight-critical-vulnerabilities-including-fortiman",
+   "title": "Fortinet fixes eight critical vulnerabilities including FortiManager RCE CVE-2026-126170",
+   "n_events": 8,
+   "last_seen": "2026-11-11T06:07:33Z",
+   "first_event_title": "Fortinet fixes eight critical vulnerabilities, including FortiManager RCE CVE-2026-126170 (CVSS 9.8). Fortinet critical vulnerabilities also"
+  },
+  {
+   "id": "ghostframe-a-new-esxi-implant-linked-to-settra-ransomware",
+   "title": "GhostFrame: A new ESXi Implant Linked to Settra Ransomware",
+   "n_events": 6,
+   "last_seen": "2026-11-11T05:58:33Z",
+   "first_event_title": "GhostFrame: A new ESXi Implant Linked to Settra Ransomware"
+  },
+  {
+   "id": "able2shell-frequently-asked-questions-for-reported-n-able-n-cent",
+   "title": "Able2Shell: Frequently asked questions for reported N-able N-central zero-day vulnerabilities",
+   "n_events": 2,
+   "last_seen": "2026-11-11T05:55:43Z",
+   "first_event_title": "Able2Shell: Frequently asked questions for reported N-able N-central zero-day vulnerabilities"
+  },
+  {
+   "id": "stylesmuggler-a-magento-zero-day-cve-2026-75650-delivering-a-rus",
+   "title": "StyleSmuggler: a Magento zero-day, CVE-2026-75650, delivering a Rust backdoor and a PHP web shell. Two payloads means two eviction problems.",
+   "n_events": 25,
+   "last_seen": "2026-11-11T05:45:28.000Z",
+   "first_event_title": "StyleSmuggler: a Magento zero-day, CVE-2026-75650, delivering a Rust backdoor and a PHP web shell. Two payloads means two eviction problems."
+  },
+  {
+   "id": "hackers-use-fake-cloudflare-captcha-checks-to-deploy-malware-hid",
+   "title": "Hackers Use Fake Cloudflare CAPTCHA Checks to Deploy Malware Hidden Inside PNG Images",
+   "n_events": 1,
+   "last_seen": "2026-11-11T05:39:05Z",
+   "first_event_title": "Hackers Use Fake Cloudflare CAPTCHA Checks to Deploy Malware Hidden Inside PNG Images"
+  },
+  {
+   "id": "a-free-open-source-75-chapter-cybersecurity-curriculum-interacti",
+   "title": "A free, open-source 75-chapter cybersecurity curriculum & interactive browser terminal wargame (1,820 challenges)",
+   "n_events": 0,
+   "last_seen": "2026-11-11T05:38:15Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "google-chrome-zero-day-cve-2026-125350-exploited-in-the-wild",
+   "title": "Google Chrome zero-day CVE-2026-125350 exploited in the wild",
+   "n_events": 20,
+   "last_seen": "2026-11-11T05:25:06.000Z",
+   "first_event_title": "Google fixes Chrome zero-day CVE-2026-125350, exploited in the wild, plus 8 more flaws. Install the Chrome security update to 157.0.8103.50 "
+  },
+  {
+   "id": "sberspasibo-data-breach-exposes-3-29-million-accounts",
+   "title": "SberSpasibo data breach exposes 3.29 million accounts",
+   "n_events": 1,
+   "last_seen": "2026-11-11T05:23:51.000Z",
+   "first_event_title": "Data breach at SberSpasibo: 3,288,711 accounts compromised"
+  },
+  {
+   "id": "apt29-watering-hole-campaign-targets-mobile-users-via-compromise",
+   "title": "APT29 watering-hole campaign targets mobile users via compromised legitimate websites",
+   "n_events": 8,
+   "last_seen": "2026-11-11T05:16:03.000Z",
+   "first_event_title": "\ud83e\udd16 APT29 (Cozy Bear) compromises legitimate websites to serve mobile-specific watering holes, fingerprinting visitors and harvesting data onl"
+  },
+  {
+   "id": "ibm-security-advisory-av26-1135",
+   "title": "IBM security advisory (AV26-1135)",
+   "n_events": 11,
+   "last_seen": "2026-11-11T05:15:06.000Z",
+   "first_event_title": "IBM security advisory (AV26-1135)"
+  },
+  {
+   "id": "cisa-director-pick-already-drawing-concern-from-hill-dems-over-p",
+   "title": "CISA director pick already drawing concern from Hill Dems over Palantir connection",
+   "n_events": 1,
+   "last_seen": "2026-11-11T05:05:06.000Z",
+   "first_event_title": "Trump taps Palantir security chief to lead battered US cyber defense agency (CISA)"
+  },
+  {
+   "id": "not-all-that-glitters-is-gold-tracking-copperdragon-s-sparrow-fr",
+   "title": "Check Point Research links CopperDragon Sparrow framework to China-nexus actors",
+   "n_events": 9,
+   "last_seen": "2026-11-11T05:04:48Z",
+   "first_event_title": "Not All That Glitters Is Gold: Tracking CopperDragon\u2019s Sparrow Framework Around the Globe"
+  },
+  {
+   "id": "signalwire-critical-freeswitch-vulnerabilities-cve-2026-116779",
+   "title": "SignalWire Critical FreeSWITCH Vulnerabilities CVE-2026-116779",
+   "n_events": 8,
+   "last_seen": "2026-11-11T03:16:21.000Z",
+   "first_event_title": "SignalWire patched 3 critical FreeSWITCH vulnerabilities: actively exploited RCE flaw CVE-2026-116779, plus CVE-2026-116785 and CVE-2026-116"
+  },
+  {
+   "id": "hacking-the-meta-ray-ban-smartglasses",
+   "title": "Hacking the meta ray-ban smartglasses",
+   "n_events": 4,
+   "last_seen": "2026-11-11T03:12:43.000Z",
+   "first_event_title": "Hacking the meta ray-ban smartglasses"
+  },
+  {
+   "id": "apple-ios-and-ipados-27-2-1-security-update",
+   "title": "Apple iOS and iPadOS 27.2.1 security update",
+   "n_events": 10,
+   "last_seen": "2026-11-11T03:06:45.000Z",
+   "first_event_title": "\u2692\ufe0f FIXED IN iOS and iPadOS 27.2.1 \u2692\ufe0f - 2 bugs in CoreUtils - 2 bugs in Messages - 1 bug in AirPlay - 1 bug in App Intents and 3 other vulner"
+  },
+  {
+   "id": "2026-11-10-traffic-analysis-exercise-the-lucky-turkey",
+   "title": "2026-11-10: Traffic Analysis Exercise: The Lucky Turkey",
+   "n_events": 0,
+   "last_seen": "2026-11-11T02:26:18Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "isc-stormcast-for-wednesday-november-11th-2026-https-isc-sans-ed",
+   "title": "ISC Stormcast For Wednesday, November 11th, 2026 (Wed, Nov 11th)",
+   "n_events": 0,
+   "last_seen": "2026-11-11T02:05:42Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "isc2-shares-new-details-about-its-ai-security-certification-pilo",
+   "title": "ISC2 shares new details about its AI Security Certification pilot",
+   "n_events": 0,
+   "last_seen": "2026-11-11T01:30:11Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "vortex-ransomware-targets-andersen-construction",
+   "title": "Vortex Ransomware Targets Andersen Construction",
+   "n_events": 1,
+   "last_seen": "2026-11-11T00:05:42Z",
+   "first_event_title": "Vortex Ransomware Targets Andersen Construction"
+  },
+  {
+   "id": "climax-inc-targets-frolina-home-in-ransomware-attack",
+   "title": "Climax Inc Targets Frolina Home in Ransomware Attack",
+   "n_events": 1,
+   "last_seen": "2026-11-11T00:05:40Z",
+   "first_event_title": "Climax Inc Targets Frolina Home in Ransomware Attack"
+  },
+  {
+   "id": "gpustack-authentication-bypass-cve-2026-102895-exploited-in-the",
+   "title": "GPUStack authentication bypass CVE-2026-102895 exploited in the wild",
+   "n_events": 7,
+   "last_seen": "2026-11-10T23:36:00.000Z",
+   "first_event_title": "Attackers exploit the GPUStack authentication bypass CVE-2026-102895 in the wild. Update to 2.2.2 now to fix this flaw and CVE-2026-102894. "
+  },
+  {
+   "id": "insignary-releases-free-insignary-chk-tool-to-detect-php2shell-a",
+   "title": "Insignary Releases Free Insignary-Chk Tool to Detect PHP2Shell and Node2Shell Exposure",
+   "n_events": 0,
+   "last_seen": "2026-11-10T23:29:49.000Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "critical-xen-orchestra-auth-bypass-flaw-exploited-to-hijack-vm-s",
+   "title": "Critical Xen Orchestra auth bypass flaw exploited to hijack VM servers",
+   "n_events": 5,
+   "last_seen": "2026-11-10T23:24:39.000Z",
+   "first_event_title": "Critical Xen Orchestra auth bypass flaw exploited to hijack VM servers"
+  },
+  {
+   "id": "cisa-outlines-internal-plan-to-swiftly-address-cyber-infrastruct",
+   "title": "CISA outlines internal plan to swiftly address cyber, infrastructure threats",
+   "n_events": 1,
+   "last_seen": "2026-11-10T23:15:41Z",
+   "first_event_title": "CISA outlines internal plan to swiftly address cyber, infrastructure threats"
+  },
+  {
+   "id": "git-index-integer-truncation-rce-cve-2026-111760",
+   "title": "Git index integer truncation RCE (CVE-2026-111760)",
+   "n_events": 8,
+   "last_seen": "2026-11-10T23:10:59.000Z",
+   "first_event_title": "\ud83e\udd16 CVE-2026-111760: integer truncation in Git's index handling lets a malicious repository execute code on a machine that clones it recursive"
+  },
+  {
+   "id": "detecting-sleeper-agents-hiding-in-ai-model-neurons",
+   "title": "Detecting sleeper agents hiding in AI model neurons",
+   "n_events": 1,
+   "last_seen": "2026-11-10T23:00:00Z",
+   "first_event_title": "Detecting sleeper agents hiding in AI model neurons"
+  },
+  {
+   "id": "lake-county-school-board-seeks-injunction-requiring-a-parent-who",
+   "title": "Lake County School Board seeks injunction requiring a parent who received unredacted data because of the district\u2019s error to destroy the data",
+   "n_events": 1,
+   "last_seen": "2026-11-10T22:50:59Z",
+   "first_event_title": "Lake County School Board seeks injunction requiring a parent who received unredacted data because of the district\u2019s error to destroy the data"
+  },
+  {
+   "id": "bitcoin-core-fixes-three-vulnerabilities-in-30-0-cve-2025-62859",
+   "title": "Bitcoin Core fixes three vulnerabilities in 30.0 (CVE-2025-62859, CVE-2025-62860, CVE-2025-62861)",
+   "n_events": 1,
+   "last_seen": "2026-11-10T22:31:56.000Z",
+   "first_event_title": "Update to version 30.0 now to fix three Bitcoin Core vulnerabilities, including CVE-2025-62861, CVE-2025-62860, and CVE-2025-62859 affecting"
+  },
+  {
+   "id": "supabase-security-findings-why-rls-is-only-25-of-the-issues",
+   "title": "Supabase Security findings why RLS is only 25% of the issues",
+   "n_events": 1,
+   "last_seen": "2026-11-10T22:21:14Z",
+   "first_event_title": "Supabase Security findings why RLS is only 25% of the issues"
+  },
+  {
+   "id": "adobe-security-advisory-av26-1092",
+   "title": "Adobe security advisory (AV26-1092)",
+   "n_events": 2,
+   "last_seen": "2026-10-30T08:01:42.000Z",
+   "first_event_title": "Adobe security advisory (AV26-1092)"
+  },
+  {
+   "id": "arara-message-email-service-breach-leaks-77-million-addresses",
+   "title": "Arara Message Email Service Breach Leaks 77 Million Addresses",
+   "n_events": 14,
+   "last_seen": "2026-11-10T19:35:41Z",
+   "first_event_title": "\ud83d\udcf0 Email Service Breach Leaks 77 Million Addresses, Sparks Phishing Wave A breach at Japanese email service Arara Message has leaked 77 milli"
+  },
+  {
+   "id": "cisco-security-advisory-av26-1127",
+   "title": "Cisco security advisory (AV26-1127)",
+   "n_events": 2,
+   "last_seen": "2026-11-05T03:58:31.000Z",
+   "first_event_title": "Cisco security advisory (AV26-1127)"
+  },
+  {
+   "id": "control-systems-moxa-security-advisory-av26-1089",
+   "title": "[Control Systems] Moxa security advisory (AV26-1089)",
+   "n_events": 1,
+   "last_seen": "2026-10-27T13:35:40Z",
+   "first_event_title": "[Control Systems] Moxa security advisory (AV26-1089)"
+  },
+  {
+   "id": "control-systems-phoenix-contact-security-advisory-av26-1121",
+   "title": "[Control Systems] Phoenix Contact security advisory (AV26-1121)",
+   "n_events": 1,
+   "last_seen": "2026-11-04T15:10:42Z",
+   "first_event_title": "[Control Systems] Phoenix Contact security advisory (AV26-1121)"
+  },
+  {
+   "id": "craft-cms-security-advisory-av26-1086",
+   "title": "Craft CMS security advisory (AV26-1086)",
+   "n_events": 2,
+   "last_seen": "2026-10-26T17:00:13.000Z",
+   "first_event_title": "Craft CMS security advisory (AV26-1086)"
+  },
+  {
+   "id": "dell-security-advisory-av26-1134",
+   "title": "Dell security advisory (AV26-1134)",
+   "n_events": 1,
+   "last_seen": "2026-11-09T14:05:40Z",
+   "first_event_title": "Dell security advisory (AV26-1134)"
+  },
+  {
+   "id": "docker-security-advisory-av26-1123",
+   "title": "Docker security advisory (AV26-1123)",
+   "n_events": 1,
+   "last_seen": "2026-11-04T19:40:43Z",
+   "first_event_title": "Docker security advisory (AV26-1123)"
+  },
+  {
+   "id": "fortinet-security-advisory-av26-812",
+   "title": "Fortinet security advisory (AV26-812)",
+   "n_events": 2,
+   "last_seen": "2026-08-13T10:40:57Z",
+   "first_event_title": "Fortinet security advisory (AV26-812)"
+  },
+  {
+   "id": "github-security-advisory-av26-1126",
+   "title": "GitHub security advisory (AV26-1126)",
+   "n_events": 1,
+   "last_seen": "2026-11-04T19:55:39Z",
+   "first_event_title": "GitHub security advisory (AV26-1126)"
+  },
+  {
+   "id": "google-security-advisory-av26-1118",
+   "title": "Google security advisory (AV26-1118)",
+   "n_events": 1,
+   "last_seen": "2026-11-04T14:45:41Z",
+   "first_event_title": "Google security advisory (AV26-1118)"
+  },
+  {
+   "id": "google-security-advisory-av26-904",
+   "title": "Google security advisory (AV26-904)",
+   "n_events": 2,
+   "last_seen": "2026-09-09T20:49:30Z",
+   "first_event_title": "Google security advisory (AV26-904)"
+  },
+  {
+   "id": "grafana-security-advisory-av26-860",
+   "title": "Grafana Alloy Vulnerability CVE-2026-19516",
+   "n_events": 3,
+   "last_seen": "2026-10-13T16:00:56.470Z",
+   "first_event_title": "Grafana security advisory (AV26-860)"
+  },
+  {
+   "id": "hashicorp-security-advisory-av26-797",
+   "title": "HashiCorp security advisory (AV26-797)",
+   "n_events": 1,
+   "last_seen": "2026-08-11T14:05:42Z",
+   "first_event_title": "HashiCorp security advisory (AV26-797)"
+  },
+  {
+   "id": "hashicorp-security-advisory-av26-817",
+   "title": "HashiCorp security advisory (AV26-817)",
+   "n_events": 1,
+   "last_seen": "2026-08-14T16:05:44Z",
+   "first_event_title": "HashiCorp security advisory (AV26-817)"
+  },
+  {
+   "id": "hpe-security-advisory-av26-1119",
+   "title": "HPE security advisory (AV26-1119)",
+   "n_events": 1,
+   "last_seen": "2026-11-04T14:55:41Z",
+   "first_event_title": "HPE security advisory (AV26-1119)"
+  },
+  {
+   "id": "ibm-security-advisory-av26-1040",
+   "title": "IBM security advisory (AV26-1040)",
+   "n_events": 1,
+   "last_seen": "2026-10-14T18:40:41Z",
+   "first_event_title": "IBM security advisory (AV26-1040)"
+  },
+  {
+   "id": "ivanti-security-advisory-av26-805",
+   "title": "Ivanti security advisory (AV26-805)",
+   "n_events": 1,
+   "last_seen": "2026-08-11T20:20:39Z",
+   "first_event_title": "Ivanti security advisory (AV26-805)"
+  },
+  {
+   "id": "ivanti-security-advisory-av26-897",
+   "title": "Ivanti September 2026 security advisory: EPMM, ITSM, Sentry vulnerabilities",
+   "n_events": 3,
+   "last_seen": "2026-09-09T06:39:58Z",
+   "first_event_title": "Ivanti security advisory (AV26-897)"
+  },
+  {
+   "id": "jetbrains-security-advisory-av26-1132",
+   "title": "JetBrains security advisory (AV26-1132)",
+   "n_events": 1,
+   "last_seen": "2026-11-06T19:35:40Z",
+   "first_event_title": "JetBrains security advisory (AV26-1132)"
+  },
+  {
+   "id": "cisa-adds-six-known-exploited-vulnerabilities-to-catalog",
+   "title": "CISA adds six known exploited vulnerabilities to catalog",
+   "n_events": 9,
+   "last_seen": "2026-11-10T21:35:44.000Z",
+   "first_event_title": "I'm late in posting today but happy Patch Tuesday. CISA added 6 new vulnerabilities to the KEV Catalog, two are zero-days but only one is ne"
+  }
+ ]
+}

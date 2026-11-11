@@ -1,0 +1,3 @@
+Author here. We opened the first page of each Grok app address once, with no account. Besides 24 SpaceXSI and X staff apps (taken down after our report), the open apps held internal data from 30 organizations we could identify, 26 of them with more than 1,000 employees. The post covers the method, two test apps we built to check Grok's defaults, and what a security team can do when employees build apps with AI. Ars Technica also covered it: https://arstechnica.com/security/2026/11/grok-build-coding-agent-leaks-oodles-of-confidential-info-some-belonging-to-spacexsi/ submitted by /u/3pun0x [link] [comments]
+
+via reddit r/cybersecurity: Grok Build apps default to "Anyone with the link": 94.7% of live apps we tested opened without sign-in, including SpaceXSI's own sales dat
