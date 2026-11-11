@@ -35,9 +35,10 @@ CVE_INDEX = os.path.join(DATA, "cve-index.json")
 TRACK = "microsoft-patch-tuesday"
 
 BASE_URL = "https://zarguell.github.io/tia-n-list"
-RELEASE_RE = re.compile(r"^\d{4}-[A-Z][a-z]{2}$")
+# Monthly releases are "YYYY-Mon"; Red Hat's weekly rollups are "YYYY-Www".
+RELEASE_RE = re.compile(r"^\d{4}-(?:[A-Z][a-z]{2}|W\d{2})$")
 TRACK_RE = re.compile(r"^[a-z0-9][a-z0-9-]{2,60}$")
-SLUG_RE = re.compile(r"^[a-z]{3}-\d{4}$")
+SLUG_RE = re.compile(r"^(?:[a-z]{3}-\d{4}|w\d{2}-\d{4})$")
 CVE_RE = re.compile(r"^CVE-\d{4}-\d{4,7}$")
 
 _SEV_CLASS = {"critical": "sev-crit", "important": "sev-high",
@@ -172,12 +173,15 @@ def load_release(slug, track=None):
 
 
 def release_from_slug(slug):
-    """'oct-2026' -> '2026-Oct' (data files are keyed by the vendor release id)."""
+    """'oct-2026' -> '2026-Oct', 'w45-2026' -> '2026-W45' (data files are keyed
+    by the vendor release id)."""
     slug = gate_slug(slug)
     if not slug:
         return None
-    mon, year = slug.split("-")
-    return f"{year}-{mon.capitalize()}"
+    first, year = slug.split("-")
+    if first.startswith("w"):
+        return f"{year}-{first.upper()}"
+    return f"{year}-{first.capitalize()}"
 
 
 def _release_ok(rec):
