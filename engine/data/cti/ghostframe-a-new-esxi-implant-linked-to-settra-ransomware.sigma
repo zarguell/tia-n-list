@@ -1,0 +1,42 @@
+title: GhostFrame ESXi Implant Persistence and execInstalledOnly Tampering
+id: ca688781-fb85-4659-ad61-42398381bb8b
+status: experimental
+description: Detects the GhostFrame post-exploitation framework on VMware ESXi hosts (Recorded Future Insikt Group, TAG-218 / Settra overlap). The implant vmhostd-core is dropped at /opt/vmhostd-core, persists by editing /etc/rc.local.d/local.sh, and the operator disables the ESXi firewall and the execInstalledOnly control via esxcli roughly every five seconds. Authored from case analysis - not validated against a live sample.
+references:
+  - https://www.recordedfuture.com/blog/ghostframe-esxi-implant-settra-ransomware
+  - https://www.huntress.com/blog/new-settra-ransomware-variant
+  - https://gbhackers.com/new-ghostframe-malware-targets-vmware-esxi-servers/
+author: Tia N. List
+date: 2026/11/11
+tags:
+  - attack.t1003
+  - attack.t1562
+  - attack.t1685
+  - attack.t1090
+  - attack.t1219
+  - attack.t1070
+logsource:
+  category: process_creation
+  product: linux
+detection:
+  selection_implant_image:
+    Image|endswith: '/vmhostd-core'
+  selection_implant_cmdline:
+    CommandLine|contains: 'vmhostd-core'
+  selection_local_sh_persistence:
+    CommandLine|contains|all:
+      - '/etc/rc.local.d/local.sh'
+      - 'vmhostd-core'
+  selection_execinstalledonly:
+    CommandLine|contains|all:
+      - 'esxcli'
+      - 'execInstalledOnly'
+  selection_firewall_disable:
+    CommandLine|contains|all:
+      - 'esxcli network firewall set'
+      - 'false'
+  condition: selection_implant_image or selection_implant_cmdline or selection_local_sh_persistence or selection_execinstalledonly or selection_firewall_disable
+falsepositives:
+  - Administrators legitimately lowering execInstalledOnly or the ESXi firewall during approved maintenance windows
+  - Backup or hardening scripts that rewrite /etc/rc.local.d/local.sh
+level: high
