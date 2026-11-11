@@ -1,0 +1,3 @@
+The White House has tapped Palantir's security chief to lead CISA, the US Cybersecurity and Infrastructure Security Agency, according to The Register's reporting. The appointment is already drawing concern from Hill Democrats over the Palantir connection, given the company's extensive government and intelligence-community contracting footprint.
+
+The story is governance rather than a vulnerability, but leadership at CISA shapes vulnerability disclosure timelines, KEV catalog priorities, and federal remediation deadlines, so the appointment's reception on Capitol Hill is worth tracking. Watch for confirmation hearings, any policy shifts in CISA's advisory output, and whether the Palantir tie affects the agency's posture toward the vendors and sectors it oversees.
