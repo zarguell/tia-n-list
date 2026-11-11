@@ -1,0 +1,1 @@
+N-able published release notes for N-central 2026.4 Hotfix 2, build 2026.4.1.26, on November 10, 2026. The critical security update addresses the most critical vulnerabilities disclosed on November 9. N-able states hosted servers were upgraded and advises on-premises customers to apply the hotfix.
