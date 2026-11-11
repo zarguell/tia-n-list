@@ -1,0 +1,1 @@
+Apple released iOS 27.2.1 for iPhone on November 9, 2026, a minor software update focused on bug fixes following the larger iOS 27.2 release. The update arrived two weeks after Apple introduced iOS 27.2 on October 26.
