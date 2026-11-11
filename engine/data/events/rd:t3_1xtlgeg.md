@@ -1,0 +1,3 @@
+Microsoft's November Patch Tuesday addressed 1,235 vulnerabilities, including CVE-2026-124194, an actively exploited Outlook spoofing vulnerability. Attackers could use a specially crafted message file to cause affected Outlook installations to connect to an attacker-controlled network location, potentially exposing NTLM authentication hashes. The attack requires the victim to open the malicious file; it is not a zero-click exploit. Stolen authentication hashes can potentially help attackers impersonate users or compromise organizational accounts. Updating Outlook and avoiding unexpected email attachments would be important defenses. submitted by /u/BTC-brother2018 [link] [comments]
+
+via reddit r/cybersecurity: Microsoft patches actively exploited Outlook zero-day

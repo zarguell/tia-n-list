@@ -1,0 +1,693 @@
+{
+ "date": "2026-11-11",
+ "decisions_path": "engine/data/triage/decisions-2026-11-11T1603.json",
+ "instructions": "For every new event decide: (1) keep or drop \u2014 keep only stories worth covering (real security events, vulnerabilities, attacks, breaches, advisories with substance); drop press releases, vendor marketing, generic explainers, and anything duplicating an existing story. (2) If keep, assign the event to the RIGHT story: an existing candidate story id if it belongs there (this FIXES mechanical clustering \u2014 e.g. different outlets' Patch Tuesday roundups are ONE story), or NEW with a clean story_title. (3) merges: list candidate stories that are really the same story (from = fragment, into = the most complete one). (4) For every kept event that names CVEs, optionally assess exploitation: exploited = the event reports OBSERVED in-the-wild exploitation (implants, victim counts, campaigns, CISA KEV confirmation); suspected = public exploit code/PoC or likely-but-unconfirmed. Attribute ONLY the CVEs you can tie to the claim \u2014 a bulletin's blanket 'actively exploited' does NOT flag all its CVEs. Omit the exploitation field when the event makes no claim.\n(5) LOW-TRUST events (\"low_trust\": true \u2014 AI-drafted aggregator reposts, late and overstated): treat as unverified leads. When the text attributes the claim to a named primary source (a researcher firm like watchTowr, a vendor advisory, CISA, a major outlet) and attribution_urls or a web search (/home/ubuntu/repos/cronman/bin/web-search.sh \"query\") locate that primary source CONFIRMING the claim, include a provenance object in the decision: {\"url\": <primary url>, \"source\": <domain>, \"evidence\": <one line>, \"verified\": true}. VERIFIED provenance lets the event mint a story (credited to the primary source) and count as a development; without it, a low-trust event can only attach to an EXISTING story, never mint. If you cannot verify, keep/drop on normal merit and omit provenance.\n\nWrite decisions as JSON with EXACTLY this shape:\n{\n  \"decisions\": [\n    {\"event_id\": \"<id>\", \"action\": \"keep\", \"story\": \"<existing candidate story id>\", \"reason\": \"...\"},\n    {\"event_id\": \"<id>\", \"action\": \"keep\", \"story\": \"NEW\", \"story_title\": \"<clean title>\", \"reason\": \"...\"},\n    {\"event_id\": \"<id>\", \"action\": \"drop\", \"reason\": \"...\"}\n  ],\n  \"merges\": [{\"from\": \"<fragment story id>\", \"into\": \"<canonical story id>\"}]\n}\nFor events marked \"low_trust\" (AI-drafted aggregator reposts) a decision\nmay carry an optional \"provenance\" object when you VERIFIED the claim at\nthe named primary source: {\"event_id\": ..., \"action\": \"keep\", ...}\n  \"provenance\": {\"url\": \"<primary source url>\", \"source\": \"<domain>\", \"evidence\": \"<one line>\"}\nOnly include provenance when the primary source (vendor advisory, CISA,\nthe named researcher/outlet) really carries the claim \u2014 verified\nprovenance lets a low-trust event mint a story and set freshness; without\nit the event can only amplify an existing story.\nSTRICT KEY NAMES: the array key is \"decisions\" (never \"events\"); the story\nkey is \"story\" (never \"story_id\"); \"story\" holds a candidate_stories id\nverbatim or the literal string \"NEW\". Optional per-event field\n\"exploitation\": {\"CVE-...\": {\"status\": \"exploited|suspected\", \"evidence\": \"1-2 sentences\"}}.",
+ "new_events": [
+  {
+   "id": "rd:t3_1xtlgeg",
+   "title": "Microsoft patches actively exploited Outlook zero-day",
+   "source": "bleepingcomputer.com",
+   "published_at": "2026-11-11T15:59:42Z",
+   "cves": [
+    "CVE-2026-124194"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Microsoft's November Patch Tuesday addressed 1,235 vulnerabilities, including CVE-2026-124194, an actively exploited Outlook spoofing vulnerability. Attackers could use a specially crafted message file to cause affected "
+  },
+  {
+   "id": "rd:t3_1xtl66j",
+   "title": "Russian hackers compromised Microsoft Exchange to steal NATO, EU emails",
+   "source": "cybernews.com",
+   "published_at": "2026-11-11T15:48:37Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "submitted by /u/Cybernews_com [link] [comments]  via reddit r/cybersecurity: Russian hackers compromised Microsoft Exchange to steal NATO, EU emails "
+  },
+  {
+   "id": "rss:be78a2ec5b58e8ab",
+   "title": "Critical Xen Orchestra Flaws Exploited in Attacks",
+   "source": "securityweek.com",
+   "published_at": "2026-11-11T15:42:47Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "A threat actor has been exploiting a critical-severity Xen Orchestra vulnerability to bypass authentication, software maker Vates warns. A web-based backup, management, and disaster recovery solution for XCP-ng and XenSe"
+  },
+  {
+   "id": "rss:9657c4a0278aa924",
+   "title": "How to Export Logs with Amazon Athena",
+   "source": "socprime.com",
+   "published_at": "2026-11-11T15:36:46Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Athena doesn\u2019t store logs itself. It queries log files in S3, such as CloudTrail, VPC Flow Logs, load balancer and WAF logs, through tables you define. Normal query results are saved as CSV in your results bucket. To get"
+  },
+  {
+   "id": "rss:fcfad0f0a113b7fc",
+   "title": "Ca: York University Breach Exposes 19 Years of Student Health and Financial Data",
+   "source": "malware.news",
+   "published_at": "2026-11-11T15:30:43Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Garrett Cole reports: Toronto\u2019s York University has confirmed a major cybersecurity incident that resulted in the unauthorized theft of sensitive personal, medical, and financial records submitted across departmental web"
+  },
+  {
+   "id": "rss:9f297c3ba5c4c50d",
+   "title": "How to Export Snowflake Logs",
+   "source": "socprime.com",
+   "published_at": "2026-11-11T15:23:41Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "\u201cSnowflake logs\u201d means one of two things, and the export works the same for both. It can be security data your team stores in Snowflake tables. Or it can be Snowflake\u2019s own audit trail, the SNOWFLAKE.ACCOUNT_USAGE views "
+  },
+  {
+   "id": "rss:b7634927b84dea71",
+   "title": "Nvidia spying allegations test Washington\u2019s defenses against tech espionage",
+   "source": "malware.news",
+   "published_at": "2026-11-11T15:20:43Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Allegations that Chinese intelligence targeted Nvidia\u2019s chief executive are raising questions about how American technology companies can protect themselves from foreign spies and whether Washington is doing enough to he"
+  },
+  {
+   "id": "rss:a2cd40d0faaa3841",
+   "title": "Criminal IP Launches New TI Feed App on Splunkbase for Automated Threat Detection",
+   "source": "gbhackers.com",
+   "published_at": "2026-11-11T15:18:09Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Torrance, USA, November 11th, 2026, CyberNewswire Criminal IP, the AI-powered threat intelligence and attack surface management platform developed by AI SPERA, has launched the Criminal IP TI Feed app for Splunk. Availab"
+  },
+  {
+   "id": "rss:e4a556e3d9ec35c2",
+   "title": "How to Export Databricks Logs",
+   "source": "socprime.com",
+   "published_at": "2026-11-11T15:16:29Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "As with Snowflake, \u201cDatabricks logs\u201d can mean security data you keep in Delta tables, or Databricks\u2019 own audit log in the system.access.audit system table. The simplest export for both is a notebook cell. Query with Spar"
+  },
+  {
+   "id": "rss:aec6d5009e80d6fb",
+   "title": "Hotel giant Wyndham exposed customer data after app security lapse",
+   "source": "malware.news",
+   "published_at": "2026-11-11T15:15:44Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "It\u2019s been a while since hotel and resort giant Wyndham has shown up on DataBreaches.net . There was one report in 2024, but prior extensive coverage involved their historic litigation with the FTC following a breach. Now"
+  },
+  {
+   "id": "rd:t3_1xtkb4y",
+   "title": "Hide and Stream: Ambient Aircraft-DopplerGeolocation of Live Audio, and a Defense",
+   "source": "doinfinitely.github.io",
+   "published_at": "2026-11-11T15:15:12Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Working draft (potential DEFCON publication). critique welcome submitted by /u/lymn [link] [comments]  via reddit r/netsec: Hide and Stream: Ambient Aircraft-DopplerGeolocation of Live Audio, and a Defense "
+  },
+  {
+   "id": "rss:4bb5422350907c69",
+   "title": "Hackers use AntiFox AI agents in AWS credential-theft attacks",
+   "source": "bleepingcomputer.com",
+   "published_at": "2026-11-11T15:12:59Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Attackers are using Alibaba Cloud to host self-managed instances of AntiFox, an open-source agentic penetration testing platform, to target web services and AWS environments. The infrastructure hosting AntiFox was used f"
+  },
+  {
+   "id": "rss:5f7a42f2916f2545",
+   "title": "iPhone Safari(\uc544\uc774\ud3f0 \uc0ac\ud30c\ub9ac)\ub178\ub9ac\ub294 \ud050\uc2f1(Quishing) \uacf5\uaca9 \ubd84\uc11d",
+   "source": "malware.news",
+   "published_at": "2026-11-11T15:11:17Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "\uc624\ub298\uc740 iPhone Safari \ub178\ub9ac\ub294 \uac00\uc9dc reCAPTCHA \uacf5\uaca9 \ubd84\uc11d\uc744 \ud574\ubcf4\uaca0\uc2b5\ub2c8\ub2e4.\uc77c\ub2e8 \ud574\ub2f9 \uacf5\uaca9\uc740 \ud050\uc2f1(Quishing) \uacf5\uaca9\uc73c\ub85c \uc548\ub4dc\ub85c\uc774\ub4dc \uc0ac\uc6a9\uc790\ub4e4\uc774 \uc544\ub2cc \uc774\ubc88\uc740 \uc560\ud50c iPhone(\uc544\uc774\ud3f0)\uc0ac\uc6a9\uc790\ub97c \ub300\uc0c1\uc73c\ub85c \uacf5\uaca9\uc744 \uac10\ud589\ud558\ub294 \uac83\uc785\ub2c8\ub2e4.\ud050\uc2f1(Quishing.. Article Link: iPhone Safari(\uc544\uc774\ud3f0 \uc0ac\ud30c\ub9ac)\ub178\ub9ac\ub294 \ud050\uc2f1(Quishing) \uacf5\uaca9 \ubd84\uc11d "
+  },
+  {
+   "id": "rss:2147eb3dbbfc5896",
+   "title": "How to Export BigQuery Logs",
+   "source": "socprime.com",
+   "published_at": "2026-11-11T15:10:42Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "When security logs sit in BigQuery (from a Cloud Logging sink, a Google Workspace export or your own pipeline), export them with EXPORT DATA. It writes newline-delimited JSON to a Cloud Storage bucket, and you download t"
+  },
+  {
+   "id": "rss:bc25dcc03597b253",
+   "title": "AI Is Both Target and Tool for Threat Actors",
+   "source": "malware.news",
+   "published_at": "2026-11-11T15:06:24Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Summary Artificial intelligence (AI)-enabled attacks are accelerating, with AI as both a target and a force multiplier. Of the 103 AI-enabled incidents analyzed for this report, most involve AI accelerating familiar atta"
+  },
+  {
+   "id": "rss:cd485eb878ac3924",
+   "title": "CVE-2026-124194: Microsoft Outlook Zero-Day Exploited to Steal NTLM Hashes",
+   "source": "socprime.com",
+   "published_at": "2026-11-11T15:04:15Z",
+   "cves": [
+    "CVE-2026-124194"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Microsoft has patched CVE-2026-124194, an actively exploited zero-day vulnerability in Microsoft Outlook that can expose a user\u2019s NTLMv2 authentication information when a specially crafted message file is opened. Microso"
+  },
+  {
+   "id": "rss:7dca55a95a756054",
+   "title": "eBPF Rootkits: Why Underground Actors Are Taking Notice",
+   "source": "bleepingcomputer.com",
+   "published_at": "2026-11-11T15:01:11Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "For years, eBPF (extended Berkeley Packet Filter) has been one of the most celebrated technologies in the Linux kernel. It lets developers run sandboxed programs inside the kernel without writing kernel modules, while po"
+  },
+  {
+   "id": "rss:b3f1f81ec109edd5",
+   "title": "The XG Files: Falcon C2 Flying Under The (Browser) Radar",
+   "source": "unit42.paloaltonetworks.com",
+   "published_at": "2026-11-11T15:00:23Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "We uncover Falcon C2, a browser-based threat framework targeting governments via malicious scripts, extensions, and the Antino implant. The post The XG Files: Falcon C2 Flying Under The (Browser) Radar appeared first on "
+  },
+  {
+   "id": "rss:04633c00b5f095f7",
+   "title": "From Managed Security to Cyber Resilience: What We Believe the IDC MarketScape 2026 Asia/Pacific MSS Assessment Means for Security Leaders",
+   "source": "levelblue.com",
+   "published_at": "2026-11-11T15:00:01Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Security leaders across Asia/Pacific are being asked to do more than watch alerts. Boards and regulators want proof that the organization can withstand an attack, contain it fast and recover with minimal disruption. That"
+  }
+ ],
+ "candidate_stories": [
+  {
+   "id": "microsoft-s-november-2026-patch-tuesday-addresses-1093-cves-cve",
+   "title": "Microsoft\u2019s November 2026 Patch Tuesday addresses 1093 CVEs (CVE-2026-124194)",
+   "n_events": 31,
+   "last_seen": "2026-11-11T15:59:42Z",
+   "first_event_title": "Microsoft\u2019s November 2026 Patch Tuesday addresses 1093 CVEs (CVE-2026-124194)"
+  },
+  {
+   "id": "russian-hackers-compromised-microsoft-exchange-to-steal-nato-eu",
+   "title": "Russian hackers compromised Microsoft Exchange to steal NATO, EU emails",
+   "n_events": 1,
+   "last_seen": "2026-11-11T15:48:37Z",
+   "first_event_title": "Russian hackers compromised Microsoft Exchange to steal NATO, EU emails"
+  },
+  {
+   "id": "critical-xen-orchestra-flaws-exploited-in-attacks",
+   "title": "Critical Xen Orchestra Flaws Exploited in Attacks",
+   "n_events": 1,
+   "last_seen": "2026-11-11T15:42:47Z",
+   "first_event_title": "Critical Xen Orchestra Flaws Exploited in Attacks"
+  },
+  {
+   "id": "how-to-export-aws-cloudtrail-logs",
+   "title": "How to Export AWS CloudTrail Logs",
+   "n_events": 4,
+   "last_seen": "2026-11-11T15:36:46Z",
+   "first_event_title": "How to Export BigQuery Logs"
+  },
+  {
+   "id": "ca-york-university-breach-exposes-19-years-of-student-health-and",
+   "title": "Ca: York University Breach Exposes 19 Years of Student Health and Financial Data",
+   "n_events": 1,
+   "last_seen": "2026-11-11T15:30:43Z",
+   "first_event_title": "Ca: York University Breach Exposes 19 Years of Student Health and Financial Data"
+  },
+  {
+   "id": "nvidia-spying-allegations-test-washington-s-defenses-against-tec",
+   "title": "Nvidia spying allegations test Washington\u2019s defenses against tech espionage",
+   "n_events": 1,
+   "last_seen": "2026-11-11T15:20:43Z",
+   "first_event_title": "Nvidia spying allegations test Washington\u2019s defenses against tech espionage"
+  },
+  {
+   "id": "criminal-ip-launches-new-ti-feed-app-on-splunkbase-for-automated",
+   "title": "Criminal IP Launches New TI Feed App on Splunkbase for Automated Threat Detection",
+   "n_events": 1,
+   "last_seen": "2026-11-11T15:18:09Z",
+   "first_event_title": "Criminal IP Launches New TI Feed App on Splunkbase for Automated Threat Detection"
+  },
+  {
+   "id": "hotel-giant-wyndham-exposed-customer-data-after-app-security-lap",
+   "title": "Hotel giant Wyndham exposed customer data after app security lapse",
+   "n_events": 1,
+   "last_seen": "2026-11-11T15:15:44Z",
+   "first_event_title": "Hotel giant Wyndham exposed customer data after app security lapse"
+  },
+  {
+   "id": "hide-and-stream-ambient-aircraft-dopplergeolocation-of-live-audi",
+   "title": "Hide and Stream: Ambient Aircraft-DopplerGeolocation of Live Audio, and a Defense",
+   "n_events": 1,
+   "last_seen": "2026-11-11T15:15:12Z",
+   "first_event_title": "Hide and Stream: Ambient Aircraft-DopplerGeolocation of Live Audio, and a Defense"
+  },
+  {
+   "id": "hackers-use-autonomous-ai-agents-to-launch-mass-credential-theft",
+   "title": "AI Agents Automate Credential Theft Campaigns in Under 6 Hours",
+   "n_events": 19,
+   "last_seen": "2026-11-11T15:12:59Z",
+   "first_event_title": "Hackers Use Autonomous AI Agents to Launch Mass Credential Theft Attacks in Under 6 Hours"
+  },
+  {
+   "id": "iphone-safari-quishing",
+   "title": "iPhone Safari(\uc544\uc774\ud3f0 \uc0ac\ud30c\ub9ac)\ub178\ub9ac\ub294 \ud050\uc2f1(Quishing) \uacf5\uaca9 \ubd84\uc11d",
+   "n_events": 1,
+   "last_seen": "2026-11-11T15:11:17Z",
+   "first_event_title": "iPhone Safari(\uc544\uc774\ud3f0 \uc0ac\ud30c\ub9ac)\ub178\ub9ac\ub294 \ud050\uc2f1(Quishing) \uacf5\uaca9 \ubd84\uc11d"
+  },
+  {
+   "id": "ai-is-both-target-and-tool-for-threat-actors-10251",
+   "title": "AI Is Both Target and Tool for Threat Actors",
+   "n_events": 1,
+   "last_seen": "2026-11-11T15:06:24Z",
+   "first_event_title": "AI Is Both Target and Tool for Threat Actors"
+  },
+  {
+   "id": "cisa-adds-six-known-exploited-vulnerabilities-to-catalog",
+   "title": "CISA adds six known exploited vulnerabilities to catalog",
+   "n_events": 14,
+   "last_seen": "2026-11-11T15:04:15Z",
+   "first_event_title": "I'm late in posting today but happy Patch Tuesday. CISA added 6 new vulnerabilities to the KEV Catalog, two are zero-days but only one is ne"
+  },
+  {
+   "id": "ebpf-rootkits-why-underground-actors-are-taking-notice",
+   "title": "eBPF Rootkits: Why Underground Actors Are Taking Notice",
+   "n_events": 1,
+   "last_seen": "2026-11-11T15:01:11Z",
+   "first_event_title": "eBPF Rootkits: Why Underground Actors Are Taking Notice"
+  },
+  {
+   "id": "the-xg-files-falcon-c2-flying-under-the-browser-radar",
+   "title": "The XG Files: Falcon C2 Flying Under The (Browser) Radar",
+   "n_events": 1,
+   "last_seen": "2026-11-11T15:00:23Z",
+   "first_event_title": "The XG Files: Falcon C2 Flying Under The (Browser) Radar"
+  },
+  {
+   "id": "from-managed-security-to-cyber-resilience-what-we-believe-the-id",
+   "title": "From Managed Security to Cyber Resilience: What We Believe the IDC MarketScape 2026 Asia/Pacific MSS Assessment Means for Security Leaders",
+   "n_events": 1,
+   "last_seen": "2026-11-11T15:00:01Z",
+   "first_event_title": "From Managed Security to Cyber Resilience: What We Believe the IDC MarketScape 2026 Asia/Pacific MSS Assessment Means for Security Leaders"
+  },
+  {
+   "id": "qlik-sense-servers-hit-with-powershell-reverse-shells-attacker-s",
+   "title": "Qlik Sense servers compromised with PowerShell reverse shells, attacker infrastructure holds ActiveMQ and Veeam exploits",
+   "n_events": 1,
+   "last_seen": "2026-11-11T14:55:07Z",
+   "first_event_title": "Qlik Sense Servers Hit With PowerShell Reverse Shells; Attacker Server Holds ActiveMQ and Veeam Exploits"
+  },
+  {
+   "id": "phishing-at-the-front-desk-usable-security-in-luxury-hotels",
+   "title": "Phishing at the Front Desk: Usable Security in Luxury Hotels",
+   "n_events": 0,
+   "last_seen": "2026-11-11T14:53:32Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "falso-sito-inps-in-allestimento-per-futura-distribuzione-di-apk",
+   "title": "Fake INPS portal set up to distribute malicious Android APK via SMS",
+   "n_events": 1,
+   "last_seen": "2026-11-11T14:40:43Z",
+   "first_event_title": "Falso sito INPS in allestimento per futura distribuzione di APK malevolo"
+  },
+  {
+   "id": "rural-hospital-cyber-incident-17-days-of-access-went-unseen",
+   "title": "Rural Hospital Cyber Incident: 17 Days of Access Went Unseen",
+   "n_events": 0,
+   "last_seen": "2026-11-11T14:35:58Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "eset-links-cereal-to-turla-in-romanian-server-breach-case-defens",
+   "title": "ESET links Cereal malware to Turla in Romanian government server breach",
+   "n_events": 1,
+   "last_seen": "2026-11-11T14:35:56Z",
+   "first_event_title": "ESET Links Cereal to Turla in Romanian Server Breach Case \u2014 Defense News"
+  },
+  {
+   "id": "hundreds-of-dutch-sports-clubs-report-cyberattack-exposing-membe",
+   "title": "AllUnited breach exposes personal data of 350+ Dutch sports clubs members",
+   "n_events": 1,
+   "last_seen": "2026-11-11T14:35:53Z",
+   "first_event_title": "Hundreds of Dutch sports clubs report cyberattack exposing members\u2019 personal data"
+  },
+  {
+   "id": "french-bank-credit-mutuel-arkea-says-100m-missing-after-cyberatt",
+   "title": "Credit Mutuel Arkea reports ~EUR 100M stolen in cyber heist",
+   "n_events": 1,
+   "last_seen": "2026-11-11T14:35:51Z",
+   "first_event_title": "French bank Credit Mutuel Arkea says \u20ac100m missing after cyberattack"
+  },
+  {
+   "id": "sg-fullerton-health-server-hit-by-cyberattack-personal-data-of-m",
+   "title": "Fullerton Health Singapore migrant worker server hit by cyberattack",
+   "n_events": 1,
+   "last_seen": "2026-11-11T14:35:49Z",
+   "first_event_title": "SG: Fullerton Health server hit by cyberattack; personal data of migrant workers affected"
+  },
+  {
+   "id": "cyber-threat-prompts-new-plymouth-school-district-in-idaho-to-ca",
+   "title": "New Plymouth School District Idaho cancels classes after cyber threat",
+   "n_events": 2,
+   "last_seen": "2026-11-11T14:35:46Z",
+   "first_event_title": "Cyber threat prompts New Plymouth School District in Idaho to cancel classes"
+  },
+  {
+   "id": "2013-breach-at-russian-cybercrime-forum-resurfaces-with-millions",
+   "title": "2013 YouHack Russian cybercrime forum breach resurfaces with millions of credentials",
+   "n_events": 1,
+   "last_seen": "2026-11-11T14:35:44Z",
+   "first_event_title": "2013 breach at Russian cybercrime forum resurfaces with millions of victims\u2019 credentials"
+  },
+  {
+   "id": "grok-s-security-blind-spot-exposed-users-and-musk-s-company-secr",
+   "title": "Grok-created apps exposed corporate secrets and personal data of 35,000+ apps",
+   "n_events": 6,
+   "last_seen": "2026-11-11T14:35:42Z",
+   "first_event_title": "Grok\u2019s security blind spot exposed users and Musk\u2019s company secrets"
+  },
+  {
+   "id": "scriptblock-smuggling-amsi-evasion",
+   "title": "ScriptBlock Smuggling - AMSI Evasion",
+   "n_events": 0,
+   "last_seen": "2026-11-11T14:35:36Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "apache-http-server-flaws-enable-remote-code-execution-and-denial",
+   "title": "Apache HTTP Server Flaws Enable Remote Code Execution and Denial-of-Service Attacks",
+   "n_events": 9,
+   "last_seen": "2026-11-11T14:33:38.000Z",
+   "first_event_title": "Apache HTTP Server Flaws Enable Remote Code Execution and Denial-of-Service Attacks"
+  },
+  {
+   "id": "socradar-mcp-126-tools-and-the-new-mssp-mcp-server",
+   "title": "SOCRadar MCP: 126 Tools and the New MSSP MCP Server",
+   "n_events": 0,
+   "last_seen": "2026-11-11T14:20:40Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "able2shell-frequently-asked-questions-for-reported-n-able-n-cent",
+   "title": "Able2Shell: Frequently asked questions for reported N-able N-central zero-day vulnerabilities",
+   "n_events": 27,
+   "last_seen": "2026-11-11T14:20:24.925Z",
+   "first_event_title": "Able2Shell: Frequently asked questions for reported N-able N-central zero-day vulnerabilities"
+  },
+  {
+   "id": "remus-malware-claims-gmail-access-even-after-you-change-your-pas",
+   "title": "Remus malware claims Gmail access even after you change your password",
+   "n_events": 1,
+   "last_seen": "2026-11-11T14:20:07.568Z",
+   "first_event_title": "Source: Malwarebytes Labs Read: https://www. malwarebytes.com/blog/news/202 6/11/remus-malware-claims-gmail-access-even-after-you-change-you"
+  },
+  {
+   "id": "fortinet-patches-nearly-100-vulnerabilities",
+   "title": "Fortinet Patches Nearly 100 Vulnerabilities",
+   "n_events": 13,
+   "last_seen": "2026-11-11T14:16:10.000Z",
+   "first_event_title": "Fortinet Patches Nearly 100 Vulnerabilities"
+  },
+  {
+   "id": "openssh-on-musl-linux-has-been-letting-people-into-password-less",
+   "title": "openssh on musl linux has been letting people into password-less accounts since 2016",
+   "n_events": 78,
+   "last_seen": "2026-11-11T14:14:48.000Z",
+   "first_event_title": "openssh on musl linux has been letting people into password-less accounts since 2016"
+  },
+  {
+   "id": "2-4-of-afrinic-s-ipv4-addresses-answer-from-outside-africa-and-a",
+   "title": "2.4% of AFRINIC\u2019s IPv4 addresses answer from outside Africa, and about 81% of those sit in one company\u2019s four blocks",
+   "n_events": 1,
+   "last_seen": "2026-11-11T14:12:37Z",
+   "first_event_title": "2.4% of AFRINIC\u2019s IPv4 addresses answer from outside Africa, and about 81% of those sit in one company\u2019s four blocks"
+  },
+  {
+   "id": "vanderbilt-university-campus-wide-ransomware-attack",
+   "title": "Vanderbilt University campus-wide ransomware attack",
+   "n_events": 23,
+   "last_seen": "2026-11-11T14:02:20.958Z",
+   "first_event_title": "# VanderbiltUniversity is undergoing a campus-wide # ransomware attack. https:// vanderbilthustler.com/2026/11/ 09/breaking-vanderbilt-wi-fi"
+  },
+  {
+   "id": "asus-zoom-release-security-patches",
+   "title": "Asus, Zoom Release Security Patches",
+   "n_events": 1,
+   "last_seen": "2026-11-11T13:58:38Z",
+   "first_event_title": "Asus, Zoom Release Security Patches"
+  },
+  {
+   "id": "citrix-ivanti-patch-critical-and-high-severity-vulnerabilities",
+   "title": "Citrix, Ivanti Patch Critical and High-Severity Vulnerabilities",
+   "n_events": 1,
+   "last_seen": "2026-11-11T13:37:19Z",
+   "first_event_title": "Citrix, Ivanti Patch Critical and High-Severity Vulnerabilities"
+  },
+  {
+   "id": "muse-sleep-band-users-weren-t-told-their-brain-data-was-training",
+   "title": "Muse sleep band users weren\u2019t told their brain data was training AI",
+   "n_events": 1,
+   "last_seen": "2026-11-11T12:55:43Z",
+   "first_event_title": "Muse sleep band users weren\u2019t told their brain data was training AI"
+  },
+  {
+   "id": "operation-snowball-exposes-ai-hacking-campaign-targeting-europea",
+   "title": "Operation Snowball Exposes AI Hacking Campaign Targeting European Telecom and 13 Hosted Organizations",
+   "n_events": 5,
+   "last_seen": "2026-11-11T12:37:41.000Z",
+   "first_event_title": "Operation Snowball Exposes AI Hacking Campaign Targeting European Telecom and 13 Hosted Organizations"
+  },
+  {
+   "id": "adobe-security-advisory-av26-1092",
+   "title": "Adobe security advisory (AV26-1092)",
+   "n_events": 2,
+   "last_seen": "2026-10-30T08:01:42.000Z",
+   "first_event_title": "Adobe security advisory (AV26-1092)"
+  },
+  {
+   "id": "ai-is-both-target-and-tool-for-threat-actors",
+   "title": "AI Is Both Target and Tool for Threat Actors",
+   "n_events": 1,
+   "last_seen": "2026-11-11T00:00:00Z",
+   "first_event_title": "AI Is Both Target and Tool for Threat Actors"
+  },
+  {
+   "id": "cisco-security-advisory-av26-1127",
+   "title": "Cisco security advisory (AV26-1127)",
+   "n_events": 2,
+   "last_seen": "2026-11-05T03:58:31.000Z",
+   "first_event_title": "Cisco security advisory (AV26-1127)"
+  },
+  {
+   "id": "control-systems-moxa-security-advisory-av26-1089",
+   "title": "[Control Systems] Moxa security advisory (AV26-1089)",
+   "n_events": 1,
+   "last_seen": "2026-10-27T13:35:40Z",
+   "first_event_title": "[Control Systems] Moxa security advisory (AV26-1089)"
+  },
+  {
+   "id": "craft-cms-security-advisory-av26-1086",
+   "title": "Craft CMS security advisory (AV26-1086)",
+   "n_events": 2,
+   "last_seen": "2026-10-26T17:00:13.000Z",
+   "first_event_title": "Craft CMS security advisory (AV26-1086)"
+  },
+  {
+   "id": "dell-security-advisory-av26-1134",
+   "title": "Dell security advisory (AV26-1134)",
+   "n_events": 1,
+   "last_seen": "2026-11-09T14:05:40Z",
+   "first_event_title": "Dell security advisory (AV26-1134)"
+  },
+  {
+   "id": "docker-security-advisory-av26-1123",
+   "title": "Docker security advisory (AV26-1123)",
+   "n_events": 1,
+   "last_seen": "2026-11-04T19:40:43Z",
+   "first_event_title": "Docker security advisory (AV26-1123)"
+  },
+  {
+   "id": "fortinet-security-advisory-av26-812",
+   "title": "Fortinet security advisory (AV26-812)",
+   "n_events": 2,
+   "last_seen": "2026-08-13T10:40:57Z",
+   "first_event_title": "Fortinet security advisory (AV26-812)"
+  },
+  {
+   "id": "github-security-advisory-av26-1126",
+   "title": "GitHub security advisory (AV26-1126)",
+   "n_events": 1,
+   "last_seen": "2026-11-04T19:55:39Z",
+   "first_event_title": "GitHub security advisory (AV26-1126)"
+  },
+  {
+   "id": "google-security-advisory-av26-904",
+   "title": "Google security advisory (AV26-904)",
+   "n_events": 2,
+   "last_seen": "2026-09-09T20:49:30Z",
+   "first_event_title": "Google security advisory (AV26-904)"
+  },
+  {
+   "id": "grafana-security-advisory-av26-860",
+   "title": "Grafana Alloy Vulnerability CVE-2026-19516",
+   "n_events": 3,
+   "last_seen": "2026-10-13T16:00:56.470Z",
+   "first_event_title": "Grafana security advisory (AV26-860)"
+  },
+  {
+   "id": "hashicorp-security-advisory-av26-797",
+   "title": "HashiCorp security advisory (AV26-797)",
+   "n_events": 1,
+   "last_seen": "2026-08-11T14:05:42Z",
+   "first_event_title": "HashiCorp security advisory (AV26-797)"
+  },
+  {
+   "id": "hashicorp-security-advisory-av26-817",
+   "title": "HashiCorp security advisory (AV26-817)",
+   "n_events": 1,
+   "last_seen": "2026-08-14T16:05:44Z",
+   "first_event_title": "HashiCorp security advisory (AV26-817)"
+  },
+  {
+   "id": "ibm-security-advisory-av26-1040",
+   "title": "IBM security advisory (AV26-1040)",
+   "n_events": 1,
+   "last_seen": "2026-10-14T18:40:41Z",
+   "first_event_title": "IBM security advisory (AV26-1040)"
+  },
+  {
+   "id": "ibm-security-advisory-av26-1135",
+   "title": "IBM security advisory (AV26-1135)",
+   "n_events": 11,
+   "last_seen": "2026-11-11T05:15:06.000Z",
+   "first_event_title": "IBM security advisory (AV26-1135)"
+  },
+  {
+   "id": "ivanti-security-advisory-av26-805",
+   "title": "Ivanti security advisory (AV26-805)",
+   "n_events": 1,
+   "last_seen": "2026-08-11T20:20:39Z",
+   "first_event_title": "Ivanti security advisory (AV26-805)"
+  },
+  {
+   "id": "ivanti-security-advisory-av26-897",
+   "title": "Ivanti September 2026 security advisory: EPMM, ITSM, Sentry vulnerabilities",
+   "n_events": 3,
+   "last_seen": "2026-09-09T06:39:58Z",
+   "first_event_title": "Ivanti security advisory (AV26-897)"
+  },
+  {
+   "id": "jetbrains-security-advisory-av26-1132",
+   "title": "JetBrains security advisory (AV26-1132)",
+   "n_events": 1,
+   "last_seen": "2026-11-06T19:35:40Z",
+   "first_event_title": "JetBrains security advisory (AV26-1132)"
+  },
+  {
+   "id": "jetbrains-security-advisory-av26-825",
+   "title": "JetBrains security advisory (AV26-825)",
+   "n_events": 1,
+   "last_seen": "2026-08-18T13:40:50Z",
+   "first_event_title": "JetBrains security advisory (AV26-825)"
+  },
+  {
+   "id": "juniper-networks-security-advisory-av26-1043",
+   "title": "Juniper Networks security advisory (AV26-1043)",
+   "n_events": 4,
+   "last_seen": "2026-10-16T09:54:34Z",
+   "first_event_title": "Juniper Networks security advisory (AV26-1043)"
+  },
+  {
+   "id": "microsoft-s-september-2026-patch-tuesday-fixes-two-zero-day-flaw",
+   "title": "Microsoft\u2019s Patching",
+   "n_events": 46,
+   "last_seen": "2026-09-17T15:10:04.000Z",
+   "first_event_title": "Microsoft's September 2026 Patch Tuesday fixes two zero-day flaws, CVE-2026-81963 and CVE-2026-85880, both exploited in the wild. # PatchTue"
+  },
+  {
+   "id": "microsoft-october-2026-patch-tuesday-fixes-1-411-flaws-3-zero-da",
+   "title": "Microsoft October 2026 Patch Tuesday fixes 1,411 flaws, 3 zero-days",
+   "n_events": 52,
+   "last_seen": "2026-10-29T12:45:05.000Z",
+   "first_event_title": "Microsoft October 2026 Patch Tuesday fixes 1,411 flaws, 3 zero-days"
+  },
+  {
+   "id": "what-s-new-in-microsoft-security-november-2026",
+   "title": "What\u2019s new in Microsoft Security: November 2026",
+   "n_events": 0,
+   "last_seen": "2026-11-05T17:00:00Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "microsoft-fixes-classic-outlook-bug-that-hid-copilot-buttons",
+   "title": "Microsoft fixes classic Outlook bug that hid Copilot buttons",
+   "n_events": 5,
+   "last_seen": "2026-11-10T19:07:36Z",
+   "first_event_title": "Microsoft fixes classic Outlook bug that hid Copilot buttons"
+  },
+  {
+   "id": "microsoft-says-october-updates-didn-t-actually-fix-vpn-issues",
+   "title": "Microsoft October Updates Did Not Fix Always On VPN Issues",
+   "n_events": 1,
+   "last_seen": "2026-10-21T10:14:53Z",
+   "first_event_title": "Microsoft says October updates didn\u2019t actually fix VPN issues"
+  },
+  {
+   "id": "microsoft-exchange-2016-2019-security-updates-end-in-october",
+   "title": "Microsoft Exchange 2016/2019 \u2014 Security Updates End in October",
+   "n_events": 7,
+   "last_seen": "2026-09-01T06:48:24Z",
+   "first_event_title": "Microsoft Exchange 2016/2019 \u2014 Security Updates End in October"
+  },
+  {
+   "id": "how-to-export-datadog-cloud-siem-logs",
+   "title": "How to Export Datadog Cloud SIEM Logs",
+   "n_events": 0,
+   "last_seen": "2026-11-09T17:50:59Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "microsoft-outlook-to-block-msix-attachments-starting-november",
+   "title": "Microsoft Outlook to block MSIX attachments starting November",
+   "n_events": 3,
+   "last_seen": "2026-10-12T02:02:07.000Z",
+   "first_event_title": "Outlook to block MSIX attachments starting in November https:// fawkes.rocks/2026/10/07/outloo k-to-block-msix-attachments-starting-in-novem"
+  },
+  {
+   "id": "cisa-warns-of-actively-exploited-microsoft-sql-server-rce-vulner",
+   "title": "CISA Warns of Actively Exploited Microsoft SQL Server RCE Vulnerability",
+   "n_events": 2,
+   "last_seen": "2026-08-27T09:49:47Z",
+   "first_event_title": "CISA Warns of Actively Exploited Microsoft SQL Server RCE Vulnerability"
+  },
+  {
+   "id": "nikkei-employee-microsoft-365-account-compromised-9-000-phishing",
+   "title": "Nikkei employee Microsoft 365 account compromised, 9,000 phishing emails sent to sources and contacts",
+   "n_events": 2,
+   "last_seen": "2026-10-08T13:20:13.000Z",
+   "first_event_title": "Nikkei's hijacked mailbox phished journalistic sources from a sender they already trusted. 9 detections, 4 IOCs. Full analysis + IOCs: https"
+  }
+ ]
+}
