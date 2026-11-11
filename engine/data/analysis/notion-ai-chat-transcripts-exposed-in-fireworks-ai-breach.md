@@ -1,0 +1,3 @@
+Notion has confirmed that a cyberattack against its AI infrastructure provider, Fireworks AI, exposed customer chat transcripts affecting fewer than 1% of Notion workspaces. The company said its own systems were not breached and no other Notion features were affected. Impacted customers received notifications on November 9, 2026, while the investigation remains ongoing.
+
+The incident is a third-party supply-chain exposure rather than a compromise of Notion itself, but chat transcripts can contain sensitive prompts and business context. Watch for updates on the full scope of accessed data and any guidance from Fireworks AI on its own remediation.

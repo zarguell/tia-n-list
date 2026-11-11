@@ -1,0 +1,3 @@
+Railway reported a security incident after noticing unusual activity in systems that store customer environment variables. An unauthorized third party may have accessed encrypted variables and obtained decrypted content for some values, potentially exposing API keys, database passwords, and private registry credentials. The platform is urging all customers to rotate their stored secrets.
+
+A separate postmortem describes an AI-driven attack that turned a partial sandbox escape into a large cloud credential heist. Watch for confirmed scope, whether specific customers were affected, and any additional mitigations or hardening steps Railway publishes.
