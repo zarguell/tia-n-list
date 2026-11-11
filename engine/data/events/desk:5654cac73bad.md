@@ -1,0 +1,1 @@
+Beazley Security Labs published this advisory on 3 November 2026, describing CVE-2026-116606 as allowing an unauthenticated remote attacker to restore a crafted configuration backup to an ESG appliance and overwrite its global configuration, chaining with CVE-2026-111560 for root access; affected ESG versions are earlier than 9.4.0.030.

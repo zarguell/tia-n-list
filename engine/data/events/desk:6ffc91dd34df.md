@@ -1,0 +1,1 @@
+This record shows CVE-2026-111793 was published on 16 October 2026 and last modified on 10 November 2026, describing Openwave Webtop Media Transcoder's failure to enforce administrator-defined file type restrictions, which allows an authenticated user to process and convert unintended document types; the fix is version 1.1.22.0 or later.

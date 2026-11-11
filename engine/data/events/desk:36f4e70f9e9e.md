@@ -1,0 +1,1 @@
+WatchTowr Labs published a technical write-up on 5 November 2026 detailing the CVE-2026-116606 authentication bypass and the CVE-2026-111560 command injection, including the affected firmware versions and remediation patches for the Barracuda Email Security Gateway.
