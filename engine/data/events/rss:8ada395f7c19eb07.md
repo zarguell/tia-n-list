@@ -1,0 +1,1 @@
+Der Agentic Security Operations Report 2026 zeigt, wie Unternehmen mit KI-gestützten Security Operations Cyberbedrohungen schneller erkennen, das Warnungsrauschen reduzieren und Sicherheitsteams effizienter skalieren können. Article Link: https://arcticwolf.com/resources/report-de/2026-agentic-security-operations-report-de/
