@@ -1,0 +1,1 @@
+CyPro reports that the WhiteArmor Maersk claim appeared on an extortion leak site on 7 November 2026, alleging theft of about 100 GB of logistics data. The claim remained unverified and unsupported by publicly available evidence as of 23:59 UK time that day.

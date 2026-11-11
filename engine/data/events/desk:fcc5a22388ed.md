@@ -1,0 +1,1 @@
+DeXpose reports that the Whitearmor ransomware group publicly claimed responsibility for a cyberattack against Maersk on November 7, 2026, threatening to leak data unless a $5 million ransom is paid. The post summarizes the victim as a Danish logistics company with about 100,000 employees across roughly 130 countries.
