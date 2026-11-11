@@ -1,0 +1,1 @@
+The post North Korean IT Workers Use AI and Remote Desktop Tools to Fake Technical Interviews appeared first on Silent Push . Article Link: https://www.politico.com/newsletters/weekly-cybersecurity/2026/09/14/inside-a-new-push-to-bring-ai-to-critical-infrastructure-01074100#new_tab
