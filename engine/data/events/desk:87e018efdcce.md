@@ -1,0 +1,1 @@
+Socprime's detection-focused write-up describes CVE-2026-124194 as an actively exploited Outlook zero-day that can expose a user's NTLMv2 authentication information when a specially crafted message file is opened, and notes the vulnerability was not publicly disclosed before a fix became available.

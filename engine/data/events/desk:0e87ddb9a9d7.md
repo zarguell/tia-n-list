@@ -1,0 +1,1 @@
+Tenable's November 2026 Patch Tuesday post notes Microsoft patched 1,093 CVEs, with CVE-2026-124194 a moderate-rated Outlook spoofing flaw (CVSS 6.5) that can be triggered when a target is convinced to open a crafted message file. Microsoft Office Outlook accounted for 20 of the patched CVEs in that release.

@@ -1,0 +1,1 @@
+OpenCVE records CVE-2026-124194 as a Microsoft Office Outlook spoofing vulnerability in which the product UI does not warn the user of unsafe actions, allowing an unauthorized attacker to perform spoofing over a network. The CVE record was published on 2026-11-10 by Microsoft and at the time of listing carried no advisories. The entry notes the issue is in the CISA KEV catalog.

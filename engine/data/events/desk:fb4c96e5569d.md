@@ -1,0 +1,1 @@
+Shattered.io's Patch Tuesday roundup states Microsoft fixed 1,094 CVEs on November 10, 2026, including CVE-2026-124194, an Outlook spoofing bug rated moderate (CVSS 6.5) that Microsoft says was already being exploited and can leak a user's NTLMv2 password hash.
