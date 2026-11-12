@@ -1,11 +1,12 @@
 {% extends "base.html" %}
 {% block title %}Detection coverage — Tia N. List{% endblock %}
+{% block page_class %}page--wide{% endblock %}
 {% block content %}
 <p class="eyebrow">CTI · detection coverage</p>
 <h1 class="page-title">ATT&amp;CK coverage</h1>
 <p class="lead">Every technique our cases report, joined with the detections we publish. Amber means the technique appears in our coverage but no detection is published yet — that is the gap. Green means a detection exists. Immutable daily <a href="cti/snapshots/">STIX snapshots</a> pin the full state.</p>
 
-<p class="matrix-hint">Scroll → for more tactics</p>
+<p class="matrix-hint matrix-scroll-hint">Scroll → for more tactics</p>
 <div class="matrix">
   <div class="matrix-row">
   {% for tactic in matrix %}
@@ -25,6 +26,8 @@
 
 <h2 class="eyebrow" style="margin: 40px 0 12px;">Covered techniques</h2>
 {% if covered %}
+<p class="matrix-hint">Case pills show what each case publishes: <span class="intel"><b title="Sigma rule">Σ</b><b title="Splunk query">SPL</b><b title="KQL query">KQL</b><b title="Curated indicators">IOC</b><b title="YARA rule">YARA</b></span></p>
+<p class="matrix-hint table-hint">Swipe → for cases and detections</p>
 <div class="table-scroll"><table class="cti-table">
   <colgroup>
     <col style="width: 92px">
@@ -41,7 +44,17 @@
       <td>{{ t.name }}</td>
       <td class="mono">{{ t.tactic_name }}</td>
       <td>
-        {% for c in t.cases %}<a class="chip covered" href="cti/{{ c.story_id }}/">{{ c.title }}</a>{% endfor %}
+        <div class="case-list">
+        {% for c in t.cases[:INLINE_CASES] %}{% include "_cti_case_chip.html" %}{% endfor %}
+        </div>
+        {% if t.cases|length > INLINE_CASES %}
+        <details class="case-more">
+          <summary>{{ t.cases|length - INLINE_CASES }} more case{{ '' if t.cases|length - INLINE_CASES == 1 else 's' }}{% if t.n_detections %} · {{ t.n_detections }} with detections{% endif %}</summary>
+          <div class="case-list">
+          {% for c in t.cases[INLINE_CASES:] %}{% include "_cti_case_chip.html" %}{% endfor %}
+          </div>
+        </details>
+        {% endif %}
       </td>
       <td>
         {% if t.n_detections %}<span class="det-badge">{{ t.n_detections }}/{{ t.cases|length }}</span>

@@ -88,6 +88,7 @@ def site_url(path):
     return BASE_URL + "/" + path.lstrip("/")
 HOT_THRESHOLD = 5.0      # display "hot" = the heat() h2 band; merge.py keeps its own 3.3 analysis-queue gate
 DIGEST_TOP_N = 10      # not a hard limit — how many stories the digest page lists
+INLINE_CASES = 4       # CTI coverage rows: cases shown inline before the disclosure
 
 def pl(n, word):
     """'1 day' / '3 days' for template gap strings; None -> empty."""
@@ -222,6 +223,30 @@ def load_events():
 
 
 SENT_SPLIT = re.compile(r"(?<=[.!?])\s+")
+
+
+# Digest narrative markers ([NEW] / [UPDATE] / [REVISIT]) are a machine-written
+# convention that rendered as literal bracketed words in the published prose
+# (514 / 128 / 89 occurrences across the stored digests). Render them as status
+# badges — applied AFTER sanitize(), so the badge markup cannot be stripped.
+_DIGEST_MARKER = re.compile(
+    r"\[(NEW|UPDATE|REVISIT)\]", re.IGNORECASE)
+_DIGEST_BADGE_CLASS = {"new": "dg-new", "update": "dg-update", "revisit": "dg-revisit"}
+
+
+def digest_markers_html(html):
+    """Turn [NEW]/[UPDATE]/[REVISIT] markers into <span class=\"dg-badge ...\">.
+    Idempotent: an already-rendered badge is not a bracket marker, so a second
+    pass is a no-op."""
+    if not html:
+        return html
+
+    def _sub(m):
+        word = m.group(1).upper()
+        cls = _DIGEST_BADGE_CLASS[word.lower()]
+        return f'<span class="dg-badge {cls}">{word}</span>'
+
+    return _DIGEST_MARKER.sub(_sub, html)
 
 
 def _toks(s):
@@ -1003,16 +1028,12 @@ def main():
     # CTI & detection tier: matrix + case pages
     import cti as cti_mod
     import sigma as sigma_mod
+    import ioc as ioc_mod
     cti_records = cti_mod.load_records()
     cards_by_id_cti = {c["id"]: c for c in cards}
-    has_detection = lambda sid: os.path.exists(os.path.join(CTI_DIR, sid + ".sigma")) or \
-                                os.path.exists(os.path.join(CTI_DIR, sid + ".yara"))
-    cti_matrix = cti_mod.build_matrix(cti_records, cards_by_id_cti, has_detection)
-    cti_covered = cti_mod.all_covered(cti_matrix)
-    write("cti/index.html", render("cti.html", active="cti", og_url=site_url("cti/"),
-                                   matrix=cti_matrix, covered=cti_covered))
-    # curated IOC set (built once, used by case sidecars, feeds and snapshots)
-    import ioc as ioc_mod
+    # curated IOC set (built once, used by case sidecars, feeds and snapshots).
+    # Built BEFORE the matrix now: the coverage table shows which cases carry
+    # indicators, so the join has to exist when the matrix is built.
     iocs = ioc_mod.build_index(cards, events)
     curated_path = os.path.join(ENGINE, "data", "iocs-curated.json")
     if os.path.exists(curated_path):
@@ -1021,6 +1042,7 @@ def main():
         for i in kept:
             i["reason"] = curated[i["value"]]["reason"]
         iocs = kept
+
     # Hoisted lookups (perf phase 1): techniques.json was re-read per
     # record (750x) and the IOC join scanned all IOCs per record.
     tech_by_id = cti_mod.load_techniques()
@@ -1028,6 +1050,27 @@ def main():
     for _ioc in iocs:
         for _s in _ioc.get("stories", []):
             iocs_by_story.setdefault(_s, []).append(_ioc)
+
+    def cti_intel(sid):
+        """Published artifacts a CTI case actually carries. The coverage table
+        shows these per case so an empty case page is visible before the click
+        (2026-11-13: cases were listed with no signal, and most opened to
+        empty Detections/IOC sections)."""
+        return {
+            "sigma": os.path.exists(os.path.join(CTI_DIR, sid + ".sigma")),
+            "splunk": os.path.exists(os.path.join(CTI_DIR, sid + ".splunk")),
+            "kql": os.path.exists(os.path.join(CTI_DIR, sid + ".kql")),
+            "yara": os.path.exists(os.path.join(CTI_DIR, sid + ".yara")),
+            "iocs": len(iocs_by_story.get(sid, [])),
+        }
+
+    intel_by_case = {sid: cti_intel(sid) for sid in cti_records}
+    cti_matrix = cti_mod.build_matrix(
+        cti_records, cards_by_id_cti, lambda sid: intel_by_case.get(sid, {}))
+    cti_covered = cti_mod.all_covered(cti_matrix)
+    write("cti/index.html", render("cti.html", active="cti", og_url=site_url("cti/"),
+                                   matrix=cti_matrix, covered=cti_covered,
+                                   INLINE_CASES=INLINE_CASES))
     for sid, r in cti_records.items():
         card = cards_by_id_cti.get(sid)
         texts = {}
@@ -1231,7 +1274,8 @@ def main():
     for d in reversed(digest_dates):                      # newest first
         md_content = strip_provenance(
             open(os.path.join(DIGESTS_DIR, d + ".md")).read())
-        analysis_html = sanitize(md_to_html(md_content, output_format="html5"))
+        analysis_html = digest_markers_html(
+            sanitize(md_to_html(md_content, output_format="html5")))
         meta = digest_meta.get(d, {})
         write(f"daily/{d}/index.html", render("daily.html", active="daily",
                                               og_url=site_url(f"daily/{d}/"), digest={

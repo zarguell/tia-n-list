@@ -208,6 +208,51 @@ def main():
         finally:
             del os.environ["GITHUB_SHA"]
 
+        # ---- 2026-11-13 UI pass: digest status badges + CTI per-case intel ----
+        badges = ssg.digest_markers_html(
+            "<p>[NEW] a</p><p>[UPDATE] b</p><p>[REVISIT] c</p>")
+        ok &= check("digest [NEW] renders as a badge",
+                    'class="dg-badge dg-new"' in badges, True)
+        ok &= check("digest [UPDATE] renders as a badge",
+                    'class="dg-badge dg-update"' in badges, True)
+        ok &= check("digest [REVISIT] renders as a badge",
+                    'class="dg-badge dg-revisit"' in badges, True)
+        ok &= check("digest badge rendering is idempotent",
+                    ssg.digest_markers_html(badges), badges)
+        ok &= check("non-status bracket words stay text",
+                    ssg.digest_markers_html("[ASOS] stays text"), "[ASOS] stays text")
+        ok &= check("empty digest html is untouched", ssg.digest_markers_html(""), "")
+
+        import cti as cti_mod
+        orig_tech = cti_mod.load_techniques
+        cti_mod.load_techniques = lambda: {
+            "T1595": {"id": "T1595", "name": "Active Scanning",
+                      "tactic": "reconnaissance", "tactic_name": "Reconnaissance"}}
+        try:
+            intel = {
+                "case-rich": {"sigma": True, "splunk": True, "kql": False,
+                              "yara": False, "iocs": 3},
+                "case-yara": {"sigma": False, "splunk": False, "kql": False,
+                              "yara": True, "iocs": 0},
+                "case-empty": {"sigma": False, "splunk": False, "kql": False,
+                               "yara": False, "iocs": 0},
+            }
+            recs = {sid: {"title": sid, "attack": [{"id": "T1595"}]}
+                    for sid in intel}
+            mx = cti_mod.build_matrix(recs, {}, lambda sid: intel[sid])
+            covered = cti_mod.all_covered(mx)
+        finally:
+            cti_mod.load_techniques = orig_tech
+        tech = [x for tac in mx for x in tac["techniques"] if x["id"] == "T1595"][0]
+        ok &= check("CTI row keeps every case", len(tech["cases"]), 3)
+        ok &= check("CTI cases with intel sort first",
+                    tech["cases"][0]["story_id"], "case-rich")
+        ok &= check("CTI intel travels with the case",
+                    tech["cases"][0]["intel"]["iocs"], 3)
+        ok &= check("CTI detection = sigma/yara only",
+                    [c["detection"] for c in tech["cases"]], [True, True, False])
+        ok &= check("CTI technique detection count", covered[0]["n_detections"], 2)
+
     print("ALL PASS" if ok else "FAILURES")
     return 0 if ok else 1
 
