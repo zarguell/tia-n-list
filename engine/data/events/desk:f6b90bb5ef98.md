@@ -1,0 +1,1 @@
+NVD published the CVE-2026-123710 record with status Awaiting Analysis, CVSS 3.1 base score 9.8 (AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H) and CWE-1287. The description matches Red Hat's: an unauthenticated client can install its own approved signing key with no expiry and have tokens signed by it accepted for any repository. The entry carries no exploitation evidence.
