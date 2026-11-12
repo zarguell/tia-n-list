@@ -1,0 +1,1 @@
+Japanese outlet ITmedia reported that Microsoft Teams users were unable to join meetings from the morning of August 26, 2026. The post shared the outlet's coverage as reports of the issue spread on X.
