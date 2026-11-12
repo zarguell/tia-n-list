@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Sources we follow — Tia N. List{% endblock %}
+{% block content %}
+<p class="eyebrow">Syndication · sources</p>
+<h1 class="page-title">Feeds we follow</h1>
+<p class="lead">Every publication feed the hourly pass polls, rendered straight from our ingest list — the same file the pipeline reads, so this page cannot drift from what we actually track. Stories also reach us through Reddit, X, Mastodon and the CISA / NVD / EPSS APIs; those legs are described in <a href="methodology/">methodology</a>.</p>
+
+<div class="src-stats">
+  <div class="src-stat">
+    <span class="src-stat-value">{{ src_count }}</span>
+    <span class="src-stat-label">feeds polled</span>
+  </div>
+  <div class="src-stat">
+    <span class="src-stat-value">{{ active_count }}</span>
+    <span class="src-stat-label">with a story in 30 days</span>
+  </div>
+  <div class="src-stat">
+    <span class="src-stat-value">{{ total_30d }}</span>
+    <span class="src-stat-label">stories in 30 days</span>
+  </div>
+  <a class="dl-button" href="feeds/sources.opml" download title="Download this source list as OPML (import it into any reader)">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v11m0 0 4-4m-4 4-4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <span>Download OPML</span>
+  </a>
+</div>
+
+<div class="table-scroll">
+  <table class="kev-table src-table">
+    <thead>
+      <tr><th scope="col">Source</th><th scope="col">Latest</th><th scope="col">30 d</th><th scope="col">Links</th></tr>
+    </thead>
+    <tbody>
+    {% for f in feeds %}
+      <tr>
+        <td>
+          <span class="src-title">{{ f.title }}</span>
+          <span class="src-host">{{ f.host }}</span>
+        </td>
+        <td class="mono">{{ f.latest or "—" }}</td>
+        <td class="mono">{{ f.last_30d or "—" }}</td>
+        <td class="src-links">
+          <a href="{{ f.site }}" target="_blank" rel="noopener noreferrer">site</a>
+          <a href="{{ f.feed }}" target="_blank" rel="noopener noreferrer">feed</a>
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<p class="src-foot">“Latest” is the most recent story we have from that source and “30 d” how many it surfaced in the last 30 days — a quiet row is a low-volume feed, not a broken one. Adding or removing a source is an edit to the same list the pipeline polls, so a feed appears here the day it starts being tracked and disappears the day it stops.</p>
+{% endblock %}
