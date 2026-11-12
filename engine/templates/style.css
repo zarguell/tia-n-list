@@ -35,7 +35,11 @@
   --sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --mono: ui-monospace, "SF Mono", Menlo, Monaco, Consolas, monospace;
 
-  --maxw: 1080px;
+  --maxw: 1200px;
+  --maxw-wide: 1660px;
+  /* long-form measure: wide enough to use a desktop's real estate, still a
+     readable line (92ch) rather than a full-bleed ribbon of text */
+  --measure: 92ch;
   --radius-panel: 12px;
   --radius-row: 8px;
 }
@@ -89,6 +93,11 @@ a:hover { text-decoration: underline; text-underline-offset: 3px; }
 
 /* ---------- masthead ---------- */
 
+/* mobile page-lock: nothing may widen the document, so the page can never be
+   panned sideways like a leaflet (2026-11-13). Wide data tables are contained
+   by .table-scroll (which scrolls internally instead). */
+html, body { overflow-x: clip; }
+
 .masthead {
   position: sticky;
   top: 0;
@@ -104,7 +113,7 @@ a:hover { text-decoration: underline; text-underline-offset: 3px; }
   padding: 14px 24px;
   display: flex;
   align-items: center;
-  gap: 24px;
+  gap: 18px;
 }
 
 .wordmark {
@@ -123,6 +132,28 @@ a:hover { text-decoration: underline; text-underline-offset: 3px; }
   gap: 4px;
   margin-left: 8px;
 }
+
+/* small-screen menu toggle (hidden on desktop) */
+.navtoggle {
+  display: none;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  background: var(--card);
+  border: 1.5px solid var(--border);
+  border-radius: 999px;
+  padding: 7px 12px;
+  cursor: pointer;
+}
+.navtoggle:hover { color: var(--fg); border-color: var(--gray-500); }
+.navtoggle svg { width: 14px; height: 14px; }
+.navtoggle .navtoggle-x { display: none; }
+.masthead[data-nav="open"] .navtoggle .navtoggle-x { display: block; }
+.masthead[data-nav="open"] .navtoggle .navtoggle-bars { display: none; }
 .mainnav a {
   font-family: var(--mono);
   font-size: 12px;
@@ -166,6 +197,10 @@ a:hover { text-decoration: underline; text-underline-offset: 3px; }
   padding: 40px 24px 96px;
 }
 
+/* data-dense pages (ATT&CK matrix, wide evidence tables) get more of the
+   viewport instead of being squeezed into the reading column */
+.page--wide { max-width: var(--maxw-wide); }
+
 .eyebrow {
   font-family: var(--mono);
   font-size: 11.5px;
@@ -187,11 +222,11 @@ a:hover { text-decoration: underline; text-underline-offset: 3px; }
 .lead {
   font-size: 16.5px;
   color: var(--muted);
-  max-width: 62ch;
+  max-width: 80ch;
   margin: 0 0 32px;
 }
 
-.about-body { max-width: 76ch; }
+.about-body { max-width: 88ch; }
 .about-body p { margin: 0 0 16px; }
 .about-body p:last-child { margin-bottom: 0; }
 
@@ -465,17 +500,37 @@ a:hover { text-decoration: underline; text-underline-offset: 3px; }
   border-left: 3px solid var(--clay);
   padding: 2px 0 2px 16px;
   margin: 0 0 32px;
-  max-width: 76ch;
+  max-width: var(--measure);
 }
 .digest-analysis p { margin: 0 0 12px; }
 .digest-analysis p:last-child { margin-bottom: 0; }
 .digest-analysis strong { color: var(--fg); }
 
+/* [NEW] / [UPDATE] / [REVISIT] rendered as status badges instead of literal
+   bracketed words in the prose (2026-11-13) */
+.dg-badge {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  line-height: 1;
+  padding: 3px 7px 2px;
+  border-radius: 999px;
+  border: 1.5px solid currentColor;
+  vertical-align: 2px;
+  margin-right: 7px;
+  white-space: nowrap;
+}
+.dg-new { color: var(--bg); background: var(--olive); border-color: var(--olive); }
+.dg-update { color: var(--bg); background: var(--clay-d); border-color: var(--clay-d); }
+.dg-revisit { color: var(--muted); background: transparent; border-style: dashed; }
+
 .digest-stories {
   list-style: none;
   margin: 0;
   padding: 0;
-  max-width: 76ch;
+  max-width: var(--measure);
 }
 .digest-stories li {
   display: flex;
@@ -603,6 +658,41 @@ a.chip.covered { text-decoration: none; }
 a.chip.covered:hover { border-color: var(--clay); color: var(--link); }
 .covered-list .chip { white-space: normal; }
 
+/* technique rows: a few cases inline, the rest behind a disclosure — one row
+   listed up to 400 full-headline pills and the page grew to 124k px tall */
+.case-list { display: flex; flex-wrap: wrap; gap: 4px; }
+.case-list .chip { white-space: normal; font-size: 11.5px; padding: 3px 8px; }
+.case-more { margin-top: 6px; }
+.case-more summary {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  cursor: pointer;
+  user-select: none;
+  padding: 2px 0;
+}
+.case-more summary:hover { color: var(--fg); }
+.case-more[open] summary { margin-bottom: 6px; }
+
+/* per-case intel markers: which cases actually carry Sigma/Splunk/KQL, IOCs,
+   YARA — so an empty case page is visible before the click */
+.intel { display: inline-flex; gap: 3px; margin-left: 6px; vertical-align: middle; }
+.intel b {
+  font-family: var(--mono);
+  font-size: 8.5px;
+  font-weight: 600;
+  line-height: 1;
+  padding: 2px 3px;
+  border-radius: 3px;
+  background: var(--olive);
+  color: var(--bg);
+}
+.intel b.ioc { background: var(--clay-d); }
+.chip.covered.no-intel { border-style: dashed; color: var(--muted); }
+.chip.covered.no-intel:hover { color: var(--link); }
+
 .story-analysis { margin: 0 0 28px; }
 .story-analysis .tl-body { background: transparent; }
 
@@ -651,14 +741,17 @@ a.chip.covered:hover { border-color: var(--clay); color: var(--link); }
   position: relative;
 }
 .matrix-row {
-  display: flex;
+  /* columns never wrap and stretch to fill the page: at 1660px each tactic
+     column is ~120px, at 390px the row keeps 96px columns and scrolls */
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(96px, 1fr);
   gap: 6px;
   align-items: flex-start;
   min-width: 1320px;
 }
 .matrix-col {
-  flex: 0 0 82px;
-  max-width: 82px;
+  min-width: 0;
 }
 /* sticky first tactic column: always know which tactic you're reading
    while the matrix scrolls sideways */
@@ -681,8 +774,8 @@ a.chip.covered:hover { border-color: var(--clay); color: var(--link); }
 .matrix-tactic .m-count { color: var(--gray-500); }
 .m-cell {
   font-family: var(--mono);
-  font-size: 9.5px;
-  padding: 4px 2px;
+  font-size: 10px;
+  padding: 5px 3px;
   margin-bottom: 3px;
   border-radius: 4px;
   text-align: center;
@@ -875,13 +968,51 @@ a.chip.covered:hover { border-color: var(--clay); color: var(--link); }
   .page { padding: 28px 16px 80px; }
   .page-title { font-size: 30px; }
   .story-title { font-size: 28px; }
-  .masthead-inner { padding: 12px 16px; gap: 12px; flex-wrap: wrap; }
-  .mainnav { margin-left: 0; flex-wrap: wrap; }
-  .mainnav a { padding: 5px 9px; font-size: 11px; }
   .feedlinks { flex-wrap: wrap; margin-left: 0; }
   .cti-grid { grid-template-columns: 1fr 1fr; }
   .src-badge { padding: 7px; }
   .src-badge-text { display: none; }
+}
+
+/* Phones: the pill nav becomes a disclosure panel so seven items + the theme
+   toggle never wrap onto a second line (masthead was 178px tall at 360px,
+   i.e. 27% of an iPhone SE viewport, before this) */
+@media (max-width: 760px) {
+  .masthead-inner { padding: 10px 16px; gap: 10px; }
+  .navtoggle { display: inline-flex; }
+  .mainnav {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    margin: 0;
+    padding: 8px 16px 14px;
+    flex-direction: column;
+    gap: 2px;
+    background: var(--bg);
+    border-bottom: 1.5px solid var(--border);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+  }
+  .masthead[data-nav="open"] .mainnav { display: flex; }
+  .mainnav a {
+    padding: 11px 12px;
+    border-radius: 10px;
+    font-size: 13px;
+  }
+  .mainnav a.active { padding: 9.5px 10.5px; }
+  /* without JS the panel is unreachable, so degrade to the old scrollable row */
+  html.no-js .navtoggle { display: none; }
+  html.no-js .mainnav {
+    display: flex;
+    position: static;
+    flex-direction: row;
+    overflow-x: auto;
+    padding: 0 0 2px;
+    border: none;
+    box-shadow: none;
+    flex-wrap: nowrap;
+  }
 }
 
 /* narrow screens: data tables scroll horizontally with readable columns
@@ -911,6 +1042,14 @@ a.chip.covered:hover { border-color: var(--clay); color: var(--link); }
   letter-spacing: 0.08em;
   color: var(--muted);
   margin: 0 0 8px;
+}
+/* the hint only makes sense when the matrix actually has to scroll */
+@media (min-width: 1400px) {
+  .matrix-scroll-hint { display: none; }
+}
+.table-hint { display: none; margin: 0 0 8px; }
+@media (max-width: 900px) {
+  .table-hint { display: block; }
 }
 .filters select:focus-visible, .filters input:focus-visible,
 .mainnav a:focus-visible, .wordmark:focus-visible {
@@ -1246,7 +1385,7 @@ button.chip:hover { border-color: var(--gray-500); }
 .mp-next-sub { display: block; font-size: 12px; color: var(--muted); }
 .mp-latest-line { margin: 14px 0 0; font-size: 13.5px; }
 
-.mp-analysis { max-width: 74ch; }
+.mp-analysis { max-width: var(--measure); }
 .mp-analysis p { margin: 0 0 12px; line-height: 1.62; }
 .mp-datavprose, .mp-patch-note {
   border-left: 3px solid var(--clay);

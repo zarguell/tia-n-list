@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="no-js">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -16,6 +16,7 @@
 <script>
 (function () {
   var root = document.documentElement;
+  root.classList.remove('no-js');
   var saved = null;
   try { saved = localStorage.getItem('ts-theme'); } catch (e) {}
   if (!saved && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) saved = 'dark';
@@ -33,7 +34,12 @@
 <header class="masthead">
   <div class="masthead-inner">
     <a class="wordmark" href="./">Tia N.<span>List</span></a>
-    <nav class="mainnav" aria-label="Primary">
+    <button class="navtoggle" id="navToggle" type="button" aria-expanded="false" aria-controls="mainnav" aria-label="Show navigation">
+      <svg class="navtoggle-bars" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      <svg class="navtoggle-x" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      <span>Menu</span>
+    </button>
+    <nav class="mainnav" id="mainnav" aria-label="Primary">
       <a href="./" {% if active == 'index' %}class="active" aria-current="page"{% endif %}>Hot</a>
       <a href="stories/" {% if active == 'all' %}class="active" aria-current="page"{% endif %}>All</a>
       <a href="daily/" {% if active == 'daily' %}class="active" aria-current="page"{% endif %}>Daily</a>
@@ -48,7 +54,7 @@
     </button>
   </div>
 </header>
-<main class="page">
+<main class="page {% block page_class %}{% endblock %}">
 {% block content %}{% endblock %}
 </main>
 <footer class="footer">
@@ -80,6 +86,26 @@
   if (btn) btn.addEventListener('click', function () {
     tsSetTheme(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
   });
+
+  // small-screen nav disclosure (the pill row wraps otherwise)
+  var header = document.querySelector('.masthead');
+  var navBtn = document.getElementById('navToggle');
+  if (header && navBtn) {
+    var setNav = function (open) {
+      header.setAttribute('data-nav', open ? 'open' : 'closed');
+      navBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      navBtn.setAttribute('aria-label', open ? 'Hide navigation' : 'Show navigation');
+    };
+    navBtn.addEventListener('click', function () {
+      setNav(header.getAttribute('data-nav') !== 'open');
+    });
+    document.getElementById('mainnav').addEventListener('click', function (e) {
+      if (e.target.closest('a')) setNav(false);
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') setNav(false);
+    });
+  }
 })();
 </script>
 </body>

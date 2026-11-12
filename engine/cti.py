@@ -64,19 +64,28 @@ def confidence(record, card):
     return "reported"
 
 
-def build_matrix(records, cards_by_id, has_detection=None):
+def build_matrix(records, cards_by_id, intel_for=None):
     """Tactic-ordered matrix: each technique with state + the cases covering it.
     A technique is 'detection' (green) when ANY covering case has a published
-    detection (Sigma/YARA file); 'case' (amber) when covered but undetected."""
+    detection (Sigma/YARA file); 'case' (amber) when covered but undetected.
+
+    ``intel_for(sid)`` returns the artifacts a case publishes
+    ({sigma, splunk, kql, yara} booleans; richer keys are passed through) so the
+    coverage table can show which cases are worth a click and which open to an
+    empty page (2026-11-13). Cases carrying intel sort first."""
     tech = load_techniques()
     technique_cases = {}
     for sid, r in records.items():
+        intel = (intel_for(sid) if intel_for else {}) or {}
         for t in r.get("attack", []):
             technique_cases.setdefault(t["id"], []).append({
                 "story_id": sid,
                 "title": r.get("title", sid),
-                "detection": bool(has_detection and has_detection(sid)),
+                "detection": bool(intel.get("sigma") or intel.get("yara")),
+                "intel": intel,
             })
+    for cases in technique_cases.values():
+        cases.sort(key=lambda c: (-_intel_weight(c["intel"]), c["title"].lower()))
     matrix = []
     for tactic in TACTIC_ORDER:
         cols = [t for t in tech.values() if t["tactic"] == tactic]
@@ -94,6 +103,15 @@ def build_matrix(records, cards_by_id, has_detection=None):
                        "n_covered": sum(1 for r in rows if r["state"] != "none"),
                        "techniques": rows})
     return matrix
+
+
+def _intel_weight(intel):
+    """Ordering weight: detection content first, then indicators."""
+    if not intel:
+        return 0
+    return (4 if intel.get("sigma") else 0) + (3 if intel.get("yara") else 0) \
+        + (2 if intel.get("splunk") else 0) + (2 if intel.get("kql") else 0) \
+        + (1 if intel.get("iocs") else 0)
 
 
 def all_covered(matrix):
