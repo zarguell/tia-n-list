@@ -2,4 +2,6 @@ Nitori, the Japanese furniture and home furnishings retailer often compared to I
 
 The scale and dwell time make this a significant retail breach: roughly three weeks of undetected access to a system holding tens of millions of records creates substantial downstream risk of phishing, fraud, and identity abuse even without payment data. The cross-border store footprint also means notification and regulatory obligations span multiple jurisdictions. Nitori says it blocked the attacker, addressed vulnerabilities, and strengthened threat monitoring, but the full scope of exposed data types is still being determined.
 
+Follow-on coverage frames the 37.62 million figure as an impersonation and fraud risk rather than a data-exposure problem, since the fields confirmed untouched (passwords, payment data) are the ones that would have enabled direct account takeover. That is the exposure to plan against: credential stuffing is unlikely, targeted vishing and fake support contact quoting real order history is likely.
+
 Watch for Nitori's follow-up disclosure naming the specific data fields leaked, any evidence of data publication or extortion, and whether the initial access vector is identified. Customers should treat unexpected communications referencing Nitori orders with caution until the investigation concludes.
