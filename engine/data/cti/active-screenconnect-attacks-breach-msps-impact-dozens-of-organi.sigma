@@ -1,0 +1,42 @@
+title: ScreenConnect Host Connecting to Reported Rogue-Client Attacker Infrastructure
+id: 69465c8a-db75-4c28-afcb-7af59fffcde2
+status: experimental
+description: >
+    Detects a host connecting to infrastructure Huntress and ConnectWise tied
+    to the November 2026 ScreenConnect MSP campaign, in which stolen partner
+    credentials and the Run Command feature were used to install rogue
+    ScreenConnect clients across customer endpoints. Covered here are the
+    reported relay 185.99.255.28, the dynamic-DNS C2 hosts newnewnew.gotdns.org
+    and soxnewwork.homedns.org, the additional C2 cdn007-digitaldownloads.com,
+    the secondary C2 sc.payproofkit.com (155.94.150.39) and the ns.mo7sen.dev
+    stager. A hit means a managed endpoint is talking to attacker-held
+    remote-access infrastructure, which survives removal of the abused
+    extensions because the rogue clients are separate ScreenConnect instances.
+references:
+    - https://www.bleepingcomputer.com/news/security/active-screenconnect-attacks-breach-msps-impact-dozens-of-organizations/
+    - https://www.huntress.com/blog/rogue-screenconnect-installations
+    - https://www.connectwise.com/company/trust/advisories
+author: Tia N. List
+date: 2026/11/12
+tags:
+    - attack.t1219
+    - attack.t1199
+logsource:
+    category: network_connection
+detection:
+    selection_domain:
+        DestinationHostname|endswith:
+            - 'newnewnew.gotdns.org'
+            - 'soxnewwork.homedns.org'
+            - 'cdn007-digitaldownloads.com'
+            - 'sc.payproofkit.com'
+            - 'ns.mo7sen.dev'
+    selection_ip:
+        DestinationIp:
+            - '185.99.255.28'
+            - '155.94.150.39'
+    condition: selection_domain or selection_ip
+falsepositives:
+    - Threat-intelligence research, sandbox detonation, URL or proxy scanners and analyst pivots that deliberately resolve the reported infrastructure
+    - Re-registration of the dynamic-DNS hostnames (gotdns.org / homedns.org) by an unrelated party after the campaign is dismantled
+level: high

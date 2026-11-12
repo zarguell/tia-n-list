@@ -1,0 +1,48 @@
+title: ClickFix - Browser Process Spawning Command or Script Interpreter
+id: e68b0f4a-8fba-4abd-bef6-bd22bf57b472
+status: experimental
+description: >
+    Detects the ClickFix execution pattern Huntress documented: a browser page
+    talks the victim through pasting a command into the Windows Run box or a
+    PowerShell window, so the resulting interpreter is a child of the browser
+    process rather than of Explorer, a mail client or a management agent. The
+    newer chains built on this entry point add lateral movement, payloads
+    hidden inside PNG files and Node.js remote access trojans, none of which
+    need a software vulnerability. Lineage is the only durable signal because
+    Huntress published no hashes or domains for these chains.
+references:
+    - https://www.huntress.com/blog/the-evolving-tradecraft-of-clickfix
+    - https://secquill.com/articles/huntress-details-how-clickfix-scams-have-grown-beyond-simple-copy-and-paste-tricks/
+author: Tia N. List
+date: 2026/11/12
+tags:
+    - attack.t1204
+    - attack.t1059
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_parent_browser:
+        ParentImage|endswith:
+            - '\chrome.exe'
+            - '\msedge.exe'
+            - '\firefox.exe'
+            - '\brave.exe'
+            - '\opera.exe'
+            - '\vivaldi.exe'
+    selection_child_interpreter:
+        Image|endswith:
+            - '\cmd.exe'
+            - '\powershell.exe'
+            - '\pwsh.exe'
+            - '\mshta.exe'
+            - '\rundll32.exe'
+            - '\wscript.exe'
+            - '\cscript.exe'
+            - '\msiexec.exe'
+    condition: selection_parent_browser and selection_child_interpreter
+falsepositives:
+    - Browser-integrated installers and 'open with' flows that hand a download to msiexec.exe or rundll32.exe
+    - Enterprise launchers and kiosk shells that start cmd.exe or PowerShell from a browser-hosted application
+    - Remote-support tools whose client runs inside a browser tab and legitimately starts a helper process
+level: medium

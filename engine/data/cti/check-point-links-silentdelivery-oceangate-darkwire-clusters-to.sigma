@@ -1,0 +1,40 @@
+title: CopperDragon Sparrow Framework Binary Executed From Staging Directory
+id: 15557d1d-b8ad-4ccb-b30c-48598cfbab7a
+status: experimental
+description: >
+    Detects execution of a binary from one of the staging directories Check
+    Point Research attributes to the CopperDragon Sparrow framework used by
+    the SilentDelivery, OceanGate and DarkWire clusters. The intrusions park
+    implants and droppers under C:\Program Files\7-Zip\Lang (which legitimately
+    holds only 7-Zip language files), C:\Windows\debug, C:\ProgramData\Oracle\Java
+    and C:\ProgramData\Waves before loading them. A hit means a process was
+    launched from a path no legitimate 7-Zip, Oracle Java or Windows debug
+    component uses for executables.
+references:
+    - https://research.checkpoint.com/2026/not-all-that-glitters-is-gold-tracking-copperdragons-sparrow-framework-around-the-globe/
+    - https://gbhackers.com/copperdragon-malware-framework/
+author: Tia N. List
+date: 2026/11/12
+tags:
+    - attack.t1036
+    - attack.t1505
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_staging_path:
+        Image|startswith:
+            - 'C:\Program Files\7-Zip\Lang\'
+            - 'C:\Windows\debug\'
+            - 'C:\ProgramData\Oracle\Java\'
+            - 'C:\ProgramData\Waves\'
+    filter_lang_files:
+        Image|endswith:
+            - '.ttt'
+            - '.txt'
+            - '.log'
+    condition: selection_staging_path and not filter_lang_files
+falsepositives:
+    - Administrators or installers that deliberately drop vendor binaries under C:\Windows\debug or C:\ProgramData\Oracle\Java
+    - Software that ships helper executables inside C:\Program Files\7-Zip\Lang (not expected for 7-Zip itself, which stores only language files there)
+level: high
