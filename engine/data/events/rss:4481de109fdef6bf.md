@@ -1,0 +1,1 @@
+Repositories give teams a managed source for build inputs. They proxy public registries, host internal components, and cache packages. Article Link: Beyond Storage: Your Repository as Software Inventory

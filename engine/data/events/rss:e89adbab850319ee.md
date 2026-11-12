@@ -1,0 +1,1 @@
+After hand-typed commands against a U.S. retailer’s web server were blocked, the attackers switched to what appears to be AI-generated commands and began harvesting credentials and moving laterally within minutes. Article Link: https://www.security.com/threat-intelligence/ai-assisted-attack-us-retailer
