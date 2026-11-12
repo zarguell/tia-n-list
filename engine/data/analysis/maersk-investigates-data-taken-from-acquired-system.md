@@ -1,0 +1,5 @@
+Maersk confirmed a data breach on November 11, 2026 after the WhiteArmor ransomware group issued an extortion demand. The intrusion targeted an older system Maersk had gained through an acquisition, and an intruder accessed and removed data from it. Coverage of the incident links it to a financially motivated ransomware operator rather than a targeted state campaign.
+
+The exposed material has not been itemized in full, but the breach is confined to a legacy acquired environment rather than Maersk's core shipping systems. That limits the scope of any customer data exposure while still requiring notification and forensic review of the inherited platform.
+
+Watch for Maersk's formal disclosure of what was taken, whether WhiteArmor publishes any sample data, and whether the company accelerates retirement of the acquired system. The key risk is that legacy platforms inherited through mergers and acquisitions often sit outside the parent's standard monitoring and patching regime.
