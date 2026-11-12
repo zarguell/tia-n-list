@@ -256,3 +256,58 @@ def test_feed_items_pubdate_falls_back_to_add_date(monkeypatch):
                        "vendor_project": "V", "product": "P"}]}
     (it,) = kev.feed_items(index, days=90)
     assert "00:00:00" in it["pub_date"]
+
+
+# ---------------------------------------------------------------------------
+# Remediation deadlines (2026-11-13): CISA's own due date + countdown buckets
+# ---------------------------------------------------------------------------
+
+def test_due_iso_and_days_left():
+    today = datetime(2026, 11, 13, tzinfo=timezone.utc).date()
+    assert kev.due_iso({"kev_due_date": "2026-11-12"}) == "2026-11-12"
+    assert kev.due_iso({}) == ""
+    assert kev.due_iso(None) == ""
+    assert kev.days_left("2026-11-12", today) == -1
+    assert kev.days_left("2026-11-13", today) == 0
+    assert kev.days_left("2026-11-20", today) == 7
+    assert kev.days_left("", today) is None
+    assert kev.days_left("not-a-date", today) is None
+
+
+def test_deadline_state_thresholds():
+    assert kev.deadline_state(None) == "none"
+    assert kev.deadline_state(-40) == "overdue"
+    assert kev.deadline_state(0) == "urgent"
+    assert kev.deadline_state(kev.DEADLINE_URGENT_DAYS) == "urgent"
+    assert kev.deadline_state(kev.DEADLINE_URGENT_DAYS + 1) == "soon"
+    assert kev.deadline_state(kev.DEADLINE_SOON_DAYS + 1) == "horizon"
+    assert kev.deadline_state(kev.DEADLINE_HORIZON_DAYS + 1) == "later"
+
+
+def test_deadline_label_is_human():
+    assert kev.deadline_label(None) == ""
+    assert kev.deadline_label(0) == "due today"
+    assert kev.deadline_label(3) == "3d left"
+    assert kev.deadline_label(-12) == "12d overdue"
+
+
+def test_enrich_deadlines_joins_records_without_guessing():
+    today = datetime(2026, 11, 13, tzinfo=timezone.utc).date()
+    rows = [{"id": "CVE-2026-0001"}, {"id": "CVE-2026-0002"}, {"id": "CVE-2026-0003"}]
+    records = {
+        "CVE-2026-0001": {"kev_due_date": "2026-11-12"},   # yesterday
+        "CVE-2026-0002": {"kev_due_date": None},           # no date
+        # CVE-2026-0003 has no record at all
+    }
+    kev.enrich_deadlines(rows, records, today=today)
+    assert (rows[0]["due"], rows[0]["days"], rows[0]["state"], rows[0]["countdown"]) == \
+        ("2026-11-12", -1, "overdue", "1d overdue")
+    assert (rows[1]["due"], rows[1]["days"], rows[1]["state"]) == ("", None, "none")
+    assert (rows[2]["due"], rows[2]["state"]) == ("", "none")
+    assert kev.deadline_summary(rows)["overdue"] == 1
+    assert kev.deadline_summary(rows)["none"] == 2
+
+
+def test_sitemap_lists_the_deadline_board():
+    paths = [p for p, _ in kev.kev_sitemap_entries({"cves": []})]
+    assert "kev/deadlines/" in paths

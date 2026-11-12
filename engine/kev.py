@@ -175,6 +175,83 @@ def index_rows(index):
 
 
 # ---------------------------------------------------------------------------
+# Remediation deadlines (CISA's own KEV due date, plus the BOD 26-04 classes)
+# ---------------------------------------------------------------------------
+
+DEADLINE_URGENT_DAYS = 2      # "act now" window
+DEADLINE_SOON_DAYS = 7        # "this week"
+DEADLINE_HORIZON_DAYS = 30    # "this month"
+
+
+def due_iso(rec):
+    """CISA's KEV remediation due date as YYYY-MM-DD, or '' when absent."""
+    return fmt_date((rec or {}).get("kev_due_date"))
+
+
+def days_left(due, today=None):
+    """Days from `today` (UTC date) to an ISO due date; None when unparseable.
+
+    Negative = overdue. Counted in whole UTC days so a build cannot disagree
+    with a reader's calendar by a timezone."""
+    try:
+        d = datetime.fromisoformat(str(due)[:10]).date()
+    except (ValueError, TypeError):
+        return None
+    return (d - (today or datetime.now(timezone.utc).date())).days
+
+
+def deadline_state(days):
+    """Bucket a deadline: overdue | urgent | soon | horizon | later | none."""
+    if days is None:
+        return "none"
+    if days < 0:
+        return "overdue"
+    if days <= DEADLINE_URGENT_DAYS:
+        return "urgent"
+    if days <= DEADLINE_SOON_DAYS:
+        return "soon"
+    if days <= DEADLINE_HORIZON_DAYS:
+        return "horizon"
+    return "later"
+
+
+def deadline_label(days):
+    """Human countdown: '3d left' / 'due today' / '12d overdue' / ''."""
+    if days is None:
+        return ""
+    if days == 0:
+        return "due today"
+    if days > 0:
+        return f"{days}d left"
+    return f"{-days}d overdue"
+
+
+def deadline_summary(rows):
+    """Counts per bucket for the board header and the dashboard stat."""
+    out = {k: 0 for k in ("overdue", "urgent", "soon", "horizon", "later", "none")}
+    for r in rows:
+        out[r.get("state") or "none"] += 1
+    return out
+
+
+def enrich_deadlines(rows, records, today=None):
+    """Attach CISA's due date + countdown to dashboard/index rows (in place).
+
+    `records` is the {cve: record} map render_site already loads, so this adds
+    no file reads. Rows without a due date stay empty rather than guessed."""
+    today = today or datetime.now(timezone.utc).date()
+    for r in rows:
+        rec = records.get(r["id"]) or {}
+        due = due_iso(rec)
+        n = days_left(due, today)
+        r["due"] = due
+        r["days"] = n
+        r["state"] = deadline_state(n)
+        r["countdown"] = deadline_label(n)
+    return rows
+
+
+# ---------------------------------------------------------------------------
 # Feed items (M4: feeds/feed-kev.xml) — newest KEV additions, 90-day window
 # ---------------------------------------------------------------------------
 
@@ -498,19 +575,39 @@ def render_site(env, write, cards):
             if g:
                 cve_stories.setdefault(g, []).append(card["id"])
 
+    # Load every per-CVE record once: the deadline join and the detail pages
+    # both need it (previously the detail loop re-read each file).
+    records = {}
+    for r in rows:
+        rec = load_cve(r["id"])
+        if rec:
+            records[r["id"]] = rec
+    enrich_deadlines(rows, records)
+    deadlines = deadline_summary(rows)
+
     write("kev/kev-index.json", json.dumps(rows, ensure_ascii=True))
 
     write("kev/index.html", env.get_template("kev_index.html").render(
         active="kev", kev_section="catalog", og_url=site_url("kev/"),
         total=total, active_exploit=active, three_day=three_day,
-        automatable=automatable, generated=generated))
+        automatable=automatable, generated=generated,
+        due_overdue=deadlines["overdue"], due_urgent=deadlines["urgent"]))
+
+    # Remediation deadline board: every KEV entry counting down to CISA's due
+    # date, bucketed the way a defender triages (past due -> this week ->
+    # this month). Rendered from the same kev-index.json the dashboard uses.
+    write("kev/deadlines/index.html", env.get_template("kev_deadlines.html").render(
+        active="kev", kev_section="deadlines", og_url=site_url("kev/deadlines/"),
+        total=total, buckets=deadlines, generated=generated,
+        urgent_days=DEADLINE_URGENT_DAYS, soon_days=DEADLINE_SOON_DAYS,
+        horizon_days=DEADLINE_HORIZON_DAYS))
 
     # Per-CVE detail pages (the record is loaded from disk per entry; rows
     # already passed the shape gate, so the id is safe for path construction)
     import cve_timeline as tl_mod
     tl_rows = tl_mod.build(today=datetime.now(timezone.utc).date())   # per-CVE timeline join for the Tia-coverage panel
     for r in rows:
-        rec = load_cve(r["id"]) or {}
+        rec = records.get(r["id"]) or {}
         if not rec:
             continue
         mentioned = [{"id": sid, "url": f"stories/{sid}/"}
@@ -602,7 +699,7 @@ def kev_sitemap_entries(index, days=90):
     from datetime import timedelta
     today = datetime.now(timezone.utc).date()
     cutoff = today - timedelta(days=days)
-    entries = [("kev/", ""), ("kev/candidates/", ""),
+    entries = [("kev/", ""), ("kev/deadlines/", ""), ("kev/candidates/", ""),
                ("kev/pipeline.html", ""), ("kev/schema.html", "")]
     for e in index.get("cves", []):
         c = gate_cve(e.get("cve_id"))

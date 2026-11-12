@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+{% block title %}Remediation deadlines — KEV · Tia N. List{% endblock %}
+{% block content %}
+<p class="eyebrow">KEV · remediation deadlines</p>
+<h1 class="page-title">KEV deadline board</h1>
+<p class="lead">Every entry in CISA's Known Exploited Vulnerabilities catalog, counting down to the federal remediation due date. You are probably not a federal agency — attackers do not care. The dates are CISA's own; the BOD 26-04 class on each row is what that deadline would be for an internet-facing asset under the directive's risk model.</p>
+{% include "_kev_nav.html" %}
+
+<div class="kev-stats" id="dl-stats">
+  <div class="kev-stat"><span class="kev-stat-value">{{ total }}</span><span class="kev-stat-label">KEV entries</span></div>
+  <div class="kev-stat"><span class="kev-stat-value sev-crit">{{ buckets.overdue }}</span><span class="kev-stat-label">Past due</span></div>
+  <div class="kev-stat"><span class="kev-stat-value sev-high">{{ buckets.urgent }}</span><span class="kev-stat-label">Due in ≤{{ urgent_days }} days</span></div>
+  <div class="kev-stat"><span class="kev-stat-value">{{ buckets.soon + buckets.horizon + buckets.later }}</span><span class="kev-stat-label">Still ahead</span></div>
+</div>
+
+<p class="matrix-hint" id="dl-clock">Clock: <span data-clock="utc">—</span> UTC</p>
+
+<div class="filters" role="search" aria-label="Filter deadlines">
+  <label class="f-search">Search
+    <input id="dl-q" type="search" placeholder="CVE ID, vendor, product" autocomplete="off">
+  </label>
+  <button class="chip active" data-dl="all" type="button">All</button>
+  <button class="chip" data-dl="overdue" type="button">Past due</button>
+  <button class="chip" data-dl="urgent" type="button">≤{{ urgent_days }}d</button>
+  <button class="chip" data-dl="soon" type="button">≤{{ soon_days }}d</button>
+  <button class="chip" data-dl="horizon" type="button">≤{{ horizon_days }}d</button>
+  <button class="chip" data-dl="later" type="button">Later</button>
+  <span class="f-count" id="dl-count"></span>
+</div>
+
+<div class="table-scroll">
+  <table class="kev-table dl-table" id="dl-table">
+    <thead>
+      <tr>
+        <th scope="col">CVE</th>
+        <th scope="col">Vendor / product</th>
+        <th scope="col">Added</th>
+        <th scope="col">Due</th>
+        <th scope="col">Countdown</th>
+        <th scope="col" title="BOD 26-04 class for an internet-facing asset">Class</th>
+      </tr>
+    </thead>
+    <tbody id="dl-tbody"><tr><td colspan="6" class="no-results">Loading deadlines…</td></tr></tbody>
+  </table>
+</div>
+<p class="no-results" id="dl-empty" hidden>No entries match.</p>
+<nav class="pager" id="dl-pager" aria-label="Pagination"></nav>
+
+<p class="src-foot">Due dates are CISA's <code>dueDate</code> from the KEV catalog, shown in UTC. “Past due” is the normal state of most of the catalog — a vulnerability listed years ago keeps its old due date, so the useful question is what is <em>due next</em> and what still has no compensating control. See the <a href="methodology/">methodology</a> for how entries are enriched, and the <a href="kev/">catalog</a> for the full field set.</p>
+
+<script>
+(function () {
+  var PAGE = 100;
+  var ROWS = [], filter = 'all', page = 1;
+  var q = document.getElementById('dl-q');
+  var tbody = document.getElementById('dl-tbody');
+  var count = document.getElementById('dl-count');
+  var pager = document.getElementById('dl-pager');
+  var empty = document.getElementById('dl-empty');
+
+  // UTC "today" recomputed in the browser so the countdown stays right between
+  // builds (the server-rendered counts are a build-time snapshot).
+  function todayUtc() {
+    var n = new Date();
+    return Date.UTC(n.getUTCFullYear(), n.getUTCMonth(), n.getUTCDate());
+  }
+  function daysFor(due) {
+    var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(due || '');
+    if (!m) return null;
+    var d = Date.UTC(+m[1], +m[2] - 1, +m[3]);
+    return Math.round((d - todayUtc()) / 86400000);
+  }
+  function stateFor(n) {
+    if (n === null) return 'none';
+    if (n < 0) return 'overdue';
+    if (n <= {{ urgent_days }}) return 'urgent';
+    if (n <= {{ soon_days }}) return 'soon';
+    if (n <= {{ horizon_days }}) return 'horizon';
+    return 'later';
+  }
+  function label(n) {
+    if (n === null) return '—';
+    if (n === 0) return 'due today';
+    return n > 0 ? n + 'd left' : (-n) + 'd overdue';
+  }
+  function el(tag, text) {
+    var e = document.createElement(tag);
+    if (text != null) e.textContent = text;
+    return e;
+  }
+
+  function render() {
+    var now = todayUtc();
+    ROWS.forEach(function (r) { r.days = daysFor(r.due); r.state = stateFor(r.days); });
+    var term = (q.value || '').trim().toLowerCase();
+    var list = ROWS.filter(function (r) {
+      if (filter !== 'all' && r.state !== filter) return false;
+      if (!term) return true;
+      return (r.id + ' ' + (r.vendor || '') + ' ' + (r.product || ''))
+        .toLowerCase().indexOf(term) !== -1;
+    });
+    // Triage order: what is due next (today, 1d, 2d … later), then what went
+    // overdue most recently — a 2021 entry is history, a -1d one is a problem.
+    list.sort(function (a, b) {
+      if (a.days === null) return 1;
+      if (b.days === null) return -1;
+      var ao = a.days < 0, bo = b.days < 0;
+      if (ao !== bo) return ao ? 1 : -1;          // upcoming before overdue
+      if (ao) return b.days - a.days;             // -1d before -1821d
+      return a.days - b.days;                     // 0d, 1d, 2d …
+    });
+    count.textContent = list.length + ' of ' + ROWS.length + ' shown';
+    empty.hidden = list.length !== 0;
+    var pages = Math.max(1, Math.ceil(list.length / PAGE));
+    if (page > pages) page = pages;
+    var slice = list.slice((page - 1) * PAGE, page * PAGE);
+
+    tbody.textContent = '';
+    slice.forEach(function (r) {
+      var tr = document.createElement('tr');
+      tr.className = 'dl-' + r.state;
+      var td = el('td');
+      var a = el('a', r.id);
+      a.href = 'kev/cves/' + r.id + '/';
+      td.appendChild(a);
+      tr.appendChild(td);
+      tr.appendChild(el('td', [r.vendor, r.product].filter(Boolean).join(' — ')));
+      tr.appendChild(el('td', r.dateAdded || '—'));
+      tr.appendChild(el('td', r.due || '—'));
+      var cd = el('td', label(r.days));
+      cd.className = 'dl-countdown';
+      tr.appendChild(cd);
+      tr.appendChild(el('td', r.threeDay ? '3-day' : (r.timeline || '—')));
+      tbody.appendChild(tr);
+    });
+
+    pager.textContent = '';
+    if (pages > 1) {
+      for (var i = 1; i <= pages; i++) {
+        var b = el('button', String(i));
+        b.type = 'button';
+        b.className = 'chip' + (i === page ? ' active' : '');
+        b.setAttribute('aria-label', 'Page ' + i);
+        (function (n) { b.onclick = function () { page = n; render(); }; })(i);
+        pager.appendChild(b);
+      }
+    }
+  }
+
+  document.querySelectorAll('[data-dl]').forEach(function (c) {
+    c.onclick = function () {
+      filter = c.getAttribute('data-dl');
+      page = 1;
+      document.querySelectorAll('[data-dl]').forEach(function (x) { x.classList.remove('active'); });
+      c.classList.add('active');
+      render();
+    };
+  });
+  q.addEventListener('input', function () { page = 1; render(); });
+
+  var clock = document.querySelector('[data-clock="utc"]');
+  function tick() {
+    var n = new Date();
+    clock.textContent = n.toISOString().slice(11, 19);
+  }
+  tick();
+  setInterval(tick, 1000);
+
+  fetch('kev/kev-index.json').then(function (r) { return r.json(); }).then(function (data) {
+    ROWS = data || [];
+    render();
+  }).catch(function () {
+    tbody.textContent = '';
+    tbody.appendChild(el('tr', '')).appendChild(el('td', 'deadlines unavailable'));
+  });
+})();
+</script>
+{% endblock %}
