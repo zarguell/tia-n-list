@@ -210,6 +210,12 @@
     <button class="chip" data-mp-filter="critical" type="button">Critical</button>
     <button class="chip" data-mp-filter="covered" type="button">With coverage</button>
     <span class="f-count" id="mp-count"></span>
+    <button class="mp-export" id="mp-export" type="button"
+            title="Download the rows matching the current filter and search as CSV (raw field values, all pages)"
+            aria-label="Export the filtered CVEs as CSV">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v11m0 0 4-4m-4 4-4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="mp-export-label">Export CSV</span>
+    </button>
   </div>
   <div class="table-scroll">
     <table class="kev-table mp-table" id="mp-table">
@@ -263,6 +269,8 @@
   var countEl = document.getElementById('mp-count');
   var emptyEl = document.getElementById('mp-empty');
   var pager = document.getElementById('mp-pager');
+  var exportBtn = document.getElementById('mp-export');
+  var exportLabel = exportBtn ? exportBtn.querySelector('.mp-export-label') : null;
   var chips = document.querySelectorAll('[data-mp-filter]');
   var PAGE = 50;                 // rows per page
   var rows = [];
@@ -310,6 +318,64 @@
     td.textContent = text;
     return td;
   }
+
+  // ---- CSV export -------------------------------------------------------
+  // Exports the rows matching the CURRENT filter + search (every page of it,
+  // not just the 50 on screen) with raw field values so the file is directly
+  // usable in pandas/Excel. Titles/families come from vendor documents, so
+  // every cell is escaped and formula-injection guarded.
+  function csvCell(v) {
+    var s = (v === null || v === undefined) ? '' : String(v);
+    // one record per line: vendor titles sometimes embed newlines (grep/awk/
+    // naive splitters break on quoted multi-line cells)
+    s = s.replace(/[\r\n]+/g, ' ').trim();
+    // spreadsheet formula injection: a leading = + - @ (or tab) is run as a
+    // formula by Excel/Sheets when the file is opened
+    if (/^[=+\-@\t]/.test(s)) s = "'" + s;
+    if (/[",]/.test(s)) s = '"' + s.replace(/"/g, '""') + '"';
+    return s;
+  }
+  function csvText(list) {
+    var head = ['score', 'cve', 'title', 'family', 'severity', 'cvss',
+                'epss_pct', 'kev', 'automatable', 'technical_impact', 'bod_public'];
+    var lines = [head.join(',')];
+    list.forEach(function (r) {
+      lines.push([
+        num(r.score) === null ? '' : num(r.score).toFixed(0),
+        r.cve || '',
+        r.title || '',
+        r.family || '',
+        r.severity || '',
+        num(r.cvss) === null ? '' : num(r.cvss).toFixed(1),
+        num(r.epss_pct) === null ? '' : num(r.epss_pct).toFixed(5),
+        r.kev ? 'yes' : 'no',
+        r.automatable || '',
+        r.technical_impact || '',
+        r.bod_public || '',
+      ].map(csvCell).join(','));
+    });
+    // BOM so Excel reads the UTF-8 titles; CRLF per RFC 4180
+    return '\ufeff' + lines.join('\r\n') + '\r\n';
+  }
+  function csvFilename() {
+    // PAGE_PATH is 'megapatch/<track>/<slug>/'
+    var base = PAGE_PATH.split('/').filter(Boolean).join('-');
+    return base + (filter === 'all' ? '' : '-' + filter) + '.csv';
+  }
+  function exportCsv() {
+    var list = rows.filter(matches);
+    if (!list.length) return;
+    var blob = new Blob([csvText(list)], { type: 'text/csv;charset=utf-8' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = csvFilename();
+    a.rel = 'noopener';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+  }
   function render() {
     var list = rows.filter(matches);
     body.textContent = '';
@@ -341,6 +407,12 @@
       body.appendChild(tr);
     });
     countEl.textContent = list.length + ' of ' + rows.length;
+    // the button states exactly what will be in the file
+    exportBtn.disabled = list.length === 0;
+    exportLabel.textContent = 'Export CSV' + (list.length ? ' \u00b7 ' + list.length : '');
+    exportBtn.setAttribute('aria-label', list.length
+      ? 'Export the ' + list.length + ' filtered CVEs as CSV'
+      : 'No rows to export');
     emptyEl.hidden = list.length !== 0;
     pager.textContent = '';
     var pages = Math.ceil(list.length / PAGE);
@@ -366,6 +438,7 @@
     };
   });
   q.addEventListener('input', function () { page = 0; render(); });
+  if (exportBtn) exportBtn.addEventListener('click', exportCsv);
 
   var m = /[?&]cve=(CVE-\d{4}-\d{4,7})/i.exec(window.location.search || '');
   if (m) q.value = m[1].toUpperCase();

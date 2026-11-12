@@ -50,7 +50,9 @@ const PAGE = 50;
 // hostile values must stay text
 const hostile = {
   cve: 'CVE-2026-9999',
-  title: '<img src=x onerror=window.__xss=1>',
+  // comma + quote + newline exercise RFC4180 quoting; the leading '=' would be
+  // run as a spreadsheet formula without the injection guard
+  title: '=HYPERLINK("http://x"), quoted "title"\nsecond line',
   family: '<svg/onload=window.__xss=2>',
   severity: 'critical',
   score: 9.9, cvss: 9.9, epss_pct: 0.5,
@@ -69,6 +71,14 @@ const dom = new JSDOM(html, {
     window.fetch = (url) => {
       window.__fetchUrls.push(url);
       return Promise.resolve({ json: () => Promise.resolve(data) });
+    };
+    // jsdom has no blob URL / download plumbing: capture what the export builds
+    window.__csvBlob = null;
+    window.__csvDownload = null;
+    window.URL.createObjectURL = (blob) => { window.__csvBlob = blob; return 'blob:fake'; };
+    window.URL.revokeObjectURL = () => {};
+    window.HTMLAnchorElement.prototype.click = function () {
+      window.__csvDownload = this.download;
     };
   },
 });
@@ -117,6 +127,48 @@ const ev = (el, type) => el.dispatchEvent(new window.Event(type));
   out.kevTotal = data.filter((r) => r.kev).length;
   out.chipActive = kevChip.classList.contains('active');
 
+  // ---- CSV export: matches the current filter, properly escaped -----------
+  await (async () => {
+    const btn = d.getElementById('mp-export');
+    out.exportButton = !!btn;
+    out.exportDisabledWhenEmpty = (() => {
+      // filter that matches nothing (no KEV rows in this release) -> disabled
+      d.querySelector('[data-mp-filter="forensic"]').click();
+      return btn.disabled;
+    })();
+    // back to All: the label states how many rows the file will contain
+    d.querySelector('[data-mp-filter="all"]').click();
+    await later(80);
+    out.exportLabel = btn.querySelector('.mp-export-label').textContent;
+    out.exportEnabled = !btn.disabled;
+    d.getElementById('mp-export').click();
+    await later(80);
+    const readBlob = (blob) => new Promise((res, rej) => {
+      const fr = new window.FileReader();
+      fr.onload = () => res(fr.result);
+      fr.onerror = rej;
+      fr.readAsText(blob);
+    });
+    const csv = await readBlob(window.__csvBlob);
+    out.__csvPreview = csv.slice(0, 160);
+    const lines = csv.replace(/^\ufeff/, '').split('\r\n').filter(Boolean);
+    out.csvDownload = window.__csvDownload;
+    out.csvHeader = lines[0];
+    out.csvLineCount = lines.length - 1;
+    out.csvFirstCve = (lines[1] || '').split(',')[1];
+    out.csvQuotedTitle = lines.some(
+      (l) => l.includes('"\'=HYPERLINK(""http://x""), quoted ""title"" second line"'));
+    out.csvBlankLine = lines.some((l) => l.trim() === '');
+    // the KEV filter narrows the export exactly like the table
+    d.querySelector('[data-mp-filter="kev"]').click();
+    await later(80);
+    d.getElementById('mp-export').click();
+    await later(80);
+    const kevCsv = await readBlob(window.__csvBlob);
+    out.csvKevLines = kevCsv.replace(/^\ufeff/, '').split('\r\n').filter(Boolean).length - 1;
+    out.csvKevFilename = window.__csvDownload;
+  })();
+
   // hostile rows are text only
   const hostileRow = [...tbody.querySelectorAll('tr')].find(
     (tr) => (tr.children[1] || {}).textContent === 'CVE-2026-9999');
@@ -139,7 +191,18 @@ const ev = (el, type) => el.dispatchEvent(new window.Event(type));
     out.kevRows === out.expectedKevRows &&
     out.kevCount === `${out.kevTotal} of ${total}` &&
     out.chipActive === true &&
-    (out.hostileIsText === null || out.hostileIsText === true);
+    (out.hostileIsText === null || out.hostileIsText === true) &&
+    // CSV export
+    out.exportButton === true &&
+    out.exportLabel === 'Export CSV · ' + total &&
+    out.exportDisabledWhenEmpty === true &&
+    out.exportEnabled === true &&
+    out.csvHeader === 'score,cve,title,family,severity,cvss,epss_pct,kev,automatable,technical_impact,bod_public' &&
+    out.csvLineCount === total &&
+    /^megapatch-[a-z0-9-]+\.csv$/.test(String(out.csvDownload)) &&
+    out.csvQuotedTitle === true &&
+    out.csvBlankLine === false &&
+    out.csvKevLines === data.filter((r) => r.kev).length;
 
   console.log(ok ? 'PASS megapatch release table' : 'FAIL megapatch release table');
   process.exit(ok ? 0 : 1);
