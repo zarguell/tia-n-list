@@ -1,0 +1,1 @@
+Help Net Security reported the Operation Endgame takedown hitting Gootloader, CastleRAT, and StealC, seizing 235 servers and finding over 6 million stolen credentials. The article summarized the coordinated law enforcement action across nine countries.

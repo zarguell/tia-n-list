@@ -1,0 +1,1 @@
+Sophos reported that the JavaScript-based infection framework behind the Gootkit RAT evolved into Gootloader, a multi-payload delivery platform distributing ransomware and other malware via poisoned search results. Gootkit financial malware was already six years old at that time.

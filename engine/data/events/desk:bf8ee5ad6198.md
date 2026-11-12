@@ -1,0 +1,1 @@
+Cynet's static analysis describes StealC as a malware-as-a-service infostealer introduced in early 2023, based on Vidar, Raccoon, Mars, and RedLine. It focuses on stealing browser data, crypto wallets, and account credentials from applications such as Outlook and Telegram.
