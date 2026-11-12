@@ -1,0 +1,561 @@
+{
+ "date": "2026-11-12",
+ "decisions_path": "engine/data/triage/decisions-2026-11-12T0602.json",
+ "instructions": "For every new event decide: (1) keep or drop \u2014 keep only stories worth covering (real security events, vulnerabilities, attacks, breaches, advisories with substance); drop press releases, vendor marketing, generic explainers, and anything duplicating an existing story. (2) If keep, assign the event to the RIGHT story: an existing candidate story id if it belongs there (this FIXES mechanical clustering \u2014 e.g. different outlets' Patch Tuesday roundups are ONE story), or NEW with a clean story_title. (3) merges: list candidate stories that are really the same story (from = fragment, into = the most complete one). (4) For every kept event that names CVEs, optionally assess exploitation: exploited = the event reports OBSERVED in-the-wild exploitation (implants, victim counts, campaigns, CISA KEV confirmation); suspected = public exploit code/PoC or likely-but-unconfirmed. Attribute ONLY the CVEs you can tie to the claim \u2014 a bulletin's blanket 'actively exploited' does NOT flag all its CVEs. Omit the exploitation field when the event makes no claim.\n(5) LOW-TRUST events (\"low_trust\": true \u2014 AI-drafted aggregator reposts, late and overstated): treat as unverified leads. When the text attributes the claim to a named primary source (a researcher firm like watchTowr, a vendor advisory, CISA, a major outlet) and attribution_urls or a web search (/home/ubuntu/repos/cronman/bin/web-search.sh \"query\") locate that primary source CONFIRMING the claim, include a provenance object in the decision: {\"url\": <primary url>, \"source\": <domain>, \"evidence\": <one line>, \"verified\": true}. VERIFIED provenance lets the event mint a story (credited to the primary source) and count as a development; without it, a low-trust event can only attach to an EXISTING story, never mint. If you cannot verify, keep/drop on normal merit and omit provenance.\n\nWrite decisions as JSON with EXACTLY this shape:\n{\n  \"decisions\": [\n    {\"event_id\": \"<id>\", \"action\": \"keep\", \"story\": \"<existing candidate story id>\", \"reason\": \"...\"},\n    {\"event_id\": \"<id>\", \"action\": \"keep\", \"story\": \"NEW\", \"story_title\": \"<clean title>\", \"reason\": \"...\"},\n    {\"event_id\": \"<id>\", \"action\": \"drop\", \"reason\": \"...\"}\n  ],\n  \"merges\": [{\"from\": \"<fragment story id>\", \"into\": \"<canonical story id>\"}]\n}\nFor events marked \"low_trust\" (AI-drafted aggregator reposts) a decision\nmay carry an optional \"provenance\" object when you VERIFIED the claim at\nthe named primary source: {\"event_id\": ..., \"action\": \"keep\", ...}\n  \"provenance\": {\"url\": \"<primary source url>\", \"source\": \"<domain>\", \"evidence\": \"<one line>\"}\nOnly include provenance when the primary source (vendor advisory, CISA,\nthe named researcher/outlet) really carries the claim \u2014 verified\nprovenance lets a low-trust event mint a story and set freshness; without\nit the event can only amplify an existing story.\nSTRICT KEY NAMES: the array key is \"decisions\" (never \"events\"); the story\nkey is \"story\" (never \"story_id\"); \"story\" holds a candidate_stories id\nverbatim or the literal string \"NEW\". Optional per-event field\n\"exploitation\": {\"CVE-...\": {\"status\": \"exploited|suspected\", \"evidence\": \"1-2 sentences\"}}.",
+ "new_events": [
+  {
+   "id": "rss:f82fe01a04e9df7a",
+   "title": "Microsoft AI Exposes 21-Year-Old Linux Kernel Bug Among 59 Security Issues Reported to Maintainers",
+   "source": "gbhackers.com",
+   "published_at": "2026-11-12T05:50:53Z",
+   "cves": [
+    "CVE-2026-74544"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "AI-driven scanning system, codenamed MDASH, to find 59 security issues in the Linux kernel. One of them, a cls_u32 shift-out-of-bounds flaw tracked as CVE-2026-74544, had gone unnoticed for at least 21 years. One full-ti"
+  },
+  {
+   "id": "rss:4e10d8424c07a1ee",
+   "title": "Apache HTTP Server Patches Critical RCE Vulnerability Allowing Attackers to Execute Remote Code",
+   "source": "gbhackers.com",
+   "published_at": "2026-11-12T05:50:37Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Apache has released HTTP Server 2.4.71 to address three security vulnerabilities, including a critical memory corruption flaw that could enable remote code execution. Released on November 11, 2026, the update fixes weakn"
+  },
+  {
+   "id": "rd:t3_1xu4gpl",
+   "title": "Wow \ud83d\ude32 University of Texas Data Breached by Qilin Ransomware",
+   "source": "homeland411.com",
+   "published_at": "2026-11-12T05:27:24Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "The University of Texas at Arlington has reportedly suffered a cyberattack linked to the Qilin ransomware group. Researchers say campus-wide MachForms infrastructure was compromised, with alleged stolen data samples circ"
+  },
+  {
+   "id": "rd:t3_1xu4dka",
+   "title": "Windows SignDrop Zero-Day Bypasses CLFS Kernel Driver for SYSTEM Access",
+   "source": "homeland411.com",
+   "published_at": "2026-11-12T05:22:25Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Serious Vulnerability! submitted by /u/TheoryEcstatic4275 [link] [comments]  via reddit r/cybersecurity: Windows SignDrop Zero-Day Bypasses CLFS Kernel Driver for SYSTEM Access "
+  },
+  {
+   "id": "rss:af11c6a42b6de076",
+   "title": "Node.js Patches 16 Security Vulnerabilities Allowing Remote Server Crashes, Memory Leaks, and Authentication Bypass",
+   "source": "gbhackers.com",
+   "published_at": "2026-11-12T05:14:21Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "The Node.js Project released security updates on November 11, 2026, for the 26.x, 24.x, and 22.x lines. They fix 16 vulnerabilities: 7 high, 6 medium, and 3 low severity. Many can be triggered remotely by unauthenticated"
+  },
+  {
+   "id": "rss:ddd044c3050eca63",
+   "title": "Citrus Ransomware Hides Malicious Traffic as HTTPS to Evade Corporate Network Security",
+   "source": "gbhackers.com",
+   "published_at": "2026-11-12T05:13:15Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "A previously undocumented group called Citrus Ransomware is combining VLESS tunnels that mimic ordinary HTTPS, the Sn00py ransomware-as-a-service Trojan, and large language model (LLM) assistance to compromise Russian co"
+  }
+ ],
+ "candidate_stories": [
+  {
+   "id": "linux-kernel-cve-2026-74628-critical-flaw-cvss-9-8-no-fix-yet",
+   "title": "Linux Kernel CVE-2026-74628 Critical Flaw (CVSS 9.8, No Fix Yet)",
+   "n_events": 4,
+   "last_seen": "2026-11-12T05:50:53Z",
+   "first_event_title": "Heads-up: a new Linux flaw just got published. It's rated critical, score 9.8, and there's no fixed version yet. # Cybersecurity # InfoSec #"
+  },
+  {
+   "id": "apache-http-server-flaws-enable-remote-code-execution-and-denial",
+   "title": "Apache HTTP Server Flaws Enable Remote Code Execution and Denial-of-Service Attacks",
+   "n_events": 15,
+   "last_seen": "2026-11-12T05:50:37Z",
+   "first_event_title": "Apache HTTP Server Flaws Enable Remote Code Execution and Denial-of-Service Attacks"
+  },
+  {
+   "id": "qilin-ransomware-group-claims-breach-of-axe-experts",
+   "title": "Qilin ransomware group claims breach of AXE-EXPERTS, a business services firm",
+   "n_events": 2,
+   "last_seen": "2026-11-12T05:27:24Z",
+   "first_event_title": "Qilin ransomware group claims breach of AXE-EXPERTS, a business services firm"
+  },
+  {
+   "id": "windows-signdrop-zero-day-bypasses-clfs-kernel-driver-for-system",
+   "title": "Windows SignDrop Zero-Day Bypasses CLFS Kernel Driver for SYSTEM Access",
+   "n_events": 1,
+   "last_seen": "2026-11-12T05:22:25Z",
+   "first_event_title": "Windows SignDrop Zero-Day Bypasses CLFS Kernel Driver for SYSTEM Access"
+  },
+  {
+   "id": "node-js-patches-16-security-vulnerabilities-allowing-remote-serv",
+   "title": "Node.js Patches 16 Security Vulnerabilities Allowing Remote Server Crashes, Memory Leaks, and Authentication Bypass",
+   "n_events": 1,
+   "last_seen": "2026-11-12T05:14:21Z",
+   "first_event_title": "Node.js Patches 16 Security Vulnerabilities Allowing Remote Server Crashes, Memory Leaks, and Authentication Bypass"
+  },
+  {
+   "id": "citrus-ransomware-hides-malicious-traffic-as-https-to-evade-corp",
+   "title": "Citrus Ransomware Hides Malicious Traffic as HTTPS to Evade Corporate Network Security",
+   "n_events": 1,
+   "last_seen": "2026-11-12T05:13:15Z",
+   "first_event_title": "Citrus Ransomware Hides Malicious Traffic as HTTPS to Evade Corporate Network Security"
+  },
+  {
+   "id": "active-screenconnect-attacks-breach-msps-impact-dozens-of-organi",
+   "title": "Active ScreenConnect attacks breach MSPs, impact dozens of organizations",
+   "n_events": 7,
+   "last_seen": "2026-11-12T04:59:06Z",
+   "first_event_title": "Active ScreenConnect attacks breach MSPs, impact dozens of organizations"
+  },
+  {
+   "id": "operation-snowball-exposes-ai-hacking-campaign-targeting-europea",
+   "title": "Operation Snowball Exposes AI Hacking Campaign Targeting European Telecom and 13 Hosted Organizations",
+   "n_events": 6,
+   "last_seen": "2026-11-12T04:44:22.000Z",
+   "first_event_title": "Operation Snowball Exposes AI Hacking Campaign Targeting European Telecom and 13 Hosted Organizations"
+  },
+  {
+   "id": "asus-zoom-release-security-patches",
+   "title": "Asus, Zoom Release Security Patches",
+   "n_events": 7,
+   "last_seen": "2026-11-12T04:35:59.000Z",
+   "first_event_title": "Asus, Zoom Release Security Patches"
+  },
+  {
+   "id": "microsoft-s-november-2026-patch-tuesday-addresses-1093-cves-cve",
+   "title": "Microsoft\u2019s November 2026 Patch Tuesday addresses 1093 CVEs (CVE-2026-124194)",
+   "n_events": 47,
+   "last_seen": "2026-11-12T04:10:29.792Z",
+   "first_event_title": "Microsoft\u2019s November 2026 Patch Tuesday addresses 1093 CVEs (CVE-2026-124194)"
+  },
+  {
+   "id": "huntress-documents-evolving-clickfix-attack-chains",
+   "title": "Huntress documents evolving ClickFix attack chains",
+   "n_events": 2,
+   "last_seen": "2026-11-12T04:07:14.000Z",
+   "first_event_title": "ClickFix has outgrown the clipboard. Huntress just documented four attack chains: lateral movement, payloads hidden in PNGs, Node.js RATs, a"
+  },
+  {
+   "id": "compromised-emudhra-intermediate-certificates",
+   "title": "Compromised eMudhra intermediate certificates",
+   "n_events": 89,
+   "last_seen": "2026-11-12T04:05:02.000Z",
+   "first_event_title": "Compromised eMudhra intermediate certificates"
+  },
+  {
+   "id": "debian-and-ubuntu-apt-flaw-lets-mitm-attackers-swap-verified-pac",
+   "title": "Debian and Ubuntu APT Flaw Lets MitM Attackers Swap Verified Packages and Run Code as Root",
+   "n_events": 25,
+   "last_seen": "2026-11-12T04:04:57.163Z",
+   "first_event_title": "Debian and Ubuntu APT Flaw Lets MitM Attackers Swap Verified Packages and Run Code as Root"
+  },
+  {
+   "id": "critical-xen-orchestra-flaws-exploited-in-attacks",
+   "title": "Critical Xen Orchestra Flaws Exploited in Attacks",
+   "n_events": 13,
+   "last_seen": "2026-11-12T03:52:14.000Z",
+   "first_event_title": "Critical Xen Orchestra Flaws Exploited in Attacks"
+  },
+  {
+   "id": "japanese-furniture-giant-nitori-says-hackers-stole-37-6m-custome",
+   "title": "Japanese furniture giant Nitori says hackers stole 37.6M customer records",
+   "n_events": 7,
+   "last_seen": "2026-11-12T03:29:13.000Z",
+   "first_event_title": "Japanese furniture giant Nitori says hackers stole 37.6M customer records"
+  },
+  {
+   "id": "maersk-confirms-data-breach-as-whitearmor-ransomware-demands-5-m",
+   "title": "Maersk confirms data breach as WhiteArmor ransomware demands $5 million",
+   "n_events": 10,
+   "last_seen": "2026-11-12T03:27:36.000Z",
+   "first_event_title": "Maersk confirms data breach as WhiteArmor ransomware demands $5 million"
+  },
+  {
+   "id": "france-hack-2-0",
+   "title": "France Hack 2.0",
+   "n_events": 0,
+   "last_seen": "2026-11-12T03:18:51Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "barracuda-warns-of-critical-flaws-allowing-root-access-to-device",
+   "title": "Barracuda warns of critical flaws allowing root access to devices",
+   "n_events": 40,
+   "last_seen": "2026-11-12T03:16:08.000Z",
+   "first_event_title": "Barracuda warns of critical flaws allowing root access to devices"
+  },
+  {
+   "id": "ebpf-rootkits-why-underground-actors-are-taking-notice",
+   "title": "eBPF Rootkits: Why Underground Actors Are Taking Notice",
+   "n_events": 2,
+   "last_seen": "2026-11-12T03:06:23.000Z",
+   "first_event_title": "eBPF Rootkits: Why Underground Actors Are Taking Notice"
+  },
+  {
+   "id": "telegram-android-voice-call-flaw-enables-attacker-code-execution",
+   "title": "Telegram Android Voice Call Flaw Enables Attacker Code Execution",
+   "n_events": 4,
+   "last_seen": "2026-11-12T02:55:54.000Z",
+   "first_event_title": "\ud83e\udd16 Telegram for Android: answering a voice call was enough to run attacker code (confirmed on ARM64). Cause: MediaState call-setup messages d"
+  },
+  {
+   "id": "exposed-latvian-server-reveals-14-months-of-hacker-operations-ag",
+   "title": "Exposed Latvian server reveals 14 months of hacker operations against European targets",
+   "n_events": 1,
+   "last_seen": "2026-11-12T02:35:59.000Z",
+   "first_event_title": "Exposed server reveals 14 months of a hacker's operations against European targets Group-IB found an open directory on a Latvian server expo"
+  },
+  {
+   "id": "google-chrome-zero-day-cve-2026-125350-exploited-in-the-wild",
+   "title": "Google Chrome zero-day CVE-2026-125350 exploited in the wild",
+   "n_events": 27,
+   "last_seen": "2026-11-12T02:07:48.000Z",
+   "first_event_title": "Google fixes Chrome zero-day CVE-2026-125350, exploited in the wild, plus 8 more flaws. Install the Chrome security update to 157.0.8103.50 "
+  },
+  {
+   "id": "from-counties-to-campuses-the-next-ai-crisis-may-begin-with-a-tr",
+   "title": "From Counties to Campuses, the Next AI Crisis May Begin With a Trusted Identity",
+   "n_events": 0,
+   "last_seen": "2026-11-12T01:37:08Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "history-of-password-cracking",
+   "title": "History of Password Cracking",
+   "n_events": 0,
+   "last_seen": "2026-11-12T01:02:04Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "zoho-patches-eight-manageengine-flaws-in-ddi-central-and-adaudit",
+   "title": "Zoho patches eight ManageEngine flaws in DDI Central and ADAudit Plus",
+   "n_events": 1,
+   "last_seen": "2026-11-12T00:45:58.000Z",
+   "first_event_title": "Zoho fixes eight ManageEngine vulnerabilities in DDI Central and ADAudit Plus, including Cisco router command injection and SQL injection fl"
+  },
+  {
+   "id": "vanderbilt-university-campus-wide-ransomware-attack",
+   "title": "Vanderbilt University campus-wide ransomware attack",
+   "n_events": 25,
+   "last_seen": "2026-11-12T00:23:54.318Z",
+   "first_event_title": "# VanderbiltUniversity is undergoing a campus-wide # ransomware attack. https:// vanderbilthustler.com/2026/11/ 09/breaking-vanderbilt-wi-fi"
+  },
+  {
+   "id": "n-able-takes-cloud-platform-offline-after-30-zero-days-published",
+   "title": "N-able takes cloud platform offline after 30+ \"zero-days\" published",
+   "n_events": 16,
+   "last_seen": "2026-11-12T00:23:43.428Z",
+   "first_event_title": "N-able takes cloud platform offline after 30+ \"zero-days\" published"
+  },
+  {
+   "id": "go-1-27-4-and-1-26-11-fix-12-security-issues-including-cgo-code",
+   "title": "Go 1.27.4 and 1.26.11 fix 12 security issues including cgo code execution",
+   "n_events": 1,
+   "last_seen": "2026-11-12T00:06:08.000Z",
+   "first_event_title": "Go 1.27.4 and 1.26.11 deliver 12 Go security fixes, blocking cgo code execution at build time (CVE-2026-97033) and an HTTP/1 server crash. #"
+  },
+  {
+   "id": "interlock-ransomware-targets-garden-valley-school-division",
+   "title": "Interlock Ransomware Targets Garden Valley School Division",
+   "n_events": 1,
+   "last_seen": "2026-11-12T00:05:43Z",
+   "first_event_title": "Interlock Ransomware Targets Garden Valley School Division"
+  },
+  {
+   "id": "linux-kernel-tcp-flaw-with-9-8-cvss-score-affects-ubuntu-red-hat",
+   "title": "Linux Kernel TCP Flaw With 9.8 CVSS Score Affects Ubuntu, Red Hat and Other Distributions",
+   "n_events": 74,
+   "last_seen": "2026-11-11T23:45:06.000Z",
+   "first_event_title": "Linux Kernel TCP Flaw With 9.8 CVSS Score Affects Ubuntu, Red Hat and Other Distributions"
+  },
+  {
+   "id": "baker-tilly-notifies-clients-of-data-breach-at-third-party-provi",
+   "title": "Baker Tilly notifies clients of data breach at third-party provider",
+   "n_events": 1,
+   "last_seen": "2026-11-11T23:01:31Z",
+   "first_event_title": "Baker Tilly notifies clients of data breach at third-party provider"
+  },
+  {
+   "id": "artex-ai-pentest-tool-what-security-teams-need-to-know",
+   "title": "ARTEX AI Pentest Tool: What Security Teams Need to Know",
+   "n_events": 2,
+   "last_seen": "2026-11-11T23:00:53Z",
+   "first_event_title": "ARTEX AI Pentest Tool: What Security Teams Need to Know"
+  },
+  {
+   "id": "bricklink-taken-offline-after-suspected-security-incident",
+   "title": "BrickLink taken offline after suspected security incident",
+   "n_events": 1,
+   "last_seen": "2026-11-11T22:57:01.000Z",
+   "first_event_title": "# Lego # Bricklink has been deactivated after a potential # cybersecurity incident.. https://www. bbc.co.uk/news/articles/c6rmgw 8zynr4o"
+  },
+  {
+   "id": "railway-breach-exposes-decrypted-customer-secrets-in-hunt-for-ai",
+   "title": "Railway breach exposes decrypted customer secrets in hunt for AI keys",
+   "n_events": 1,
+   "last_seen": "2026-11-11T22:37:24.000Z",
+   "first_event_title": "Railway says attacker decrypted customer secrets in an apparent hunt for AI keys Railway says an attacker partly escaped file isolation in i"
+  },
+  {
+   "id": "inside-the-2026-agentic-security-operations-report",
+   "title": "Inside the 2026 Agentic Security Operations Report",
+   "n_events": 0,
+   "last_seen": "2026-11-11T22:15:41Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "au-hacker-claims-to-have-sold-stolen-exams-to-students-but-marke",
+   "title": "AU: Hacker claims to have sold stolen exams to students \u2014 but marked them for identification purposes?",
+   "n_events": 1,
+   "last_seen": "2026-11-11T22:10:42Z",
+   "first_event_title": "AU: Hacker claims to have sold stolen exams to students \u2014 but marked them for identification purposes?"
+  },
+  {
+   "id": "log-analysis-field-guide-tips-for-spotting-patterns-and-red-flag",
+   "title": "Log Analysis Field Guide: Tips for Spotting Patterns and Red Flags",
+   "n_events": 0,
+   "last_seen": "2026-11-11T22:00:44Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "my-80-year-old-aunt-was-scammed-out-of-80-000-using-an-ai-clone",
+   "title": "My 80-Year-Old Aunt Was Scammed Out of $80,000 Using an AI Clone of Her 90-Year-Old Brother\u2019s Voice. We Need Help.",
+   "n_events": 0,
+   "last_seen": "2026-11-11T21:57:10Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "check-point-links-silentdelivery-oceangate-darkwire-clusters-to",
+   "title": "Check Point links SilentDelivery, OceanGate, DarkWire clusters to Sparrow malware espionage",
+   "n_events": 1,
+   "last_seen": "2026-11-11T21:08:16.924Z",
+   "first_event_title": "Check Point: three clusters (SilentDelivery, OceanGate, DarkWire) share the same Sparrow malware ecosystem"
+  },
+  {
+   "id": "rails-action-view-strip-tags-xss-flaw-patched",
+   "title": "Rails Action View strip_tags XSS flaw patched",
+   "n_events": 2,
+   "last_seen": "2026-11-11T21:07:21.000Z",
+   "first_event_title": "Rails fixes Action View tag-stripping flaw that could enable cross-site scripting Rails has patched Action View's strip_tags helper, which l"
+  },
+  {
+   "id": "adobe-security-advisory-av26-1092",
+   "title": "Adobe security advisory (AV26-1092)",
+   "n_events": 2,
+   "last_seen": "2026-10-30T08:01:42.000Z",
+   "first_event_title": "Adobe security advisory (AV26-1092)"
+  },
+  {
+   "id": "cisco-security-advisory-av26-1127",
+   "title": "Cisco security advisory (AV26-1127)",
+   "n_events": 2,
+   "last_seen": "2026-11-05T03:58:31.000Z",
+   "first_event_title": "Cisco security advisory (AV26-1127)"
+  },
+  {
+   "id": "control-systems-moxa-security-advisory-av26-1089",
+   "title": "[Control Systems] Moxa security advisory (AV26-1089)",
+   "n_events": 1,
+   "last_seen": "2026-10-27T13:35:40Z",
+   "first_event_title": "[Control Systems] Moxa security advisory (AV26-1089)"
+  },
+  {
+   "id": "craft-cms-security-advisory-av26-1086",
+   "title": "Craft CMS security advisory (AV26-1086)",
+   "n_events": 2,
+   "last_seen": "2026-10-26T17:00:13.000Z",
+   "first_event_title": "Craft CMS security advisory (AV26-1086)"
+  },
+  {
+   "id": "dell-security-advisory-av26-1134",
+   "title": "Dell security advisory (AV26-1134)",
+   "n_events": 1,
+   "last_seen": "2026-11-09T14:05:40Z",
+   "first_event_title": "Dell security advisory (AV26-1134)"
+  },
+  {
+   "id": "fortinet-security-advisory-av26-812",
+   "title": "Fortinet security advisory (AV26-812)",
+   "n_events": 2,
+   "last_seen": "2026-08-13T10:40:57Z",
+   "first_event_title": "Fortinet security advisory (AV26-812)"
+  },
+  {
+   "id": "google-security-advisory-av26-904",
+   "title": "Google security advisory (AV26-904)",
+   "n_events": 2,
+   "last_seen": "2026-09-09T20:49:30Z",
+   "first_event_title": "Google security advisory (AV26-904)"
+  },
+  {
+   "id": "grafana-security-advisory-av26-860",
+   "title": "Grafana Alloy Vulnerability CVE-2026-19516",
+   "n_events": 3,
+   "last_seen": "2026-10-13T16:00:56.470Z",
+   "first_event_title": "Grafana security advisory (AV26-860)"
+  },
+  {
+   "id": "hashicorp-security-advisory-av26-797",
+   "title": "HashiCorp security advisory (AV26-797)",
+   "n_events": 1,
+   "last_seen": "2026-08-11T14:05:42Z",
+   "first_event_title": "HashiCorp security advisory (AV26-797)"
+  },
+  {
+   "id": "hashicorp-security-advisory-av26-817",
+   "title": "HashiCorp security advisory (AV26-817)",
+   "n_events": 1,
+   "last_seen": "2026-08-14T16:05:44Z",
+   "first_event_title": "HashiCorp security advisory (AV26-817)"
+  },
+  {
+   "id": "ibm-security-advisory-av26-1040",
+   "title": "IBM security advisory (AV26-1040)",
+   "n_events": 1,
+   "last_seen": "2026-10-14T18:40:41Z",
+   "first_event_title": "IBM security advisory (AV26-1040)"
+  },
+  {
+   "id": "ibm-security-advisory-av26-1135",
+   "title": "IBM security advisory (AV26-1135)",
+   "n_events": 11,
+   "last_seen": "2026-11-11T05:15:06.000Z",
+   "first_event_title": "IBM security advisory (AV26-1135)"
+  },
+  {
+   "id": "ivanti-security-advisory-av26-805",
+   "title": "Ivanti security advisory (AV26-805)",
+   "n_events": 1,
+   "last_seen": "2026-08-11T20:20:39Z",
+   "first_event_title": "Ivanti security advisory (AV26-805)"
+  },
+  {
+   "id": "ivanti-security-advisory-av26-897",
+   "title": "Ivanti September 2026 security advisory: EPMM, ITSM, Sentry vulnerabilities",
+   "n_events": 3,
+   "last_seen": "2026-09-09T06:39:58Z",
+   "first_event_title": "Ivanti security advisory (AV26-897)"
+  },
+  {
+   "id": "jetbrains-security-advisory-av26-1132",
+   "title": "JetBrains security advisory (AV26-1132)",
+   "n_events": 1,
+   "last_seen": "2026-11-06T19:35:40Z",
+   "first_event_title": "JetBrains security advisory (AV26-1132)"
+  },
+  {
+   "id": "jetbrains-security-advisory-av26-825",
+   "title": "JetBrains security advisory (AV26-825)",
+   "n_events": 1,
+   "last_seen": "2026-08-18T13:40:50Z",
+   "first_event_title": "JetBrains security advisory (AV26-825)"
+  },
+  {
+   "id": "juniper-networks-security-advisory-av26-1043",
+   "title": "Juniper Networks security advisory (AV26-1043)",
+   "n_events": 4,
+   "last_seen": "2026-10-16T09:54:34Z",
+   "first_event_title": "Juniper Networks security advisory (AV26-1043)"
+  },
+  {
+   "id": "juniper-networks-security-advisory-av26-1101",
+   "title": "Juniper Networks security advisory (AV26-1101)",
+   "n_events": 4,
+   "last_seen": "2026-10-29T13:42:52Z",
+   "first_event_title": "Juniper Networks security advisory (AV26-1101)"
+  },
+  {
+   "id": "mongodb-security-advisory-av26-810",
+   "title": "MongoDB security advisory (AV26-810)",
+   "n_events": 1,
+   "last_seen": "2026-08-12T15:55:39Z",
+   "first_event_title": "MongoDB security advisory (AV26-810)"
+  },
+  {
+   "id": "mozilla-security-advisory-av26-1057",
+   "title": "Mozilla security advisory (AV26-1057)",
+   "n_events": 2,
+   "last_seen": "2026-10-23T01:32:17.000Z",
+   "first_event_title": "Mozilla security advisory (AV26-1057)"
+  },
+  {
+   "id": "debian-dsa-6528-1-linux-kernel-security-update",
+   "title": "Debian DSA-6528-1 Linux kernel security update",
+   "n_events": 2,
+   "last_seen": "2026-09-29T20:43:40.000Z",
+   "first_event_title": "[SECURITY] [DSA 6528-1] linux security update https:// lists.debian.org/debian-securi ty-announce/2026/msg00441.html?pow_referer=https%3A%2F"
+  },
+  {
+   "id": "ibm-i-http-server-admin-remote-code-execution-cve-2026-96119-cvs",
+   "title": "IBM i HTTP Server Admin Remote Code Execution (CVE-2026-96119, CVSS 9.9)",
+   "n_events": 1,
+   "last_seen": "2026-10-13T00:00:35.000Z",
+   "first_event_title": "IBM i 7.3 \u2013 7.6 HTTP Server Admin is vulnerable (CVE-2026-96119, CRITICAL, CVSS 9.9). Remote authenticated code execution possible via code "
+  },
+  {
+   "id": "linux-kernel-vulnerability-cve-2026-31419-with-public-poc-exploi",
+   "title": "Linux Kernel Vulnerability CVE-2026-31419 with Public PoC Exploit",
+   "n_events": 1,
+   "last_seen": "2026-11-02T02:40:40.000Z",
+   "first_event_title": "Details and a Linux kernel vulnerability PoC exploit are public for CVE-2026-31419. Patch this high-severity flaw to prevent local privilege"
+  },
+  {
+   "id": "windows-afd-sys-zero-day-exploited-by-lazarus-hackers-to-gain-sy",
+   "title": "Windows AFD.sys Zero-Day Exploited by Lazarus Hackers to Gain SYSTEM Access",
+   "n_events": 12,
+   "last_seen": "2026-09-18T10:10:00.000Z",
+   "first_event_title": "Windows AFD.sys Zero-Day Exploited by Lazarus Hackers to Gain SYSTEM Access"
+  },
+  {
+   "id": "zcopyreaper-cve-2026-43502-has-been-identified-as-a-notable-vuln",
+   "title": "Linux kernel ZcopyReaper vulnerability CVE-2026-43502",
+   "n_events": 2,
+   "last_seen": "2026-09-20T08:00:10.000Z",
+   "first_event_title": "\ud83d\udea8 ZcopyReaper (CVE-2026-43502) has been identified as a notable vulnerability. In the Linux kernel, the following vulnerability has been res"
+  },
+  {
+   "id": "cve-2026-80982-linux-net-smc-use-after-free-in-smc-rx-pipe-buf-r",
+   "title": "CVE-2026-80982: Linux kernel net/smc use-after-free with no patch",
+   "n_events": 1,
+   "last_seen": "2026-09-17T18:10:01.515Z",
+   "first_event_title": "CVE-2026-80982 Linux net/smc use-after-free in smc_rx_pipe_buf_release(), patch status unknown, CVSS not assigned. Unpatched kernel race can"
+  },
+  {
+   "id": "cve-2026-80981-linux-kernel-net-smc-high-severity-use-after-free",
+   "title": "CVE-2026-80981: Linux Kernel net/smc Use-After-Free",
+   "n_events": 3,
+   "last_seen": "2026-09-15T20:40:10.761Z",
+   "first_event_title": "CVE-2026-80981: Linux kernel net/smc HIGH severity use-after-free in smc_llc_srv_add_link(). Risk of memory corruption & escalation. Patch w"
+  },
+  {
+   "id": "wordpress-rce-vulnerability-lets-authenticated-authors-execute-r",
+   "title": "WordPress RCE Vulnerability Lets Authenticated Authors Execute Remote Code",
+   "n_events": 6,
+   "last_seen": "2026-09-21T05:27:50.042Z",
+   "first_event_title": "WordPress RCE Vulnerability Lets Authenticated Authors Execute Remote Code"
+  },
+  {
+   "id": "critical-watchguard-agent-flaws-let-unauthenticated-attackers-ex",
+   "title": "Critical WatchGuard Agent Flaws Let Unauthenticated Attackers Execute Remote Code",
+   "n_events": 2,
+   "last_seen": "2026-08-26T12:33:30Z",
+   "first_event_title": "Critical WatchGuard Agent Flaws Let Unauthenticated Attackers Execute Remote Code"
+  },
+  {
+   "id": "cisa-adds-cve-2022-0492-to-kev-linux-kernel-cgroup-v1-container",
+   "title": "CISA Adds CVE-2022-0492 to KEV \u2014 Linux Kernel cgroup-v1 Container Escape Actively Exploited",
+   "n_events": 4,
+   "last_seen": "2026-06-04T00:00:00Z",
+   "first_event_title": "CISA Adds CVE-2022-0492 to KEV \u2014 Linux Kernel cgroup-v1 Container Escape Actively Exploited"
+  }
+ ]
+}
