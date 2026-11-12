@@ -22,6 +22,8 @@
   {% if rel.counts.more_likely %}<div class="kev-stat"><span class="kev-stat-value">{{ rel.counts.more_likely }}</span><span class="kev-stat-label">Exploitation more likely</span></div>{% endif %}
   {% if rel.counts.remote_unauth %}<div class="kev-stat"><span class="kev-stat-value sev-high">{{ rel.counts.remote_unauth }}</span><span class="kev-stat-label">Remote, no credentials</span></div>{% endif %}
   <div class="kev-stat"><span class="kev-stat-value">{{ rel.counts.automatable }}</span><span class="kev-stat-label">Automatable</span></div>
+  {% if rel.counts.auto_total %}<div class="kev-stat"><span class="kev-stat-value sev-crit">{{ rel.counts.auto_total }}</span><span class="kev-stat-label">Automatable + total</span></div>{% endif %}
+  {% if rel.counts.three_day %}<div class="kev-stat"><span class="kev-stat-value">{{ rel.counts.three_day }}</span><span class="kev-stat-label">BOD 3-day (public)</span></div>{% endif %}
   <div class="kev-stat"><span class="kev-stat-value">{{ rel.counts.epss_ge_10 }}</span><span class="kev-stat-label">EPSS ≥ 90th pct</span></div>
   <div class="kev-stat"><span class="kev-stat-value">{{ rel.counts.media }}</span><span class="kev-stat-label">With news coverage</span></div>
 </div>
@@ -192,6 +194,7 @@
 
 <section class="mp-section" id="all-cves">
   <h2 class="mp-h2">All {{ rel.counts.total }} CVEs</h2>
+  <p class="mp-muted">Filter <strong>Auto + total · 3-day</strong> for the BOD 26-04 3-day class on internet-facing assets (automatable <em>and</em> total technical impact); <strong>3-day + forensic</strong> adds the KEV rows that also require forensic triage.</p>
   <div class="filters" role="search" aria-label="Filter CVEs">
     <label class="f-search">Search
       <input id="mp-q" type="search" placeholder="CVE, product family, title" autocomplete="off">
@@ -201,6 +204,9 @@
     <button class="chip" data-mp-filter="exploited" type="button">Exploitation detected</button>
     <button class="chip" data-mp-filter="more_likely" type="button">More likely</button>
     <button class="chip" data-mp-filter="automatable" type="button">Automatable</button>
+    <button class="chip" data-mp-filter="total" type="button">Total impact</button>
+    <button class="chip" data-mp-filter="three_day" type="button" title="Automatable + total impact: 3-day remediation on internet-facing assets (BOD 26-04)">Auto + total · 3-day</button>
+    <button class="chip" data-mp-filter="forensic" type="button" title="BOD 26-04 3-day bucket with forensic triage (KEV + total impact)">3-day + forensic</button>
     <button class="chip" data-mp-filter="critical" type="button">Critical</button>
     <button class="chip" data-mp-filter="covered" type="button">With coverage</button>
     <span class="f-count" id="mp-count"></span>
@@ -218,6 +224,8 @@
           <th scope="col">EPSS pct</th>
           <th scope="col">KEV</th>
           <th scope="col">Auto</th>
+          <th scope="col" title="SSVC Technical Impact (CISA Vulnrichment where published)">Impact</th>
+          <th scope="col" title="BOD 26-04 timeline for an internet-facing asset">BOD</th>
         </tr>
       </thead>
       <tbody id="mp-tbody"></tbody>
@@ -236,8 +244,9 @@
       <p>The vendor's advisory feed ({{ rel.source_label }} — scope, CVSS vectors, exploitability flags), FIRST EPSS (probability + percentile), CISA KEV catalog, CISA Vulnrichment (SSVC assessments, matched per CVE), and Tia's own story store for news uptake.</p>
     </div>
     <div>
-      <h3>Derived, not official</h3>
-      <p>Unless a row says <em>CISA Vulnrichment</em>, the SSVC-style decision points are derived locally from the CVSS vector: automatable = AV:N/AC:L/UI:N/PR:N or L; technical impact total = C, I and A all High. Vulnrichment is fetched for the 40 highest-CVSS CVEs per release, not all of them.</p>
+      <h3>SSVC and BOD 26-04</h3>
+      <p>Automatable / Technical Impact / Exploitation come from <em>CISA Vulnrichment</em> for every CVE where CISA has published an assessment (the table's <code>Impact</code> column). Rows CISA has not assessed are derived locally from the CVSS vector (automatable = AV:N/AC:L/UI:N/PR:N or L; technical impact total = C, I and A all High) and are labelled as such in the JSON.</p>
+      <p>The <code>BOD</code> column is the BOD 26-04 Table 1 timeline for an <strong>internet-facing</strong> asset, computed from the final triple: automatable + total impact = <strong>3 days</strong> (3 days + forensic triage if the CVE is also on KEV), automatable + partial = 14 days, total only = 14 days, neither = 60 days. Internal-asset timelines are in the JSON (<code>bod_internal</code>).</p>
     </div>
     <div>
       <h3>Known limits</h3>
@@ -277,6 +286,9 @@
     if (filter === 'kev' && !r.kev) return false;
     if (filter === 'exploited' && !r.exploited) return false;
     if (filter === 'automatable' && r.automatable !== 'yes') return false;
+    if (filter === 'total' && r.technical_impact !== 'total') return false;
+    if (filter === 'three_day' && !r.three_day) return false;
+    if (filter === 'forensic' && !r.forensic) return false;
     if (filter === 'more_likely' && !r.more_likely) return false;
     if (filter === 'critical' && String(r.severity).toLowerCase() !== 'critical') return false;
     if (filter === 'covered' && !(r.media > 0)) return false;
@@ -313,6 +325,13 @@
       tr.appendChild(cell(pctText(r.epss_pct)));
       tr.appendChild(cell(r.kev ? 'yes' : '—'));
       tr.appendChild(cell(r.automatable === 'yes' ? 'yes' : '—'));
+      tr.appendChild(cell(r.technical_impact === 'total' ? 'total'
+                          : (r.technical_impact || '—')));
+      tr.appendChild(cell(r.bod_public === '3_days' ? '3d'
+                          : r.bod_public === '3_days_forensic_triage' ? '3d+fx'
+                          : r.bod_public === '14_days' ? '14d'
+                          : r.bod_public === '60_days' ? '60d'
+                          : r.bod_public === 'defer_to_next_upgrade' ? 'upgrade' : '—'));
       body.appendChild(tr);
     });
     countEl.textContent = list.length + ' of ' + rows.length;

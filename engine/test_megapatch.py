@@ -161,8 +161,10 @@ def test_table_rows_shape_gate():
     ok &= check("why capped", len(rows[1]["why"]), 5)
     ok &= check("table keys", sorted(rows[0]),
                 sorted(["cve", "title", "family", "severity", "cvss", "epss_pct",
-                        "kev", "automatable", "exploited", "more_likely",
-                        "remote_unauth", "media", "score", "why"]))
+                        "kev", "automatable", "technical_impact", "exploitation",
+                        "ssvc_source", "bod_public", "bod_internal", "three_day",
+                        "forensic", "exploited", "more_likely", "remote_unauth",
+                        "media", "score", "why"]))
     assert ok
 
 
@@ -279,6 +281,10 @@ def test_render_site_end_to_end():
         ok &= check("analysis rendered", "A test headline" in html, True)
         ok &= check("coverage join rendered", "Story A" in html, True)
         ok &= check("tracking rendered", "Day 1" in html, True)
+        ok &= check("BOD filter chip", "Auto + total · 3-day" in html, True)
+        ok &= check("total impact filter", 'data-mp-filter="total"' in html, True)
+        ok &= check("impact column", '<th scope="col" title="SSVC Technical Impact' in html, True)
+        ok &= check("bod column", ">BOD</th>" in html, True)
         ok &= check("no origin-absolute URLs", 'href="/' not in html, True)
         ok &= check("base-relative data fetch",
                     "fetch('megapatch/microsoft-patch-tuesday/oct-2026.json')" in html,
@@ -373,7 +379,7 @@ def test_multi_vendor_render():
         ok &= check("channel tag rendered", "CSPU" in ora_html, True)
         ok &= check("cvss severity note", "CVSS-derived" in ora_html, True)
         ok &= check("impact chart hidden when unknown",
-                    ">Impact<" not in ora_html, True)
+                    '<h3 class="mp-h3">Impact</h3>' not in ora_html, True)
         ok &= check("nav points at oracle track",
                     'href="megapatch/oracle-critical-patch-update/"' in ora_html, True)
         assert ok

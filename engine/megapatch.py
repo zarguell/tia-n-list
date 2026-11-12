@@ -192,8 +192,9 @@ def _release_ok(rec):
 def table_rows(rec):
     """Client-table projection: only the fields the table renders."""
     keys = ("cve", "title", "family", "severity", "cvss", "epss_pct", "kev",
-            "automatable", "exploited", "more_likely", "remote_unauth",
-            "media", "score", "why")
+            "automatable", "technical_impact", "exploitation", "ssvc_source",
+            "bod_public", "bod_internal", "three_day", "forensic",
+            "exploited", "more_likely", "remote_unauth", "media", "score", "why")
     out = []
     for r in rec.get("rows") or []:
         if not CVE_RE.match(str(r.get("cve") or "")):
