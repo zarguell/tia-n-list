@@ -286,6 +286,12 @@ def test_render_site_end_to_end():
         ok &= check("impact column", '<th scope="col" title="SSVC Technical Impact' in html, True)
         ok &= check("bod column", ">BOD</th>" in html, True)
         ok &= check("no origin-absolute URLs", 'href="/' not in html, True)
+        ok &= check("no bare fragment links (base=site root)",
+                    'href="#' not in html, True)
+        ok &= check("nav anchors carry the page path",
+                    'href="megapatch/microsoft-patch-tuesday/oct-2026/#all-cves"' in html, True)
+        ok &= check("js cve links carry the page path",
+                    "var PAGE = 'megapatch/microsoft-patch-tuesday/oct-2026/';" in html, True)
         ok &= check("base-relative data fetch",
                     "fetch('megapatch/microsoft-patch-tuesday/oct-2026.json')" in html,
                     True)
