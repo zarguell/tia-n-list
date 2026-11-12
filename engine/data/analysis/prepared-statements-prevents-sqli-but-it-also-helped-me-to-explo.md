@@ -1,0 +1,3 @@
+A researcher disclosed CVE-2026-6460, described as a 22-year-old PostgreSQL remote code execution vulnerability. The disclosure, posted to r/netsec and hosted on mehmetince.net, frames the work as turning a long-standing type-confusion primitive into RCE, with prepared statements, normally a SQL injection defense, playing a role in reaching the primitive.
+
+The captured event gives no affected versions, fixed releases, or exploitation status, so this should be treated as a research disclosure pending vendor confirmation. Operators running PostgreSQL should watch for an advisory and patch once versions are published.

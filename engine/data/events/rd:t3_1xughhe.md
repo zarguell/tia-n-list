@@ -1,0 +1,3 @@
+Attackers have been and are still capitalizing on the GTA6 release. Netcraft recently reviewed GTA VI-themed domains first seen between July 1 and Oct. 27 and found four recurring lures: fake downloads using the name of the leaker CyberLeek, false early access offers, nonexistent mobile versions, and free key or GTA$ giveaways, including one “leaked build” installer that's been flagged as a trojan. Once the game comes out next week, we expect the lures to shift toward free GTA$, fake support pages, and cheats after release. Linked the full threat intel write-up with screenshots and examples. submitted by /u/WorksAtNetcraft [link] [comments]
+
+via reddit r/cybersecurity: Grand Theft Auto VI' Release Phishing Lures
