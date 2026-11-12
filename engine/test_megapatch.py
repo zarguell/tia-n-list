@@ -333,7 +333,11 @@ def test_render_site_end_to_end():
         ok &= check("BOD filter chip", "Auto + total · 3-day" in html, True)
         ok &= check("total impact filter", 'data-mp-filter="total"' in html, True)
         ok &= check("impact column", '<th scope="col" title="SSVC Technical Impact' in html, True)
-        ok &= check("bod column", ">BOD</th>" in html, True)
+        # 2026-11-13: one BOD column split into the two exposures BOD 26-04
+        # actually distinguishes
+        ok &= check("bod internet column", ">BOD internet</th>" in html, True)
+        ok &= check("bod internal column", ">BOD internal</th>" in html, True)
+        ok &= check("bod due helper present", "function bodDue(" in html, True)
         ok &= check("no origin-absolute URLs", 'href="/' not in html, True)
         ok &= check("no bare fragment links (base=site root)",
                     'href="#' not in html, True)
