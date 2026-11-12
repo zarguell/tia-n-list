@@ -23,7 +23,7 @@
   {% if rel.counts.remote_unauth %}<div class="kev-stat"><span class="kev-stat-value sev-high">{{ rel.counts.remote_unauth }}</span><span class="kev-stat-label">Remote, no credentials</span></div>{% endif %}
   <div class="kev-stat"><span class="kev-stat-value">{{ rel.counts.automatable }}</span><span class="kev-stat-label">Automatable</span></div>
   {% if rel.counts.auto_total %}<div class="kev-stat"><span class="kev-stat-value sev-crit">{{ rel.counts.auto_total }}</span><span class="kev-stat-label">Automatable + total</span></div>{% endif %}
-  {% if rel.counts.three_day %}<div class="kev-stat"><span class="kev-stat-value">{{ rel.counts.three_day }}</span><span class="kev-stat-label">BOD 3-day (public)</span></div>{% endif %}
+  {% if rel.counts.three_day %}<div class="kev-stat"><span class="kev-stat-value">{{ rel.counts.three_day }}</span><span class="kev-stat-label">BOD 3-day (internet)</span></div>{% endif %}
   <div class="kev-stat"><span class="kev-stat-value">{{ rel.counts.epss_ge_10 }}</span><span class="kev-stat-label">EPSS ≥ 90th pct</span></div>
   <div class="kev-stat"><span class="kev-stat-value">{{ rel.counts.media }}</span><span class="kev-stat-label">With news coverage</span></div>
 </div>
@@ -231,7 +231,8 @@
           <th scope="col">KEV</th>
           <th scope="col">Auto</th>
           <th scope="col" title="SSVC Technical Impact (CISA Vulnrichment where published)">Impact</th>
-          <th scope="col" title="BOD 26-04 timeline for an internet-facing asset">BOD</th>
+          <th scope="col" title="BOD 26-04 due date if the asset is internet-facing — counted from the vendor publication date">BOD internet</th>
+          <th scope="col" title="BOD 26-04 due date if the asset is internal-only — counted from the vendor publication date">BOD internal</th>
         </tr>
       </thead>
       <tbody id="mp-tbody"></tbody>
@@ -252,7 +253,8 @@
     <div>
       <h3>SSVC and BOD 26-04</h3>
       <p>Automatable / Technical Impact / Exploitation come from <em>CISA Vulnrichment</em> for every CVE where CISA has published an assessment (the table's <code>Impact</code> column). Rows CISA has not assessed are derived locally from the CVSS vector (automatable = AV:N/AC:L/UI:N/PR:N or L; technical impact total = C, I and A all High) and are labelled as such in the JSON.</p>
-      <p>The <code>BOD</code> column is the BOD 26-04 Table 1 timeline for an <strong>internet-facing</strong> asset, computed from the final triple: automatable + total impact = <strong>3 days</strong> (3 days + forensic triage if the CVE is also on KEV), automatable + partial = 14 days, total only = 14 days, neither = 60 days. Internal-asset timelines are in the JSON (<code>bod_internal</code>).</p>
+      <p>The <code>BOD internet</code> and <code>BOD internal</code> columns are the BOD 26-04 Table 1 timelines for an <strong>internet-facing</strong> and an <strong>internal-only</strong> asset, computed from the final triple: automatable + total impact = <strong>3 days</strong> (3 days + forensic triage if the CVE is also on KEV), automatable + partial = 14 days, total only = 14 days, neither = 60 days. Each cell shows the due <strong>date</strong> and its class, counted from the vendor publication date above — the day the fix became available. <code>upgrade</code> means the internal timeline is "at next system upgrade", not a date.</p>
+      <p>For a federal agency the binding clock is different: BOD 26-04 timelines run from the <strong>KEV listing date</strong>, and CISA publishes its own due date for each entry — that date is on the CVE's <a href="kev/">KEV page</a> once the CVE is listed. Rows CISA has not assessed (no SSVC input) leave both columns empty rather than guess.</p>
     </div>
     <div>
       <h3>Known limits</h3>
@@ -318,6 +320,31 @@
             String(r.title).toLowerCase().indexOf(term) !== -1 ||
             String(r.family).toLowerCase().indexOf(term) !== -1);
   }
+  // ---- BOD 26-04 due dates (split by exposure) -------------------------
+  // The buckets come from the release data (SSVC triple + KEV). Timelines are
+  // counted from the vendor publication date — the day the fix existed. For an
+  // agency bound by BOD 26-04 the clock starts at the KEV listing instead; the
+  // CVE's /kev/cves/ page carries CISA's own due date once it is listed.
+  var BOD_DAYS = { '3_days': 3, '3_days_forensic_triage': 3,
+                   '14_days': 14, '60_days': 60 };
+  var BOD_TAG = { '3_days': '3d', '3_days_forensic_triage': '3d+fx',
+                  '14_days': '14d', '60_days': '60d',
+                  'defer_to_next_upgrade': 'upgrade' };
+  function bodDue(bucket, published) {
+    var n = BOD_DAYS[bucket];
+    var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(published || '');
+    if (!n || !m) return '';
+    var dt = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]));
+    dt.setUTCDate(dt.getUTCDate() + n);
+    return dt.toISOString().slice(0, 10);
+  }
+  function bodCell(bucket) {
+    if (!bucket) return '\u2014';
+    var due = bodDue(bucket, REL_PUBLISHED);
+    var tag = BOD_TAG[bucket] || bucket;
+    return due ? due + ' \u00b7 ' + tag : tag;
+  }
+
   function cell(text, cls) {
     var td = document.createElement('td');
     if (cls) td.className = cls;
@@ -353,7 +380,8 @@
                 'family', 'severity', 'cvss', 'cvss_vector', 'impact', 'epss',
                 'epss_pct', 'kev', 'exploited', 'exploitation', 'more_likely',
                 'remote_unauth', 'automatable', 'technical_impact', 'ssvc_source',
-                'bod_public', 'bod_internal', 'three_day', 'forensic', 'disclosed',
+                'bod_public', 'bod_internal', 'bod_public_due', 'bod_internal_due',
+                'three_day', 'forensic', 'disclosed',
                 'media', 'media_stories', 'why', 'kbs', 'advisory', 'release_url',
                 'vendor_doc'];
     var lines = [head.join(',')];
@@ -382,6 +410,8 @@
         r.ssvc_source || '',
         r.bod_public || '',
         r.bod_internal || '',
+        bodDue(r.bod_public, REL_PUBLISHED),
+        bodDue(r.bod_internal, REL_PUBLISHED),
         flag(r.three_day),
         flag(r.forensic),
         flag(r.disclosed),
@@ -445,11 +475,8 @@
       tr.appendChild(cell(r.automatable === 'yes' ? 'yes' : '—'));
       tr.appendChild(cell(r.technical_impact === 'total' ? 'total'
                           : (r.technical_impact || '—')));
-      tr.appendChild(cell(r.bod_public === '3_days' ? '3d'
-                          : r.bod_public === '3_days_forensic_triage' ? '3d+fx'
-                          : r.bod_public === '14_days' ? '14d'
-                          : r.bod_public === '60_days' ? '60d'
-                          : r.bod_public === 'defer_to_next_upgrade' ? 'upgrade' : '—'));
+      tr.appendChild(cell(bodCell(r.bod_public), 'mp-bod'));
+      tr.appendChild(cell(bodCell(r.bod_internal), 'mp-bod'));
       body.appendChild(tr);
     });
     countEl.textContent = list.length + ' of ' + rows.length;

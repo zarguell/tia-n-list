@@ -196,6 +196,12 @@ const ev = (el, type) => el.dispatchEvent(new window.Event(type));
     out.csvVendorDoc = col('vendor_doc');
     out.csvTriState = { kev: col('kev'), exploited: col('exploited'),
                         threeDay: col('three_day'), disclosed: col('disclosed') };
+    out.csvBodDue = [col('bod_public'), col('bod_internal'),
+                     col('bod_public_due'), col('bod_internal_due')].join(',');
+
+    // the table splits BOD by exposure, with dates
+    out.bodHeaders = [...d.querySelectorAll('#mp-table thead th')].map((th) => th.textContent.trim())
+      .filter((t) => t.startsWith('BOD'));
 
     // the hostile row: commas/quotes survive, formula prefix is neutralised
     const hostileRow = parsed.find((r) => r[H.indexOf('cve')] === 'CVE-2026-9999');
@@ -241,6 +247,60 @@ const ev = (el, type) => el.dispatchEvent(new window.Event(type));
     dom2.window.close();
   }
 
+  // ---- BOD due dates split by exposure (release that has SSVC data) ------
+  {
+    const ms = candidates.find((c) => /microsoft/.test(c.track)) || candidates[1];
+    // client JSON is a bare array; the publish date is a template constant
+    const msRows = JSON.parse(fs.readFileSync(ms.json, 'utf8'));
+    const msHtml = fs.readFileSync(ms.page, 'utf8');
+    const published = (/var REL_PUBLISHED = "([^"]+)"/.exec(msHtml) || [])[1] || null;
+    const dom3 = new JSDOM(fs.readFileSync(ms.page, 'utf8'), {
+      url: `https://zarguell.github.io/tia-n-list/megapatch/${ms.track}/${ms.slug}/`,
+      runScripts: 'dangerously',
+      pretendToBeVisual: true,
+      beforeParse(w) {
+        w.fetch = () => Promise.resolve({ json: () => Promise.resolve(msRows) });
+      },
+    });
+    await later(400);
+    const d3 = dom3.window.document;
+    const addDays = (iso, n) => {
+      const [y, m, dd] = iso.slice(0, 10).split('-').map(Number);
+      const dt = new Date(Date.UTC(y, m - 1, dd));
+      dt.setUTCDate(dt.getUTCDate() + n);
+      return dt.toISOString().slice(0, 10);
+    };
+    // probe via the search box (same filter path as the ?cve= deep link);
+    // page 1 only holds the top 50 by score
+    const rowFor = (cve) => {
+      const q = d3.getElementById('mp-q');
+      q.value = cve;
+      q.dispatchEvent(new dom3.window.Event('input'));
+      return d3.querySelector('#mp-tbody tr');
+    };
+    const DAYS = { '3_days': 3, '3_days_forensic_triage': 3, '14_days': 14, '60_days': 60 };
+    const TAG = { '3_days': '3d', '3_days_forensic_triage': '3d+fx', '14_days': '14d', '60_days': '60d' };
+    const expect = (bucket) => DAYS[bucket]
+      ? `${addDays(published, DAYS[bucket])} · ${TAG[bucket]}`
+      : (bucket === 'defer_to_next_upgrade' ? 'upgrade' : '\u2014');
+
+    const threeDay = msRows.find((r) => r.bod_public === '3_days');
+    const tr3 = threeDay ? rowFor(threeDay.cve) : null;
+    const deferRow = msRows.find((r) => r.bod_internal === 'defer_to_next_upgrade');
+    const trD = deferRow ? rowFor(deferRow.cve) : null;
+    out.msBod = {
+      headers: [...d3.querySelectorAll('#mp-table thead th')].map((th) => th.textContent.trim()),
+      published,
+      threeDayCell: tr3 ? tr3.children[10].textContent.trim() : null,
+      threeDayExpected: threeDay ? expect(threeDay.bod_public) : null,
+      internalCell: trD ? trD.children[11].textContent.trim() : null,
+      internalExpected: deferRow ? expect(deferRow.bod_internal) : null,
+      internalPublicCell: trD ? trD.children[10].textContent.trim() : null,
+      internalPublicExpected: deferRow ? expect(deferRow.bod_public) : null,
+    };
+    dom3.window.close();
+  }
+
   console.log(JSON.stringify(out, null, 1));
 
   const ok =
@@ -269,7 +329,7 @@ const ev = (el, type) => el.dispatchEvent(new window.Event(type));
     out.exportLabel === 'Export CSV · ' + total &&
     out.exportDisabledWhenEmpty === true &&
     out.exportEnabled === true &&
-    out.csvColumns === 33 &&
+    out.csvColumns === 35 &&
     out.csvLineCount === total &&
     out.csvRagged === 0 &&
     /^megapatch-[a-z0-9-]+\.csv$/.test(String(out.csvDownload)) &&
@@ -283,6 +343,7 @@ const ev = (el, type) => el.dispatchEvent(new window.Event(type));
     out.csvTriState.kev === 'no' &&
     out.csvTriState.exploited === 'no' &&
     out.csvTriState.threeDay === '' &&
+    out.csvBodDue === ',,,' && /* no SSVC on this release -> empty buckets+dates */
     out.csvTriState.disclosed === 'no' &&
     out.csvHostileTitle ===
       "'=HYPERLINK(\"http://x\"), quoted \"title\" second line" &&
@@ -291,7 +352,14 @@ const ev = (el, type) => el.dispatchEvent(new window.Event(type));
     out.csvKevLines === data.filter((r) => r.kev).length &&
     // the in-page filter is still reachable via ?cve= (story links use it)
     out.deepLinkQuery === data[0].cve &&
-    out.deepLinkRows === out.deepLinkExpected;
+    out.deepLinkRows === out.deepLinkExpected &&
+    // BOD split by exposure, dated from the vendor publication date
+    /^\d{4}-\d{2}-\d{2}$/.test(String(out.msBod.published)) &&
+    out.msBod.headers.includes('BOD internet') &&
+    out.msBod.headers.includes('BOD internal') &&
+    out.msBod.threeDayCell === out.msBod.threeDayExpected &&
+    out.msBod.internalCell === out.msBod.internalExpected &&
+    out.msBod.internalPublicCell === out.msBod.internalPublicExpected;
 
   console.log(ok ? 'PASS megapatch release table' : 'FAIL megapatch release table');
   process.exit(ok ? 0 : 1);
