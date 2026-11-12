@@ -211,7 +211,7 @@
     <button class="chip" data-mp-filter="covered" type="button">With coverage</button>
     <span class="f-count" id="mp-count"></span>
     <button class="mp-export" id="mp-export" type="button"
-            title="Download the rows matching the current filter and search as CSV (raw field values, all pages)"
+            title="CSV of every row matching the current filter — all fields, including the CVSS vector, exploitation signals, patch KBs and advisory URLs"
             aria-label="Export the filtered CVEs as CSV">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v11m0 0 4-4m-4 4-4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
       <span class="mp-export-label">Export CSV</span>
@@ -272,6 +272,12 @@
   var exportBtn = document.getElementById('mp-export');
   var exportLabel = exportBtn ? exportBtn.querySelector('.mp-export-label') : null;
   var chips = document.querySelectorAll('[data-mp-filter]');
+  // release context, carried into every exported row so one CSV file is
+  // self-describing outside this site
+  var REL_VENDOR = {{ rel.vendor|tojson }};
+  var REL_LABEL = {{ rel.label|tojson }};
+  var REL_PUBLISHED = {{ rel.published|tojson }};
+  var REL_DOC = {{ (rel.doc or {}).url|tojson }};
   var PAGE = 50;                 // rows per page
   var rows = [];
   // <base href> is the site root: a bare '?cve=' or '#frag' resolves there,
@@ -336,24 +342,56 @@
     return s;
   }
   function csvText(list) {
-    var head = ['score', 'cve', 'title', 'family', 'severity', 'cvss',
-                'epss_pct', 'kev', 'automatable', 'technical_impact', 'bod_public',
-                'advisory'];
+    // Full export: every field the release JSON carries, not just the columns
+    // on screen (CVSS vector, exploitation signals, patch KBs, media refs,
+    // advisory + vendor document URLs). Tri-state flags stay tri-state:
+    // yes / no / "" (unknown).
+    var flag = function (v) { return v === true ? 'yes' : (v === false ? 'no' : ''); };
+    var join = function (v) { return (v || []).join('; '); };
+    var num = function (v, dp) { return v === null || v === undefined ? '' : Number(v).toFixed(dp); };
+    var head = ['vendor', 'release', 'published', 'score', 'cve', 'title',
+                'family', 'severity', 'cvss', 'cvss_vector', 'impact', 'epss',
+                'epss_pct', 'kev', 'exploited', 'exploitation', 'more_likely',
+                'remote_unauth', 'automatable', 'technical_impact', 'ssvc_source',
+                'bod_public', 'bod_internal', 'three_day', 'forensic', 'disclosed',
+                'media', 'media_stories', 'why', 'kbs', 'advisory', 'release_url',
+                'vendor_doc'];
     var lines = [head.join(',')];
     list.forEach(function (r) {
       lines.push([
-        num(r.score) === null ? '' : num(r.score).toFixed(0),
+        REL_VENDOR || '',
+        REL_LABEL || '',
+        REL_PUBLISHED || '',
+        num(r.score, 0),
         r.cve || '',
         r.title || '',
         r.family || '',
         r.severity || '',
-        num(r.cvss) === null ? '' : num(r.cvss).toFixed(1),
-        num(r.epss_pct) === null ? '' : num(r.epss_pct).toFixed(5),
+        num(r.cvss, 1),
+        r.vector || '',
+        r.impact || '',
+        num(r.epss, 5),
+        num(r.epss_pct, 5),
         r.kev ? 'yes' : 'no',
+        flag(r.exploited),
+        r.exploitation || '',
+        flag(r.more_likely),
+        flag(r.remote_unauth),
         r.automatable || '',
         r.technical_impact || '',
+        r.ssvc_source || '',
         r.bod_public || '',
+        r.bod_internal || '',
+        flag(r.three_day),
+        flag(r.forensic),
+        flag(r.disclosed),
+        r.media === null || r.media === undefined ? '' : String(r.media),
+        join(r.media_stories),
+        join(r.why),
+        join(r.kbs),
         r.advisory || ('https://nvd.nist.gov/vuln/detail/' + encodeURIComponent(r.cve || '')),
+        PAGE_PATH,
+        REL_DOC || '',
       ].map(csvCell).join(','));
     });
     // BOM so Excel reads the UTF-8 titles; CRLF per RFC 4180

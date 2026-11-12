@@ -159,12 +159,27 @@ def test_table_rows_shape_gate():
     rows = mp.table_rows(rec)
     ok = check("invalid CVE dropped", len(rows), 2)
     ok &= check("why capped", len(rows[1]["why"]), 5)
+    ok &= check("media_stories projected to ids",
+                rows[0]["media_stories"], [])
+    ok &= check("kbs projected as a list", rows[0]["kbs"], ["5000001"])
+    ok &= check("cvss vector carried for the export",
+                rows[0]["vector"], "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H")
+    ok &= check("cvss impact class carried for the export",
+                rows[0]["impact"], "Remote Code Execution")
+    ok &= check("raw epss carried for the export", rows[0]["epss"], 0.5)
+    ok &= check("media_stories keep only ids",
+                mp.table_rows({"rows": [_row("CVE-2026-1111", media_stories=[
+                    {"id": "a-story", "title": "A"}, {"title": "no id"}])]}
+                )[0]["media_stories"], ["a-story"])
     ok &= check("table keys", sorted(rows[0]),
                 sorted(["cve", "title", "family", "severity", "cvss", "epss_pct",
                         "kev", "automatable", "technical_impact", "exploitation",
                         "ssvc_source", "bod_public", "bod_internal", "three_day",
                         "forensic", "exploited", "more_likely", "remote_unauth",
-                        "media", "score", "why", "advisory"]))
+                        "media", "score", "why", "advisory",
+                        # all-data export fields (2026-11-13)
+                        "vector", "impact", "epss", "disclosed", "kbs",
+                        "media_stories"]))
     assert ok
 
 
