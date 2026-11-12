@@ -1,0 +1,1 @@
+Today, in November 2026, a security incident occurred in the PC launcher of the game Goddess of Victory: NIKKE, developed by Shift Up and globally serviced by Level Infinite. In this incident the attacker served a fake installation package... Article Link: https://malware.news/t/nikke-pc-feedlist-feb647c9-js/127246#post_1

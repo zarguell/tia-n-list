@@ -1,0 +1,3 @@
+Microsoft researchers have documented attackers abusing GSocket, a legitimate remote-access tool, to maintain persistent access to compromised Linux servers. Microsoft reports a 356.2% increase in GSocket-related detections between March and August. Most observed activity involved web applications and hosting environments. Attackers can establish outbound encrypted connections through relay infrastructure, allowing them to reconnect without opening a conventional inbound network port. Some also use scheduled tasks and system services to keep access alive. submitted by /u/BTC-brother2018 [link] [comments]
+
+via reddit r/cybersecurity: Microsoft researchers uncover growing GSocket backdoor activity on Linux servers
