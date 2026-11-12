@@ -1,3 +1,3 @@
-LEGO took the BrickLink marketplace offline after detecting unusual activity, but has not confirmed a hack or whether customer data was affected. The outage blocks collectors from accessing the marketplace while the company investigates.
+LEGO took its BrickLink marketplace offline after detecting unusual activity. The company has not confirmed a hack or whether customer data was affected. Users are advised to watch for suspicious payment requests and avoid reusing passwords across sites.
 
-Users should treat the incident as a potential credential and payment-data exposure until LEGO says otherwise. Watch for an official statement on scope, any password-reset or payment-card guidance, and phishing that impersonates BrickLink support or resale listings. In the meantime, avoid reusing BrickLink passwords and scrutinize unexpected payment requests.
+The outage has lasted at least three days with no public explanation. Collectors cannot access the platform for buying, selling, or browsing LEGO parts. The incident is being treated as a potential cybersecurity event pending an official statement from LEGO.
