@@ -55,7 +55,6 @@
   {% if rel.analysis.watchlist %}
   <div class="mp-watch">
     <h3 class="mp-h3">Watch this week</h3>
-    <div class="table-scroll">
     <table class="kev-table mp-table">
       <thead><tr><th scope="col">CVE</th><th scope="col">Why</th></tr></thead>
       <tbody>
@@ -64,7 +63,6 @@
         {% endfor %}
       </tbody>
     </table>
-    </div>
   </div>
   {% endif %}
 </section>
@@ -266,11 +264,14 @@
   var emptyEl = document.getElementById('mp-empty');
   var pager = document.getElementById('mp-pager');
   var chips = document.querySelectorAll('[data-mp-filter]');
-  var PAGE = 50;
+  var PAGE = 50;                 // rows per page
   var rows = [];
   // <base href> is the site root: a bare '?cve=' or '#frag' resolves there,
   // not to this page. Build the page path explicitly.
-  var PAGE = '{{ month.url }}';
+  // NOT named PAGE: that shadowed the page-size constant above, so
+  // `page * PAGE` was NaN and list.slice(NaN, ...) rendered zero rows on every
+  // release page (2026-11-13).
+  var PAGE_PATH = '{{ month.url }}';
   var filter = 'all';
   var page = 0;
 
@@ -319,7 +320,7 @@
       tr.appendChild(cell(num(r.score) === null ? '—' : num(r.score).toFixed(0), 'mp-score-cell'));
       var td = document.createElement('td');
       var a = document.createElement('a');
-      a.href = PAGE + '?cve=' + encodeURIComponent(r.cve) + '#all-cves';
+      a.href = PAGE_PATH + '?cve=' + encodeURIComponent(r.cve) + '#all-cves';
       a.textContent = r.cve;
       td.appendChild(a);
       tr.appendChild(td);
