@@ -30,7 +30,8 @@ import subprocess
 import posixpath
 import re
 import sys
-from datetime import datetime, timezone
+import xml.etree.ElementTree as ET
+from datetime import datetime, timedelta, timezone
 from email.utils import format_datetime
 from zoneinfo import ZoneInfo
 
@@ -147,6 +148,72 @@ def display_domain(s):
     """Defensive: if a source slips in as a full URL, render only its domain."""
     m = re.match(r"https?://(?:www\.)?([^/:]+)", s or "")
     return m.group(1).lower() if m else s
+
+
+def _host(u):
+    """Bare lowercase host of a URL, 'www.' stripped ('https://a.b/c' -> 'a.b')."""
+    h = re.sub(r"^https?://", "", (u or "").strip(), flags=re.I).split("/")[0]
+    return re.sub(r"^www\.", "", h, flags=re.I).lower()
+
+
+FEEDS_OPML = os.path.join(ENGINE, "feeds", "cyber.opml")
+
+
+def load_source_feeds(path=None):
+    """The ingest source list (checked-in OPML) as rows for /feeds/sources/.
+
+    This is the same file ingest.py polls, so the page can never describe a
+    different set of sources than the pipeline actually reads. Tolerant by
+    design: a malformed outline is skipped, a missing/corrupt file yields []
+    (the site must still build).
+    """
+    from store import safe_url
+    try:
+        root = ET.parse(path or FEEDS_OPML).getroot()
+    except (OSError, ET.ParseError):
+        return []
+    out, seen = [], set()
+    for o in root.iter("outline"):
+        feed = safe_url((o.get("xmlUrl") or "").strip())
+        site = safe_url((o.get("htmlUrl") or "").strip()) or feed
+        host = _host(site) or _host(feed)
+        if not feed or not host or host in seen:
+            continue
+        seen.add(host)
+        out.append({
+            "title": (o.get("title") or o.get("text") or host).strip(),
+            "site": site,
+            "feed": feed,
+            "host": host,
+        })
+    out.sort(key=lambda f: (f["title"].lower(), f["host"]))
+    return out
+
+
+def source_activity(events, feeds, days=30):
+    """How much each source actually produced: {host: {n, latest}}.
+
+    Counts the last `days` days of events per source host and remembers the
+    newest one, so the sources page shows live throughput rather than a static
+    bookmark list. Events whose source does not match a listed feed host are
+    simply not counted (social legs, API legs)."""
+    cutoff = datetime.now(timezone.utc) - timedelta(days=days)
+    hosts = {f["host"] for f in feeds}
+    agg = {}
+    for e in events.values():
+        host = _host(e.get("source") or "")
+        if host not in hosts:
+            continue
+        try:
+            dt = parse_utc(str(e.get("published_at") or e.get("added_at") or ""))
+        except (ValueError, TypeError):
+            continue
+        a = agg.setdefault(host, {"n": 0, "latest": None})
+        if dt >= cutoff:
+            a["n"] += 1
+        if a["latest"] is None or dt > a["latest"]:
+            a["latest"] = dt
+    return agg
 
 
 def md_snippet(text, max_chars=600):
@@ -1022,6 +1089,24 @@ def main():
     write("404.html", render("404.html", active=None))
     write("deploy.json", json.dumps(deploy_info(), indent=1))
     write("feeds/index.html", render("feeds.html", active="feeds", og_url=site_url("feeds/")))
+    # Public source list: the OPML the ingest pass polls, rendered as a page so
+    # readers can see (and import) exactly what we track (2026-11-13).
+    source_feeds = load_source_feeds()
+    activity = source_activity(events, source_feeds)
+    for f in source_feeds:
+        a = activity.get(f["host"]) or {}
+        f["last_30d"] = a.get("n", 0)
+        f["latest"] = a["latest"].strftime("%Y-%m-%d") if a.get("latest") else ""
+    write("feeds/sources/index.html", render(
+        "feeds-sources.html", active="feeds", og_url=site_url("feeds/sources/"),
+        feeds=source_feeds,
+        src_count=len(source_feeds),
+        active_count=sum(1 for f in source_feeds if f["last_30d"]),
+        total_30d=sum(f["last_30d"] for f in source_feeds)))
+    try:
+        write("feeds/sources.opml", open(FEEDS_OPML, encoding="utf-8").read())
+    except OSError:
+        pass          # no checked-in list on this checkout -> page still builds
     write("methodology/index.html", render("methodology.html", active=None, og_url=site_url("methodology/")))
     write("about/index.html", render("about.html", active=None, og_url=site_url("about/")))
 

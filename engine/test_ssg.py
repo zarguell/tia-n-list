@@ -253,6 +253,50 @@ def main():
                     [c["detection"] for c in tech["cases"]], [True, True, False])
         ok &= check("CTI technique detection count", covered[0]["n_detections"], 2)
 
+        # ---- 2026-11-13: the published source list (/feeds/sources/) ----
+        feeds = ssg.load_source_feeds()
+        ok &= check("OPML loads every checked-in feed", len(feeds), 53)
+        ok &= check("source rows are https and titled",
+                    all(f["feed"].startswith("https://") and f["title"]
+                        and f["host"] for f in feeds), True)
+        ok &= check("source hosts are unique",
+                    len({f["host"] for f in feeds}), len(feeds))
+        ok &= check("sources sorted by title",
+                    [f["title"].lower() for f in feeds],
+                    sorted(f["title"].lower() for f in feeds))
+        # activity joins on the source host; unknown hosts are ignored
+        now = ssg.datetime.now(ssg.timezone.utc)
+        evs = {
+            "a": {"source": feeds[0]["host"], "published_at":
+                  (now - ssg.timedelta(days=2)).isoformat()},
+            "b": {"source": "www." + feeds[0]["host"], "published_at":
+                  (now - ssg.timedelta(days=40)).isoformat()},
+            "c": {"source": "not-in-the-opml.example", "published_at":
+                  now.isoformat()},
+        }
+        act = ssg.source_activity(evs, feeds, days=30)
+        ok &= check("activity counts the 30-day window only",
+                    act[feeds[0]["host"]]["n"], 1)
+        ok &= check("activity keeps the newest sighting",
+                    act[feeds[0]["host"]]["latest"].strftime("%Y-%m-%d"),
+                    (now - ssg.timedelta(days=2)).strftime("%Y-%m-%d"))
+        ok &= check("activity ignores non-OPML sources",
+                    "not-in-the-opml.example" in act, False)
+
+        page = ssg.env.get_template("feeds-sources.html").render(
+            active="feeds", feeds=[
+                {"title": "Example", "site": "https://example.com/",
+                 "feed": "https://example.com/feed", "host": "example.com",
+                 "latest": "2026-11-01", "last_30d": 7}],
+            src_count=1, active_count=1, total_30d=7,
+            og_url="https://example.com/feeds/sources/")
+        ok &= check("sources page lists the feed", "example.com" in page, True)
+        ok &= check("sources page links the OPML download",
+                    'href="feeds/sources.opml"' in page, True)
+        ok &= check("sources page renders the stats", ">7<" in page, True)
+        ok &= check("sources page external links are noopener",
+                    'rel="noopener noreferrer"' in page, True)
+
     print("ALL PASS" if ok else "FAILURES")
     return 0 if ok else 1
 
