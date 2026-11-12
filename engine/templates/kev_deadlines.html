@@ -27,6 +27,7 @@
   <button class="chip" data-dl="later" type="button">Later</button>
   <span class="f-count" id="dl-count"></span>
 </div>
+<div id="stack-panel"></div>
 
 <div class="table-scroll">
   <table class="kev-table dl-table" id="dl-table">
@@ -48,6 +49,9 @@
 
 <p class="src-foot">Due dates are CISA's <code>dueDate</code> from the KEV catalog, shown in UTC. “Past due” is the normal state of most of the catalog — a vulnerability listed years ago keeps its old due date, so the useful question is what is <em>due next</em> and what still has no compensating control. See the <a href="methodology/">methodology</a> for how entries are enriched, and the <a href="kev/">catalog</a> for the full field set.</p>
 
+<script>
+{% include "kev-stack.js" %}
+</script>
 <script>
 (function () {
   var PAGE = 100;
@@ -94,6 +98,7 @@
     ROWS.forEach(function (r) { r.days = daysFor(r.due); r.state = stateFor(r.days); });
     var term = (q.value || '').trim().toLowerCase();
     var list = ROWS.filter(function (r) {
+      if (!window.KevStack || !KevStack.matches(r)) return false;
       if (filter !== 'all' && r.state !== filter) return false;
       if (!term) return true;
       return (r.id + ' ' + (r.vendor || '') + ' ' + (r.product || ''))
@@ -168,6 +173,7 @@
 
   fetch('kev/kev-index.json').then(function (r) { return r.json(); }).then(function (data) {
     ROWS = data || [];
+    if (window.KevStack) KevStack.mount(document.getElementById('stack-panel'), ROWS, function () { page = 1; render(); });
     render();
   }).catch(function () {
     tbody.textContent = '';

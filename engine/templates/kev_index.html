@@ -25,6 +25,7 @@
   <button class="chip" data-filter="poc" data-value="yes" type="button">Has PoC</button>
   <span class="f-count" id="f-count"></span>
 </div>
+<div id="stack-panel"></div>
 
 <div class="table-scroll">
   <table class="kev-table" id="kev-table">
@@ -51,6 +52,9 @@
 <nav class="pager" id="pager" aria-label="Pagination"></nav>
 
 <script>
+{% include "kev-stack.js" %}
+</script>
+<script>
 (function () {
   var ROWS = [];
   var currentPage = 1, pageSize = 50, sortCol = 'dateAdded', sortAsc = false;
@@ -74,6 +78,7 @@
   }
 
   function matches(r) {
+    if (window.KevStack && !KevStack.matches(r)) return false;
     if (filters.auto !== 'all' && r.auto !== filters.auto) return false;
     if (filters.exploit !== 'all' && r.exploit !== filters.exploit) return false;
     if (filters.threeDay !== 'all' && !r.threeDay) return false;
@@ -150,9 +155,17 @@
   document.querySelectorAll('[data-filter]').forEach(function (c) {
     c.addEventListener('click', function () {
       var f = c.getAttribute('data-filter'), v = c.getAttribute('data-value');
-      if (filters[f] === v) return;
-      filters[f] = v;
-      document.querySelectorAll('[data-filter="' + f + '"]').forEach(function (x) { x.classList.remove('active'); });
+      // "All" is the reset, not a fourth independent facet: leaving the other
+      // chips set meant the catalog stayed filtered with "All" highlighted
+      // (2026-11-13).
+      if (f === 'auto' && v === 'all') {
+        filters = { auto: 'all', exploit: 'all', threeDay: 'all', poc: 'all' };
+        document.querySelectorAll('[data-filter]').forEach(function (x) { x.classList.remove('active'); });
+      } else {
+        if (filters[f] === v) return;
+        filters[f] = v;
+        document.querySelectorAll('[data-filter="' + f + '"]').forEach(function (x) { x.classList.remove('active'); });
+      }
       c.classList.add('active');
       currentPage = 1;
       render();
@@ -171,6 +184,7 @@
   });
   fetch('kev/kev-index.json').then(function (r) { return r.json(); }).then(function (data) {
     ROWS = data;
+    if (window.KevStack) KevStack.mount(document.getElementById('stack-panel'), ROWS, function () { currentPage = 1; render(); });
     render();
   }).catch(function () {
     noResults.hidden = false;
