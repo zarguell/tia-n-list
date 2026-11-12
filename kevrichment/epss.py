@@ -146,7 +146,12 @@ def enrich(score_date, scores, prev_scores):
             continue
         rec.update(fields)
         with open(path, "w", encoding="utf-8") as f:
-            json.dump(rec, f, indent=1)
+            # Canonical serialization (indent=2), matching every other writer
+            # of these records (main.py, kev_seq_backfill.py, burndown.py).
+            # indent=1 here re-indented all ~1,780 files on each daily
+            # refresh — ~171k changed lines and ~30 MB/month of git history
+            # for a few changed score fields per record (2026-11-13).
+            json.dump(rec, f, indent=2)
         changed += 1
     return changed, total
 
