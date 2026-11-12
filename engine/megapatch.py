@@ -190,11 +190,15 @@ def _release_ok(rec):
 
 
 def table_rows(rec):
-    """Client-table projection: only the fields the table renders."""
-    keys = ("cve", "title", "family", "severity", "cvss", "epss_pct", "kev",
-            "automatable", "technical_impact", "exploitation", "ssvc_source",
-            "bod_public", "bod_internal", "three_day", "forensic",
-            "exploited", "more_likely", "remote_unauth", "media", "score", "why")
+    """Client projection: the visible table columns PLUS the fields the CSV
+    "all data" export needs (CVSS vector, CVSS impact class, raw EPSS, patch
+    KBs, disclosure flag, the story refs behind a media count). The page renders
+    a subset; the export writes everything (2026-11-13)."""
+    keys = ("cve", "title", "family", "severity", "cvss", "vector", "impact",
+            "epss", "epss_pct", "kev", "automatable", "technical_impact",
+            "exploitation", "exploited", "more_likely", "remote_unauth",
+            "ssvc_source", "bod_public", "bod_internal", "three_day", "forensic",
+            "disclosed", "media", "media_stories", "kbs", "score", "why")
     vendor = rec.get("vendor")
     out = []
     for r in rec.get("rows") or []:
@@ -202,6 +206,10 @@ def table_rows(rec):
             continue
         row = {k: r.get(k) for k in keys}
         row["why"] = [str(x)[:80] for x in (r.get("why") or [])][:5]
+        # media_stories is [{id,title,...}]; the export only needs the ids
+        row["media_stories"] = [str(s.get("id") or "") for s in
+                                (r.get("media_stories") or []) if s.get("id")]
+        row["kbs"] = [str(k) for k in (r.get("kbs") or [])]
         row["advisory"] = advisory_url(vendor, r.get("cve"))
         out.append(row)
     return out

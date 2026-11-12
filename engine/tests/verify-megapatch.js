@@ -131,7 +131,24 @@ const ev = (el, type) => el.dispatchEvent(new window.Event(type));
   out.kevTotal = data.filter((r) => r.kev).length;
   out.chipActive = kevChip.classList.contains('active');
 
-  // ---- CSV export: matches the current filter, properly escaped -----------
+  // ---- CSV export: all fields, RFC4180 escaped, filter-scoped ------------
+  // A real CSV parser (quotes, doubled quotes, commas inside cells) so the
+  // assertions below validate the escaping rather than assume it.
+  function parseCsvLine(line) {
+    const out = []; let cur = ''; let q = false;
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i];
+      if (q) {
+        if (ch === '"') {
+          if (line[i + 1] === '"') { cur += '"'; i++; } else { q = false; }
+        } else { cur += ch; }
+      } else if (ch === '"') { q = true; }
+      else if (ch === ',') { out.push(cur); cur = ''; }
+      else { cur += ch; }
+    }
+    out.push(cur);
+    return out;
+  }
   await (async () => {
     const btn = d.getElementById('mp-export');
     out.exportButton = !!btn;
@@ -140,11 +157,11 @@ const ev = (el, type) => el.dispatchEvent(new window.Event(type));
       d.querySelector('[data-mp-filter="forensic"]').click();
       return btn.disabled;
     })();
-    // back to All: the label states how many rows the file will contain
     d.querySelector('[data-mp-filter="all"]').click();
     await later(80);
     out.exportLabel = btn.querySelector('.mp-export-label').textContent;
     out.exportEnabled = !btn.disabled;
+
     d.getElementById('mp-export').click();
     await later(80);
     const readBlob = (blob) => new Promise((res, rej) => {
@@ -154,16 +171,39 @@ const ev = (el, type) => el.dispatchEvent(new window.Event(type));
       fr.readAsText(blob);
     });
     const csv = await readBlob(window.__csvBlob);
-    out.__csvPreview = csv.slice(0, 160);
+    out.__csvPreview = csv.slice(0, 150);
     const lines = csv.replace(/^\ufeff/, '').split('\r\n').filter(Boolean);
+    const H = parseCsvLine(lines[0]);
     out.csvDownload = window.__csvDownload;
     out.csvHeader = lines[0];
+    out.csvColumns = H.length;
     out.csvLineCount = lines.length - 1;
-    out.csvFirstCve = (lines[1] || '').split(',')[1];
-    out.csvQuotedTitle = lines.some(
-      (l) => l.includes('"\'=HYPERLINK(""http://x""), quoted ""title"" second line"'));
-    out.csvBlankLine = lines.some((l) => l.trim() === '');
-    // the KEV filter narrows the export exactly like the table
+
+    // every row has the same shape as the header (no ragged rows from a
+    // comma/quote/newline inside a cell)
+    const parsed = lines.slice(1).map(parseCsvLine);
+    out.csvRagged = parsed.filter((r) => r.length !== H.length).length;
+
+    const row = parsed[0];
+    const col = (name) => row[H.indexOf(name)];
+    out.csvFirstCve = col('cve');
+    out.csvVendor = col('vendor');
+    out.csvRelease = col('release');
+    out.csvVector = col('cvss_vector');
+    out.csvImpact = col('impact');
+    out.csvAdvisory = col('advisory');
+    out.csvReleaseUrl = col('release_url');
+    out.csvVendorDoc = col('vendor_doc');
+    out.csvTriState = { kev: col('kev'), exploited: col('exploited'),
+                        threeDay: col('three_day'), disclosed: col('disclosed') };
+
+    // the hostile row: commas/quotes survive, formula prefix is neutralised
+    const hostileRow = parsed.find((r) => r[H.indexOf('cve')] === 'CVE-2026-9999');
+    out.csvHostileTitle = hostileRow ? hostileRow[H.indexOf('title')] : null;
+    out.csvHostileKe = hostileRow ? hostileRow[H.indexOf('kev')] : null;
+    out.csvHostileThreeDay = hostileRow ? hostileRow[H.indexOf('three_day')] : null;
+
+    // filter scoping: KEV narrows the export exactly like the table
     d.querySelector('[data-mp-filter="kev"]').click();
     await later(80);
     d.getElementById('mp-export').click();
@@ -172,6 +212,7 @@ const ev = (el, type) => el.dispatchEvent(new window.Event(type));
     out.csvKevLines = kevCsv.replace(/^\ufeff/, '').split('\r\n').filter(Boolean).length - 1;
     out.csvKevFilename = window.__csvDownload;
   })();
+
 
   // hostile rows are text only
   const hostileRow = [...tbody.querySelectorAll('tr')].find(
@@ -221,19 +262,32 @@ const ev = (el, type) => el.dispatchEvent(new window.Event(type));
     out.kevCount === `${out.kevTotal} of ${total}` &&
     out.chipActive === true &&
     (out.hostileIsText === null || out.hostileIsText === true) &&
-    // a row with no advisory falls back to the NVD detail page
     (out.hostileHref === null ||
       out.hostileHref === 'https://nvd.nist.gov/vuln/detail/CVE-2026-9999') &&
-    // CSV export
+    // CSV export: all fields, properly escaped, filter scoped
     out.exportButton === true &&
     out.exportLabel === 'Export CSV · ' + total &&
     out.exportDisabledWhenEmpty === true &&
     out.exportEnabled === true &&
-    out.csvHeader === 'score,cve,title,family,severity,cvss,epss_pct,kev,automatable,technical_impact,bod_public,advisory' &&
+    out.csvColumns === 33 &&
     out.csvLineCount === total &&
+    out.csvRagged === 0 &&
     /^megapatch-[a-z0-9-]+\.csv$/.test(String(out.csvDownload)) &&
-    out.csvQuotedTitle === true &&
-    out.csvBlankLine === false &&
+    out.csvVendor === 'Adobe' &&
+    out.csvRelease === 'September 2026' &&
+    /^CVSS:3\.1\/AV:/.test(String(out.csvVector)) &&
+    typeof out.csvImpact === 'string' &&      // column present (MS-only value)
+    /^https:\/\//.test(String(out.csvAdvisory)) &&
+    String(out.csvReleaseUrl).startsWith('megapatch/') &&
+    /^https:\/\//.test(String(out.csvVendorDoc)) &&
+    out.csvTriState.kev === 'no' &&
+    out.csvTriState.exploited === 'no' &&
+    out.csvTriState.threeDay === '' &&
+    out.csvTriState.disclosed === 'no' &&
+    out.csvHostileTitle ===
+      "'=HYPERLINK(\"http://x\"), quoted \"title\" second line" &&
+    out.csvHostileKe === 'yes' &&
+    out.csvHostileThreeDay === 'yes' &&
     out.csvKevLines === data.filter((r) => r.kev).length &&
     // the in-page filter is still reachable via ?cve= (story links use it)
     out.deepLinkQuery === data[0].cve &&
