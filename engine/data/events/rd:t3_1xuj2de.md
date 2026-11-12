@@ -1,0 +1,3 @@
+Teams are connecting AI agents to internal systems through MCP, and the specification lists authorization as OPTIONAL. One documented server changed its tool descriptions after three calls. A research demo leaked WhatsApp chat data while the user confirmed each tool call, and a fake npm package secretly BCC'd outgoing email. I put the cases, the spec's requirements and OWASP's beta MCP Top 10 into one vendor-neutral guide. If you review MCP servers at work, tell me what it's missing. https://archanacontent.github.io/mcp-security-guide/ submitted by /u/ProfessionalLow8814 [link] [comments]
+
+via reddit r/cybersecurity: MCP's own spec says it can't enforce its security principles at the protocol level
