@@ -195,14 +195,37 @@ def table_rows(rec):
             "automatable", "technical_impact", "exploitation", "ssvc_source",
             "bod_public", "bod_internal", "three_day", "forensic",
             "exploited", "more_likely", "remote_unauth", "media", "score", "why")
+    vendor = rec.get("vendor")
     out = []
     for r in rec.get("rows") or []:
         if not CVE_RE.match(str(r.get("cve") or "")):
             continue
         row = {k: r.get(k) for k in keys}
         row["why"] = [str(x)[:80] for x in (r.get("why") or [])][:5]
+        row["advisory"] = advisory_url(vendor, r.get("cve"))
         out.append(row)
     return out
+
+
+# Per-CVE advisory pages. Only vendors that publish a canonical CVE-specific
+# page are listed; everything else falls back to NVD, because a per-advisory
+# or per-quarter vendor index (Adobe APSB, Oracle CPU, Cisco advisory, Siemens
+# SSA) is not "the advisory for THIS CVE" (2026-11-13).
+ADVISORY_URL = {
+    "Microsoft": "https://msrc.microsoft.com/update-guide/vulnerability/{cve}",
+    "Red Hat": "https://access.redhat.com/security/cve/{cve}",
+    "SUSE": "https://www.suse.com/security/cve/{cve}.html",
+}
+ADVISORY_FALLBACK = "https://nvd.nist.gov/vuln/detail/{cve}"
+
+
+def advisory_url(vendor, cve):
+    """Vendor-specific advisory page for one CVE, else the NVD detail page."""
+    cve = str(cve or "").strip().upper()
+    if not CVE_RE.match(cve):
+        return ""
+    tpl = ADVISORY_URL.get(str(vendor or "").strip(), ADVISORY_FALLBACK)
+    return tpl.format(cve=cve)
 
 
 def release_url(slug, track=None):

@@ -101,7 +101,11 @@ const ev = (el, type) => el.dispatchEvent(new window.Event(type));
     count: d.getElementById('mp-count').textContent,
     firstHref: (tbody.querySelector('tr a') || {}).getAttribute
       ? tbody.querySelector('tr a').getAttribute('href') : null,
-    expectedHrefPrefix: `megapatch/${rel.track}/${rel.slug}/?cve=CVE-`,
+    firstTarget: (tbody.querySelector('tr a') || {}).getAttribute
+      ? tbody.querySelector('tr a').getAttribute('target') : null,
+    firstRel: (tbody.querySelector('tr a') || {}).getAttribute
+      ? tbody.querySelector('tr a').getAttribute('rel') : null,
+    expectedAdvisory: data[0].advisory,
     pagerButtons: d.querySelectorAll('#mp-pager button').length,
     expectedPager: Math.ceil(total / PAGE),
     imgCount: tbody.querySelectorAll('img, svg').length,
@@ -174,6 +178,27 @@ const ev = (el, type) => el.dispatchEvent(new window.Event(type));
     (tr) => (tr.children[1] || {}).textContent === 'CVE-2026-9999');
   out.hostileIsText = hostileRow
     ? hostileRow.querySelector('img, svg') === null : null;
+  out.hostileHref = hostileRow && hostileRow.children[1].querySelector('a')
+    ? hostileRow.children[1].querySelector('a').getAttribute('href') : null;
+
+  // ---- ?cve= deep links (story pages -> release) still filter the table ----
+  {
+    const cve = data[0].cve;
+    const dom2 = new JSDOM(html, {
+      url: pageUrl + '?cve=' + encodeURIComponent(cve),
+      runScripts: 'dangerously',
+      pretendToBeVisual: true,
+      beforeParse(w) {
+        w.fetch = () => Promise.resolve({ json: () => Promise.resolve(data) });
+      },
+    });
+    await later(300);
+    const d2 = dom2.window.document;
+    out.deepLinkQuery = d2.getElementById('mp-q').value;
+    out.deepLinkRows = d2.querySelectorAll('#mp-tbody tr').length;
+    out.deepLinkExpected = data.filter((r) => r.cve === cve).length;
+    dom2.window.close();
+  }
 
   console.log(JSON.stringify(out, null, 1));
 
@@ -182,7 +207,11 @@ const ev = (el, type) => el.dispatchEvent(new window.Event(type));
     out.rowsRendered > 0 &&
     out.rowsRendered === out.expectedFirstPage &&
     out.count === `${total} of ${total}` &&
-    String(out.firstHref || '').startsWith(out.expectedHrefPrefix) &&
+    out.firstHref === out.expectedAdvisory &&
+    /^https:\/\//.test(String(out.firstHref)) &&
+    !String(out.firstHref).includes('?cve=') &&
+    out.firstTarget === '_blank' &&
+    /noopener/.test(String(out.firstRel)) &&
     out.pagerButtons === out.expectedPager &&
     out.imgCount === 0 &&
     out.xssFired === null &&
@@ -192,17 +221,23 @@ const ev = (el, type) => el.dispatchEvent(new window.Event(type));
     out.kevCount === `${out.kevTotal} of ${total}` &&
     out.chipActive === true &&
     (out.hostileIsText === null || out.hostileIsText === true) &&
+    // a row with no advisory falls back to the NVD detail page
+    (out.hostileHref === null ||
+      out.hostileHref === 'https://nvd.nist.gov/vuln/detail/CVE-2026-9999') &&
     // CSV export
     out.exportButton === true &&
     out.exportLabel === 'Export CSV · ' + total &&
     out.exportDisabledWhenEmpty === true &&
     out.exportEnabled === true &&
-    out.csvHeader === 'score,cve,title,family,severity,cvss,epss_pct,kev,automatable,technical_impact,bod_public' &&
+    out.csvHeader === 'score,cve,title,family,severity,cvss,epss_pct,kev,automatable,technical_impact,bod_public,advisory' &&
     out.csvLineCount === total &&
     /^megapatch-[a-z0-9-]+\.csv$/.test(String(out.csvDownload)) &&
     out.csvQuotedTitle === true &&
     out.csvBlankLine === false &&
-    out.csvKevLines === data.filter((r) => r.kev).length;
+    out.csvKevLines === data.filter((r) => r.kev).length &&
+    // the in-page filter is still reachable via ?cve= (story links use it)
+    out.deepLinkQuery === data[0].cve &&
+    out.deepLinkRows === out.deepLinkExpected;
 
   console.log(ok ? 'PASS megapatch release table' : 'FAIL megapatch release table');
   process.exit(ok ? 0 : 1);

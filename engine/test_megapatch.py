@@ -164,7 +164,41 @@ def test_table_rows_shape_gate():
                         "kev", "automatable", "technical_impact", "exploitation",
                         "ssvc_source", "bod_public", "bod_internal", "three_day",
                         "forensic", "exploited", "more_likely", "remote_unauth",
-                        "media", "score", "why"]))
+                        "media", "score", "why", "advisory"]))
+    assert ok
+
+
+def test_advisory_urls():
+    """The CVE cell must point at the advisory for THAT CVE: the vendor's own
+    CVE page where a canonical one exists, NVD otherwise. The old href was the
+    in-page filter (?cve=...), which readers reported as a useless link."""
+    ok = check("MSRC update guide (Microsoft)",
+               mp.advisory_url("Microsoft", "CVE-2026-124194"),
+               "https://msrc.microsoft.com/update-guide/vulnerability/CVE-2026-124194")
+    ok &= check("Red Hat CVE page",
+                mp.advisory_url("Red Hat", "CVE-2026-97229"),
+                "https://access.redhat.com/security/cve/CVE-2026-97229")
+    ok &= check("SUSE CVE page",
+                mp.advisory_url("SUSE", "CVE-2026-111497"),
+                "https://www.suse.com/security/cve/CVE-2026-111497.html")
+    # no per-CVE vendor page exists for these -> NVD detail page
+    for vendor in ("Adobe", "Oracle", "Cisco", "Siemens", "Unknown Vendor", ""):
+        ok &= check(f"{vendor or '(none)'} falls back to NVD",
+                    mp.advisory_url(vendor, "CVE-2026-73369"),
+                    "https://nvd.nist.gov/vuln/detail/CVE-2026-73369")
+    ok &= check("lower-case cve is normalised",
+                mp.advisory_url("SUSE", "cve-2026-111497"),
+                "https://www.suse.com/security/cve/CVE-2026-111497.html")
+    ok &= check("garbage cve yields no link", mp.advisory_url("Microsoft", "x"), "")
+    # table_rows carries it through and keeps the fallback for a no-vendor rec
+    rec = {"vendor": "SUSE", "rows": [_row("CVE-2026-111497")]}
+    ok &= check("table_rows carries the advisory",
+                mp.table_rows(rec)[0]["advisory"],
+                "https://www.suse.com/security/cve/CVE-2026-111497.html")
+    rec2 = {"rows": [_row("CVE-2026-111497")]}
+    ok &= check("table_rows without a vendor falls back",
+                mp.table_rows(rec2)[0]["advisory"],
+                "https://nvd.nist.gov/vuln/detail/CVE-2026-111497")
     assert ok
 
 
@@ -298,11 +332,19 @@ def test_render_site_end_to_end():
                     html.count("var PAGE ="), 1)
         ok &= check("js page-size constant is 50",
                     "var PAGE = 50;" in html, True)
-        ok &= check("js cve links carry the page path",
+        ok &= check("js release path var kept (CSV filename)",
                     "var PAGE_PATH = 'megapatch/microsoft-patch-tuesday/oct-2026/';"
                     in html, True)
-        ok &= check("js cve links use the page path",
-                    "a.href = PAGE_PATH + '?cve='" in html, True)
+        # the CVE cell links off-site to the advisory for that CVE (vendor page
+        # or NVD), never to the in-page ?cve= filter (2026-11-13)
+        ok &= check("js cve cells link to the advisory",
+                    "a.href = r.advisory" in html, True)
+        ok &= check("js cve links open off-site",
+                    "a.target = '_blank';" in html, True)
+        ok &= check("js cve links do not filter the table",
+                    "PAGE_PATH + '?cve='" not in html, True)
+        ok &= check("js csv filename carries the release path",
+                    "PAGE_PATH.split('/')" in html, True)
         ok &= check("base-relative data fetch",
                     "fetch('megapatch/microsoft-patch-tuesday/oct-2026.json')" in html,
                     True)
@@ -405,7 +447,8 @@ def test_multi_vendor_render():
 def main():
     ok = True
     for fn in (test_gate_slug, test_helpers, test_table_rows_shape_gate,
-               test_cve_index_gate, test_coverage_join, test_sitemap_entries,
+               test_advisory_urls, test_cve_index_gate, test_coverage_join,
+               test_sitemap_entries,
                test_month_row_tracking_states, test_multi_vendor_render,
                test_render_site_end_to_end,
                test_backfilled_release_is_an_archive_not_tracked):
