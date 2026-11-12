@@ -77,6 +77,23 @@ def test_enrich_preserves_fields_and_computes_delta(tmp_path):
     assert changed2 == 0
 
 
+def test_enrich_writes_canonical_formatting(tmp_path):
+    """Regression (2026-11-13): this writer used indent=1 while every other
+    writer of data/cves/*.json uses indent=2, so each daily refresh
+    re-indented all ~1,780 records (~171k changed lines) and packed ~30 MB/
+    month of git history for a handful of changed score fields per record.
+    The fixture is written with indent=1 on purpose: enrich() must normalize
+    it, not preserve it."""
+    d = _mk_record(tmp_path, "CVE-2026-0001", kev_date_added="2026-09-01")
+    epss.CVE_DIR = str(d)
+    changed, _ = epss.enrich("2026-09-23",
+                             {"CVE-2026-0001": ("0.55", "0.91")}, {})
+    assert changed == 1
+    p = d / "CVE-2026-0001.json"
+    rec = json.loads(p.read_text())
+    assert p.read_text() == json.dumps(rec, indent=2)
+
+
 def test_enrich_skips_unknown_cves(tmp_path):
     d = _mk_record(tmp_path, "CVE-2026-0002")
     epss.CVE_DIR = str(d)
