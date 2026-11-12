@@ -290,8 +290,19 @@ def test_render_site_end_to_end():
                     'href="#' not in html, True)
         ok &= check("nav anchors carry the page path",
                     'href="megapatch/microsoft-patch-tuesday/oct-2026/#all-cves"' in html, True)
+        # 2026-11-13: this assertion used to pin `var PAGE = '<url>'` — the very
+        # declaration that shadowed the PAGE = 50 rows-per-page constant and
+        # made every release table render zero rows. Assert the page-size
+        # constant is NOT redeclared and that the URL lives in its own var.
+        ok &= check("js page-size constant declared once",
+                    html.count("var PAGE ="), 1)
+        ok &= check("js page-size constant is 50",
+                    "var PAGE = 50;" in html, True)
         ok &= check("js cve links carry the page path",
-                    "var PAGE = 'megapatch/microsoft-patch-tuesday/oct-2026/';" in html, True)
+                    "var PAGE_PATH = 'megapatch/microsoft-patch-tuesday/oct-2026/';"
+                    in html, True)
+        ok &= check("js cve links use the page path",
+                    "a.href = PAGE_PATH + '?cve='" in html, True)
         ok &= check("base-relative data fetch",
                     "fetch('megapatch/microsoft-patch-tuesday/oct-2026.json')" in html,
                     True)
