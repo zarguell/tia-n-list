@@ -1,0 +1,5 @@
+Go 1.27.4 and Go 1.26.11 ship 12 security fixes across the toolchain, the standard library, and the runtime. The one issue called out by name is CVE-2026-97033, which blocks arbitrary code execution during cgo-enabled builds, meaning a malicious or compromised dependency could run code on the machine doing the build rather than merely break it.
+
+The release also addresses a crash in the HTTP/1 server path, a denial-of-service class of bug for any service built on net/http and exposed to hostile clients.
+
+What to watch is packaging lag: distributions and container base images tend to carry older point releases for weeks, so build images and CI runners are the realistic exposure window for the cgo issue. Rebuild against the patched toolchains and confirm pinned Go versions in CI, and check whether the HTTP/1 crash gets its own CVE identifier in a later advisory.
