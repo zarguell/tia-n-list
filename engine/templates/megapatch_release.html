@@ -337,7 +337,8 @@
   }
   function csvText(list) {
     var head = ['score', 'cve', 'title', 'family', 'severity', 'cvss',
-                'epss_pct', 'kev', 'automatable', 'technical_impact', 'bod_public'];
+                'epss_pct', 'kev', 'automatable', 'technical_impact', 'bod_public',
+                'advisory'];
     var lines = [head.join(',')];
     list.forEach(function (r) {
       lines.push([
@@ -352,6 +353,7 @@
         r.automatable || '',
         r.technical_impact || '',
         r.bod_public || '',
+        r.advisory || ('https://nvd.nist.gov/vuln/detail/' + encodeURIComponent(r.cve || '')),
       ].map(csvCell).join(','));
     });
     // BOM so Excel reads the UTF-8 titles; CRLF per RFC 4180
@@ -386,7 +388,13 @@
       tr.appendChild(cell(num(r.score) === null ? '—' : num(r.score).toFixed(0), 'mp-score-cell'));
       var td = document.createElement('td');
       var a = document.createElement('a');
-      a.href = PAGE_PATH + '?cve=' + encodeURIComponent(r.cve) + '#all-cves';
+      // CVE cell links to the advisory for THIS CVE (vendor page where one
+      // exists, NVD otherwise) — the in-page filter link was useless to
+      // readers; ?cve= deep links from story pages still work below.
+      a.href = r.advisory || ('https://nvd.nist.gov/vuln/detail/' + encodeURIComponent(r.cve));
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      a.title = r.advisory ? 'Advisory for ' + r.cve : 'NVD entry for ' + r.cve;
       a.textContent = r.cve;
       td.appendChild(a);
       tr.appendChild(td);
