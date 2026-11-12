@@ -1,0 +1,1 @@
+The National Vulnerability Database entry for CVE-2020-17103 records the Windows Cloud Files Mini Filter Driver elevation-of-privilege issue with a CVSS 3.1 score of 7.0 (AV:L/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:H) and lists the weakness as CWE-269. The entry was published on December 10, 2020 and was last modified on June 17, 2026 after the bug re-emerged as MiniPlasma.
