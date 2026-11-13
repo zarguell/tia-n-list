@@ -1,0 +1,1 @@
+CNBC reported a Microsoft outage on Thursday 12 November 2026 affecting users of Outlook, Teams and Microsoft 365. Microsoft 365 had drawn nearly 50,000 reports on Downdetector alongside problems reported for Teams, with users across multiple regions affected.
