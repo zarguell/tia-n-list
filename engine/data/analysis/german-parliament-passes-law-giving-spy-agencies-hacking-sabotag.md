@@ -1,0 +1,3 @@
+The Bundestag approved a bill overhauling Germany's spy laws by a vote of 308 to 190, with 71 abstentions, months after Chancellor Friedrich Merz's cabinet signed off on the draft. The legislation grants German intelligence services new powers to combat foreign threats, including hacking and sabotage authority, and is described as the biggest overhaul of the country's spy laws of the postwar era.
+
+The measure expands the legal toolkit available to intelligence agencies. Watch for final enactment, implementation details, and any oversight or civil-liberties challenges that follow. The corroborating social post adds little beyond the headline.
