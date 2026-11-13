@@ -1,0 +1,39 @@
+title: dllhost.exe Masquerade From Outside Windows Directories (SQL Server Gh0st RAT campaign)
+id: 47ed99fa-fbfd-485e-a7d7-080a02279ade
+status: experimental
+description: >
+    Detects dllhost.exe executing from a path outside the Windows system
+    directories, the masquerade used by the October 2026 campaign that
+    brute-forces internet-facing Microsoft SQL Server logins and runs
+    attacker-supplied T-SQL to deploy a payload. The stage-one loader is a
+    UPX-packed Go binary named dllhost.exe that embeds the Naabu v2 port
+    scanner, retrieves its target range from
+    hxxp://site.vietnam852[.]com:88/ip.php, then installs Gh0st RAT and a
+    Monero miner. The legitimate COM+ surrogate host only runs from
+    System32/SysWOW64, so an instance in a temp, data or application directory
+    on a database host is the hunting signal. Derived from published campaign
+    reporting - not validated against a live sample.
+references:
+    - https://gbhackers.com/microsoft-sql-servers-hijacked/
+    - https://www.techfinitive.com/weak-passwords-and-sql-used-in-gh0st-rat-attack-against-microsoft-users/
+author: Tia N. List
+date: 2026/11/13
+tags:
+    - attack.t1036
+    - attack.t1059
+    - attack.t1105
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        Image|endswith: '\dllhost.exe'
+    filter_system:
+        Image|startswith:
+            - 'C:\Windows\System32\'
+            - 'C:\Windows\SysWOW64\'
+    condition: selection_img and not filter_system
+falsepositives:
+    - Third-party software shipping or installing its own copy of a COM+ surrogate host outside the Windows directories
+    - Portable application bundles and installers that stage a dllhost.exe copy in their own program directory
+level: high

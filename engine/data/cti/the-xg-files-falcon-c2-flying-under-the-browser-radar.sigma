@@ -1,0 +1,34 @@
+title: Falcon/XG "PDF Viewer" Chrome Extension Artifacts Created on Disk
+id: 450e76ca-d012-46e3-8801-5c2d4aa15a2c
+status: experimental
+description: >
+    Detects file creation inside the profile directory of the Chrome extension
+    that ships with the Falcon (XG / Xiang Ge) browser C2 framework. The
+    framework injects JavaScript into webmail portals and government web
+    applications and keeps its implant inside the victim's browser tab, and it
+    installs a companion extension posing as "PDF Viewer" with ID
+    mbidcmlcbgbphpoacojjbmfpohcimjji that requests roughly 40 permissions for
+    credential, cookie, history, clipboard and network access. The same
+    intrusion drops the Antino Rust backdoor, whose command and control rides
+    Microsoft Graph against Outlook and OneDrive. The extension ID is a fixed
+    artifact reported by Unit 42, so a match is a direct hit rather than a
+    behavioral guess. The rule ships without a product qualifier so browser
+    extension directories on any endpoint telemetry source can match.
+references:
+    - https://unit42.paloaltonetworks.com/falcon-c2-browser-compromise/
+    - https://blog.talosintelligence.com/china-nexus-uat-11587-targets-government-and-policy-organizations-across-asia-with-antino-backdoor/
+author: Tia N. List
+date: 2026/11/13
+tags:
+    - attack.t1176
+    - attack.t1185
+logsource:
+    category: file_event
+detection:
+    selection_extension_id:
+        TargetFilename|contains: 'mbidcmlcbgbphpoacojjbmfpohcimjji'
+    condition: selection_extension_id
+falsepositives:
+    - Malware analysts or threat-intel tooling staging artifacts of the reported extension ID in an isolated profile or sandbox
+    - Enterprise browsers syncing an archived extension directory whose folder name carries the same identifier
+level: high
