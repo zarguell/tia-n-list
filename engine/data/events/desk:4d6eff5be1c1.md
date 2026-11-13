@@ -1,0 +1,1 @@
+Hackread reported that in an October 31, 2026 announcement the FBI said the Binance theft occurred on or around October 29, 2026 and attributed it to the North Korean TraderTraitor group. The FBI published 628 attacker wallet addresses and asked cryptocurrency firms to block transactions involving them. The article was published on November 1, 2026.

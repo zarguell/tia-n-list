@@ -1,0 +1,1 @@
+This critical advisory covers the allow_module declarations in Products.CMFPlone that opened whole modules, and everything those modules import, to restricted code. TALES expressions and Python Scripts could therefore escape the restricted Python sandbox and reach modules including os, which is the component of the chain that converts a logic flaw into code execution.
