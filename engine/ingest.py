@@ -2,7 +2,7 @@
 """Tia Storyline — hourly ingest: native RSS polling + reddit RSS.
 
 Leaf A (docs/vps-migration.md): miniflux replaced by a stdlib poller over
-engine/feeds/cyber.opml (the 53 cyber feeds). Dedup = bounded seen-ring of
+engine/feeds/cyber.opml (the curated cyber feed list). Dedup = bounded seen-ring of
 content-hashed feed+guid + a one-time cutover timestamp (the miniflux backlog
 is never re-ingested). Event ids: rss:<sha1>. The two ex-crawler hosts
 (bleepingcomputer, securityweek) still get best-effort full-article text;
@@ -159,9 +159,9 @@ FETCH_WORKERS = 8          # IO-only parallelism (AGENTS rule: never parallel pi
 FETCH_TIMEOUT = 15
 RSS_WINDOW = 2000          # seen-guid ring buffer
 # Feeds whose content miniflux historically upgraded via its crawler — keep
-# fetching best-effort full article text for just these (51/53 feeds consumed
-# RSS content as-is; their scraper config: SecurityWeek div.zox-post-body,
-# BleepingComputer default readability).
+# fetching best-effort full article text for just these (every other feed
+# consumes its RSS content as-is; their scraper config: SecurityWeek
+# div.zox-post-body, BleepingComputer default readability).
 FULL_TEXT_HOSTS = ("bleepingcomputer.com", "securityweek.com")
 
 

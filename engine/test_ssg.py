@@ -255,7 +255,13 @@ def main():
 
         # ---- 2026-11-13: the published source list (/feeds/sources/) ----
         feeds = ssg.load_source_feeds()
-        ok &= check("OPML loads every checked-in feed", len(feeds), 53)
+        # count-free assertion: the OPML is a curated list, so pin the
+        # invariants (unique hosts, https, sorted) and that every outline is
+        # carried, not a hard-coded number that needs a test edit per curation
+        import xml.etree.ElementTree as _ET
+        outlines = [o for o in _ET.parse(ssg.FEEDS_OPML).getroot().iter("outline")
+                    if o.get("xmlUrl")]
+        ok &= check("OPML loads every checked-in feed", len(feeds), len(outlines))
         ok &= check("source rows are https and titled",
                     all(f["feed"].startswith("https://") and f["title"]
                         and f["host"] for f in feeds), True)
