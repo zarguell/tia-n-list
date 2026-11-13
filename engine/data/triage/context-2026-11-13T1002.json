@@ -1,0 +1,769 @@
+{
+ "date": "2026-11-13",
+ "decisions_path": "engine/data/triage/decisions-2026-11-13T1002.json",
+ "instructions": "For every new event decide: (1) keep or drop \u2014 keep only stories worth covering (real security events, vulnerabilities, attacks, breaches, advisories with substance); drop press releases, vendor marketing, generic explainers, and anything duplicating an existing story. (2) If keep, assign the event to the RIGHT story: an existing candidate story id if it belongs there (this FIXES mechanical clustering \u2014 e.g. different outlets' Patch Tuesday roundups are ONE story), or NEW with a clean story_title. (3) merges: list candidate stories that are really the same story (from = fragment, into = the most complete one). (4) For every kept event that names CVEs, optionally assess exploitation: exploited = the event reports OBSERVED in-the-wild exploitation (implants, victim counts, campaigns, CISA KEV confirmation); suspected = public exploit code/PoC or likely-but-unconfirmed. Attribute ONLY the CVEs you can tie to the claim \u2014 a bulletin's blanket 'actively exploited' does NOT flag all its CVEs. Omit the exploitation field when the event makes no claim.\n(5) LOW-TRUST events (\"low_trust\": true \u2014 AI-drafted aggregator reposts, late and overstated): treat as unverified leads. When the text attributes the claim to a named primary source (a researcher firm like watchTowr, a vendor advisory, CISA, a major outlet) and attribution_urls or a web search (/home/ubuntu/repos/cronman/bin/web-search.sh \"query\") locate that primary source CONFIRMING the claim, include a provenance object in the decision: {\"url\": <primary url>, \"source\": <domain>, \"evidence\": <one line>, \"verified\": true}. VERIFIED provenance lets the event mint a story (credited to the primary source) and count as a development; without it, a low-trust event can only attach to an EXISTING story, never mint. If you cannot verify, keep/drop on normal merit and omit provenance.\n\nWrite decisions as JSON with EXACTLY this shape:\n{\n  \"decisions\": [\n    {\"event_id\": \"<id>\", \"action\": \"keep\", \"story\": \"<existing candidate story id>\", \"reason\": \"...\"},\n    {\"event_id\": \"<id>\", \"action\": \"keep\", \"story\": \"NEW\", \"story_title\": \"<clean title>\", \"reason\": \"...\"},\n    {\"event_id\": \"<id>\", \"action\": \"drop\", \"reason\": \"...\"}\n  ],\n  \"merges\": [{\"from\": \"<fragment story id>\", \"into\": \"<canonical story id>\"}]\n}\nFor events marked \"low_trust\" (AI-drafted aggregator reposts) a decision\nmay carry an optional \"provenance\" object when you VERIFIED the claim at\nthe named primary source: {\"event_id\": ..., \"action\": \"keep\", ...}\n  \"provenance\": {\"url\": \"<primary source url>\", \"source\": \"<domain>\", \"evidence\": \"<one line>\"}\nOnly include provenance when the primary source (vendor advisory, CISA,\nthe named researcher/outlet) really carries the claim \u2014 verified\nprovenance lets a low-trust event mint a story and set freshness; without\nit the event can only amplify an existing story.\nSTRICT KEY NAMES: the array key is \"decisions\" (never \"events\"); the story\nkey is \"story\" (never \"story_id\"); \"story\" holds a candidate_stories id\nverbatim or the literal string \"NEW\". Optional per-event field\n\"exploitation\": {\"CVE-...\": {\"status\": \"exploited|suspected\", \"evidence\": \"1-2 sentences\"}}.",
+ "new_events": [
+  {
+   "id": "rss:dd9422fb976beab1",
+   "title": "OpenAI Launches Advanced AI Cybersecurity Tools for Automated Penetration Testing and Vulnerability Research",
+   "source": "gbhackers.com",
+   "published_at": "2026-11-13T09:54:49Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "OpenAI introduced Daybreak Red Team and Daybreak Defense Factory at its November 12 \u201cCyber at the Frontier\u201d event, expanding its cybersecurity platform with agents that investigate vulnerabilities, validate attack paths,"
+  },
+  {
+   "id": "rss:98cfcac700eba525",
+   "title": "Citrix Patches 10 Critical NetScaler Vulnerabilities",
+   "source": "securityweek.com",
+   "published_at": "2026-11-13T09:36:56Z",
+   "cves": [
+    "CVE-2026-107407",
+    "CVE-2026-107410",
+    "CVE-2026-107412",
+    "CVE-2026-107415",
+    "CVE-2026-111334",
+    "CVE-2026-111338",
+    "CVE-2026-120864",
+    "CVE-2026-120868",
+    "CVE-2026-120869"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Citrix on Thursday announced patches for 28 vulnerabilities in NetScaler ADC and NetScaler Gateway, including nine critical-severity bugs. The critical flaws stem from memory overflow issues in Packet Processing, SMPP tr"
+  },
+  {
+   "id": "rss:3f7386997c61348e",
+   "title": "Microsoft confirms Windows activation failures after November updates",
+   "source": "bleepingcomputer.com",
+   "published_at": "2026-11-13T09:36:18Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Microsoft has confirmed that this month's Patch Tuesday security updates are causing Windows activation and licensing failures with 0x80041008 error codes. According to a Wednesday service alert seen by BleepingComputer,"
+  },
+  {
+   "id": "rss:f2eebf9668543b5c",
+   "title": "Chinese-Speaking Hackers Weaponize Cairn AI Framework to Breach Semiconductor and Defense Organizations",
+   "source": "gbhackers.com",
+   "published_at": "2026-11-13T09:33:24Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Chinese-speaking attackers weaponized the open-source Cairn penetration-testing framework to conduct 25 autonomous operations against at least 19 organizations during August\u2013September 2026. Ten organizations experienced "
+  },
+  {
+   "id": "rss:9ea192bb62f3aea3",
+   "title": "OpenAI Unveils Daybreak Red Team, Defense Factory Security Tools",
+   "source": "securityweek.com",
+   "published_at": "2026-11-13T09:21:01Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "OpenAI has introduced two new Daybreak cybersecurity products that use AI agents to test web applications for vulnerabilities and help security teams develop fixes. The products, Daybreak Red Team and Daybreak Defense Fa"
+  },
+  {
+   "id": "rss:a06664a4d675ea96",
+   "title": "Ransomware at the hypervisor layer: how attackers use ESXi and vCenter features for malicious purposes",
+   "source": "malware.news",
+   "published_at": "2026-11-13T09:05:43Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Our Global Emergency Response Team (GERT) recently investigated an engagement in which an adversary destroyed an organization\u2019s virtualization estate over a 10-day period. The campaign targeted four ESXi hosts, every vir"
+  },
+  {
+   "id": "rss:51a5b4803a6f3e4a",
+   "title": "Law enforcement dismantle cocaine network from Ecuador to Europe",
+   "source": "malware.news",
+   "published_at": "2026-11-13T09:05:40Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "An international investigation supported by Europol and Eurojust has dismantled a criminal network suspected of importing cocaine into Europe from Ecuador and other Latin American countries. Investigators link the networ"
+  },
+  {
+   "id": "rss:11d9e6b6c4e3efde",
+   "title": "CERT-In\u2019s AI Security Auditing Guidelines: Will Your AI System Need an Independent Audit?",
+   "source": "malware.news",
+   "published_at": "2026-11-13T09:00:46Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Picture a customer-support chatbot at a mid-sized Indian e-commerce company. It answers questions about orders and returns. It runs on a third-party large language model. Nobody thinks of it as high-risk. Now the product"
+  },
+  {
+   "id": "masto:117608016756358346",
+   "title": "POV: anthropic and google both found the same apache bug before you patched it CVE-2026-119618, a race condition in HTTP/2 headers affected:",
+   "source": "www.wiz.io",
+   "published_at": "2026-11-13T07:45:19.748Z",
+   "cves": [
+    "CVE-2026-119618"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "POV: anthropic and google both found the same apache bug before you patched it CVE-2026-119618, a race condition in HTTP/2 headers affected:  via Mastodon https://www.wiz.io/blog/cve-2026-119618-rce-apache-http-server-vu"
+  },
+  {
+   "id": "masto:117607969381570510",
+   "title": "Marketing Scoops: The Difference Between The Dark Web and The Deep Web https:// marketingscooops.blogspot.com/ 2026/11/the-difference-betwee",
+   "source": "marketingscooops.blogspot.com",
+   "published_at": "2026-11-13T07:33:16.866Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Marketing Scoops: The Difference Between The Dark Web and The Deep Web https:// marketingscooops.blogspot.com/ 2026/11/the-difference-betwee  via Mastodon https://marketingscooops.blogspot.com/2026/11/the-difference-betw"
+  },
+  {
+   "id": "masto:117607960336461217",
+   "title": "\ud83d\udee1\ufe0f The CVEs that mattered \u00b7 Thursday 12 November 1. CVE-2026-84869 \u00b7 Critical 9.9 \u00b7 exploited \u2014 ConnectWise ScreenConnect 2. CVE-2026-102895",
+   "source": "ax-news.com",
+   "published_at": "2026-11-13T07:30:58.000Z",
+   "cves": [
+    "CVE-2026-102895",
+    "CVE-2026-109618",
+    "CVE-2026-84869"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "\ud83d\udee1\ufe0f The CVEs that mattered \u00b7 Thursday 12 November 1. CVE-2026-84869 \u00b7 Critical 9.9 \u00b7 exploited \u2014 ConnectWise ScreenConnect 2. CVE-2026-102895  via Mastodon https://ax-news.com/cve "
+  },
+  {
+   "id": "masto:117607899454034937",
+   "title": "Technology and Business Domain Extensions and Their Stories. A Domain Guide, Part 3 Extensions such as .com, .app, .shop or .bank denote not",
+   "source": "vsx.global",
+   "published_at": "2026-11-13T07:15:29.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Technology and Business Domain Extensions and Their Stories. A Domain Guide, Part 3 Extensions such as .com, .app, .shop or .bank denote not  via Mastodon https://vsx.global/technology-business-domain-extensions-guide-pa"
+  },
+  {
+   "id": "masto:117607888913011492",
+   "title": "Governments advise citizens to store at least three days' worth of food and water. It\u2019s always wise to keep some essentials on hand. But bes",
+   "source": "hackers-arise.com",
+   "published_at": "2026-11-13T07:12:47.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Governments advise citizens to store at least three days' worth of food and water. It\u2019s always wise to keep some essentials on hand. But bes  via Mastodon https://hackers-arise.com/off-grid-communications-part-2-getting-"
+  },
+  {
+   "id": "masto:117607867334481530",
+   "title": "Jensen Huang resigns as Nvidia CEO amid affairs and smuggling probe, Anthropic files for IPO, and Google quietly launches a new Gemini model",
+   "source": "ai0.news",
+   "published_at": "2026-11-13T07:07:19.748Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Jensen Huang resigns as Nvidia CEO amid affairs and smuggling probe, Anthropic files for IPO, and Google quietly launches a new Gemini model  via Mastodon https://ai0.news/posts/2026-11-13-daily-digest/ "
+  },
+  {
+   "id": "masto:117607845925332115",
+   "title": "\ud83d\udd13 Free & open-source. Live MSSP demo \u2192 https:// mssp.hookprobe.com Code + issues \u2192 https:// github.com/hookprobe Bootstrapped and building i",
+   "source": "mssp.hookprobe.com",
+   "published_at": "2026-11-13T07:01:53.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "\ud83d\udd13 Free & open-source. Live MSSP demo \u2192 https:// mssp.hookprobe.com Code + issues \u2192 https:// github.com/hookprobe Bootstrapped and building i  via Mastodon https://mssp.hookprobe.com/ "
+  },
+  {
+   "id": "masto:117607845981828702",
+   "title": "Worried about \"missing user interaction\" vulnerabilities like CVE-2026-124194 in Microsoft Office Outlook? \ud83d\ude2c HookProbe's AI-native engines (",
+   "source": "hookprobe.com",
+   "published_at": "2026-11-13T07:01:53.000Z",
+   "cves": [
+    "CVE-2026-124194"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Worried about \"missing user interaction\" vulnerabilities like CVE-2026-124194 in Microsoft Office Outlook? \ud83d\ude2c HookProbe's AI-native engines (  via Mastodon https://hookprobe.com/blog/how-hookprobe-detects-cve-2026-124194-"
+  },
+  {
+   "id": "masto:117607845341472062",
+   "title": "CVE-2026-128424: A flaw in the Kroxylicious ACL authorizer in Red Hat Streams for Apache Kafka 3 strips regex escapes, so allow rules can ma",
+   "source": "www.cve.org",
+   "published_at": "2026-11-13T07:01:43.000Z",
+   "cves": [
+    "CVE-2026-128424"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "CVE-2026-128424: A flaw in the Kroxylicious ACL authorizer in Red Hat Streams for Apache Kafka 3 strips regex escapes, so allow rules can ma  via Mastodon https://www.cve.org/CVERecord?id=CVE-2026-128424 "
+  },
+  {
+   "id": "masto:117607826856634727",
+   "title": "\ud83c\udf99\ufe0f Cyberwald - Cybersecurity-News - 13.11.2026 Heute im Podcast: \u2022 N-able N-central Zero-Days 4EverAble2Shell und Agent2Shell aktiv ausgenut",
+   "source": "cyberwald.com",
+   "published_at": "2026-11-13T06:57:01.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "\ud83c\udf99\ufe0f Cyberwald - Cybersecurity-News - 13.11.2026 Heute im Podcast: \u2022 N-able N-central Zero-Days 4EverAble2Shell und Agent2Shell aktiv ausgenut  via Mastodon https://cyberwald.com/podcast/2026-11-13.podcast.ogg "
+  }
+ ],
+ "candidate_stories": [
+  {
+   "id": "openai-launches-advanced-ai-cybersecurity-tools-for-automated-pe",
+   "title": "OpenAI Launches Advanced AI Cybersecurity Tools for Automated Penetration Testing and Vulnerability Research",
+   "n_events": 1,
+   "last_seen": "2026-11-13T09:54:49Z",
+   "first_event_title": "OpenAI Launches Advanced AI Cybersecurity Tools for Automated Penetration Testing and Vulnerability Research"
+  },
+  {
+   "id": "critical-rce-in-citrix-netscaler-cve-2026-107406",
+   "title": "Critical RCE in Citrix NetScaler CVE-2026-107406",
+   "n_events": 6,
+   "last_seen": "2026-11-13T09:36:56Z",
+   "first_event_title": "\ud83d\udcf0 New Critical RCE Flaw Found in Patched Citrix NetScaler Appliances Citrix issues another emergency patch for a critical RCE flaw (CVE-2026"
+  },
+  {
+   "id": "microsoft-releases-emergency-windows-updates-to-fix-rds-failures",
+   "title": "Microsoft releases emergency Windows updates to fix RDS failures",
+   "n_events": 5,
+   "last_seen": "2026-11-13T09:36:18Z",
+   "first_event_title": "Microsoft releases emergency Windows updates to fix RDS failures"
+  },
+  {
+   "id": "chinese-speaking-hackers-weaponize-cairn-ai-framework-to-breach",
+   "title": "Chinese-Speaking Hackers Weaponize Cairn AI Framework to Breach Semiconductor and Defense Organizations",
+   "n_events": 1,
+   "last_seen": "2026-11-13T09:33:24Z",
+   "first_event_title": "Chinese-Speaking Hackers Weaponize Cairn AI Framework to Breach Semiconductor and Defense Organizations"
+  },
+  {
+   "id": "openai-unveils-daybreak-red-team-defense-factory-security-tools",
+   "title": "OpenAI Unveils Daybreak Red Team, Defense Factory Security Tools",
+   "n_events": 1,
+   "last_seen": "2026-11-13T09:21:01Z",
+   "first_event_title": "OpenAI Unveils Daybreak Red Team, Defense Factory Security Tools"
+  },
+  {
+   "id": "ransomware-at-the-hypervisor-layer-how-attackers-use-esxi-and-vc",
+   "title": "Ransomware at the hypervisor layer: how attackers use ESXi and vCenter features for malicious purposes",
+   "n_events": 1,
+   "last_seen": "2026-11-13T09:05:43Z",
+   "first_event_title": "Ransomware at the hypervisor layer: how attackers use ESXi and vCenter features for malicious purposes"
+  },
+  {
+   "id": "law-enforcement-dismantle-cocaine-network-from-ecuador-to-europe",
+   "title": "Law enforcement dismantle cocaine network from Ecuador to Europe",
+   "n_events": 1,
+   "last_seen": "2026-11-13T09:05:40Z",
+   "first_event_title": "Law enforcement dismantle cocaine network from Ecuador to Europe"
+  },
+  {
+   "id": "cert-in-s-ai-security-auditing-guidelines-will-your-ai-system-ne",
+   "title": "CERT-In\u2019s AI Security Auditing Guidelines: Will Your AI System Need an Independent Audit?",
+   "n_events": 1,
+   "last_seen": "2026-11-13T09:00:46Z",
+   "first_event_title": "CERT-In\u2019s AI Security Auditing Guidelines: Will Your AI System Need an Independent Audit?"
+  },
+  {
+   "id": "researchers-discover-6-zero-day-vulnerabilities-in-danfoss-refri",
+   "title": "Researchers Discover 6 Zero-Day Vulnerabilities in Danfoss Refrigeration Controllers Allowing Remote Root Access",
+   "n_events": 1,
+   "last_seen": "2026-11-13T08:52:58Z",
+   "first_event_title": "Researchers Discover 6 Zero-Day Vulnerabilities in Danfoss Refrigeration Controllers Allowing Remote Root Access"
+  },
+  {
+   "id": "nightmare-eclipse-drops-windows-zero-day-exploit-signdrop",
+   "title": "Nightmare Eclipse Drops Windows Zero-Day Exploit \u2018SignDrop\u2019",
+   "n_events": 1,
+   "last_seen": "2026-11-13T08:50:36Z",
+   "first_event_title": "Nightmare Eclipse Drops Windows Zero-Day Exploit \u2018SignDrop\u2019"
+  },
+  {
+   "id": "massive-microsoft-365-outage-disrupts-outlook-teams-copilot-and",
+   "title": "Massive Microsoft 365 Outage Disrupts Outlook, Teams, Copilot, and Defender XDR Worldwide",
+   "n_events": 10,
+   "last_seen": "2026-11-13T08:45:42Z",
+   "first_event_title": "Massive Microsoft 365 Outage Disrupts Outlook, Teams, Copilot, and Defender XDR Worldwide"
+  },
+  {
+   "id": "10-database-security-activity-monitoring-tools-the-2026-buyer-s",
+   "title": "10 Database Security & Activity Monitoring Tools: The 2026 Buyer\u2019s Verdict Guide",
+   "n_events": 0,
+   "last_seen": "2026-11-13T08:39:44Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "12-data-privacy-management-platforms-the-2026-buyer-s-verdict-gu",
+   "title": "12 Data Privacy Management Platforms: The 2026 Buyer\u2019s Verdict Guide",
+   "n_events": 0,
+   "last_seen": "2026-11-13T08:36:31Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "stingybasilisk-apt-uses-windows-named-pipes-to-control-malware-a",
+   "title": "StingyBasilisk APT Uses Windows Named Pipes to Control Malware and Evade Security Detection",
+   "n_events": 1,
+   "last_seen": "2026-11-13T08:34:25Z",
+   "first_event_title": "StingyBasilisk APT Uses Windows Named Pipes to Control Malware and Evade Security Detection"
+  },
+  {
+   "id": "police-arrest-354-suspects-in-dark-web-cybercrime-crackdown",
+   "title": "Police arrest 354 suspects in dark web cybercrime crackdown",
+   "n_events": 1,
+   "last_seen": "2026-11-13T08:34:20Z",
+   "first_event_title": "Police arrest 354 suspects in dark web cybercrime crackdown"
+  },
+  {
+   "id": "critical-red-hat-quay-vulnerability-could-expose-private-contain",
+   "title": "Red Hat Quay critical signing-key takeover (CVE-2026-123710, CVSS 9.8)",
+   "n_events": 11,
+   "last_seen": "2026-11-13T08:19:55Z",
+   "first_event_title": "Critical Red Hat Quay Vulnerability Could Expose Private Container Images"
+  },
+  {
+   "id": "cisco-broadworks-xxe-vulnerability-cve-2026-20320",
+   "title": "Cisco BroadWorks XXE Vulnerability CVE-2026-20320",
+   "n_events": 13,
+   "last_seen": "2026-11-13T08:15:05.000Z",
+   "first_event_title": "Cisco BroadWorks XXE Flaw Allows Unauthenticated Remote File Disclosure"
+  },
+  {
+   "id": "the-xg-files-falcon-c2-flying-under-the-browser-radar",
+   "title": "The XG Files: Falcon C2 Flying Under The (Browser) Radar",
+   "n_events": 4,
+   "last_seen": "2026-11-13T08:11:09.000Z",
+   "first_event_title": "The XG Files: Falcon C2 Flying Under The (Browser) Radar"
+  },
+  {
+   "id": "tsmc-reports-data-breach-after-hackers-access-employee-informati",
+   "title": "TSMC Reports Data Breach After Hackers Access Employee Information Through Cloud Provider",
+   "n_events": 2,
+   "last_seen": "2026-11-13T08:11:05Z",
+   "first_event_title": "TSMC Reports Data Breach After Hackers Access Employee Information Through Cloud Provider"
+  },
+  {
+   "id": "china-linked-hackers-exploit-php2shell-to-root-firewalls",
+   "title": "China-Linked Hackers Exploit PHP2Shell to Root Firewalls",
+   "n_events": 44,
+   "last_seen": "2026-11-13T08:05:49Z",
+   "first_event_title": "China-Linked Hackers Exploit PHP2Shell to Root Firewalls"
+  },
+  {
+   "id": "stormshield-cti-tracks-fake-job-offer-campaign-delivering-a-cust",
+   "title": "Stormshield CTI tracks fake job offer campaign delivering a custom control panel",
+   "n_events": 1,
+   "last_seen": "2026-11-13T08:00:26.819Z",
+   "first_event_title": "Stormshield CTI: fake job offers deliver a bespoke control panel"
+  },
+  {
+   "id": "able2shell-frequently-asked-questions-for-reported-n-able-n-cent",
+   "title": "Able2Shell: Frequently asked questions for reported N-able N-central zero-day vulnerabilities",
+   "n_events": 47,
+   "last_seen": "2026-11-13T07:49:06.875Z",
+   "first_event_title": "Able2Shell: Frequently asked questions for reported N-able N-central zero-day vulnerabilities"
+  },
+  {
+   "id": "apache-http-server-flaws-enable-remote-code-execution-and-denial",
+   "title": "Apache HTTP Server Flaws Enable Remote Code Execution and Denial-of-Service Attacks",
+   "n_events": 43,
+   "last_seen": "2026-11-13T07:45:19.748Z",
+   "first_event_title": "Apache HTTP Server Flaws Enable Remote Code Execution and Denial-of-Service Attacks"
+  },
+  {
+   "id": "cisa-adds-four-cves-to-kev-catalog-on-nov-9",
+   "title": "CISA adds four CVEs to KEV catalog on Nov 9",
+   "n_events": 15,
+   "last_seen": "2026-11-13T07:30:58.000Z",
+   "first_event_title": "CISA added four CVEs to its KEV catalog on Nov. 9 based on exploitation evidence: GPUStack CVE-2026-102895, FreeSWITCH CVE-2026-116779, Open"
+  },
+  {
+   "id": "vulnerabilities-in-edito-cms-software",
+   "title": "CERT Polska reports 8 vulnerabilities in Edito CMS (CVE-2026-59074 through CVE-2026-59081)",
+   "n_events": 1,
+   "last_seen": "2026-11-13T07:20:38Z",
+   "first_event_title": "Vulnerabilities in Edito CMS software"
+  },
+  {
+   "id": "hackers-deploy-beast-ransomware-to-disable-backup-services-delet",
+   "title": "Beast ransomware sample gives affiliates a GUI console and wipes recovery before encrypting",
+   "n_events": 1,
+   "last_seen": "2026-11-13T07:04:00Z",
+   "first_event_title": "Hackers Deploy Beast Ransomware to Disable Backup Services, Delete Shadow Copies, and Encrypt Network Drives"
+  },
+  {
+   "id": "microsoft-s-november-2026-patch-tuesday-addresses-1093-cves-cve",
+   "title": "Microsoft\u2019s November 2026 Patch Tuesday addresses 1093 CVEs (CVE-2026-124194)",
+   "n_events": 56,
+   "last_seen": "2026-11-13T07:01:53.000Z",
+   "first_event_title": "Microsoft\u2019s November 2026 Patch Tuesday addresses 1093 CVEs (CVE-2026-124194)"
+  },
+  {
+   "id": "kaspersky-tracks-citrus-sn00py-ransomware-hitting-russian-firms",
+   "title": "Kaspersky tracks Citrus (Sn00py) ransomware hitting Russian firms via VLESS tunnels and Certighost",
+   "n_events": 1,
+   "last_seen": "2026-11-13T06:41:11.000Z",
+   "first_event_title": "Kaspersky uncovers Citrus Ransomware hitting Russian firms. See how the Sn00py Citrus Ransomware group uses VLESS tunnels, Certighost, and L"
+  },
+  {
+   "id": "docaposte-breach-exposed-addresses-of-22-million-french-citizens",
+   "title": "Docaposte breach exposed addresses of 22 million French citizens",
+   "n_events": 1,
+   "last_seen": "2026-11-13T06:36:36.000Z",
+   "first_event_title": "Docaposte confirms theft of 22 million French citizens' addresses after cyberattack"
+  },
+  {
+   "id": "arcticrat-malware-uses-fake-vpn-connections-to-evade-google-play",
+   "title": "ArcticRAT Malware Uses Fake VPN Connections to Evade Google Play Protect During Installation",
+   "n_events": 1,
+   "last_seen": "2026-11-13T06:28:59Z",
+   "first_event_title": "ArcticRAT Malware Uses Fake VPN Connections to Evade Google Play Protect During Installation"
+  },
+  {
+   "id": "europol-dismantles-three-major-malware-networks-seizes-235-serve",
+   "title": "Europol Dismantles Three Major Malware Networks, Seizes 235 Servers and 6.4 Million Stolen Records",
+   "n_events": 1,
+   "last_seen": "2026-11-13T06:09:47Z",
+   "first_event_title": "Europol Dismantles Three Major Malware Networks, Seizes 235 Servers and 6.4 Million Stolen Records"
+  },
+  {
+   "id": "active-screenconnect-attacks-breach-msps-impact-dozens-of-organi",
+   "title": "Active ScreenConnect attacks breach MSPs, impact dozens of organizations",
+   "n_events": 19,
+   "last_seen": "2026-11-13T06:06:08.000Z",
+   "first_event_title": "Active ScreenConnect attacks breach MSPs, impact dozens of organizations"
+  },
+  {
+   "id": "bob-shop-data-breach-compromised-customer-card-numbers",
+   "title": "Bob Shop data breach compromised customer card numbers",
+   "n_events": 1,
+   "last_seen": "2026-11-13T06:04:29.000Z",
+   "first_event_title": "If you've bought anything from Bob Shop since you last renewed your credit card, you should treat that card as compromised. \u2060:( https:// tec"
+  },
+  {
+   "id": "forgeptr-cve-2026-47501-a-nvidia-driver-lpe-aka-how-an-attacker",
+   "title": "ForgePtr (CVE-2026-47501): a NVIDIA driver LPE, aka, how an attacker could rent root for multi-tenant GPU cloud environments",
+   "n_events": 5,
+   "last_seen": "2026-11-13T05:49:12.043Z",
+   "first_event_title": "ForgePtr (CVE-2026-47501): a NVIDIA driver LPE, aka, how an attacker could rent root for multi-tenant GPU cloud environments"
+  },
+  {
+   "id": "186-fake-ai-domains-redirect-users-to-clickfix-lures-browser-mal",
+   "title": "186 Fake AI Domains Redirect Users to ClickFix Lures, Browser Malware, and Search Hijackers",
+   "n_events": 2,
+   "last_seen": "2026-11-13T05:32:12.000Z",
+   "first_event_title": "186 Fake AI Domains Redirect Users to ClickFix Lures, Browser Malware, and Search Hijackers"
+  },
+  {
+   "id": "aws-warns-of-mcp-gateway-registry-vulnerability-allowing-attacke",
+   "title": "AWS Warns of MCP Gateway Registry Vulnerability Allowing Attackers to Access Internal Network Services",
+   "n_events": 1,
+   "last_seen": "2026-11-13T05:01:23Z",
+   "first_event_title": "AWS Warns of MCP Gateway Registry Vulnerability Allowing Attackers to Access Internal Network Services"
+  },
+  {
+   "id": "citrix-netscaler-adc-and-gateway-face-critical-memory-overflow-v-2",
+   "title": "Citrix NetScaler ADC and Gateway Face Critical Memory Overflow Vulnerabilities",
+   "n_events": 10,
+   "last_seen": "2026-11-13T04:30:35.000Z",
+   "first_event_title": "CVE-2026-107412 | CRITICAL memory overflow in Citrix NetScaler ADC/Gateway (CVSS 9.5). Affects https:// radar.offseq.com/threat/cve-20 26-10"
+  },
+  {
+   "id": "macfinger-clickfix-campaign-sends-downthedrain-infostealer-for-m",
+   "title": "Macfinger ClickFix campaign deploys DownTheDRAIN infostealer on macOS",
+   "n_events": 1,
+   "last_seen": "2026-11-13T03:50:41Z",
+   "first_event_title": "Macfinger ClickFix campaign sends DownTheDRAIN infostealer for macOS, (Fri, Nov 13th)"
+  },
+  {
+   "id": "open-enclave-critical-use-after-free-flaw-and-sgx-enclave-vulner",
+   "title": "Open Enclave Critical Use-After-Free Flaw and SGX Enclave Vulnerabilities",
+   "n_events": 1,
+   "last_seen": "2026-11-13T03:26:36.000Z",
+   "first_event_title": "Update Open Enclave to 0.19.22 now to fix GHSA-2rx6-6737-vpgh, a critical use-after-free flaw, alongside two high-severity SGX enclave bugs."
+  },
+  {
+   "id": "notion-ai-data-breach-via-fireworks-ai-vendor-exposes-user-chat",
+   "title": "Notion AI Data Breach via Fireworks AI Vendor Exposes User Chat Logs",
+   "n_events": 1,
+   "last_seen": "2026-11-13T03:09:44.000Z",
+   "first_event_title": "A recent Notion AI data breach via vendor Fireworks AI exposed user chat logs, prompting urgent credential rotation warnings for affected wo"
+  },
+  {
+   "id": "adobe-security-advisory-av26-1092",
+   "title": "Adobe security advisory (AV26-1092)",
+   "n_events": 2,
+   "last_seen": "2026-10-30T08:01:42.000Z",
+   "first_event_title": "Adobe security advisory (AV26-1092)"
+  },
+  {
+   "id": "adobe-security-advisory-av26-1146",
+   "title": "Adobe security advisory (AV26-1146)",
+   "n_events": 1,
+   "last_seen": "2026-11-12T15:50:40Z",
+   "first_event_title": "Adobe security advisory (AV26-1146)"
+  },
+  {
+   "id": "apple-security-advisory-av26-1149",
+   "title": "Apple security advisory (AV26-1149)",
+   "n_events": 1,
+   "last_seen": "2026-11-12T18:45:43Z",
+   "first_event_title": "Apple security advisory (AV26-1149)"
+  },
+  {
+   "id": "cisco-security-advisory-av26-1127",
+   "title": "Cisco security advisory (AV26-1127)",
+   "n_events": 2,
+   "last_seen": "2026-11-05T03:58:31.000Z",
+   "first_event_title": "Cisco security advisory (AV26-1127)"
+  },
+  {
+   "id": "control-systems-moxa-security-advisory-av26-1089",
+   "title": "[Control Systems] Moxa security advisory (AV26-1089)",
+   "n_events": 1,
+   "last_seen": "2026-10-27T13:35:40Z",
+   "first_event_title": "[Control Systems] Moxa security advisory (AV26-1089)"
+  },
+  {
+   "id": "craft-cms-security-advisory-av26-1086",
+   "title": "Craft CMS security advisory (AV26-1086)",
+   "n_events": 2,
+   "last_seen": "2026-10-26T17:00:13.000Z",
+   "first_event_title": "Craft CMS security advisory (AV26-1086)"
+  },
+  {
+   "id": "dell-security-advisory-av26-1134",
+   "title": "Dell security advisory (AV26-1134)",
+   "n_events": 1,
+   "last_seen": "2026-11-09T14:05:40Z",
+   "first_event_title": "Dell security advisory (AV26-1134)"
+  },
+  {
+   "id": "docker-security-advisory-av26-1153",
+   "title": "Docker security advisory (AV26-1153)",
+   "n_events": 1,
+   "last_seen": "2026-11-12T19:05:45Z",
+   "first_event_title": "Docker security advisory (AV26-1153)"
+  },
+  {
+   "id": "fortinet-security-advisory-av26-1145",
+   "title": "Fortinet security advisory (AV26-1145)",
+   "n_events": 1,
+   "last_seen": "2026-11-12T15:35:41Z",
+   "first_event_title": "Fortinet security advisory (AV26-1145)"
+  },
+  {
+   "id": "fortinet-security-advisory-av26-812",
+   "title": "Fortinet security advisory (AV26-812)",
+   "n_events": 2,
+   "last_seen": "2026-08-13T10:40:57Z",
+   "first_event_title": "Fortinet security advisory (AV26-812)"
+  },
+  {
+   "id": "google-security-advisory-av26-1157",
+   "title": "Google security advisory (AV26-1157)",
+   "n_events": 1,
+   "last_seen": "2026-11-12T20:45:43Z",
+   "first_event_title": "Google security advisory (AV26-1157)"
+  },
+  {
+   "id": "google-security-advisory-av26-904",
+   "title": "Google security advisory (AV26-904)",
+   "n_events": 2,
+   "last_seen": "2026-09-09T20:49:30Z",
+   "first_event_title": "Google security advisory (AV26-904)"
+  },
+  {
+   "id": "grafana-security-advisory-av26-860",
+   "title": "Grafana Alloy Vulnerability CVE-2026-19516",
+   "n_events": 3,
+   "last_seen": "2026-10-13T16:00:56.470Z",
+   "first_event_title": "Grafana security advisory (AV26-860)"
+  },
+  {
+   "id": "hashicorp-security-advisory-av26-797",
+   "title": "HashiCorp security advisory (AV26-797)",
+   "n_events": 1,
+   "last_seen": "2026-08-11T14:05:42Z",
+   "first_event_title": "HashiCorp security advisory (AV26-797)"
+  },
+  {
+   "id": "hashicorp-security-advisory-av26-817",
+   "title": "HashiCorp security advisory (AV26-817)",
+   "n_events": 1,
+   "last_seen": "2026-08-14T16:05:44Z",
+   "first_event_title": "HashiCorp security advisory (AV26-817)"
+  },
+  {
+   "id": "hpe-security-advisory-av26-1144",
+   "title": "HPE security advisory (AV26-1144)",
+   "n_events": 1,
+   "last_seen": "2026-11-12T15:10:45Z",
+   "first_event_title": "HPE security advisory (AV26-1144)"
+  },
+  {
+   "id": "ibm-security-advisory-av26-1040",
+   "title": "IBM security advisory (AV26-1040)",
+   "n_events": 1,
+   "last_seen": "2026-10-14T18:40:41Z",
+   "first_event_title": "IBM security advisory (AV26-1040)"
+  },
+  {
+   "id": "ibm-security-advisory-av26-1135",
+   "title": "IBM security advisory (AV26-1135)",
+   "n_events": 11,
+   "last_seen": "2026-11-11T05:15:06.000Z",
+   "first_event_title": "IBM security advisory (AV26-1135)"
+  },
+  {
+   "id": "ivanti-security-advisory-av26-805",
+   "title": "Ivanti security advisory (AV26-805)",
+   "n_events": 1,
+   "last_seen": "2026-08-11T20:20:39Z",
+   "first_event_title": "Ivanti security advisory (AV26-805)"
+  },
+  {
+   "id": "ivanti-security-advisory-av26-897",
+   "title": "Ivanti September 2026 security advisory: EPMM, ITSM, Sentry vulnerabilities",
+   "n_events": 3,
+   "last_seen": "2026-09-09T06:39:58Z",
+   "first_event_title": "Ivanti security advisory (AV26-897)"
+  },
+  {
+   "id": "arara-message-email-service-breach-leaks-77-million-addresses",
+   "title": "Arara Message Email Service Breach Leaks 77 Million Addresses",
+   "n_events": 15,
+   "last_seen": "2026-11-12T15:14:22.906Z",
+   "first_event_title": "\ud83d\udcf0 Email Service Breach Leaks 77 Million Addresses, Sparks Phishing Wave A breach at Japanese email service Arara Message has leaked 77 milli"
+  },
+  {
+   "id": "cisa-2026-0908-cisa-adds-4-known-exploited-vulnerabilities-to-ca",
+   "title": "CISA Adds Four Known Exploited Vulnerabilities to Catalog",
+   "n_events": 14,
+   "last_seen": "2026-09-23T08:26:14.000Z",
+   "first_event_title": "\ud83d\udea8 [CISA-2026:0908] CISA Adds 4 Known Exploited Vulnerabilities to Catalog ( https:// secdb.nttzen.cloud/security-ad visory/detail/CISA-2026:"
+  },
+  {
+   "id": "fragnesia-new-dirty-frag-class-linux-kernel-lpe-cve-2026-46300-p",
+   "title": "Fragnesia \u2014 new Dirty Frag-class Linux kernel LPE (CVE-2026-46300), PoC public, patches rolling out",
+   "n_events": 9,
+   "last_seen": "2026-11-05T07:10:19.000Z",
+   "first_event_title": "Fragnesia \u2014 new Dirty Frag-class Linux kernel LPE (CVE-2026-46300), PoC public, patches rolling out"
+  },
+  {
+   "id": "cisa-adds-six-known-exploited-vulnerabilities-to-catalog",
+   "title": "CISA adds six known exploited vulnerabilities to catalog",
+   "n_events": 16,
+   "last_seen": "2026-11-11T16:23:16.571Z",
+   "first_event_title": "I'm late in posting today but happy Patch Tuesday. CISA added 6 new vulnerabilities to the KEV Catalog, two are zero-days but only one is ne"
+  },
+  {
+   "id": "gpustack-authentication-bypass-cve-2026-102895-exploited-in-the",
+   "title": "GPUStack authentication bypass CVE-2026-102895 exploited in the wild",
+   "n_events": 10,
+   "last_seen": "2026-11-12T13:00:48.000Z",
+   "first_event_title": "Attackers exploit the GPUStack authentication bypass CVE-2026-102895 in the wild. Update to 2.2.2 now to fix this flaw and CVE-2026-102894. "
+  },
+  {
+   "id": "microsoft-patch-tuesday-for-november-2026-snort-rules-and-promin",
+   "title": "Microsoft Patch Tuesday for November 2026 \u2014 Snort rules and prominent vulnerabilities",
+   "n_events": 1,
+   "last_seen": "2026-11-11T01:41:17Z",
+   "first_event_title": "Microsoft Patch Tuesday for November 2026 \u2014 Snort rules and prominent vulnerabilities"
+  },
+  {
+   "id": "october-2026-cve-landscape",
+   "title": "October 2026 CVE Landscape",
+   "n_events": 6,
+   "last_seen": "2026-11-06T00:00:00Z",
+   "first_event_title": "October 2026 CVE Landscape"
+  },
+  {
+   "id": "cve-2026-84869-critical-9-9-a-condition-in-the-screenconnect-cli",
+   "title": "ScreenConnect critical CVE-2026-84869 allows file transfer and execution via active sessions",
+   "n_events": 14,
+   "last_seen": "2026-09-17T19:30:04.000Z",
+   "first_event_title": "\ud83d\udd34 CVE-2026-84869 - Critical (9.9) A condition in the ScreenConnect client may allow files to be transferred and executed through an active r"
+  },
+  {
+   "id": "php-warns-admins-of-two-critical-flaws-emergency-patches-coming",
+   "title": "PHP warns admins of two critical flaws, emergency patches coming tomorrow",
+   "n_events": 426,
+   "last_seen": "2026-11-10T19:35:41Z",
+   "first_event_title": "PHP warns admins of two critical flaws, emergency patches coming tomorrow"
+  },
+  {
+   "id": "citrix-security-advisory-av26-1150",
+   "title": "Citrix security advisory (AV26-1150)",
+   "n_events": 12,
+   "last_seen": "2026-11-12T19:23:47.000Z",
+   "first_event_title": "Citrix security advisory (AV26-1150)"
+  },
+  {
+   "id": "jfrog-artifactory-vulnerabilities-actively-exploited-in-the-wild",
+   "title": "JFrog Artifactory Vulnerabilities Actively Exploited in the Wild to Gain Administrative Control Indicators extracted from public reporting.",
+   "n_events": 21,
+   "last_seen": "2026-09-25T23:20:27.000Z",
+   "first_event_title": "JFrog Artifactory Vulnerabilities Actively Exploited in the Wild to Gain Administrative Control Indicators extracted from public reporting. "
+  },
+  {
+   "id": "citrix-netscaler-unpatched-rce-zero-days",
+   "title": "Citrix NetScaler zero-days CVE-2026-88771-88778 patched after confirmed exploitation",
+   "n_events": 225,
+   "last_seen": "2026-11-01T18:05:10.000Z",
+   "first_event_title": "NetScaler alert: watchTowr says reports of unpatched remote code execution flaws in Citrix NetScaler are verified, and organisations are shu"
+  },
+  {
+   "id": "microsoft-fixes-vpn-issues-caused-by-september-windows-updates",
+   "title": "Microsoft fixes VPN issues caused by September Windows updates",
+   "n_events": 6,
+   "last_seen": "2026-11-12T10:24:07Z",
+   "first_event_title": "Microsoft fixes VPN issues caused by September Windows updates"
+  },
+  {
+   "id": "microsoft-expects-more-windows-security-updates-from-ai-discover",
+   "title": "Microsoft Expects More Windows Security Updates From AI-Discovered Flaws",
+   "n_events": 1,
+   "last_seen": "2026-07-10T00:00:00Z",
+   "first_event_title": "Microsoft Expects More Windows Security Updates From AI-Discovered Flaws"
+  },
+  {
+   "id": "cybertop-ai-identified-cve-2026-20805-an-actively-exploited-micr",
+   "title": "Microsoft Windows Information Disclosure Actively Exploited (CVE-2026-20805)",
+   "n_events": 4,
+   "last_seen": "2026-09-12T08:50:02.642Z",
+   "first_event_title": "CYBERTOP AI identified CVE-2026-20805, an actively exploited Microsoft Windows Information Disclosure vulnerability. Defensive takeaway: PAT"
+  },
+  {
+   "id": "openai-builds-defense-factory-as-ai-agents-gain-ability-to-chain",
+   "title": "OpenAI Builds \u2018Defense Factory\u2019 as AI Agents Gain Ability to Chain Cyber Exploits",
+   "n_events": 2,
+   "last_seen": "2026-09-10T09:24:37Z",
+   "first_event_title": "OpenAI Builds \u2018Defense Factory\u2019 as AI Agents Gain Ability to Chain Cyber Exploits"
+  },
+  {
+   "id": "microsoft-fixes-smart-app-control-broken-by-october-windows-upda",
+   "title": "Microsoft fixes Smart App Control broken by October Windows update",
+   "n_events": 2,
+   "last_seen": "2026-11-03T17:30:01.000Z",
+   "first_event_title": "Microsoft fixes Smart App Control broken by October Windows update"
+  },
+  {
+   "id": "citrix-netscaler-memory-disclosure-flaw-cve-2026-8451-shares-roo",
+   "title": "Citrix NetScaler Memory Disclosure Flaw (CVE-2026-8451) \u2014 Shares Root Cause with CitrixBleed",
+   "n_events": 2,
+   "last_seen": "2026-07-03T00:00:00Z",
+   "first_event_title": "Citrix NetScaler Memory Disclosure Flaw (CVE-2026-8451) \u2014 Shares Root Cause with CitrixBleed"
+  },
+  {
+   "id": "cve-2025-3935-connectwise-screenconnect-authentication-flaw",
+   "title": "CVE-2025-3935 ConnectWise ScreenConnect Authentication Flaw",
+   "n_events": 1,
+   "last_seen": "2026-10-02T08:50:02.673Z",
+   "first_event_title": "CVE-2025-3935: ConnectWise ScreenConnect suffers from an improper authentication vulnerability, actively exploited. CYBERTOP agents identifi"
+  },
+  {
+   "id": "microsoft-s-september-2026-patch-tuesday-fixes-two-zero-day-flaw",
+   "title": "Microsoft\u2019s Patching",
+   "n_events": 46,
+   "last_seen": "2026-09-17T15:10:04.000Z",
+   "first_event_title": "Microsoft's September 2026 Patch Tuesday fixes two zero-day flaws, CVE-2026-81963 and CVE-2026-85880, both exploited in the wild. # PatchTue"
+  }
+ ]
+}
