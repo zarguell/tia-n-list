@@ -1,0 +1,1 @@
+Synology published advisory Synology_SA_24_20 on 2024-11-05 covering DSM and BeeStation OS flaws, including CVE-2024-10441, an improper certificate validation issue in the update functionality rated CVSS 9.8. The advisory lists fixed DSM builds 6.2.4-25556-8, 7.1.1-42962-7, 7.2-64570-4, 7.2.1-69057-6 and 7.2.2-72806-1 or above, and states no mitigation.
