@@ -1,0 +1,5 @@
+CVE-2026-107412 is a critical memory overflow vulnerability affecting Citrix NetScaler ADC and Gateway with a CVSS score of 9.5. The vulnerability allows attackers to trigger denial-of-service conditions and cause unpredictable or erroneous behavior in affected systems.
+
+Citrix NetScaler ADC and Gateway are widely deployed in enterprise environments as application delivery controllers and secure remote access gateways. Memory overflow vulnerabilities in these products are particularly dangerous because they often sit at network perimeters and handle untrusted traffic. Organizations using NetScaler for load balancing, SSL VPN, or reverse proxy functionality should prioritize patching.
+
+The vulnerability was reported on November 13, 2026. While exploitation has not been confirmed in the wild, the critical severity and attack surface exposure mean that exploitation attempts are likely once proof-of-concept code becomes available. Historical Citrix vulnerabilities like CVE-2019-19781 (Citrix ADC path traversal) were exploited within days of disclosure, demonstrating that threat actors actively monitor and target NetScaler deployments.
