@@ -1,0 +1,1 @@
+GitGuardian cataloged roughly 45 agentic attack frameworks beyond ARTEX, documenting how they automate reconnaissance through post-exploitation. The post emphasized exposed management interfaces and leaked secrets as common enabling factors.

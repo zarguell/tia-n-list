@@ -1,0 +1,1 @@
+Wiz Research identified activity using tooling associated with ARTEX throughout October 2026 against multiple IT and software vendors. The activity focused on ConnectWise ScreenConnect and credential harvesting against vendor environments.
