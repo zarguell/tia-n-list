@@ -1,0 +1,503 @@
+{
+ "date": "2026-11-13",
+ "decisions_path": "engine/data/triage/decisions-2026-11-13T0403.json",
+ "instructions": "For every new event decide: (1) keep or drop \u2014 keep only stories worth covering (real security events, vulnerabilities, attacks, breaches, advisories with substance); drop press releases, vendor marketing, generic explainers, and anything duplicating an existing story. (2) If keep, assign the event to the RIGHT story: an existing candidate story id if it belongs there (this FIXES mechanical clustering \u2014 e.g. different outlets' Patch Tuesday roundups are ONE story), or NEW with a clean story_title. (3) merges: list candidate stories that are really the same story (from = fragment, into = the most complete one). (4) For every kept event that names CVEs, optionally assess exploitation: exploited = the event reports OBSERVED in-the-wild exploitation (implants, victim counts, campaigns, CISA KEV confirmation); suspected = public exploit code/PoC or likely-but-unconfirmed. Attribute ONLY the CVEs you can tie to the claim \u2014 a bulletin's blanket 'actively exploited' does NOT flag all its CVEs. Omit the exploitation field when the event makes no claim.\n(5) LOW-TRUST events (\"low_trust\": true \u2014 AI-drafted aggregator reposts, late and overstated): treat as unverified leads. When the text attributes the claim to a named primary source (a researcher firm like watchTowr, a vendor advisory, CISA, a major outlet) and attribution_urls or a web search (/home/ubuntu/repos/cronman/bin/web-search.sh \"query\") locate that primary source CONFIRMING the claim, include a provenance object in the decision: {\"url\": <primary url>, \"source\": <domain>, \"evidence\": <one line>, \"verified\": true}. VERIFIED provenance lets the event mint a story (credited to the primary source) and count as a development; without it, a low-trust event can only attach to an EXISTING story, never mint. If you cannot verify, keep/drop on normal merit and omit provenance.\n\nWrite decisions as JSON with EXACTLY this shape:\n{\n  \"decisions\": [\n    {\"event_id\": \"<id>\", \"action\": \"keep\", \"story\": \"<existing candidate story id>\", \"reason\": \"...\"},\n    {\"event_id\": \"<id>\", \"action\": \"keep\", \"story\": \"NEW\", \"story_title\": \"<clean title>\", \"reason\": \"...\"},\n    {\"event_id\": \"<id>\", \"action\": \"drop\", \"reason\": \"...\"}\n  ],\n  \"merges\": [{\"from\": \"<fragment story id>\", \"into\": \"<canonical story id>\"}]\n}\nFor events marked \"low_trust\" (AI-drafted aggregator reposts) a decision\nmay carry an optional \"provenance\" object when you VERIFIED the claim at\nthe named primary source: {\"event_id\": ..., \"action\": \"keep\", ...}\n  \"provenance\": {\"url\": \"<primary source url>\", \"source\": \"<domain>\", \"evidence\": \"<one line>\"}\nOnly include provenance when the primary source (vendor advisory, CISA,\nthe named researcher/outlet) really carries the claim \u2014 verified\nprovenance lets a low-trust event mint a story and set freshness; without\nit the event can only amplify an existing story.\nSTRICT KEY NAMES: the array key is \"decisions\" (never \"events\"); the story\nkey is \"story\" (never \"story_id\"); \"story\" holds a candidate_stories id\nverbatim or the literal string \"NEW\". Optional per-event field\n\"exploitation\": {\"CVE-...\": {\"status\": \"exploited|suspected\", \"evidence\": \"1-2 sentences\"}}.",
+ "new_events": [
+  {
+   "id": "rss:6f425c7f586bfc92",
+   "title": "Macfinger ClickFix campaign sends DownTheDRAIN infostealer for macOS, (Fri, Nov 13th)",
+   "source": "malware.news",
+   "published_at": "2026-11-13T03:50:41Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Introduction Article Link: Macfinger ClickFix campaign sends DownTheDRAIN infostealer for macOS "
+  },
+  {
+   "id": "rss:71a6a0a23f2dd32e",
+   "title": "Microsoft Researchers Show AI Agents Can Be Backdoored by Editing Fewer Than 10 Neurons",
+   "source": "thehackernews.com",
+   "published_at": "2026-11-11T07:21:05Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "An AI model can be given a hidden backdoor by editing fewer than 10 of its rarely used neurons, without retraining the model, Microsoft researchers have shown. When a chosen trigger appears, the model outputs an attacker"
+  },
+  {
+   "id": "rss:5c3fbc2ab37c045b",
+   "title": "Cisco BroadWorks and Openwave Flaws Actively Exploited Despite Available Patches",
+   "source": "thehackernews.com",
+   "published_at": "2026-11-11T06:04:02Z",
+   "cves": [
+    "CVE-2026-20320"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "The U.S. Cybersecurity and Infrastructure Security Agency (CISA) Tuesday added two security flaws impacting Cisco BroadWorks and Openwave Messaging Webtop Media Transcoder to its Known Exploited Vulnerabilities (KEV) cat"
+  }
+ ],
+ "candidate_stories": [
+  {
+   "id": "macfinger-clickfix-campaign-sends-downthedrain-infostealer-for-m",
+   "title": "Macfinger ClickFix campaign sends DownTheDRAIN infostealer for macOS, (Fri, Nov 13th)",
+   "n_events": 1,
+   "last_seen": "2026-11-13T03:50:41Z",
+   "first_event_title": "Macfinger ClickFix campaign sends DownTheDRAIN infostealer for macOS, (Fri, Nov 13th)"
+  },
+  {
+   "id": "beware-of-phishing-emails-disguised-as-quote-requests",
+   "title": "Beware of phishing emails disguised as quote requests",
+   "n_events": 8,
+   "last_seen": "2026-11-13T02:51:31Z",
+   "first_event_title": "Beware of phishing emails disguised as quote requests"
+  },
+  {
+   "id": "fbi-disrupts-intricate-north-korean-fake-call-scheme-tied-to-400",
+   "title": "FBI disrupts intricate North Korean fake-call scheme tied to $400M in crypto theft",
+   "n_events": 10,
+   "last_seen": "2026-11-13T02:28:21Z",
+   "first_event_title": "FBI disrupts intricate North Korean fake-call scheme tied to $400M in crypto theft"
+  },
+  {
+   "id": "prepared-statements-prevents-sqli-but-it-also-helped-me-to-explo",
+   "title": "prepared statements prevents SQLi. But it also helped me to exploit a 22 years old PostgreSQL 0-day RCE (CVE-2026-6460)",
+   "n_events": 2,
+   "last_seen": "2026-11-13T02:27:31.000Z",
+   "first_event_title": "prepared statements prevents SQLi. But it also helped me to exploit a 22 years old PostgreSQL 0-day RCE (CVE-2026-6460)"
+  },
+  {
+   "id": "microsoft-teams-outage-disrupts-meetings-and-screen-sharing-for",
+   "title": "Microsoft Teams Outage Disrupts Meetings and Screen Sharing for Users",
+   "n_events": 10,
+   "last_seen": "2026-11-13T02:20:18.691Z",
+   "first_event_title": "Microsoft Teams Outage Disrupts Meetings and Screen Sharing for Users"
+  },
+  {
+   "id": "hundreds-of-copies-of-chinese-made-artex-hacking-tools-leaked-on",
+   "title": "Hundreds of copies of Chinese-made ARTEX hacking tools leaked online for anyone to use in further attacks",
+   "n_events": 1,
+   "last_seen": "2026-11-13T02:18:12Z",
+   "first_event_title": "Hundreds of copies of Chinese-made ARTEX hacking tools leaked online for anyone to use in further attacks"
+  },
+  {
+   "id": "qubole-trusted-aws-access-abused-to-breach-customer-accounts",
+   "title": "Qubole trusted AWS access abused to breach customer accounts",
+   "n_events": 10,
+   "last_seen": "2026-11-13T02:07:00.000Z",
+   "first_event_title": "\ud83e\udd16 Attackers abused Qubole's trusted AWS access to reach multiple customer accounts between Oct 14-26, stealing stored secrets and data. Wiz "
+  },
+  {
+   "id": "isc-stormcast-for-friday-november-13th-2026-https-isc-sans-edu-p",
+   "title": "ISC Stormcast For Friday, November 13th, 2026 (Fri, Nov 13th)",
+   "n_events": 1,
+   "last_seen": "2026-11-13T02:05:40Z",
+   "first_event_title": "ISC Stormcast For Friday, November 13th, 2026 https://isc.sans.edu/podcastdetail/10178, (Fri, Nov 13th)"
+  },
+  {
+   "id": "manageengine-fixes-critical-m365-manager-plus-and-servicedesk-pl",
+   "title": "ManageEngine fixes critical M365 Manager Plus and ServiceDesk Plus flaws",
+   "n_events": 4,
+   "last_seen": "2026-11-13T01:53:52.000Z",
+   "first_event_title": "ManageEngine critical vulnerabilities fixed: CVE-2026-12591 (CVSS 9.9) in M365 Manager Plus, CVE-2026-12507 RCE in ServiceDesk Plus, DDI Cen"
+  },
+  {
+   "id": "synology-dsm-patches-cve-2026-76954-cve-2026-85101-and-25-other",
+   "title": "Synology DSM patches CVE-2026-76954, CVE-2026-85101 and 25 other flaws",
+   "n_events": 4,
+   "last_seen": "2026-11-13T01:48:03.498Z",
+   "first_event_title": "Update Synology DiskStation Manager now to patch CVE-2026-76954, CVE-2026-85101, and 25 other flaws allowing arbitrary file writes and crash"
+  },
+  {
+   "id": "red-hat-fixes-cve-2026-107360-satellite-sandbox-bypass-and-21-ot",
+   "title": "Red Hat fixes CVE-2026-107360 Satellite sandbox bypass and 21 other flaws",
+   "n_events": 6,
+   "last_seen": "2026-11-13T01:39:16.000Z",
+   "first_event_title": "Red Hat Satellite vulnerabilities fixed: CVE-2026-107360 (CVSS 9.6) sandbox bypass leads 21 new Red Hat CVEs across Satellite, RHEL and Ansi"
+  },
+  {
+   "id": "ai-didn-t-create-a-new-kind-of-risk-it-removed-the-time-you-had",
+   "title": "AI Didn\u2019t Create a New Kind of Risk. It Removed the Time You Had to Fix the Old One.",
+   "n_events": 0,
+   "last_seen": "2026-11-13T01:37:30Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "massive-wfx-loot-campaign-probes-over-60-000-github-repositories",
+   "title": "Massive \u2018wfx-loot\u2019 Campaign Probes Over 60,000 GitHub Repositories to Steal CI and Cloud Secrets",
+   "n_events": 0,
+   "last_seen": "2026-11-13T01:12:20Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "gradle-9-9-1-and-8-14-7-fix-version-catalog-code-injection",
+   "title": "Gradle 9.9.1 and 8.14.7 fix version catalog code injection",
+   "n_events": 6,
+   "last_seen": "2026-11-13T01:06:11.000Z",
+   "first_event_title": "Gradle 9.9.1 and 8.14.7 fix three Gradle vulnerabilities, including a CVSS 9.3 version catalog code injection that runs during builds and ID"
+  },
+  {
+   "id": "barracuda-warns-of-critical-flaws-allowing-root-access-to-device",
+   "title": "Barracuda warns of critical flaws allowing root access to devices",
+   "n_events": 43,
+   "last_seen": "2026-11-13T01:00:18.000Z",
+   "first_event_title": "Barracuda warns of critical flaws allowing root access to devices"
+  },
+  {
+   "id": "apache-http-server-flaws-enable-remote-code-execution-and-denial",
+   "title": "Apache HTTP Server Flaws Enable Remote Code Execution and Denial-of-Service Attacks",
+   "n_events": 42,
+   "last_seen": "2026-11-13T00:58:54.000Z",
+   "first_event_title": "Apache HTTP Server Flaws Enable Remote Code Execution and Denial-of-Service Attacks"
+  },
+  {
+   "id": "2026-09-30-smartapesg-clickfix-pushes-cncmachinerms-rat",
+   "title": "2026-09-30: SmartApeSG ClickFix pushes CNCmachineRMS RAT",
+   "n_events": 3,
+   "last_seen": "2026-11-13T00:41:16Z",
+   "first_event_title": "2026-09-30: SmartApeSG ClickFix pushes CNCmachineRMS RAT"
+  },
+  {
+   "id": "mitel-patches-three-mivoice-mx-one-flaws-including-cvss-9-4-auth",
+   "title": "Mitel patches three MiVoice MX-ONE flaws including CVSS 9.4 authentication bypass and command injection",
+   "n_events": 6,
+   "last_seen": "2026-11-13T00:41:02.000Z",
+   "first_event_title": "Mitel fixes three MiVoice MX-ONE vulnerabilities, including a CVSS 9.4 authentication bypass and command injection. Apply 8.2 SP1 HF2 now. #"
+  },
+  {
+   "id": "7-zip-26-02-rce-via-heap-based-buffer-overflow-in-xz-decompressi",
+   "title": "7-Zip 26.02 \u2014 RCE via Heap-Based Buffer Overflow in XZ Decompression",
+   "n_events": 5,
+   "last_seen": "2026-11-13T00:08:48.263098Z",
+   "first_event_title": "7-Zip 26.02 \u2014 RCE via Heap-Based Buffer Overflow in XZ Decompression"
+  },
+  {
+   "id": "sap-fixes-multiple-flaws-that-could-allow-remote-code-execution",
+   "title": "SAP fixes multiple flaws that could allow remote code execution on unpatched systems",
+   "n_events": 1,
+   "last_seen": "2026-11-13T00:06:19.000Z",
+   "first_event_title": "SAP fixes flaws that could let remote attackers run code on unpatched systems CERT-FR warned on 10 November 2026 that flaws across many SAP "
+  },
+  {
+   "id": "plone-fixes-anonymous-remote-code-execution-chain-rated-cvss-9-8",
+   "title": "Plone fixes anonymous remote code execution chain rated CVSS 9.8 in 6.2.3, 6.1.6 and 6.0.16",
+   "n_events": 8,
+   "last_seen": "2026-11-13T00:06:13.000Z",
+   "first_event_title": "Plone fixes an anonymous Plone remote code execution chain rated CVSS 9.8. Update to 6.2.3, 6.1.6 or 6.0.16, or install the Plone hotfix. # "
+  },
+  {
+   "id": "payoutsking-targets-ys-with-ransomware-attack",
+   "title": "PayoutsKing Targets Ys with Ransomware Attack",
+   "n_events": 1,
+   "last_seen": "2026-11-13T00:05:41Z",
+   "first_event_title": "PayoutsKing Targets Ys with Ransomware Attack"
+  },
+  {
+   "id": "active-screenconnect-attacks-breach-msps-impact-dozens-of-organi",
+   "title": "Active ScreenConnect attacks breach MSPs, impact dozens of organizations",
+   "n_events": 18,
+   "last_seen": "2026-11-12T23:50:04.000Z",
+   "first_event_title": "Active ScreenConnect attacks breach MSPs, impact dozens of organizations"
+  },
+  {
+   "id": "linux-kernel-tcp-flaw-with-9-8-cvss-score-affects-ubuntu-red-hat",
+   "title": "Linux Kernel TCP Flaw With 9.8 CVSS Score Affects Ubuntu, Red Hat and Other Distributions",
+   "n_events": 75,
+   "last_seen": "2026-11-12T23:45:05.000Z",
+   "first_event_title": "Linux Kernel TCP Flaw With 9.8 CVSS Score Affects Ubuntu, Red Hat and Other Distributions"
+  },
+  {
+   "id": "signalwire-critical-freeswitch-vulnerabilities-cve-2026-116779",
+   "title": "SignalWire Critical FreeSWITCH Vulnerabilities CVE-2026-116779",
+   "n_events": 9,
+   "last_seen": "2026-11-12T23:41:25.000Z",
+   "first_event_title": "SignalWire patched 3 critical FreeSWITCH vulnerabilities: actively exploited RCE flaw CVE-2026-116779, plus CVE-2026-116785 and CVE-2026-116"
+  },
+  {
+   "id": "owasp-top-10-neocloud-and-ai-data-center-security-risks-project",
+   "title": "OWASP Top 10 Neocloud and AI Data Center Security Risks project released",
+   "n_events": 0,
+   "last_seen": "2026-11-12T22:58:44Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "hackers-compromise-nearly-5-000-github-accounts-to-steal-secrets",
+   "title": "Hackers Compromise Nearly 5,000 GitHub Accounts to Steal Secrets From Software Development Pipelines",
+   "n_events": 12,
+   "last_seen": "2026-11-12T22:57:08.000Z",
+   "first_event_title": "Hackers Compromise Nearly 5,000 GitHub Accounts to Steal Secrets From Software Development Pipelines"
+  },
+  {
+   "id": "getting-past-the-post-quantum-cryptography-discovery-phase",
+   "title": "Getting Past the Post-Quantum Cryptography Discovery Phase",
+   "n_events": 0,
+   "last_seen": "2026-11-12T22:46:05Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "json-schema-references-considered-harmful",
+   "title": "JSON Schema References Considered Harmful",
+   "n_events": 0,
+   "last_seen": "2026-11-12T22:35:34Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "ransomware-without-data-theft-can-still-trigger-mandatory-breach",
+   "title": "Ransomware Without Data Theft Can Still Trigger Mandatory Breach Reporting Under India\u2019s DPDP Law: K7 CyberSecurity",
+   "n_events": 0,
+   "last_seen": "2026-11-12T21:35:50Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "resource-dysruptionhub-s-cyber-incident-registry-completes-its-h",
+   "title": "Resource: DysruptionHub\u2019s Cyber Incident Registry completes its historical backfill",
+   "n_events": 0,
+   "last_seen": "2026-11-12T21:35:48Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "tsmc-has-reportedly-leaked-the-personal-data-of-46-000-employees",
+   "title": "TSMC has reportedly leaked the personal data of 46,000 employees, but emphasized that no evidence of intrusion was found in the system",
+   "n_events": 0,
+   "last_seen": "2026-11-12T21:35:46Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "who-runs-the-ransomware-group-qilin",
+   "title": "Who Runs the Ransomware Group Qilin?",
+   "n_events": 10,
+   "last_seen": "2026-11-12T21:30:05.000Z",
+   "first_event_title": "Who Runs the Ransomware Group Qilin?"
+  },
+  {
+   "id": "cyber-experts-weigh-in-how-to-fight-artex-amp-antifox",
+   "title": "Cyber Experts Weigh In: How to Fight Artex &amp; AntiFox",
+   "n_events": 0,
+   "last_seen": "2026-11-12T21:18:52Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "grok-build-apps-exposed-confidential-data-from-35-000-sites",
+   "title": "Grok Build apps exposed confidential data from 35,000 sites",
+   "n_events": 18,
+   "last_seen": "2026-11-12T21:15:13.000Z",
+   "first_event_title": "\"...GhostShares 2: Grok Apps Exposed xAI\u2019s Business Secrets and People\u2019s Private Data We found more than 35,000 apps built with Grok that an"
+  },
+  {
+   "id": "lego-s-bricklink-taken-offline-what-users-should-know",
+   "title": "LEGO\u2019s BrickLink taken offline: What users should know",
+   "n_events": 3,
+   "last_seen": "2026-11-12T21:03:27.000Z",
+   "first_event_title": "LEGO\u2019s BrickLink taken offline: What users should know"
+  },
+  {
+   "id": "able2shell-frequently-asked-questions-for-reported-n-able-n-cent",
+   "title": "Able2Shell: Frequently asked questions for reported N-able N-central zero-day vulnerabilities",
+   "n_events": 38,
+   "last_seen": "2026-11-12T20:55:32.000Z",
+   "first_event_title": "Able2Shell: Frequently asked questions for reported N-able N-central zero-day vulnerabilities"
+  },
+  {
+   "id": "google-security-advisory-av26-1157",
+   "title": "Google security advisory (AV26-1157)",
+   "n_events": 1,
+   "last_seen": "2026-11-12T20:45:43Z",
+   "first_event_title": "Google security advisory (AV26-1157)"
+  },
+  {
+   "id": "nodejs-security-advisory-av26-1156",
+   "title": "Nodejs security advisory (AV26-1156)",
+   "n_events": 2,
+   "last_seen": "2026-11-12T20:40:45Z",
+   "first_event_title": "Nodejs security advisory (AV26-1156)"
+  },
+  {
+   "id": "maersk-confirms-data-breach-as-whitearmor-ransomware-demands-5-m",
+   "title": "Maersk confirms data breach as WhiteArmor ransomware demands $5 million",
+   "n_events": 19,
+   "last_seen": "2026-11-12T20:30:07.000Z",
+   "first_event_title": "Maersk confirms data breach as WhiteArmor ransomware demands $5 million"
+  },
+  {
+   "id": "adobe-security-advisory-av26-1092",
+   "title": "Adobe security advisory (AV26-1092)",
+   "n_events": 2,
+   "last_seen": "2026-10-30T08:01:42.000Z",
+   "first_event_title": "Adobe security advisory (AV26-1092)"
+  },
+  {
+   "id": "adobe-security-advisory-av26-1146",
+   "title": "Adobe security advisory (AV26-1146)",
+   "n_events": 1,
+   "last_seen": "2026-11-12T15:50:40Z",
+   "first_event_title": "Adobe security advisory (AV26-1146)"
+  },
+  {
+   "id": "apple-security-advisory-av26-1149",
+   "title": "Apple security advisory (AV26-1149)",
+   "n_events": 1,
+   "last_seen": "2026-11-12T18:45:43Z",
+   "first_event_title": "Apple security advisory (AV26-1149)"
+  },
+  {
+   "id": "cisco-security-advisory-av26-1127",
+   "title": "Cisco security advisory (AV26-1127)",
+   "n_events": 2,
+   "last_seen": "2026-11-05T03:58:31.000Z",
+   "first_event_title": "Cisco security advisory (AV26-1127)"
+  },
+  {
+   "id": "control-systems-moxa-security-advisory-av26-1089",
+   "title": "[Control Systems] Moxa security advisory (AV26-1089)",
+   "n_events": 1,
+   "last_seen": "2026-10-27T13:35:40Z",
+   "first_event_title": "[Control Systems] Moxa security advisory (AV26-1089)"
+  },
+  {
+   "id": "craft-cms-security-advisory-av26-1086",
+   "title": "Craft CMS security advisory (AV26-1086)",
+   "n_events": 2,
+   "last_seen": "2026-10-26T17:00:13.000Z",
+   "first_event_title": "Craft CMS security advisory (AV26-1086)"
+  },
+  {
+   "id": "dell-security-advisory-av26-1134",
+   "title": "Dell security advisory (AV26-1134)",
+   "n_events": 1,
+   "last_seen": "2026-11-09T14:05:40Z",
+   "first_event_title": "Dell security advisory (AV26-1134)"
+  },
+  {
+   "id": "docker-security-advisory-av26-1153",
+   "title": "Docker security advisory (AV26-1153)",
+   "n_events": 1,
+   "last_seen": "2026-11-12T19:05:45Z",
+   "first_event_title": "Docker security advisory (AV26-1153)"
+  },
+  {
+   "id": "fortinet-security-advisory-av26-1145",
+   "title": "Fortinet security advisory (AV26-1145)",
+   "n_events": 1,
+   "last_seen": "2026-11-12T15:35:41Z",
+   "first_event_title": "Fortinet security advisory (AV26-1145)"
+  },
+  {
+   "id": "fortinet-security-advisory-av26-812",
+   "title": "Fortinet security advisory (AV26-812)",
+   "n_events": 2,
+   "last_seen": "2026-08-13T10:40:57Z",
+   "first_event_title": "Fortinet security advisory (AV26-812)"
+  },
+  {
+   "id": "google-security-advisory-av26-904",
+   "title": "Google security advisory (AV26-904)",
+   "n_events": 2,
+   "last_seen": "2026-09-09T20:49:30Z",
+   "first_event_title": "Google security advisory (AV26-904)"
+  },
+  {
+   "id": "grafana-security-advisory-av26-860",
+   "title": "Grafana Alloy Vulnerability CVE-2026-19516",
+   "n_events": 3,
+   "last_seen": "2026-10-13T16:00:56.470Z",
+   "first_event_title": "Grafana security advisory (AV26-860)"
+  },
+  {
+   "id": "hashicorp-security-advisory-av26-797",
+   "title": "HashiCorp security advisory (AV26-797)",
+   "n_events": 1,
+   "last_seen": "2026-08-11T14:05:42Z",
+   "first_event_title": "HashiCorp security advisory (AV26-797)"
+  },
+  {
+   "id": "hashicorp-security-advisory-av26-817",
+   "title": "HashiCorp security advisory (AV26-817)",
+   "n_events": 1,
+   "last_seen": "2026-08-14T16:05:44Z",
+   "first_event_title": "HashiCorp security advisory (AV26-817)"
+  },
+  {
+   "id": "hpe-security-advisory-av26-1144",
+   "title": "HPE security advisory (AV26-1144)",
+   "n_events": 1,
+   "last_seen": "2026-11-12T15:10:45Z",
+   "first_event_title": "HPE security advisory (AV26-1144)"
+  },
+  {
+   "id": "ibm-security-advisory-av26-1040",
+   "title": "IBM security advisory (AV26-1040)",
+   "n_events": 1,
+   "last_seen": "2026-10-14T18:40:41Z",
+   "first_event_title": "IBM security advisory (AV26-1040)"
+  },
+  {
+   "id": "ibm-security-advisory-av26-1135",
+   "title": "IBM security advisory (AV26-1135)",
+   "n_events": 11,
+   "last_seen": "2026-11-11T05:15:06.000Z",
+   "first_event_title": "IBM security advisory (AV26-1135)"
+  },
+  {
+   "id": "ivanti-security-advisory-av26-805",
+   "title": "Ivanti security advisory (AV26-805)",
+   "n_events": 1,
+   "last_seen": "2026-08-11T20:20:39Z",
+   "first_event_title": "Ivanti security advisory (AV26-805)"
+  },
+  {
+   "id": "ivanti-security-advisory-av26-897",
+   "title": "Ivanti September 2026 security advisory: EPMM, ITSM, Sentry vulnerabilities",
+   "n_events": 3,
+   "last_seen": "2026-09-09T06:39:58Z",
+   "first_event_title": "Ivanti security advisory (AV26-897)"
+  },
+  {
+   "id": "jetbrains-security-advisory-av26-1132",
+   "title": "JetBrains security advisory (AV26-1132)",
+   "n_events": 1,
+   "last_seen": "2026-11-06T19:35:40Z",
+   "first_event_title": "JetBrains security advisory (AV26-1132)"
+  },
+  {
+   "id": "cisa-adds-six-known-exploited-vulnerabilities-to-catalog",
+   "title": "CISA adds six known exploited vulnerabilities to catalog",
+   "n_events": 15,
+   "last_seen": "2026-11-11T16:23:16.571Z",
+   "first_event_title": "I'm late in posting today but happy Patch Tuesday. CISA added 6 new vulnerabilities to the KEV Catalog, two are zero-days but only one is ne"
+  },
+  {
+   "id": "cisco-broadworks-xxe-vulnerability-cve-2026-20320",
+   "title": "Cisco BroadWorks XXE Vulnerability CVE-2026-20320",
+   "n_events": 12,
+   "last_seen": "2026-11-12T18:30:18.000Z",
+   "first_event_title": "Cisco BroadWorks XXE Flaw Allows Unauthenticated Remote File Disclosure"
+  },
+  {
+   "id": "operation-snowball-exposes-ai-hacking-campaign-targeting-europea",
+   "title": "Operation Snowball Exposes AI Hacking Campaign Targeting European Telecom and 13 Hosted Organizations",
+   "n_events": 6,
+   "last_seen": "2026-11-12T04:44:22.000Z",
+   "first_event_title": "Operation Snowball Exposes AI Hacking Campaign Targeting European Telecom and 13 Hosted Organizations"
+  },
+  {
+   "id": "microsoft-researchers-show-ai-agents-can-be-backdoored-by-editin",
+   "title": "Microsoft Researchers Show AI Agents Can Be Backdoored by Editing Fewer Than 10 Neurons",
+   "n_events": 1,
+   "last_seen": "2026-11-11T07:21:05Z",
+   "first_event_title": "Microsoft Researchers Show AI Agents Can Be Backdoored by Editing Fewer Than 10 Neurons"
+  },
+  {
+   "id": "macfinger-clickfix-campaign-tue-sep-22nd",
+   "title": "Macfinger ClickFix campaign, (Tue, Sep 22nd)",
+   "n_events": 4,
+   "last_seen": "2026-10-03T17:41:15Z",
+   "first_event_title": "Macfinger ClickFix campaign, (Tue, Sep 22nd)"
+  },
+  {
+   "id": "cisco-patches-critical-flaws-in-nexus-dashboard-broadworks-thous",
+   "title": "Cisco Patches Critical Flaws in Nexus Dashboard, BroadWorks, ThousandEyes",
+   "n_events": 2,
+   "last_seen": "2026-09-18T03:05:54.000Z",
+   "first_event_title": "Cisco Patches Critical Flaws in Nexus Dashboard Cisco released security updates for Nexus Dashboard, BroadWorks, and ThousandEyes to fix eig"
+  }
+ ]
+}
