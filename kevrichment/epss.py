@@ -37,6 +37,12 @@ CVE_DIR = os.path.join(HERE, "data", "cves")
 CACHE_DIR = os.path.join(HERE, "data", "epss")
 EPSS_URL = "https://epss.cyentia.com/epss_scores-current.csv.gz"  # 301 -> epss.empiricalsecurity.com
 CACHE_KEEP_DAYS = 35
+# Published trend series (data/epss-history.json) for the site's per-CVE EPSS
+# panel. The snapshot cache itself is never committed (2.6 MB/day); this is a
+# compact downsample: HISTORY_DAYS points, scores scaled to integers.
+HISTORY_PATH = os.path.join(HERE, "data", "epss-history.json")
+HISTORY_DAYS = 21
+HISTORY_SCALE = 1000
 DELTA_DAYS = 7
 TIMEOUT = 120
 
@@ -156,12 +162,58 @@ def enrich(score_date, scores, prev_scores):
     return changed, total
 
 
+def write_history(days=HISTORY_DAYS, cve_dir=None):
+    """Write the committed 21-day EPSS series for the CVEs we publish.
+
+    The site builds from a clean clone, so it cannot read the untracked
+    snapshot cache — this file is the small, reviewable projection the /kev/
+    CVE pages use for their EPSS trend. Values are integers scaled by
+    HISTORY_SCALE (0.0162 -> 16); a CVE missing from a snapshot is null.
+
+    Returns the number of series written (0 when there is no cache at all).
+    """
+    cve_dir = cve_dir or CVE_DIR
+    snaps = sorted(glob.glob(os.path.join(CACHE_DIR, "epss_scores-*.csv.gz")))
+    snaps = snaps[-days:]
+    if not snaps:
+        return 0
+    dates, per_date = [], []
+    for path in snaps:
+        date_, scores = parse(path)
+        dates.append(date_)
+        per_date.append(scores)
+    cves = sorted(os.path.splitext(os.path.basename(p))[0]
+                  for p in glob.glob(os.path.join(cve_dir, "CVE-*.json")))
+    series = {}
+    for cve in cves:
+        row = []
+        for scores in per_date:
+            hit = scores.get(cve)
+            row.append(int(round(float(hit[0]) * HISTORY_SCALE)) if hit else None)
+        series[cve] = row
+    doc = {"schema": 1, "scale": HISTORY_SCALE, "dates": dates, "series": series}
+    text = json.dumps(doc, separators=(",", ":"), sort_keys=True) + "\n"
+    try:
+        if open(HISTORY_PATH, encoding="utf-8").read() == text:
+            return len(series)          # write-if-changed: no daily churn
+    except OSError:
+        pass
+    tmp = HISTORY_PATH + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        f.write(text)
+    os.replace(tmp, HISTORY_PATH)
+    return len(series)
+
+
 def main():
     score_date, path = fetch()
     scores = parse(path)[1]
     prev_date, prev_scores = _prior_snapshot(score_date)
     changed, total = enrich(score_date, scores, prev_scores)
+    series = write_history()
     cached = len(glob.glob(os.path.join(CACHE_DIR, "epss_scores-*.csv.gz")))
+    print(f"epss: {score_date} history: {series} series in "
+          f"{os.path.basename(HISTORY_PATH)}")
     print(f"epss: {score_date} refreshed {changed}/{total} records "
           f"(cache {cached} files"
           f"{f', delta vs {prev_date}' if prev_date else ', no prior snapshot'})")

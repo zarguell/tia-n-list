@@ -252,6 +252,61 @@ def enrich_deadlines(rows, records, today=None):
 
 
 # ---------------------------------------------------------------------------
+# EPSS trend (the committed 21-day series written by kevrichment/epss.py)
+# ---------------------------------------------------------------------------
+
+EPSS_HISTORY = os.path.join(KEV_DIR, "epss-history.json")
+
+
+def load_epss_history(path=None):
+    """{cve: [int|null, ...]} + dates from data/epss-history.json.
+
+    Tolerant: a missing or corrupt file yields (dates=[], series={}) so the
+    build never depends on the EPSS job having run."""
+    try:
+        with open(path or EPSS_HISTORY, encoding="utf-8") as f:
+            doc = json.load(f)
+    except (OSError, ValueError):
+        return [], {}
+    dates = doc.get("dates") or []
+    series = doc.get("series") or {}
+    if not isinstance(dates, list) or not isinstance(series, dict):
+        return [], {}
+    return dates, series
+
+
+def epss_trend(values, scale=1000, width=132, height=26, pad=3):
+    """Inline-SVG geometry + summary for one CVE's EPSS series.
+
+    `values` are scaled ints (0..scale) with None for days the CVE was absent.
+    Returns None when fewer than two real points exist (a single observation is
+    not a trend). The path is a polyline in a `width x height` box."""
+    pts = [(i, v) for i, v in enumerate(values or []) if isinstance(v, (int, float))]
+    if len(pts) < 2:
+        return None
+    span = max(1, len(values) - 1)
+    lo = min(v for _, v in pts)
+    hi = max(v for _, v in pts)
+    rng = (hi - lo) or 1
+    xy = []
+    for i, v in pts:
+        x = pad + (width - 2 * pad) * (i / span)
+        y = height - pad - (height - 2 * pad) * ((v - lo) / rng)
+        xy.append(f"{x:.1f},{y:.1f}")
+    first, last = pts[0][1], pts[-1][1]
+    return {
+        "points": " ".join(xy),
+        "width": width,
+        "height": height,
+        "first": first / scale,
+        "last": last / scale,
+        "delta": (last - first) / scale,
+        "days": len(pts),
+        "rising": last > first,
+    }
+
+
+# ---------------------------------------------------------------------------
 # Feed items (M4: feeds/feed-kev.xml) — newest KEV additions, 90-day window
 # ---------------------------------------------------------------------------
 
@@ -439,6 +494,38 @@ def src_tag(value):
     return ""
 
 
+def _epss_view(rec):
+    """Current EPSS + the committed trend for this CVE (None when untracked)."""
+    score = rec.get("epss")
+    if score is None and not rec.get("epss_percentile"):
+        return None
+    dates, series = _epss_data()
+    cve = gate_cve(rec.get("cve_id")) or ""
+    values = series.get(cve) or []
+    trend = epss_trend(values)
+    if trend:
+        trend["from_date"] = dates[0] if dates else ""
+        trend["to_date"] = dates[-1] if dates else ""
+    return {
+        "score": score,
+        "pct": rec.get("epss_percentile"),
+        "date": rec.get("epss_date") or "",
+        "delta_7d": rec.get("epss_delta_7d"),
+        "trend": trend,
+    }
+
+
+_EPSS_CACHE = {}
+
+
+def _epss_data():
+    """(dates, series) loaded once per build: 1,784 CVE pages would otherwise
+    re-read the 175 KB history file."""
+    if "data" not in _EPSS_CACHE:
+        _EPSS_CACHE["data"] = load_epss_history()
+    return _EPSS_CACHE["data"]
+
+
 def cve_view(rec, mentioned, tia_timeline=None):
     """Precompute the detail-page context from a record. All strings here are
     plain values; escaping happens in the template (autoescape).
@@ -467,6 +554,7 @@ def cve_view(rec, mentioned, tia_timeline=None):
         "product": rec.get("kev_product", ""),
         "vuln_name": rec.get("kev_vulnerability_name", ""),
         "date_added": fmt_date(rec.get("kev_date_added")),
+        "epss": _epss_view(rec),
         "due_date": fmt_date(rec.get("kev_due_date")),
         "required_action": rec.get("kev_required_action", ""),
         "published": fmt_date(rec.get("cve_published")),

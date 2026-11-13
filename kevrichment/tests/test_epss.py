@@ -129,3 +129,45 @@ def test_output_line_format(tmp_path, monkeypatch, capsys):
     out = capsys.readouterr().out.strip().splitlines()[-1]
     assert out == ("epss: 2026-09-23 refreshed 0/0 records "
                    "(cache 0 files, no prior snapshot)")
+
+
+def test_write_history_from_cache(tmp_path, monkeypatch):
+    """The committed 21-day series the /kev/ CVE pages chart: built from the
+    untracked snapshot cache, integers scaled by HISTORY_SCALE, nulls for CVEs
+    absent on a day, and write-if-changed so a quiet day adds no git churn."""
+    cache = tmp_path / "epss"
+    cache.mkdir()
+    for d, rows in (("2026-11-10", [("CVE-2026-0001", "0.10", "0.5")]),
+                    ("2026-11-11", [("CVE-2026-0001", "0.20", "0.6")]),
+                    ("2026-11-12", [("CVE-2026-0001", "0.30", "0.7")])):
+        with open(cache / f"epss_scores-{d}.csv.gz", "wb") as f:
+            f.write(_gz_bytes(d, rows))
+    cves = tmp_path / "cves"
+    cves.mkdir()
+    (cves / "CVE-2026-0001.json").write_text("{}")
+    (cves / "CVE-2026-0002.json").write_text("{}")      # never scored
+    out = tmp_path / "epss-history.json"
+
+    monkeypatch.setattr(epss, "CACHE_DIR", str(cache))
+    monkeypatch.setattr(epss, "HISTORY_PATH", str(out))
+    n = epss.write_history(days=21, cve_dir=str(cves))
+    assert n == 2
+    doc = json.loads(out.read_text())
+    assert doc["scale"] == 1000
+    assert doc["dates"] == ["2026-11-10", "2026-11-11", "2026-11-12"]
+    assert doc["series"]["CVE-2026-0001"] == [100, 200, 300]
+    assert doc["series"]["CVE-2026-0002"] == [None, None, None]
+
+    # write-if-changed: identical input must not rewrite the file
+    stamp = out.stat().st_mtime_ns
+    epss.write_history(days=21, cve_dir=str(cves))
+    assert out.stat().st_mtime_ns == stamp
+
+    # empty cache -> no file written, 0 returned
+    empty = tmp_path / "empty"
+    empty.mkdir()
+    monkeypatch.setattr(epss, "CACHE_DIR", str(empty))
+    out2 = tmp_path / "none.json"
+    monkeypatch.setattr(epss, "HISTORY_PATH", str(out2))
+    assert epss.write_history(cve_dir=str(cves)) == 0
+    assert not out2.exists()
