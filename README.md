@@ -1,51 +1,85 @@
 # Tia N. List
 
-Story-centric cybersecurity news + remediation site. Stories are first-class
-entities with timelines (original reporting → updates from multiple sources),
-hot-scored by a custom static site generator (no Hugo), with RSS feeds
-(daily digest / hot stories / every article / KEV catalog) and a CTI &
-detection tier (ATT&CK coverage matrix, IOC feeds + STIX snapshots, Sigma/SPL/
-KQL/YARA rules).
+Story-centric cybersecurity news and remediation tracker. Stories are
+first-class entities with timelines (original reporting → updates from multiple
+outlets), hot-scored by a custom static site generator (no Hugo), and published
+with RSS feeds, a CTI/detection tier, an enriched KEV catalog and a
+vendor-patch tracker.
 
-The **KEV catalog section** (`/kev/`) is powered by the kevrichment pipeline in
-`kevrichment/` — per-CVE enrichment of the CISA KEV catalog (PoC availability,
-exploitation preconditions, BOD 26-04 remediation timelines, hunting
-hypotheses). Story pages link their CVEs straight to the matching `/kev/cves/`
-page when a record exists.
+Everything is static: the hourly jobs commit data, CI renders the site from that
+data on every push, and GitHub Pages serves it.
+
+## What's on the site
+
+| Path | What it is |
+|---|---|
+| `/` `/stories/` | Hot ranking, then the full archive — every story with its timeline |
+| `/daily/` | Daily briefs: landscape analysis plus the stories that moved |
+| `/kev/` | CISA KEV catalog, enriched per CVE (PoC, exploitation preconditions, SSVC, BOD 26-04 timelines, hunting hypotheses) |
+| `/kev/deadlines/` | Remediation deadline board — every KEV entry counting down to CISA's due date, bucketed past-due / ≤2d / ≤7d / ≤30d |
+| `/kev/candidates/` | Exploited CVEs CISA has not listed yet |
+| `/cti/` | ATT&CK coverage matrix, per-case detections (Sigma/SPL/KQL/YARA), IOC sets and immutable daily STIX snapshots |
+| `/megapatch/` | Vendor patch trackers (Microsoft, Adobe, Oracle, Cisco, Red Hat, SUSE, Siemens): per-release CVE tables with filtering, vendor-advisory links and an all-fields CSV export |
+| `/feeds/sources/` | Every publication feed we poll, with 30-day activity — and the list itself as a downloadable OPML |
+| `/methodology/` `/about/` | How the process works, and why it exists |
 
 ## Structure
 
-- `engine/ssg.py` — static site generator (logic only; all markup in `engine/templates/`)
-- `engine/templates/` — Jinja2 templates + design system (`style.css`, light default,
-  dark toggle)
-- `engine/data/events/<id>.md` + `<id>.json` — hybrid store: markdown content + JSON metadata
-- `engine/data/stories/<id>.json` — story metadata + ordered event refs
-- `engine/digest_candidates.py` — coverage-delta brief for the daily digest (yesterday's
-  coverage ∪ evolved stories ∪ hot-uncovered), consumed by the digest automation
-- `engine/kev.py` — /kev/ section generator (reads `kevrichment/data/`)
-- `kevrichment/` — kevrichment pipeline (see its AGENTS.md): deterministic KEV+NVD+
-  Vulnrichment enrichment, committed `data/` (index.json + per-CVE records), daily
-  automation runbook. Its dashboard was ported into the Tia design system; the old
-  generator (`build_site.py`) is gone.
-- `known-ref-states.md` — settled reference conditions (owner decisions) so later
-  audits stop re-raising known states as rot; currently the host-wide
-  `unreachable`-with-no-snapshot rule and the kept `cybersecuritynews.com` refs.
+- `engine/ssg.py` — site generator (logic only; all markup in `engine/templates/`)
+- `engine/templates/` — Jinja2 templates + design system (`style.css`, light default, dark toggle)
+- `engine/kev.py` — `/kev/` section: dashboard, deadline board, per-CVE pages, candidates, pipeline/schema pages
+- `engine/megapatch.py` — `/megapatch/` section: release pages, tracker indexes, per-release JSON
+- `engine/cti.py`, `engine/ioc.py`, `engine/sigma.py` — ATT&CK matrix, IOC extraction, detection-variant derivation
+- `engine/ingest.py` — hourly RSS polling of `engine/feeds/cyber.opml` (48 sources) + Reddit/X/Mastodon legs
+- `engine/merge.py`, `engine/triage.py`, `engine/score.py` — clustering, editorial decisions, hot scoring
+- `engine/store.py` — the one loader for the event store (content is markdown, metadata is JSON)
+- `engine/stage_pages.py` — stages only the published surface for the Pages artifact and fails the build on a dangling reference
+- `engine/feeds/cyber.opml` — the source list the ingest pass polls, published at `/feeds/sources/`
+
+Data lives beside the code:
+
+- `engine/data/events/<id>.json` + `<id>.md` — the article store (markdown body, JSON metadata)
+- `engine/data/stories/<id>.json` — story metadata and ordered event refs
+- `engine/data/{analysis,digests,cti,audit}…` — analyst prose, daily briefs, CTI records, audit reports
+- `kevrichment/data/cves/CVE-*.json` — per-CVE enrichment; `index.json` feeds the dashboard;
+  `epss-history.json` is the compact 21-day EPSS series the CVE pages chart
+- `engine/data/megapatch/<track>/<release>.json` — normalized vendor releases
+
+Settled reference conditions (owner decisions that later audits should not
+re-raise as rot) live in `known-ref-states.md`.
 
 ## Regenerate
 
 ```bash
-uv venv ~/.local/venvs/tia-engine && uv pip install jinja2 markdown bleach   # once
-~/.local/venvs/tia-engine/bin/python engine/ssg.py          # full site
-~/.local/venvs/tia-engine/bin/python engine/ssg.py --kev    # kev section only (automation verify)
+uv venv ~/.local/venvs/tia-engine && uv pip install jinja2 "markdown==3.10.3" bleach
+~/.local/venvs/tia-engine/bin/python engine/ssg.py            # full site
+~/.local/venvs/tia-engine/bin/python engine/ssg.py --kev      # /kev/ only (automation pre-push verify)
+~/.local/venvs/tia-engine/bin/python engine/ssg.py --megapatch  # /megapatch/ only
+~/.local/venvs/tia-engine/bin/python engine/ssg.py --lint-only  # source-level lints, no render
 ```
 
-Generated site lands at the repo root (GitHub Pages serves `/`). CI builds it
-on every push; lint gates (link resolution, path-absolute, chips, CTI, Sigma,
-YARA) fail the build on any violation.
+A full build also derives the Sigma/Splunk/KQL variants, which needs the pinned
+detection stack (`sigma-cli`, `pysigma`, `pyparsing`, the Splunk/Kusto backends,
+`yara-x` — exact pins in `.github/workflows/site-deploy.yml`). Without it the
+build skips derivation and only re-renders committed variants.
 
-CI publishes only the generated surface: `engine/stage_pages.py` copies it into
-`$RUNNER_TEMP/pages-site` for the Pages artifact (the repo root also holds the
-source tree and the raw event store, which are not site content — staging them
-made every deploy upload 114k files) and fails the build if a staged page
-references anything the staging missed. The deploy job retries once with the
-same artifact when GitHub's Pages sync stalls.
+Generated site lands at the repo root (GitHub Pages serves `/`; all generated
+paths are gitignored). CI builds on every push and fails on any lint violation:
+link resolution, path-absolute URLs, chip contents, CTI joins, Sigma parity,
+YARA, prose.
+
+## Pipeline
+
+The jobs that feed this repo live in the `cronman` repo (see its README and
+`AGENTS.md`): hourly ingest → merge → triage → analysis → publish, a KEV
+catalog watch, daily KEV enrichment and EPSS refresh, a five-minute megapatch
+watcher during vendor disclosure windows, the morning digest, plus audit and
+autodiag passes. Every job commits data here; CI does the rendering.
+
+## Tests
+
+```bash
+.venv/bin/python -m pytest kevrichment/tests       # pipeline + site unit tests
+for f in engine/test_*.py; do python3 "$f" || break; done   # engine contract suites
+NODE_PATH=… node engine/tests/verify-kev.js        # jsdom suites (CI runs these)
+```
