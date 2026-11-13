@@ -311,3 +311,66 @@ def test_enrich_deadlines_joins_records_without_guessing():
 def test_sitemap_lists_the_deadline_board():
     paths = [p for p, _ in kev.kev_sitemap_entries({"cves": []})]
     assert "kev/deadlines/" in paths
+
+
+# ---------------------------------------------------------------------------
+# EPSS trend (2026-11-13): committed 21-day series -> sparkline geometry
+# ---------------------------------------------------------------------------
+
+def test_epss_trend_geometry():
+    t = kev.epss_trend([None, None, 10, 12, None, 14, 20], scale=1000,
+                       width=132, height=26, pad=3)
+    assert t["days"] == 4 and t["rising"] is True
+    assert abs(t["first"] - 0.010) < 1e-9 and abs(t["last"] - 0.020) < 1e-9
+    assert abs(t["delta"] - 0.010) < 1e-9
+    pts = t["points"].split(" ")
+    assert len(pts) == 4
+    # x maps day index -> [pad, width-pad]: values live at indices 2,3,5,6 of 7
+    assert abs(float(pts[0].split(",")[0]) - (3 + 126 * (2 / 6))) < 0.2
+    assert abs(float(pts[-1].split(",")[0]) - (132 - 3)) < 0.2
+    # y is inverted (bigger value -> smaller y)
+    ys = [float(p.split(",")[1]) for p in pts]
+    assert ys[0] > ys[-1]
+
+
+def test_epss_trend_needs_two_points():
+    assert kev.epss_trend([]) is None
+    assert kev.epss_trend([None, None]) is None
+    assert kev.epss_trend([None, 5, None]) is None
+
+
+def test_epss_trend_flat_series_does_not_divide_by_zero():
+    t = kev.epss_trend([7, 7, 7])
+    assert t["first"] == t["last"] == 0.007 and t["delta"] == 0
+    assert t["rising"] is False
+    ys = {p.split(",")[1] for p in t["points"].split(" ")}
+    assert len(ys) == 1          # flat line
+
+
+def test_load_epss_history_is_tolerant(tmp_path):
+    empty = tmp_path / "missing.json"
+    assert kev.load_epss_history(str(empty)) == ([], {})
+    bad = tmp_path / "bad.json"
+    bad.write_text("{not json")
+    assert kev.load_epss_history(str(bad)) == ([], {})
+    odd = tmp_path / "odd.json"
+    odd.write_text('{"dates": "x", "series": []}')
+    assert kev.load_epss_history(str(odd)) == ([], {})
+    good = tmp_path / "good.json"
+    good.write_text('{"dates": ["2026-11-11"], "series": {"CVE-2026-0001": [16]}}')
+    dates, series = kev.load_epss_history(str(good))
+    assert dates == ["2026-11-11"] and series["CVE-2026-0001"] == [16]
+
+
+def test_epss_view_joins_record_and_history(monkeypatch):
+    monkeypatch.setattr(kev, "_EPSS_CACHE", {"data": (
+        ["2026-11-10", "2026-11-11", "2026-11-12"],
+        {"CVE-2026-0001": [100, 110, 130]})}, raising=False)
+    rec = {"cve_id": "CVE-2026-0001", "epss": 0.013,
+           "epss_percentile": 0.9, "epss_date": "2026-11-12"}
+    v = kev._epss_view(rec)
+    assert v["score"] == 0.013 and v["pct"] == 0.9
+    assert v["trend"]["first"] == 0.1 and v["trend"]["last"] == 0.13
+    assert v["trend"]["from_date"] == "2026-11-10"
+    # a record with no EPSS at all renders nothing (no empty panel)
+    assert kev._epss_view({"cve_id": "CVE-2026-0002"}) is None

@@ -42,6 +42,37 @@
       {% if rec.required_action %}<div class="kev-row"><span class="kev-label">Required action</span><span class="kev-value">{{ rec.required_action }}</span></div>{% endif %}
       {% if rec.cwes %}<div class="kev-row"><span class="kev-label">CWE</span><span class="kev-value">{% for w in rec.cwes %}<span class="chip">{{ w }}</span> {% endfor %}</span></div>{% endif %}
       {% if rec.cvss_vector %}<div class="kev-row"><span class="kev-label">CVSS vector</span><span class="kev-value mono">{{ rec.cvss_vector }}</span></div>{% endif %}
+      {% if rec.epss %}
+      <div class="kev-row">
+        <span class="kev-label">EPSS</span>
+        <span class="kev-value">
+          {% if rec.epss.score is not none %}<strong>{{ '%.4f'|format(rec.epss.score) }}</strong>{% endif %}
+          {% if rec.epss.pct is not none %}<span class="reltime">· {{ '%.0f'|format(rec.epss.pct * 100) }}th percentile</span>{% endif %}
+          {% if rec.epss.date %}<span class="reltime">· {{ rec.epss.date }}</span>{% endif %}
+          {% if rec.epss.delta_7d is not none %}
+          <span class="reltime">· 7d {{ '%+.4f'|format(rec.epss.delta_7d) }}</span>
+          {% endif %}
+        </span>
+      </div>
+      {% if rec.epss.trend %}
+      <div class="kev-row">
+        <span class="kev-label">EPSS trend</span>
+        <span class="kev-value">
+          <svg class="epss-spark" viewBox="0 0 {{ rec.epss.trend.width }} {{ rec.epss.trend.height }}"
+               width="{{ rec.epss.trend.width }}" height="{{ rec.epss.trend.height }}"
+               role="img" aria-label="EPSS over {{ rec.epss.trend.days }} observations, {{ '%.4f'|format(rec.epss.trend.first) }} to {{ '%.4f'|format(rec.epss.trend.last) }}">
+            <polyline points="{{ rec.epss.trend.points }}" fill="none"
+                      stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span class="epss-trend-text">
+            {{ '%.4f'|format(rec.epss.trend.first) }} → {{ '%.4f'|format(rec.epss.trend.last) }}
+            <span class="{{ 'sev-crit' if rec.epss.trend.rising else 'reltime' }}">{{ '%+.4f'|format(rec.epss.trend.delta) }}</span>
+            <span class="reltime">over {{ rec.epss.trend.days }} observations</span>
+          </span>
+        </span>
+      </div>
+      {% endif %}
+      {% endif %}
       {% if rec.kev_desc or rec.nvd_desc %}
       <details class="kev-collapse" {% if rec.kev_desc %}open{% endif %}>
         <summary>Descriptions</summary>
