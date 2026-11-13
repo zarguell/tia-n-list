@@ -1,0 +1,1 @@
+Early coverage of the 4EverAble2Shell and Agent2Shell disclosures, reporting that the exploits achieve root remote code execution on N-central servers and SYSTEM-level execution on managed Windows agents even after patching. Attackers chain the Apache Axis flaw CVE-2026-90436 to gain initial code execution before escalating privileges.
