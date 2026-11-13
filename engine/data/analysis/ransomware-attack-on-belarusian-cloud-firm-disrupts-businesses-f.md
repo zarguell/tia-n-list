@@ -1,0 +1,3 @@
+ActiveCloud, a Belarusian cloud provider, said hackers breached its systems and encrypted parts of its cloud infrastructure, leaving customers unable to access key services for several days. The incident is a ransomware attack against a cloud firm whose customers depend on it for hosted services, so the impact extends to downstream businesses that rely on ActiveCloud's platform.
+
+No CVEs or technical details have been published; the available reporting is limited to ActiveCloud's own statement and a short aggregator summary. Watch for confirmation of which services and customer data were affected, whether a ransom was demanded or paid, and how long restoration takes for affected tenants.
