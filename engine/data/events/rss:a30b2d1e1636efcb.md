@@ -1,0 +1,1 @@
+Climate change is the issue . As usual, you can also use this squid post to talk about the security stories in the news that I haven’t covered. Blog moderation policy.

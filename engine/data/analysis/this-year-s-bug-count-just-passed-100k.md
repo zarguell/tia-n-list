@@ -1,0 +1,5 @@
+Vulnerability disclosures crossed the 100,000 mark in 2026, a milestone that one observer had predicted would land closer to 105,000 and now expects to overshoot by roughly 15,000. A separate account attributes the surge to AI-driven discoveries, with the disclosure volume skyrocketing past 100,000 during the year. The exact attribution of the surge to AI is asserted rather than quantified in the available reporting, and the two sources differ in framing, one a prediction shortfall, the other an AI-driven discovery narrative.
+
+The milestone is a volume signal, not a severity signal: 100,000 CVEs says nothing about how many are exploitable, in KEV, or reachable in typical environments. The more useful question for defenders is how many of those disclosures land on internet-facing assets and how quickly they get patched, not the headline count.
+
+Watch whether the disclosure rate keeps accelerating through year-end and whether AI-assisted discovery starts producing more severe, chainable findings rather than low-impact ones. The metric that matters is time-to-exploit versus time-to-patch, not the raw CVE total.
