@@ -1,0 +1,1 @@
+The org.gradle.daemon.registry.base property is honoured from a project's gradle.properties, so a project can point the client at a registry file it ships. The client deserializes parts of that file with Java serialization and connects to any address it lists, including a remote host, although daemons only listen locally. Rated high at CVSS 4.0 8.6 and fixed in 9.9.1 and 8.14.7.

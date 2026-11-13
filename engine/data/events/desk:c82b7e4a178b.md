@@ -1,0 +1,1 @@
+Red Hat released RHSA-2026:99949 on 2026-11-12 for Red Hat Satellite 6.16 for RHEL 8 and RHEL 9. The errata fixes rubygem-safemode to 1.5.0-3 and foreman to 3.12.0.26, and bundles 22 CVEs including the Jail allow-list bypass CVE-2026-107360. The flaw is listed with critical impact.

@@ -1,0 +1,1 @@
+Gradle 8.14.7 is the seventh patch release for Gradle 8.14 and addresses the same three security vulnerabilities fixed in 9.9.1, with the version catalog code injection rated 9.3 critical. It is the open source fix for all 8.x builds still on 8.14.6 or earlier.
