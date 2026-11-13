@@ -1,0 +1,5 @@
+ManageEngine shipped fixes for two critical vulnerabilities in its IT management portfolio. CVE-2026-12591 is rated CVSS 9.9 in M365 Manager Plus, the product that holds Microsoft 365 tenant administration credentials, and CVE-2026-12507 is a remote code execution flaw in ServiceDesk Plus. The advisory summary presents both as fixed flaws and does not accompany them with an exploitation claim.
+
+The 9.9 rating on an M365 management console is what should drive patching order. A compromise there is a tenant-wide identity compromise: mailboxes, Teams, SharePoint, and the ability to create or remove accounts. ServiceDesk Plus holds the same class of data for the service desk, including credentials for the systems it manages, so remote code execution there is a pivot into the rest of the estate.
+
+The summary does not name affected build numbers, so verify installed versions against the ManageEngine advisory and patch both products. Watch for a CISA KEV listing if exploitation is confirmed, and until the patch is in place check M365 Manager Plus for unusual API activity, new application registrations or mailbox rule changes.

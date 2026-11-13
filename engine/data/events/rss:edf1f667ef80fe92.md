@@ -1,0 +1,1 @@
+Recently, the AhnLab SEcurity intelligence Center (ASEC) identified a case of phishing emails that disguise themselves as requests to confirm purchase orders. The email body prompts recipients to open a malicious DOCX file disguised as a purchase order to verify the order. [Figure 1] Phishing email body When a user downloads and opens […]

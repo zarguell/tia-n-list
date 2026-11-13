@@ -1,0 +1,5 @@
+Gradle 9.9.1 and 8.14.7 fix three Gradle vulnerabilities. The most serious is a CVSS 9.3 code injection in version catalog handling that runs during a build, so the input that triggers it is a malicious or tampered catalog rather than a network service. The other two flaws are not itemized in the advisory summary.
+
+Build-time code execution is a supply chain problem with a short path. The version catalog is a dependency input, and a compromised plugin, repository or fork can rewrite what a build resolves. Gradle shipped fixes on both the current 9.x line and the 8.x line, so teams still on older 8.x builds need 8.14.7 rather than only the newest release.
+
+Check the Gradle advisory for the exact affected version ranges and the two remaining CVE identifiers. Verify the wrapper version in each repository, since the wrapper properties, not the locally installed Gradle, decide what runs in CI, and review any catalog or plugin source that resolves from outside the default portal.
