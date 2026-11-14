@@ -260,6 +260,22 @@ with tempfile.TemporaryDirectory() as td:
     check("capped story not requeued", n == 0
           and json.load(open(merge.NEEDS))["stories"] == [])
 
+# --- 5c: emit_needs skips merged-away redirect shells ------------------------
+# merge_story leaves the loser's pre-merge score on its redirect json, so a
+# duplicate merged minutes earlier still cleared HOT_THRESHOLD and was handed
+# to the hourly agent as analysis work on a story with ZERO events (2026-11-14
+# audit: 12 of 13 queued ids were merged shells).
+with tempfile.TemporaryDirectory() as td:
+    merge.NEEDS = os.path.join(td, "needs-analysis.json")
+    merge.ANALYSIS_DIR = os.path.join(td, "analysis")
+    os.makedirs(merge.ANALYSIS_DIR)
+    live = {"id": "hot-live", "score": 5.0, "events": []}
+    shell = {"id": "hot-shell", "score": 8.1, "events": [],
+             "merged_into": "hot-live"}
+    n = merge.emit_needs({"hot-live": live, "hot-shell": shell})
+    check("merged redirect shell not queued, live story is",
+          n == 1 and json.load(open(merge.NEEDS))["stories"] == ["hot-live"])
+
 # --- 6: ssg.load_stories drops frozen from cards ------------------------------
 with tempfile.TemporaryDirectory() as td:
     sdir = os.path.join(td, "stories")
