@@ -40,19 +40,13 @@ jobs:
         # render identically.
         run: pip install jinja2 "markdown==3.10.3" bleach "sigma-cli==3.1.0" "pysigma==1.5.0" "pyparsing==3.3.2" "pysigma-backend-splunk==2.1.0" "pysigma-backend-kusto==1.0.1" yara-x pytest requests
       # Derived Sigma variants are build-derived and untracked — without a
-      # cache every build re-derives all 137 rules (272 CLI spawns, ~3/4 of
-      # build time). Keyed by rule content: a rule change misses once and
-      # re-derives only through the build's hash check (perf phase 1).
+      # cache every build re-derives all 199 rules (398 CLI spawns, ~2.4s a
+      # rule pair: that IS most of the build step). Keyed by rule content: a
+      # rule change misses once and re-derives only through the build's hash
+      # check (perf phase 1) — but only ssg.py persisting variants to
+      # engine/data/cti/ lets the save step below ever fill this cache.
       - name: Restore derived Sigma variants
         uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: |
-            engine/data/cti/*.splunk
-            engine/data/cti/*.kql
-          key: sigma-variants-${{ hashFiles('engine/data/cti/*.sigma') }}
-      - name: Save derived Sigma variants
-        if: always()
-        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: |
             engine/data/cti/*.splunk
@@ -98,6 +92,21 @@ jobs:
         run: python -m pytest kevrichment/tests/test_schema.py kevrichment/tests/test_main.py kevrichment/tests/test_kev_site.py -q
       - name: Build the static site
         run: python engine/ssg.py
+      # SAVE MUST FOLLOW THE BUILD (2026-11-13): it used to sit right after the
+      # restore, so it cached whatever the restore had just put back — the
+      # entry stayed 3 KB and every run re-derived all 199 rules ("sigma
+      # variants: 10 fresh, 189 derived", most of the 145s build step).
+      # ssg.py now writes derived variants back into engine/data/cti/, so this
+      # step has something to cache: one full derivation after a rule change,
+      # zero after that (the freshness header self-invalidates edited rules).
+      - name: Save derived Sigma variants
+        if: always()
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            engine/data/cti/*.splunk
+            engine/data/cti/*.kql
+          key: sigma-variants-${{ hashFiles('engine/data/cti/*.sigma') }}
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '26'

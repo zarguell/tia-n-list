@@ -283,10 +283,17 @@ def load_events():
     from store import load_events as _load
     global store_safe_url
     from store import safe_url as store_safe_url
-    events = _load()
-    for e in events.values():
-        e["html"] = sanitize(md_to_html(e["content_md"], output_format="html5"))
-    return events
+    # DEAD PRE-RENDER REMOVED (2026-11-13, perf): this used to render every
+    # event body to bleach-cleaned HTML and stash it on e["html"] — 37.6k
+    # markdown+bleach passes per build (~68s CPU, 46% of all markdown work).
+    # Nothing ever read it: story.html has rendered e.body_html (from
+    # delta_body, which renders only the sentence-delta of each update) since
+    # 18a03c329ba (2026-08-11) swapped {{ e.html | safe }} for body_html and
+    # left this loop orphaned. Full-site A/B over 12,927 generated files: byte
+    # identical except build timestamps. Do NOT reintroduce a per-event
+    # pre-render here: delta_body derives its text from the story's events, so
+    # a per-event HTML cache would never be reusable anyway.
+    return _load()
 
 
 SENT_SPLIT = re.compile(r"(?<=[.!?])\s+")
@@ -381,6 +388,137 @@ def _card_snippet(st, original):
     return md_snippet(original["content_md"])
 
 
+# ---------- story cards ----------
+
+def _build_card(st, evs, max_score):
+    """One story card dict, or None when no renderable event survives the gate.
+
+    Pure apart from reading the analysis file for the snippet: it touches only
+    its own arguments and the module's render helpers, which is what lets the
+    card pass fan out across processes (see _build_cards).
+    """
+    # Public pages are the product: unverified low-trust events (AI-drafted
+    # aggregator reposts, template-inflated) stay in the store but do not
+    # render — same amplify-never-establish bar as merge/triage/digest.
+    # Verified-provenance events render (the primary source was checked).
+    evs = [ev for ev in evs
+           if not (ev.get("low_trust")
+                   and not (ev.get("provenance") or {}).get("verified"))]
+    if not evs:
+        return None
+    evs_sorted = sorted(evs, key=lambda e: e["published_at"])
+    deltas = delta_body(evs_sorted)
+    original = next((e for e in evs_sorted if e["kind"] == "original"), evs_sorted[0])
+    hc, hl, hv = heat(st.get("score", 0), st.get("last_seen"))
+    src_domains = [display_domain(s) for s in st.get("sources", [])]
+    return {
+        "id": st["id"],
+        "title": st["title"],
+        "url": f"stories/{st['id']}/",
+        "snippet": _card_snippet(st, original),
+        "sources": src_domains,
+        "cves": st.get("cves", []),
+        "score": st.get("score", 0),
+        "heat_class": hc,
+        "heat_label": hl,
+        "heat_var": hv,
+        "heat_pct": min(100, int(st.get("score", 0) / max_score * 100)),
+        "desk": bool(st.get("desk_reviewed_at")),
+        "reddit": st.get("reddit_signal", {}).get("best_score") or None,
+        "score_breakdown": st.get("score_breakdown", {}),
+        "n_sources": st.get("n_sources", len(st.get("sources", []))),
+        "first_seen": st.get("first_seen", evs_sorted[0]["published_at"]),
+        "last_seen": st.get("last_seen", evs_sorted[-1]["published_at"]),
+        "first_seen_human": reltime(st.get("first_seen", evs_sorted[0]["published_at"])),
+        "last_seen_human": reltime(st.get("last_seen", evs_sorted[-1]["published_at"])),
+        "events": [{
+            "kind": e["kind"],
+            "event_id": e["id"],
+            "title": e.get("title", st["title"]),
+            "source": display_domain(e["source"]),
+            "url": e["url"],
+            "published_human": reltime(e["published_at"]),
+            "published_date": date_human(e["published_at"]),
+            "published_at": e["published_at"],
+            "pub_date": rfc2822(e["published_at"]),
+            "snippet": md_snippet(e["content_md"], 400),
+            "body_html": deltas[e["id"]]["body_html"],
+            "is_mention": deltas[e["id"]]["is_mention"],
+        } for e in sorted(evs_sorted,
+                          key=lambda e: (e["kind"] != "original", e["published_at"]))],
+    }
+
+_CARD_INPUT = []
+_CARD_MAX_SCORE = 1
+
+
+def _card_batch(rng):
+    """Worker: cards for one index range of the inherited _CARD_INPUT."""
+    lo, hi = rng
+    out = []
+    for st, evs in _CARD_INPUT[lo:hi]:
+        c = _build_card(st, evs, _CARD_MAX_SCORE)
+        if c is not None:
+            out.append(c)
+    return out
+
+
+def _card_jobs(n):
+    """Worker processes for the card pass. SSG_JOBS wins (1 = serial)."""
+    try:
+        want = int(os.environ.get("SSG_JOBS") or 0)
+    except ValueError:
+        want = 0
+    if want > 0:
+        return want
+    try:
+        cpus = len(os.sched_getaffinity(0))
+    except AttributeError:  # pragma: no cover — non-Linux
+        cpus = os.cpu_count() or 1
+    return max(1, min(cpus, 8))
+
+
+def _build_cards(parsed, max_score):
+    """Cards for every parsed story, serially or fanned out.
+
+    Perf (2026-11-13): the card pass is the build's remaining markdown-heavy
+    block — delta_body renders each story's update-article delta, ~24s of a
+    150s build. It is embarrassingly parallel (one story = one card, no
+    shared state) and the workers inherit the loaded event store through
+    fork(), so nothing but the finished cards crosses the process boundary.
+
+    Order is preserved (Pool.map keeps chunk order; the caller's final sort by
+    score is stable), so output is byte-identical to the serial pass — pinned
+    by test_ssg.py::test_card_pass_serial_matches_fanout.
+
+    Fail-open on infrastructure only: if the pool cannot start or a worker
+    dies, the same pass is redone serially (a warning on stderr) instead of
+    failing the publish. Content errors still propagate.
+    """
+    n = len(parsed)
+    jobs = _card_jobs(n)
+    if jobs <= 1 or n < 200:          # below ~200 cards fork() costs more than it saves
+        return [c for c in (_build_card(st, evs, max_score) for st, evs in parsed)
+                if c is not None]
+    global _CARD_INPUT, _CARD_MAX_SCORE
+    _CARD_INPUT, _CARD_MAX_SCORE = parsed, max_score
+    try:
+        import multiprocessing as mp
+        ctx = mp.get_context("fork")  # fork so children inherit `parsed` COW
+        chunk = max(1, n // (jobs * 4))   # 4 chunks/worker smooths the tail
+        ranges = [(i, min(i + chunk, n)) for i in range(0, n, chunk)]
+        with ctx.Pool(jobs) as pool:
+            parts = pool.map(_card_batch, ranges)
+        return [c for part in parts for c in part]
+    except Exception as exc:  # noqa: BLE001 — never fail a publish over a pool
+        print(f"WARN: card-pass fan-out failed ({exc!r}); redoing serially",
+              file=sys.stderr)
+    finally:
+        _CARD_INPUT, _CARD_MAX_SCORE = [], 1
+    return [c for c in (_build_card(st, evs, max_score) for st, evs in parsed)
+            if c is not None]
+
+
 def load_stories(events):
     import lifecycle
     # ---- cold-tier freeze ----
@@ -412,58 +550,7 @@ def load_stories(events):
         evs = [events[e["event_id"]] for e in st["events"] if e["event_id"] in events]
         max_score = max(max_score, st.get("score", 0))
         parsed.append((st, evs))
-    cards = []
-    for st, evs in parsed:
-        # Public pages are the product: unverified low-trust events (AI-drafted
-        # aggregator reposts, template-inflated) stay in the store but do not
-        # render — same amplify-never-establish bar as merge/triage/digest.
-        # Verified-provenance events render (the primary source was checked).
-        evs = [ev for ev in evs
-               if not (ev.get("low_trust")
-                       and not (ev.get("provenance") or {}).get("verified"))]
-        if not evs:
-            continue
-        evs_sorted = sorted(evs, key=lambda e: e["published_at"])
-        deltas = delta_body(evs_sorted)
-        original = next((e for e in evs_sorted if e["kind"] == "original"), evs_sorted[0])
-        hc, hl, hv = heat(st.get("score", 0), st.get("last_seen"))
-        src_domains = [display_domain(s) for s in st.get("sources", [])]
-        cards.append({
-            "id": st["id"],
-            "title": st["title"],
-            "url": f"stories/{st['id']}/",
-            "snippet": _card_snippet(st, original),
-            "sources": src_domains,
-            "cves": st.get("cves", []),
-            "score": st.get("score", 0),
-            "heat_class": hc,
-            "heat_label": hl,
-            "heat_var": hv,
-            "heat_pct": min(100, int(st.get("score", 0) / max_score * 100)),
-            "desk": bool(st.get("desk_reviewed_at")),
-            "reddit": st.get("reddit_signal", {}).get("best_score") or None,
-            "score_breakdown": st.get("score_breakdown", {}),
-            "n_sources": st.get("n_sources", len(st.get("sources", []))),
-            "first_seen": st.get("first_seen", evs_sorted[0]["published_at"]),
-            "last_seen": st.get("last_seen", evs_sorted[-1]["published_at"]),
-            "first_seen_human": reltime(st.get("first_seen", evs_sorted[0]["published_at"])),
-            "last_seen_human": reltime(st.get("last_seen", evs_sorted[-1]["published_at"])),
-            "events": [{
-                "kind": e["kind"],
-                "event_id": e["id"],
-                "title": e.get("title", st["title"]),
-                "source": display_domain(e["source"]),
-                "url": e["url"],
-                "published_human": reltime(e["published_at"]),
-                "published_date": date_human(e["published_at"]),
-                "published_at": e["published_at"],
-                "pub_date": rfc2822(e["published_at"]),
-                "snippet": md_snippet(e["content_md"], 400),
-                "body_html": deltas[e["id"]]["body_html"],
-                "is_mention": deltas[e["id"]]["is_mention"],
-            } for e in sorted(evs_sorted,
-                              key=lambda e: (e["kind"] != "original", e["published_at"]))],
-        })
+    cards = _build_cards(parsed, max_score)
     # kev cross-link join: which of a story's CVEs have a kevrichment record?
     # (story cves are CVE_RE-validated + upper-cased at ingestion, so the
     # normalized membership check is exact; template renders linked chips)
@@ -1142,6 +1229,64 @@ def main():
         for _s in _ioc.get("stories", []):
             iocs_by_story.setdefault(_s, []).append(_ioc)
 
+    # Derive Splunk/KQL variants from the authored Sigma rules (deterministic —
+    # never hand-written, so they cannot drift). Content-hash freshness
+    # (perf phase 1): each present variant carries its source sha256, so an
+    # unchanged rule costs two header regexes and zero subprocesses. The
+    # Actions cache restores prior variants (keyed by rule content); a cold
+    # build derives everything once. Variants stay build-derived and
+    # untracked — a missing CLI or inexpressible rule keeps the old behavior
+    # (that backend silently absent from output).
+    #
+    # ORDER MATTERS (fixed 2026-11-13): this loop used to run AFTER the CTI
+    # section, but cti_intel() and the case pages read <slug>.splunk/.kql off
+    # CTI_DIR at render time. On a clean clone (every CI build — the variants
+    # are gitignored) nothing was derived yet, so every published case page
+    # rendered EMPTY SPL/KQL sections and the coverage matrix flagged
+    # splunk/kql as absent, even though the raw files were published. Verified
+    # on the live site: 0 "Splunk SPL" blocks on a case page. Deriving first
+    # makes the first build on a cold clone identical to the steady state.
+    _fresh = _derived = 0
+    for f in sorted(glob.glob(os.path.join(CTI_DIR, "*.sigma"))):
+        slug = os.path.splitext(os.path.basename(f))[0]
+        sigma_text = open(f).read()
+        # raw rule copy in the site output (write-if-changed downstream)
+        write(f"cti/{slug}.sigma", sigma_text)
+        _digest = sigma_mod.source_sha256(f)
+        _cached = {}
+        _stale = False
+        for _ext in (".splunk", ".kql"):
+            _vp = os.path.join(CTI_DIR, slug + _ext)
+            try:
+                _cur = open(_vp).read() if os.path.exists(_vp) else ""
+            except OSError:
+                _cur = ""
+            if _cur and sigma_mod.variant_fresh_text(_cur, _digest):
+                _cached[_ext] = _cur
+            else:
+                _stale = True
+        if _stale:
+            _derived += 1
+            splunk, kql = sigma_mod.convert_variants(f)
+            for _ext, _kind, _body in ((".splunk", "Splunk SPL", splunk),
+                                      (".kql", "KQL", kql)):
+                if _body is None:
+                    continue
+                _cached[_ext] = (sigma_mod.variant_header(slug, _kind, _digest)
+                                 + _body + "\n")
+                # Persist next to the .sigma so the next build's freshness
+                # check (and the Actions cache save, which globs
+                # engine/data/cti/*.splunk|*.kql) actually hits. Without this
+                # every build re-derives every rule — see
+                # sigma.persist_variant.
+                sigma_mod.persist_variant(f, _ext, _cached[_ext])
+        else:
+            _fresh += 1
+        for _ext, _text in _cached.items():
+            write(f"cti/{slug}{_ext}", _text)
+    print(f"sigma variants: {_fresh} fresh, {_derived} derived")
+
+
     def cti_intel(sid):
         """Published artifacts a CTI case actually carries. The coverage table
         shows these per case so an empty case page is visible before the click
@@ -1190,48 +1335,6 @@ def main():
         write(f"cti/{sid}/index.html", render("cti_case.html", active=None, rec=r,
                                       og_url=site_url(f"cti/{sid}/")))
 
-    # Derive Splunk/KQL variants from the authored Sigma rules (deterministic —
-    # never hand-written, so they cannot drift). Content-hash freshness
-    # (perf phase 1): each present variant carries its source sha256, so an
-    # unchanged rule costs two header regexes and zero subprocesses. The
-    # Actions cache restores prior variants (keyed by rule content); a cold
-    # build derives everything once. Variants stay build-derived and
-    # untracked — a missing CLI or inexpressible rule keeps the old behavior
-    # (that backend silently absent from output).
-    _fresh = _derived = 0
-    for f in sorted(glob.glob(os.path.join(CTI_DIR, "*.sigma"))):
-        slug = os.path.splitext(os.path.basename(f))[0]
-        sigma_text = open(f).read()
-        # raw rule copy in the site output (write-if-changed downstream)
-        write(f"cti/{slug}.sigma", sigma_text)
-        _digest = sigma_mod.source_sha256(f)
-        _cached = {}
-        _stale = False
-        for _ext in (".splunk", ".kql"):
-            _vp = os.path.join(CTI_DIR, slug + _ext)
-            try:
-                _cur = open(_vp).read() if os.path.exists(_vp) else ""
-            except OSError:
-                _cur = ""
-            if _cur and sigma_mod.variant_fresh_text(_cur, _digest):
-                _cached[_ext] = _cur
-            else:
-                _stale = True
-        if _stale:
-            _derived += 1
-            splunk, kql = sigma_mod.convert_variants(f)
-            for _ext, _kind, _body in ((".splunk", "Splunk SPL", splunk),
-                                      (".kql", "KQL", kql)):
-                if _body is None:
-                    continue
-                _cached[_ext] = (sigma_mod.variant_header(slug, _kind, _digest)
-                                 + _body + "\n")
-        else:
-            _fresh += 1
-        for _ext, _text in _cached.items():
-            write(f"cti/{slug}{_ext}", _text)
-    print(f"sigma variants: {_fresh} fresh, {_derived} derived")
-
     # author-authored YARA rules: publish raw for defenders
     for f in sorted(glob.glob(os.path.join(CTI_DIR, "*.yara"))):
         slug = os.path.splitext(os.path.basename(f))[0]
@@ -1265,9 +1368,15 @@ def main():
                                              latest=snap_manifest))
 
     # KEV catalog section (/kev/) — kevrichment data rendered in the Tia design
-    # system; story pages cross-link enriched CVEs via the kev_cves join
+    # system; story pages cross-link enriched CVEs via the kev_cves join.
+    # Timeline rows are built ONCE here and threaded through the kev section,
+    # the sitemap and the candidates feed (perf 2026-11-13: three bare
+    # cve_timeline.build() calls were ~35s of every build, each re-reading the
+    # full event+story store for the same answer).
     import kev as kev_mod
-    kev_total = kev_mod.render_site(env, write, cards)
+    import cve_timeline as tl_mod
+    tl_rows = tl_mod.build(today=datetime.now(timezone.utc).date())
+    kev_total = kev_mod.render_site(env, write, cards, timeline_rows=tl_rows)
     print(f"  kev section: {kev_total} CVEs")
 
     # Mega Patch Tracker (/megapatch/) — monthly vendor mega-patch releases
@@ -1393,7 +1502,8 @@ def main():
     digest_date = digest_dates[-1] if digest_dates else build_today
 
     write("sitemap.xml", render("sitemap.xml", stories=cards,
-                                kev_entries=kev_mod.kev_sitemap_entries(kev_mod.load_index()),
+                                kev_entries=kev_mod.kev_sitemap_entries(
+                                    kev_mod.load_index(), rows=tl_rows),
                                 megapatch_entries=mp_mod.sitemap_entries()))
 
     # feeds — MVP: all / hot / daily
@@ -1413,7 +1523,7 @@ def main():
          kev_mod.feed_items(kev_mod.load_index()), rfc_now),
         ("feeds/feed-kev-candidates.xml", "Tia N. List — KEV candidates",
          "Exploited CVEs Tia's reporting is tracking that CISA has not listed on the KEV catalog yet (the live candidate set).", "/feeds/feed-kev-candidates.xml",
-         kev_mod.candidate_feed_items(), rfc_now),
+         kev_mod.candidate_feed_items(tl_rows), rfc_now),
     ]
     for rel, title, desc, self_url, items, built in feeds:
         write(rel, render("feed.xml", feed={

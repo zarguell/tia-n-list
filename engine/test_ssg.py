@@ -169,6 +169,51 @@ def main():
                     "Only 1 story cleared" in html_quiet1, True)
         html_hot = render_index(False, 6)
         ok &= check("no banner at 6 hot", "quiet-banner" not in html_hot, True)
+
+        # 7. card-pass fan-out (perf 2026-11-13): the build forks the card pass
+        #    across processes. A silent difference here would change story
+        #    pages, feeds and the all-stories index site-wide, so the parallel
+        #    path is pinned against the serial one on the same store.
+        bulk_events = {}
+        for i in range(210):
+            sid = f"bulk-{i:03d}"
+            with open(os.path.join(stories_dir, sid + ".json"), "w") as f:
+                json.dump({"id": sid, "title": f"Bulk {i}",
+                           "sources": [f"site{i % 7}.example"], "cves": [],
+                           "score": float(i % 9),
+                           "last_seen": "2026-08-14T12:00:00Z",
+                           "events": [{"event_id": f"e-{sid}"},
+                                      {"event_id": f"e-{sid}-u"}]}, f)
+            bulk_events[f"e-{sid}"] = ev(
+                f"e-{sid}", text=f"Original body {i}. Second sentence about topic {i}.\n",
+                source=f"site{i % 7}.example")
+            bulk_events[f"e-{sid}-u"] = ev(
+                f"e-{sid}-u", published="2026-08-14T11:00:00Z", kind="update",
+                text=f"Update {i}: a distinct development about item {i}.\n")
+
+        def cards_shape(jobs):
+            saved = os.environ.get("SSG_JOBS")
+            os.environ["SSG_JOBS"] = str(jobs)
+            try:
+                cs = ssg.load_stories(bulk_events)
+            finally:
+                if saved is None:
+                    os.environ.pop("SSG_JOBS", None)
+                else:
+                    os.environ["SSG_JOBS"] = saved
+            return [(c["id"], c["score"], c["heat_label"], c["snippet"],
+                     [(e["event_id"], e["body_html"], e["is_mention"])
+                      for e in c["events"]]) for c in cs]
+
+        serial_cards = cards_shape(1)
+        fanned_cards = cards_shape(4)
+        ok &= check("card pass: fan-out matches serial (n=210)",
+                    fanned_cards == serial_cards, True,
+                    f"({len(serial_cards)} cards)")
+        ok &= check("card pass: fan-out keeps the serial order",
+                    [c[0] for c in fanned_cards] == [c[0] for c in serial_cards], True)
+        ok &= check("card pass: fan-out still renders update deltas",
+                    any(e[1] for c in fanned_cards for e in c[4]), True)
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
 

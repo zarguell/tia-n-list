@@ -125,6 +125,24 @@ def main():
         ok &= check("receipt rejects garbage",
                     sigma.receipt_covers(None, {}, ""), False)
 
+        # Persisted variants are what the Actions cache restores on the next
+        # run (2026-11-13: derivation used to write ONLY to the site tree, so
+        # the cache stayed ~3KB and every build re-derived all 199 rules).
+        sigma.persist_variant(a, ".kql",
+                             sigma.variant_header("a", "KQL", digest) + "body\n")
+        vp = os.path.splitext(a)[0] + ".kql"
+        ok &= check("derived variant is persisted beside the rule",
+                    os.path.exists(vp), True)
+        ok &= check("persisted variant round-trips as fresh",
+                    sigma.variant_fresh_text(open(vp).read(), digest), True)
+        sigma.persist_variant(a, ".kql",
+                             sigma.variant_header("a", "KQL", "0" * 64) + "x\n")
+        ok &= check("re-persist overwrites (no stale variant lingers)",
+                    sigma.variant_fresh_text(open(vp).read(), digest), False)
+        sigma.persist_variant(os.path.join(tmp, "missing-dir", "b.sigma"),
+                             ".kql", "x\n")
+        ok &= check("persist is best-effort on an unwritable path", True, True)
+
     # The publish gate must call the shared validator, not a private path.
     ssg_src = open(os.path.join(ENGINE, "ssg.py")).read()
     lint_block = ssg_src[ssg_src.index("sigma_errs = []"):]
@@ -133,6 +151,8 @@ def main():
     ok &= check("ssg.py gate no longer picks its own check",
                 bool(re.search(r"sigma_mod\.(check_with_cli|validate_sigma)\(",
                                lint_block)), False)
+    ok &= check("ssg.py derivation persists variants for the next build",
+                bool(re.search(r"sigma_mod\.persist_variant\(", ssg_src)), True)
 
     print("ALL PASS" if ok else "FAILURES")
     return 0 if ok else 1

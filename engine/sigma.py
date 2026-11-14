@@ -89,6 +89,29 @@ def variant_fresh_text(text, digest):
     return False
 
 
+def persist_variant(sigma_path, ext, text):
+    """Write a derived variant beside its .sigma so the NEXT build can reuse it.
+
+    2026-11-13: derivation wrote its output only to the site tree, never to
+    engine/data/cti/ — the directory the Actions cache restores and saves. So
+    the cache only ever held whatever a previous restore had put back (~3KB),
+    and every CI run re-derived all 199 rules: `sigma variants: 10 fresh, 189
+    derived` in the 2026-11-13 build log, most of that run's 145s build step.
+    Writing here is what makes the hash-keyed cache work at all (the freshness
+    header makes a rule edit invalidate its own variant).
+
+    Best effort: a read-only checkout just re-derives next time.
+    """
+    path = os.path.splitext(sigma_path)[0] + ext
+    try:
+        tmp = f"{path}.tmp"
+        with open(tmp, "w") as f:
+            f.write(text)
+        os.replace(tmp, path)
+    except OSError:
+        pass
+
+
 def cli_version():
     """sigma-cli version string, or "missing"/"unknown" (part of the
     validation receipt key: a pin change must invalidate it)."""

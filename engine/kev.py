@@ -641,9 +641,16 @@ def candidate_view(row):
 # Site rendering
 # ---------------------------------------------------------------------------
 
-def render_site(env, write, cards):
+def render_site(env, write, cards, timeline_rows=None):
     """Render /kev/ pages + kev-index.json. `cards` = the story cards (for the
-    Mentioned-in reverse join, computed identically to the full build)."""
+    Mentioned-in reverse join, computed identically to the full build).
+
+    `timeline_rows` = prebuilt cve_timeline rows (see cve_timeline.build). The
+    full build computes them ONCE and threads them everywhere they are used
+    (here, the sitemap, the candidates feed); each of those used to call
+    build() bare and re-read the whole event+story store (~11s a piece,
+    35s/build measured 2026-11-13). None = build on demand (--kev mode).
+    """
     env.globals.setdefault("cvss_color", cvss_color)
     env.globals.setdefault("timeline_label", timeline_label)
     index = load_index()
@@ -693,7 +700,8 @@ def render_site(env, write, cards):
     # Per-CVE detail pages (the record is loaded from disk per entry; rows
     # already passed the shape gate, so the id is safe for path construction)
     import cve_timeline as tl_mod
-    tl_rows = tl_mod.build(today=datetime.now(timezone.utc).date())   # per-CVE timeline join for the Tia-coverage panel
+    tl_rows = (timeline_rows if timeline_rows is not None else
+               tl_mod.build(today=datetime.now(timezone.utc).date()))   # per-CVE timeline join for the Tia-coverage panel
     for r in rows:
         rec = records.get(r["id"]) or {}
         if not rec:
@@ -780,10 +788,16 @@ def render_site(env, write, cards):
     return total
 
 
-def kev_sitemap_entries(index, days=90):
+def kev_sitemap_entries(index, days=90, rows=None):
     """(path, lastmod) pairs for the sitemap: section pages + CVE pages with
     kev_date_added within the last `days` (bounded), plus the KEV-candidates
-    section and recently-flagged candidate timeline pages (bounded)."""
+    section and recently-flagged candidate timeline pages (bounded).
+
+    `rows` = cve_timeline rows already built by the caller (the full build
+    passes the same dict it gave render_site); None keeps the old on-demand
+    build. Only on_kev / first_exploit_report are read here, so the `today`
+    base the rows were built with does not affect this output.
+    """
     from datetime import timedelta
     today = datetime.now(timezone.utc).date()
     cutoff = today - timedelta(days=days)
@@ -802,7 +816,7 @@ def kev_sitemap_entries(index, days=90):
             entries.append((f"kev/cves/{c}/", added))
     try:
         import cve_timeline as tl_mod
-        for r in tl_mod.build().values():
+        for r in (rows if rows is not None else tl_mod.build()).values():
             if r["on_kev"] or not r["first_exploit_report"]:
                 continue
             try:
