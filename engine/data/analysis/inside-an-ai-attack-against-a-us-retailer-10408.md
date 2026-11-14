@@ -1,0 +1,3 @@
+A Dark Reading case study describes an attack in which an attacker, after hand-typed commands failed to breach a US retailer, switched to AI-generated scripts and achieved lateral movement within minutes. The published detail is essentially that shift from manual to AI-assisted tooling, with no indicators, affected systems, or outcomes provided.
+
+Because the report is anecdotal and thin on technical substance, it should be treated as an illustration of AI-accelerated lateral movement rather than a documented incident. Defenders should assume similar AI-assisted pivoting in their own environments and tighten detection on rapid, scripted lateral movement and on command sequences that change style mid-intrusion.
