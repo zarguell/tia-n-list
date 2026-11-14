@@ -857,12 +857,23 @@ def real_score(s):
 def emit_needs(stories, exclude=None):
     """Analysis-queue emit. `exclude` is the frozen set: a cold-tier story
     never queues analysis work (its peak never crossed the bar anyway, but
-    the explicit filter keeps the freeze contract local and testable)."""
+    the explicit filter keeps the freeze contract local and testable).
+
+    Merged-away shells are never queued: merge_story leaves the loser's
+    pre-merge score (and score_breakdown) on the redirect json, so without
+    this filter a duplicate merged minutes earlier still clears
+    HOT_THRESHOLD and is handed to the hourly agent as analysis work on a
+    story that has ZERO events to ground an analysis in (2026-11-14 audit:
+    12 of 13 queued ids were merged redirect shells, burning a full
+    free-rung agent run every hour). triage.apply's own queue loop already
+    skips them; this is the same contract for the mechanical merge path."""
     exclude = exclude or set()
     queue = []
     for s in stories.values():
         if s["id"] in exclude:
             continue
+        if s.get("merged_into"):
+            continue                  # redirect shell: no events to analyse
         if s["score"] < HOT_THRESHOLD:
             continue
         # 2026-09-25: a story that failed the analysis gate MAX times carries
