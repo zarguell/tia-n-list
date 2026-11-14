@@ -43,15 +43,22 @@ jobs:
       # cache every build re-derives all 199 rules (398 CLI spawns, ~2.4s a
       # rule pair: that IS most of the build step). Keyed by rule content: a
       # rule change misses once and re-derives only through the build's hash
-      # check (perf phase 1) — but only ssg.py persisting variants to
-      # engine/data/cti/ lets the save step below ever fill this cache.
+      # check (perf phase 1).
+      #
+      # -v2 (2026-11-14): cache entries are IMMUTABLE — saving under a key that
+      # already exists is a silent no-op. The pre-persist entries were 3KB
+      # stubs (nothing ever wrote engine/data/cti/*.splunk, so the save step
+      # only ever archived what the restore had just put back), and reordering
+      # save-after-build alone could not replace them: the build still derived
+      # all 199 rules. Bump this namespace whenever the variant format or the
+      # persistence path changes, or the cache silently stays cold.
       - name: Restore derived Sigma variants
         uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: |
             engine/data/cti/*.splunk
             engine/data/cti/*.kql
-          key: sigma-variants-${{ hashFiles('engine/data/cti/*.sigma') }}
+          key: sigma-variants-v2-${{ hashFiles('engine/data/cti/*.sigma') }}
       - name: Sanitizer regression suite
         run: python engine/test_sanitize.py
       - name: KEV candidates determinism suite
@@ -106,7 +113,7 @@ jobs:
           path: |
             engine/data/cti/*.splunk
             engine/data/cti/*.kql
-          key: sigma-variants-${{ hashFiles('engine/data/cti/*.sigma') }}
+          key: sigma-variants-v2-${{ hashFiles('engine/data/cti/*.sigma') }}
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '26'
