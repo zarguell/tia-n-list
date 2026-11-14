@@ -1,0 +1,3 @@
+Revolut suffered an 11-hour outage on October 20 that took out card payments, ATM withdrawals, balances and transfers for millions of customers. A postmortem published on thecybersecguru.com attributes the outage to quorum loss in Google Cloud.
+
+The incident highlights how a single cloud quorum failure can halt core banking functions for a large customer base. Customers and merchants that depend on Revolut should maintain backup payment methods and monitor the provider's status communications for recurrence.
