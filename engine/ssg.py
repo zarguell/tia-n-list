@@ -976,6 +976,31 @@ def _scan_html_hits(rel, content):
                   f" not the Pages base): …{snippet}…", file=sys.stderr)
 
 
+def _present(paths):
+    """Yield only glob results that still exist, re-checked per path.
+
+    2026-10-23: the CTI pass agent (our own concurrent job) authors a
+    candidate <slug>.sigma, runs `sigma check`, and deletes the file when the
+    rule is inexpressible. It does that WHILE another job's publish gate is
+    running `ssg.py --lint-only`, whose glob snapshot was taken before the
+    delete; validating that snapshot runs one `sigma check` subprocess per
+    rule (minutes), so a path deleted mid-fan-out raised FileNotFoundError and
+    aborted the whole gate with an ssg-build-failed (story-desk publish,
+    11:43Z). The check is therefore per path, not per glob: a rule file that
+    is gone is simply not in the tree — nothing to validate.
+
+    Holding the git lock across the whole lint was the alternative and was
+    rejected: the gate takes minutes and would stall every concurrent
+    publisher instead of tolerating one vanished rule.
+    """
+    for path in paths:
+        if os.path.exists(path):
+            yield path
+        else:
+            print(f"WARN {os.path.relpath(path, ROOT)}: vanished mid-lint — "
+                  f"skipped", file=sys.stderr)
+
+
 def main():
     events = load_events()
     cards = load_stories(events)
@@ -1044,7 +1069,7 @@ def main():
         sigma_files = sorted(glob.glob(os.path.join(CTI_DIR, "*.sigma")))
         sigma_errs = []
         sigma_hashes = {}
-        for f in sigma_files:
+        for f in _present(sigma_files):
             sigma_hashes[os.path.splitext(os.path.basename(f))[0]] = \
                 sigma_mod.source_sha256(f)
             for e in sigma_mod.validate(f):
@@ -1247,7 +1272,7 @@ def main():
     # on the live site: 0 "Splunk SPL" blocks on a case page. Deriving first
     # makes the first build on a cold clone identical to the steady state.
     _fresh = _derived = 0
-    for f in sorted(glob.glob(os.path.join(CTI_DIR, "*.sigma"))):
+    for f in _present(sorted(glob.glob(os.path.join(CTI_DIR, "*.sigma")))):
         slug = os.path.splitext(os.path.basename(f))[0]
         sigma_text = open(f).read()
         # raw rule copy in the site output (write-if-changed downstream)
@@ -1555,7 +1580,7 @@ def main():
     # re-validation for covered rules, validate only the uncovered ones.
     # Any doubt validates fully (failure mode is slowness, never unsound).
     sigma_hashes = {os.path.splitext(os.path.basename(f))[0]:
-                    sigma_mod.source_sha256(f) for f in sigma_files}
+                    sigma_mod.source_sha256(f) for f in _present(sigma_files)}
     try:
         import json as _json2
         _receipt = _json2.load(open(os.path.join(
@@ -1571,7 +1596,7 @@ def main():
         print(f"sigma: receipt covers {len(sigma_hashes)} rules "
               f"(cli {_cli}) — skipped re-validate")
     else:
-        for f in sigma_files:
+        for f in _present(sigma_files):
             _slug = os.path.splitext(os.path.basename(f))[0]
             if _rfiles.get(_slug) == sigma_hashes[_slug]:
                 continue

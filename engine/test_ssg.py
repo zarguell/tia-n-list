@@ -348,6 +348,25 @@ def main():
         ok &= check("sources page external links are noopener",
                     'rel="noopener noreferrer"' in page, True)
 
+    # 8. vanished-mid-lint tolerance (2026-10-23): the CTI pass agent deletes
+    #    an inexpressible candidate .sigma while another job's --lint-only
+    #    gate is walking its glob snapshot; the gate must skip it, not abort
+    #    with FileNotFoundError (that froze a story-desk publish).
+    vd = tempfile.mkdtemp(prefix="tia-vanish-")
+    try:
+        keep = os.path.join(vd, "keep.sigma")
+        gone = os.path.join(vd, "gone.sigma")
+        open(keep, "w").write("x")
+        open(gone, "w").write("x")
+        os.remove(gone)
+        seen = list(ssg._present([keep, gone]))
+        ok &= check("vanished glob entry is skipped", seen, [keep])
+        ok &= check("present entries pass through untouched",
+                    list(ssg._present([keep, keep])), [keep, keep])
+        ok &= check("empty snapshot is fine", list(ssg._present([])), [])
+    finally:
+        shutil.rmtree(vd, ignore_errors=True)
+
     print("ALL PASS" if ok else "FAILURES")
     return 0 if ok else 1
 
