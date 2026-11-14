@@ -1,0 +1,3 @@
+Japan recorded 233 publicly disclosed security incidents in October 2026, roughly 2.4 times its previous monthly peak, as researchers uncovered AI-assisted exploitation targeting application backends. MM Research Institute estimated that incidents disclosed during October exposed or potentially exposed 185 million personal information records, nearly four times the total reported throughout 2025.
+
+The surge is attributed to AI-assisted techniques lowering the barrier to exploiting application backends, though the underlying report is truncated on the specific thirty incidents it references. Defenders supporting Japanese organizations should expect continued pressure and prioritize exposure management and patching for internet-facing application services.
