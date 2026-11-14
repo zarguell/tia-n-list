@@ -1,0 +1,1 @@
+The FAA halted all departing flights nationwide 'due to extraordinary circumstances and for reasons of safety,' Gizmodo reported. The outlet noted that CBS News reported around 6:45 PM ET that an update to the private communications network connecting the country's air traffic control system was pushed out on Friday and crashed the system.

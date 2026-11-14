@@ -1,0 +1,1 @@
+The FAA ordered a nationwide ground stop, directing airports to hold departing traffic due to 'extraordinary circumstances,' according to this local CBS affiliate brief published at 4:15 PM ET on November 13, 2026. The station reported that, per the FAA, all airports in the United States were ground stopped.

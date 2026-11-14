@@ -1,0 +1,1 @@
+CNN's live coverage, which began at 4:22 PM ET on November 13, 2026, tracked the nationwide FAA ground stop as flight cancellations climbed. The blog reported no timeline for resolving the stop and showed planes parked on the tarmac at Dallas Fort Worth International Airport.
