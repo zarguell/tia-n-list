@@ -2,4 +2,6 @@ Apiiro researchers Shmulik Cohen and Matan Giladi found that Claude Code's "Yes,
 
 Counting Git history, shared settings, and saved agent transcripts, the exposure rises to 2,539 secrets across 1,994 repositories. Reported examples include a database vendor's admin-level cloud key, a production Azure Postgres password, a Square production token, and the owner password of a medical-records database, affecting 63 organizations.
 
+The finding has held up as it moved from specialist security press into mainstream technology coverage, including Ars Technica and IT News Australia, and GitGuardian published a companion write-up on settings.local.json secrets. That spread matters because the file is a committed artifact in ordinary developer repositories, not a server or an endpoint, so the exposure sits in source control where it persists through forks and history rewrites.
+
 Remediation centers on auditing repositories for committed .claude/settings.local.json files, rotating any exposed credentials, and avoiding credential-bearing commands in approved shell invocations. Teams using local desktop tools sidestep this class of leak entirely.
