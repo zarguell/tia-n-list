@@ -25,6 +25,16 @@ artifact and daily_digest's recover sweep would republish a bad one in a
 loop; a failed publish records telemetry and pages via autodiag instead of
 shipping slop.
 
+Specificity is STAGED (decision e732e816ab3e, 2026-10-21 audit Issue 4 +
+Rec 7): the MIN_LEN + grounding gate above accepts any 2+ digit number, so a
+stub whose only digits were years cleared it. Stage 2 (specificity_hits)
+requires a CVE id, an ATT&CK technique id, a version token, an IOC, or a
+tool/malware/actor designation drawn from the event's own text (plus the
+existing subject-naming alternative). It ships in SPECIFICITY_STAGE="warn"
+first: the rule is reported per analysis and counted over the whole store,
+but does NOT quarantine until the backlog is re-analysed and the stage flips
+to "hard".
+
 A third, DISTINCT class is WARN-only: internal triage bookkeeping in
 analysis prose (TRIAGE_BOOKKEEPING / triage_bookkeeping_hits). It narrates
 the ingest object ("The event references …", "attaches to the existing
@@ -117,12 +127,88 @@ SIGNIFICANT_SCORE = 5.0
 SIGNIFICANT_MIN_LEN = 900
 SIGNIFICANT_MIN_PARAS = 3
 
-# Specificity (the filler-killer): a grounded analysis names a CVE, a
-# multi-digit number or a version. The literal shipped filler above has no
-# digit at all, so it fails here even before the structure checks.
+# Specificity (the filler-killer), stage 1: a grounded analysis names a CVE,
+# a multi-digit number or a version. The literal shipped filler above has no
+# digit at all, so it fails here even before the structure checks. Stage 2
+# (specificity_hits below) replaces the loose numeric arm — see
+# SPECIFICITY_STAGE for how the two are staged.
 CVE_RE = re.compile(r"CVE-\d{4}-\d{4,7}", re.IGNORECASE)
+# LEGACY (stage-1) numeric grounding: any 2+ digit number cleared it, which is
+# what a bare year exploited (see SPECIFICITY_STAGE). Kept only for the disarmed
+# stage so behaviour does not change until the stage-2 backlog is drained.
 NUM2_RE = re.compile(r"\d[\d,.]*\d")
-VERSION_RE = re.compile(r"\b\d+\.\d+\b")
+VERSION_RE = re.compile(r"\b\d+\.\d+(?:\.\d+)*\b")
+
+# --- Specificity stage 2 (decision e732e816ab3e: 2026-10-21 audit Issue 4 +
+# Rec 7). The 2026-10-18 thin-analysis gate (decision 7925e9ba91b6, PR #154)
+# shipped MIN_LEN + grounding, but its numeric arm accepts ANY 2+ digit number,
+# so analysis/bronze-sandcastle-apt-uses-legitimate-windows-apps-for-encrypted.md
+# (508 bytes) cleared it on "August 2025 through August 2026" alone. Stage 2
+# requires ONE of:
+#
+#   - a CVE id;
+#   - an ATT&CK technique id (T1566, T1566.001);
+#   - a version token (2.3.1, 152.0.7977.82);
+#   - an IOC: a defanged or live domain, an IPv4 address, a 32-64 hex hash;
+#   - a named tool/malware/actor designation that appears in BOTH the analysis
+#     AND the event's own text (the story's event titles/snippets), so a writer
+#     cannot invent a name to satisfy the gate;
+#
+# plus the pre-existing subject-naming alternative for non-CVE research pieces
+# (a research/policy analysis can never contain any of the above).
+#
+# STAGED, per the decision: stage "warn" reports the new rule per analysis and
+# counts the shipped analyses that would newly fail, WITHOUT quarantining — a
+# straight flip would quarantine the backlog and re-queue it against a prompt
+# that does not yet ask for the extra specificity, burning agent runs. Flip with
+# PROSE_LINT_SPECIFICITY_STAGE=hard once the backlog is re-analysed.
+ATTACK_RE = re.compile(r"\bT\d{4}(?:\.\d{3})?\b")
+IPV4_RE = re.compile(r"\b(?:\d{1,3}\.){3}\d{1,3}\b")
+# 32 hex = MD5, 40 = SHA-1, 64 = SHA-256. A bare 32-char hex run is still a
+# distinctive observable (a GUID without dashes), never prose filler.
+HASH_RE = re.compile(r"\b[0-9a-fA-F]{32,64}\b")
+# TLD allowlist, not `[a-z]{2,63}`: prose is full of file names (cmd.exe,
+# claude.json) whose "TLD" is an extension — ioc.py's FILE_EXT_TLDS problem.
+IOC_TLDS = (
+    "com", "net", "org", "io", "co", "ru", "cn", "top", "xyz", "info",
+    "biz", "me", "dev", "app", "cloud", "site", "online", "su", "ir", "kp",
+    "hk", "tw", "jp", "kr", "uk", "de", "fr", "nl", "pl", "br", "in", "au",
+    "ca", "us", "eu", "cc", "ws", "tv", "sh", "link", "click", "live",
+    "shop", "store", "tech", "world", "space", "website", "network",
+    "hosting", "support", "pro", "name", "mobi", "asia", "gov", "edu", "mil",
+    "int", "icu", "buzz", "sbs", "cyou", "rest", "cam", "bar", "cyber",
+)
+DOMAIN_RE = re.compile(
+    r"\b(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+(?:"
+    + "|".join(sorted(IOC_TLDS, key=len, reverse=True)) + r")\b", re.I)
+# Defanged indicators are the house style ("americanprgoress[.]top"), so the
+# IOC probe normalises them back before matching.
+DEFANG_RE = re.compile(
+    r"\[\s*\.\s*\]|\(\s*\.\s*\)|\{\s*\.\s*\}"
+    r"|\[\s*dot\s*\]|\(\s*dot\s*\)", re.IGNORECASE)
+
+# Acronyms/brands that appear in nearly every analysis: naming one is not
+# specificity, and letting them ground would gut the rule. Deliberately short
+# and high-precision, like SLOP.
+GENERIC_DESIGNATIONS = {
+    "cisa", "nist", "mitre", "nsa", "fbi", "kev", "cve", "cves", "cvss",
+    "epss", "ttp", "ttps", "ioc", "iocs", "api", "apis", "http", "https",
+    "tls", "dns", "ssh", "rdp", "vpn", "sql", "xss", "rce", "csrf", "ssrf",
+    "dll", "dlls", "exe", "pdf", "url", "urls", "apt", "apts", "lolbin",
+    "lolbins", "os", "oses", "windows", "linux", "android", "macos", "ios",
+    "chrome", "firefox", "edge", "safari", "google", "microsoft", "apple",
+    "amazon", "azure", "aws", "gcp", "github", "openai", "anthropic",
+    "claude", "cloudflare", "adobe", "cisco", "fortinet", "ivanti",
+    "vmware", "citrix", "sap", "oracle", "kubernetes", "docker", "npm",
+    "pypi", "patchstack", "wordpress", "united", "states", "europe", "asia",
+    "africa", "america", "china", "russia", "iran", "north", "korea",
+}
+
+
+# Which arm quarantines. "warn" = stage 1 (report only, legacy numeric
+# grounding still decides). "hard" = stage 2 (specificity decides).
+SPECIFICITY_STAGE_ENV = "PROSE_LINT_SPECIFICITY_STAGE"
+SPECIFICITY_STAGE = (os.environ.get(SPECIFICITY_STAGE_ENV) or "warn").strip().lower()
 
 # Digests always link their coverage (prompts/daily-digest.md: "Every story
 # appears in prose, linked once as [name](stories/<slug>/)").
@@ -196,6 +282,98 @@ def _names_subject(text, title):
     return matched >= min(2, len(toks))
 
 
+def _has_ioc(text):
+    """True when the prose carries a real observable: domain, IPv4, hash.
+    Defanged forms ([.]/(.)) are the house style and normalise first."""
+    norm = DEFANG_RE.sub(".", text or "")
+    return bool(IPV4_RE.search(norm) or HASH_RE.search(norm)
+                or DOMAIN_RE.search(norm))
+
+
+def _designations(source_text):
+    """Tool/malware/actor DESIGNATIONS in the event's own text.
+
+    A designation is a name-like token, not any capitalized word: an acronym
+    (CLEANGULP, UTA0565), an acronym+word compound (COFFLoader), or a
+    letter/digit compound. Plain capitalized words (Sandboxie, Windows) are
+    excluded deliberately — naming a technology is not naming tooling, and
+    the bronze-sandcastle stub must stay a negative."""
+    out = set()
+    for tok in re.findall(r"[A-Za-z][A-Za-z0-9_.-]{3,}", source_text or ""):
+        t = tok.strip("._-")
+        if len(t) < 4 or t.lower() in TITLE_STOPWORDS \
+                or t.upper() in GENERIC_DESIGNATIONS \
+                or t.lower() in GENERIC_DESIGNATIONS:
+            continue
+        if re.fullmatch(r"[A-Z0-9][A-Z0-9_-]{3,}", t) \
+                or re.search(r"[A-Z]{2,}[a-z]{2,}|[a-z]{2,}[A-Z]{2,}", t) \
+                or re.search(r"[A-Za-z]{2,}\d{2,}|\d{2,}[A-Za-z]{2,}", t):
+            out.add(t)
+    return out
+
+
+def _names_designation(text, subject_title, source_text):
+    """The analysis names a tool/malware/actor that the EVENT text names.
+    Title tokens are skipped: naming the story's subject is the separate
+    subject-naming arm below, so the two arms stay distinct."""
+    toks = _designations(source_text)
+    if not toks:
+        return False
+    titled = {t.lower() for t in _subject_tokens(subject_title)}
+    low = text.lower()
+    for t in toks:
+        if t.lower() in titled:
+            continue
+        if re.search(r"\b" + re.escape(t.lower()) + r"\b", low):
+            return True
+    return False
+
+
+def specificity_hits(text, subject_title=None, source_text=None):
+    """STAGE-2 specificity (decision e732e816ab3e): [] when grounded.
+
+    Grounded means at least one CVE id, ATT&CK technique id, version token,
+    IOC, or event-sourced tool/malware/actor designation — or, for non-CVE
+    research pieces, the story subject named as before. A bare year or any
+    2-digit number no longer clears it. Returns human-readable violations
+    (never raises); the caller decides WARN (stage "warn") vs quarantine
+    (stage "hard")."""
+    text = text or ""
+    if CVE_RE.search(text) or ATTACK_RE.search(text) or VERSION_RE.search(text):
+        return []
+    if _has_ioc(text):
+        return []
+    if _names_designation(text, subject_title, source_text):
+        return []
+    if subject_title and _names_subject(text, subject_title):
+        return []
+    return ["no specificity: needs a CVE id, an ATT&CK technique id, a "
+            "version token, an IOC (domain/IP/hash), a named tool/malware/"
+            "actor drawn from the event text, or the story subject by name "
+            "(a bare year or any 2-digit number no longer grounds)"]
+
+
+def specificity_backlog(analysis_dir, stories=None):
+    """Store-wide stage-2 dry run: ids of shipped analyses that would newly
+    fail (decision e732e816ab3e's "report the count, do not quarantine yet").
+    stories maps id -> mapping with title/source_text (the card fields);
+    unknown ids are probed title-less, which is the conservative direction."""
+    stories = stories or {}
+    out = []
+    for f in sorted(glob.glob(os.path.join(analysis_dir, "*.md"))):
+        sid = os.path.splitext(os.path.basename(f))[0]
+        st = stories.get(sid) or {}
+        try:
+            with open(f, encoding="utf-8", errors="replace") as fh:
+                text = fh.read()
+        except OSError:
+            continue
+        if specificity_hits(text, subject_title=st.get("title") or "",
+                            source_text=st.get("source_text")):
+            out.append(sid)
+    return out
+
+
 def triage_bookkeeping_hits(text):
     """DISTINCT WARN: internal triage bookkeeping in published analysis
     prose, one message per occurrence (2026-10-17 audit Issue 2 / Rec 4b).
@@ -245,13 +423,19 @@ def raw_html_hits(text):
     return out
 
 
-def lint_analysis(text, story=None, subject_title=None):
+def lint_analysis(text, story=None, subject_title=None, source_text=None):
     """HARD violations for one analysis (plain markdown) — each of these
     quarantines. story, when given, only names the file in the messages.
     subject_title, when given, enables the subject-grounding alternative
     (see TITLE_STOPWORDS note): a non-CVE story's analysis is grounded when
-    it names the story's subject. Empty list = passes the gate.
-    Paragraph-count drift is soft: see soft_paras()."""
+    it names the story's subject. source_text is the event text the analysis
+    was written from (event titles/snippets) — it enables the stage-2
+    tool/malware/actor arm. Empty list = passes the gate. Paragraph-count
+    drift is soft: see soft_paras().
+
+    Which grounding rule decides depends on SPECIFICITY_STAGE: "warn" (the
+    shipped default) keeps the legacy numeric arm so nothing new is
+    quarantined, "hard" applies specificity_hits (see its docstring)."""
     out = _banned_hits(text)
     for tag in raw_html_hits(text):
         out.append(f"raw HTML {tag} (payloads/markup belong in code spans)")
@@ -259,12 +443,17 @@ def lint_analysis(text, story=None, subject_title=None):
         out.append("markdown heading line (prompts ban headings)")
     if not MIN_LEN <= len(text) <= MAX_LEN:
         out.append(f"length {len(text)} chars (need {MIN_LEN}..{MAX_LEN})")
-    grounded = bool(CVE_RE.search(text) or NUM2_RE.search(text) or VERSION_RE.search(text))
-    if not grounded and subject_title:
-        grounded = _names_subject(text, subject_title)
-    if not grounded:
-        out.append("no grounding: no CVE id, no 2+ digit number, no version "
-                   "token, and the story subject is never named")
+    if SPECIFICITY_STAGE == "hard":
+        out.extend(specificity_hits(text, subject_title=subject_title,
+                                    source_text=source_text))
+    else:
+        grounded = bool(CVE_RE.search(text) or NUM2_RE.search(text)
+                        or VERSION_RE.search(text))
+        if not grounded and subject_title:
+            grounded = _names_subject(text, subject_title)
+        if not grounded:
+            out.append("no grounding: no CVE id, no 2+ digit number, no "
+                       "version token, and the story subject is never named")
     if story:
         out = [f"{story}: {m}" for m in out]
     return out
@@ -345,9 +534,20 @@ def quarantine_analysis(stories_dir, analysis_dir, story, now=None, log=print):
         return []
     with open(ap, encoding="utf-8", errors="replace") as f:
         text = f.read()
+    subject_title = (story.get("title") or "") if isinstance(story, dict) else None
+    source_text = story.get("source_text") if isinstance(story, dict) else None
     violations = lint_analysis(text, story=story,
-                               subject_title=(story.get("title") or "")
-                               if isinstance(story, dict) else None)
+                               subject_title=subject_title,
+                               source_text=source_text)
+    if SPECIFICITY_STAGE != "hard":
+        # Stage-1 rollout (decision e732e816ab3e): the stage-2 rule is a WARN
+        # that names the files which would newly fail — no quarantine until
+        # the backlog is re-analysed and the stage flips to "hard".
+        spec = specificity_hits(text, subject_title=subject_title,
+                                source_text=source_text)
+        if spec:
+            log(f"WARN analysis/{sid}.md: specificity (kept, "
+                f"stage={SPECIFICITY_STAGE}): {'; '.join(spec)}")
     violations = violations + depth_violations(
         text, story.get("score") if isinstance(story, dict) else None)
     soft = soft_paras(text)
