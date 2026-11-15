@@ -860,8 +860,20 @@ def ingest_noise(data_dir, now, *, raw_glob=None, window_days=2,
          at 81%.
       4. flood entrant — source that minted >= flood_min events in the last
          flood_days AND >= flood_share of its lifetime presence in that
-         window — a brand-new firehose even when triage keeps it
-         (thehackerwire: ~26/day, 94% KEPT — detectors 1-2 are blind to it).
+         window — a firehose even when triage keeps it (thehackerwire:
+         ~26/day, 94% KEPT — detectors 1-2 are blind to it). The
+         lifetime-share arm needs a lifetime to speak of: the source's own
+         first event must be >= 2 * flood_days old, so a source first seen
+         days ago cannot read as "100% of lifetime" on newness alone
+         (2026-11-06 owner decision 686570728316, audit Issue 1:
+         infonewscyber.fr minted 53/53 lifetime events in 6 days — a real
+         source, FAILing forever). The >= flood_min volume bar still gates
+         the arm; an undated source cannot prove its age and is not accused.
+         Trade-off, stated so the next audit does not read this arm as
+         covering it: a genuinely NEW firehose that triage mostly KEEPS
+         (the original thehackerwire shape) is invisible to arm 4 for its
+         first 2 * flood_days; the dropped/thin/tag-spam arms are unchanged
+         and still cover the cases they covered.
 
     Returns (problems, info): problems = human-readable findings (audit
     FAILs when non-empty); info = per-source/per-author tables for the
@@ -943,12 +955,15 @@ def ingest_noise(data_dir, now, *, raw_glob=None, window_days=2,
                 if action == "drop":
                     pa[1] += 1
 
-    lifetime, recent = {}, {}
+    lifetime, recent, first_seen = {}, {}, {}
     flood_cutoff = (now - timedelta(days=flood_days)).strftime("%Y-%m-%d")
     for src, pub, _md in events.values():
         lifetime[src] = lifetime.get(src, 0) + 1
         if pub[:10] >= flood_cutoff:
             recent[src] = recent.get(src, 0) + 1
+        day = pub[:10]
+        if day and (src not in first_seen or day < first_seen[src]):
+            first_seen[src] = day
 
     problems = []
     for src, (n, drops, stubs) in per_source.items():
@@ -959,9 +974,22 @@ def ingest_noise(data_dir, now, *, raw_glob=None, window_days=2,
         if kept >= min_kept and stubs / kept >= stub_rate:
             problems.append(f"kept-stub source {src}: {100 * stubs // kept}% of "
                             f"{kept} kept events have <200c content")
+    # Age gate on the lifetime-share arm (2026-11-06 owner decision
+    # 686570728316, audit Issue 1): a new source's whole lifetime necessarily
+    # sits inside the window, so rec/life ~= 100% fires on NEWNESS, not on
+    # flooding — infonewscyber.fr (first event 6 days old, 53/53 lifetime in
+    # 7d, 70% dropped) FAILed for six consecutive audits while being the only
+    # source on 13 French local-breach stories. The share arm now requires a
+    # real lifetime: the source's own first event at least 2 * flood_days old.
+    # The >= flood_min volume bar and the drop-rate/tag-spam/kept-stub arms are
+    # unchanged; a source with no dated event cannot prove its age and is not
+    # accused (cannot confirm = not flagged).
+    age_gate = (now - timedelta(days=2 * flood_days)).strftime("%Y-%m-%d")
     for src, rec in recent.items():  # flood: decision-independent
         life = lifetime.get(src, 0)
-        if rec >= flood_min and life and rec / life >= flood_share:
+        born = first_seen.get(src, "")
+        if (rec >= flood_min and life and rec / life >= flood_share
+                and born and born <= age_gate):
             problems.append(f"flood entrant {src}: {rec} events in {flood_days}d "
                             f"= {100 * rec // life}% of lifetime {life}")
     for author, (n, drops) in per_author.items():

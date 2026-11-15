@@ -681,8 +681,12 @@ for i in range(12):  # kept-stub source: kept but content-free
     ev[f"s{i}"] = {"source": "stub.example", "published_at": "2026-08-01T00:00:00Z",
                    "md_len": 150}
     dec[f"s{i}"] = "keep"
-for i in range(60):  # flood entrant: brand-new source, half the store
+for i in range(60):  # flood entrant: firehose on top of a real lifetime
     ev[f"f{i}"] = {"source": "flood.example", "published_at": "2026-09-15T00:00:00Z"}
+for i in range(60):  # ...its older half: the source must predate the window by
+    # >= 2 * flood_days before the lifetime-share arm may fire (2026-11-06
+    # decision 686570728316); 60 recent / 120 lifetime = 50% share.
+    ev[f"fo{i}"] = {"source": "flood.example", "published_at": "2026-08-01T00:00:00Z"}
 noise_events = {eid: {**meta, "excluded": dec[eid] == "drop"}
                 for eid, meta in ev.items() if eid in dec}
 noise_events.update({eid: meta for eid, meta in ev.items() if eid not in dec})
@@ -724,8 +728,50 @@ check("...and the source's kept-stub rate reads 0",
       [r for r in info3["sources"]
        if r["name"] == "bleepingcomputer.com"][0]["kept_stub_pct"], 0)
 
+# 2026-11-06 decision 686570728316 (audit Issue 1): the lifetime-share arm
+# fires on newness for a source first seen days ago (its whole lifetime IS the
+# window). A real lifetime must exist first: first event >= 2 * flood_days old.
+floodage_events = {}
+for i in range(96):   # secquill.com: 96 recent on a 123-event lifetime -> fires
+    floodage_events[f"sq{i:03d}"] = {"source": "secquill.com",
+                                     "published_at": "2026-09-12T00:00:00Z"}
+for i in range(27):
+    floodage_events[f"sqo{i:03d}"] = {"source": "secquill.com",
+                                      "published_at": "2026-08-05T00:00:00Z"}
+for i in range(53):   # infonewscyber.fr: 53/53 lifetime in 6 days -> NOT flagged
+    floodage_events[f"in{i:03d}"] = {"source": "infonewscyber.fr",
+                                     "published_at": "2026-09-12T00:00:00Z"}
+_mk_noise_dir(os.path.join(tmp, "floodage"), floodage_events, {})
+p4, info4 = jc.ingest_noise(os.path.join(tmp, "floodage"), NOW2)
+check("flood entrant with a real lifetime still flagged (secquill.com 96/123)",
+      any(x.startswith("flood entrant secquill.com") for x in p4), True)
+check("brand-new entrant is not convicted on lifetime share "
+      "(infonewscyber.fr 53/53 lifetime in 6d)",
+      any("infonewscyber.fr" in x for x in p4), False)
+
+# the age gate's boundary, pinned in both directions (NOW2 - 2 * flood_days
+# = 2026-09-02): one day either side must flip the verdict, so an off-by-one
+# (< vs <=, flood_days vs 2 * flood_days) cannot slip through.
+edge_events = {}
+for i in range(60):   # in-window half, identical for both sources
+    edge_events[f"e14r{i:03d}"] = {"source": "edge14.example",
+                                   "published_at": "2026-09-12T00:00:00Z"}
+    edge_events[f"e13r{i:03d}"] = {"source": "edge13.example",
+                                   "published_at": "2026-09-12T00:00:00Z"}
+for i in range(60):
+    edge_events[f"e14o{i:03d}"] = {"source": "edge14.example",
+                                   "published_at": "2026-09-02T00:00:00Z"}
+    edge_events[f"e13o{i:03d}"] = {"source": "edge13.example",
+                                   "published_at": "2026-09-03T00:00:00Z"}
+_mk_noise_dir(os.path.join(tmp, "floodedge"), edge_events, {})
+p5, _ = jc.ingest_noise(os.path.join(tmp, "floodedge"), NOW2)
+check("age gate opens exactly at 2 * flood_days (first event 2026-09-02)",
+      any(x.startswith("flood entrant edge14.example") for x in p5), True)
+check("age gate still closed one day short (first event 2026-09-03)",
+      any("edge13.example" in x for x in p5), False)
+
 clean_events = {f"g{i}": {"source": "fine.example",
-                          "published_at": "2026-08-01T00:00:00Z"}
+                           "published_at": "2026-08-01T00:00:00Z"}
                 for i in range(30)}
 clean_decs = {"2026-09-16T1100": [
     {"event_id": f"g{i}", "action": "keep" if i < 20 else "drop"}
