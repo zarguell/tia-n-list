@@ -890,20 +890,53 @@ def run_prose_gate(cards_by_id, today=None, log=print):
 
     Returns the digest violations (empty list = gate passed); analysis
     quarantine is reported via log only. Sequenced after the other lints by
-    the caller so link/path errors surface first."""
+    the caller so link/path errors surface first.
+
+    Under the staged specificity rule (prose_lint.SPECIFICITY_STAGE "warn",
+    decision e732e816ab3e) this also logs the STORE-WIDE count of shipped
+    analyses that would newly fail, so the backlog is measurable before the
+    stage flips to "hard" and files start being quarantined."""
     import prose_lint
+    probe = {}
     for cid in sorted(cards_by_id):
+        card = cards_by_id[cid] or {}
         # 2026-10-04 (audit issue #3): pass the card title — without it
         # quarantine_analysis can never enable the subject-grounding
         # fallback, so every CVE-less analysis without a number/version
         # token was quarantined even when it named the story's subject
         # (the UK Resilience Act analyses passed the gate with a title
         # and were quarantined 8x without one).
+        #
+        # source_text (decision e732e816ab3e): the stage-2 specificity rule
+        # grounds on a tool/malware/actor designation only when the EVENT's
+        # own text carries it, so the writer cannot invent a name to pass.
+        source_text = "\n".join(
+            f"{e.get('title') or ''} {e.get('snippet') or ''}"
+            for e in (card.get("events") or []))
+        probe[cid] = {"title": card.get("title", ""),
+                      "source_text": source_text}
         prose_lint.quarantine_analysis(STORIES_DIR, ANALYSIS_DIR,
                                        {"id": cid,
-                                        "title": cards_by_id[cid].get("title", ""),
-                                        "score": cards_by_id[cid].get("score", 0)},
+                                        "title": card.get("title", ""),
+                                        "score": card.get("score", 0),
+                                        "source_text": source_text},
                                        log=log)
+    if prose_lint.SPECIFICITY_STAGE != "hard":
+        # Decision e732e816ab3e, stage 1: "emit the new rule as a WARN over
+        # the whole store and report the count of shipped analyses that
+        # would newly fail (do not quarantine yet)". Orphan/frozen analysis
+        # FILES without a live card are never published, so the shipped
+        # count is the card-backed subset (and a zero count stays silent —
+        # an empty backlog is the signal to flip the stage, not log noise).
+        backlog = [sid for sid in
+                   prose_lint.specificity_backlog(ANALYSIS_DIR, probe)
+                   if sid in probe]
+        if backlog:
+            log(f"WARN prose specificity (stage={prose_lint.SPECIFICITY_STAGE}): "
+                f"{len(backlog)} of {len(probe)} shipped analysis file(s) "
+                f"would newly fail (not quarantined): "
+                f"{', '.join(backlog[:20])}"
+                + (" ..." if len(backlog) > 20 else ""))
     today = today or datetime.now(timezone.utc).strftime("%Y-%m-%d")
     dp = os.path.join(DIGESTS_DIR, today + ".md")
     if not os.path.exists(dp):

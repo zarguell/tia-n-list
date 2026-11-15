@@ -149,6 +149,10 @@ check("grounding accepts each shape",
                   prose_lint.lint_analysis(para("Version 3.14 fixed it.", 30)))
       and not any("no grounding" in m for m in
                   prose_lint.lint_analysis(para("About 42 organizations hit.", 30))))
+# NOTE (decision e732e816ab3e): "About 42 organizations hit." is NOT grounding
+# once the stage-2 specificity rule is on — a bare 2-digit number was exactly
+# the hole. Section 5d pins that; the stage-1 arm above still accepts it so the
+# shipped default does not change behaviour.
 
 # --- 3: the GOOD analysis passes clean ----------------------------------------
 check("good grounded analysis passes clean",
@@ -370,6 +374,138 @@ with tempfile.TemporaryDirectory() as td:
     check("post-cap violations still quarantined for evidence",
           len([n for n in os.listdir(rejects) if n.startswith("cap-story-")])
           == prose_lint.MAX_ANALYSIS_QUARANTINES + 1)
+
+# --- 5d: specificity stage 2 (decision e732e816ab3e, 2026-10-21 audit
+# Issue 4 + Rec 7). The stage-1 gate above is grounded by ANY 2+ digit number
+# (NUM2_RE), so a stub whose only digits were YEARS cleared it and shipped as
+# a newest analysis at score 4.5. Stage 2 requires real specificity and ships
+# DISARMED (warn) so the backlog is measured before anything is quarantined.
+#
+# The negative fixture is the stored stub verbatim (508 bytes; the live file
+# was re-analysed on 2026-10-21T18:20Z and now carries version tokens, so the
+# historical text is pinned here). The positive fixture is read from the real
+# store: chrome-156 (build number, 353 fixes, CVEs).
+BRONZE_STUB = (
+    "BRONZE SANDCASTLE, a suspected China-linked APT, has been using "
+    "legitimate Windows applications and malicious DLLs to run encrypted "
+    "payloads inside trusted processes, then stealing Active Directory "
+    "databases. Investigations from August 2025 through August 2026 "
+    "identified victims in the Philippines, Taiwan, and Afghanistan. The "
+    "approach minimizes file-system artifacts, making detection by "
+    "conventional scanning difficult. Watch for further victim reports and "
+    "attribution updates from threat-intel vendors.")
+YEAR_ONLY = ("In August 2025 a suspected intrusion cluster targeted utilities "
+             "across Europe and Asia, and the campaign ran on through 2026 "
+             "with 40 victims. The group moves quietly and the public "
+             "reporting stays thin. Watch for further victim reports and "
+             "attribution updates from threat-intel vendors.")
+ANALYSIS_DATA = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                             "data", "analysis")
+CHROME156 = os.path.join(
+    ANALYSIS_DATA, "chrome-156-security-update-fixes-critical-vulnerabilities.md")
+
+check("stage-2 specificity ships DISARMED by default (warn, no quarantine)",
+      prose_lint.SPECIFICITY_STAGE == "warn")
+check("bronze-sandcastle stub fails stage-2 specificity",
+      len(prose_lint.specificity_hits(BRONZE_STUB)) == 1)
+check("the stub's only digits are years (so the stage-1 gate passed it)",
+      prose_lint.NUM2_RE.search(BRONZE_STUB)
+      and not prose_lint.CVE_RE.search(BRONZE_STUB)
+      and not prose_lint.ATTACK_RE.search(BRONZE_STUB)
+      and not prose_lint.VERSION_RE.search(BRONZE_STUB)
+      and not prose_lint._has_ioc(BRONZE_STUB))
+check("disarmed stage keeps the stub unquarantined (legacy arm unchanged)",
+      prose_lint.lint_analysis(BRONZE_STUB) == [])
+check("bare years no longer clear the stage-2 rule",
+      any("no specificity" in m
+          for m in prose_lint.specificity_hits(YEAR_ONLY)))
+check("any 2-digit number no longer clears the stage-2 rule",
+      any("no specificity" in m for m in prose_lint.specificity_hits(
+          "About 42 organizations were hit in the campaign.")))
+check("a CVE id grounds",
+      prose_lint.specificity_hits("CVE-2026-113341 was patched.") == [])
+check("an ATT&CK technique id grounds",
+      prose_lint.specificity_hits("The actor used T1566.001 to land it.") == []
+      and prose_lint.specificity_hits("Spearphishing (T1566) seeded it.") == [])
+check("a version token grounds",
+      prose_lint.specificity_hits("Chrome 156.0.8078.47 fixed it.") == [])
+check("an IOC grounds (live, defanged domain, IPv4, hash)",
+      prose_lint.specificity_hits("Beaconing to cdn-metrics.top.") == []
+      and prose_lint.specificity_hits("Block americanprgoress[.]top.") == []
+      and prose_lint.specificity_hits("C2 at 185.220.101.4 answered.") == []
+      and prose_lint.specificity_hits(
+          "Hash 8858ea412dc306b3558885af18006c5ca24689e8875733b5e13b3c2692e603cb.")
+      == [])
+check("file names are not IOCs (cmd.exe, claude.json)",
+      prose_lint.specificity_hits("It spawned cmd.exe and read claude.json.")
+      != [])
+check("a tool named in the EVENT text grounds",
+      prose_lint.specificity_hits(
+          "The loader, CLEANGULP, ran from a scheduled task.",
+          source_text="UTA0565 installed CLEANGULP on the cloned sites.") == [])
+check("the same tool name does not ground without event backing",
+      prose_lint.specificity_hits(
+          "The loader, CLEANGULP, ran from a scheduled task.") != [])
+check("naming the subject still grounds a non-CVE research piece",
+      prose_lint.specificity_hits(NOCVE, subject_title=K8S_TITLE) == [])
+check("chrome-156 analysis (build, 353 fixes, CVEs) grounds under stage 2",
+      os.path.exists(CHROME156)
+      and prose_lint.specificity_hits(open(CHROME156).read()) == []
+      and prose_lint.lint_analysis(open(CHROME156).read()) == [])
+
+# stage 1 reports over the whole store without touching a file
+with tempfile.TemporaryDirectory() as td:
+    stories_dir = os.path.join(td, "stories")
+    analysis_dir = os.path.join(td, "analysis")
+    digests_dir = os.path.join(td, "digests")
+    for d in (stories_dir, analysis_dir, digests_dir):
+        os.makedirs(d)
+    # no title at all: the year-only text names no subject, so the
+    # subject-naming alternative (deliberately kept) cannot rescue it.
+    json.dump({"id": "stub-story", "title": ""},
+              open(os.path.join(stories_dir, "stub-story.json"), "w"), indent=1)
+    open(os.path.join(analysis_dir, "stub-story.md"), "w").write(YEAR_ONLY)
+    log = []
+    prose_lint.quarantine_analysis(
+        stories_dir, analysis_dir,
+        {"id": "stub-story", "title": ""}, log=log.append)
+    check("stage-1 WARN names the analysis that would newly fail",
+          any("specificity (kept, stage=warn)" in m for m in log))
+    check("stage-1 WARN never quarantines (file still shipped)",
+          os.path.exists(os.path.join(analysis_dir, "stub-story.md"))
+          and not os.path.exists(os.path.join(analysis_dir, ".rejects")))
+    check("store-wide backlog count reports the file",
+          prose_lint.specificity_backlog(
+              analysis_dir, {"stub-story": {"title": ""}})
+          == ["stub-story"])
+    # ssg.run_prose_gate logs the count (the flip-to-hard signal)
+    ssg.STORIES_DIR, ssg.ANALYSIS_DIR, ssg.DIGESTS_DIR = (stories_dir,
+                                                          analysis_dir,
+                                                          digests_dir)
+    gate_log = []
+    ssg.run_prose_gate({"stub-story": {
+        "id": "stub-story", "title": "",
+        "score": 1.0, "events": [{"title": "Utilities hit",
+                                   "snippet": "A cluster hit utilities."}]}},
+        today="2026-10-21", log=gate_log.append)
+    check("prose gate reports the shipped stage-2 backlog count",
+          any("1 of 1 shipped analysis" in m for m in gate_log))
+    check("prose gate still does not quarantine at stage=warn",
+          os.path.exists(os.path.join(analysis_dir, "stub-story.md")))
+
+# flipping the stage makes the same text a HARD (quarantining) violation
+try:
+    prose_lint.SPECIFICITY_STAGE = "hard"
+    check("flipped to hard, the year-only text is a hard violation",
+          any("no specificity" in m
+              for m in prose_lint.lint_analysis(YEAR_ONLY)))
+    check("flipped to hard, the bronze stub is a hard violation",
+          any("no specificity" in m
+              for m in prose_lint.lint_analysis(BRONZE_STUB)))
+    check("flipped to hard, the chrome-156 analysis still passes",
+          prose_lint.lint_analysis(open(CHROME156).read()) == [])
+finally:
+    prose_lint.SPECIFICITY_STAGE = "warn"
 
 # --- 6: ssg.run_prose_gate ------------------------------------------------------
 with tempfile.TemporaryDirectory() as td:
