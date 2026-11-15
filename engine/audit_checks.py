@@ -869,6 +869,11 @@ def ingest_noise(data_dir, now, *, raw_glob=None, window_days=2,
          infonewscyber.fr minted 53/53 lifetime events in 6 days — a real
          source, FAILing forever). The >= flood_min volume bar still gates
          the arm; an undated source cannot prove its age and is not accused.
+         Trade-off, stated so the next audit does not read this arm as
+         covering it: a genuinely NEW firehose that triage mostly KEEPS
+         (the original thehackerwire shape) is invisible to arm 4 for its
+         first 2 * flood_days; the dropped/thin/tag-spam arms are unchanged
+         and still cover the cases they covered.
 
     Returns (problems, info): problems = human-readable findings (audit
     FAILs when non-empty); info = per-source/per-author tables for the

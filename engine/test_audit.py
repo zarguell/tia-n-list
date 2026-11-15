@@ -749,6 +749,27 @@ check("brand-new entrant is not convicted on lifetime share "
       "(infonewscyber.fr 53/53 lifetime in 6d)",
       any("infonewscyber.fr" in x for x in p4), False)
 
+# the age gate's boundary, pinned in both directions (NOW2 - 2 * flood_days
+# = 2026-09-02): one day either side must flip the verdict, so an off-by-one
+# (< vs <=, flood_days vs 2 * flood_days) cannot slip through.
+edge_events = {}
+for i in range(60):   # in-window half, identical for both sources
+    edge_events[f"e14r{i:03d}"] = {"source": "edge14.example",
+                                   "published_at": "2026-09-12T00:00:00Z"}
+    edge_events[f"e13r{i:03d}"] = {"source": "edge13.example",
+                                   "published_at": "2026-09-12T00:00:00Z"}
+for i in range(60):
+    edge_events[f"e14o{i:03d}"] = {"source": "edge14.example",
+                                   "published_at": "2026-09-02T00:00:00Z"}
+    edge_events[f"e13o{i:03d}"] = {"source": "edge13.example",
+                                   "published_at": "2026-09-03T00:00:00Z"}
+_mk_noise_dir(os.path.join(tmp, "floodedge"), edge_events, {})
+p5, _ = jc.ingest_noise(os.path.join(tmp, "floodedge"), NOW2)
+check("age gate opens exactly at 2 * flood_days (first event 2026-09-02)",
+      any(x.startswith("flood entrant edge14.example") for x in p5), True)
+check("age gate still closed one day short (first event 2026-09-03)",
+      any("edge13.example" in x for x in p5), False)
+
 clean_events = {f"g{i}": {"source": "fine.example",
                            "published_at": "2026-08-01T00:00:00Z"}
                 for i in range(30)}
