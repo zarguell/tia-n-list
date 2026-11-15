@@ -1,0 +1,3 @@
+As explained in https://unit42.paloaltonetworks.com/cairn-framework-ai-autonomous-attacks/ article Chinese hackers used autonomous AI agents to breach 10 major organizations, including US defense programs and chipmakers - by tricking the AI into thinking it was a legitimate security test. Cairn weaponized for autonomous Cyberattacks with DeepSeek & GLM. So open source in terms of security is like a box of chocolates... submitted by /u/Prestigious-Bank2145 [link] [comments]
+
+via reddit r/cybersecurity: How Cairn, an Open-Source AI penetration testing tool, Was Weaponized for Autonomous Cyberattacks
