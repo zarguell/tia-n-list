@@ -1,0 +1,7 @@
+The Pentagon renamed its Chief Digital and Artificial Intelligence Office (CDAO) the Super Intelligence Office, following President Trump's September executive order 14434 directing federal agencies to use "Super Intelligence" and "SI" instead of "Artificial Intelligence" in official communications. The change was announced on Friday. The office now sits under what the department calls the Department of War.
+
+Cameron Stanley continues to lead the office as Chief Super Intelligence Officer, with Andrew Mapes as Principal Deputy Super Intelligence Officer. Stanley took over the Pentagon's chief digital and AI role in January after leading national security transformation at Amazon Web Services, and he previously led Project Maven, the Pentagon's military AI initiative.
+
+The office moved its public resources, procurement information, and partnership portals to SI.mil and said existing programs, solicitations, and defense partnerships would continue without interruption. Its portfolio includes the Maven Smart System, an AI-enabled intelligence and targeting platform, and the War Data Platform, a central hub for military data.
+
+The rebrand is a naming and organizational signal rather than a new capability, but it points at where the department is putting weight: AI-enabled targeting and a consolidated military data layer. Watch whether the "Super Intelligence" label propagates into other agencies' solicitations and budgets, and whether the Maven Smart System and War Data Platform expand or draw scrutiny.
