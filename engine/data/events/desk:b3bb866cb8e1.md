@@ -1,0 +1,1 @@
+Security Affairs reported on 15 November 2026 that a cyberattack on Maileva, a La Poste subsidiary, exposed the names and postal addresses of 22 million people, including patients and tenants. The coverage framed the incident as one of the largest reported data breaches in France.

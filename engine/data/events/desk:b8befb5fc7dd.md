@@ -1,0 +1,1 @@
+Le Figaro reported on 14 November 2026 that Maileva, a La Poste subsidiary, had been hit mid-September by a large-scale cyberattack described as one of the largest committed in France, leading to the theft of contact details for 22 million people. The article was among the first national press accounts of the breach.
