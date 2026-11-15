@@ -1,0 +1,44 @@
+title: ESXi execInstalledOnly Enforcement Disabled via esxcli
+id: 3d1f6c2a-9b47-4e18-8a5c-71c0a4de2f6b
+status: experimental
+description: >
+    Detects an ESXi host where the VMkernel advanced setting
+    /UserVars/ExecInstalledOnly is switched off through esxcli. The control
+    blocks execution of unsigned binaries from the filesystem, so disabling it
+    is the enabling step for running a dropped or uploaded ELF payload on the
+    hypervisor. Kaspersky GERT documented BlackNevas ransomware doing exactly
+    this in an October 2025 intrusion: after reusing a shared root password to
+    log in over SSH, the operator uploaded an "esx" binary, set
+    ExecInstalledOnly to 0, and cleared the logs before wiping four ESXi hosts,
+    every guest VM, both vCenter Server Appliances and the backups. No
+    hypervisor vulnerability was used, so configuration-plane monitoring is the
+    only place this stage is visible.
+references:
+    - https://osintsights.com/ransomware-targets-hypervisor-layer-via-legitimate-vmware-interfaces
+    - https://cyber.netsecops.io/articles/blacknevas-ransomware-wipes-vmware-environment-with-stolen-credentials/
+author: Tia N. List
+date: 2026/11/15
+tags:
+    - attack.t1675
+    - attack.t1562
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection_setting:
+        CommandLine|contains|all:
+            - 'execInstalledOnly'
+            - 'system settings advanced'
+    selection_value:
+        CommandLine|contains:
+            - '-i 0'
+            - '--int-value 0'
+    filter_list:
+        CommandLine|contains:
+            - 'advanced list'
+            - 'advanced get'
+    condition: selection_setting and selection_value and not filter_list
+falsepositives:
+    - Administrators or backup/upgrade tooling temporarily allowing unsigned VIBs or drivers on lab and build hosts
+    - Hypervisor hardening scripts that report or reset the setting during a maintenance window
+level: high
