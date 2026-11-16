@@ -1,0 +1,3 @@
+In a nutshell: A GPU driver call incorrectly trusts the CPU permission field, enabling write where only read should exist. Then consequences roll on from there. What's it need: a CUDA-capable NVIDIA GPU and an unprivileged local account (no special group, no CAP_SYS_ADMIN ). Aka, what you rent from a neocloud. Affected range: this one's present in every open-source driver release from 515.43.04 (2022-05-09) Fixed in 610.57.04, 595.91.07 (and 595.44.14 on the 595.44.x line), 580.178.04, and later releases on those branches. submitted by /u/ChrisAtStealthium [link] [comments]
+
+via reddit r/cybersecurity: NvRoot aka from rent to root - new LPE vulnerability for NVIDIA GPU driver (CVE-2026-47591)
