@@ -693,7 +693,7 @@
   "current_release": "2026-11-15T23:59:59"
  },
  "collected_at": "2026-11-16T12:05:03Z",
- "updated_at": "2026-11-16T12:05:03Z",
+ "updated_at": "2026-11-16T12:07:48Z",
  "next": {
   "release": "2026-W47",
   "date": "2026-11-23",
@@ -42129,7 +42129,119 @@
   }
  ],
  "analysis": {
-  "source": "pending"
+  "headline": "Red Hat's week is a kernel UAF swarm plus four KEVs \u2014 patch now, not later",
+  "summary": [
+   "Vendor severity labels are a poor triage guide in this release. Three of the four KEV entries \u2014 the ruby regex-compiler integer overflow at CVSS 9.8, both PHP flaws at 8.1 \u2014 are labelled Moderate or Important, while much of the top-scoring mass is unglamorous kernel networking code (SCTP, ipvs, nfsd, RDMA/siw, libceph) that ships in every RHEL and OpenShift node. Score CVSS, EPSS and KEV separately; they disagree on purpose here.",
+   "No CVE is flagged exploited or publicly disclosed and none is marked remote-unauthenticated, so this is a pre-exploitation window, but 335 automatable and 161 at EPSS \u226550% argue it is short. Operational weight sits in RHEL base packages (kernel, php, ruby, nginx, podman), with smaller counts carrying disproportionate blast radius in OpenShift Enterprise (brotli, OpenSSL, kernel), Single Sign-On/Keycloak, and Satellite."
+  ],
+  "themes": [
+   {
+    "title": "Kernel networking use-after-free cluster",
+    "detail": "Roughly two-thirds of the top-30 triage list is Linux kernel memory-safety work in network paths \u2014 SCTP association/transport handling, ipvs ICMP headroom and IPv4 options, nfsd async COPY state, udp tunnel segmentation, RDMA/siw and libceph OOB writes. EPSS clusters tightly at 0.42\u20130.56 and every one is automatable, which is what a broad backport batch looks like rather than a single weaponised bug. Container hosts inherit the exposure.",
+    "cves": [
+     "CVE-2026-64564",
+     "CVE-2026-89479",
+     "CVE-2026-74752",
+     "CVE-2026-74588",
+     "CVE-2026-68159",
+     "CVE-2026-68156",
+     "CVE-2026-64268",
+     "CVE-2026-72319",
+     "CVE-2026-74669",
+     "CVE-2026-74705",
+     "CVE-2026-98432",
+     "CVE-2026-89676",
+     "CVE-2026-90036",
+     "CVE-2026-72222"
+    ]
+   },
+   {
+    "title": "The KEV four are mid-tier by vendor labelling",
+    "detail": "Ruby's CI/CD regex compiler integer overflow is a 9.8 rated Moderate; the paired PHP OOM-bailout memory corruption and stale-request-state UAF are Important at 8.1 with EPSS pinned at 1.00; brotli's decoder OOB write rides in OpenShift Enterprise. All four are KEV-listed and all four are library-level, meaning the fix cycle depends on every product that vendors the component, not on Red Hat alone.",
+    "cves": [
+     "CVE-2026-97229",
+     "CVE-2026-110264",
+     "CVE-2026-109618",
+     "CVE-2026-109619",
+     "CVE-2026-111497"
+    ]
+   },
+   {
+    "title": "Identity and control plane carry the worst single bugs",
+    "detail": "One SSO CVE in the whole release, and it is unauthenticated account takeover in keycloak-services via the reset-credentials flow at 9.1. Satellite 6 has Puma HTTP request smuggling through underscore-header confusion, plus a separately covered sandbox bypass. These are low-count families where a single successful exploitation yields administrative reach across everything the platform manages.",
+    "cves": [
+     "CVE-2026-18963",
+     "CVE-2026-68006",
+     "CVE-2026-107360"
+    ]
+   },
+   {
+    "title": "Web tier and container trust boundaries",
+    "detail": "NGINX's dav module buffer overflow permits DoS or file modification, not just crashes. Tomcat appears twice \u2014 unvalidated HTTP/2 request headers and a security-constraint bypass \u2014 plus Tomcat's WebSocket constraint bypass in the covered set. Podman will let an image annotation switch off user-requested sandboxing, which turns a hostile registry image into host compromise and is the more interesting supply-chain item in the batch.",
+    "cves": [
+     "CVE-2026-27654",
+     "CVE-2026-41293",
+     "CVE-2026-65182",
+     "CVE-2026-76183",
+     "CVE-2026-94603",
+     "CVE-2026-15176"
+    ]
+   },
+   {
+    "title": "Crypto stack fixes without a KEV flag",
+    "detail": "OpenSSL's PKCS7_verify heap use-after-free scores 8.1 with EPSS 0.91 and no flags at all, and the broader OpenSSL and BIND batches sit outside the top 30 entirely. These are the entries most likely to be missed by anyone triaging on KEV or vendor severity alone, and they are embedded in far more of the estate than the headline kernel work.",
+    "cves": [
+     "CVE-2026-45447",
+     "CVE-2026-18798",
+     "CVE-2026-63072",
+     "CVE-2026-63076",
+     "CVE-2026-94300"
+    ]
+   }
+  ],
+  "data_vs_prose": "The data says pre-exploitation: zero exploited, zero disclosed, zero remote-unauthenticated, despite 335 automatable and 161 at EPSS \u226550%. It also contradicts itself in places \u2014 the EPSS buckets report 10 CVEs at \u226510% and 161 at \u226550%, which is arithmetically impossible, and the automatable counters disagree (335 vs 80) \u2014 so treat those two figures as directional, not exact. There are no KB mappings at all for 1,202 fixes, so Red Hat errata are the only authoritative per-package reference. Coverage is thin and misaligned: 22 of 1,202 CVEs have headlines, and several attach unrelated stories \u2014 the ruby KEV is headlined with an Ivanti CVE, the PHP pair with an email-breach leak, Keycloak with a Siemens advisory. Conversely the newsroom surfaces things the ranking buries: the NGINX five-flaw batch, OpenSSL and BIND advisories, GitLab's double free and integer overflow, and Apache MINA SSHD's auth bypass, none of which reach the top 30 by triage score.",
+  "watchlist": [
+   {
+    "cve": "CVE-2026-97229",
+    "why": "KEV, EPSS 0.99, CVSS 9.8 but rated Moderate \u2014 the largest severity/label gap in the release. Ruby ships inside Satellite, foreman and many appliance images, so package-level patching understates exposure."
+   },
+   {
+    "cve": "CVE-2026-109618",
+    "why": "KEV with EPSS 1.00; OOM bailout during request parsing becomes memory corruption and RCE in any PHP-FPM front end. Its sibling CVE-2026-109619 is the same fix \u2014 treat as one change window."
+   },
+   {
+    "cve": "CVE-2026-111497",
+    "why": "KEV, EPSS 1.00, brotli decoder OOB write in OpenShift Enterprise. Compression is enabled by default in most ingress and proxy paths, so the parsing surface is already exposed."
+   },
+   {
+    "cve": "CVE-2026-18963",
+    "why": "Unauthenticated account takeover through the Keycloak reset-credentials flow at 9.1, with no interaction required. One CVE, but it precedes every downstream authorisation decision."
+   },
+   {
+    "cve": "CVE-2026-64564",
+    "why": "SCTP DEL-IP processing frees a transport it still references; reachable from an adjacent network and a credible container-escape primitive on shared kernel hosts."
+   },
+   {
+    "cve": "CVE-2026-98432",
+    "why": "IPv4 inet_opt/ireq_opt freed before the RCU grace period completes \u2014 9.8, automatable, and applicable to both RHEL and OpenShift Enterprise kernels."
+   },
+   {
+    "cve": "CVE-2026-94603",
+    "why": "Podman honours an image annotation that disables nearly all sandboxing, including user-requested isolation. Any registry you do not fully control becomes a host-compromise vector."
+   },
+   {
+    "cve": "CVE-2026-45447",
+    "why": "OpenSSL PKCS7_verify heap use-after-free, 8.1 with EPSS 0.91 and zero flags. No KEV listing means it drops off most automated queues while remaining widely reachable."
+   }
+  ],
+  "patch_note": "Start with Red Hat Enterprise Linux: kernel first (the SCTP/ipvs/nfsd/sunrpc batch plus the ipv4 RCU fix), then php and ruby immediately behind it, then nginx, podman and tomcat. Second, OpenShift Enterprise \u2014 brotli and the OpenSSL PKCS7 fix, then the kernel rebase \u2014 because these sit in shared ingress and node images. Third, Single Sign-On for the Keycloak takeover, ahead of its single-CVE count suggests, and Satellite 6 for Puma smuggling and the sandbox bypass on the same maintenance window. Then the remaining families in bulk: JBoss EAP and JBoss Web Server for Tomcat, OpenJDK, OpenShift Container Platform, Hardened Images and the smaller OpenShift components. There are no KB articles for this release, so drive the rollout from RHSA errata and verify the installed package version rather than trusting advisory presence.",
+  "source": "agent",
+  "kev_snapshot": [
+   "CVE-2026-109618",
+   "CVE-2026-109619",
+   "CVE-2026-111497",
+   "CVE-2026-97229"
+  ]
  },
  "backfilled": false,
  "tracking": {
