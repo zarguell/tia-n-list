@@ -1,0 +1,1 @@
+The vendor changelog lists V 3.4.0 as released 12-Nov-2026 with a security fix for a vulnerability issue; the preceding 3.3.8 entry notes a fix for unauthorized file deletion in the factory reset functionality. The page metadata carries an article modified timestamp of 2026-11-12T06:24:49Z. The changelog does not name CVE-2026-119077 or describe the deserialization sink.
