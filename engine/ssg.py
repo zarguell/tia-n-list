@@ -239,6 +239,61 @@ def strip_provenance(md_text):
     return body.rstrip() + "\n"
 
 
+# Collector relay trailers. The Mastodon and Reddit collectors append their own
+# provenance line to the event body ("via Mastodon https://…", and on Reddit
+# "submitted by /u/… [link] [comments]" followed by "via reddit r/<sub>: …").
+# 25,921 masto bodies and 986 reddit bodies in the 38,077-event store ended in
+# one (audit 2026-11-15), and delta_body renders the body as article prose, so
+# /stories/<id>/ published sentences like "…iPhone attacks on the via Mastodon
+# https://english.mathrubhumi.com/…". Stripped at load/render time for the same
+# reason as the digest provenance trailer: a lagging deploy or a store that
+# still holds the raw bodies can never republish collector scaffolding.
+# The collector appends the footer as its own line, but ingest's body cap
+# sometimes truncates the post mid-sentence, leaving "… Update your sites
+# immediately via Mastodon https://…" as one line (13 bodies on 2026-11-15),
+# so a whitespace separator is accepted as well. Observed variants: the label
+# with no link at all ("\n\nvia Mastodon"), "(original link omitted in
+# snippet)", and the same trailer repeated twice.
+_RELAY_TARGET = (r"(?:https?://\S+|\.\.\.|\(original link omitted[^)\n]*\))")
+RELAY_FOOTER_RE = re.compile(
+    r"(?:(?:(?:\A|\n)[ \t\n]*|[ \t]+)"
+    r"via Mastodon(?:\s+" + _RELAY_TARGET + r")?[ \t]*)+\Z")
+
+# Reddit's link-post wrapper line ("submitted by /u/… [link] [comments]") is
+# scaffolding, and ingest glues it onto the end of the post text for long
+# submissions, so it is matched inline rather than as a line of its own. It is
+# only dropped where it is a wrapper — immediately before the "via reddit
+# r/<sub>:" attribution or at the end of the body — never where an article
+# legitimately discusses Reddit's markup.
+# The wrapper is also truncated by the body cap ("… [link] [" at the cut), so
+# the tail after the handle is matched loosely up to the attribution line.
+REDDIT_SUBMITTER_RE = re.compile(
+    r"[ \t]*submitted by\s+/u/\S+[^\n]*?"
+    r"(?=\n*\Z|\n*via reddit r/[A-Za-z0-9_]+:)")
+
+# Cheap pre-check so the 38k-event build pays for the regex only on the
+# bodies that can match (the load-time pass cost ~7s without it).
+RELAY_MARKERS = ("via Mastodon", "submitted by /u/")
+
+
+def strip_relay_footer(md_text):
+    """Drop the collectors' relay scaffolding from an event body.
+
+    Only pure provenance is removed: the Mastodon collector's trailing
+    "via Mastodon <url>" line and Reddit's "submitted by /u/… [link]
+    [comments]" wrapper line. The Reddit "via reddit r/<sub>: <post text>"
+    line stays because it carries the post's own text. The Mastodon footer is
+    end-anchored, so prose that merely mentions "via Mastodon" mid-paragraph
+    survives, and the strip is idempotent. Returns the body with a single
+    trailing newline, or "" when the body was nothing but scaffolding.
+    """
+    if not any(m in md_text for m in RELAY_MARKERS):
+        return md_text
+    body = REDDIT_SUBMITTER_RE.sub("", md_text)
+    body = RELAY_FOOTER_RE.sub("", body.rstrip()).lstrip("\n").rstrip()
+    return body + "\n" if body else ""
+
+
 def sanitize(html_text):
     """Parse-based HTML sanitizer (bleach / html5lib): allowlist tags,
     attributes and protocols; everything else is stripped with content kept.
@@ -293,7 +348,15 @@ def load_events():
     # identical except build timestamps. Do NOT reintroduce a per-event
     # pre-render here: delta_body derives its text from the story's events, so
     # a per-event HTML cache would never be reusable anyway.
-    return _load()
+    events = _load()
+    # Collector relay trailers are scaffolding, not article prose (see
+    # strip_relay_footer); drop them once at load so every reader-facing
+    # surface (story pages, cards, snippets, feeds, digests) is covered.
+    for e in events.values():
+        body = e.get("content_md")
+        if body:
+            e["content_md"] = strip_relay_footer(body)
+    return events
 
 
 SENT_SPLIT = re.compile(r"(?<=[.!?])\s+")
