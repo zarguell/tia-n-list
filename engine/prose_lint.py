@@ -46,6 +46,15 @@ violation, because the family is wide (100+ stored analyses say "the event
 …") and the re-analysis prompt does not ban the phrasing — quarantining on
 it would pull every affected live card and requeue against a prompt that
 reproduces it until the retry cap, for prose a reader still understands.
+
+A fourth class IS hard: bare internal event/channel ids (`masto:`, `mf:`, `rd:`,
+`x:`, `desk:`, `rss:`, `bsky:`) printed in analysis prose (INTERNAL_ID_RE /
+internal_id_hits, 2026-10-25 audit Issue 1 + Rec 1). The bookkeeping WARN above
+saw the sentences but not the id shape, so 11 published analyses — the front
+page hero among them — kept printing triage identifiers a reader cannot
+resolve. Unlike its WARN sibling the class is narrow and mechanical (delete the
+parenthesis, keep the sentence), so it quarantines like any other hard error;
+ids quoted inside code spans stay legal.
 """
 import glob
 import json
@@ -97,6 +106,26 @@ TRIAGE_BOOKKEEPING = (
     # appropriate because …"
     r"\bthe new story is appropriate\b",
 )
+
+# Bare internal event/channel ids (2026-10-25 audit Issue 1 + Rec 1). The
+# bookkeeping WARN above catches the SENTENCES that narrate ingest state; it
+# never matched the id SHAPE, so 11 published analyses kept printing the
+# pipeline's own identifiers in prose — including the front page hero
+# analysis, whose second sentence read "The new event
+# (masto:117498992322565382) reinforces active exploitation". A reader has no
+# way to resolve `masto:`/`mf:`/`rd:` and every such token is triage state,
+# not the real-world subject, so this is a HARD violation (quarantine +
+# requeue) unlike its WARN-only sibling: the class is narrow and mechanical
+# (remove the parenthesis, keep the sentence) and the prompt already bans
+# narrating ingest objects. Code spans are stripped first, so an id quoted as
+# part of a genuine payload stays legal.
+#
+# The prefix must start a token (`(?<![A-Za-z0-9_])`): bare `x:123` is a real
+# id, but the same text inside `box:123` or `standard:7` is a word, not an
+# identifier — without that guard the two-letter prefixes match inside prose.
+INTERNAL_ID_RE = re.compile(
+    r"(?<![A-Za-z0-9_])(?:masto|mf|rd|x|desk|rss|bsky):[0-9A-Za-z_]+")
+
 
 # Structure contract: prompts/tia-hourly.md promises "2-4 short plain
 # paragraphs", no headings. Length bounds keep auto-extracted stubs (too
@@ -423,6 +452,23 @@ def raw_html_hits(text):
     return out
 
 
+def internal_id_hits(text):
+    """Bare internal event/channel ids in agent prose that breaks the rendered
+    site.
+
+    2026-10-25 audit Issue 1 + Rec 1: published analyses printed the
+    pipeline's own identifiers (`masto:117498992322565382`, `mf:164959`,
+    `rd:…`, …) — the front page hero analysis led with one. A reader cannot
+    resolve them and they narrate ingest state instead of the story, so this
+    is a HARD violation (see INTERNAL_ID_RE). Code spans and fenced blocks
+    are stripped before matching, so an id carried inside a genuine payload
+    stays legal. Returns the offending tokens.
+    """
+    stripped = re.sub(r"```.*?```", "", text or "", flags=re.S)
+    stripped = re.sub(r"`[^`\n]+`", "", stripped)
+    return [m.group(0) for m in INTERNAL_ID_RE.finditer(stripped)]
+
+
 def lint_analysis(text, story=None, subject_title=None, source_text=None):
     """HARD violations for one analysis (plain markdown) — each of these
     quarantines. story, when given, only names the file in the messages.
@@ -439,6 +485,10 @@ def lint_analysis(text, story=None, subject_title=None, source_text=None):
     out = _banned_hits(text)
     for tag in raw_html_hits(text):
         out.append(f"raw HTML {tag} (payloads/markup belong in code spans)")
+    for ev_id in internal_id_hits(text):
+        out.append(f"internal event id {ev_id!r} (published prose names the "
+                   f"story, never the ingest object; drop the "
+                   f"parenthetical)")
     if any(l.lstrip().startswith("#") for l in text.splitlines()):
         out.append("markdown heading line (prompts ban headings)")
     if not MIN_LEN <= len(text) <= MAX_LEN:
