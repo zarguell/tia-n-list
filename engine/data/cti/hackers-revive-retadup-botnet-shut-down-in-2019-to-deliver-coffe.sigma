@@ -1,0 +1,39 @@
+title: CoffeeLoader Execution via rundll32 and Patched 7z.dll in a Temp Directory
+id: 6d1cb07c-04e5-4cca-ad40-8e65586ef0be
+status: experimental
+description: >
+    Detects the CoffeeLoader delivery pattern reported in November 2026: an
+    NSIS installer drops a trojanized 7z.dll into a temporary directory and
+    launches it through rundll32.exe. The DLL is a patched 7-Zip library whose
+    code was partly replaced with self-decrypting shellcode implementing the
+    Armoury packer, which now performs GPU-assisted decryption through OpenGL
+    compute shaders instead of OpenCL.
+references:
+    - https://gbhackers.com/coffeeloader-malware-attack/
+    - https://malware.news/t/a-usb-worm-s-second-life-retadup-spreading-coffeeloader/127317#post_1
+author: Tia N. List
+date: 2026/11/16
+tags:
+    - attack.t1027
+    - attack.t1218
+    - attack.t1055
+    - attack.t1091
+    - attack.t1105
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_rundll32:
+        Image|endswith: '\rundll32.exe'
+    selection_7z_dll:
+        CommandLine|contains: '7z.dll'
+    selection_temp_path:
+        CommandLine|contains:
+            - '\Temp\'
+            - '\tmp\'
+            - '%TEMP%'
+    condition: selection_rundll32 and selection_7z_dll and selection_temp_path
+falsepositives:
+    - Legitimate 7-Zip component registration or installers that stage 7z.dll under a user or Windows temp directory
+    - Software updaters that load a bundled 7-Zip library through rundll32.exe
+level: medium
