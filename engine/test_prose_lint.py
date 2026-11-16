@@ -91,6 +91,42 @@ check("story id prefixes messages when given",
       all(m.startswith("sid:") for m in prose_lint.lint_analysis(filler,
                                                                  story="sid")))
 
+# --- 1b: bare internal event ids are a HARD violation --------------------------
+# 2026-10-25 audit Issue 1 + Rec 1: 11 published analyses printed the
+# pipeline's own identifiers (`masto:`, `mf:`, `rd:`, …) — the front page hero
+# analysis led its second sentence with one. The TRIAGE_BOOKKEEPING WARN never
+# matched the id shape, so the class recurred; this one quarantines.
+for _prefix, _id in (("masto", "masto:117498992322565382"),
+                     ("mf", "mf:164959"),
+                     ("rd", "rd:8f2c41a0"),
+                     ("x", "x:1770000000000000000"),
+                     ("desk", "desk:481"),
+                     ("rss", "rss:aa3b91"),
+                     ("bsky", "bsky:3kzv4wz2k7c2b")):
+    check(f"bare {_prefix}: id is a hard violation",
+          any("internal event id" in m for m in prose_lint.lint_analysis(
+              GOOD.replace("Attackers exploited CVE-2026-1234",
+                           f"Attackers exploited CVE-2026-1234 (event {_id})"))))
+    check(f"{_prefix}: helper names the offending token",
+          prose_lint.internal_id_hits(
+              f"the new event {_id} reinforces it") == [_id])
+check("clean prose has no internal-id violation",
+      not any("internal event id" in m
+              for m in prose_lint.lint_analysis(GOOD))
+      and prose_lint.internal_id_hits(GOOD) == [])
+check("ids quoted inside code spans stay legal (genuine payloads)",
+      prose_lint.internal_id_hits("the relay wrote `masto:117498992322565382`")
+      == []
+      and prose_lint.internal_id_hits(
+          "```\nmasto:117498992322565382\n```") == [])
+check("two-letter prefixes only match as a whole token (no prose words)",
+      prose_lint.internal_id_hits("box:123 and standard:7 and deskx:9") == []
+      and prose_lint.internal_id_hits("see x:123 now") == ["x:123"])
+check("an id-bearing analysis is quarantined by the prose gate",
+      prose_lint.internal_id_hits("The new event (masto:117498992322565382) "
+                                 "reinforces active exploitation")
+      == ["masto:117498992322565382"])
+
 # --- 2: banned strings + structure, one violation at a time ------------------
 emdash = GOOD.replace("September 12", "September\u201412")
 v = prose_lint.lint_analysis(emdash)
