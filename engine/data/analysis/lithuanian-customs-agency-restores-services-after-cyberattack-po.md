@@ -1,0 +1,3 @@
+Lithuanian Customs confirmed a cyberattack on November 10 that forced the agency to take its main user management portal offline. The Record reported that restoration work continued over the weekend, and a later update said services had been brought back while a possible data breach remained under assessment.
+
+The available reporting names no actor, malware or CVE, so the firm details are the date, the targeted user management portal and the agency's confirmation of unauthorized activity. Watch for a formal statement on whether data was accessed, which records were exposed and whether the portal outage was connected to other Lithuanian government systems.
