@@ -1,0 +1,5 @@
+French security news site infonewscyber reports that the health data of 23 million people in France has been exposed following a cyberattack on 1001RDV. The reporting is brief on detail but specific on the number and on the target: the incident is attributed to a successful intrusion against the appointment platform rather than to a third-party processor.
+
+1001RDV is used by medical practices to handle patient scheduling, so a compromise of the platform itself puts appointment records and whatever patient identifiers travel with them at risk for practices across the country. A figure of 23 million people would make this one of the larger French health-data incidents, though the number has not been broken down by record type or confirmed by the operator in the material published so far.
+
+Watch for a statement from the operator confirming the intrusion and the record categories involved, for a CNIL notification, and for any evidence that the data has been offered for sale. Until then the 23 million figure should be treated as reported rather than verified.
