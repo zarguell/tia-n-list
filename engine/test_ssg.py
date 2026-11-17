@@ -348,6 +348,40 @@ def main():
         ok &= check("sources page external links are noopener",
                     'rel="noopener noreferrer"' in page, True)
 
+    # 7b. RAM-aware fan-out (2026-11-17): the 2.9 GB host OOM-killed jobs while
+    #     this pool was live. Worker count must follow AVAILABLE memory, not
+    #     just CPU count — a 4-CPU box with 900 MB free gets one worker, a
+    #     bogged box gets none (serial), and SSG_JOBS=1 still wins outright.
+    def jobs_with(avail_mb, cpus=4):
+        saved_aff = getattr(os, "sched_getaffinity", None)
+        saved_env = os.environ.pop("SSG_JOBS", None)
+        try:
+            os.sched_getaffinity = lambda pid: list(range(cpus))
+            ssg._available_mb = lambda: avail_mb
+            return ssg._card_jobs(1000)
+        finally:
+            if saved_aff is not None:
+                os.sched_getaffinity = saved_aff
+            ssg._available_mb = _real_avail
+            if saved_env is not None:
+                os.environ["SSG_JOBS"] = saved_env
+
+    _real_avail = ssg._available_mb
+    try:
+        ok &= check("pool: 4 cpus + 8 GB free -> 4 workers", jobs_with(8000), 4)
+        ok &= check("pool: 4 cpus + 1.2 GB free -> 1 worker", jobs_with(1200), 1)
+        ok &= check("pool: 4 cpus + 400 MB free -> 1 (never 0)", jobs_with(400), 1)
+        ok &= check("pool: 4 cpus + 2.4 GB free -> 3 workers", jobs_with(2400), 3)
+        os.environ["SSG_JOBS"] = "1"
+        ok &= check("pool: SSG_JOBS=1 beats the RAM allowance",
+                    ssg._card_jobs(1000), 1)
+        os.environ.pop("SSG_JOBS", None)
+        ssg._available_mb = lambda: None
+        ok &= check("pool: unreadable meminfo falls back to CPU count",
+                    ssg._card_jobs(1000) >= 1, True)
+    finally:
+        ssg._available_mb = _real_avail
+
     # 8. vanished-mid-lint tolerance (2026-10-23): the CTI pass agent deletes
     #    an inexpressible candidate .sigma while another job's --lint-only
     #    gate is walking its glob snapshot; the gate must skip it, not abort

@@ -526,19 +526,46 @@ def _card_batch(rng):
     return out
 
 
+# Measured on the 2.9 GB home box (2026-11-17): the fork pool costs ~194 MB
+# on top of the serial build (442 MB -> 636 MB peak, ~97 MB/worker). That is
+# fine on an idle box and dangerous on a tight one — this host also runs the
+# megapatch collector, story-desk and the hosted services, and it has been
+# OOM-killing jobs (three times in one evening). So the pool is capped by
+# AVAILABLE memory, not just by CPU count: never fork into a box that is
+# already at the edge, and never take more than half of what is free.
+MIN_FREE_MB_PER_WORKER = 400      # ~97 MB/worker measured; 4x headroom
+MAX_FREE_MB_TOTAL = 3500          # never take more than this much of it
+
+
+def _available_mb():
+    """/proc/meminfo MemAvailable in MB, or None when unreadable."""
+    try:
+        with open("/proc/meminfo") as f:
+            for line in f:
+                if line.startswith("MemAvailable:"):
+                    return int(line.split()[1]) / 1024
+    except OSError:
+        pass
+    return None
+
+
 def _card_jobs(n):
     """Worker processes for the card pass. SSG_JOBS wins (1 = serial)."""
     try:
         want = int(os.environ.get("SSG_JOBS") or 0)
     except ValueError:
         want = 0
-    if want > 0:
-        return want
-    try:
-        cpus = len(os.sched_getaffinity(0))
-    except AttributeError:  # pragma: no cover — non-Linux
-        cpus = os.cpu_count() or 1
-    return max(1, min(cpus, 8))
+    if want <= 0:
+        try:
+            cpus = len(os.sched_getaffinity(0))
+        except AttributeError:  # pragma: no cover — non-Linux
+            cpus = os.cpu_count() or 1
+        want = max(1, min(cpus, 8))
+    avail = _available_mb()
+    if avail is not None:
+        budget = min(avail * 0.5, MAX_FREE_MB_TOTAL)
+        want = min(want, max(1, int(budget // MIN_FREE_MB_PER_WORKER)))
+    return max(1, want)
 
 
 def _build_cards(parsed, max_score):
