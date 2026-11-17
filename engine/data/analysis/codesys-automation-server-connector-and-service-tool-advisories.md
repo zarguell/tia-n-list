@@ -1,0 +1,5 @@
+CERT VDE published two CSAF advisories on November 17 covering CODESYS engineering software. VDE-2026-146 describes a path traversal flaw, CVE-2026-118498, in the CODESYS Automation Server Connector. VDE-2026-145 covers multiple vulnerabilities in the Automation Server Connector and the CODESYS Service Tool, tracked as CVE-2026-118496 and CVE-2026-118497. Both advisories come from the German national CERT's advisory feed.
+
+The affected components sit in industrial automation workflows, where a connector or service tool often runs with broad access to engineering projects and controllers. Path traversal in that position is worth prompt attention because it can expose files outside an intended directory. The advisory announcements here give CVE identifiers but no affected version ranges, CVSS scores or exploitation claims, so patch scope needs to come from the full CERT VDE records.
+
+Watch for a CODESYS fix or version matrix and for operators confirming which Automation Server Connector and Service Tool builds are deployed. No in-the-wild exploitation or public exploit code is reported in these notices.
