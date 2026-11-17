@@ -20,7 +20,7 @@
   "current_release": ""
  },
  "collected_at": "2026-11-17T21:30:06Z",
- "updated_at": "2026-11-17T21:30:06Z",
+ "updated_at": "2026-11-17T21:35:40Z",
  "next": {
   "release": "2026-Dec",
   "date": "2026-12-15",
@@ -22727,7 +22727,116 @@
   }
  ],
  "analysis": {
-  "source": "pending"
+  "headline": "Oracle's November CPU is a bundled-library problem; one Node.js flaw is already exploited",
+  "summary": [
+   "This is a 640-CVE Oracle CPU, and its shape is unusual: 267 of 640 (42%) sit in Oracle Hyperion, and most of the high-end CVEs are 9.8 automatable entries in install/config/security subcomponents rather than deep product logic. The recurring names behind them \u2014 Bouncy Castle, Eclipse Jetty, Apache Tomcat, curl, Apache Commons BeanUtils, CPython ssl, Java JSSE \u2014 indicate third-party code re-shipped inside Oracle builds. Operational cost will be driven by breadth of rebuild/repackaging, not by a small set of exotic bugs.",
+   "Only one CVE has demonstrated exploitation: CVE-2026-111497 in Oracle Communications PMAC (Node.js), also the sole KEV entry, EPSS 1.00, and the subject of nine of our eight-plus published headlines under the Node2Shell-to-HTTP2Shell story. Everything else in this release is potential, including four Fusion Middleware CVSS 10.0 items scoring only ~61 because EPSS is absent ('?') rather than low. Treat the 60.2/61.0 band as a ceiling on evidence, not a risk measurement."
+  ],
+  "themes": [
+   {
+    "title": "Hyperion is the release, and it is mostly repackaging",
+    "detail": "Hyperion contributes 42% of scoped CVEs, but only six reach the top 30 and nearly all are 9.8 automatable Installation/Configuration, Common Security and Application Development Framework entries. That pattern is consistent with bundled Java libraries being rebuilt, so the real work is validating every Hyperion deployment receives the updated artifacts \u2014 including dormant Essbase/EPM installs that rarely get a change window.",
+    "cves": [
+     "CVE-2026-115047",
+     "CVE-2026-115048",
+     "CVE-2026-115080",
+     "CVE-2026-115086",
+     "CVE-2026-115089",
+     "CVE-2025-48734"
+    ]
+   },
+   {
+    "title": "Upstream component flaws shipped inside Oracle products",
+    "detail": "A large share of the top triage band traces to named third-party libraries: Bouncy Castle in Fusion Middleware MFT Runtime, Eclipse Jetty in Enterprise Manager Agent Next Gen, Tomcat in Supply Chain File Manager, curl in MySQL packaging, Commons BeanUtils in Hyperion. Patching depends on Oracle's re-release cadence, not upstream's, so version-equivalence assumptions are unsafe and exploit availability is inherited from the library, often earlier than Oracle's CPU.",
+    "cves": [
+     "CVE-2026-8763",
+     "CVE-2026-10050",
+     "CVE-2026-101356",
+     "CVE-2026-92392",
+     "CVE-2025-48734"
+    ]
+   },
+   {
+    "title": "Fusion Middleware 10.0 cluster with no EPSS signal",
+    "detail": "Four CVSS 10.0 automatable CVEs land across Admin Console, Centralized Thirdparty Jars and TopLink Integration, plus a 9.8 in TopLink and Messaging Enabler. EPSS is unpublished for these, so they rank below an 8.1 with high EPSS. Admin Console is typically management-plane and reachable from ops networks; treat it as internet-adjacent even when the business app is not.",
+    "cves": [
+     "CVE-2026-114835",
+     "CVE-2026-114824",
+     "CVE-2026-91569",
+     "CVE-2026-91570",
+     "CVE-2026-114826"
+    ]
+   },
+   {
+    "title": "Business-application surfaces: EBS, Supply Chain, APEX",
+    "detail": "E-Business Suite (71) and Supply Chain (74) carry 9.8 automatable CVEs in Attachments, REST Services, Media Integration and Core, plus five identical 9.8 'Security' entries in Supply Chain and two in APEX General. These are the paths that face users and integrations, so exposure is routine rather than exceptional, and authentication requirements in the vendor advisory should not be read as a mitigating control for REST endpoints.",
+    "cves": [
+     "CVE-2026-114863",
+     "CVE-2026-114880",
+     "CVE-2026-114924",
+     "CVE-2026-114925",
+     "CVE-2026-127324",
+     "CVE-2026-127325",
+     "CVE-2026-127326",
+     "CVE-2026-127327",
+     "CVE-2026-114849",
+     "CVE-2026-114850"
+    ]
+   },
+   {
+    "title": "Scoring follows exploitation narrative, not vendor severity",
+    "detail": "The single 9.8 in Oracle Communications outranks every CVSS 10.0 because it is KEV-listed with EPSS 1.00 and sustained newsroom attention; a 8.1 with EPSS 0.81 outranks all of them. Meanwhile our own coverage includes names not in the top 30 at all \u2014 Java2Shell and a separate JSSE flaw, a Tomcat WebSocket constraint bypass, and a CPython ssl revocation flaw \u2014 showing that editorial and triage rankings are keyed to different signals and neither is complete on its own.",
+    "cves": [
+     "CVE-2026-111497",
+     "CVE-2025-48734",
+     "CVE-2026-114938",
+     "CVE-2026-114820",
+     "CVE-2026-91403",
+     "CVE-2026-87022",
+     "CVE-2026-115557"
+    ]
+   }
+  ],
+  "data_vs_prose": "The counts are internally contradictory and shaped for a different vendor: epss_ge_10 (2) cannot be smaller than epss_ge_50 (19); exploited is 0 while kev is 1, so KEV is not being counted as exploitation; important and moderate are both 0 with only 126 of 640 CVEs carrying any label, which is Oracle's Critical/High/Medium/Low taxonomy leaking into a Microsoft-style schema; with_kb is 0, and the brief itself labels this 'Microsoft Patch Tuesday'. Scope is also mismatched \u2014 640 scoped against 655 vendor patches, leaving 15 unaccounted. None of that invalidates the ranking, but it means absence of a flag is not evidence of low risk: 246 automatable CVEs and 288 remote unauthenticated, against 11 with EPSS >= 10% equivalent, reflects missing EPSS data in the 9.8/10.0 band, not a harmless release. Conversely, the prose overstates the story's centre: nine headlines chase CVE-2026-111497 while 267 Hyperion CVEs and four Fusion Middleware CVSS 10.0 items get no coverage, and the CVE-2026-114820 headline attributes the flaw to Java SE and GraalVM while our own data scopes it to Oracle Communications Core (Java) \u2014 an attribution gap to resolve before reusing that framing.",
+  "watchlist": [
+   {
+    "cve": "CVE-2026-111497",
+    "why": "Only KEV, EPSS 1.00, CVSS 9.8, and the only CVE with a live exploitation narrative (Node2Shell to HTTP2Shell). Assume reachable Node.js PMAC instances are compromised until proven otherwise; hunt for HTTP/2 abuse patterns, not just initial-access artefacts."
+   },
+   {
+    "cve": "CVE-2026-114820",
+    "why": "JSSE flaw in Communications Core (Java) with existing coverage claiming Java SE/GraalVM scope. High blast radius across Java-dependent products; confirm the real affected artifact list before publishing remediation guidance."
+   },
+   {
+    "cve": "CVE-2026-114938",
+    "why": "Named 'Java2Shell', same exploitation family as the KEV entry, yet absent from the top 30. Name-driven tracking here beats score-driven tracking."
+   },
+   {
+    "cve": "CVE-2026-114835",
+    "why": "Fusion Middleware Admin Console, CVSS 10.0, automatable, no EPSS. Management-plane exposure with the highest possible base score is the most under-prioritised row in the release."
+   },
+   {
+    "cve": "CVE-2026-91569",
+    "why": "TopLink Integration at 10.0 automatable, paired with CVE-2026-91570 at 9.8 in the same component \u2014 same code path, likely same exploit primitive."
+   },
+   {
+    "cve": "CVE-2025-48734",
+    "why": "A 2025 Commons BeanUtils CVE resurfacing in Hyperion with EPSS 0.81. Evidence of patch debt in Hyperion builds; expect further carry-over CVEs in this family next quarter."
+   },
+   {
+    "cve": "CVE-2026-101356",
+    "why": "Tomcat in Supply Chain File Manager, 9.8 automatable, and the same upstream line as the WebSocket constraint-bypass flaw we already covered (CVE-2026-87022). Authentication bypass plus file handling is a direct path to data exfiltration."
+   },
+   {
+    "cve": "CVE-2026-114880",
+    "why": "E-Business Suite Attachments at 9.8 automatable; file-upload surfaces are internet-facing in most EBS estates and rarely behind strong compensating controls."
+   }
+  ],
+  "patch_note": "Patch in this order, by family. First Oracle Communications PMAC (CVE-2026-111497) \u2014 active exploitation, internet-facing Node.js, no waiting on a change window. Second Oracle Fusion Middleware: Admin Console, TopLink Integration, Centralized Thirdparty Jars and MFT Runtime Server, prioritising anything whose admin plane is reachable beyond a management VLAN. Third Oracle Hyperion, but as a fleet-rebuild exercise \u2014 inventory every instance including dormant Essbase/EPM, since 267 of 640 CVEs are concentrated there and partial coverage leaves most of the exposure in place. Fourth Oracle E-Business Suite and Supply Chain, starting with Attachments, REST Services, Core and File Manager. Fifth MySQL (packaging/curl) and Enterprise Manager Agent Next Gen (Jetty), which usually lag because they are treated as infrastructure. Java SE last by count but not by priority if you ship JSSE-dependent services. Note that with_kb is 0: there is no KB-based deployment ring here, so drive the rollout from Oracle CPU document identifiers and per-product artifact versions, and treat 'no EPSS' or 'no severity label' as unknown rather than low.",
+  "source": "agent",
+  "kev_snapshot": [
+   "CVE-2026-111497"
+  ]
  },
  "backfilled": false,
  "tracking": {
