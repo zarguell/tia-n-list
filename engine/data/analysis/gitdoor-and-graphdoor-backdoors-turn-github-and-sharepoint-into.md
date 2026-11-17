@@ -1,0 +1,3 @@
+Kaspersky identified Operation ShadowCloud in early 2026. The campaign targets government sectors in Asia and Africa and uses a MeshCentral Agent to deliver two previously undocumented modular backdoors, GitDoor and GraphDoor. The backdoors tunnel command and control through legitimate Microsoft SharePoint and GitHub services rather than dedicated attacker infrastructure.
+
+Using trusted services for C2 makes the traffic harder to separate from ordinary enterprise activity, so the MeshCentral Agent delivery path and the backdoors' configuration artifacts are the useful detection anchors. Watch for further Kaspersky reporting on Operation ShadowCloud, particularly any IOCs for GitDoor and GraphDoor and detail on how the MeshCentral Agent is installed.
