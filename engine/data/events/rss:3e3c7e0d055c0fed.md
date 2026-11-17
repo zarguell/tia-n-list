@@ -1,0 +1,1 @@
+Il CERT-AGID ha individuato e analizzato un dominio fraudolento che riproduce l’aspetto del sito ufficiale dell’Agenzia delle Entrate, con l’obiettivo di indurre gli utenti a scaricare e installare un’applicazione Android malevola in formato APK. Article Link: Malware Mirax veicolato in Italia tramite falso domini di Agenzia delle Entrate e finto aggiornamento App IO – CERT-AGID
