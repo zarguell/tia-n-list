@@ -30,7 +30,7 @@ data on every push, and GitHub Pages serves it.
 - `engine/kev.py` — `/kev/` section: dashboard, deadline board, per-CVE pages, candidates, pipeline/schema pages
 - `engine/megapatch.py` — `/megapatch/` section: release pages, tracker indexes, per-release JSON
 - `engine/cti.py`, `engine/ioc.py`, `engine/sigma.py` — ATT&CK matrix, IOC extraction, detection-variant derivation
-- `engine/ingest.py` — hourly RSS polling of `engine/feeds/cyber.opml` (48 sources) + Reddit/X/Mastodon legs
+- `engine/ingest.py` — hourly RSS polling of `engine/feeds/cyber.opml` (the curated cyber source list) + Reddit/X/Mastodon legs
 - `engine/merge.py`, `engine/triage.py`, `engine/score.py` — clustering, editorial decisions, hot scoring
 - `engine/store.py` — the one loader for the event store (content is markdown, metadata is JSON)
 - `engine/stage_pages.py` — stages only the published surface for the Pages artifact and fails the build on a dangling reference

@@ -6,7 +6,7 @@ engine/feeds/cyber.opml (the curated cyber feed list). Dedup = bounded seen-ring
 content-hashed feed+guid + a one-time cutover timestamp (the miniflux backlog
 is never re-ingested). Event ids: rss:<sha1>. The two ex-crawler hosts
 (bleepingcomputer, securityweek) still get best-effort full-article text;
-the other 55 feeds consume RSS content as-is — exactly what miniflux stored.
+the remaining feeds consume RSS content as-is — exactly what miniflux stored.
 
 Watermark/dedup lives in engine/data/state.json (rss_seen ring, rss_cutover_ts,
 seen_reddit). New events are written to data/events/ (md + json) and their ids
