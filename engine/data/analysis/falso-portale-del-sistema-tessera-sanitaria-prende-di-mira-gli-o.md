@@ -1,0 +1,5 @@
+CERT-AGID has identified a phishing campaign that uses the names of the Italian Ministry of Economy and Finance and the Sistema Tessera Sanitaria to lure healthcare professionals. The fake portal asks victims for their SPID credentials and personal identity documents, and CERT-AGID's alert names one-time passwords (OTPs) as a target as well. The campaign is aimed at people working in healthcare rather than at the general public.
+
+The combination matters: SPID credentials plus an intercepted or solicited OTP and copies of identity documents give an attacker what they need to impersonate a professional in other services. Obtaining a doctor's or administrator's digital identity can also open access to health-sector portals that rely on SPID for authentication.
+
+Watch for further CERT-AGID notices listing the domains used, and for reports of SPID account misuse among healthcare staff. Lookalike pages that carry MEF or Sistema Tessera Sanitaria branding and request credentials, OTPs, or document scans are the core indicator described in this alert.

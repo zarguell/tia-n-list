@@ -1,0 +1,1 @@
+Oracle released a Java security patch on November 17, 2026, at 6:00 a.M. (Korea Standard Time). This patch includes a fix for CVE-2026-114938. If exploited, this vulnerability could lead to memory corruption and, in some cases, allow a threat actor to perform remote code execution without authentication. The severity is rated at 9.2점으로 the CVSS […]
