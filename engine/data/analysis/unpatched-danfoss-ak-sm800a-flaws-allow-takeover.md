@@ -1,0 +1,5 @@
+Six unauthenticated stack-based buffer overflows in the Danfoss AK-SM800A, a controller used to run supermarket and cold-storage refrigeration, were disclosed on November 11 with no CVE IDs and no fixed firmware. Carlo Meijer of Midnight Blue found the bugs in about an hour using firmware downloaded from Danfoss. Five are in web request handlers of sm_app, all are reachable before login, and a corroborating report says they can give an attacker root on the controller.
+
+The disclosure lands during active tampering with internet-exposed refrigeration controllers across Europe since October 11. Germany's BSI rates the issue criticality 3, or Orange, its level for immediate action; Belgium's CCB confirmed the findings on November 12, and Ireland's NCSC issued similar guidance. Operators are being told to take AK-SM800A management interfaces off the internet and to use a VPN at minimum for any remote access.
+
+Watch for a Danfoss firmware release and CVE assignments, and for evidence that the ongoing controller tampering has folded in these specific bugs. Until a fix ships, exposure of the management interface is the deciding factor.
