@@ -1,0 +1,28 @@
+title: OPTIMJACK Skimmer Loader Served Through Optimizely Project JavaScript
+id: 1ade141e-dd21-4f35-abe8-d30138f1571a
+status: experimental
+description: Detects proxy/web requests for the poisoned Optimizely project-JavaScript loader (cdn.optimizely.com/js/5113954737848320.js) and for the 1688360.cc host that served /track.js during the November 2026 OPTIMJACK campaign. Attackers injected skimming and crypto-clipping code into the Project JavaScript field of Optimizely Web Experimentation customers, so the payload was delivered from a trusted CDN host.
+references:
+  - https://amirulcyber.com/2026/11/16/optimjack-optimizely-skimmer/
+  - https://labs.beazley.security/advisories/BSL-A1247
+author: Tia N. List
+date: 2026/11/17
+tags:
+  - attack.t1195
+  - attack.t1659
+  - attack.t1056
+  - attack.t1185
+  - attack.t1567
+logsource:
+  category: proxy
+  product: webproxy
+detection:
+  selection_poisoned_snippet:
+    cs-host|endswith: 'cdn.optimizely.com'
+    cs-uri|contains: '5113954737848320'
+  selection_loader_host:
+    cs-host|endswith: '1688360.cc'
+  condition: 1 of selection_*
+falsepositives:
+  - The 1688360.cc host is a dedicated loader/exfiltration domain with no legitimate use; the script ID only matched one poisoned Optimizely project, so a hit on either selection warrants review of the referring site
+level: high

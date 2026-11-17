@@ -1,0 +1,35 @@
+title: Phantom53 ClickFix Delivery - MSI Installer Spawning PowerShell
+id: 6406f2d4-c3e5-4410-b029-a438d379460f
+status: experimental
+description: Detects the execution pattern of the XaocMail ClickFix chain, where a Phantom53 MSI installer launched after a fake document-sharing lure spawns PowerShell to stage Havoc and communicate over DNS-over-HTTPS. Windows Installer spawning a PowerShell interpreter is rare enough for a high-signal hunt when paired with the campaign's installer lures.
+references:
+  - https://gbhackers.com/phantom53-malware-attack/
+  - https://malware.news/t/xaocmail-clickfix-campaign-drops-phantom53-and-havox-across-latin-america-asia-and-europe/127279#post_1
+author: Tia N. List
+date: 2026/11/17
+tags:
+  - attack.t1566
+  - attack.t1204
+  - attack.t1059
+  - attack.t1071
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection_parent:
+    ParentImage|endswith: '\msiexec.exe'
+  selection_child:
+    Image|endswith:
+      - '\powershell.exe'
+      - '\pwsh.exe'
+  selection_flags:
+    CommandLine|contains:
+      - '-enc'
+      - '-EncodedCommand'
+      - '-nop'
+      - '-w hidden'
+      - '-WindowStyle Hidden'
+  condition: selection_parent and selection_child and selection_flags
+falsepositives:
+  - Some legitimate enterprise MSI packages chain a PowerShell custom action; correlate with the installer path (user Downloads/Temp) and with subsequent outbound DoH or Tor traffic before escalating
+level: medium
