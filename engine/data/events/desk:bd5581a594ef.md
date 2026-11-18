@@ -1,0 +1,1 @@
+SecurityWeek reported on 10 November that CISA had added CVE-2026-123218 and CVE-2026-116779 to KEV, giving federal agencies three days to patch under BOD 26-04. It says IBM patched the Faspex authorization bypass in 5.0.19 PL1 and that IBM's advisory makes no mention of exploitation. At publication no details of the attacks were public.

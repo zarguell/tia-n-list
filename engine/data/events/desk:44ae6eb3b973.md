@@ -1,0 +1,1 @@
+CISA's KEV catalog records dateAdded 2026-11-09 for CVE-2026-123218, IBM Aspera Faspex incorrect authorization, with a remediation due date of 2026-11-12. The entry lists known ransomware campaign use as Unknown and forensic triage as Yes, and points to IBM's bulletin and BOD 26-04 guidance on patching and triage.
