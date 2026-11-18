@@ -1,0 +1,1 @@
+Reuters reported on November 20, 2024 that US prosecutors had charged five people in a hacking scheme linked to Scattered Spider. The report was filed at 22:34 UTC by Jonathan Stempel and A.J. Vicens. It is the earliest mainstream news item located for the five-defendant case that ended with Buchanan's sentencing.

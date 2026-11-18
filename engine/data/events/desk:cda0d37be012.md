@@ -1,0 +1,1 @@
+V12 posted a follow-up on X on November 13, 2026 claiming a second remote code execution path that worked on the patched Windows Telegram client. The post argues that allowing unsandboxed QuickJS in messages widens the attack surface even as individual bugs are patched. No technical details or CVE were included in the post.
