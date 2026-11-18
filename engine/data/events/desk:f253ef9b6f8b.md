@@ -1,0 +1,1 @@
+Google released Chrome 158.0.8127.42 for Android, with availability on Google Play over the next few days. The post describes stability and performance improvements and says Android releases carry the same security fixes as the corresponding desktop releases, 158.0.8127.36/.37 on Windows and Mac and 158.0.8127.36 on Linux, unless otherwise noted.
