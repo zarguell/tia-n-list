@@ -1,0 +1,1 @@
+GitHub's release page dates the arize-phoenix v15.7.0 tag to 13 May 2026 at 01:15 UTC. That tag is the patched version later named in the advisory for CVE-2026-53998. The fix therefore shipped roughly six months before the 9 November 2026 advisory and the 18 November news coverage.
