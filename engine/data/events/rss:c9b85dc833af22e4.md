@@ -1,0 +1,1 @@
+The federal cybersecurity agency urged organizations to immediately patch a new vulnerability affecting Java — one of the world’s most used programming languages — after experts warned that it could allow an attacker to take over servers without a password.
