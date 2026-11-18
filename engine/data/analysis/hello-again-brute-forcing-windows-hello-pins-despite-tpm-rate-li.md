@@ -1,0 +1,3 @@
+Researchers published a paper titled Hello Again describing a way to brute-force Windows Hello PINs by resetting a firmware TPM's lockout counters. The paper says the TPM is expected to allow one guess every 10 minutes, but an attacker with physical access can rewrite counter state through the SPI flash and remove that delay.
+
+The reported result is a four-digit PIN recovered in 40 hours. That turns a device-loss scenario into a practical local authentication bypass if the TPM trusts lockout state that can be rolled back outside the chip. Watch for details on which firmware TPM implementations expose that state and whether vendors change how Hello PIN attempts are bound to tamper-resistant storage.

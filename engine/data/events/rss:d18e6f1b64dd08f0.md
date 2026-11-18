@@ -1,0 +1,1 @@
+GreyNoise is monitoring scanning and exploitation attempts against CVE-2026-114938, also known as “Java4Shell,” a memory-corruption vulnerability in OpenJDK’s Base64 decoder. Article Link: Global Event: Java4Shell (CVE-2026-114938) Live Activity Report
