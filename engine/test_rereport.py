@@ -21,7 +21,9 @@ overridden >= 3 times to this single class. The contracts pinned here:
      anchor — a story bumped only by echoes decays from its last genuine
      development; one genuine development re-warms it.
   3. digest_candidates.build_rows: echo events keep n_events (display) but
-     never set evolved/newest_development_at.
+     never set evolved/newest_development_at — and that dev clock stays on the
+     CVE/title/stub legs: the covered-advisory subject leg is opt-in
+     (`subject_echo`), on for score.hot_score only (2026-11-18 review).
 
 Run: python3 engine/test_rereport.py   (exit 0 = pass)
 """
@@ -542,6 +544,30 @@ def _fl_story(evs):
             "last_seen": evs[-1]["published_at"],
             "reddit_signal": {"posts": 0, "best_score": 0}}
 
+
+# ── 8b. the leg is SCORE-ONLY: the digest's development clock opts out
+# (2026-11-18 review of decision 18586e7f4b21). The decision's disagreement is
+# between the SCORE gate and the digest EDITOR: score ranked this story first
+# while the editor demoted it by hand. Feeding the same leg into
+# digest_candidates' dev clock reclassifies ~1.2k feed events on ~235 stories
+# as echoes, which moves the EVOLVED / stale_days semantics the brief feeds the
+# editor — a digest-side policy change the owner note ("do not change policy
+# beyond the stated fix") does not license. So build_rows passes
+# subject_echo=False and the divergence is pinned here, in both directions.
+check("digest seam: the subject leg is opt-in (subject_echo=False is a dev)",
+      score.is_rereport(fl_tell, FL_PRIORS, subject_echo=False), False)
+check("...while the score gate keeps it on by default",
+      score.is_rereport(fl_tell, FL_PRIORS), True)
+rows_fl = digest_candidates.build_rows(
+    {"fl": _fl_story(FL_PRIORS + [fl_tell])},
+    {e["id"]: e for e in FL_PRIORS + [fl_tell]}, {}, {}, lambda s: s,
+    since=BASE - timedelta(hours=36), recent_cutoff="2026-09-01",
+    today="2026-10-03", last_digest="2026-10-02")[0]
+check("digest seam: a subject echo still sets build_rows' dev clock",
+      rows_fl["evolved"], True)
+check("...so an echo/dev split between the two consumers is deliberate",
+      (score.is_rereport(fl_tell, FL_PRIORS, story_title=FL_TITLE), rows_fl["evolved"]),
+      (True, True))
 
 flood = [fl_found, fl_found2, fl_found3, fl_tell, fl_chatter]
 sc_flood = score.hot_score(_fl_story(flood), {e["id"]: e for e in flood}, [],

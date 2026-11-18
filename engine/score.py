@@ -703,7 +703,8 @@ def _covered_subject_echo(event, prior_events, disc, prior_cves, ev_dt,
 
 
 def is_rereport(event, prior_events, *, low_jaccard=0.25, high_jaccard=0.55,
-                min_gap_h=24, story_title=None, story_index=None):
+                min_gap_h=24, story_title=None, story_index=None,
+                subject_echo=True):
     """True when `event` re-reports coverage the story already carries.
 
     Two identity signals, combined to fit the two echo shapes:
@@ -754,6 +755,15 @@ def is_rereport(event, prior_events, *, low_jaccard=0.25, high_jaccard=0.55,
     and the covered-subject profile without re-scanning every prior per event.
     Omitted, those legs compute from `prior_events` — identical results.
 
+    `subject_echo` (default TRUE) is the covered-advisory subject leg
+    (2026-10-25 audit Issue 2 + Rec 2 — see SUBJECT_SHARE). It is on for the
+    SCORE gate, which is the consumer the decision names and whose numbers it
+    was measured on. digest_candidates passes False to keep its EVOLVED /
+    development-clock semantics unchanged — same precedent as `story_title`:
+    the leg reclassifies ~1.2k feed events across ~235 stories, and feeding
+    that into the digest's dev clock is a digest-side policy change the owner
+    note does not license. The digest still uses the CVE/title/stub legs.
+
     Pure: both arguments are event dicts; tokenization reuses merge's
     discriminator sets (lazy import — merge imports this module).
     """
@@ -793,9 +803,11 @@ def is_rereport(event, prior_events, *, low_jaccard=0.25, high_jaccard=0.55,
     # whose headline tokenizes thinly ("Critical Vulnerability Alert: PHP
     # Core") or names the advisory's subject instead of a cve id, so neither
     # floor can see it. Every delta exempts (new CVE is settled above; actor /
-    # victim / IOC / in-the-wild / KEV inside the leg).
-    if _covered_subject_echo(event, prior_events, disc, prior_cves, ev_dt,
-                             story_title, min_gap_h, index=story_index):
+    # victim / IOC / in-the-wild / KEV inside the leg). `subject_echo=False`
+    # keeps a caller on the pre-decision legs (digest_candidates' dev clock).
+    if subject_echo and _covered_subject_echo(event, prior_events, disc,
+                                              prior_cves, ev_dt, story_title,
+                                              min_gap_h, index=story_index):
         return True
     if len(disc) < min_shared:
         return False
