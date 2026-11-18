@@ -1,0 +1,23 @@
+title: GraphDoor Backdoor - GUID Log Directory Under ProgramData Intel_Log
+id: 0a7d31c7-7f4e-4c02-9c58-1b0d5f6e2a93
+status: experimental
+description: Detects file creation of GraphDoor's staging directory, C:\ProgramData\Intel_Log\<GUID>. Kaspersky's Operation ShadowCloud analysis documents the backdoor opening a PID-derived named pipe (\\.\pipe\p%lu) and then creating Intel_Log inside the Application Data folder with a randomly generated GUID subdirectory before collecting system information and pulling scr.ts, pr.ts and kl.ts plug-ins. The loaders (jli.dll, SbieDll.dll) decrypt config.ini payloads, and C2 is hidden in SharePoint, GitHub issues/repositories and Ably channels rather than fixed hostnames.
+references:
+  - https://securelist.com/operation-shadowcloud-graphdoor/122005/
+  - https://securelist.com/operation-shadowcloud-gitdoor/122004/
+author: Tia N. List
+date: 2026/11/18
+tags:
+  - attack.t1102
+  - attack.t1071
+  - attack.t1055
+logsource:
+  category: file_event
+  product: windows
+detection:
+  selection_intel_log:
+    TargetFilename|contains: '\ProgramData\Intel_Log\'
+  condition: selection_intel_log
+falsepositives:
+  - Intel-signed system software that writes its own log tree under ProgramData; the Intel_Log directory name is generic, so confirm the GUID sibling directory and correlate with named pipe creation or meshagent.exe drops before treating a hit as GraphDoor
+level: medium
