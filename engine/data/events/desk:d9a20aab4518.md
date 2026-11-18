@@ -1,0 +1,1 @@
+The indexed NVD entry for CVE-2026-132231 is timestamped 18 Nov 2026 17:17:44 UTC, about ten minutes after the CVE Program record. NVD gives the same affected-version boundary and the same mechanism, remote code execution via best-fit character mapping in Perforce settings. The record was already available before either event in this story.

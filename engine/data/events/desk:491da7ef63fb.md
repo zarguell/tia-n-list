@@ -1,0 +1,1 @@
+Defconlevel's copy of Cyber Centre advisory AV26-1176 is timestamped Nov 18, 2026 at 9:00 PM UTC, ten minutes before the story's first event. It lists TeamCity releases before 2025.11.7 and before 2026.1.3 as affected and points readers to JetBrains' fixed security issues page. The copy adds no independent analysis or exploitation reporting.
