@@ -1,0 +1,14 @@
+{
+ "id": "rss:811469417e3ba7a7",
+ "title": "Java4Shell: When Decoding base64 Leads to RCE",
+ "kind": "update",
+ "source": "blog.gitguardian.com",
+ "url": "https://blog.gitguardian.com/java4shell-vulnerability-secrets/",
+ "published_at": "2026-11-18T17:48:38Z",
+ "cves": [
+  "CVE-2026-114938"
+ ],
+ "lang": "en",
+ "content_md": "TL;DR Java4Shell (CVE-2026-114938): the vulnerability corrupts heap memory through the OpenJDK base64 decoder on x86-64 AVX-512 VBMI hosts running 17.0.6 or later, patched Nov. 17, 2026. Pre-auth RCE on Jira, Jenkins, and Keycloak: these critical services store keys, tokens, and personal data. Secrets can leak before code runs: The heap read can leak keys, tokens, and personal data from a Java service's memory, so a failed RCE attempt can still expose credentials. Fixed in 17.0.21.1, 21.0.13.1, and 25.0.5.1: Install Oracle's fixed builds or your vendor's equivalent, or set -XX:-UseBASE64Intrinsics , then revoke every credential contained in the application and its environment on each exposed Java service. What is Java4Shell and how does it work? Java4Shell is a bug in the hand-written x86-64 assembly that OpenJDK's C2 JIT substitutes for the base64 decoder, using AVX-512 VBMI instructions. The routine decodes the input in 256-byte blocks, or 64-byte blocks if the input is shorter, and finishes the tail with the evmovdqub instruction. That instruction takes a 64-bit mask that selects which bytes reach memory. The mask is built from the output length. For a tail of 1 to 3 base64 characters ending with padding, the output length is zero; however, the padding handler still decrements it, so it underflows to -1 or -2. bzhiq(-1, output_len) instruction leaves every bit set when the length is 64 or more, so output_mask becomes all ones and all 64 bytes are written. Considering an ex\n",
+ "excluded": false
+}
