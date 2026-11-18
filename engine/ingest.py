@@ -162,7 +162,12 @@ RSS_WINDOW = 2000          # seen-guid ring buffer
 # fetching best-effort full article text for just these (every other feed
 # consumes its RSS content as-is; their scraper config: SecurityWeek
 # div.zox-post-body, BleepingComputer default readability).
-FULL_TEXT_HOSTS = ("bleepingcomputer.com", "securityweek.com")
+# therecord.media added 2026-11-18: its feed ships one-paragraph teasers
+# (130-260 chars), so 71% of its kept events were sub-200c stubs and the
+# audit's ingest_noise invariant failed; the article pages read cleanly
+# (2.0-2.7k chars of prose) through the same paragraph join.
+FULL_TEXT_HOSTS = ("bleepingcomputer.com", "securityweek.com",
+                   "therecord.media")
 
 
 def _load_feed_urls(path=None):
