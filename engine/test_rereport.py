@@ -12,6 +12,11 @@ overridden >= 3 times to this single class. The contracts pinned here:
      headline is near-identical; CVE-less stories classify on title overlap;
      `rd:` repost stubs classify on the DELTA they carry (a new CVE, actor,
      victim count, or IOC) and are otherwise zero-delta echoes.
+  1b. covered-advisory subject echo (2026-10-25 audit Issue 2 + Rec 2,
+     decision 18586e7f4b21): on a story that already covers a CVE advisory, a
+     re-tell that names the SUBJECT its coverage repeats (and no cve id at
+     all) is covered material too — unless it brings a new CVE, actor, victim
+     count, or IOC, or a fresh in-the-wild / KEV development.
   2. score.hot_score: echoes count zero velocity and never move the decay
      anchor — a story bumped only by echoes decays from its last genuine
      development; one genuine development re-warms it.
@@ -429,6 +434,130 @@ adv_sc2 = score.hot_score(_adv_story([adv_found, adv_dev]),
                           [], now=BASE)
 check("a re-tell that brings a NEW CVE keeps the story's score",
       (adv_sc2["zero_delta"], adv_sc2["score"] > adv_sc["score"]), (False, True))
+
+# ── 8. covered-advisory subject echo (2026-10-25 audit Issue 2 + Rec 2,
+# decision 18586e7f4b21). The 10-25 audit's top story —
+# `php-warns-admins-of-two-critical-flaws-emergency-patches-coming`, 339
+# events / 159 sources, score 9.10, peak 10.0 — was demoted by the digest on
+# the third day running while SCORE ranked it first: every in-window event was
+# a restatement of the advisory the story already covers, and the re-tells
+# name NO cve id, so neither the CVE-anchored leg nor the 0.55-jaccard title
+# floors saw them. Identity for this class is the SUBJECT the story's covered
+# titles repeat (SUBJECT_SHARE); the four deltas still decide development vs
+# echo. ──────────────────────────────────────────────────────────────────────
+print("== covered-advisory subject echo (re-report flood) ==")
+
+
+def _adv(eid, title, published, cves=(), body="", url=None):
+    e = ev(eid, title, published, cves)
+    e["content_md"] = body
+    if url:
+        e["url"] = url
+    return e
+
+
+FL_TITLE = "PHP warns admins of two critical flaws, emergency patches coming tomorrow"
+fl_found = _adv("fl1", FL_TITLE, iso(120), ["CVE-2026-1234"])
+fl_found2 = _adv("fl2", "PHP2Shell: two critical RCE flaws in the PHP runtime",
+                 iso(114), ["CVE-2026-1234"], "PHP2Shell affects PHP 8.x.")
+fl_found3 = _adv("fl3", "PHP2Shell exploitation telemetry keeps climbing",
+                 iso(100), (), "The PHP2Shell runtime flaw is unpatched.")
+FL_PRIORS = [fl_found, fl_found2, fl_found3]
+fl_tell = _adv("fl4", "PHP shares mitigation for new RCE vulnerability with no patch",
+               iso(30), (), "php2shell mitigation posted while patches are pending.")
+check("a cve-less re-tell of a covered advisory is a re-report (subject identity)",
+      score.is_rereport(fl_tell, FL_PRIORS, story_title=FL_TITLE), True)
+check("...and it carries no delta (zero-delta echo)",
+      score._echo_is_zero_delta(fl_tell, FL_PRIORS), True)
+fl_thin = _adv("fl5", "Critical Vulnerability Alert: PHP Core", iso(28), (),
+               "php2shell. Patch soon.")
+check("a re-tell whose headline tokenizes thinly is still caught",
+      score.is_rereport(fl_thin, FL_PRIORS, story_title=FL_TITLE), True)
+fl_chatter = _adv("fl6", "Important news! PHP2Shell is already being widely abused",
+                  iso(20), (), "Make sure your systems are up to date! via Mastodon",
+                  url="https://masto.example/@someone/1")
+check("subject-only chatter (no cve, no PHP headline) is caught too",
+      score.is_rereport(fl_chatter, FL_PRIORS, story_title=FL_TITLE), True)
+
+# the four deltas still settle development vs echo
+fl_new_cve = _adv("fl7", "PHP2Shell second flaw tracked as CVE-2026-5678",
+                  iso(18), ["CVE-2026-5678"], "php2shell.")
+check("...but a re-tell naming a NEW cve is a development",
+      score.is_rereport(fl_new_cve, FL_PRIORS, story_title=FL_TITLE), False)
+fl_actor = _adv("fl8", "LockBit exploits PHP2Shell against banks", iso(18), (),
+                "php2shell.")
+check("...a new actor attribution is a development",
+      score.is_rereport(fl_actor, FL_PRIORS, story_title=FL_TITLE), False)
+fl_victim = _adv("fl9", "PHP2Shell web shells planted on 4,100 victims",
+                 iso(18), (), "php2shell.")
+check("...a new victim count is a development",
+      score.is_rereport(fl_victim, FL_PRIORS, story_title=FL_TITLE), False)
+fl_ioc = _adv("fl10", "PHP2Shell C2 server found at 45.153.160.10", iso(18), (),
+              "php2shell.")
+check("...a new IOC is a development",
+      score.is_rereport(fl_ioc, FL_PRIORS, story_title=FL_TITLE), False)
+fl_kev = _adv("fl11", "PHP2Shell added to the CISA KEV catalog", iso(16), (),
+              "php2shell.")
+check("...a KEV addition is a development (never demoted for it)",
+      score.is_rereport(fl_kev, FL_PRIORS, story_title=FL_TITLE), False)
+fl_wild = _adv("fl12", "PHP2Shell is now actively exploited in the wild",
+               iso(16), (), "php2shell.")
+check("...a fresh in-the-wild confirmation is a development",
+      score.is_rereport(fl_wild, FL_PRIORS, story_title=FL_TITLE), False)
+
+# the event's own citation host is not an observable (sanitized bodies break
+# URLs as "https:// host/path", which landed in _ioc_values as a "new IOC"
+# and silently disabled the zero-delta leg for exactly this class)
+fl_cite = _adv("fl13", "PHP2Shell, in short", iso(14), (),
+               "via Mastodon https:// bleepingcomputer.com/news/php2shell",
+               url="https://www.bleepingcomputer.com/news/php2shell")
+check("the citation host alone is not a new IOC delta",
+      score._echo_is_zero_delta(fl_cite, FL_PRIORS), True)
+check("...so the re-tell stays an echo",
+      score.is_rereport(fl_cite, FL_PRIORS, story_title=FL_TITLE), True)
+
+# first-day burst stays legitimate velocity
+y_start = _adv("fy1", "PHP warns admins of two critical flaws", iso(3),
+               ["CVE-2026-1234"])
+y_tell = _adv("fy2", "PHP shares mitigation for the PHP2Shell flaw", iso(2), ())
+check("a first-day pickup is still burst velocity, not an echo",
+      score.is_rereport(y_tell, [y_start], story_title=FL_TITLE), False)
+
+# scope: the leg needs a COVERED ADVISORY — a story covering no CVE is untouched
+nb1 = _adv("fn1", "Ticketmaster breach exposed 8.8 million records", iso(60))
+nb2 = _adv("fn2", "Regulators open an inquiry into the Ticketmaster incident",
+           iso(4))
+check("a story covering no CVE is untouched by the subject leg",
+      score.is_rereport(nb2, [nb1],
+                        story_title="Ticketmaster breach exposed 8.8 million records"),
+      False)
+
+# end-to-end: the flood story is demoted below the digest gate; a twin whose
+# newest event carries a real delta keeps its score.
+def _fl_story(evs):
+    return {"id": "fl", "title": FL_TITLE,
+            "sources": ["example.com", "example.org", "example.net"],
+            "n_sources": 3, "cves": ["CVE-2026-1234"],
+            "events": [{"event_id": e["id"], "label": "update"} for e in evs],
+            "last_seen": evs[-1]["published_at"],
+            "reddit_signal": {"posts": 0, "best_score": 0}}
+
+
+flood = [fl_found, fl_found2, fl_found3, fl_tell, fl_chatter]
+sc_flood = score.hot_score(_fl_story(flood), {e["id"]: e for e in flood}, [],
+                           now=BASE)
+check("the re-report flood demotes the story (zero_delta)",
+      sc_flood["zero_delta"], True)
+check("...and it lands below the digest hot gate (3.3)",
+      sc_flood["score"] < 3.3, True)
+check("...with no velocity earned by the re-tells", sc_flood["velocity"], 0.0)
+
+dev = [fl_found, fl_found2, fl_found3, fl_tell,
+       _adv("fd1", "PHP2Shell web shells planted on 4,100 victims", iso(18), (),
+            "php2shell.")]
+sc_dev = score.hot_score(_fl_story(dev), {e["id"]: e for e in dev}, [], now=BASE)
+check("a re-tell that brings a new victim count keeps the story's score",
+      (sc_dev["zero_delta"], sc_dev["score"] > sc_flood["score"]), (False, True))
 
 print()
 if failures:
