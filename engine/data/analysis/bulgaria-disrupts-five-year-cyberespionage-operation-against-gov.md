@@ -1,0 +1,3 @@
+Reuters reported on November 18 that Bulgaria uncovered a cyberespionage operation that ran for five years and accessed tens of millions of pages of documents across a wide range of government systems. The report describes the operation as the longest known campaign of its kind against the country's state administration, with access to systems used to exchange documents between institutions.
+
+Watch for the Bulgarian government's attribution, details on how access was maintained for five years, and any indication that the campaign is still active elsewhere. The scale of document access makes this a significant exposure of state records even before a motive or actor is named.
