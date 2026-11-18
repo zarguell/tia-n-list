@@ -212,6 +212,39 @@ def test_full_text_gated_to_ex_crawler_hosts():
             ingest._fetch = real_fetch
 
 
+def test_therecord_teaser_feed_gets_full_text():
+    """therecord.media ships one-paragraph teasers; 71% of its kept events were
+    sub-200c stubs and audit.ingest_noise failed on it (2026-11-18). It must be
+    in the ex-crawler full-text host set."""
+    assert "therecord.media" in ingest.FULL_TEXT_HOSTS
+    with _Tmp() as tmp:
+        feed = f"""<?xml version="1.0"?>
+<rss version="2.0"><channel><title>tr</title>
+<item>
+  <title>California fines Hertz</title>
+  <link>https://therecord.media/california-fines-hertz</link>
+  <guid>guid-tr-1</guid>
+  <pubDate>{P_FRESH}</pubDate>
+  <description>Hertz agreed to the fine and said it would change its business practices.</description>
+</item>
+</channel></rss>""".encode()
+        _patch_ingest(tmp, {"https://feed.example/rss": feed})
+        fetched = []
+        real = ingest._fetch_full_text
+        ingest._fetch_full_text = lambda url: (
+            fetched.append(url),
+            "Full article prose about the CPPA fine and the opt-out failures."
+        )[1]
+        try:
+            new = ingest.ingest_rss(dict(STEADY_STATE), hours=48)
+        finally:
+            ingest._fetch_full_text = real
+        assert len(new) == 1, f"teaser entry should create an event, got {new}"
+        assert fetched == ["https://therecord.media/california-fines-hertz"], fetched
+        body = open(os.path.join(tmp.events, new[0] + ".md")).read()
+        assert "Full article prose" in body, body
+
+
 def test_malformed_feed_isolated():
     with _Tmp() as tmp:
         st = dict(STEADY_STATE)
