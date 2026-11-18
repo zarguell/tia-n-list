@@ -1,0 +1,5 @@
+A November 18, 2026 report from Security.com describes an intrusion in which the attacker used CyberPower PowerPanel Business (PPB), software that manages UPS devices, as the execution channel on a Windows domain controller. The abused feature runs a script when power fails, giving the intruder a trusted, built-in way to execute code without dropping an obvious standalone launcher onto the host.
+
+The report says the activity enabled dumping Active Directory secrets and deployment of a persistent implant. Power monitoring is normally treated as operational plumbing rather than an attack surface, so a UPS management script on a domain controller can blend into routine administration and be missed by responders focused on endpoint or server software.
+
+What to watch is whether other incidents show the same PPB execution path, how the script was placed or invoked, and whether defenders see domain controller process activity tied to UPS management events. The available content gives no CVE, actor name, victim count, or IOC, so the useful near-term signal is the technique itself and any follow-up detail from the primary report.
