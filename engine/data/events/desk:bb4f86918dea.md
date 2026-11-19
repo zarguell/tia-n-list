@@ -1,0 +1,1 @@
+Ruby's advisory posted November 18, 2026 discloses seven vulnerabilities in the regular expression engine and string case conversion, with proofs of concept showing remote code execution in some scenarios. The fixes shipped in Ruby 4.0.10, 3.4.13 and 3.3.14. Among the issues is GHSA-34m4-m9fh-gqp5, a one-byte heap overflow reached by changing the case of a crafted string.
