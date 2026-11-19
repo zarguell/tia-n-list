@@ -1,0 +1,3 @@
+German authorities have raised their assessment of the threat to information technology systems to "tense to critical", according to a Reuters report carried on 19 November 2026. The available text ends mid-sentence after noting an agent-related factor, so no actor, sector or triggering incident can be grounded beyond the threat-level change itself.
+
+No CVEs, indicators or affected products appear in the material. Watch the Reuters report and the German authorities' own statement for the stated trigger, the sectors in scope and any required actions for system operators before treating this as a sector-specific alert.
