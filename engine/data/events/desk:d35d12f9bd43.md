@@ -1,0 +1,1 @@
+This early news aggregation of the GitHub advisory describes a critical PSP bootrom flaw in AMD Zen 1 and Zen+ CPUs that permits persistent code execution with full system privileges and no physical access. It summarizes the size_signed equal to zero loader trick, notes that Zen 2 and later are unaffected, and points back to the Google advisory as its source.
