@@ -103,6 +103,14 @@ TAKEDOWN_SIGNALS = ["sinkhol", "taken down", "seized", "dismantled", "revoked",
 
 _TYPE_ORDER = {"ipv4": 0, "domain": 1, "sha256": 2}
 
+# Display order for the published IOC page: a dead observable must never lead
+# a table of live indicators (2026-10-25 audit Issue 3 / Rec 5 — the
+# Corroborated table opened with six expired/revoked observables while the
+# live ones sat below the fold). active first, then expired, then revoked;
+# anything unrecognised sorts last (fail-safe: never promoted above a live
+# record by a status string this module does not know).
+LIVE_STATUS_ORDER = {"active": 0, "expired": 1, "revoked": 2}
+
 
 def _is_private_ip(s):
     try:
@@ -286,6 +294,20 @@ def build_index(stories, events):
         })
     out.sort(key=lambda i: (_TYPE_ORDER.get(i["type"], 9), -len(i["stories"]), i["value"]))
     return out
+
+
+def sort_by_liveness(iocs):
+    """IOC records ordered for display: live before dead, then most recent.
+
+    Primary key is the same ``status`` the page renders (active / expired /
+    revoked), so the sort can never disagree with the Status column; ties are
+    broken by ``last_seen`` (newest first) and then by value so the order is
+    deterministic. Returns a new list — callers keep their own ordering for
+    the machine feeds, which are not presentation-order sensitive.
+    """
+    out = sorted(iocs, key=lambda i: (i.get("value") or ""))
+    out = sorted(out, key=lambda i: (i.get("last_seen") or ""), reverse=True)
+    return sorted(out, key=lambda i: LIVE_STATUS_ORDER.get(i.get("status"), 9))
 
 
 def to_csv(iocs):

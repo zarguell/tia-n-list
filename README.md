@@ -48,6 +48,30 @@ Data lives beside the code:
 Settled reference conditions (owner decisions that later audits should not
 re-raise as rot) live in `known-ref-states.md`.
 
+### IOC curation: candidates are a review queue, not a published backlog
+
+IOC handling is deliberately two-stage:
+
+- `engine/ioc.py` extracts observables from every event in our curated coverage
+  on each CTI pass and diffs them against `engine/data/iocs-curated.json`. The
+  difference is written to `engine/data/iocs-candidates.json`.
+- `/cti/iocs/` and its JSON/CSV/TXT/STIX exports render ONLY
+  `engine/data/iocs-curated.json`. A candidate is not an indicator we stand
+  behind until an analyst has read its source story, judged it to be attacker
+  infrastructure rather than a product name, source link, version string or
+  prose fragment, and recorded a one-line `reason`.
+
+So candidates outnumbering the published feed is the normal steady state, not
+an undrained backlog: extraction is high-recall and unbounded (every pass adds
+whatever its new stories mention), while promotion is deliberately low-recall
+and capped — the daily CTI pass (cronman `prompts/cti-pass.md`) judges at most
+60 candidates per run, "precision over recall — when in doubt, drop". The
+candidate file grows when coverage grows; the curated set grows at the review
+rate, and a candidate that keeps failing review stays in the queue rather than
+being silently promoted. Publishing the candidate file directly is the one
+thing this pipeline must not do: it is how source links, victim brands and
+version numbers end up in a feed defenders are expected to trust.
+
 ## Regenerate
 
 ```bash
