@@ -1,0 +1,5 @@
+Cisco Talos disclosed a financially motivated Windows malware campaign on November 18 that hides command-and-control addresses for the Overlord remote access trojan in Solana transaction memos. Talos tracks the operators as UAT-12643 and assesses a North Korea alignment with low confidence, based on similarities to earlier documented activity. A follow-up from Secquill says the C2 addresses are stored encrypted on a public blockchain.
+
+Using blockchain memos as a dead-drop resolver lets the operators publish new C2 addresses in public transaction data without owning a conventional domain or server that defenders can sinkhole. The attribution remains tentative, so the concrete finding is the C2 concealment technique and the Overlord RAT payload rather than a firm state sponsor.
+
+Watch for Talos indicators tied to UAT-12643, decoding of Solana memos used as C2 pointers, and Windows hosts contacting addresses recovered from those memos. Any update that raises the confidence of the North Korea assessment or names victims would materially change the story.
