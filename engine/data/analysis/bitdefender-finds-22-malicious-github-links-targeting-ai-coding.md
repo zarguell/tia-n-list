@@ -1,0 +1,5 @@
+Bitdefender reported 22 malicious GitHub links containing files built to make AI-assisted development tools run a concealed payload. A securityonline.info post covering the same research says the GitHub AI agent malware abuses project rules and hooks to steal developer credentials and secrets. The social posts here are the only event content available, so they support the count and the mechanism, but not a victim list, CVE or detailed indicator set.
+
+The supply-chain angle matters because repository instructions and hook configuration are read and executed by coding assistants and by the developer's tooling, not just displayed as documentation. A poisoned repository can therefore turn routine AI-assisted review or build steps into a credential-theft path on the developer's machine.
+
+Watch for unexpected edits to agent rule files, git hooks and project-level configuration, and for new outbound connections from development environments after cloning unfamiliar repositories. Repositories should be treated as untrusted input even when the AI tool is the one reading them.
