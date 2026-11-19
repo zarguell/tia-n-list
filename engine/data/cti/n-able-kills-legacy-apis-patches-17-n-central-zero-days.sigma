@@ -1,0 +1,35 @@
+title: N-central Exploitation Staging Script and XMRig Archive Command Line
+id: 7b5e730a-8f60-4f65-98a7-e1f83364b0dd
+status: experimental
+description: Detects command lines carrying the file names N-able published as hunting leads for the November 2026 N-central zero-day exploitation, where the 4EverAble2Shell chain abused Apache Axis unsafe instantiation in the Legacy API and operators dropped XMRig on managed servers. Huntback found miners on 21 N-central servers, 19 already on Hotfix 2, so the identifiers appear on hosts that had the earlier patch level and still executed attacker commands through the managed agent or a root shell on the server.
+references:
+  - https://status.n-able.com/2026/11/16/n-central-2026-4-hf3-release-notes/
+  - https://thehackernews.com/2026/11/hackers-exploit-n-central-flaws-to.html
+  - https://github.com/MSPNightmare/CVEs/commit/288a6b0a312ff2c8586bcd97911b97245439af2b
+author: Tia N. List
+date: 2026/11/19
+tags:
+  - attack.t1190
+  - attack.t1072
+  - attack.t1496
+  - attack.t1059
+logsource:
+  product: linux
+  category: process_creation
+detection:
+  selection_staging:
+    CommandLine|contains:
+      - 'jup.sh'
+      - 'jup_start'
+      - 'xmrig.tgz'
+      - 'xvgz'
+      - 'ob/cronhit'
+  filter_ncentral_upgrade:
+    CommandLine|contains:
+      - '/usr/local/ncid/bin/'
+      - 'ncentral-upgrade'
+  condition: selection_staging and not filter_ncentral_upgrade
+falsepositives:
+  - N-central administrators or MSP automation that legitimately stage tarballs under matching names, or download a vendor script called jup.sh during unrelated maintenance
+  - Backup, patch-management or monitoring scripts whose paths happen to contain the xvgz or cronhit strings
+level: high

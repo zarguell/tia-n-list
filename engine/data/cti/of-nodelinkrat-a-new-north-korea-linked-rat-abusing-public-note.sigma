@@ -1,0 +1,30 @@
+title: PowerShell Command Line Referencing aNotepad Pages as NodeLinkRAT C2
+id: 6aee8aa2-a78e-4ef9-8e11-5f7d3590a4ac
+status: experimental
+description: Detects PowerShell invocations that reference an aNotepad page, the public note service the North Korea-linked operators repurposed as a command channel for NodeLinkRAT and XenoRAT in September 2026. Spearphishing lures impersonating a South Korean National Assembly aide delivered a Windows shortcut that launched PowerShell and then fetched stage code from the note page, with the second stage rewritten on every connection so no dedicated server exists to sinkhole. The rule catches the interpreter-to-note-service hop rather than a fixed payload hash, which the operators change between connections.
+references:
+  - https://gbhackers.com/nodelinkrat-targets-windows/
+  - https://en.hacks.gr/chaker-apo-ti-voreia-korea-chrisimopoyn-dorean-selida-simeioseon-gia-na-elegchoyn-molysmenoys-ypologistes/
+author: Tia N. List
+date: 2026/11/19
+tags:
+  - attack.t1566
+  - attack.t1204
+  - attack.t1059
+  - attack.t1102
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection_img:
+    Image|endswith:
+      - '\powershell.exe'
+      - '\pwsh.exe'
+  selection_c2:
+    CommandLine|contains:
+      - 'anotepad.com'
+      - 'anotepad.io'
+  condition: selection_img and selection_c2
+falsepositives:
+  - Users or scripts that paste aNotepad links into a PowerShell one-liner for note retrieval, which is unusual but not malicious on its own; check the parent process, the LNK or Office document that started the shell, and any follow-on encoded download
+level: high

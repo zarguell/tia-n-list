@@ -1,0 +1,35 @@
+title: Installation of Compromised agent-framework PyPI Releases 1.26.1 or 1.26.2
+id: 5947ac2f-7e5d-486d-b67b-861f0b5db114
+status: experimental
+description: Detects package installer commands that pull the two agent-framework releases Microsoft published with a credential stealer on 17 November 2026. Versions 1.26.1 and 1.26.2 were live for about 33 minutes, dropped a .pth startup hook into site-packages so the stealer ran on every interpreter start, and harvested Azure, AWS, GitHub, Docker, Hugging Face and OpenAI secrets plus managed identity and GitHub Actions OIDC tokens. Any hit means the host or CI runner may already have leaked cloud credentials, so rotate secrets rather than only uninstalling the package.
+references:
+  - https://github.com/advisories/GHSA-764m-3ppc-5m73
+  - https://www.securityweek.com/microsoft-agent-framework-releases-poisoned-with-credential-stealer/
+  - https://thehackernews.com/2026/11/attackers-compromise-microsofts-agent.html
+author: Tia N. List
+date: 2026/11/19
+tags:
+  - attack.t1195
+  - attack.t1546
+  - attack.t1552
+  - attack.t1528
+logsource:
+  product: linux
+  category: process_creation
+detection:
+  selection_installer:
+    Image|endswith:
+      - '/pip'
+      - '/pip3'
+      - '/uv'
+  selection_version:
+    CommandLine|contains:
+      - 'agent-framework==1.26.1'
+      - 'agent-framework==1.26.2'
+      - 'agent-framework 1.26.1'
+      - 'agent-framework 1.26.2'
+  condition: selection_installer and selection_version
+falsepositives:
+  - Pinned lockfiles or CI caches that still reference the withdrawn releases long after quarantine, which indicate legacy exposure rather than new installation
+  - Security researchers pulling the quarantined artefacts into an isolated analysis environment
+level: high
