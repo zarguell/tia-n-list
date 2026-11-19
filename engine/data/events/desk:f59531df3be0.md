@@ -1,0 +1,1 @@
+Cybernews reported that scammers promoted a fake crypto asset giveaway on YouTube during Tesla's flying car demonstration in October. Citing Coinbase, the article says the fake livestream attracted more than 500,000 viewers. The report describes Coinbase's AI system stopping the scam before viewers lost millions.
