@@ -15,6 +15,17 @@ analysis means the story was real coverage, and keeping it keeps the pair
 consistent. Pass ``--include-analyzed`` to delete those too. Age is
 ``max(first_seen, last_seen)``; an undated story counts as old.
 
+It also sweeps ORPHAN ANALYSIS: an analysis file whose story was merged away
+(or whose story json is gone) never renders — ssg skips merged stories and
+shells render only a redirect — yet it still counts in ``data/analysis/``, so
+the analysis count overstates real coverage (2026-10-25 audit Issue 5 / Rec 6:
+150 such files and growing ~1-2/day; 245 by 2026-11-19). Those files are MOVED
+to ``data/analysis/.archive/``, never deleted, and story jsons are never
+touched, so every merged-away URL keeps redirecting and the archived prose
+stays available. Every consumer globs ``analysis/*.md`` non-recursively, so
+the archive is invisible to the build and to the ghost keep-gate (same shape
+as ``data/cti/.archive/``).
+
 Run hourly from the tia-kev job: it self-gates on the store (no state file),
 deleting a ghost only once it crosses the retention window. ``--dry-run``
 previews. Never deletes a live story (one with events).
@@ -37,6 +48,7 @@ DATA = os.path.join(ENGINE, "data")
 # ballast. 30d keeps a generous window for a story that was briefly live
 # while stopping the store-weight and trend-inflation accumulation.
 DEFAULT_DAYS = 30
+ORPHAN_ANALYSIS_ARCHIVE = ".archive"
 DIGEST_LINK_RE = re.compile(r"\]\(stories/([^/]+)/\)")
 
 
@@ -198,6 +210,80 @@ def _remove(deletable):
     return removed
 
 
+def _live_story_ids(stories_dir):
+    """Story ids that still render: a json exists and is not a merge shell."""
+    live = set()
+    for p in glob.glob(os.path.join(stories_dir, "*.json")):
+        story = _read_json(p) or {}
+        sid = story.get("id") or os.path.splitext(os.path.basename(p))[0]
+        if sid and not story.get("merged_into"):
+            live.add(sid)
+    return live
+
+
+def find_orphan_analysis(data_dir):
+    """[(path, story_id)] analysis files whose story no longer renders.
+
+    Two shapes, both provably non-rendering and neither a live story:
+      * the story json still exists but is a merged-away shell
+        (``merged_into``) — ssg renders only a redirect for it;
+      * the story json is gone entirely.
+
+    A live story's analysis is never returned. Digest/CTI/queue references do
+    not keep the file here: they point at the story (whose json and redirect
+    stay) or at the CTI record — separate artefacts — never at the analysis
+    file, which no page renders and no build glob reads recursively.
+    """
+    live = _live_story_ids(os.path.join(data_dir, "stories"))
+    out = []
+    for p in sorted(glob.glob(os.path.join(data_dir, "analysis", "*.md"))):
+        sid = os.path.splitext(os.path.basename(p))[0]
+        if sid not in live:
+            out.append((p, sid))
+    return out
+
+
+def _free_archive_path(dest, sid):
+    """First unused archive path for `sid` — preserved history is never
+    overwritten (a second story merged into the same slug gets `<sid>.1.md`,
+    and so on)."""
+    target, n = os.path.join(dest, sid + ".md"), 1
+    while os.path.exists(target):
+        target = os.path.join(dest, f"{sid}.{n}.md")
+        n += 1
+    return target
+
+
+def archive_orphan_analysis(data_dir, orphans=None):
+    """Move orphan analysis into ``analysis/.archive/``; returns the count.
+
+    os.replace, never delete: the archived prose stays on disk and in git, so
+    an analysis count that measures distinct incidents does not cost history.
+    Idempotent — an archived file is out of the ``analysis/*.md`` glob, so the
+    next pass finds nothing.
+    """
+    orphans = find_orphan_analysis(data_dir) if orphans is None else orphans
+    if not orphans:
+        return 0
+    dest = os.path.join(data_dir, "analysis", ORPHAN_ANALYSIS_ARCHIVE)
+    os.makedirs(dest, exist_ok=True)
+    moved = 0
+    for p, sid in orphans:
+        with contextlib.suppress(OSError):
+            os.replace(p, _free_archive_path(dest, sid))
+            moved += 1
+    return moved
+
+
+def _report_orphan_analysis(orphans, dry):
+    print(f"orphan analysis: {len(orphans)} file(s) for merged-away/missing "
+          f"stories -> analysis/{ORPHAN_ANALYSIS_ARCHIVE}/")
+    for _, sid in orphans[:20]:
+        print(f"  {'DRY mv' if dry else 'mv'} analysis/{sid}.md")
+    if len(orphans) > 20:
+        print(f"  ... and {len(orphans) - 20} more")
+
+
 def main():
     args = sys.argv[1:]
     days = _days_arg(args)
@@ -207,11 +293,16 @@ def main():
     dry = "--dry-run" in args
     deletable, stats = find_ghosts(DATA, days, "--include-analyzed" in args)
     _report(deletable, stats, days, dry)
+    orphans = find_orphan_analysis(DATA)
+    _report_orphan_analysis(orphans, dry)
     if dry:
         return 0
     removed = _remove(deletable)
     if removed:
         print(f"cleanup_ghosts: removed {removed} ghost stories")
+    archived = archive_orphan_analysis(DATA, orphans)
+    if archived:
+        print(f"cleanup_ghosts: archived {archived} orphan analysis file(s)")
     return 0
 
 
