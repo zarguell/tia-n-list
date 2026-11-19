@@ -1,0 +1,1 @@
+Reuters, carried by Euronext on 17 November 2026, reported that Equinor had detected an ongoing cyberattack against certain IT systems and had informed authorities. The company said it was mobilising resources to neutralise the attack and regain full integrity, and reported no data theft or impact on operations. The Euronext page timestamps the item at 18:10 UTC.
