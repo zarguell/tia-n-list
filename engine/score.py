@@ -31,6 +31,16 @@ the 48h window — the score is halved and the breakdown says so (`zero_delta`
 decayed base still crossed the digest's 3.3 gate with a reddit bump) and
 makes the demotion explainable instead of a daily hand-override.
 
+Covered-advisory subject echo (2026-10-25 audit Issue 2 + Rec 2, decision
+18586e7f4b21): that demotion only fired on 48h of COMPLETE silence, so a
+story whose newest events merely restated an advisory it already covers kept
+their velocity and decay anchor — `php-warns-admins-of-two-critical-flaws-
+emergency-patches-coming` held the day's top score (9.10) while the digest
+demoted it by hand for the third day running. Re-tells of that shape carry no
+cve id at all, so identity now also comes from the SUBJECT the story's
+already-covered titles repeat (see SUBJECT_SHARE / _covered_subject_echo).
+The new-CVE/actor/victim/IOC/in-the-wild/KEV exemptions are unchanged.
+
 Coherence (2026-10-23 audit Issue 1 + Rec 2, owner decision 065758633baa):
 a title that its own event headlines never echo is a collection, not an
 incident — breadth/velocity stop paying (`incoherent` +
@@ -39,6 +49,7 @@ hot on the size of its pile.
 """
 import glob
 import json
+import math
 import os
 import re
 from datetime import datetime, timezone
@@ -175,6 +186,34 @@ VICTIM_COUNT_RE = re.compile(
 VELOCITY_WINDOW_H = 48      # the velocity factor's window == the recent
                             # window the demotion trigger draws from
 ZERO_DELTA_FACTOR = 0.5     # keep half the (already decayed) score
+
+# ── covered-advisory subject echo (2026-10-25 audit Issue 2 + Rec 2, decision
+# 18586e7f4b21). The zero-delta leg above still only fired on 48h of COMPLETE
+# silence: a story whose newest events merely restate an advisory it already
+# covers was re-read as a fresh development, so the echo flood kept earning
+# velocity and re-warming the decay anchor — the day's top score
+# (`php-warns-admins-of-two-critical-flaws-emergency-patches-coming`, 339
+# events / 159 sources, 9.10, peak 10.0) was demoted by hand on the third
+# digest running while SCORE still ranked it first. The CVE-anchored identity
+# leg cannot see these: the re-tells carry NO cve id at all (the advisory is
+# named only by subject, e.g. "PHP2Shell"), and their headlines tokenize
+# differently enough to miss the 0.55-jaccard title floors.
+#
+# So identity for this class is the SUBJECT the story's own coverage repeats:
+# tokens taken at the coherence floor (ECHO_TOKEN_MIN, so 3-char product names
+# PHP/RCE count) that appear in at least SUBJECT_SHARE of the covered event
+# titles, plus the canonical headline's own tokens. An OLD story (past the
+# first-day burst) that already covers one or more CVEs — i.e. a covered
+# advisory, never a breach claim or a legal follow-up — and whose event names
+# that subject while carrying NO delta is a restatement of covered material,
+# not a disclosure.
+#
+# Exemptions are deliberate and unchanged from the legs above: a NEW CVE
+# (settled before this leg runs), a new actor attribution, a new victim count
+# or a new IOC (_repost_delta), a fresh in-the-wild confirmation, and a CISA
+# KEV addition all keep the event a development worth its velocity/recency.
+SUBJECT_SHARE = 0.2         # token repeated across >= 1/5 of covered titles
+SUBJECT_BODY_CHARS = 600    # lede scanned for the subject, not the whole body
 
 # ── incoherent-event-sink penalty (2026-10-23 audit Issue 1 + Rec 2, owner
 # decision 065758633baa). `machine-speed-attacks-require-machine-speed-
@@ -456,23 +495,62 @@ def _prior_actor_tokens(prior_events):
     return out
 
 
-def _repost_delta(event, prior_events, disc):
+def _source_domains(event):
+    """Hosts that are the event's own CITATION, never an indicator: the
+    article URL's host and the credited source domain.
+
+    Sanitized bodies carry the citation as "https:// <host>/<path>" — a space
+    after the scheme — so ioc.extract_from_text's URL strip never sees a URL
+    and the HOST lands in _ioc_values as a bare domain. Every such event then
+    looked like it carried a "new IOC" against every prior that did not quote
+    the same outlet, which silently disabled the zero-delta leg for exactly
+    the re-tells it exists to catch (2026-10-25 audit Issue 2 + Rec 2,
+    decision 18586e7f4b21: the PHP2Shell re-tells from the-independent.com and
+    alternativeto.net were delta-free apart from their own citation host).
+    """
+    out = set()
+    for raw in (event.get("url") or "", event.get("source") or ""):
+        host = raw.strip().lower()
+        if not host:
+            continue
+        if "//" in host:
+            host = host.split("//", 1)[1]
+        host = host.split("/", 1)[0].split(":", 1)[0]
+        if host.startswith("www."):
+            host = host[4:]
+        if host:
+            out.add(host)
+    return out
+
+
+def _repost_delta(event, prior_events, disc, index=None):
     """True when a repost stub still carries a genuine new development: a new
     actor attribution, a new victim count, or a new IOC. A new CVE is settled
     by is_rereport before this runs. False = zero-delta echo (see
-    REPOST_STUB_RE)."""
-    if _actor_tokens(disc) - _prior_actor_tokens(prior_events):
+    REPOST_STUB_RE).
+
+    `index` is hot_score's incremental _StoryIndex: the same answer, without
+    re-scanning every prior event on every event (see _StoryIndex)."""
+    prior_actor = (index.actor_tokens if index is not None
+                   else _prior_actor_tokens(prior_events))
+    if _actor_tokens(disc) - prior_actor:
         return True
     text = (event.get("title") or "") + " " + (event.get("content_md") or "")
-    prior_text = " ".join((p.get("title") or "") + " "
-                          + (p.get("content_md") or "")
-                          for p in prior_events)
-    if _victim_counts(text) - _victim_counts(prior_text):
+    if index is not None:
+        prior_victims, prior_iocs = index.victim_counts, index.ioc_values
+    else:
+        prior_text = " ".join((p.get("title") or "") + " "
+                              + (p.get("content_md") or "")
+                              for p in prior_events)
+        prior_victims, prior_iocs = (_victim_counts(prior_text),
+                                     _ioc_values(prior_text))
+    if _victim_counts(text) - prior_victims:
         return True               # a new victim count
-    return bool(_ioc_values(text) - _ioc_values(prior_text))
+    # The event's own citation host is not an observable (see _source_domains).
+    return bool(_ioc_values(text) - prior_iocs - _source_domains(event))
 
 
-def _echo_is_zero_delta(event, prior_events):
+def _echo_is_zero_delta(event, prior_events, index=None):
     """True when a re-report event adds NOTHING the story doesn't carry.
 
     is_rereport() has already settled identity (the event re-tells covered
@@ -485,11 +563,148 @@ def _echo_is_zero_delta(event, prior_events):
     """
     from merge import title_discriminators
     disc = title_discriminators(event.get("title") or "")
-    return not _repost_delta(event, prior_events, disc)
+    return not _repost_delta(event, prior_events, disc, index=index)
+
+
+def _parse_dt(value):
+    """published_at -> aware datetime, or None when unusable."""
+    try:
+        return datetime.fromisoformat((value or "").replace("Z", "+00:00"))
+    except ValueError:
+        return None
+
+
+class _StoryIndex:
+    """The story's covered material, accumulated ONE event at a time.
+
+    The per-event legs need views over everything the story already carries:
+    the covered-subject token profile, the actor/victim/IOC baseline the delta
+    test subtracts, and the founding date the first-day burst rule measures
+    from. Recomputing those from `prior_events` inside every leg is quadratic
+    and measured 5x the runtime on the 427-event PHP2Shell story (45s vs 9s),
+    so hot_score maintains the same facts incrementally here and passes the
+    index down. Direct callers of is_rereport/_echo_is_zero_delta may omit it;
+    the legs then compute from `prior_events` and return identical answers.
+    """
+    __slots__ = ("n", "subject_counts", "founding_at", "actor_tokens",
+                 "victim_counts", "ioc_values")
+
+    def __init__(self):
+        self.n = 0                  # covered events seen
+        self.subject_counts = {}    # token -> titles carrying it
+        self.founding_at = None     # oldest non-backfill published_at
+        self.actor_tokens = set()
+        self.victim_counts = set()
+        self.ioc_values = set()
+
+    def add(self, event):
+        """Fold one covered event into the index."""
+        from merge import (title_discriminators, ACTOR_TOKENS, _actor_norm)
+        title = event.get("title") or ""
+        for t in title_discriminators(title, ECHO_TOKEN_MIN):
+            self.subject_counts[t] = self.subject_counts.get(t, 0) + 1
+        self.n += 1
+        text = title + " " + (event.get("content_md") or "")
+        self.victim_counts |= _victim_counts(text)
+        self.ioc_values |= _ioc_values(text)
+        self.actor_tokens |= (_actor_norm(title_discriminators(title))
+                              & ACTOR_TOKENS)
+        if event.get("kind") != "backfill":
+            dt = _parse_dt(event.get("published_at"))
+            if dt is not None and (self.founding_at is None
+                                   or dt < self.founding_at):
+                self.founding_at = dt
+        return self
+
+    def young(self, ev_dt, min_gap_h):
+        """The first-day burst rule over the accumulated founding date."""
+        if ev_dt is None or self.founding_at is None:
+            return False
+        return (ev_dt - self.founding_at).total_seconds() < min_gap_h * 3600
+
+    def subject_tokens(self, story_title):
+        """The covered-subject profile (see SUBJECT_SHARE)."""
+        return _subject_profile(self.subject_counts, self.n, story_title)
+
+
+def _young(ev_dt, prior_events, min_gap_h):
+    """True while the story's own non-backfill material is younger than
+    `min_gap_h`: the first-day burst rule (legitimate pickup velocity, not
+    echoes). Same window for the identity floors and the covered-subject leg;
+    hot_score's _StoryIndex carries the same fact incrementally."""
+    if ev_dt is None:
+        return False
+    founding = [_parse_dt(p.get("published_at")) for p in prior_events
+                if p.get("kind") != "backfill"]
+    founding = [d for d in founding if d is not None]
+    return bool(founding) and \
+        (ev_dt - min(founding)).total_seconds() < min_gap_h * 3600
+
+
+def _subject_profile(counts, n_prior, story_title):
+    """Covered-subject token set from `counts` (token -> number of covered
+    event titles carrying it) over `n_prior` covered events."""
+    from merge import title_discriminators
+    floor = max(2, int(math.ceil(n_prior * SUBJECT_SHARE)))
+    out = {t for t, c in counts.items() if c >= floor}
+    if story_title:
+        out |= title_discriminators(story_title, ECHO_TOKEN_MIN)
+    return out
+
+
+def _covered_subject_tokens(prior_events, story_title):
+    """The subject the story's coverage repeats: title discriminators at
+    ECHO_TOKEN_MIN carried by at least SUBJECT_SHARE of the covered events,
+    plus the canonical headline's own tokens (see SUBJECT_SHARE)."""
+    from merge import title_discriminators
+    counts = {}
+    for p in prior_events:
+        for t in title_discriminators(p.get("title") or "", ECHO_TOKEN_MIN):
+            counts[t] = counts.get(t, 0) + 1
+    return _subject_profile(counts, len(prior_events), story_title)
+
+
+def _covered_subject_echo(event, prior_events, disc, prior_cves, ev_dt,
+                          story_title, min_gap_h, index=None):
+    """True when `event` merely restates the subject a CVE-covering story has
+    already been re-reported about (see SUBJECT_SHARE / decision
+    18586e7f4b21). Identity is the covered subject; every delta the other
+    legs honour keeps the event a development."""
+    if not prior_cves or ev_dt is None:
+        return False
+    if index.young(ev_dt, min_gap_h) if index is not None \
+            else _young(ev_dt, prior_events, min_gap_h):
+        return False          # first-day burst: legitimate pickup velocity
+    if _repost_delta(event, prior_events, disc, index=index):
+        return False          # new actor / victim count / IOC
+    ev_title = event.get("title") or ""
+    if IN_WILD_RE.search(ev_title) and not any(
+            IN_WILD_RE.search(p.get("title") or "") for p in prior_events):
+        return False          # fresh exploitation confirmation
+    if _kev_added(ev_title, event.get("content_md")) and not any(
+            _kev_added(p.get("title") or "", p.get("content_md"))
+            for p in prior_events):
+        return False          # CISA KEV addition
+    from merge import title_discriminators
+    # The event's own link slug names the subject too: sanitized bodies break
+    # URLs ("https:// wiz.io/blog/php2shell-php-rce") and _norm_tokens strips
+    # whole URLs, so a chatter post whose LEDE is opinion still identifies the
+    # advisory it is about through its link path. Dropping only the SCHEME
+    # keeps the path words as tokens (2026-10-25 audit Issue 2: the wiz.io
+    # AI-bottleneck post).
+    text = " ".join((ev_title,
+                     (event.get("content_md") or "")[:SUBJECT_BODY_CHARS],
+                     event.get("url") or ""))
+    text = re.sub(r"https?://\s*", " ", text, flags=re.I)
+    tokens = title_discriminators(text, ECHO_TOKEN_MIN)
+    subject_tokens = (index.subject_tokens(story_title) if index is not None
+                      else _covered_subject_tokens(prior_events, story_title))
+    return bool(tokens & subject_tokens)
 
 
 def is_rereport(event, prior_events, *, low_jaccard=0.25, high_jaccard=0.55,
-                min_gap_h=24, story_title=None):
+                min_gap_h=24, story_title=None, story_index=None,
+                subject_echo=True):
     """True when `event` re-reports coverage the story already carries.
 
     Two identity signals, combined to fit the two echo shapes:
@@ -535,6 +750,20 @@ def is_rereport(event, prior_events, *, low_jaccard=0.25, high_jaccard=0.55,
     headline tokenizes says nothing about whether the story developed. A stub
     with no new CVE, actor, victim count, or IOC is a zero-delta echo.
 
+    `story_index` (optional) is hot_score's incremental _StoryIndex over the
+    SAME priors: it answers the founding date, the actor/victim/IOC baseline
+    and the covered-subject profile without re-scanning every prior per event.
+    Omitted, those legs compute from `prior_events` — identical results.
+
+    `subject_echo` (default TRUE) is the covered-advisory subject leg
+    (2026-10-25 audit Issue 2 + Rec 2 — see SUBJECT_SHARE). It is on for the
+    SCORE gate, which is the consumer the decision names and whose numbers it
+    was measured on. digest_candidates passes False to keep its EVOLVED /
+    development-clock semantics unchanged — same precedent as `story_title`:
+    the leg reclassifies ~1.2k feed events across ~235 stories, and feeding
+    that into the digest's dev clock is a digest-side policy change the owner
+    note does not license. The digest still uses the CVE/title/stub legs.
+
     Pure: both arguments are event dicts; tokenization reuses merge's
     discriminator sets (lazy import — merge imports this module).
     """
@@ -563,11 +792,23 @@ def is_rereport(event, prior_events, *, low_jaccard=0.25, high_jaccard=0.55,
     # content-free, so it must not earn velocity/pickup/recency by resembling
     # anything, and it must not dodge the rule by tokenizing thinly either.
     if REPOST_STUB_RE.match(event.get("id") or event.get("event_id") or ""):
-        if _repost_delta(event, prior_events, disc):
+        if _repost_delta(event, prior_events, disc, index=story_index):
             return False          # a genuine delta: a development
         return True               # content-free stub, no delta: zero-delta echo
     floor = low_jaccard if ev_cves else high_jaccard
     min_shared = 1 if ev_cves else 2
+    # Covered-advisory subject echo (2026-10-25 audit Issue 2 + Rec 2, decision
+    # 18586e7f4b21 — see SUBJECT_SHARE). Placed BEFORE the title floors and
+    # the min_shared bail-out on purpose: this class is exactly the re-tell
+    # whose headline tokenizes thinly ("Critical Vulnerability Alert: PHP
+    # Core") or names the advisory's subject instead of a cve id, so neither
+    # floor can see it. Every delta exempts (new CVE is settled above; actor /
+    # victim / IOC / in-the-wild / KEV inside the leg). `subject_echo=False`
+    # keeps a caller on the pre-decision legs (digest_candidates' dev clock).
+    if subject_echo and _covered_subject_echo(event, prior_events, disc,
+                                              prior_cves, ev_dt, story_title,
+                                              min_gap_h, index=story_index):
+        return True
     if len(disc) < min_shared:
         return False
     if ev_cves and not new_cves:
@@ -600,19 +841,8 @@ def is_rereport(event, prior_events, *, low_jaccard=0.25, high_jaccard=0.55,
     # June backfill must not age a day-old story past the window) is younger
     # than min_gap_h. An old story gets no skip: day-2+ pickups of covered
     # material must clear the identity floors below.
-    young = False
-    if ev_dt is not None:
-        founding = []
-        for p in prior_events:
-            if p.get("kind") == "backfill":
-                continue
-            try:
-                founding.append(datetime.fromisoformat(
-                    (p.get("published_at") or "").replace("Z", "+00:00")))
-            except ValueError:
-                continue
-        if founding:
-            young = (ev_dt - min(founding)).total_seconds() < min_gap_h * 3600
+    young = (story_index.young(ev_dt, min_gap_h) if story_index is not None
+             else _young(ev_dt, prior_events, min_gap_h))
     for p in prior_events:
         if ev_dt is not None:
             try:
@@ -715,10 +945,16 @@ def hot_score(story, events, reddit_posts, now=None):
     zd48 = False       # a zero-delta outlet echo inside the window
     zd_only = True     # every in-window re-report so far carried no delta
     prior = []
+    # Every per-event leg reads the story's covered material (founding date,
+    # actor/victim/IOC baseline, covered-subject profile). Accumulated once
+    # per event, not re-derived per event: see _StoryIndex (quadratic
+    # otherwise — 45s vs 9s on the 427-event PHP2Shell story).
+    index = _StoryIndex()
     for ref in refs:
         e = events[ref["event_id"]]
         dt = parse(e["published_at"])
-        if is_rereport(e, prior, story_title=story.get("title")):
+        if is_rereport(e, prior, story_title=story.get("title"),
+                       story_index=index):
             n_rereports += 1
             in48 = (now - dt).total_seconds() < VELOCITY_WINDOW_H * 3600
             if in48:
@@ -726,7 +962,7 @@ def hot_score(story, events, reddit_posts, now=None):
                     pass    # stubs are neutral: pinned to neither gain nor
                             # trigger rank (6aad368c1a1b) — no delta by
                             # construction (is_rereport settled it)
-                elif _echo_is_zero_delta(e, prior):
+                elif _echo_is_zero_delta(e, prior, index=index):
                     zd48 = True   # an outlet echo restating covered facts
                 else:
                     zd_only = False   # a re-report still carrying a real
@@ -736,6 +972,7 @@ def hot_score(story, events, reddit_posts, now=None):
             if (now - dt).total_seconds() < VELOCITY_WINDOW_H * 3600:
                 n48 += 1
         prior.append(e)
+        index.add(e)
     velocity = min(2.0, 0.5 * n48)
 
     # incoherence (2026-10-23 audit Issue 1 + Rec 2, owner decision

@@ -425,6 +425,71 @@ def main():
     ok &= check("a defensive explainer is not a claim (no claim in the headline)",
                 score.hot_score(st5, evs5, [], now=base)["leak_claim"], False)
 
+    # --- A7: covered-advisory re-report flood (2026-10-25 audit Issue 2 +
+    # Rec 2, decision 18586e7f4b21). The zero-delta demotion only fired on 48h
+    # of COMPLETE silence, so a story whose newest events merely restated an
+    # advisory it already covers (the audit's PHP2Shell story: 339 events /
+    # 159 sources, 9.10, top of the slate, demoted by hand three days running)
+    # kept the echoes' velocity and decay anchor and ranked first. Subject
+    # identity (SUBJECT_SHARE) closes it; the deltas still exempt.
+    def _adv(eid, title, hours_before, cves=(), text=""):
+        return {"event_id": eid, "published_at": iso(hours_before),
+                "url": f"https://example.example/{eid}", "content_md": text,
+                "kind": "original", "lang": "en", "source": "example.example",
+                "title": title, "cves": list(cves)}
+
+    php_title = "PHP warns admins of two critical flaws, emergency patches coming tomorrow"
+    php_evs = [_adv("p0", php_title, 120, ["CVE-2026-99999"]),
+               _adv("p1", "PHP2Shell: two critical RCE flaws in the PHP runtime",
+                    114, ["CVE-2026-99999"], "PHP2Shell affects PHP 8.x."),
+               _adv("p2", "PHP2Shell exploitation telemetry keeps climbing", 100,
+                    (), "The PHP2Shell runtime flaw is unpatched."),
+               _adv("p3", "PHP shares mitigation for new RCE vulnerability", 30,
+                    (), "php2shell mitigation posted."),
+               _adv("p4", "Important news! PHP2Shell is already being abused", 6,
+                    (), "Make sure your systems are up to date.")]
+    php = {"id": "php-flood", "title": php_title,
+           "sources": ["example.example", "example.org"], "n_sources": 2,
+           "cves": ["CVE-2026-99999"],
+           "events": [{"event_id": e["event_id"], "label": "update"}
+                      for e in php_evs],
+           "last_seen": iso(6),
+           "reddit_signal": {"posts": 0, "best_score": 0}}
+    r_php = score.hot_score(php, {e["event_id"]: e for e in php_evs}, [],
+                            now=base)
+    ok &= check("a cve-covering story flooded by subject re-tells is demoted",
+                r_php["zero_delta"], True)
+    ok &= check("...and it drops below the digest hot gate (3.3)",
+                r_php["score"] < 3.3, True)
+    ok &= check("...earning no velocity from the re-tells",
+                r_php["velocity"], 0.0)
+
+    # ...but the newest event that carries a real development still keeps it
+    php_dev_evs = php_evs[:4] + [_adv("p4", "PHP2Shell web shells planted on "
+                                          "4,100 victims", 6, (), "php2shell.")]
+    php_dev = dict(php, events=[{"event_id": e["event_id"], "label": "update"}
+                                for e in php_dev_evs], last_seen=iso(6))
+    r_php_dev = score.hot_score(php_dev, {e["event_id"]: e for e in php_dev_evs},
+                                [], now=base)
+    ok &= check("a re-tell carrying a NEW victim count blocks the demotion",
+                (r_php_dev["zero_delta"], r_php_dev["score"] > r_php["score"]),
+                (False, True))
+
+    # scope guard: no covered advisory (no cve in the story's coverage) -> the
+    # subject leg is silent, a breach/claim story keeps today's behaviour
+    nb_evs = [_adv("n0", "Ticketmaster breach exposed 8.8 million records", 60),
+              _adv("n1", "Regulators open an inquiry into the Ticketmaster "
+                         "incident", 6)]
+    nb = {"id": "nb", "title": "Ticketmaster breach exposed 8.8 million records",
+          "sources": ["example.example"], "n_sources": 1, "cves": [],
+          "events": [{"event_id": e["event_id"], "label": "update"}
+                     for e in nb_evs],
+          "last_seen": iso(6),
+          "reddit_signal": {"posts": 0, "best_score": 0}}
+    r_nb = score.hot_score(nb, {e["event_id"]: e for e in nb_evs}, [], now=base)
+    ok &= check("a story covering no advisory is not demoted by the subject leg",
+                r_nb["zero_delta"], False)
+
     print("PASS" if ok else "FAIL")
     return 0 if ok else 1
 

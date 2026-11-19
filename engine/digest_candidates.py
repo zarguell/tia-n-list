@@ -218,7 +218,15 @@ def build_rows(stories, events, kev_map, coverage, canonical, since, recent_cuto
             key=lambda e: e["published_at"])
         rereports, prior = set(), []
         for e in chrono:
-            if is_rereport(e, prior):
+            # subject_echo=False (2026-11-18 review of decision 18586e7f4b21):
+            # the covered-advisory subject leg belongs to the SCORE gate, which
+            # is what the decision measured and what disagrees with the digest
+            # editor. Wiring it in here as well would reclassify ~1.2k feed
+            # events on ~235 stories into echoes and so move this brief's
+            # EVOLVED/dev-clock semantics — a separate digest-side policy
+            # change. Same precedent as `story_title` above: off unless a
+            # caller opts in.
+            if is_rereport(e, prior, subject_echo=False):
                 rereports.add(e["id"])
             prior.append(e)
         for ref in s.get("events", []):
