@@ -1,0 +1,3 @@
+Security.com reports that a major African stock exchange was targeted with a 41-module PowerShell toolkit whose structure and code carried the hallmarks of AI authorship. The tooling tested credentials and API keys against the exchange's investment API and a securities depository gateway, indicating credential validation against market infrastructure rather than a generic phishing campaign.
+
+The report does not name the exchange, the operator behind the toolkit, or a confirmed breach, so the significance is the target set and the automation. Watch for follow-up on whether any credentials were accepted, whether the depository gateway was reached, and whether the same 41-module framework appears against other financial exchanges.
