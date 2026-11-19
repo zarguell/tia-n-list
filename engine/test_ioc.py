@@ -14,6 +14,9 @@ events were not emitted (Step 1 kept 0 IOCs for consecutive runs). Contracts:
      ("news.ycombinator" from [news.ycombinator](https://...)).
   4. Code-fragment filenames never emit (installer-3.9.2-lts.dmg, page.aspx).
   5. Bare IOC-shaped domains with no URL scheme still emit (no over-strip).
+  6. Display order puts live observables first: active before expired/revoked,
+     newest last_seen first inside a band — a dead IOC never leads the page
+     (2026-10-25 audit Issue 3 / Rec 5).
 
 Run:  python3 engine/test_ioc.py   (exit 0 = pass)
       or: pytest engine/test_ioc.py
@@ -83,6 +86,32 @@ r = ioc.extract_from_text(
     "indicators 9.9.9.9 aside, reachable at 203.0.113.9 over TLS")
 check("TEST-NET documentation IP stays excluded",
       "203.0.113.9" in r, False)
+
+# ── 6. display order: a dead observable never leads ───────────────────────
+# 2026-10-25 audit Issue 3 / Rec 5: the Corroborated table opened with six
+# expired/revoked observables ahead of live ones. Order is status band first
+# (active > expired > revoked, using the same field the Status column shows),
+# then last_seen newest-first inside the band.
+display = [
+    {"value": "103.102.31.18", "type": "ipv4", "status": "expired",
+     "last_seen": "2026-09-22"},
+    {"value": "45.234.176.202", "type": "ipv4", "status": "revoked",
+     "last_seen": "2026-01-28"},
+    {"value": "142.11.200.186", "type": "ipv4", "status": "active",
+     "last_seen": "2026-06-12"},
+    {"value": "evil-c2.io", "type": "domain", "status": "active",
+     "last_seen": "2026-10-24"},
+]
+ordered = ioc.sort_by_liveness(display)
+check("active observables lead the table",
+      [i["status"] for i in ordered],
+      ["active", "active", "expired", "revoked"])
+check("recency breaks ties inside a status band (newest first)",
+      [i["value"] for i in ordered],
+      ["evil-c2.io", "142.11.200.186", "103.102.31.18", "45.234.176.202"])
+check("a dead observable is never first", ordered[0]["status"], "active")
+check("display ordering does not mutate the caller's list",
+      [i["value"] for i in display][0], "103.102.31.18")
 
 print()
 if failures:

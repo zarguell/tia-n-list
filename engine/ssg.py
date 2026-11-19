@@ -1491,6 +1491,11 @@ def main():
     # IOC feeds (curated set -> JSON/CSV/TXT/STIX + readable page)
     corroborated = [i for i in iocs if i["confidence"] == "corroborated"]
     reported = [i for i in iocs if i["confidence"] != "corroborated"]
+    # Live observables lead the table (2026-10-25 audit Issue 3 / Rec 5): the
+    # order used to be type/story-count, so six expired/revoked indicators sat
+    # above every live one. Sort on the status/last_seen the page already
+    # renders — active first, then newest — so a dead observable never leads.
+    corroborated = ioc_mod.sort_by_liveness(corroborated)
     write("cti/iocs/index.html", render("iocs.html", active="cti", og_url=site_url("cti/iocs/"),
                                         iocs=iocs, corroborated=corroborated,
                                         reported=reported, generated=today))
