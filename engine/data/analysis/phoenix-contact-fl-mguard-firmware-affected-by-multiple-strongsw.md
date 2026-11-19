@@ -1,0 +1,5 @@
+CERT VDE published advisory VDE-2026-123 for Phoenix Contact FL MGUARD 2xxx and 4xxx firmware, listing multiple StrongSwan vulnerabilities tracked as CVE-2026-78123, CVE-2026-78124, CVE-2026-78127, CVE-2026-78129 and CVE-2026-78131. The advisory concerns the IPsec implementation in the FL MGUARD industrial security appliance line, where StrongSwan is used for VPN termination.
+
+The available event text is the advisory announcement, so it does not give per-CVE impact, affected firmware releases, fixed versions or exploitation status. That limits any conclusion about urgency to the vendor and CERT VDE severity assessments once the full CSAF record is reviewed.
+
+Watch for the advisory's version matrix and remediation guidance, then map those releases against deployed FL MGUARD 2xxx and 4xxx devices. Also look for corroborating reporting on whether any of the five CVEs is remotely reachable without authentication, since that would change this from a routine firmware update into an internet-facing VPN priority.
