@@ -1,0 +1,5 @@
+JPMorgan said on 19 November that its investigation pointed to attackers targeting third-party vendors after a bank outage and reports of customer data circulating online. Reuters carried the bank's statement that it believed the attackers accessed data through vendors. Cybernews reported that the outage was not a software error and was not being attributed to a ransomware gang.
+
+Data from thousands of customers of Visa, Mastercard and JPMorgan Chase has surfaced over the past week. Visa said no payments data such as card numbers was affected and that its own systems were not involved, describing the incident as involving a third-party service provider. Those statements leave the third-party provider as the common thread, without confirming which provider or which data set was involved for each bank.
+
+Watch for disclosure of the vendor name, the exact fields exposed and the count of affected customers in each country. The link between the outage and the data leak is still based on the banks' public statements, so later breach notices or regulator filings should settle whether this was one supply-chain incident or several parallel ones.

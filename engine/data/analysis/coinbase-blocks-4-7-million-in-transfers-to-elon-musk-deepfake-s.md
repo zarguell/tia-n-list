@@ -1,0 +1,5 @@
+Coinbase says it blocked about $4.7 million in transfers to a fake crypto giveaway promoted with an AI-generated Elon Musk deepfake. The scammers ran a fake Tesla livestream around the "flying car" demonstration that drew more than 500,000 viewers, showing Musk, wallet addresses and a QR code while promising to double any crypto sent. Hundreds of Coinbase customers tried to pay over roughly two hours.
+
+The transactions were approved by the account holders, not by an attacker with stolen credentials. Coinbase says its fraud systems stopped about 91 percent of the attempts. The company notes that most fraud defenses look for activity the customer did not authorize, which does not help when the customer logs in and presses confirm after believing the giveaway is real.
+
+Watch for further livestream scams built around product launches, especially those using QR codes and wallet addresses, and for any Coinbase update on losses from the attempted transfers that were not blocked.
