@@ -107,6 +107,70 @@ check("real run removes the ghost",
 check("real run keeps the referenced ghost",
       os.path.exists(os.path.join(root, "stories", "ghost-ref.json")), True)
 
+# ── orphan analysis: a merge leaves no orphan, the prose is preserved ─────
+# 2026-10-25 audit Issue 5 / Rec 6: analyses of merged-away stories stop
+# rendering (ssg draws only a redirect) but keep counting in analysis/, so the
+# count overstated coverage by ~12% and grew ~1-2/day. The hourly pass now
+# MOVES them to analysis/.archive/ — the story json (and its redirect) and the
+# prose both survive.
+import repair_dedupe  # noqa: E402
+
+mroot = tempfile.mkdtemp()
+for d in ("stories", "analysis", "digests", "cti"):
+    os.makedirs(os.path.join(mroot, d))
+mkstory(mroot, "winner", events=[{"event_id": "e1", "label": "original"}])
+mkstory(mroot, "loser", events=[{"event_id": "e2", "label": "update"}],
+        first_seen="2026-09-01T00:00:00Z", last_seen="2026-09-02T00:00:00Z")
+winner_md = "winner analysis stays\n"
+loser_md = "loser analysis, must be archived verbatim\n"
+for sid, body in (("winner", winner_md), ("loser", loser_md)):
+    with open(os.path.join(mroot, "analysis", sid + ".md"), "w") as fh:
+        fh.write(body)
+
+stories = {s: json.load(open(os.path.join(mroot, "stories", s + ".json")))
+           for s in ("winner", "loser")}
+check("pre-merge: a live story's analysis is not an orphan",
+      cg.find_orphan_analysis(mroot), [])
+merge_log = []
+repair_dedupe.merge_story(stories, "loser", "winner", merge_log)
+for sid, s in stories.items():
+    with open(os.path.join(mroot, "stories", sid + ".json"), "w") as fh:
+        json.dump(s, fh)
+
+orphans = cg.find_orphan_analysis(mroot)
+check("post-merge: the merged-away analysis is the only orphan",
+      [sid for _, sid in orphans], ["loser"])
+check("the live story's analysis is never an orphan",
+      "winner" in [sid for _, sid in orphans], False)
+check("merge moved 1 orphan analysis",
+      cg.archive_orphan_analysis(mroot, orphans), 1)
+check("orphan analysis left analysis/",
+      os.path.exists(os.path.join(mroot, "analysis", "loser.md")), False)
+check("archived analysis is preserved verbatim",
+      open(os.path.join(mroot, "analysis", ".archive", "loser.md")).read(),
+      loser_md)
+check("live story keeps its analysis",
+      open(os.path.join(mroot, "analysis", "winner.md")).read(), winner_md)
+check("story json is untouched: the merge still redirects",
+      json.load(open(os.path.join(mroot, "stories", "loser.json")))
+      .get("merged_into"), "winner")
+check("no orphan remains after the sweep", cg.find_orphan_analysis(mroot), [])
+check("a second pass moves nothing (idempotent)",
+      cg.archive_orphan_analysis(mroot), 0)
+check("stories are never deleted by the sweep",
+      sorted(os.listdir(os.path.join(mroot, "stories"))),
+      ["loser.json", "winner.json"])
+
+# --dry-run through main() must not move the orphan either
+mkstory(mroot, "loser2", merged_into="winner")
+with open(os.path.join(mroot, "analysis", "loser2.md"), "w") as fh:
+    fh.write("another orphan\n")
+sys.argv = ["cleanup_ghosts.py", "--dry-run", "--days", "90"]
+cg.DATA = mroot
+cg.main()
+check("dry-run leaves the orphan analysis in place",
+      os.path.exists(os.path.join(mroot, "analysis", "loser2.md")), True)
+
 print()
 if failures:
     print(f"FAIL: {len(failures)} cleanup_ghosts checks failed")
