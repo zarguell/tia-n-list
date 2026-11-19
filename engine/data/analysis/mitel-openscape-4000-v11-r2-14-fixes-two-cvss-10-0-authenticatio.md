@@ -1,0 +1,5 @@
+Mitel released V11 R2.14 for OpenScape 4000 with fixes for two vulnerabilities rated CVSS 10.0. The SecurityOnline.info item describes an authentication bypass and a command injection. It also says OpenScape 4000 Manager is affected, but the Mastodon post is truncated before the full affected-product and version list.
+
+The existing Mitel coverage in the store concerns three MiVoice MX-ONE flaws, including a CVSS 9.4 authentication bypass and command injection fixed in 8.2 SP1 HF2. This OpenScape 4000 disclosure is a different product line and should not be folded into that advisory. Two maximum-severity issues in a telephony platform deserve separate tracking, particularly where the management interface is reachable from outside the voice network.
+
+Details still needed are the CVE identifiers, the exact affected builds, whether OpenScape 4000 Manager requires its own patch, and any mitigation for operators who cannot upgrade immediately. Watch for the vendor bulletin and for reports of exploitation, neither of which appears in the event text. Treat the CVSS 10.0 ratings as the severity assigned in the reporting, not as evidence of active attacks.
