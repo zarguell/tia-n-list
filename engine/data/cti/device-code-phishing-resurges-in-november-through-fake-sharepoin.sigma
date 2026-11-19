@@ -1,0 +1,29 @@
+title: Device Code Phishing Kit Backend Request to api device start with X-Antibot-Token
+id: 50f2f168-c941-42df-af7f-0bf0cd0b18b2
+status: experimental
+description: Detects web requests to the device-authorization backend used by the 2026 device-code phishing kits (MadApe, EvilTokens, Wazza and the Storm-2372 lineage), where the kit generates a fresh Microsoft device code on link click and marks its own API calls with an X-Antibot-Token header. The URI patterns /api/device/start and /api/code/status/ or /api/code/entered are kit backend paths, not Microsoft endpoints, so a hit identifies the phishing infrastructure rather than the victim.
+references:
+  - https://www.volexity.com/blog/2025/02/13/multiple-russian-threat-actors-targeting-microsoft-device-code-authentication/
+  - https://www.microsoft.com/en-us/security/blog/2026/04/06/ai-enabled-device-code-phishing-campaign-april-2026/
+  - https://group-ib.com/blog/madape-microsoft-device-code-phishing-kit
+  - https://levelblue.com/blogs/spiderlabs-blog/inside-wazza-a-newly-observed-device-code-phishing-kit-targeting-microsoft-365-accounts
+author: Tia N. List
+date: 2026/11/19
+tags:
+  - attack.t1566
+  - attack.t1528
+logsource:
+  category: proxy
+detection:
+  selection_uri:
+    c-uri|contains:
+      - '/api/device/start'
+      - '/api/code/status/'
+      - '/api/code/entered'
+  selection_header:
+    cs-header|contains: 'X-Antibot-Token'
+  condition: selection_uri and selection_header
+falsepositives:
+  - A legitimate application that hosts its own device-authorization helper and reuses the same header name; confirm the destination host is not a sanctioned identity provider
+  - Security scanners or red-team infrastructure replaying kit traffic
+level: high

@@ -1,0 +1,27 @@
+title: Overlord RAT Execution as MsgEdgeUpdate from User AppData
+id: 9fe472a6-ff8f-4d17-abb6-d5dc774c7188
+status: experimental
+description: Detects execution of the Overlord RAT implant that Cisco Talos attributes to UAT-12643, which copies itself to %APPDATA%\MsgEdgeUpdate.exe and is relaunched through the Zoipers and MsgEdgeUpdate Run values. The same campaign persists through the Windows recovery environment by patching %TARGETOSDRIVE%\Recovery\OEM\ResetConfig.xml, so pair an alert here with a check of that file and with JSON-RPC traffic to Solana endpoints used for the dead-drop resolver.
+references:
+  - https://gbhackers.com/solana-blockchain-transactions/
+  - https://malware.news/t/uat-12643-suspected-north-korea-aligned-actor-blends-blockchain-resilience-with-targeted-infostealing/127417
+  - https://alcybr.com/blog/talos-finds-uat-12643-hiding-c2-addresses-in-solana-transactions
+author: Tia N. List
+date: 2026/11/19
+tags:
+  - attack.t1102
+  - attack.t1071
+  - attack.t1547
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection_img:
+    Image|endswith: '\MsgEdgeUpdate.exe'
+  selection_path:
+    Image|contains: '\AppData\'
+  condition: selection_img and selection_path
+falsepositives:
+  - Endpoint management or backup agents that legitimately run binaries from per-user AppData; confirm the file name and the Zoipers or MsgEdgeUpdate Run value before isolating
+  - Malware sandboxes and threat-intel tooling that detonate Overlord samples under analysis paths
+level: high

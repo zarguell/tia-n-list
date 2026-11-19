@@ -1,0 +1,32 @@
+title: Bazuka Android Fraud Framework C2 Beacon to brokerok or gargona Domains
+id: 36d1bd6b-cdfa-4a29-bd12-38e6edea4d68
+status: experimental
+description: Detects network connections toward the Bazuka fraud-framework command-and-control infrastructure described by ThreatFabric, where the dropper and core reach the Control and Data WebSocket channels on c2ws, c2data, c2proxy and c2api subdomains of brokerok.org and on gargona.cash. Pair a hit with the TikTok18+ themed package com.tiktok.premium.pro on the same device before escalating.
+references:
+  - https://www.threatfabric.com/blogs/bazuka-the-fraud-framework-that-can-do-it-all
+  - https://malware.news/t/bazuka-the-fraud-framework-that-can-do-it-all/127422#post_1
+author: Tia N. List
+date: 2026/11/19
+tags:
+  - attack.t1071
+  - attack.t1620
+logsource:
+  category: network_connection
+detection:
+  selection_brokerok:
+    DestinationHostname|endswith: '.brokerok.org'
+  selection_apex:
+    DestinationHostname|endswith:
+      - 'brokerok.org'
+      - 'gargona.cash'
+  selection_ports:
+    DestinationPort:
+      - 8443
+      - 8444
+      - 8082
+      - 8445
+  condition: (selection_brokerok or selection_apex) and selection_ports
+falsepositives:
+  - Threat-intelligence platforms, sandboxes and mail gateways that resolve or detonate Bazuka samples
+  - Apex gargona.cash resolving from a sinkhole or research proxy rather than a victim device
+level: high
