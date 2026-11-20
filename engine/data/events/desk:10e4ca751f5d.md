@@ -1,0 +1,1 @@
+The 21.x pre-release notes say v21.0.0-beta4 merges the v20.19.1 security release and carries the same 12 security fixes. They list GHSA-pqgf-g7m7-vh98 at Critical 9.3 fixed in 21.0.0-beta4, alongside the other advisories from v20.19.1. The notes say dependency versions were aligned with v20.19.1.
