@@ -1,0 +1,3 @@
+Contabo detected unauthorized access to its systems on Saturday, November 14, 2026, and said the access was stopped. The detail comes from a short Mastodon post by linuxiarze.pl, the only event in this story with a dated timeline. An earlier report from The Cyber Sec Guru said the German VPS and cloud hosting provider confirmed an intrusion into internal systems and reset customer VNC passwords.
+
+The public record is thin. There is no named actor, no entry vector and no statement on what the intruder reached before access was cut off. Watch for a fuller Contabo incident note, for confirmation of whether the VNC password resets were precautionary or tied to observed access, and for any customer advisory about console access or attached storage.

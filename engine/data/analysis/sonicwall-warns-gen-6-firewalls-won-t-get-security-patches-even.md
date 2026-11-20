@@ -1,0 +1,3 @@
+SonicWall has told customers to retire Generation 6 firewalls immediately and stop leaving them exposed at the internet edge. The company cited a shift in attacker behavior, saying automation and AI now help attackers find and exploit unsupported edge devices faster. The warning applies to Gen 6 hardware still in service, especially devices reachable from public networks.
+
+The advisory offers no patch path for these devices. Replacement is the remedy, so the operational question is how fast operators can inventory Gen 6 units and move services off them. The Hacker News and en.hacks.gr carried the same instruction. Watch for exploitation attempts against internet-facing Gen 6 management interfaces and for vendor detail on which SonicOS builds are past support.
