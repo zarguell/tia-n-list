@@ -347,6 +347,17 @@ try:
 except Exception as e:
     check("score0_sweep", False, f"sweep error: {e}")
 
+# Entity-duplicate probe cap for the AUDIT run (2026-10-25 audit Issue 8 /
+# Rec 8, owner card 430f34b79179): at the probe's default 10 pairs, genuine
+# duplicates queued up behind each other on the 11k-story store. Raising it
+# costs no scan time — the O(pool^2) probe runs to completion either way
+# (merge.AUDIT_ENTITY_DUP_CAP documents the measurement: 21-22s for 11,043
+# stories / 461 qualifying pairs on 2026-11-20, identical at 10 and uncapped) —
+# so the audit runs the wider cap and `entity_dup_probe` publishes the true
+# qualifying count, letting the duplicate section report "top N of M" instead
+# of a list that was silently cut at 10.
+_entity_dup_stats: dict = {}
+
 _dup_suspects = jc.duplicate_suspects(_all_stories, NOW,
                                           exclusions=_sweep_exclusions)
 EXTRA = {
@@ -363,7 +374,11 @@ EXTRA = {
         # probe already honors them, and without passing them here the entity
         # probe re-reported pairs dismissed on 10-21/10-25/10-26/10-31 every
         # following day (2026-11-01 audit Issue 3).
-        exclusions=_sweep_exclusions),
+        exclusions=_sweep_exclusions,
+        max_out=merge_mod.AUDIT_ENTITY_DUP_CAP, stats=_entity_dup_stats),
+    # how many pairs the store actually holds vs how many the section got
+    # (qualifying/returned/capped/store_pool) — see merge.AUDIT_ENTITY_DUP_CAP
+    "entity_dup_probe": _entity_dup_stats,
     # what the pre-adjudication sweep merged this run (see score0_sweep check)
     "score0_sweep": {"merged": _score0_log, "count": len(_score0_log)},
     # 2026-10-19 owner decision 1ba8f94ae822 (audit Issue 2 / Rec 4):
