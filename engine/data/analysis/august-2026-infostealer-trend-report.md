@@ -1,0 +1,3 @@
+ASEC's October 2026 Infostealer Trend Report covers distribution channels, the number of infostealers and detections, and companies that new infostealers disguise themselves as to appear legitimate. The samples were collected during October 2026 through an automated data collection system, an email honeypot system and automated C2 analysis. Malware.news reposted the same report on 20 November.
+
+The captured text gives the collection scope but no family names or detection totals, so no specific campaign or count can be attributed to the report here. Watch for the full ASEC tables on October distribution channels and impersonated companies, which are the parts that would make this report actionable for mail filtering and brand monitoring.
