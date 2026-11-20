@@ -348,12 +348,37 @@ def _entity_tokens(title, extra_stop=frozenset()):
     return strong, loose
 
 
+# Entity-duplicate ADJUDICATION caps (2026-10-25 audit Issue 8 / Rec 8, owner
+# card 430f34b79179). Both bound only the RETURNED list: the O(pool^2)
+# comparison runs to completion either way — measured 21-22s over an 11,043
+# story store with 461 qualifying pairs (2026-11-20), identical at max_out=10
+# and max_out=None — so the wider audit cap costs no wall time. At the legacy
+# 10, genuine duplicates queued up behind each other on the 11k store (the
+# Ukraine/Graylog pair and the four ConnectWise/ARTEX rows kept reappearing
+# while newer pairs took the slots), so the daily audit runs the probe at
+# AUDIT_ENTITY_DUP_CAP and publishes the true backlog size via `stats`
+# ("top N of M") instead of presenting the cap as an untracked sample.
+ENTITY_DUP_CAP = 10
+AUDIT_ENTITY_DUP_CAP = 25
+
+
 def entity_dup_suspects(stories, now, *, exclude=None, exclusions=None,
-                        max_out=10, max_age_days=45, window_days=10):
+                        max_out=ENTITY_DUP_CAP, max_age_days=45,
+                        window_days=10, stats=None):
     """Entity-based near-duplicate LIVE story pairs, REPORT-ONLY (2026-10-20
     owner decision eda9f1100d5d, audit Issue 3 / Rec 2): the pairs the
     title-jaccard probe (duplicate_suspects, floor 0.5) cannot see because the
     headlines were reworded past it. It NEVER merges anything.
+
+    `max_out` is an ADJUDICATION cap, not a scan cap (2026-10-25 audit Issue 8
+    / Rec 8, owner card 430f34b79179): the O(pool^2) scan runs to completion
+    either way — measured 21-22s over an 11,043-story store with 461
+    qualifying pairs (2026-11-20), so raising it costs no wall time — it only
+    bounds how many pairs the audit section has to adjudicate. The daily audit
+    runs it at AUDIT_ENTITY_DUP_CAP (25, not this default 10) so genuine
+    duplicates stop queuing behind each other, and passes `stats`
+    to publish the true qualifying count (the section can then report
+    "top N of M" instead of presenting the cap as a sample of unknown depth).
 
     A pair surfaces only when ALL hold (the audit's Rec 2 predicate):
       - both stories LIVE (not merged_into, have events) and recently active
@@ -451,7 +476,18 @@ def entity_dup_suspects(stories, now, *, exclude=None, exclusions=None,
     out.sort(key=lambda x: (x["newest_first_seen"],
                             -len(x["shared_entities"]),
                             -x["jaccard"], x["a"], x["b"]), reverse=True)
-    return out[:max_out]
+    qualifying = len(out)
+    kept = out if max_out is None else out[:max_out]
+    if stats is not None:
+        # TRUE backlog size, so the audit section can report "top N of M"
+        # rather than presenting the cap as a sample of unknown depth.
+        stats.clear()
+        stats.update({"qualifying": qualifying, "returned": len(kept),
+                      "capped": len(kept) < qualifying,
+                      "store_pool": len(pool), "max_out": max_out,
+                      "max_age_days": max_age_days,
+                      "window_days": window_days})
+    return kept
 
 
 # ── score-0 duplicate backlog sweep (2026-10-20 owner decision eda9f1100d5d,

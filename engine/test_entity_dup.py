@@ -19,7 +19,10 @@ NightmareStresser are real duplicates it missed, and the score-0.0 backlog
   5. the sweep refuses analysis-file / digest-referenced / score>0 /
      distinct-CVE pairs.
   6. a second run immediately after merges is a no-op (idempotent).
-  7. the per-invocation cap holds.
+  7. the per-invocation sweep cap holds.
+  8. a genuine pair ranked beyond the legacy 10-pair adjudication cap is still
+     returned by the audit run (merge.AUDIT_ENTITY_DUP_CAP), and the probe
+     reports the true qualifying count so the section is not a silent sample.
 
 Run: /home/zach/.local/venvs/tia-engine/bin/python engine/test_entity_dup.py
      (from the repo/worktree root; exit 0 = pass)
@@ -400,6 +403,47 @@ check("an unrelated exclusion leaves the pair alone",
           REWORD, NOW, exclusions={frozenset(("other-a", "other-b"))})), 1)
 check("exclusions=None stays empty (no hidden file dependency)",
       len(merge.entity_dup_suspects(REWORD, NOW, exclusions=None)), 1)
+
+# ── 10. genuine pairs beyond the legacy 10-pair cap still surface ───────
+# 2026-10-25 audit Issue 8 / Rec 8 (owner card 430f34b79179): at 10 pairs per
+# run genuine duplicates queued up behind each other on the 11k-story store.
+print("10. entity probe: pairs beyond the legacy 10-pair cap")
+MANY = {}
+for _i in range(12):
+    _day = f"2026-10-{12 + _i:02d}"     # newest-first ranking: pair 11 first
+    _cve = [f"CVE-2026-{1000 + _i}"]     # shared inside a pair, disjoint across
+    MANY[f"many-{_i:02d}-a"] = story(
+        f"many-{_i:02d}-a", f"RansomHub claims victim Acme{_i:02d}",
+        f"{_day}T01:00:00Z", cves=_cve)
+    MANY[f"many-{_i:02d}-b"] = story(
+        f"many-{_i:02d}-b", f"Acme{_i:02d} named as a RansomHub victim",
+        f"{_day}T06:00:00Z", cves=_cve)
+full_stats = {}
+full_pairs = merge.entity_dup_suspects(MANY, NOW, max_out=None,
+                                       stats=full_stats)
+check("all 12 genuine pairs qualify (disjoint CVEs keep cross pairs out)",
+      len(full_pairs), 12)
+check("stats carry the true qualifying count", full_stats["qualifying"], 12)
+check("uncapped run is not flagged as capped", full_stats["capped"], False)
+check("stats keep the probe windows", (full_stats["max_age_days"],
+      full_stats["window_days"]), (45, 10))
+legacy_stats = {}
+legacy_pairs = merge.entity_dup_suspects(MANY, NOW, stats=legacy_stats)
+check("default caller still caps at 10", len(legacy_pairs), 10)
+check("default run records the truncation", legacy_stats["capped"], True)
+check("default run hides the pair ranked 11th/12th",
+      any(frozenset((p["a"], p["b"])) ==
+          frozenset(("many-00-a", "many-00-b")) for p in legacy_pairs), False)
+audit_stats = {}
+audit_pairs = merge.entity_dup_suspects(MANY, NOW,
+                                        max_out=merge.AUDIT_ENTITY_DUP_CAP,
+                                        stats=audit_stats)
+check("audit run returns a genuine pair ranked beyond the old cap",
+      any(frozenset((p["a"], p["b"])) ==
+          frozenset(("many-00-a", "many-00-b")) for p in audit_pairs), True)
+check("audit run returns all 12", len(audit_pairs), 12)
+check("audit run reports not capped when the backlog fits",
+      audit_stats["capped"], False)
 
 for d in (root, root2, root2b, root3, root3b, root3c, root4, root4b, root5,
           root5b, root7, root8):
