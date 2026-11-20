@@ -1,0 +1,42 @@
+title: Directory Replication Rights Exercised by a Non-Machine Account (DCSync)
+id: 0f3c7a52-9d64-4e18-b7a1-2c8d5e6f4a91
+status: experimental
+description: >
+  Detects DS-Replication-Get-Changes* replication rights being exercised in Windows
+  event 4662 by an account that is not a domain-controller machine account. The FBI
+  FLASH on ARTEX-driven intrusions documents the post-compromise pattern this rule
+  hunts - secrets lifted from configuration and front-end bundles, more than 110,000
+  Active Directory objects enumerated, LAPS passwords read, and DCSync against KRBTGT -
+  the same chain CERT-EU reported against European Commission systems. Derived from
+  case analysis (Politico, Euronews, SecurityWeek coverage; FBI FLASH and CERT-EU
+  guidance as summarised) - NOT validated against live telemetry.
+references:
+  - https://www.securityweek.com/european-commission-confirms-ai-assisted-cyberattack-disrupted-services/
+  - https://www.politico.eu/newsletter/brussels-playbook/cyberattack-hits-the-commission/
+  - https://www.euronews.com/2026/11/19/eu-commission-hit-by-large-scale-cyberattack-with-data-leakage-unknown
+  - https://www.theregister.com/cyber-crime/2026/11/19/european-commission-scrambles-to-contain-ai-assisted-cyberattack/5311103
+author: Tia N. List
+date: 2026/11/20
+tags:
+  - attack.t1003
+  - attack.t1003.006
+  - attack.credential-access
+logsource:
+  product: windows
+  service: security
+detection:
+  selection_event:
+    EventID: 4662
+  selection_replication_rights:
+    Properties|contains:
+      - '1131f6aa-9c07-11d1-f79f-00c04fc2dcd2'
+      - '1131f6ad-9c07-11d1-f79f-00c04fc2dcd2'
+      - '89e95b76-444d-4c62-991a-0facbeda640c'
+  filter_machine_accounts:
+    SubjectUserName|endswith: '$'
+  condition: selection_event and selection_replication_rights and not filter_machine_accounts
+falsepositives:
+  - Directory synchronisation products that legitimately hold replication rights (Entra Connect / Azure AD Connect, Okta or Ping directory agents, backup and identity-governance suites) when they run under a named service account instead of a machine account
+  - Domain controller promotion, migration and disaster-recovery tooling running with delegated replication permissions
+  - Purple-team or authorised adversary-simulation activity exercising DCSync
+level: high
