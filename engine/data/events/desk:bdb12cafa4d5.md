@@ -1,0 +1,1 @@
+Apple announced additional controls around the macOS Full Disk Access setting days after the Muse messages claim and a WIRED report on a ChatGPT Mac app flaw. TechCrunch noted that the setting was designed to let backups function properly while AI agents increase the risk of broad access. Apple warned that granting it puts all data on a Mac at risk.

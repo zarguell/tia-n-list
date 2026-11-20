@@ -1,0 +1,1 @@
+9to5Mac reported that Apple planned changes to macOS Full Disk Access amid AI agents requesting that permission. The article said Apple had not shared specifics of the planned controls beyond requiring very explicit user action. It framed the move as a privacy response to the rapid rise of autonomous AI agents on Macs.
