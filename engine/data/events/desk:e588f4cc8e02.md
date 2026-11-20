@@ -1,0 +1,1 @@
+GitHub's advisory database published GHSA-83xj-7xh4-4p7x on 18 November 2026, mirroring the OpenSSL CVE description and rating the issue critical. The advisory entry lists no affected package and no patched versions, and carries the NVD record and OpenSSL pull request 33652 as references.
