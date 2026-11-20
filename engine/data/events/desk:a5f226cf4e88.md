@@ -1,0 +1,1 @@
+The WordPress.org plugin page records version 5.6.2 with a changelog entry reading only Minor security fix and plugin metadata last modified on 16 November 2026 at 16:56 UTC. Its page metadata lists 5.6.2 as the current software version and 439 reviews. No CVE identifier or exploitation detail appears in the changelog.
