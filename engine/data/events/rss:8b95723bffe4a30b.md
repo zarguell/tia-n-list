@@ -1,0 +1,1 @@
+Content AhnLab utilized its own infrastructure to monitor APT (Advanced Persistent Threat, an attack that covertly targets specific victims over a long period) attacks against targets in Korea throughout the month of October 2026. The report categorizes the identified attacks by type, compiles statistics, and explains how each type operates. Purpose and Scope This report […]
