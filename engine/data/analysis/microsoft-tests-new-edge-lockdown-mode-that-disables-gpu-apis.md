@@ -1,0 +1,3 @@
+Microsoft is testing an early Lockdown Mode in Edge Canary that reduces what the browser exposes to attack, including disabling GPU APIs. BleepingComputer first covered the Canary feature and Secquill reported the same rollout on 20 November. The aim is a smaller browser attack surface, following the pattern of a strict opt-in mode rather than a default change.
+
+The available text gives no Canary build number, CVE or stable-release date, so there is nothing yet to patch against. What to watch is which build first carries the toggle, exactly which APIs and web features it turns off, and whether the restrictions reach the stable channel. For now this is a browser hardening option in testing, not a mitigation with a published support commitment.
