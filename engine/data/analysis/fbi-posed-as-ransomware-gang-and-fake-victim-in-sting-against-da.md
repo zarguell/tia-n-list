@@ -1,0 +1,5 @@
+Two reports describe an FBI operation that used role reversal against a ransomware scammer. The Sekurak post says agents impersonated a ransomware gang and a company that appeared to be infected, and the 404 Media report is titled around the same tactic, with the bureau posing as both victim and attacker. The story is indexed as a sting against a data-recovery firm, but the captured text gives no name for the target and no charge details.
+
+The value of the tactic is that it reaches people who monetize ransomware fear without needing a real compromise first. By presenting a fake infected company and a fake gang, investigators can draw out the scammer's workflow and messages. Neither report in the set publishes those chats or an indictment document, so the only confirmed facts are the impersonation and the 404 Media link to an indictment.
+
+Watch for the indictment itself: who is charged, which victims were solicited, and whether the fake-victim persona produced payments or credential theft. If court filings show the operation ran over a real incident, that would change the scope. As written, this is a law-enforcement method story, not a new ransomware campaign.
