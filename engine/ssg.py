@@ -749,6 +749,34 @@ def render(template, **ctx):
 
 LINT_HITS = []
 
+# The only *.html the generator writes at ROOT. Everything else the site
+# publishes lives in a subdirectory (stories/, daily/, kev/, ...). A root
+# .html the generator does not write can only be a stray — and it is expensive:
+# lint_links walks EVERY .html under ROOT, so one committed scrape reds the
+# whole deploy (2026-11-19: cna.html + e2.html, raw article dumps saved during
+# research, contributed 1112 unresolvable/origin-absolute links and froze the
+# site for 15h; ms.html rode along in the same publish). The VPS gate
+# (--lint-only) does no render, so it could not see them before pushing.
+GENERATED_ROOT_HTML = {"index.html", "404.html"}
+
+
+def stray_root_html(root=None):
+    """Root-level *.html files the generator does not produce (sorted).
+
+    Checked at source, so --lint-only (the VPS publish gate) catches a stray
+    before it is committed/pushed, not 40s into the Actions link lint.
+    Pure/testable: pass root=<dir>.
+    """
+    root = root or ROOT
+    try:
+        names = os.listdir(root)
+    except OSError:
+        return []
+    return sorted(n for n in names
+                  if n.endswith(".html")
+                  and os.path.isfile(os.path.join(root, n))
+                  and n not in GENERATED_ROOT_HTML)
+
 
 def lint_md_refs(story_ids, digest_dates, paths):
     """Markdown cross-references resolvable without a render.
@@ -1268,11 +1296,24 @@ def main():
         ref_errs = lint_md_refs(story_ids, digest_dates, ref_srcs)
         for e in ref_errs:
             print(f"REF FAIL {e}", file=sys.stderr)
-        errs = len(cti_errs) + len(sigma_errs) + len(yara_errs) + len(prose_digest_errs) + len(html_errs) + len(ref_errs)
+        # Stray root-level HTML (2026-11-19): render-free and deterministic, so
+        # the VPS gate can catch what only the remote link lint used to see.
+        # A stray is committed scratch from the prod checkout — remove the file
+        # (it is not site content); never widen the gate.
+        stray = stray_root_html()
+        for rel in stray:
+            print(f"STRAY FAIL {rel}: root-level HTML the generator does not write "
+                  f"(scraped page / scratch export — remove it, it is not site "
+                  f"content; lint_links would red every deploy on its links)",
+                  file=sys.stderr)
+        errs = (len(cti_errs) + len(sigma_errs) + len(yara_errs)
+                + len(prose_digest_errs) + len(html_errs) + len(ref_errs)
+                + len(stray))
         if errs:
             print(f"LINT-ONLY FAIL: {len(cti_errs)} CTI + {len(sigma_errs)} Sigma "
                   f"+ {len(yara_errs)} YARA + {len(prose_digest_errs)} prose + "
-                  f"{len(html_errs)} HTML + {len(ref_errs)} ref errors.",
+                  f"{len(html_errs)} HTML + {len(ref_errs)} ref + {len(stray)} stray "
+                  f"root HTML errors.",
                   file=sys.stderr)
             sys.exit(1)
         print(f"lint-only: OK ({len(cards)} stories, {errs} errors)")
@@ -1686,6 +1727,11 @@ def main():
 
     print(f"done: wrote {WROTE} files, {SKIPPED} unchanged.")
 
+    stray = stray_root_html()
+    for rel in stray:
+        print(f"STRAY FAIL {rel}: root-level HTML the generator does not write "
+              f"(scraped page / scratch export — remove it, it is not site "
+              f"content)", file=sys.stderr)
     bad_links = lint_links()
     for rel, url, why in bad_links:
         print(f"LINK FAIL {rel}: href/src {url!r} {why}", file=sys.stderr)
@@ -1749,13 +1795,13 @@ def main():
     prose_digest_errs = run_prose_gate(cards_by_id, today, log=print)
     for e in prose_digest_errs:
         print(f"PROSE FAIL {e}", file=sys.stderr)
-    if (LINT_HITS or bad_links or bad_chips or backlink_errs or cti_errs
+    if (LINT_HITS or stray or bad_links or bad_chips or backlink_errs or cti_errs
             or sigma_errs or yara_errs or prose_digest_errs):
         print(f"LINT FAIL: {len(LINT_HITS)} path-absolute + {len(bad_links)} unresolvable"
               f" internal URL(s) + {len(bad_chips)} URL-in-chip + {len(backlink_errs)}"
               f" backlink errors + {len(cti_errs)} CTI errors + {len(sigma_errs)}"
               f" Sigma errors + {len(yara_errs)} YARA errors + {len(prose_digest_errs)}"
-              f" prose errors — fix before publishing.",
+              f" prose errors + {len(stray)} stray root HTML — fix before publishing.",
               file=sys.stderr)
         sys.exit(1)
 

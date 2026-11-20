@@ -401,6 +401,30 @@ def main():
     finally:
         shutil.rmtree(vd, ignore_errors=True)
 
+    # 9. stray root-level HTML (2026-11-19): three raw scraped article dumps
+    #    (cna.html/e2.html/ms.html) were swept into the repo root by the hourly
+    #    publish; lint_links walks every ROOT *.html, so cna+e2 alone red-ed
+    #    every Actions build for 15h (1112 unresolvable/origin-absolute links)
+    #    while the render-free VPS gate stayed green. The gate must name the
+    #    stray instead of letting it through.
+    sd = tempfile.mkdtemp(prefix="tia-stray-")
+    try:
+        for n in ("index.html", "404.html", "cna.html", "ms.html"):
+            open(os.path.join(sd, n), "w").write("<html></html>")
+        os.makedirs(os.path.join(sd, "stories"))
+        open(os.path.join(sd, "stories", "x.html"), "w").write("<html></html>")
+        open(os.path.join(sd, "style.css"), "w").write("body{}")
+        ok &= check("stray root html: generator-owned + subdir pages are not strays",
+                    ssg.stray_root_html(sd), ["cna.html", "ms.html"])
+        os.remove(os.path.join(sd, "cna.html"))
+        os.remove(os.path.join(sd, "ms.html"))
+        ok &= check("stray root html: clean root reports none",
+                    ssg.stray_root_html(sd), [])
+    finally:
+        shutil.rmtree(sd, ignore_errors=True)
+    ok &= check("stray root html: unreadable root is not a crash",
+                ssg.stray_root_html(os.path.join(sd, "gone")), [])
+
     print("ALL PASS" if ok else "FAILURES")
     return 0 if ok else 1
 
