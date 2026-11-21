@@ -1,0 +1,1 @@
+Vísir Business reports that 1984 ehf stopped its hosting service after a cyberattack. Its summary of the initial investigation says the attack was well organised and technically advanced; the article was published at 11:15 Icelandic time, which is UTC.
