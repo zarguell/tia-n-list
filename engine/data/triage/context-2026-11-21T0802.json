@@ -1,0 +1,531 @@
+{
+ "date": "2026-11-21",
+ "decisions_path": "engine/data/triage/decisions-2026-11-21T0802.json",
+ "instructions": "For every new event decide: (1) keep or drop \u2014 keep only stories worth covering (real security events, vulnerabilities, attacks, breaches, advisories with substance); drop press releases, vendor marketing, generic explainers, and anything duplicating an existing story. (2) If keep, assign the event to the RIGHT story: an existing candidate story id if it belongs there (this FIXES mechanical clustering \u2014 e.g. different outlets' Patch Tuesday roundups are ONE story), or NEW with a clean story_title. (3) merges: list candidate stories that are really the same story (from = fragment, into = the most complete one). (4) For every kept event that names CVEs, optionally assess exploitation: exploited = the event reports OBSERVED in-the-wild exploitation (implants, victim counts, campaigns, CISA KEV confirmation); suspected = public exploit code/PoC or likely-but-unconfirmed. Attribute ONLY the CVEs you can tie to the claim \u2014 a bulletin's blanket 'actively exploited' does NOT flag all its CVEs. Omit the exploitation field when the event makes no claim.\n(5) LOW-TRUST events (\"low_trust\": true \u2014 AI-drafted aggregator reposts, late and overstated): treat as unverified leads. When the text attributes the claim to a named primary source (a researcher firm like watchTowr, a vendor advisory, CISA, a major outlet) and attribution_urls or a web search (/home/ubuntu/repos/cronman/bin/web-search.sh \"query\") locate that primary source CONFIRMING the claim, include a provenance object in the decision: {\"url\": <primary url>, \"source\": <domain>, \"evidence\": <one line>, \"verified\": true}. VERIFIED provenance lets the event mint a story (credited to the primary source) and count as a development; without it, a low-trust event can only attach to an EXISTING story, never mint. If you cannot verify, keep/drop on normal merit and omit provenance.\n\nWrite decisions as JSON with EXACTLY this shape:\n{\n  \"decisions\": [\n    {\"event_id\": \"<id>\", \"action\": \"keep\", \"story\": \"<existing candidate story id>\", \"reason\": \"...\"},\n    {\"event_id\": \"<id>\", \"action\": \"keep\", \"story\": \"NEW\", \"story_title\": \"<clean title>\", \"reason\": \"...\"},\n    {\"event_id\": \"<id>\", \"action\": \"drop\", \"reason\": \"...\"}\n  ],\n  \"merges\": [{\"from\": \"<fragment story id>\", \"into\": \"<canonical story id>\"}]\n}\nFor events marked \"low_trust\" (AI-drafted aggregator reposts) a decision\nmay carry an optional \"provenance\" object when you VERIFIED the claim at\nthe named primary source: {\"event_id\": ..., \"action\": \"keep\", ...}\n  \"provenance\": {\"url\": \"<primary source url>\", \"source\": \"<domain>\", \"evidence\": \"<one line>\"}\nOnly include provenance when the primary source (vendor advisory, CISA,\nthe named researcher/outlet) really carries the claim \u2014 verified\nprovenance lets a low-trust event mint a story and set freshness; without\nit the event can only amplify an existing story.\nSTRICT KEY NAMES: the array key is \"decisions\" (never \"events\"); the story\nkey is \"story\" (never \"story_id\"); \"story\" holds a candidate_stories id\nverbatim or the literal string \"NEW\". Optional per-event field\n\"exploitation\": {\"CVE-...\": {\"status\": \"exploited|suspected\", \"evidence\": \"1-2 sentences\"}}.",
+ "new_events": [
+  {
+   "id": "rss:2cba0146c88e9580",
+   "title": "Critical F5 BIG-IP Stack Buffer Overflow Flaw Enables Remote Code Execution and Denial-of-Service Attacks",
+   "source": "gbhackers.com",
+   "published_at": "2026-11-21T07:53:29Z",
+   "cves": [
+    "CVE-2026-123637"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "F5 disclosed a critical stack-based buffer overflow in BIG-IP Access Policy Manager (APM) on November 18, 2026. Tracked as CVE-2026-123637, the flaw allows a remote, unauthenticated attacker to terminate the Traffic Mana"
+  },
+  {
+   "id": "rss:b11d8a1241d8bac3",
+   "title": "China-Linked Webworm Hackers Deploy Custom SoftEther VPN to Maintain Hidden Access to Government Networks",
+   "source": "gbhackers.com",
+   "published_at": "2026-11-21T07:37:44Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "A newly identified modified SoftEther VPN Bridge that is attributed with moderate confidence to Webworm, a China-aligned espionage group known for targeting government organizations, particularly in Europe. The November "
+  },
+  {
+   "id": "rss:d97896bbdf49b300",
+   "title": "AI-Powered Bazuka Banking Trojan Targets Android Users With Keylogging and SMS Interception",
+   "source": "gbhackers.com",
+   "published_at": "2026-11-21T07:15:46Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "A newly disclosed Bazuka, a modular Android banking Trojan that captures banking credentials and intercepts SMS verification codes while using large language models (LLMs) to help operators prioritize compromised devices"
+  }
+ ],
+ "candidate_stories": [
+  {
+   "id": "f5-big-ip-november-2026-update-fixes-seven-flaws-including-apm-r",
+   "title": "F5 BIG-IP November 2026 update fixes seven flaws including APM RCE CVE-2026-123637",
+   "n_events": 14,
+   "last_seen": "2026-11-21T07:53:29Z",
+   "first_event_title": "F5 BIG-IP fixes seven flaws, including APM RCE CVE-2026-123637 and BIG-IP iRule overflows rated CVSS 9.8. Hotfixes, versions and mitigations"
+  },
+  {
+   "id": "china-linked-webworm-hackers-deploy-custom-softether-vpn-to-main",
+   "title": "China-Linked Webworm Hackers Deploy Custom SoftEther VPN to Maintain Hidden Access to Government Networks",
+   "n_events": 1,
+   "last_seen": "2026-11-21T07:37:44Z",
+   "first_event_title": "China-Linked Webworm Hackers Deploy Custom SoftEther VPN to Maintain Hidden Access to Government Networks"
+  },
+  {
+   "id": "ai-powered-bazuka-banking-trojan-targets-android-users-with-keyl",
+   "title": "AI-Powered Bazuka Banking Trojan Targets Android Users With Keylogging and SMS Interception",
+   "n_events": 1,
+   "last_seen": "2026-11-21T07:15:46Z",
+   "first_event_title": "AI-Powered Bazuka Banking Trojan Targets Android Users With Keylogging and SMS Interception"
+  },
+  {
+   "id": "beyondtrust-remote-support-zero-day-cve-2026-102769-active-explo",
+   "title": "BeyondTrust Remote Support Zero-Day CVE-2026-102769 Active Exploitation",
+   "n_events": 52,
+   "last_seen": "2026-11-21T06:59:27Z",
+   "first_event_title": "BeyondTrust doing their darnedest not to explicitly say that there's an exploited zero-day vulnerability in their Remote Support product. CV"
+  },
+  {
+   "id": "silent-push-exposes-north-korean-fake-construction-company",
+   "title": "Silent Push Exposes North Korean Fake Construction Company",
+   "n_events": 2,
+   "last_seen": "2026-11-21T06:50:30Z",
+   "first_event_title": "Silent Push Exposes North Korean Fake Construction Company"
+  },
+  {
+   "id": "apache-tomcat-cve-2026-133325-authentication-bypass-in-clustered",
+   "title": "Apache Tomcat CVE-2026-133325 authentication bypass in clustered deployments",
+   "n_events": 9,
+   "last_seen": "2026-11-21T06:39:51Z",
+   "first_event_title": "Critical # Apache # Tomcat authentication bypass CVE-2026-133325 \"A flaw was found in Apache Tomcat. When a # cluster is configured to secur"
+  },
+  {
+   "id": "refitter-2-1-2-fixes-code-injection-via-crafted-api-descriptions",
+   "title": "Refitter 2.1.2 fixes code injection via crafted API descriptions at app startup",
+   "n_events": 3,
+   "last_seen": "2026-11-21T06:37:51.000Z",
+   "first_event_title": "Refitter fixes flaw that let crafted API descriptions run code at app startup Refitter 2.1.2 fixes a code injection flaw in which a crafted "
+  },
+  {
+   "id": "bazuka-the-fraud-framework-that-can-do-it-all",
+   "title": "Bazuka: The Fraud Framework That Can Do It All",
+   "n_events": 6,
+   "last_seen": "2026-11-21T05:57:49.614Z",
+   "first_event_title": "Bazuka: The Fraud Framework That Can Do It All"
+  },
+  {
+   "id": "former-nsa-hacker-says-30-plus-ai-agents-breached-a-company-in-1",
+   "title": "Former NSA hacker says 30-plus AI agents breached a company in 14 minutes",
+   "n_events": 2,
+   "last_seen": "2026-11-21T05:44:15.000Z",
+   "first_event_title": "14 minutes to break in david kennedy, a former nsa hacker, told cnn one of his clients was hit by a swarm of 30+ ai agents. they used valid "
+  },
+  {
+   "id": "fbi-investigates-apparent-breach-of-national-crime-information-c",
+   "title": "FBI investigates apparent breach of National Crime Information Center criminal database",
+   "n_events": 1,
+   "last_seen": "2026-11-21T05:34:46.193Z",
+   "first_event_title": "The suspected cyber intrusion raises questions about the safety of sensitive law enforcement records, including arrest warrants, criminal hi"
+  },
+  {
+   "id": "machine-speed-attacks-require-machine-speed-detection-and-respon",
+   "title": "Machine speed attacks require machine speed detection and response",
+   "n_events": 154,
+   "last_seen": "2026-11-21T05:25:03.000Z",
+   "first_event_title": "OpenCode Flaw Lets Malicious MCP Servers Execute Code During Sign-In on Windows and WSL"
+  },
+  {
+   "id": "microsoft-confirms-entra-connect-health-exposure-of-tenant-metad",
+   "title": "Microsoft confirms Entra Connect Health exposure of tenant metadata and admin emails",
+   "n_events": 1,
+   "last_seen": "2026-11-21T05:13:24.000Z",
+   "first_event_title": "Microsoft confirmed a Microsoft Entra Connect Health exposure that leaked tenant metadata and admin emails. Learn what was accessed and how "
+  },
+  {
+   "id": "cve-2026-19793-wp-import-export-lite-3-9-32-unauthenticated-php",
+   "title": "CVE-2026-19793: WP Import Export Lite 3.9.32 unauthenticated PHP execution via crafted comments",
+   "n_events": 1,
+   "last_seen": "2026-11-21T04:30:35.000Z",
+   "first_event_title": "CVE-2026-19793: WP Import Export Lite \u22643.9.32 (HIGH) lets unauthenticated users execute PHP via crafted comments if admin runs export/import"
+  },
+  {
+   "id": "nvidia-dgx-spark-rack-cooling",
+   "title": "Nvidia DGX Spark Rack & Cooling",
+   "n_events": 1,
+   "last_seen": "2026-11-21T04:26:18Z",
+   "first_event_title": "Nvidia DGX Spark Rack & Cooling"
+  },
+  {
+   "id": "apache-roller-pre-auth-rce-cve-2026-82384-cvss-9-8",
+   "title": "Apache Roller pre-auth RCE CVE-2026-82384 (CVSS 9.8)",
+   "n_events": 15,
+   "last_seen": "2026-11-21T04:25:03.000Z",
+   "first_event_title": "Apache Roller 6.1.5 has a critical pre-auth flaw (CVE-2026-82384, CVSS 9.8): its XML-RPC endpoint reads attacker data before any login, allo"
+  },
+  {
+   "id": "cve-2026-123007-critical-nginx-http-2-integer-underflow-leads-to",
+   "title": "CVE-2026-123007: Critical NGINX HTTP/2 Integer Underflow Leads to RCE (FIXED)",
+   "n_events": 72,
+   "last_seen": "2026-11-21T04:15:02.000Z",
+   "first_event_title": "CVE-2026-123007: Critical NGINX HTTP/2 Integer Underflow Leads to RCE (FIXED)"
+  },
+  {
+   "id": "gnupg-rates-gpgme-double-free-triggered-by-long-openpgp-user-id",
+   "title": "GnuPG rates GPGME double free triggered by long OpenPGP user ID as critical",
+   "n_events": 1,
+   "last_seen": "2026-11-21T04:08:27.298Z",
+   "first_event_title": "GnuPG calls it critical: a double free in GPGME, triggered by an OpenPGP key with a very long user ID. It sits in the library behind most ma"
+  },
+  {
+   "id": "vcenter-zero-day-cve-2026-123890-exploited-by-armory-castle-befo",
+   "title": "vCenter zero-day CVE-2026-123890 exploited by ARMORY CASTLE before Broadcom patch (VMSA-2026-0009)",
+   "n_events": 47,
+   "last_seen": "2026-11-21T03:25:03.000Z",
+   "first_event_title": "vCenter zero-day CVE-2026-123890 was exploited by ARMORY CASTLE before Broadcom patched it in VMSA-2026-0009. Attack chain, fixes and huntin"
+  },
+  {
+   "id": "cisa-warns-of-4-exploited-flaws-linked-to-ransomware-cryptominin",
+   "title": "CISA Warns of 4 Exploited Flaws Linked to Ransomware, Cryptomining, and LLMjacking Attacks",
+   "n_events": 20,
+   "last_seen": "2026-11-21T03:16:22.000Z",
+   "first_event_title": "CISA Warns of 4 Exploited Flaws Linked to Ransomware, Cryptomining, and LLMjacking Attacks"
+  },
+  {
+   "id": "unpatched-windows-0-day-fastunlock-lets-someone-holding-a-locked",
+   "title": "Unpatched Windows 0-Day FastUnlock Lets Someone Holding a Locked PC Run Programs on It",
+   "n_events": 11,
+   "last_seen": "2026-11-21T02:52:01.000Z",
+   "first_event_title": "Unpatched Windows 0-Day FastUnlock Lets Someone Holding a Locked PC Run Programs on It"
+  },
+  {
+   "id": "php-warns-admins-of-two-critical-flaws-emergency-patches-coming",
+   "title": "PHP warns admins of two critical flaws, emergency patches coming tomorrow",
+   "n_events": 475,
+   "last_seen": "2026-11-21T02:43:09.000Z",
+   "first_event_title": "PHP warns admins of two critical flaws, emergency patches coming tomorrow"
+  },
+  {
+   "id": "china-linked-hackers-exploit-php2shell-to-root-firewalls",
+   "title": "China-Linked Hackers Exploit PHP2Shell to Root Firewalls",
+   "n_events": 77,
+   "last_seen": "2026-11-21T02:20:06.726Z",
+   "first_event_title": "China-Linked Hackers Exploit PHP2Shell to Root Firewalls"
+  },
+  {
+   "id": "jupyter-mcp-server-cve-2026-77359-allows-dns-rebinding-takeover",
+   "title": "Jupyter MCP Server CVE-2026-77359 allows DNS rebinding takeover of notebook backend, fixed in 1.0.3",
+   "n_events": 1,
+   "last_seen": "2026-11-21T01:37:48.000Z",
+   "first_event_title": "Jupyter MCP Server flaw lets malicious websites redirect its notebook backend A critical flaw in Jupyter MCP Server before version 1.0.3 let"
+  },
+  {
+   "id": "amazon-says-chinese-hackers-used-cairn-ai-tool-to-discover-appar",
+   "title": "Amazon says Chinese hackers used Cairn AI tool to discover apparent zero-day during attack on university",
+   "n_events": 7,
+   "last_seen": "2026-11-21T01:32:44.000Z",
+   "first_event_title": "Amazon says Chinese hackers used Cairn AI tool to discover apparent zero-day during attack on university"
+  },
+  {
+   "id": "cto-of-ransomwarehelp-indicted-for-wire-fraud",
+   "title": "CTO of \u2018RansomwareHelp\u2019 Indicted for Wire Fraud",
+   "n_events": 6,
+   "last_seen": "2026-11-21T01:00:12.000Z",
+   "first_event_title": "CTO of \u2018RansomwareHelp\u2019 Indicted for Wire Fraud"
+  },
+  {
+   "id": "bell-canada-says-agentic-hacker-stole-enterprise-customer-data",
+   "title": "Bell Canada says 'agentic' hacker stole enterprise customer data",
+   "n_events": 3,
+   "last_seen": "2026-11-21T00:43:36.000Z",
+   "first_event_title": "Bell Canada says 'agentic' hacker stole enterprise customer data"
+  },
+  {
+   "id": "ransomware-what-we-know-about-the-arrests-of-chaos-affiliates",
+   "title": "Ransomware: What we know about the arrests of Chaos affiliates",
+   "n_events": 1,
+   "last_seen": "2026-11-21T00:00:45Z",
+   "first_event_title": "Ransomware: What we know about the arrests of Chaos affiliates"
+  },
+  {
+   "id": "ncsc-operation-disconnects-thousands-of-refrigeration-controller",
+   "title": "NCSC operation disconnects thousands of refrigeration controllers at UK supermarkets",
+   "n_events": 6,
+   "last_seen": "2026-11-20T23:20:33.000Z",
+   "first_event_title": "\"A behind the scenes cyber-security operation has taken place to secure tens of thousands of fridges and freezers at major UK supermarkets, "
+  },
+  {
+   "id": "friday-squid-blogging-the-largest-squid-ever-filmed",
+   "title": "Friday Squid Blogging: The Largest Squid Ever Filmed",
+   "n_events": 0,
+   "last_seen": "2026-11-20T22:04:12Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "dialing-for-data-inside-the-com-s-high-profile-heists",
+   "title": "Dialing for Data: Inside the Com\u2019s High-Profile Heists",
+   "n_events": 1,
+   "last_seen": "2026-11-20T22:00:25Z",
+   "first_event_title": "Dialing for Data: Inside the Com\u2019s High-Profile Heists"
+  },
+  {
+   "id": "west-virginia-legislature-hit-with-cyber-incident-affecting-it-s",
+   "title": "West Virginia Legislature hit with cyber incident affecting IT systems",
+   "n_events": 1,
+   "last_seen": "2026-11-20T21:34:36Z",
+   "first_event_title": "West Virginia Legislature hit with cyber incident affecting IT systems"
+  },
+  {
+   "id": "ai-joins-the-industrial-attack-workflow",
+   "title": "AI Joins the Industrial Attack Workflow",
+   "n_events": 2,
+   "last_seen": "2026-11-20T21:22:03Z",
+   "first_event_title": "AI Joins the Industrial Attack Workflow"
+  },
+  {
+   "id": "jpmorgan-says-third-party-vendors-were-targeted-in-cyberattack",
+   "title": "JPMorgan says third-party vendors were targeted in cyberattack",
+   "n_events": 25,
+   "last_seen": "2026-11-20T20:37:57.000Z",
+   "first_event_title": "There's a lot of stuff going on today. Here's some of it: JP Morgan, today: \"Based on our investigation so far, we believe the attackers acc"
+  },
+  {
+   "id": "in-security-words-matter-as-much-as-tools-maybe-more",
+   "title": "In Security, Words Matter as Much as Tools, Maybe More",
+   "n_events": 0,
+   "last_seen": "2026-11-20T20:34:04.831Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "us-companies-use-of-chinese-open-weight-ai-draws-rebuke-from-hou",
+   "title": "US companies\u2019 use of Chinese open weight AI draws rebuke from House chairmen",
+   "n_events": 0,
+   "last_seen": "2026-11-20T20:25:00Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "carnegie-endowment-discloses-breach-exposing-contact-and-donor-i",
+   "title": "Carnegie Endowment discloses breach exposing contact and donor information",
+   "n_events": 1,
+   "last_seen": "2026-11-20T20:16:00Z",
+   "first_event_title": "Carnegie Endowment discloses breach exposing contact and donor information"
+  },
+  {
+   "id": "signal-blocks-apple-google-ai-screenshotting-in-response-to-exis",
+   "title": "Signal blocks Apple, Google AI screenshotting in response to \u2018existential threat\u2019 to privacy app",
+   "n_events": 0,
+   "last_seen": "2026-11-20T19:54:25Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "police-dismantle-gootloader-castlerat-stealc-malware-infrastruct",
+   "title": "Police dismantle Gootloader, CastleRAT, StealC malware infrastructure",
+   "n_events": 29,
+   "last_seen": "2026-11-20T19:54:11.316Z",
+   "first_event_title": "Police dismantle Gootloader, CastleRAT, StealC malware infrastructure"
+  },
+  {
+   "id": "openssl-cve-2026-121481-heap-buffer-overflow-in-evp-encodeblock",
+   "title": "OpenSSL CVE-2026-121481 heap buffer overflow in EVP_EncodeBlock output sizing",
+   "n_events": 13,
+   "last_seen": "2026-11-20T19:39:30.000Z",
+   "first_event_title": "OpenSSL **CVE-2026-121481** OpenSSL: heap buffer overflow in EVP_EncodeBlock() output sizing. \"The CVSS score is not provided and the exploi"
+  },
+  {
+   "id": "container-store-restores-systems-after-cyberattack",
+   "title": "Container Store restores systems after cyberattack",
+   "n_events": 1,
+   "last_seen": "2026-11-20T19:32:00Z",
+   "first_event_title": "Container Store restores systems after cyberattack"
+  },
+  {
+   "id": "adobe-security-advisory-av26-1092",
+   "title": "Adobe security advisory (AV26-1092)",
+   "n_events": 2,
+   "last_seen": "2026-10-30T08:01:42.000Z",
+   "first_event_title": "Adobe security advisory (AV26-1092)"
+  },
+  {
+   "id": "atlassian-security-advisory-av26-1166",
+   "title": "Atlassian security advisory (AV26-1166)",
+   "n_events": 1,
+   "last_seen": "2026-11-17T15:25:41Z",
+   "first_event_title": "Atlassian security advisory (AV26-1166)"
+  },
+  {
+   "id": "cisco-security-advisory-av26-1127",
+   "title": "Cisco security advisory (AV26-1127)",
+   "n_events": 2,
+   "last_seen": "2026-11-05T03:58:31.000Z",
+   "first_event_title": "Cisco security advisory (AV26-1127)"
+  },
+  {
+   "id": "cisco-security-advisory-av26-1175",
+   "title": "Cisco security advisory (AV26-1175)",
+   "n_events": 2,
+   "last_seen": "2026-11-18T21:25:28.000Z",
+   "first_event_title": "Cisco security advisory (AV26-1175)"
+  },
+  {
+   "id": "control-systems-moxa-security-advisory-av26-1089",
+   "title": "[Control Systems] Moxa security advisory (AV26-1089)",
+   "n_events": 1,
+   "last_seen": "2026-10-27T13:35:40Z",
+   "first_event_title": "[Control Systems] Moxa security advisory (AV26-1089)"
+  },
+  {
+   "id": "control-systems-moxa-security-advisory-av26-1187",
+   "title": "[Control Systems] Moxa security advisory (AV26-1187)",
+   "n_events": 1,
+   "last_seen": "2026-11-20T15:50:59Z",
+   "first_event_title": "[Control Systems] Moxa security advisory (AV26-1187)"
+  },
+  {
+   "id": "craft-cms-security-advisory-av26-1086",
+   "title": "Craft CMS security advisory (AV26-1086)",
+   "n_events": 2,
+   "last_seen": "2026-10-26T17:00:13.000Z",
+   "first_event_title": "Craft CMS security advisory (AV26-1086)"
+  },
+  {
+   "id": "dell-security-advisory-av26-1161",
+   "title": "Dell security advisory (AV26-1161)",
+   "n_events": 1,
+   "last_seen": "2026-11-16T14:25:58Z",
+   "first_event_title": "Dell security advisory (AV26-1161)"
+  },
+  {
+   "id": "fortinet-security-advisory-av26-812",
+   "title": "Fortinet security advisory (AV26-812)",
+   "n_events": 2,
+   "last_seen": "2026-08-13T10:40:57Z",
+   "first_event_title": "Fortinet security advisory (AV26-812)"
+  },
+  {
+   "id": "github-security-advisory-av26-1172",
+   "title": "GitHub security advisory (AV26-1172)",
+   "n_events": 1,
+   "last_seen": "2026-11-18T14:40:41Z",
+   "first_event_title": "GitHub security advisory (AV26-1172)"
+  },
+  {
+   "id": "gnu-security-advisory-av26-1173",
+   "title": "GNU security advisory (AV26-1173)",
+   "n_events": 1,
+   "last_seen": "2026-11-18T15:41:31Z",
+   "first_event_title": "GNU security advisory (AV26-1173)"
+  },
+  {
+   "id": "google-security-advisory-av26-904",
+   "title": "Google security advisory (AV26-904)",
+   "n_events": 2,
+   "last_seen": "2026-09-09T20:49:30Z",
+   "first_event_title": "Google security advisory (AV26-904)"
+  },
+  {
+   "id": "grafana-security-advisory-av26-860",
+   "title": "Grafana Alloy Vulnerability CVE-2026-19516",
+   "n_events": 3,
+   "last_seen": "2026-10-13T16:00:56.470Z",
+   "first_event_title": "Grafana security advisory (AV26-860)"
+  },
+  {
+   "id": "hashicorp-security-advisory-av26-797",
+   "title": "HashiCorp security advisory (AV26-797)",
+   "n_events": 1,
+   "last_seen": "2026-08-11T14:05:42Z",
+   "first_event_title": "HashiCorp security advisory (AV26-797)"
+  },
+  {
+   "id": "hashicorp-security-advisory-av26-817",
+   "title": "HashiCorp security advisory (AV26-817)",
+   "n_events": 1,
+   "last_seen": "2026-08-14T16:05:44Z",
+   "first_event_title": "HashiCorp security advisory (AV26-817)"
+  },
+  {
+   "id": "ibm-security-advisory-av26-1040",
+   "title": "IBM security advisory (AV26-1040)",
+   "n_events": 1,
+   "last_seen": "2026-10-14T18:40:41Z",
+   "first_event_title": "IBM security advisory (AV26-1040)"
+  },
+  {
+   "id": "ibm-security-advisory-av26-1135",
+   "title": "IBM security advisory (AV26-1135)",
+   "n_events": 11,
+   "last_seen": "2026-11-11T05:15:06.000Z",
+   "first_event_title": "IBM security advisory (AV26-1135)"
+  },
+  {
+   "id": "ibm-security-advisory-av26-1162",
+   "title": "IBM security advisory (AV26-1162)",
+   "n_events": 1,
+   "last_seen": "2026-11-16T14:50:50Z",
+   "first_event_title": "IBM security advisory (AV26-1162)"
+  },
+  {
+   "id": "ivanti-security-advisory-av26-805",
+   "title": "Ivanti security advisory (AV26-805)",
+   "n_events": 1,
+   "last_seen": "2026-08-11T20:20:39Z",
+   "first_event_title": "Ivanti security advisory (AV26-805)"
+  },
+  {
+   "id": "ivanti-security-advisory-av26-897",
+   "title": "Ivanti September 2026 security advisory: EPMM, ITSM, Sentry vulnerabilities",
+   "n_events": 3,
+   "last_seen": "2026-09-09T06:39:58Z",
+   "first_event_title": "Ivanti security advisory (AV26-897)"
+  },
+  {
+   "id": "apache-http-server-flaws-enable-remote-code-execution-and-denial",
+   "title": "Apache HTTP Server Flaws Enable Remote Code Execution and Denial-of-Service Attacks",
+   "n_events": 56,
+   "last_seen": "2026-11-19T05:01:44.244Z",
+   "first_event_title": "Apache HTTP Server Flaws Enable Remote Code Execution and Denial-of-Service Attacks"
+  },
+  {
+   "id": "cve-2026-28763-critical-stack-buffer-overflow-in-totolink-x2000r",
+   "title": "CVE-2026-28763 critical stack buffer overflow in TOTOLINK X2000R allows code execution",
+   "n_events": 1,
+   "last_seen": "2026-10-21T00:00:38.000Z",
+   "first_event_title": "CVE-2026-28763: CRITICAL stack buffer overflow in TOTOLINK X2000R (V1.0.0-B20250421.1327). Authenticated attacker can trigger code execution"
+  },
+  {
+   "id": "edk-ii-pxe-network-stack-remote-code-execution-cve-2026-97631",
+   "title": "EDK II PXE Network Stack Remote Code Execution (CVE-2026-97631)",
+   "n_events": 1,
+   "last_seen": "2026-11-06T10:21:24.000Z",
+   "first_event_title": "\ud83d\udea8 A critical vulnerability (CVE-2026-97631) has been discovered in the EDK II PXE network stack, with a CVSS score of 9.5. The good news? No"
+  },
+  {
+   "id": "spying-on-governments-with-zero-lines-of-malware-a-custom-softet",
+   "title": "Webworm uses a custom SoftEther bridge to hide long-term access in government networks",
+   "n_events": 2,
+   "last_seen": "2026-11-19T18:46:48.000Z",
+   "first_event_title": "Spying on Governments with Zero Lines of Malware: A Custom SoftEther Bridge in Webworm\u2019s Toolkit"
+  },
+  {
+   "id": "critical-gogs-flaw-enables-remote-code-execution-through-path-tr",
+   "title": "Critical Gogs Flaw Enables Remote Code Execution Through Path Traversal",
+   "n_events": 2,
+   "last_seen": "2026-08-29T08:03:29Z",
+   "first_event_title": "Critical Gogs Flaw Enables Remote Code Execution Through Path Traversal"
+  },
+  {
+   "id": "critical-apache-airflow-flaw-cve-2026-68982-enables-unauthentica",
+   "title": "Critical Apache Airflow Flaw CVE-2026-68982 Enables Unauthenticated Remote Code Execution",
+   "n_events": 2,
+   "last_seen": "2026-11-10T17:16:41.000Z",
+   "first_event_title": "Critical Apache Airflow Flaw CVE-2026-68982 Enables Unauthenticated Remote Code Execution"
+  },
+  {
+   "id": "cve-2026-6730-ibm-concert-buffer-overflow-allows-local-arbitrary",
+   "title": "CVE-2026-6730: IBM Concert buffer overflow allows local arbitrary code execution (CVSS 9.8)",
+   "n_events": 1,
+   "last_seen": "2026-09-24T06:00:23.000Z",
+   "first_event_title": "Buffer overflow (CVE-2026-6730) in IBM Concert 1.0.0-3.0.0 (CVSS 9.8, CRITICAL) lets local users execute arbitrary code. No patch yet \u2014 rest"
+  },
+  {
+   "id": "curl-cve-2026-92392-enables-remote-code-execution-during-http-2",
+   "title": "cURL CVE-2026-92392 Enables Remote Code Execution During HTTP/2 Uploads",
+   "n_events": 4,
+   "last_seen": "2026-10-18T12:02:16.000Z",
+   "first_event_title": "The cURL CVE-2026-92392 vulnerability enables remote code execution during HTTP/2 uploads. Update to cURL 8.23.0 or disable HTTP/2 to protec"
+  },
+  {
+   "id": "critical-langflow-flaws-enable-remote-code-execution",
+   "title": "Critical Langflow flaws enable remote code execution",
+   "n_events": 2,
+   "last_seen": "2026-11-12T11:33:15Z",
+   "first_event_title": "https:// thehackernews.com/2026/11/crit ical-langflow-flaws-could-let.html # Langflow # CyberSecurity # CriticalVulnerability # RCE # ZeroDa"
+  },
+  {
+   "id": "remcontrol-android-banking-trojan-steals-pins-using-ai-built-phi",
+   "title": "RemControl Android Banking Trojan Steals PINs Using AI-Built Phishing Overlays",
+   "n_events": 12,
+   "last_seen": "2026-09-28T09:23:41.000Z",
+   "first_event_title": "RemControl Android Banking Trojan Steals PINs Using AI-Built Phishing Overlays"
+  }
+ ]
+}
