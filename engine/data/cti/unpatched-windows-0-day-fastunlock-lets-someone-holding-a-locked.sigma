@@ -1,0 +1,27 @@
+title: FastUnlock - Program Launched From Removable Media as WsiAccount
+id: 8f1c4a52-6f4d-4b1e-9d0a-2c7b5e93af14
+status: experimental
+description: Detects the FastUnlock Windows 11 lock-screen bypass, where a physically present attacker uses Narrator to reach SystemSettings and Explorer, mounts a USB drive and runs a binary as the ephemeral non-administrative WsiAccount without signing in. WsiAccount executing an image from a non-system drive letter is the observable residue of that flow.
+references:
+  - https://thehackernews.com/2026/11/new-unpatched-windows-0-day-fastunlock.html
+  - https://www.threatlocker.com/blog/proof-of-concept-for-fastunlock-windows-lock-screen-bypass-from-nightmare-eclipse
+  - https://github.com/MSNightmare/FastUnlock
+author: Tia N. List
+date: 2026/11/21
+tags:
+  - attack.t1200
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection_user:
+    User|endswith: '\WsiAccount'
+  selection_external_media:
+    Image|re: '^[d-zD-Z]:\\'
+  filter_integrity:
+    IntegrityLevel: 'System'
+  condition: selection_user and selection_external_media and not filter_integrity
+falsepositives:
+  - Legitimate provisioning or imaging runs that launch signed vendor tools from a removable drive under the WsiAccount context
+  - Backup and recovery software executing from external media while running as WsiAccount
+level: medium
