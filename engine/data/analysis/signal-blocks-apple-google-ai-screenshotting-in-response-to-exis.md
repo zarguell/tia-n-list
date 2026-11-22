@@ -1,0 +1,3 @@
+Signal says its fix for OS-level AI agents reading chat content is to block screenshots in its apps, and the company says that does not cover an agent reading content off the device by other means. The concern centers on Apple and Google AI features that capture chat screens. The limit comes from Signal itself, so this should be read as closing one capture path, not as removing an OS agent's ability to observe message text.
+
+The practical risk is that screenshot blocking looks like a complete fix while Signal's own caveat leaves another access path unresolved. Watch for a fuller description of the threat model, any follow-up client changes, and testing of whether OS AI agents can still recover message content after screenshots are blocked.
