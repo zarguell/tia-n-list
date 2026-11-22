@@ -1,0 +1,3 @@
+Signal has added a control that stops AI agents from reading private chats through screenshots on Android and iOS, according to the November 22 post linking the punkreport.sh writeup. Coverage in the story's sources, which include The Hacker News, frames this as a product change to block agent-driven screen capture rather than as a patched software flaw. The story lists no CVE.
+
+The change matters because screenshot access lets an agent with device-level reach read message content without a user forwarding it. What to watch is whether the block behaves the same on Android and iOS, and whether it holds up against updates to the accessibility and capture paths that agents use.

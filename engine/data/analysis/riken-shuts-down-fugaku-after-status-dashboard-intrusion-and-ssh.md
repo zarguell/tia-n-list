@@ -1,0 +1,3 @@
+RIKEN confirmed a cyberattack on November 13, 2026 that took Fugaku, Japan's flagship supercomputer, offline. A November 22 follow-up described the incident as a network intrusion with data leakage. The original japancyberwatch.com post says intruders reached internal servers through Fugaku's internet-facing status dashboard, and the source URL names SSH key theft as part of the intrusion.
+
+An internet-facing status dashboard becoming a path to internal systems is the key detail here. The two tracked posts give no CVE, actor attribution or count of exposed records, so the leaked data's scope remains unconfirmed. Watch for RIKEN's own incident statement, confirmation of which SSH keys were taken, and any word on when Fugaku returns to service.
