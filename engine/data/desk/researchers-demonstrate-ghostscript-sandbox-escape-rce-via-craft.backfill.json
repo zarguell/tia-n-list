@@ -1,0 +1,60 @@
+{
+  "findings": [
+    {
+      "title": "Bug 709684: Type 1 font-loader .forceput save/restore UAF yields native read/write and controlled dispatch/RCE under -dSAFER",
+      "published_at": "2026-09-01T21:15:54Z",
+      "url": "https://bugs.ghostscript.com/show_bug.cgi?id=709684",
+      "source_domain": "ghostscript.com",
+      "summary_md": "Paulos Yibelo filed this critical, embargoed bug with Artifex on 1 September 2026 and attached a self-contained reproduction. The report describes a type error in `.putgstringcopy` that resumes execution before a bound `.forceput`, leaving a local string referenced from `systemdict` after `restore`; allocator reuse then yields native read/write and controlled dispatch. It reproduced against official Ghostscript 10.07.1 and 10.07.0 and against Google production 10.05.0, with `29 11 mul` returning 18 instead of 319 after the native pointer swap."
+    },
+    {
+      "title": "Ghostscript releases: 10.08.0",
+      "published_at": "2026-09-08T00:00:00Z",
+      "url": "https://www.ghostscript.com/releases/index",
+      "source_domain": "ghostscript.com",
+      "summary_md": "Artifex lists Ghostscript 10.08.0, dated 2026-09-08, as the latest release on its releases page. The page points to release notes and a separate CVE and fixes index rather than naming individual issues inline. This is the upstream boundary that later advisories use to define the affected range for CVE-2026-125396."
+    },
+    {
+      "title": "USN-8949-1: Ghostscript vulnerabilities",
+      "published_at": "2026-10-21T00:00:00Z",
+      "url": "https://ubuntu.com/security/notices/USN-8949-1",
+      "source_domain": "ubuntu.com",
+      "summary_md": "Canonical published USN-8949-1 on 21 October 2026 for seven Ubuntu releases, from 16.04 LTS through 26.10. It describes Paulos Yibelo's font-operand finding as a sandbox bypass and possible arbitrary code execution from a crafted file, labelled 'No CVE number' because the identifier had not yet been assigned. Listed fixed packages include 10.02.1~dfsg1-0ubuntu7.10 for Ubuntu 24.04 LTS and 9.55.0~dfsg1-0ubuntu5.15 for 22.04 LTS."
+    },
+    {
+      "title": "CVE-2026-125396 - Vulnerability-Lookup (CIRCL)",
+      "published_at": "2026-11-09T23:28:00Z",
+      "url": "https://cve.circl.lu/vuln/cve-2026-125396",
+      "source_domain": "circl.lu",
+      "summary_md": "CIRCL's record was published on 9 November 2026 with the CVE description: Ghostscript before 10.08.0 contains a `-dSAFER` bypass in the `.putgstringcopy` procedure in `gs_fonts.ps`, which calls the privileged `.forceput`. The record carries CVSS 4.0 score 8.5 with a local attack vector and lists 2 September 2026 as the public date. A CISA ADP SSVC decision was recorded on 10 November."
+    },
+    {
+      "title": "Upload2Shell evidence index (updated 18 November 2026)",
+      "published_at": "2026-11-18T00:00:00Z",
+      "url": "https://pwn.ai/upload2shell",
+      "source_domain": "pwn.ai",
+      "summary_md": "pwn.ai's evidence index, updated 18 November 2026, documents a Type 1 font-loader use-after-free that crosses Ghostscript's `-dSAFER` boundary and runs attacker-chosen commands as the rendering process. Its first ten entries record command execution through Debian 13 CUPS, Roundcube, Forminator, Elementor, WordPress Core, MediaWiki, DokuWiki, Mayan EDMS, ResourceSpace and Plesk, with Gradio showing a live HTTP-to-Ghostscript handoff. The timeline records discovery on 27 July, the Artifex report by 2 September, release of 10.08.0 on 8 September and CVE publication on 9 November."
+    },
+    {
+      "title": "Ghostscript 10.08.0 fixes multiple CVEs, including upload2shell",
+      "published_at": "2026-11-21T19:09:32Z",
+      "url": "https://seclists.org/oss-sec/2026/q4/806",
+      "source_domain": "seclists.org",
+      "summary_md": "Alan Coopersmith posted to oss-sec on 21 November 2026 that Ghostscript 10.08.0 was released on 8 September and that its release notes only said the release addressed a number of potential security issues. He listed five CVEs that Artifex's CVE index marks fixed in 10.08.0 and noted that pwn.ai had published Upload2Shell the same day, identifying CVE-2026-125396 as also fixed and detailing exploitation through programs that pass files to Ghostscript. The post is an early cross-reference between the silent upstream fix and the public research."
+    },
+    {
+      "title": "How We Hacked the Pipes: Upload2Shell",
+      "published_at": "2026-11-21T00:00:00Z",
+      "url": "https://pwn.ai/upload2shell/research.html",
+      "source_domain": "pwn.ai",
+      "summary_md": "Paulos Yibelo's technical post, dated 21 November 2026, explains how a Type 1 font-loader use-after-free in `.putgstringcopy` recovers a privileged `.forceput`, creates a dangling reference and overwrites native path-control state so commands run with `-dSAFER` still enabled. It traces delivery through Pillow, imageio, scikit-image, PHP Imagick, libvips, Qt KImageFormats and Matplotlib, and records 145 benign calls across 29 image APIs in two controlled runs. The post lists patch versions, still-open vendor trackers as of 12 November, and markers such as `/var/tmp/GS_CUPS_PIPE_RCE` and `PATH_CONTROL_BYTES_AFTER=0,0,0,0`."
+    },
+    {
+      "title": "Upload2Shell Ghostscript Bug Turns File Uploads Into Remote Code Execution, Patch Gaps Remain",
+      "published_at": "2026-11-21T23:34:52Z",
+      "url": "https://cyberkendra.com/2026/11/upload2shell-ghostscript-bug-turns-file-uploads-into-remote-code-execution-patch-gaps-remain.html",
+      "source_domain": "cyberkendra.com",
+      "summary_md": "Cyber Kendra published this news writeup with a timestamp of 2026-11-22T05:04:52+05:30, which is 21 November 23:34:52 UTC. It reports confirmed command execution through print jobs, email attachments and public upload forms across Debian 13, Roundcube, Plesk, MediaWiki, WordPress plugins and a Google document-renderer case. It notes the CVSS 4.0 score of 8.5, the affected range before 10.08.0, and that as of 22 November Amazon Linux still listed a pending fix, Debian 12 remained vulnerable and Red Hat's tracking bug was open."
+    }
+  ]
+}
