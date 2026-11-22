@@ -1,0 +1,57 @@
+title: Python Application Spawning a Shell Reverse Connection (Cairn / MONAI Label Intrusion)
+id: d9fa78f0-21b5-4b53-9082-a0fabd945518
+status: experimental
+description: >
+    Detects a Python web application process spawning a Unix shell that
+    carries reverse-connection syntax. Amazon Threat Intelligence described
+    exactly this final step against an internet-facing MONAI Label server:
+    autonomous Cairn agents used a path traversal in the datastore upload
+    endpoint (CVE-2026-133968) to write a Python reverse shell into a file the
+    interpreter reads at startup, then obtained a root shell. The parent side
+    is the Python interpreter hosting the exposed application; the child side
+    is a shell whose command line redirects a socket back to the operator.
+    Any hit on a server that has no business running shell one-liners is worth
+    immediate triage.
+references:
+    - https://aws.amazon.com/blogs/security/chinese-nexus-actors-cairn-ai-agents-found-a-zero-day-on-their-own/
+    - https://thehackernews.com/2026/11/attackers-ai-agents-found-zero-day-in.html
+    - https://www.bleepingcomputer.com/news/security/hackers-use-autonomous-ai-tool-cairn-to-find-zero-day-take-over-server/
+author: Tia N. List
+date: 2026/11/22
+tags:
+    - attack.t1190
+    - attack.t1059
+    - attack.t1546
+logsource:
+    category: process_creation
+    product: linux
+detection:
+    selection_parent:
+        ParentImage|endswith:
+            - '/python3'
+            - '/python'
+            - '/python3.11'
+            - '/python3.12'
+            - '/python3.13'
+    selection_shell:
+        Image|endswith:
+            - '/sh'
+            - '/bash'
+            - '/dash'
+            - '/ash'
+            - '/zsh'
+    selection_reverse:
+        CommandLine|contains:
+            - '/dev/tcp/'
+            - '/dev/udp/'
+            - 'bash -i'
+            - 'nc -e'
+            - 'ncat -e'
+            - 'mkfifo'
+            - '0>&1'
+            - 'socket.socket'
+    condition: selection_parent and selection_shell and selection_reverse
+falsepositives:
+    - Developer workstations and CI jobs where a Python script legitimately launches a shell one-liner that mentions a socket or /dev/tcp redirect
+    - Health-check or diagnostic scripts maintained by an application team
+level: high
