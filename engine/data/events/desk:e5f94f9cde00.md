@@ -1,0 +1,1 @@
+The VulnCheck CNA record for CVE-2026-134814 was published on 2026-11-22 at 21:22 UTC and lists a public date of 2026-11-11. It scores CVSS v4.0 at 9.2 and v3.1 at 8.1, affects binary-parser versions below 2.3.1, and credits Zachariah Mithani of AploSec. The record points to the maintainer advisory and two patch commits as references.
