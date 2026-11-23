@@ -1,0 +1,1 @@
+The GitHub Advisory Database published an unreviewed, high-severity advisory for CVE-2026-124251 on 10 November 2026. It describes a cross-site request forgery in XplodedThemes WPIDE affecting the plugin from n/a through version 3.6.4. The record points to NVD and Patchstack references and lists no mapped package or patched version.
