@@ -165,7 +165,7 @@
   "current_release": "2026-11-22T23:59:59"
  },
  "collected_at": "2026-11-23T12:20:58Z",
- "updated_at": "2026-11-23T12:20:58Z",
+ "updated_at": "2026-11-23T12:23:53Z",
  "next": {
   "release": "2026-W48",
   "date": "2026-11-30",
@@ -55166,7 +55166,98 @@
   }
  ],
  "analysis": {
-  "source": "pending"
+  "headline": "Kernel bulk, PHP RCE cluster, one exploited Thunderbird flaw: where SUSE risk sits",
+  "summary": [
+   "SUSE's Week 47 batch is 1,701 CVEs, but the shape of it is maintenance, not emergency: 1,232 kernel entries plus 144 more across 30-plus Live Patch streams for SLE 15 SP4/SP6/SP7 and Micro 6.0, all carrying the same small set of kernel fixes per channel. Severity is top-heavy in name only \u2014 94 critical, 1,604 important \u2014 while exploitation evidence is nearly absent: one KEV (CVE-2026-111497, Thunderbird), zero flagged exploited, zero disclosed, zero remote-unauthenticated.",
+   "The genuine urgency sits in the application stacks. PHP 7/8 contributes a cluster of 9.8 and 8.1 criticals with automatable flags and EPSS near 1.0, Java ships a coordinated JSSE fix across four JDK lines (java-25/21/17/11, 185 package entries), BIND carries a network-facing resolver bug, and Thunderbird combines the release's only KEV with the largest non-kernel footprint. Admins should treat the kernel volume as a patch-cadence problem and the PHP/Thunderbird items as a same-week problem."
+  ],
+  "themes": [
+   {
+    "title": "Kernel volume is live-patch duplication, not 1,376 distinct bugs",
+    "detail": "The 1,232 'Linux Kernel' entries plus 144 entries spread over ~36 Live Patch families (mostly 4 or 2 CVEs each) reflect the same fixes reissued per SLE/Micro maintenance stream. Triage per stream and per exposure, not by raw CVE count.",
+    "cves": [
+     "CVE-2026-99999",
+     "CVE-2026-74588",
+     "CVE-2026-74688",
+     "CVE-2026-98432"
+    ]
+   },
+   {
+    "title": "PHP is where the criticals actually cluster",
+    "detail": "php7 and php8 account for a disproportionate share of the 94 criticals, including two 9.8s with automatable flags and EPSS 0.96-0.97, plus a session-handling flaw at EPSS 0.99. These are the release's most realistically exploitable items.",
+    "cves": [
+     "CVE-2026-129289",
+     "CVE-2026-126714",
+     "CVE-2026-115560",
+     "CVE-2026-129496",
+     "CVE-2026-129481"
+    ]
+   },
+   {
+    "title": "Java gets a coordinated JSSE fix across four JDK lines",
+    "detail": "java-25/21/17/11 total 185 package entries, with the JSSE flaw and related Java2Shell coverage pointing at TLS/network paths rather than sandbox escapes. Patch all installed JDKs in lockstep; mixed-version hosts are the exposure.",
+    "cves": [
+     "CVE-2026-114938",
+     "CVE-2026-114820",
+     "CVE-2026-91403"
+    ]
+   },
+   {
+    "title": "One KEV, and it is the mail client",
+    "detail": "CVE-2026-111497 is the release's only KEV, carries EPSS 1.00, sits in a 241-entry Thunderbird update, and already has ten newsroom items (Node2Shell/HTTP2Shell). It is the single item with confirmed exploitation behind it.",
+    "cves": [
+     "CVE-2026-111497"
+    ]
+   },
+   {
+    "title": "Network and infrastructure daemons: small counts, high leverage",
+    "detail": "bind (4), xen (4), python3 (4), sssd (26), vsftpd (2), open-iscsi (7) are numerically trivial next to the kernel but sit on resolvers, hypervisors, identity and storage paths. The BIND item has EPSS 0.61 and a public ISC advisory set.",
+    "cves": [
+     "CVE-2026-94300",
+     "CVE-2026-115557"
+    ]
+   }
+  ],
+  "data_vs_prose": "Headlines chase kernel corner cases with public PoCs (CVE-2026-74580 vhost, CVE-2026-98260 local-root set, CVE-2026-89495 DLM, CVE-2026-89736 USB audio) and non-kernel tooling (ImageMagick, CPython ssl), yet the scoring puts the exploitable risk in PHP, Thunderbird, BIND and Java \u2014 none of the PHP criticals has bespoke coverage beyond two roundup pieces. Conversely the prose flags things the counts understate: only 1 KEV and 0 exploited/disclosed is thin signal for a 1,701-CVE batch, and remote_unauth 0 sits oddly beside 140 automatable. Feed hygiene needs checking before publication: epss_ge_10 (8) is smaller than epss_ge_50 (56), which is impossible for nested thresholds, the top-30 titles are empty, family counts sum well past 1,701 so families overlap, and CVE-2026-99999 is headlined as a WordPress theme-preview RCE while mapped here to a kernel Live Patch family.",
+  "watchlist": [
+   {
+    "cve": "CVE-2026-111497",
+    "why": "Only KEV in the release, EPSS 1.00, 241-entry Thunderbird update, ten newsroom items. Patch mail clients first."
+   },
+   {
+    "cve": "CVE-2026-129289",
+    "why": "php7 critical 9.8, automatable, EPSS 0.97 \u2014 the strongest RCE candidate in the batch."
+   },
+   {
+    "cve": "CVE-2026-126714",
+    "why": "Second php7 9.8 with automatable flag and EPSS 0.96; same advisory wave as the above, same patch cycle."
+   },
+   {
+    "cve": "CVE-2026-115560",
+    "why": "PHP session flaw at EPSS 0.99 with five newsroom items; session handling makes blast radius hard to bound."
+   },
+   {
+    "cve": "CVE-2026-114820",
+    "why": "JSSE flaw covered as Oracle Java/GraalVM critical; TLS-path bug across JDK lines, EPSS 0.32 but automatable."
+   },
+   {
+    "cve": "CVE-2026-94300",
+    "why": "BIND 9 resolver bug, EPSS 0.61, part of a four-CVE ISC set; externally reachable on DNS infrastructure."
+   },
+   {
+    "cve": "CVE-2026-74580",
+    "why": "Linux vhost (Vghost) with released PoC and dedicated coverage, but sits outside the triage top 30 \u2014 under-ranked by score."
+   },
+   {
+    "cve": "CVE-2026-99999",
+    "why": "Scored 54.0 as a kernel Live Patch item yet headlined as a WordPress Click2Shell RCE; resolve the product attribution before linking coverage."
+   }
+  ],
+  "patch_note": "Order: (1) MozillaThunderbird for CVE-2026-111497 \u2014 only confirmed exploitation, single package, fastest win. (2) php7/php8 \u2014 critical RCE cluster with automatable flags and near-1.0 EPSS; patch both lines even where only one is internet-facing. (3) bind, then java-25/21/17/11 (all installed JDKs, JSSE path) and xen/python3 for network and hypervisor exposure. (4) Kernel by maintenance stream \u2014 SLE 15 SP4/SP6/SP7 and Micro 6.0 Live Patch channels, prioritising hosts that cannot reboot; the 1,232 kernel entries are mostly local-privilege fixes reissued per stream, so schedule them rather than emergency them. (5) Base-image and utility packages last: ImageMagick (47), busybox (20), sssd (26), tiff, rsyslog, vsftpd, open-iscsi, azcopy/osconfig agents. Note with_kb is 0 \u2014 SUSE ships advisories and repo updates, not Microsoft-style KBs, so patch by product/stream via zypper, not by KB lookup.",
+  "source": "agent",
+  "kev_snapshot": [
+   "CVE-2026-111497"
+  ]
  },
  "backfilled": false,
  "tracking": {
