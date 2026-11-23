@@ -1,0 +1,5 @@
+ANY.RUN reviewed five campaigns from the 2026 Thanksgiving and Black Friday season. The lures were fake corporate invitations, e-cards, healthcare surveys, promotional newsletters and discount coupons. The reported goals were credential theft, collection of personal data, script execution and remote access, rather than a single shared payload.
+
+Two cases targeted corporate employees through invitations and familiar workplace communications, while a third used a seasonal survey to collect personal information. Several chains used multi-stage redirects and browser fingerprinting. Others leaned on legitimate services and software instead of conventional malware, which makes link-level reputation checks a weak control.
+
+The practical watch item is what happens after the click: redirect chains, fingerprinting calls, and any use of trusted third-party services that carry a session into a credential prompt or remote-access tool. The public post is a case roundup and does not give victim counts or a consolidated indicator list, so it should be read as a campaign-pattern report, not evidence of one coordinated actor or a measured wave of incidents.
