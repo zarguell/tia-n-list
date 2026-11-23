@@ -24,7 +24,7 @@
   "current_release": "2026-11-22T23:59:59"
  },
  "collected_at": "2026-11-23T12:09:05Z",
- "updated_at": "2026-11-23T12:09:05Z",
+ "updated_at": "2026-11-23T12:19:16Z",
  "next": {
   "release": "2026-W48",
   "date": "2026-11-30",
@@ -1532,7 +1532,94 @@
   }
  ],
  "analysis": {
-  "source": "pending"
+  "headline": "Triage scores rank ClamAV DoS above NGINX RCE \u2014 metadata, not risk, sets the order",
+  "summary": [
+   "Scope reconciles at the release level: 16 CVEs scoped against 16 vendor patches, and the vendor flagged nothing notable. Below that, the machine fields do not reconcile. Severity buckets are empty (0 critical, 0 important, 0 moderate, 0 low) while the scored rows carry High/7.5; family counts sum to 21 across four families against a 16-CVE scope; and the EPSS aggregate reports 6 at \u226510% and 6 at \u226550% as the same set, which the per-row values contradict (14 of 16 rows sit above 10%). KEV, exploited, disclosed, more_likely and remote_unauth are all zero, so no exploitation signal exists anywhere in this release \u2014 the urgency ordering here is built from scoring inputs, not observed activity.",
+   "The triage order is inverted against consequence. Ten ClamAV engine bugs in Secure Endpoint occupy the top of the ranking on CVSS 7.5 plus an automatable flag, with EPSS in the 37\u201350% band and no exploitation flags; they are availability defects in a scanner, plus two scan-time bypasses. The five Intersight CVEs and the OpenJDK/Java4Shell CVE \u2014 EPSS 0.97 to 0.99, the highest in the release \u2014 rank 23\u201331 and carry no CVSS and no severity at all, so they are excluded from every severity bucket by construction. Treat the ranking as a completeness measure for metadata, not a risk ranking."
+  ],
+  "themes": [
+   {
+    "title": "ClamAV engine defects supply most of the count and all of the top scores",
+    "detail": "Ten of 16 CVEs are parser and unpacker faults in the Secure Endpoint scanning engine: infinite loops, heap over-reads and underflows, memory exhaustion. All are 7.5 High, all flagged automatable, all with EPSS in the 37\u201350% band and zero KEV/exploit signal. Impact is denial of service to scanning, except two that combine a size/scan-time bypass with DoS \u2014 evasion matters more than the crash.",
+    "cves": [
+     "CVE-2026-76411",
+     "CVE-2026-76415",
+     "CVE-2026-76414",
+     "CVE-2026-76416",
+     "CVE-2026-76422",
+     "CVE-2026-76430",
+     "CVE-2026-76515",
+     "CVE-2026-76421",
+     "CVE-2026-76417",
+     "CVE-2026-76516"
+    ]
+   },
+   {
+    "title": "Intersight is the real exposure and the severity pipeline does not see it",
+    "detail": "Five CVEs in the Intersight Virtual Appliance carry EPSS 0.97\u20130.98 and internal titles of NGINX2Root:RCE, but no CVSS, no severity, no vendor flag and no KEV entry. An internet-adjacent management appliance with a probable HTTP/2 integer-underflow path to code execution is the item to patch on sight; it is invisible in the severity counts because the fields are null.",
+    "cves": [
+     "CVE-2026-123007",
+     "CVE-2026-123633",
+     "CVE-2026-121810",
+     "CVE-2026-123634",
+     "CVE-2026-113425"
+    ]
+   },
+   {
+    "title": "Java4Shell is one CVE with the release's highest EPSS and its lowest score",
+    "detail": "The OpenJDK memory-corruption entry sits at EPSS 0.99 and triage 23.4 \u2014 the bottom of the scored set \u2014 purely because severity and CVSS are absent. The family name is a news-cycle label rather than a product line, so scope here is whatever Cisco products consume the affected JDK. Any assumption that the affected estate is small should be checked against inventory, not the family name.",
+    "cves": [
+     "CVE-2026-114938"
+    ]
+   },
+   {
+    "title": "No exploitation signal, and no vendor flags to substitute for one",
+    "detail": "KEV, exploited, disclosed, more_likely and remote_unauth are all zero, the automated-total field is zero despite 10 automatable CVEs, and the vendor's own notable-items list is empty. With no observed activity and no vendor prioritisation, the only defensible ordering is exposure-based: internet-facing appliance first, then interpreter/JDK surface, then endpoint engine content.",
+    "cves": [
+     "CVE-2026-114938",
+     "CVE-2026-123007",
+     "CVE-2026-76515"
+    ]
+   }
+  ],
+  "data_vs_prose": "The data shows a commodity endpoint-engine release: 10 ClamAV High/7.5 automatable defects with mid-band EPSS and no exploitation, against 6 CVEs with EPSS \u226550% that carry no severity metadata at all. The prose shows the opposite emphasis and worse hygiene: the newsroom's highest-volume coverage is four Intersight CVEs published under the CVE-2026-123007 NGINX headline, so 6/5/3/3/3 article counts measure headline reuse, not independent reporting on those four IDs. Three ClamAV CVEs are filed under 'Java2Shell', which mislabels a C-vs-Java stack. Only the NGINX integer-underflow-to-RCE characterisation, and the 'native code' framing, come from prose and cannot be derived from the data \u2014 the data has no CVSS and no description beyond internal labels. Two things the data does assert and the prose ignores: the ISE family contributes 5 CVEs with no corresponding row, CVE or article anywhere in this view, and with_kb 0 is a Microsoft-template field surviving into a Cisco release, not evidence of missing patches.",
+  "watchlist": [
+   {
+    "cve": "CVE-2026-123007",
+    "why": "EPSS 0.98 on an Intersight management appliance, titled RCE; the anchor for the newsroom's whole Intersight thread. Patch before reading the rest."
+   },
+   {
+    "cve": "CVE-2026-123633",
+    "why": "EPSS 0.97, same NGINX2Root:RCE thread. Reported only via a headline about CVE-2026-123007 \u2014 no independent verification of this ID."
+   },
+   {
+    "cve": "CVE-2026-121810",
+    "why": "EPSS 0.97, same thread and same headline-reuse caveat; treat as unconfirmed until the advisory text is read."
+   },
+   {
+    "cve": "CVE-2026-123634",
+    "why": "EPSS 0.97. Duplicate-looking EPSS and title suggest a cloned advisory batch; confirm which build each ID maps to."
+   },
+   {
+    "cve": "CVE-2026-113425",
+    "why": "EPSS 0.97, lowest triage score of the five (27.9) despite near-top EPSS \u2014 the clearest example of score inversion."
+   },
+   {
+    "cve": "CVE-2026-114938",
+    "why": "Highest EPSS in the release (0.99) and lowest score (23.4). Java4Shell naming will drive inbound questions; no CVSS to answer them with."
+   },
+   {
+    "cve": "CVE-2026-76515",
+    "why": "OLE2 scan-time bypass combined with DoS \u2014 detection evasion in the scanner, which outlives the availability impact."
+   },
+   {
+    "cve": "CVE-2026-76421",
+    "why": "LZX/CHM decoder heap buffer overflow: memory corruption in a parser fed untrusted files, the one ClamAV entry with a plausible path beyond DoS."
+   }
+  ],
+  "patch_note": "Intersight Virtual Appliance first \u2014 five CVEs at EPSS 0.97\u20130.98 on an internet-facing management plane, and the only items here that look like remote code execution. Second, the OpenJDK/Java4Shell surface (CVE-2026-114938): inventory which Cisco products bundle the affected JDK rather than assuming the family is small. Third, Secure Endpoint: ship the ClamAV engine/content update that covers the ten engine CVEs, prioritising the OLE2 and XAR size/scan-time bypasses over the pure DoS bugs, and verify the engine build actually advanced rather than only the management console. Cisco ISE: five CVEs are attributed to the family but appear nowhere in the scored set or the coverage list \u2014 confirm whether they exist, which IDs they are, and that the fix is applied before closing the release. Nothing here is KEV-listed or observed exploited, so no emergency change window is justified beyond Intersight.",
+  "source": "agent",
+  "kev_snapshot": []
  },
  "backfilled": false,
  "tracking": {
