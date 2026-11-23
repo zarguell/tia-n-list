@@ -1,0 +1,1 @@
+cve.now lists CVE-2026-134624 as a critical request forgery issue in N-able MailAssure with a fixed build of 20261121.1943. Its metadata gives the CVSS 4.0 vector AV:N/AC:L/AT:N/PR:H/UI:N/VC:H/VI:H/VA:N/SC:H/SI:H/SA:N and an EPSS estimate of 0.35 percent. The entry points to the LDAP synchronisation connection check as the affected function.
