@@ -1,0 +1,3 @@
+Samsung Securities disclosed on Nov. 23 that unauthorized access to its Voice of Customer system on Saturday, Nov. 21 exposed personal information belonging to 8,241 customers. The VOC system is the part of the brokerage website where customers submit inquiries and feedback, and the intruder obtained files that customers had attached to those submissions.
+
+The disclosure gives no attribution or ransom claim, so the practical impact is bounded by whatever personal data sat in the inquiry attachments. A second report on Nov. 23 restates the same breach and the "over 8,000" scale without adding technical detail. Watch for a follow-up from Samsung Securities on what the attachments contained and whether South Korean regulators open a notification review.
