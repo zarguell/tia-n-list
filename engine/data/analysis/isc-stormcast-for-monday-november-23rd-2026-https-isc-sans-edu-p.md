@@ -1,0 +1,3 @@
+The SANS Internet Storm Center published its Stormcast daily briefing for Monday, 23 November 2026. The feed entry points to episode 10190 on isc.sans.edu, and a Mastodon post from the Storm Center points to that day's diary through the ISC RSS feed. Both captured items refer to the same briefing.
+
+Neither item states a CVE, an affected product, an indicator, or a victim, so there is no discrete finding to assess in the text itself. The briefing is a daily audio roundup; the topics it covers and any defensive detail have to come from the episode or the linked ISC diary, which can be checked for the individual items ISC flagged that day.
