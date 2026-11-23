@@ -1,0 +1,35 @@
+title: PowerShell Spawned by IIS Worker Process - Possible Web Shell Activity
+id: 5d8c3b2a-41e7-4f96-b0a5-2c93e7d46b18
+status: experimental
+description: Detects powershell.exe or pwsh.exe launched as a child of the IIS worker process (w3wp.exe). The Symantec-reported intrusion at a major African stock exchange ran a 41-module credential-harvesting PowerShell toolkit under an IIS web shell, so an interactive interpreter under w3wp.exe is a strong web-shell indicator.
+references:
+  - https://www.security.com/threat-intelligence/african-stock-exchange-ai-assisted-attack
+  - https://therecord.media/witchetty-espionage-group-targeted-two-middle-eastern-govts-stock-exchange-of-african-nation
+  - https://gbhackers.com/african-stock-exchange-credential-theft/
+author: Tia N. List
+date: 2026/11/23
+tags:
+  - attack.t1100
+  - attack.t1086
+  - attack.t1059
+  - attack.t1552
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection_parent:
+    ParentImage|endswith: '\w3wp.exe'
+  selection_interpreter:
+    Image|endswith:
+      - '\powershell.exe'
+      - '\pwsh.exe'
+  filter_maintenance:
+    ParentCommandLine|contains:
+      - 'HealthCheck'
+      - 'ConfigurationManager'
+    User|endswith:
+      - '$'
+  condition: selection_parent and selection_interpreter and not filter_maintenance
+falsepositives:
+  - Application pools hosting legitimate PowerShell automation, CI agents or Exchange/SharePoint maintenance tasks
+level: medium

@@ -1,0 +1,38 @@
+title: Ghostscript Spawning a Shell - Upload2Shell Sandbox Escape
+id: b74e1f60-2c93-4a58-8d0e-6f15ab3c9207
+status: experimental
+description: Detects Ghostscript (-dSAFER) interpreters that spawn a command shell, the post-exploitation shape of CVE-2026-125396 (Upload2Shell) when a crafted document is rendered through print queues, mail filters or web upload/preview pipelines. Also matches the research marker strings named in the pwn.ai report.
+references:
+  - https://pwn.ai/upload2shell
+  - https://pwn.ai/upload2shell/research.html
+  - https://thehackernews.com/2026/11/researchers-demonstrate-ghostscript.html
+  - https://bugs.ghostscript.com/show_bug.cgi?id=709684
+author: Tia N. List
+date: 2026/11/23
+tags:
+  - attack.t1190
+  - attack.t1203
+  - attack.t1059
+logsource:
+  category: process_creation
+  product: linux
+detection:
+  selection_parent:
+    ParentImage|endswith:
+      - '/gs'
+      - '/gs-10.07'
+      - '/gs-10.05'
+  selection_shell_child:
+    Image|endswith:
+      - '/sh'
+      - '/bash'
+      - '/dash'
+      - '/python3'
+  selection_research_marker:
+    CommandLine|contains:
+      - 'GS_CUPS_PIPE_RCE'
+      - 'PATH_CONTROL_BYTES_AFTER'
+  condition: (selection_parent and selection_shell_child) or selection_research_marker
+falsepositives:
+  - Document conversion pipelines that deliberately shell out to wrapped Ghostscript helpers
+level: high
