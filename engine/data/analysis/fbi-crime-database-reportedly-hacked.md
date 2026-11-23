@@ -1,0 +1,5 @@
+Hackers reportedly breached the FBI's national crime database, and the FBI is investigating what the BBC describes as an apparent hack of its criminal information systems. The database held more than 19.3 million records in 2025. How many records, if any, were exposed is still unknown.
+
+The reported advice to the public is specific: if someone calls demanding payment over a warrant, hang up and call the agency directly. That guidance suggests concern about extortion-style calls using purported warrant data, though the available reporting does not say such calls were made or tie any actor to the intrusion.
+
+Watch for an FBI statement on scope, the intrusion timeline, and whether any criminal case data was copied or altered. Until then the confirmed facts are the reported breach, the 19.3 million record scale of the database in 2025, and an investigation with no disclosed victim or exfiltration count.

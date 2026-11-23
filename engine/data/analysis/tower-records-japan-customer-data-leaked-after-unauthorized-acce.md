@@ -1,0 +1,5 @@
+Tower Records Japan said customer information was leaked after unauthorized access, according to Japan Times reporting on 23 November 2026. A separate report dates the cyberattack to 19 November and puts the potential scale at approximately 11 million customer records.
+
+The reported fields are names, dates of birth and delivery addresses. The company said no credit card information was leaked. The incident adds to a run of retail sector breaches in Japan, and the combination of names, birth dates and addresses is useful for impersonation even without payment data.
+
+Watch for a finalized count from Tower Records, confirmation of when the unauthorized access began, and any regulator notification or customer notices. The 11 million figure is currently framed as records that may have been compromised, not a confirmed number of affected people.
