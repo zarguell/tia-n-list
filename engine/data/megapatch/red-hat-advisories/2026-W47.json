@@ -227,7 +227,7 @@
   "current_release": "2026-11-22T23:59:59"
  },
  "collected_at": "2026-11-23T12:05:03Z",
- "updated_at": "2026-11-23T12:05:03Z",
+ "updated_at": "2026-11-23T12:07:54Z",
  "next": {
   "release": "2026-W48",
   "date": "2026-11-30",
@@ -25977,7 +25977,110 @@
   }
  ],
  "analysis": {
-  "source": "pending"
+  "headline": "Red Hat's risk concentrates in container base images and the registry, not RHEL core",
+  "summary": [
+   "The release is structurally a rebuild wave, not a disclosure event: 416 of 686 CVEs land in RHEL, but the density of criticals sits in Red Hat Hardened Images (49 CVEs, over a third of the top 30) and in OpenShift AI. That is the signature of shared upstream code \u2014 PHP, nginx, Ruby, Java \u2014 compiled into a handful of base images, where one rebuild retires dozens of rows. Triage scores above 57 are dominated by use-after-free and buffer-overflow chains in native HTTP and runtime code, most of which have years of public prior art in adjacent products.",
+   "The telemetry says quiet, the headlines say loud. Zero exploited, zero disclosed, zero remote-unauthenticated in our fields, and one KEV entry; yet coverage runs on campaign branding \u2014 Node2Shell, HTTP2Shell, Java2Shell, PHP2Shell \u2014 attached to bugs whose CVE records describe ordinary memory-safety defects. Two exceptions deserve separate handling: the registry pair (CVE-2026-123710, CVE-2026-110697), where the trust anchor of the container supply chain is itself the target, and the persistent npm-transitive debt in OpenShift Data Foundation, where 2020-era 9.8s are still shipping."
+  ],
+  "themes": [
+   {
+    "title": "Base images carry the critical mass",
+    "detail": "Hardened Images contributes 49 CVEs but supplies most of the top-30 criticals: PHP use-after-free clusters (magic-method backtraces, timezone cache, session shutdown, serializer mismatch), four distinct nginx worker UAFs, and a Ruby heap overflow. These are one rebuild's worth of work with outsized triage weight because the same bug lands in every derived workload image.",
+    "cves": [
+     "CVE-2026-115560",
+     "CVE-2026-129474",
+     "CVE-2026-129182",
+     "CVE-2026-129496",
+     "CVE-2026-129481",
+     "CVE-2026-132825",
+     "CVE-2026-123633",
+     "CVE-2026-121810",
+     "CVE-2026-123634",
+     "CVE-2026-113425"
+    ]
+   },
+   {
+    "title": "nginx: six bugs, one headline",
+    "detail": "Our coverage folds CVE-2026-123007 (flow-control window overflow) together with four unrelated worker/resolver/mail-proxy use-after-frees and the rewrite-module code-execution flaw into a single HTTP/2 integer-underflow story. The remediation paths differ by module \u2014 HTTP/2, HTTP/3, resolver, mail \u2014 so an admin who patched against the headline may still be exposed on the resolver path.",
+    "cves": [
+     "CVE-2026-123007",
+     "CVE-2026-123633",
+     "CVE-2026-121810",
+     "CVE-2026-123634",
+     "CVE-2026-113425",
+     "CVE-2026-9256",
+     "CVE-2026-42055"
+    ]
+   },
+   {
+    "title": "Registry as the soft supply-chain link",
+    "detail": "Only five CVEs in the mirror registry family, but they are the release's most consequential: unauthenticated signing-key takeover via service key rotation (9.8) and a SQL LIKE wildcard injection that leaks cross-tenant robot tokens (9.9). Compromise here re-signs or substitutes content for every downstream cluster, independent of how well the images themselves are patched.",
+    "cves": [
+     "CVE-2026-123710",
+     "CVE-2026-110697"
+    ]
+   },
+   {
+    "title": "Core kernel and host tooling stay exploitable-adjacent",
+    "detail": "The RHEL 9.8s are kernel memory-lifetime bugs \u2014 IPv4 inet_opt/ireq_opt freed after an RCU grace period, two libceph out-of-bounds/auth-buffer writes \u2014 plus a podman flaw where an image annotation can disable nearly all sandboxing including user-requested isolation. These are local-to-adjacent attack paths with high reliability once reached, and they bypass the container-layer story entirely.",
+    "cves": [
+     "CVE-2026-98432",
+     "CVE-2026-68159",
+     "CVE-2026-68156",
+     "CVE-2026-94603"
+    ]
+   },
+   {
+    "title": "Stale transitive dependencies inside OpenShift Data Foundation",
+    "detail": "ODF's 88 CVEs include 2020\u20132022 npm advisories at maximum severity: bson deserialization (9.8), lodash template command injection, ini prototype pollution, qs prototype poisoning. A 9.8 from 2020 inside a current storage platform is a maintenance signal, not a new threat \u2014 but the CVSS and triage scores rank it above genuinely novel bugs, distorting prioritisation.",
+    "cves": [
+     "CVE-2020-7610",
+     "CVE-2021-23337",
+     "CVE-2020-7788",
+     "CVE-2022-24999"
+    ]
+   }
+  ],
+  "data_vs_prose": "The feed is quiet where coverage is loud: zero exploited, zero disclosed, zero remote-unauthenticated, one KEV, and no KB articles for any CVE \u2014 so nothing in the machine data supports the campaign framing of the '2shell' headlines, and nothing supports assuming patches are documented. Coverage touches 24 CVEs of 686, i.e. the newsroom is tracking roughly 3.5% of the release and mostly the branded subset. The single KEV item, CVE-2026-111497, is a brotli decoder out-of-bounds write in OpenShift AI, not a shell-chain primitive; conversely the kernel 9.8 and the two Quay bugs got thin or misattributed coverage \u2014 CVE-2026-98432's headline is about Cisco, WatchGuard and SonicWall, and CVE-2026-33278's unbound DNSSEC UAF is buried in a browser roundup. Two data caveats: the EPSS bucket fields are inconsistent (29 at \u226510% versus 154 at \u226550%, which cannot both be right), and top-30 EPSS values cluster at 0.90\u20131.00, suggesting a percentile rather than a probability \u2014 do not read 154 as '154 likely-exploited CVEs'.",
+  "watchlist": [
+   {
+    "cve": "CVE-2026-111497",
+    "why": "Only KEV entry in the release, EPSS 1.00, brotli decoder OOB write reachable through compressed request bodies on OpenShift AI endpoints."
+   },
+   {
+    "cve": "CVE-2026-98432",
+    "why": "9.8 kernel IPv4 use-after-free after an RCU grace period; lifetime-window bugs of this class tend to be reliably triggerable once a race harness exists."
+   },
+   {
+    "cve": "CVE-2026-123710",
+    "why": "Unauthenticated signing-key takeover in Quay; registry compromise invalidates every downstream signature and image-provenance assumption."
+   },
+   {
+    "cve": "CVE-2026-110697",
+    "why": "SQL LIKE wildcard injection leaks cross-tenant robot tokens at 9.9 \u2014 credential theft that enables the registry abuse above without touching a signing key."
+   },
+   {
+    "cve": "CVE-2026-114938",
+    "why": "OpenJDK memory-corruption RCE gated on AVX-512 VBMI, so exposure is hardware-selective but severe where present in Hardened Images JREs."
+   },
+   {
+    "cve": "CVE-2026-119618",
+    "why": "httpd mod_http2 remote code execution at 9.8 in OpenShift Dev Spaces, unflagged by any triage field \u2014 a pure scoring blind spot."
+   },
+   {
+    "cve": "CVE-2026-94603",
+    "why": "podman honours image annotations that disable user-requested sandboxing, undermining CI and developer-workstation isolation boundaries."
+   },
+   {
+    "cve": "CVE-2020-7610",
+    "why": "2020 bson deserialization flaw at 9.8 still shipping inside OpenShift Data Foundation; indicates dependency refresh is not gated on severity."
+   }
+  ],
+  "patch_note": "Start with RHEL hosts: kernel (CVE-2026-98432, libceph pair), then podman \u2014 the host layer underpins every container claim later. Next rebuild all Hardened Images bases, since one PHP/nginx/Ruby refresh clears most of the top-30 criticals and evicts HTTP/2 and HTTP/3 worker UAFs from derived images. Then mirror registry/Quay for the signing-key and robot-token bugs, ahead of any workload image, because a compromised registry rewrites what everything else trusts. OpenShift AI follows for the KEV brotli decoder. OpenShift Data Foundation can trail \u2014 its 9.8s are old transitive npm debt, real but not new \u2014 and JBoss, OpenJDK, Ansible, Dev Spaces and the single OpenStack entry close out. With zero KB fields populated, drive this from errata and container image digests, not KB numbers.",
+  "source": "agent",
+  "kev_snapshot": [
+   "CVE-2026-111497"
+  ]
  },
  "backfilled": false,
  "tracking": {
