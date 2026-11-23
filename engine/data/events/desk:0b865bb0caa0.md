@@ -1,0 +1,1 @@
+The GitHub Advisory Database published an unreviewed entry for CVE-2026-131914 on 19 November, rating it critical and mapping it to CWE-502. It repeats the Mandiant description of unauthenticated code execution in Idunno.AntiCsrf through 0.9.1 Beta and lists no patched version. The entry was published from the National Vulnerability Database record from the same day.
