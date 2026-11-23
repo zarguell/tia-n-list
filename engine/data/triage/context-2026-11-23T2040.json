@@ -1,0 +1,449 @@
+{
+ "date": "2026-11-23",
+ "decisions_path": "engine/data/triage/decisions-2026-11-23T2040.json",
+ "instructions": "For every new event decide: (1) keep or drop \u2014 keep only stories worth covering (real security events, vulnerabilities, attacks, breaches, advisories with substance); drop press releases, vendor marketing, generic explainers, and anything duplicating an existing story. (2) If keep, assign the event to the RIGHT story: an existing candidate story id if it belongs there (this FIXES mechanical clustering \u2014 e.g. different outlets' Patch Tuesday roundups are ONE story), or NEW with a clean story_title. (3) merges: list candidate stories that are really the same story (from = fragment, into = the most complete one). (4) For every kept event that names CVEs, optionally assess exploitation: exploited = the event reports OBSERVED in-the-wild exploitation (implants, victim counts, campaigns, CISA KEV confirmation); suspected = public exploit code/PoC or likely-but-unconfirmed. Attribute ONLY the CVEs you can tie to the claim \u2014 a bulletin's blanket 'actively exploited' does NOT flag all its CVEs. Omit the exploitation field when the event makes no claim.\n(5) LOW-TRUST events (\"low_trust\": true \u2014 AI-drafted aggregator reposts, late and overstated): treat as unverified leads. When the text attributes the claim to a named primary source (a researcher firm like watchTowr, a vendor advisory, CISA, a major outlet) and attribution_urls or a web search (/home/ubuntu/repos/cronman/bin/web-search.sh \"query\") locate that primary source CONFIRMING the claim, include a provenance object in the decision: {\"url\": <primary url>, \"source\": <domain>, \"evidence\": <one line>, \"verified\": true}. VERIFIED provenance lets the event mint a story (credited to the primary source) and count as a development; without it, a low-trust event can only attach to an EXISTING story, never mint. If you cannot verify, keep/drop on normal merit and omit provenance.\n\nWrite decisions as JSON with EXACTLY this shape:\n{\n  \"decisions\": [\n    {\"event_id\": \"<id>\", \"action\": \"keep\", \"story\": \"<existing candidate story id>\", \"reason\": \"...\"},\n    {\"event_id\": \"<id>\", \"action\": \"keep\", \"story\": \"NEW\", \"story_title\": \"<clean title>\", \"reason\": \"...\"},\n    {\"event_id\": \"<id>\", \"action\": \"drop\", \"reason\": \"...\"}\n  ],\n  \"merges\": [{\"from\": \"<fragment story id>\", \"into\": \"<canonical story id>\"}]\n}\nFor events marked \"low_trust\" (AI-drafted aggregator reposts) a decision\nmay carry an optional \"provenance\" object when you VERIFIED the claim at\nthe named primary source: {\"event_id\": ..., \"action\": \"keep\", ...}\n  \"provenance\": {\"url\": \"<primary source url>\", \"source\": \"<domain>\", \"evidence\": \"<one line>\"}\nOnly include provenance when the primary source (vendor advisory, CISA,\nthe named researcher/outlet) really carries the claim \u2014 verified\nprovenance lets a low-trust event mint a story and set freshness; without\nit the event can only amplify an existing story.\nSTRICT KEY NAMES: the array key is \"decisions\" (never \"events\"); the story\nkey is \"story\" (never \"story_id\"); \"story\" holds a candidate_stories id\nverbatim or the literal string \"NEW\". Optional per-event field\n\"exploitation\": {\"CVE-...\": {\"status\": \"exploited|suspected\", \"evidence\": \"1-2 sentences\"}}.",
+ "new_events": [
+  {
+   "id": "rss:c1c6031c9106382a",
+   "title": "US Cyber Director Pick Signals Shift Toward Expertise",
+   "source": "darkreading.com",
+   "published_at": "2026-11-23T20:13:48Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Trump named Kirsten Davies as Acting National Cyber Director, bringing greater industry experience to the role amid recent outages and rising geopolitical tensions. "
+  },
+  {
+   "id": "rss:21818ab680950ef2",
+   "title": "OpenRouter drops AI providers over leaked prompts and secrets",
+   "source": "bleepingcomputer.com",
+   "published_at": "2026-11-23T20:00:20Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "OpenRouter removed three AI providers from its platform after discovering that they had violated their stated data-handling policies and exposed sensitive data. The company also revoked Zero Data Retention (ZDR) eligibil"
+  }
+ ],
+ "candidate_stories": [
+  {
+   "id": "us-cyber-director-pick-signals-shift-toward-expertise",
+   "title": "US Cyber Director Pick Signals Shift Toward Expertise",
+   "n_events": 1,
+   "last_seen": "2026-11-23T20:13:48Z",
+   "first_event_title": "US Cyber Director Pick Signals Shift Toward Expertise"
+  },
+  {
+   "id": "openrouter-drops-ai-providers-over-leaked-prompts-and-secrets",
+   "title": "OpenRouter drops AI providers over leaked prompts and secrets",
+   "n_events": 1,
+   "last_seen": "2026-11-23T20:00:20Z",
+   "first_event_title": "OpenRouter drops AI providers over leaked prompts and secrets"
+  },
+  {
+   "id": "azure-flaw-exploited-to-target-secrets-at-norwegian-energy-firms",
+   "title": "Azure API Management flaw exploited to steal secrets from Norwegian energy firms",
+   "n_events": 11,
+   "last_seen": "2026-11-23T19:42:20Z",
+   "first_event_title": "Azure Flaw Exploited to Target Secrets at Norwegian Energy Firms"
+  },
+  {
+   "id": "vulnerability-remediation-plan-weekly-intelligence-operations-16",
+   "title": "Vulnerability Remediation Plan: Weekly Intelligence Operations (16\u201322 November 2026)",
+   "n_events": 0,
+   "last_seen": "2026-11-23T19:01:01Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "spanish-laliga-confirms-hackers-stole-soccer-fans-personal-data",
+   "title": "Spanish LaLiga confirms hackers stole soccer fans\u2019 personal data",
+   "n_events": 1,
+   "last_seen": "2026-11-23T18:38:40Z",
+   "first_event_title": "Spanish LaLiga confirms hackers stole soccer fans\u2019 personal data"
+  },
+  {
+   "id": "spying-on-governments-with-zero-lines-of-malware-a-custom-softet",
+   "title": "Webworm uses a custom SoftEther bridge to hide long-term access in government networks",
+   "n_events": 9,
+   "last_seen": "2026-11-23T18:37:26.000Z",
+   "first_event_title": "Spying on Governments with Zero Lines of Malware: A Custom SoftEther Bridge in Webworm\u2019s Toolkit"
+  },
+  {
+   "id": "meta-s-muse-ai-agent-accesses-private-signal-messages-without-us",
+   "title": "Meta\u2019s Muse AI Agent Accesses Private Signal Messages Without Users\u2019 Knowledge",
+   "n_events": 25,
+   "last_seen": "2026-11-23T18:37:00Z",
+   "first_event_title": "Meta\u2019s Muse AI Agent Accesses Private Signal Messages Without Users\u2019 Knowledge"
+  },
+  {
+   "id": "indicted-kosovo-credit-card-theft-suspect-extradited-to-us",
+   "title": "Indicted Kosovo credit card theft suspect extradited to US",
+   "n_events": 1,
+   "last_seen": "2026-11-23T18:37:00Z",
+   "first_event_title": "Indicted Kosovo credit card theft suspect extradited to US"
+  },
+  {
+   "id": "fbi-investigates-apparent-breach-of-national-crime-information-c",
+   "title": "FBI investigates apparent breach of National Crime Information Center criminal database",
+   "n_events": 25,
+   "last_seen": "2026-11-23T18:30:00Z",
+   "first_event_title": "The suspected cyber intrusion raises questions about the safety of sensitive law enforcement records, including arrest warrants, criminal hi"
+  },
+  {
+   "id": "water-utilities-in-26-states-have-signed-up-for-cyber-help-new-c",
+   "title": "Water utilities in 26 states have signed up for cyber help, new center says",
+   "n_events": 0,
+   "last_seen": "2026-11-23T18:21:13Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "gta-6-hacker-released-on-licence-with-warning-don-t-let-this-hap",
+   "title": "GTA 6 hacker released on licence with warning \u2018don\u2019t let this happen again\u2019",
+   "n_events": 0,
+   "last_seen": "2026-11-23T18:06:31Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "critical-binary-parser-flaw-enables-javascript-injection-via-mal",
+   "title": "Critical binary-parser code injection flaw CVE-2026-134814",
+   "n_events": 6,
+   "last_seen": "2026-11-23T17:52:16.000Z",
+   "first_event_title": "Critical binary-parser Flaw Enables JavaScript Injection via Malicious Parser Definitions"
+  },
+  {
+   "id": "ai-threat-detection",
+   "title": "AI Threat Detection",
+   "n_events": 0,
+   "last_seen": "2026-11-23T17:50:52Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "researchers-find-android-camera-metadata-can-expose-speakerphone",
+   "title": "Researchers find Android camera metadata can expose speakerphone speech without microphone access",
+   "n_events": 1,
+   "last_seen": "2026-11-23T17:50:33.181Z",
+   "first_event_title": "Nov. 23, 2026 \u2014 Researchers found Android camera metadata can expose parts of speakerphone speech to apps, without microphone access. The pr"
+  },
+  {
+   "id": "behind-the-alias-how-one-researcher-unmasked-a-decade-of-ransomw",
+   "title": "Behind the Alias: How One Researcher Unmasked a Decade of Ransomware Actors",
+   "n_events": 0,
+   "last_seen": "2026-11-23T17:45:52Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "bell-canada-says-agentic-hacker-stole-enterprise-customer-data",
+   "title": "Bell Canada says 'agentic' hacker stole enterprise customer data",
+   "n_events": 6,
+   "last_seen": "2026-11-23T17:44:09.000Z",
+   "first_event_title": "Bell Canada says 'agentic' hacker stole enterprise customer data"
+  },
+  {
+   "id": "holiday-lures-real-threats-5-thanksgiving-and-black-friday-campa",
+   "title": "ANY.RUN tracks five Thanksgiving and Black Friday 2026 phishing and malware campaigns",
+   "n_events": 2,
+   "last_seen": "2026-11-23T17:44:03.000Z",
+   "first_event_title": "Holiday Lures, Real Threats: 5 Thanksgiving and Black Friday Campaigns from 2026"
+  },
+  {
+   "id": "fcc-weighs-three-year-security-renewals-for-cyber-trust-mark-pro",
+   "title": "FCC weighs three-year security renewals for Cyber Trust Mark products",
+   "n_events": 0,
+   "last_seen": "2026-11-23T17:30:50Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "fritz-box-and-linux-flaw-cve-2026-98432-which-models-get-updates",
+   "title": "FRITZ!Box and Linux flaw CVE-2026-98432: which models get updates?",
+   "n_events": 3,
+   "last_seen": "2026-11-23T17:28:40.000Z",
+   "first_event_title": "FRITZ!Box and Linux flaw CVE-2026-98432: which models get updates?"
+  },
+  {
+   "id": "supply-chain-compromise-backdoors-six-wp-connect-plugins-blocked",
+   "title": "Backdoored WP connect plugin releases blocked by WordPress.org before distribution",
+   "n_events": 1,
+   "last_seen": "2026-11-23T17:21:02Z",
+   "first_event_title": "Supply Chain Compromise Backdoors Six WP connect Plugins, Blocked by WordPress.org\u2019s Release Hold"
+  },
+  {
+   "id": "cisa-warns-hackers-are-actively-exploiting-cisco-vmware-sap-and",
+   "title": "CISA Warns Hackers Are Actively Exploiting Cisco, VMware, SAP, and Apache Vulnerabilities",
+   "n_events": 13,
+   "last_seen": "2026-11-23T17:13:56.000Z",
+   "first_event_title": "CISA Warns Hackers Are Actively Exploiting Cisco, VMware, SAP, and Apache Vulnerabilities"
+  },
+  {
+   "id": "tower-records-japan-customer-data-leaked-after-unauthorized-acce",
+   "title": "Tower Records Japan customer data leaked after unauthorized access",
+   "n_events": 8,
+   "last_seen": "2026-11-23T17:01:37.000Z",
+   "first_event_title": "Music retailer Tower Records Japan said customer information was leaked following unauthorized access, making it the nation's latest retaile"
+  },
+  {
+   "id": "bazuka-the-fraud-framework-that-can-do-it-all",
+   "title": "Bazuka: The Fraud Framework That Can Do It All",
+   "n_events": 9,
+   "last_seen": "2026-11-23T17:00:19.529Z",
+   "first_event_title": "Bazuka: The Fraud Framework That Can Do It All"
+  },
+  {
+   "id": "cleverbridge-warns-hackers-stole-credit-card-numbers-cvvs-in-dat",
+   "title": "Cleverbridge warns hackers stole credit card numbers, CVVs in data breach",
+   "n_events": 5,
+   "last_seen": "2026-11-23T16:50:52.000Z",
+   "first_event_title": "Cleverbridge warns hackers stole credit card numbers, CVVs in data breach"
+  },
+  {
+   "id": "globetopper-loses-2-5-million-after-hackers-steal-70k-in-gift-ca",
+   "title": "GlobeTopper loses $2.5 million after hackers steal $70k in gift cards",
+   "n_events": 1,
+   "last_seen": "2026-11-23T16:50:01Z",
+   "first_event_title": "GlobeTopper loses $2.5 million after hackers steal $70k in gift cards"
+  },
+  {
+   "id": "gl-inet-goodcloud-zero-day-exploited-to-plant-malware-on-routers",
+   "title": "GL.iNet GoodCloud zero-day exploited to plant malware on routers and KVMs",
+   "n_events": 25,
+   "last_seen": "2026-11-23T16:40:03.000Z",
+   "first_event_title": "A GL.iNet cloud zero-day in GoodCloud remote management was exploited to plant malware on routers and KVMs. How to check your device and pat"
+  },
+  {
+   "id": "crowdstrike-to-acquire-zscaler-in-43-9-billion-deal",
+   "title": "CrowdStrike to Acquire Zscaler in $43.9 Billion Deal",
+   "n_events": 7,
+   "last_seen": "2026-11-23T16:31:07.000Z",
+   "first_event_title": "CrowdStrike to Acquire Zscaler in $43.9 Billion Deal"
+  },
+  {
+   "id": "hackers-exploit-critical-asp-net-anti-csrf-library-flaw-allowing",
+   "title": "Hackers Exploit Critical ASP.NET Anti-CSRF Library Flaw Allowing Unauthenticated RCE",
+   "n_events": 12,
+   "last_seen": "2026-11-23T16:23:38.000Z",
+   "first_event_title": "Hackers Exploit Critical ASP.NET Anti-CSRF Library Flaw Allowing Unauthenticated RCE"
+  },
+  {
+   "id": "amazon-says-chinese-hackers-used-cairn-ai-tool-to-discover-appar",
+   "title": "Amazon says Chinese hackers used Cairn AI tool to discover apparent zero-day during attack on university",
+   "n_events": 21,
+   "last_seen": "2026-11-23T16:17:21Z",
+   "first_event_title": "Amazon says Chinese hackers used Cairn AI tool to discover apparent zero-day during attack on university"
+  },
+  {
+   "id": "n-able-discloses-critical-mail-assure-vulnerability-found-during",
+   "title": "N-able Discloses Critical Mail Assure Vulnerability Found During Breach Investigation",
+   "n_events": 9,
+   "last_seen": "2026-11-23T16:13:35.000Z",
+   "first_event_title": "N-able Discloses Critical Mail Assure Vulnerability Found During Breach Investigation"
+  },
+  {
+   "id": "kirsten-davies-to-become-national-cyber-director-nominee-jay-cla",
+   "title": "Kirsten Davies to become national cyber director nominee, Jay Clayton takes acting director job",
+   "n_events": 1,
+   "last_seen": "2026-11-23T16:11:10Z",
+   "first_event_title": "Intelligence chief Jay Clayton to lead White House cyber office in interim capacity"
+  },
+  {
+   "id": "openssh-on-musl-linux-has-been-letting-people-into-password-less",
+   "title": "openssh on musl linux has been letting people into password-less accounts since 2016",
+   "n_events": 83,
+   "last_seen": "2026-11-23T16:07:38.000Z",
+   "first_event_title": "openssh on musl linux has been letting people into password-less accounts since 2016"
+  },
+  {
+   "id": "greynoise-reports-active-intrusion-campaign-against-check-point",
+   "title": "GreyNoise reports active intrusion campaign against Check Point Security Management servers",
+   "n_events": 1,
+   "last_seen": "2026-11-23T16:04:46.000Z",
+   "first_event_title": "Active Intrusion Campaign Against Check Point Security Management Servers GreyNoise recently discovered an intrusion campaign targeting Chec"
+  },
+  {
+   "id": "splunk-november-2026-updates-fix-146-flaws-including-cve-2026-13",
+   "title": "Splunk November 2026 updates fix 146 flaws including CVE-2026-131253, CVE-2026-76536 and CVE-2026-131202",
+   "n_events": 7,
+   "last_seen": "2026-11-23T16:01:01Z",
+   "first_event_title": "Splunk security updates November 2026 patch 146 flaws, including CVE-2026-131253, CVE-2026-76536, and CVE-2026-131202. Review affected versi"
+  },
+  {
+   "id": "how-to-benchmark-secret-detection-vendors-without-fooling-yourse",
+   "title": "How to Benchmark Secret Detection Vendors Without Fooling Yourself: 8-Step Guide",
+   "n_events": 0,
+   "last_seen": "2026-11-23T16:00:00Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "spring-security-advisory-av26-1195",
+   "title": "Spring AI broken logical grouping expression in TypesenseFilterExpressionConverter (AV26-1195)",
+   "n_events": 1,
+   "last_seen": "2026-11-23T15:50:58Z",
+   "first_event_title": "Spring security advisory (AV26-1195)"
+  },
+  {
+   "id": "cve-2026-123007-critical-nginx-http-2-integer-underflow-leads-to",
+   "title": "CVE-2026-123007: Critical NGINX HTTP/2 Integer Underflow Leads to RCE (FIXED)",
+   "n_events": 78,
+   "last_seen": "2026-11-23T15:50:05.000Z",
+   "first_event_title": "CVE-2026-123007: Critical NGINX HTTP/2 Integer Underflow Leads to RCE (FIXED)"
+  },
+  {
+   "id": "apache-security-advisory-av26-1194",
+   "title": "Apache Solr CVE-2026-86312: ping health-check endpoint can trigger unintended functionality",
+   "n_events": 1,
+   "last_seen": "2026-11-23T15:45:39Z",
+   "first_event_title": "Apache security advisory (AV26-1194)"
+  },
+  {
+   "id": "litellm-1-107-0-supply-chain-attack-how-to-secure-ai-gateways-be",
+   "title": "LiteLLM 1.107.0 compromise: signed wheels and images built from attacker-controlled fork",
+   "n_events": 1,
+   "last_seen": "2026-11-23T15:27:20Z",
+   "first_event_title": "LiteLLM 1.107.0 Supply Chain Attack: How to Secure AI Gateways Beyond Code Signatures"
+  },
+  {
+   "id": "23rd-november-threat-intelligence-report",
+   "title": "23rd November \u2013 Threat Intelligence Report",
+   "n_events": 0,
+   "last_seen": "2026-11-23T15:25:58Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "adobe-security-advisory-av26-1092",
+   "title": "Adobe security advisory (AV26-1092)",
+   "n_events": 2,
+   "last_seen": "2026-10-30T08:01:42.000Z",
+   "first_event_title": "Adobe security advisory (AV26-1092)"
+  },
+  {
+   "id": "atlassian-security-advisory-av26-1166",
+   "title": "Atlassian security advisory (AV26-1166)",
+   "n_events": 1,
+   "last_seen": "2026-11-17T15:25:41Z",
+   "first_event_title": "Atlassian security advisory (AV26-1166)"
+  },
+  {
+   "id": "cisco-security-advisory-av26-1127",
+   "title": "Cisco security advisory (AV26-1127)",
+   "n_events": 2,
+   "last_seen": "2026-11-05T03:58:31.000Z",
+   "first_event_title": "Cisco security advisory (AV26-1127)"
+  },
+  {
+   "id": "cisco-security-advisory-av26-1175",
+   "title": "Cisco security advisory (AV26-1175)",
+   "n_events": 2,
+   "last_seen": "2026-11-18T21:25:28.000Z",
+   "first_event_title": "Cisco security advisory (AV26-1175)"
+  },
+  {
+   "id": "control-systems-moxa-security-advisory-av26-1089",
+   "title": "[Control Systems] Moxa security advisory (AV26-1089)",
+   "n_events": 1,
+   "last_seen": "2026-10-27T13:35:40Z",
+   "first_event_title": "[Control Systems] Moxa security advisory (AV26-1089)"
+  },
+  {
+   "id": "control-systems-moxa-security-advisory-av26-1187",
+   "title": "[Control Systems] Moxa security advisory (AV26-1187)",
+   "n_events": 1,
+   "last_seen": "2026-11-20T15:50:59Z",
+   "first_event_title": "[Control Systems] Moxa security advisory (AV26-1187)"
+  },
+  {
+   "id": "craft-cms-security-advisory-av26-1086",
+   "title": "Craft CMS security advisory (AV26-1086)",
+   "n_events": 2,
+   "last_seen": "2026-10-26T17:00:13.000Z",
+   "first_event_title": "Craft CMS security advisory (AV26-1086)"
+  },
+  {
+   "id": "fortinet-security-advisory-av26-812",
+   "title": "Fortinet security advisory (AV26-812)",
+   "n_events": 2,
+   "last_seen": "2026-08-13T10:40:57Z",
+   "first_event_title": "Fortinet security advisory (AV26-812)"
+  },
+  {
+   "id": "github-security-advisory-av26-1172",
+   "title": "GitHub security advisory (AV26-1172)",
+   "n_events": 1,
+   "last_seen": "2026-11-18T14:40:41Z",
+   "first_event_title": "GitHub security advisory (AV26-1172)"
+  },
+  {
+   "id": "gnu-security-advisory-av26-1173",
+   "title": "GNU security advisory (AV26-1173)",
+   "n_events": 1,
+   "last_seen": "2026-11-18T15:41:31Z",
+   "first_event_title": "GNU security advisory (AV26-1173)"
+  },
+  {
+   "id": "google-security-advisory-av26-904",
+   "title": "Google security advisory (AV26-904)",
+   "n_events": 2,
+   "last_seen": "2026-09-09T20:49:30Z",
+   "first_event_title": "Google security advisory (AV26-904)"
+  },
+  {
+   "id": "grafana-security-advisory-av26-860",
+   "title": "Grafana Alloy Vulnerability CVE-2026-19516",
+   "n_events": 3,
+   "last_seen": "2026-10-13T16:00:56.470Z",
+   "first_event_title": "Grafana security advisory (AV26-860)"
+  },
+  {
+   "id": "hashicorp-security-advisory-av26-797",
+   "title": "HashiCorp security advisory (AV26-797)",
+   "n_events": 1,
+   "last_seen": "2026-08-11T14:05:42Z",
+   "first_event_title": "HashiCorp security advisory (AV26-797)"
+  },
+  {
+   "id": "hashicorp-security-advisory-av26-817",
+   "title": "HashiCorp security advisory (AV26-817)",
+   "n_events": 1,
+   "last_seen": "2026-08-14T16:05:44Z",
+   "first_event_title": "HashiCorp security advisory (AV26-817)"
+  },
+  {
+   "id": "ibm-security-advisory-av26-1040",
+   "title": "IBM security advisory (AV26-1040)",
+   "n_events": 1,
+   "last_seen": "2026-10-14T18:40:41Z",
+   "first_event_title": "IBM security advisory (AV26-1040)"
+  },
+  {
+   "id": "ibm-security-advisory-av26-1135",
+   "title": "IBM security advisory (AV26-1135)",
+   "n_events": 11,
+   "last_seen": "2026-11-11T05:15:06.000Z",
+   "first_event_title": "IBM security advisory (AV26-1135)"
+  },
+  {
+   "id": "ibm-security-advisory-av26-1162",
+   "title": "IBM security advisory (AV26-1162)",
+   "n_events": 1,
+   "last_seen": "2026-11-16T14:50:50Z",
+   "first_event_title": "IBM security advisory (AV26-1162)"
+  },
+  {
+   "id": "ibm-security-advisory-av26-1189",
+   "title": "IBM security advisory (AV26-1189)",
+   "n_events": 1,
+   "last_seen": "2026-11-23T13:51:00Z",
+   "first_event_title": "IBM security advisory (AV26-1189)"
+  },
+  {
+   "id": "ivanti-security-advisory-av26-805",
+   "title": "Ivanti security advisory (AV26-805)",
+   "n_events": 1,
+   "last_seen": "2026-08-11T20:20:39Z",
+   "first_event_title": "Ivanti security advisory (AV26-805)"
+  },
+  {
+   "id": "ivanti-security-advisory-av26-897",
+   "title": "Ivanti September 2026 security advisory: EPMM, ITSM, Sentry vulnerabilities",
+   "n_events": 3,
+   "last_seen": "2026-09-09T06:39:58Z",
+   "first_event_title": "Ivanti security advisory (AV26-897)"
+  }
+ ]
+}
