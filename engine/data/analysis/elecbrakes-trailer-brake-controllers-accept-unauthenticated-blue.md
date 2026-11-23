@@ -1,0 +1,3 @@
+Researchers found that Elecbrakes trailer brake controllers, including the EB2 and VM1 models, accepted brake commands over Bluetooth Low Energy without pairing, a PIN, or any authentication. The posted research describes a four-byte command enough to apply the trailer brakes at any force and receive a confirmation back. The finding was published by elementdigital.com.au as part of its Brake Check work.
+
+The issue matters because the radio interface controls a physical safety system, and no credential or pairing step stands between a nearby device and brake activation. Watch for a vendor response or firmware update for EB2 and VM1 controllers. The available posts name no CVE, patch version, or affected production range beyond those controllers.
