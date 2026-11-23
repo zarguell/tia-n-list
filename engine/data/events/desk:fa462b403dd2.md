@@ -1,0 +1,1 @@
+Investor's Business Daily reported that a CrowdStrike acquisition of Zscaler would create a company with a combined market value of about 265 billion dollars. It said any transaction would likely be mostly stock because CrowdStrike ended July with about 5 billion dollars of cash, and it noted the share reaction to the Bloomberg report.
