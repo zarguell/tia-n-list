@@ -1,0 +1,3 @@
+Dark Reading's feature Behind the Alias: How One Researcher Unmasked a Decade of Ransomware Actors follows one researcher's effort to tie ransomware aliases to the people behind them. The text carried by this story is a short social preview with no actor names, alias list, attribution method or indicators. Its concrete claims are that ransomware activity continues and that a new framework is offered to security teams.
+
+No CVE, malware sample, victim count or timeline appears in the available text beyond the decade of actor tracking named in the headline. The full article is the place to check which aliases were mapped, how identities were linked across ransomware groups, and what the proposed framework asks defenders to do with that attribution.
