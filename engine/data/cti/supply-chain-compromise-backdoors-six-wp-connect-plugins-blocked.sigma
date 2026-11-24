@@ -1,0 +1,35 @@
+title: WordPress Plugin Backdoor Beaconing to tascredit-pay.com (WP connect Supply Chain)
+id: 3f2c6c1e-8d47-4bd6-9a3e-2c5c7d1b90af
+status: experimental
+description: >
+    Detects a host contacting tascredit-pay.com, the attacker-controlled server
+    used by the backdoored WP connect WordPress plugin releases distributed on
+    22 November 2026 (CVE-2026-135202). Each affected build - Air WP Sync, WP
+    Sync for Notion, Add-on Brevo for Gravity Forms and the Contact Form 7
+    Airtable/Notion add-ons - loaded the same remote-control module, which used
+    a WP-Cron event to send the site URL, PHP, WordPress and OS versions and the
+    server user to that domain, then executed PHP returned in the response. The
+    module also exposed shell command execution, password hash theft and
+    webshell planting. WordPress.org's Protect The Shire hold stopped the builds
+    before they shipped as updates, so a hit means a site obtained the
+    malicious package another way or a staging copy already calls home.
+references:
+    - https://wordfence.com/blog/2026/11/supply-chain-compromise-backdoors-six-wp-connect-plugins-blocked-by-wordpress-orgs-release-hold
+    - https://www.cve.org/CVERecord?id=CVE-2026-135202
+    - https://securityonline.info/wordpress-plugin-backdoor-cve-2026-135202/
+author: Tia N. List
+date: 2026/11/24
+tags:
+    - attack.t1195
+    - attack.t1071
+    - attack.t1100
+logsource:
+    category: network_connection
+detection:
+    selection:
+        DestinationHostname|endswith: 'tascredit-pay.com'
+    condition: selection
+falsepositives:
+    - Threat-intel research, sandbox detonation, URL scanners or analyst pivots that deliberately resolve the reported C2 domain
+    - Archival copies of the malicious plugin builds (quarantine, malware sandboxes, backup snapshots) replayed in a lab network
+level: critical
