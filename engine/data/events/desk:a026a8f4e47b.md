@@ -1,0 +1,1 @@
+Broadcom's release notes identify VMware ESXi 8.0 Update 3m as build 25926933 and date it 19 November 2026. The page tells administrators to check for additions and updates to the notes. The indexed text does not name CVE-2026-123910 or CVE-2026-123903.

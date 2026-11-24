@@ -1,0 +1,1 @@
+UpdateAlert records ESXi 8.0 Update 3m build 25926933 as released on 20 November 2026. It says the build is distributed as an x86_64 ISO and an offline bundle. Applying it requires a host reboot and migration or shutdown of virtual machines.
