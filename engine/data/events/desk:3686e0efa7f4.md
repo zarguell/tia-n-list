@@ -1,0 +1,1 @@
+NVD published CVE-2026-108398 on 13 October 2026, describing an untrusted search path in .NET Framework that lets an authorized attacker bypass a security feature locally. The record assigns a CVSS 3.1 base score of 8.8 with changed scope and links to Microsoft's update guide as its reference.

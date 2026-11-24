@@ -1,0 +1,1 @@
+Microsoft's October 2026 .NET Framework cumulative update, released 13 October, lists CVE-2026-108398 as a security feature bypass addressed in the release. Its product table maps the fix to per-OS KBs, including KB5127694 for Windows 11 26H2 with .NET Framework 3.5 and 4.8.1, and KB5127687 for Windows Server 2022 with .NET Framework 4.8.
