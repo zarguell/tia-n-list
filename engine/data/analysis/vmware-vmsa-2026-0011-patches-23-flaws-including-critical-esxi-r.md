@@ -1,0 +1,5 @@
+SecurityOnline reported Broadcom's VMSA-2026-0011 as a 23-flaw VMware update. The two flaws flagged at CVSS 9.8 are CVE-2026-123910, remote code execution in ESX, and CVE-2026-123903, an authentication bypass in vCenter. They sit on different control planes, one on the hypervisor and one on the management server, so a cycle covering both cannot be treated as a routine endpoint patch.
+
+The collected report makes no claim of active exploitation and does not state affected version ranges or fixed builds; its text ends before the fixed-version list. That gap drives triage. Without a version mapping, an operator cannot tell whether a given ESX host or vCenter appliance is exposed, so the Broadcom advisory has to supply the build check rather than the news summary.
+
+Watch for confirmation of the fixed builds, any later CISA KEV addition for either CVSS 9.8 flaw, and the content of the other 21 fixes, especially anything else on the management plane. The July VMware advisory VMSA-2026-0006 covered different CVEs, including CVE-2026-47876 and CVE-2026-59309, so this update belongs to a separate patch cycle.
