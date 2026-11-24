@@ -1,0 +1,1 @@
+Apache's 23 November 2026 oss-security notice for CVE-2026-86156 describes a path traversal issue in Fuseki through 6.2.0 that lets SPARQL Update access data from the local server. Apache classifies the flaw as important and recommends upgrading to 6.3.0. Credit is given to Kyle /EY of China, MopMonk-AI, Frederic Pidancier of GAEL Systems and Huy Bui.
