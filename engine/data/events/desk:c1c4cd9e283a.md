@@ -1,0 +1,1 @@
+FOX31 reported on November 19, 2026 that a state spokesperson confirmed the myColorado ID app had gone down just before noon that Thursday. The spokesperson described it as an outage with a team working to restore service, and the article said the cause had not been specified. The report predates the state's November 23 acknowledgment of a cybersecurity incident.
