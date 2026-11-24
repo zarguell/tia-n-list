@@ -1,0 +1,3 @@
+Help Net Security reported on November 24 that the hacker in the Rockstar GTA 6 case was sentenced to seven years and released on licence, with the court warning against a repeat of the conduct. Prosecutors described the extortion as a threat to leak GTA 6 source code, and the material at issue included 90 gameplay videos of the unreleased game.
+
+The sentence and the release terms are the concrete development here. The report adds no technical detail on how the material was taken or on the extortion mechanics, so there is no new technique or tool to extract from it. The next items worth watching are any breach of the licence conditions and any further prosecutorial detail on the source-code threat.
