@@ -1,0 +1,5 @@
+Turnitin disclosed that it detected unauthorized activity involving certain customer-facing systems and activated its incident response plan. CEO Chris Caren's public letter says the company brought in external cybersecurity specialists and notified law enforcement and cyber regulators. Turnitin says the systems are fully operational and safe to use, and that the affected systems do not hold government identification credentials or institutional financial information.
+
+The company has not described the nature or scope of the activity, and the reviewed statement gives no timeline, actor, or victim count. Scale matters here: Turnitin says its software is used by more than 16,000 institutions in 185 countries and serves 71 million students, so even a narrow customer-facing incident can touch a large education ecosystem.
+
+Watch for follow-up detail on which systems were accessed, whether institution or student records were involved, and any regulatory filing or notification to the institutions named in Turnitin's customer base. The current statement confirms an intrusion and response, not its impact.

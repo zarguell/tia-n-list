@@ -1,0 +1,5 @@
+Gingko Bioworks Holdings issued a statement about a data breach on 8 October 2026. Databreaches.net reports that getting an update from the company since then has been difficult. On or about 19 November, FulcrumSec added Gingko Bioworks to its clearnet leak site and published a detailed account of the material it says it acquired.
+
+The actor claims 9.9 TB of data exfiltrated, spanning 10,775,976 files across 82 buckets. Those figures are the leak-site operator's claims, not a company-confirmed scope. The long gap between the October statement and the November leak-site posting is the core concern: customers and partners have had little public detail on what was taken or what has been done since the initial disclosure.
+
+Watch for a Gingko update that confirms or disputes the file and volume counts, identifies the affected systems, and sets out notification and remediation steps. Until that appears, the only firm facts in the reviewed material are the 8 October statement, the reported difficulty obtaining updates, and the FulcrumSec claims dated around 19 November.

@@ -1,0 +1,5 @@
+Bulgaria disrupted a five-year cyberespionage operation against government networks. Innovation and Digital Transformation Minister Ivan Vasilev disclosed the breach on 18 November 2026 and described it as the longest-running known espionage operation against Bulgarian state institutions. International hacking groups extracted at least 130 GB of government documents, equivalent to more than 62 million pages.
+
+A follow-up notice restates the 18 November confirmation and the five years of unauthorized access. The reviewed material does not name the responsible groups, identify the entry vector, or say which agencies and document classes were affected. Five years of access to state networks means the exposure is not a single-event breach, and the 62 million page figure suggests a large intelligence loss rather than a narrow data theft.
+
+Watch for attribution, an inventory of the accessed repositories, and evidence that the access path has been closed. Any later disclosure about personal data or classified material in the extracted documents would materially change the impact assessment.
