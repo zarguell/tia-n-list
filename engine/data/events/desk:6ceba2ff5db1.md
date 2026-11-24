@@ -1,0 +1,1 @@
+CTV News carried Reuters reporting that the CIA and ODNI discovered a breach exposing some unclassified information. The affected network was used to search public, unclassified material for intelligence insights, and the specific material compromised was not identified. The report placed the incident alongside other recent government cyber incidents and technology outages.
