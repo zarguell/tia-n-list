@@ -1,0 +1,1 @@
+GitHub's advisory mirrors Dell's description of CVE-2026-103788 and rates it critical. It repeats that an unauthenticated adjacent-network attacker could execute arbitrary commands on versions before 4.6.1. It references NVD and Dell advisory DSA-2026-451 and lists no credits.

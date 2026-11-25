@@ -1,0 +1,1 @@
+GitHub's advisory mirrors Dell's description of CVE-2026-103782 and rates it critical. It points to NVD and Dell advisory DSA-2026-451 as references and lists no credits. The advisory was published on 2026-11-23T18:31:50Z.
