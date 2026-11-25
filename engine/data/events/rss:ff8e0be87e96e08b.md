@@ -1,0 +1,1 @@
+Improper neutralization of special elements used in a template engine vulnerability (CVE-2026-129968) has been found in LiteSpeed Cache Plugin for Prestashop software. Article Link: Vulnerability in LiteSpeed Cache Plugin for Prestashop software | CERT Polska
