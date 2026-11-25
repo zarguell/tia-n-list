@@ -1,0 +1,32 @@
+title: Check Point SmartConsole Login Using Application Token From External Address
+id: 3b7d51ea-24c6-4c0f-9a83-6d1f8e0b5c27
+status: experimental
+description: "Detects SmartConsole or Multi-Domain Management logins that authenticate with an application token from a non-RFC1918 source, the hallmark of CVE-2026-16232 exploitation. The bug let an unauthenticated attacker obtain an application login token and reach Security Management as an administrator, which GreyNoise later saw in its GT13 campaign alongside forged signed admin session cookies and post-compromise firewall policy changes. Check Point's own hunting guidance for sk185169 is to review SmartConsole audit logs for 'Authentication method: application token' and for the published attacker IPs."
+references:
+  - https://support.checkpoint.com/results/sk/sk185169/
+  - https://www.greynoise.io/blog/check-point-security-management-servers-intrusion-campaign
+  - https://blog.checkpoint.com/security/security-advisory-action-required-active-exploitation-of-check-point-smartconsole-authentication-bypass-cve-2026-16232/
+  - https://www.rapid7.com/blog/post/etr-cve-2026-16232-critical-check-point-smartconsole-authentication-bypass-exploited-in-the-wild/
+author: Tia N. List
+date: 2026/11/25
+tags:
+  - attack.t1190
+  - attack.t1078
+  - attack.t1606
+logsource:
+  product: checkpoint
+  category: authentication
+detection:
+  selection_app_token:
+    AuthenticationMethod: 'application token'
+  filter_internal_source:
+    src_ip|cidr:
+      - '10.0.0.0/8'
+      - '172.16.0.0/12'
+      - '192.168.0.0/16'
+      - '127.0.0.0/8'
+  condition: selection_app_token and not filter_internal_source
+falsepositives:
+  - Automation and orchestration tooling that legitimately authenticates to the management API with an application token from a public egress address
+  - Check Point Smart-1 Cloud tenants whose service traffic appears to originate outside private ranges
+level: high

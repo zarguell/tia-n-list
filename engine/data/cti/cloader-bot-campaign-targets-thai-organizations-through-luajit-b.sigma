@@ -1,0 +1,35 @@
+title: CLoader Bot Script Host With Double-Extension PDF JavaScript or LuaJIT Interpreter
+id: 5e93ba47-1f68-4d72-a0c5-9b48e2f7063d
+status: experimental
+description: Detects the two execution primitives Seqrite Labs observed in the CLoader bot campaign against Thai organizations. Spear-phishing email attachments arrived as .lha archives named as purchase-order PDFs, expanding to a double-extension .pdf.JS script that Windows resolves through the JavaScript script host, and the loader chain then runs a bundled LuaJIT interpreter with an obfuscated Lua script to conceal its activity. The chain also disabled Microsoft Defender and pulled its C2 response from Pastebin.
+references:
+  - https://malware.news/t/cloader-bot-campaign-targets-thai-organizations-through-luajit-based-malware-delivery/127554#post_1
+  - https://meterpreter.org/cloader-bot-malware-luajit-thailand/
+author: Tia N. List
+date: 2026/11/25
+tags:
+  - attack.t1566
+  - attack.t1204
+  - attack.t1059
+  - attack.t1027
+  - attack.t1562
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection_script_host:
+    Image|endswith:
+      - '\wscript.exe'
+      - '\cscript.exe'
+  selection_double_extension:
+    CommandLine|contains:
+      - '.pdf.JS'
+      - '.pdf.js'
+      - '.pdf.Js'
+  selection_luajit:
+    Image|endswith: '\luajit.exe'
+  condition: (selection_script_host and selection_double_extension) or selection_luajit
+falsepositives:
+  - Mozilla's PDF.js is a legitimate JavaScript library and local copies named pdf.js can be launched through a script host by document-viewing tools
+  - Developers and packaging pipelines that run luajit.exe directly
+level: medium
