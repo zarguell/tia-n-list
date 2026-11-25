@@ -1,0 +1,1 @@
+ENISA's vulnerability database records CVE-2026-103782 in Dell Enterprise SONiC Distribution with a CVSS 3.1 base score of 9.9 and vector CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:H/I:H/A:H. The record describes an argument injection issue affecting versions before 4.6.1 that can lead to arbitrary command execution. The entry was published two days before the story was first seen.
