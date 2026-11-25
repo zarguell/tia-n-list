@@ -1,0 +1,3 @@
+Dark Reading describes cyberattacks increasingly affecting industrial systems across Latin America, with the range running from the Port of Santos in Brazil to a pipeline in Argentina. The single event gives no operator names, outage duration, malware family, ransom demand or victim count, so the report supports a regional trend assessment rather than a specific confirmed incident.
+
+Watch for follow-up that names the port and pipeline operators, identifies the affected operational technology and says whether the disruptions came from ransomware, extortion or sabotage. Without that detail the item stays a broad regional signal and should not be folded into unrelated Latin American breach stories.
