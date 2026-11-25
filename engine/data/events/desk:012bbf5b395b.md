@@ -1,0 +1,1 @@
+SecurityWeek reported that the FBI removed an Accenture contractor after an intrusion exposed personal information of thousands of bureau employees. The bureau blamed the contractor for failing to apply an available security patch, according to Reuters.
