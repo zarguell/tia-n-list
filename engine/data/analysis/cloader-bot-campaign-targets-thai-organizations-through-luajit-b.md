@@ -1,0 +1,5 @@
+Seqrite Labs found a CLoader bot campaign aimed at organizations and individuals in Thailand through spear-phishing. The lure was an archive named as a purchase order PDF, ORDER PO826050431, tied to a Thai sales and service company. It contained an obfuscated JavaScript file with a double extension, which kicked off a multi-stage infection chain.
+
+The loader uses a LuaJIT executable bundled with an obfuscated Lua script to hide activity and lower detection rates. Seqrite describes several anti-analysis and endpoint defense-evasion techniques in the chain. A follow-on post on the same research names Pastebin-based command and control and Microsoft Defender evasion among the observed behavior.
+
+What to watch: Thai-language purchase-order emails carrying .lha archives, double-extension JavaScript files, LuaJIT binaries paired with scripts, and C2 fetched from Pastebin. The event content provides no victim count, campaign dates or attribution, so exposure remains bounded to Seqrite's observations.
