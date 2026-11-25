@@ -1,0 +1,693 @@
+{
+ "date": "2026-11-25",
+ "decisions_path": "engine/data/triage/decisions-2026-11-25T0703.json",
+ "instructions": "For every new event decide: (1) keep or drop \u2014 keep only stories worth covering (real security events, vulnerabilities, attacks, breaches, advisories with substance); drop press releases, vendor marketing, generic explainers, and anything duplicating an existing story. (2) If keep, assign the event to the RIGHT story: an existing candidate story id if it belongs there (this FIXES mechanical clustering \u2014 e.g. different outlets' Patch Tuesday roundups are ONE story), or NEW with a clean story_title. (3) merges: list candidate stories that are really the same story (from = fragment, into = the most complete one). (4) For every kept event that names CVEs, optionally assess exploitation: exploited = the event reports OBSERVED in-the-wild exploitation (implants, victim counts, campaigns, CISA KEV confirmation); suspected = public exploit code/PoC or likely-but-unconfirmed. Attribute ONLY the CVEs you can tie to the claim \u2014 a bulletin's blanket 'actively exploited' does NOT flag all its CVEs. Omit the exploitation field when the event makes no claim.\n(5) LOW-TRUST events (\"low_trust\": true \u2014 AI-drafted aggregator reposts, late and overstated): treat as unverified leads. When the text attributes the claim to a named primary source (a researcher firm like watchTowr, a vendor advisory, CISA, a major outlet) and attribution_urls or a web search (/home/ubuntu/repos/cronman/bin/web-search.sh \"query\") locate that primary source CONFIRMING the claim, include a provenance object in the decision: {\"url\": <primary url>, \"source\": <domain>, \"evidence\": <one line>, \"verified\": true}. VERIFIED provenance lets the event mint a story (credited to the primary source) and count as a development; without it, a low-trust event can only attach to an EXISTING story, never mint. If you cannot verify, keep/drop on normal merit and omit provenance.\n\nWrite decisions as JSON with EXACTLY this shape:\n{\n  \"decisions\": [\n    {\"event_id\": \"<id>\", \"action\": \"keep\", \"story\": \"<existing candidate story id>\", \"reason\": \"...\"},\n    {\"event_id\": \"<id>\", \"action\": \"keep\", \"story\": \"NEW\", \"story_title\": \"<clean title>\", \"reason\": \"...\"},\n    {\"event_id\": \"<id>\", \"action\": \"drop\", \"reason\": \"...\"}\n  ],\n  \"merges\": [{\"from\": \"<fragment story id>\", \"into\": \"<canonical story id>\"}]\n}\nFor events marked \"low_trust\" (AI-drafted aggregator reposts) a decision\nmay carry an optional \"provenance\" object when you VERIFIED the claim at\nthe named primary source: {\"event_id\": ..., \"action\": \"keep\", ...}\n  \"provenance\": {\"url\": \"<primary source url>\", \"source\": \"<domain>\", \"evidence\": \"<one line>\"}\nOnly include provenance when the primary source (vendor advisory, CISA,\nthe named researcher/outlet) really carries the claim \u2014 verified\nprovenance lets a low-trust event mint a story and set freshness; without\nit the event can only amplify an existing story.\nSTRICT KEY NAMES: the array key is \"decisions\" (never \"events\"); the story\nkey is \"story\" (never \"story_id\"); \"story\" holds a candidate_stories id\nverbatim or the literal string \"NEW\". Optional per-event field\n\"exploitation\": {\"CVE-...\": {\"status\": \"exploited|suspected\", \"evidence\": \"1-2 sentences\"}}.",
+ "new_events": [
+  {
+   "id": "masto:117675729334273071",
+   "title": "g'mornin' admins out there... here comes your # CVE killer tape. https:// musiccloud.io/eHel0OgK",
+   "source": "musiccloud.io",
+   "published_at": "2026-11-25T06:45:31.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "g'mornin' admins out there... here comes your # CVE killer tape. https:// musiccloud.io/eHel0OgK  via Mastodon https://musiccloud.io/eHel0OgK "
+  },
+  {
+   "id": "masto:117675711881531403",
+   "title": "eSentire traces a ROMULUS ClickFix lure through an MSI, shellcode, and LegionLoader to Warden Stealer. See how each stage works and how to d",
+   "source": "securityonline.info",
+   "published_at": "2026-11-25T06:41:04.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "eSentire traces a ROMULUS ClickFix lure through an MSI, shellcode, and LegionLoader to Warden Stealer. See how each stage works and how to d  via Mastodon https://securityonline.info/romulus-clickfix-warden-stealer/?utm_"
+  },
+  {
+   "id": "masto:117675704771694193",
+   "title": "FreeSWITCH CVE-2026-116779: a single SIP MESSAGE can run commands on the server in default configs. Exploited in the wild, in CISA KEV. Upgr",
+   "source": "errorbudget.io",
+   "published_at": "2026-11-25T06:39:16.000Z",
+   "cves": [
+    "CVE-2026-116779"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "FreeSWITCH CVE-2026-116779: a single SIP MESSAGE can run commands on the server in default configs. Exploited in the wild, in CISA KEV. Upgr  via Mastodon https://errorbudget.io/fixes/cve-2026-116779-freeswitch-sip-messa"
+  },
+  {
+   "id": "masto:117675694796345645",
+   "title": "\ud83e\udd16 WordPress closed six WP Connect plugins after their repos were backdoored on Nov 22 (suspected dev account compromise). Each version loade",
+   "source": "thehackernews.com",
+   "published_at": "2026-11-25T06:36:44.000Z",
+   "cves": [
+    "CVE-2026-135202"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "\ud83e\udd16 WordPress closed six WP Connect plugins after their repos were backdoored on Nov 22 (suspected dev account compromise). Each version loade  via Mastodon https://thehackernews.com/2026/11/wordpress-blocks-six-backdoored"
+  },
+  {
+   "id": "masto:117675667426025306",
+   "title": "Exploited vulns, 2026-11-25: 9 added to CISA KEV in the last 7 days, latest: \u2022 CVE-2026-132224 Optimizely Web Experimentation \u2022 CVE-2026-131",
+   "source": "exploitedthisweek.pages.dev",
+   "published_at": "2026-11-25T06:29:47.000Z",
+   "cves": [
+    "CVE-2026-131914",
+    "CVE-2026-132165",
+    "CVE-2026-132224"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Exploited vulns, 2026-11-25: 9 added to CISA KEV in the last 7 days, latest: \u2022 CVE-2026-132224 Optimizely Web Experimentation \u2022 CVE-2026-131  via Mastodon https://exploitedthisweek.pages.dev/ "
+  },
+  {
+   "id": "masto:117675655245113233",
+   "title": "\ud83d\udee1\ufe0f A.K Threat Hub \u2014 Daily Threat Report \ud83d\udcc5 25 November 2026 On 25 November 2026, alleged data breaches at A and B, alleged data breaches at C",
+   "source": "github.com",
+   "published_at": "2026-11-25T06:26:39.000Z",
+   "cves": [
+    "CVE-2026-82329",
+    "CVE-2026-90817"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "\ud83d\udee1\ufe0f A.K Threat Hub \u2014 Daily Threat Report \ud83d\udcc5 25 November 2026 On 25 November 2026, alleged data breaches at A and B, alleged data breaches at C  via Mastodon https://github.com/alexkleber/A-K-threat-reports/blob/main/2026/N"
+  },
+  {
+   "id": "masto:117675648939601655",
+   "title": "Do you run Optimizely Web Experimentation? CISA lists CVE-2026-132224 as exploited (added 24 Nov 2026). Can it reach you? Over a network. It",
+   "source": "xploitdigest.com",
+   "published_at": "2026-11-25T06:25:04.000Z",
+   "cves": [
+    "CVE-2026-132224"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Do you run Optimizely Web Experimentation? CISA lists CVE-2026-132224 as exploited (added 24 Nov 2026). Can it reach you? Over a network. It  via Mastodon https://xploitdigest.com/kev/CVE-2026-132224 "
+  },
+  {
+   "id": "rss:42f670ec5b11d09d",
+   "title": "WordPress Blocks Six Backdoored WP Connect Plugins Before Malicious Releases Go Live",
+   "source": "thehackernews.com",
+   "published_at": "2026-11-25T06:21:12Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "WordPress has removed six WordPress plugins developed by WP Connect after they were backdoored on November 22, 2026, to enable arbitrary code execution on sites that have them installed, following a suspected compromise "
+  },
+  {
+   "id": "masto:117675598905708334",
+   "title": "Dementia Singapore CARA app breach proves hiring outside developers won\u2019t shield you from data leaks Outsourcing your app doesn't mean outso",
+   "source": "astig.ph",
+   "published_at": "2026-11-25T06:12:21.506Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Dementia Singapore CARA app breach proves hiring outside developers won\u2019t shield you from data leaks Outsourcing your app doesn't mean outso  via Mastodon https://astig.ph/dementia-singapore-cara-app-data-breach-keeper-s"
+  },
+  {
+   "id": "masto:117675578357657062",
+   "title": "Wordfence details fake WordPress plugin that feeds hidden scripts to site visitors Wordfence says a machine-generated fake WordPress plugin,",
+   "source": "secquill.com",
+   "published_at": "2026-11-25T06:07:06.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Wordfence details fake WordPress plugin that feeds hidden scripts to site visitors Wordfence says a machine-generated fake WordPress plugin,  via Mastodon https://secquill.com/articles/wordfence-details-fake-wordpress-pl"
+  },
+  {
+   "id": "masto:117675577253866513",
+   "title": "Morning briefing is live. Catch up on today\u2019s top tech stories, hardware developments, green tech, and threat intelligence. https:// stridin",
+   "source": "stridingtech.com",
+   "published_at": "2026-11-25T06:06:51.125Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Morning briefing is live. Catch up on today\u2019s top tech stories, hardware developments, green tech, and threat intelligence. https:// stridin  via Mastodon https://stridingtech.com "
+  },
+  {
+   "id": "masto:117675467408301151",
+   "title": "Beyond the Search: Understanding OSINT Open-source intelligence isn't only about finding information. It's about verifying it and understand",
+   "source": "medjay.dpdns.org",
+   "published_at": "2026-11-25T05:38:55.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Beyond the Search: Understanding OSINT Open-source intelligence isn't only about finding information. It's about verifying it and understand  via Mastodon https://medjay.dpdns.org/articles/beyond-the-search-understanding"
+  },
+  {
+   "id": "masto:117675412980247656",
+   "title": "Do you run Drupal Core? CISA lists CVE-2026-132165 as exploited (added 24 Nov 2026). Can it reach you? Not scored yet, so we cannot say yet.",
+   "source": "xploitdigest.com",
+   "published_at": "2026-11-25T05:25:04.000Z",
+   "cves": [
+    "CVE-2026-132165"
+   ],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Do you run Drupal Core? CISA lists CVE-2026-132165 as exploited (added 24 Nov 2026). Can it reach you? Not scored yet, so we cannot say yet.  via Mastodon https://xploitdigest.com/kev/CVE-2026-132165 "
+  },
+  {
+   "id": "masto:117675394176422224",
+   "title": "MedjayOS is live: an open-source intelligence (OSINT) workspace that runs in your browser. Private notes, case files, and articles. No accou",
+   "source": "medjay.dpdns.org",
+   "published_at": "2026-11-25T05:20:17.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "MedjayOS is live: an open-source intelligence (OSINT) workspace that runs in your browser. Private notes, case files, and articles. No accou  via Mastodon https://medjay.dpdns.org/ "
+  },
+  {
+   "id": "masto:117675379717898962",
+   "title": "\ud83c\udf89 ICCC 2026 starts today! One platform. Multiple perspectives. A shared future. Three days on cyberlaw, cybercrime and AI in the Autonomous ",
+   "source": "cyberlawcybersecurity.com",
+   "published_at": "2026-11-25T05:16:36.967Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "\ud83c\udf89 ICCC 2026 starts today! One platform. Multiple perspectives. A shared future. Three days on cyberlaw, cybercrime and AI in the Autonomous   via Mastodon https://cyberlawcybersecurity.com "
+  },
+  {
+   "id": "masto:117675360691258620",
+   "title": "\u201eNavele tr\u0103d\u0103toare vor arde \u00een iad\u201d. Aproape 50 de petroliere, vizate de atacuri cibernetice \u0219i amenin\u021b\u0103ri atribuite \ud83c\uddee\ud83c\uddf7#Iranului. \ud83d\udd17 https://",
+   "source": "stirileprotv.ro",
+   "published_at": "2026-11-25T05:11:45.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "\u201eNavele tr\u0103d\u0103toare vor arde \u00een iad\u201d. Aproape 50 de petroliere, vizate de atacuri cibernetice \u0219i amenin\u021b\u0103ri atribuite \ud83c\uddee\ud83c\uddf7#Iranului. \ud83d\udd17 https://  via Mastodon https://stirileprotv.ro/stiri/international/navele-tradatoare-vor"
+  },
+  {
+   "id": "masto:117675340807640943",
+   "title": "This is the automated feed for grep.tips, an independent tech publication by MCS Developers LLC: security news and plain-language explainers",
+   "source": "www.grep.tips",
+   "published_at": "2026-11-25T05:06:43.243Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "This is the automated feed for grep.tips, an independent tech publication by MCS Developers LLC: security news and plain-language explainers  via Mastodon https://www.grep.tips/about "
+  },
+  {
+   "id": "masto:117675317588919868",
+   "title": "\ud83c\udf00 Debian's APT Removing Some Features Due To Advancements In AI Security Discoveries \uff62 The features planned for the near-immediate removal i",
+   "source": "www.phoronix.com",
+   "published_at": "2026-11-25T05:00:48.000Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "\ud83c\udf00 Debian's APT Removing Some Features Due To Advancements In AI Security Discoveries \uff62 The features planned for the near-immediate removal i  via Mastodon https://www.phoronix.com/news/Debian-APT-Removing-Features "
+  },
+  {
+   "id": "masto:117675267678942793",
+   "title": "Before reading Schnader\u2019s CyDAE article, \u201cautonomous malicious AI\u201d sounds like a sci-fi premise. Afterward, it reads like an urgent legal pr",
+   "source": "scholarship.law.unc.edu",
+   "published_at": "2026-11-25T04:48:07.399Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Before reading Schnader\u2019s CyDAE article, \u201cautonomous malicious AI\u201d sounds like a sci-fi premise. Afterward, it reads like an urgent legal pr  via Mastodon https://scholarship.law.unc.edu/ncjolt/vol21/iss2/2/ "
+  },
+  {
+   "id": "masto:117675265666224444",
+   "title": "What if a thought-controlled device didn\u2019t just obey you\u2014it quietly built a model of your future? That\u2019s the engine of Digital Song: an audi",
+   "source": "podcasts.apple.com",
+   "published_at": "2026-11-25T04:47:36.676Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "What if a thought-controlled device didn\u2019t just obey you\u2014it quietly built a model of your future? That\u2019s the engine of Digital Song: an audi  via Mastodon https://podcasts.apple.com/us/podcast/digital-song-an-audiobook-s"
+  }
+ ],
+ "candidate_stories": [
+  {
+   "id": "cyber-insurers-see-new-divide-ai-defense-haves-amp-have-nots",
+   "title": "Cyber Insurers See New Divide: AI Defense 'Haves' &amp; 'Have Nots'",
+   "n_events": 0,
+   "last_seen": "2026-11-25T15:00:00Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "supply-chain-compromise-backdoors-six-wp-connect-plugins-blocked",
+   "title": "Backdoored WP connect plugin releases blocked by WordPress.org before distribution",
+   "n_events": 10,
+   "last_seen": "2026-11-25T06:36:44.000Z",
+   "first_event_title": "Supply Chain Compromise Backdoors Six WP connect Plugins, Blocked by WordPress.org\u2019s Release Hold"
+  },
+  {
+   "id": "cisa-warns-hackers-are-actively-exploiting-cisco-vmware-sap-and",
+   "title": "CISA Warns Hackers Are Actively Exploiting Cisco, VMware, SAP, and Apache Vulnerabilities",
+   "n_events": 42,
+   "last_seen": "2026-11-25T06:29:47.000Z",
+   "first_event_title": "CISA Warns Hackers Are Actively Exploiting Cisco, VMware, SAP, and Apache Vulnerabilities"
+  },
+  {
+   "id": "remus-stealer-uses-a-fake-google-sheets-extension-to-steal-gmail",
+   "title": "Remus Stealer Uses a Fake Google Sheets Extension to Steal Gmail Messages",
+   "n_events": 2,
+   "last_seen": "2026-11-25T05:58:05Z",
+   "first_event_title": "Remus Stealer Uses a Fake Google Sheets Extension to Steal Gmail Messages"
+  },
+  {
+   "id": "vmware-vmsa-2026-0011-patches-23-flaws-including-critical-esxi-r",
+   "title": "VMware VMSA-2026-0011 patches 23 flaws including critical ESXi RCE and vCenter auth bypass",
+   "n_events": 13,
+   "last_seen": "2026-11-25T05:39:57Z",
+   "first_event_title": "This VMware update fixes 23 flaws, including ESX RCE CVE-2026-123910 and vCenter auth bypass CVE-2026-123903, both CVSS 9.8. Fixed versions "
+  },
+  {
+   "id": "hackers-could-gain-hidden-access-to-windows-computers-through-vi",
+   "title": "Vinci RAT delivered via Microsoft Store app through PowerShell backdoor campaign",
+   "n_events": 1,
+   "last_seen": "2026-11-25T05:23:51Z",
+   "first_event_title": "Hackers Could Gain Hidden Access to Windows Computers Through Vinci RAT Linked to Microsoft Store"
+  },
+  {
+   "id": "microsoft-declares-code-red-after-historic-global-outage-exposes",
+   "title": "Microsoft Declares \u2018Code Red\u2019 After Historic Global Outage Exposes Critical Engineering Flaws",
+   "n_events": 0,
+   "last_seen": "2026-11-25T05:15:17Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "unclassified-intel-system-hit-by-hackers-affecting-cia-odni",
+   "title": "Unclassified intel system hit by hackers, affecting CIA, ODNI",
+   "n_events": 12,
+   "last_seen": "2026-11-25T05:03:59Z",
+   "first_event_title": "Unclassified intel system hit by hackers, affecting CIA, ODNI"
+  },
+  {
+   "id": "mcdonald-s-japan-discloses-breach-exposing-customer-purchase-and",
+   "title": "McDonald\u2019s Japan discloses breach exposing customer purchase and location data",
+   "n_events": 2,
+   "last_seen": "2026-11-25T04:50:05Z",
+   "first_event_title": "McDonald\u2019s Japan discloses breach exposing customer purchase and location data"
+  },
+  {
+   "id": "nginx-http-2-use-after-free-cve-2026-123633",
+   "title": "NGINX HTTP/2 Use-After-Free: CVE-2026-123633",
+   "n_events": 11,
+   "last_seen": "2026-11-25T04:36:49.000Z",
+   "first_event_title": "NGINX HTTP/2 Use-After-Free: CVE-2026-123633"
+  },
+  {
+   "id": "greynoise-reports-active-intrusion-campaign-against-check-point",
+   "title": "GreyNoise reports active intrusion campaign against Check Point Security Management servers",
+   "n_events": 19,
+   "last_seen": "2026-11-25T04:33:55.618Z",
+   "first_event_title": "Active Intrusion Campaign Against Check Point Security Management Servers GreyNoise recently discovered an intrusion campaign targeting Chec"
+  },
+  {
+   "id": "volant-manticore-flying-under-the-radar",
+   "title": "Volant Manticore: Flying Under the Radar",
+   "n_events": 7,
+   "last_seen": "2026-11-25T04:33:10.000Z",
+   "first_event_title": "Volant Manticore: Flying Under the Radar"
+  },
+  {
+   "id": "hackers-exploit-critical-asp-net-anti-csrf-library-flaw-allowing",
+   "title": "Hackers Exploit Critical ASP.NET Anti-CSRF Library Flaw Allowing Unauthenticated RCE",
+   "n_events": 20,
+   "last_seen": "2026-11-25T04:25:03.000Z",
+   "first_event_title": "Hackers Exploit Critical ASP.NET Anti-CSRF Library Flaw Allowing Unauthenticated RCE"
+  },
+  {
+   "id": "drupal-core-rce-cve-2026-132165-and-gadget-chain-cve-2026-132166",
+   "title": "Drupal core RCE CVE-2026-132165 and gadget chain CVE-2026-132166 patched in 11.4.13",
+   "n_events": 15,
+   "last_seen": "2026-11-25T04:15:09.000Z",
+   "first_event_title": "Drupal core security update patches Drupal Remote Code Execution flaw CVE-2026-132165 and gadget chain CVE-2026-132166. Upgrade to 11.4.13 o"
+  },
+  {
+   "id": "cyberattack-on-japan-s-fugaku-supercomputer-puts-data-of-4-597-u",
+   "title": "Cyberattack on Japan\u2019s Fugaku Supercomputer Puts Data of 4,597 Users at Risk",
+   "n_events": 7,
+   "last_seen": "2026-11-25T04:06:28.664Z",
+   "first_event_title": "Cyberattack on Japan\u2019s Fugaku Supercomputer Puts Data of 4,597 Users at Risk"
+  },
+  {
+   "id": "cloader-bot-campaign-targets-thai-organizations-through-luajit-b",
+   "title": "CLoader Bot Campaign Targets Thai Organizations Through LuaJIT-Based Malware Delivery",
+   "n_events": 2,
+   "last_seen": "2026-11-25T03:31:30.000Z",
+   "first_event_title": "CLoader Bot Campaign Targets Thai Organizations Through LuaJIT-Based Malware Delivery"
+  },
+  {
+   "id": "ivanti-connect-secure-cve-2026-104935-active-exploitation",
+   "title": "Ivanti Connect Secure CVE-2026-104935 Active Exploitation",
+   "n_events": 76,
+   "last_seen": "2026-11-25T03:30:20.000Z",
+   "first_event_title": "Ivanti Connect Secure zero-day CVE-2026-104935 We are aware of exploitation in the wild affecting a limited number of customers at the time "
+  },
+  {
+   "id": "dragos-canary-token-study-tracks-where-two-million-ai-prompts-le",
+   "title": "Dragos canary-token study tracks where two million AI prompts leak secrets",
+   "n_events": 19,
+   "last_seen": "2026-11-25T03:19:06.000Z",
+   "first_event_title": "Dragos researchers sent roughly two million prompts containing canary secrets to AI services and tracked where they surfaced. They found thr"
+  },
+  {
+   "id": "ruby-releases-fixes-for-7-regex-and-string-flaws-warns-5-have-pr",
+   "title": "Ruby Releases Fixes for 7 Regex and String Flaws, Warns 5 Have Proof-of-Concept RCE",
+   "n_events": 14,
+   "last_seen": "2026-11-25T03:00:36.000Z",
+   "first_event_title": "Ruby Releases Fixes for 7 Regex and String Flaws, Warns 5 Have Proof-of-Concept RCE"
+  },
+  {
+   "id": "joomla-6-2-1-and-5-4-11-patch-58-core-flaws-including-cve-2026-1",
+   "title": "Joomla 6.2.1 and 5.4.11 patch 58 core flaws including CVE-2026-129393 RCE",
+   "n_events": 6,
+   "last_seen": "2026-11-25T02:55:04.000Z",
+   "first_event_title": "The new Joomla security update (6.2.1 and 5.4.11) fixes 58 core flaws, including a CVSS 9.4 Joomla RCE vulnerability (CVE-2026-129393). Upda"
+  },
+  {
+   "id": "shinyhunters-claims-to-return-after-fbi-arrests-uses-old-pgp-key",
+   "title": "ShinyHunters claims to return after FBI arrests, uses old PGP keys as proof",
+   "n_events": 2,
+   "last_seen": "2026-11-25T02:25:40Z",
+   "first_event_title": "ShinyHunters claims to return after FBI arrests, uses old PGP keys as proof"
+  },
+  {
+   "id": "adobe-patches-critical-experience-manager-rce-flaws-cve-2026-132",
+   "title": "Adobe patches critical Experience Manager RCE flaws CVE-2026-132877 and CVE-2026-123266",
+   "n_events": 1,
+   "last_seen": "2026-11-25T02:16:21.000Z",
+   "first_event_title": "New Adobe security updates fix critical Adobe Experience Manager RCE flaws (CVE-2026-132877, CVE-2026-123266) and Campaign Classic bugs. Pat"
+  },
+  {
+   "id": "isc-stormcast-for-wednesday-november-25th-2026-https-isc-sans-ed",
+   "title": "ISC Stormcast For Wednesday, November 25th, 2026 (Wed, Nov 25th)",
+   "n_events": 0,
+   "last_seen": "2026-11-25T02:05:40Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "fragnesia-new-dirty-frag-class-linux-kernel-lpe-cve-2026-46300-p",
+   "title": "Fragnesia \u2014 new Dirty Frag-class Linux kernel LPE (CVE-2026-46300), PoC public, patches rolling out",
+   "n_events": 11,
+   "last_seen": "2026-11-25T02:01:27.000Z",
+   "first_event_title": "Fragnesia \u2014 new Dirty Frag-class Linux kernel LPE (CVE-2026-46300), PoC public, patches rolling out"
+  },
+  {
+   "id": "dell-enterprise-sonic-4-6-1-patches-13-flaws-including-cvss-9-9",
+   "title": "Dell Enterprise SONiC 4.6.1 patches 13 flaws including CVSS 9.9 RCE CVE-2026-103782",
+   "n_events": 6,
+   "last_seen": "2026-11-25T01:10:59.000Z",
+   "first_event_title": "New Dell SONiC 4.6.1 update fixes 13 Dell Enterprise SONiC vulnerabilities, including CVSS 9.9 RCE CVE-2026-103782 and CVE-2026-103788. Patc"
+  },
+  {
+   "id": "cve-2026-99312-kvm-guest-to-host-escape-lets-cloud-vms-read-host",
+   "title": "CVE-2026-99312: KVM guest-to-host escape lets cloud VMs read host memory",
+   "n_events": 9,
+   "last_seen": "2026-11-25T01:02:36.000Z",
+   "first_event_title": "\ud83d\udea8 BREAKING: A LINUX KVM VULNERABILITY ALLOWED A CLOUD VM TO READ 127 GB OF ITS PHYSICAL HOST'S MEMORY. Security researchers at Terra Securit"
+  },
+  {
+   "id": "researchers-demonstrate-ghostscript-sandbox-escape-rce-via-craft",
+   "title": "Researchers Demonstrate Ghostscript Sandbox-Escape RCE via Crafted File Uploads in Popular Apps",
+   "n_events": 21,
+   "last_seen": "2026-11-25T00:53:02.000Z",
+   "first_event_title": "Researchers Demonstrate Ghostscript Sandbox-Escape RCE via Crafted File Uploads in Popular Apps"
+  },
+  {
+   "id": "apache-roller-pre-auth-rce-cve-2026-82384-cvss-9-8",
+   "title": "Apache Roller pre-auth RCE CVE-2026-82384 (CVSS 9.8)",
+   "n_events": 23,
+   "last_seen": "2026-11-25T00:22:02.000Z",
+   "first_event_title": "Apache Roller 6.1.5 has a critical pre-auth flaw (CVE-2026-82384, CVSS 9.8): its XML-RPC endpoint reads attacker data before any login, allo"
+  },
+  {
+   "id": "pixelleaks-targets-india-s-national-knowledge-network",
+   "title": "Pixelleaks Targets India\u2019s National Knowledge Network",
+   "n_events": 1,
+   "last_seen": "2026-11-25T00:05:39Z",
+   "first_event_title": "Pixelleaks Targets India\u2019s National Knowledge Network"
+  },
+  {
+   "id": "debian-and-ubuntu-apt-flaw-lets-mitm-attackers-swap-verified-pac",
+   "title": "Debian and Ubuntu APT Flaw Lets MitM Attackers Swap Verified Packages and Run Code as Root",
+   "n_events": 29,
+   "last_seen": "2026-11-24T23:45:05.000Z",
+   "first_event_title": "Debian and Ubuntu APT Flaw Lets MitM Attackers Swap Verified Packages and Run Code as Root"
+  },
+  {
+   "id": "sonicwall-security-advisory-av26-1133",
+   "title": "SonicWall security advisory (AV26-1133)",
+   "n_events": 41,
+   "last_seen": "2026-11-24T23:38:33.000Z",
+   "first_event_title": "SonicWall security advisory (AV26-1133)"
+  },
+  {
+   "id": "spying-on-governments-with-zero-lines-of-malware-a-custom-softet",
+   "title": "Webworm uses a custom SoftEther bridge to hide long-term access in government networks",
+   "n_events": 14,
+   "last_seen": "2026-11-24T22:26:38.000Z",
+   "first_event_title": "Spying on Governments with Zero Lines of Malware: A Custom SoftEther Bridge in Webworm\u2019s Toolkit"
+  },
+  {
+   "id": "unpatched-windows-0-day-fastunlock-lets-someone-holding-a-locked",
+   "title": "Unpatched Windows 0-Day FastUnlock Lets Someone Holding a Locked PC Run Programs on It",
+   "n_events": 13,
+   "last_seen": "2026-11-24T22:15:22.000Z",
+   "first_event_title": "Unpatched Windows 0-Day FastUnlock Lets Someone Holding a Locked PC Run Programs on It"
+  },
+  {
+   "id": "satellites-have-a-ground-level-cybersecurity-problem",
+   "title": "Satellites Have a Ground-Level Cybersecurity Problem",
+   "n_events": 0,
+   "last_seen": "2026-11-24T22:05:34Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "tower-records-japan-customer-data-leaked-after-unauthorized-acce",
+   "title": "Tower Records Japan customer data leaked after unauthorized access",
+   "n_events": 10,
+   "last_seen": "2026-11-24T21:53:36.000Z",
+   "first_event_title": "Music retailer Tower Records Japan said customer information was leaked following unauthorized access, making it the nation's latest retaile"
+  },
+  {
+   "id": "rackspace-shuts-down-spot-cloud-platform-after-security-breach",
+   "title": "Rackspace shuts down Spot cloud platform after security breach",
+   "n_events": 1,
+   "last_seen": "2026-11-24T21:37:30Z",
+   "first_event_title": "Rackspace shuts down Spot cloud platform after security breach"
+  },
+  {
+   "id": "god-mode-flaws-could-wreak-border-control-havoc",
+   "title": "'God Mode' Flaws Could Wreak Border-Control Havoc",
+   "n_events": 1,
+   "last_seen": "2026-11-24T21:36:11Z",
+   "first_event_title": "'God Mode' Flaws Could Wreak Border-Control Havoc"
+  },
+  {
+   "id": "gl-inet-goodcloud-zero-day-exploited-to-plant-malware-on-routers",
+   "title": "GL.iNet GoodCloud zero-day exploited to plant malware on routers and KVMs",
+   "n_events": 27,
+   "last_seen": "2026-11-24T21:35:30.344Z",
+   "first_event_title": "A GL.iNet cloud zero-day in GoodCloud remote management was exploited to plant malware on routers and KVMs. How to check your device and pat"
+  },
+  {
+   "id": "two-unrelated-database-leaks-expose-3-5-billion-uusernames-passw",
+   "title": "Two unrelated database leaks expose 3.5 billion Uusernames, passwords, and documents",
+   "n_events": 8,
+   "last_seen": "2026-11-24T21:27:08.000Z",
+   "first_event_title": "Two unrelated database leaks expose 3.5 billion Uusernames, passwords, and documents"
+  },
+  {
+   "id": "water-utilities-in-26-states-have-signed-up-for-cyber-help-new-c",
+   "title": "Water utilities in 26 states have signed up for cyber help, new center says",
+   "n_events": 0,
+   "last_seen": "2026-11-24T21:21:31.000Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "adobe-security-advisory-av26-1092",
+   "title": "Adobe security advisory (AV26-1092)",
+   "n_events": 2,
+   "last_seen": "2026-10-30T08:01:42.000Z",
+   "first_event_title": "Adobe security advisory (AV26-1092)"
+  },
+  {
+   "id": "apache-security-advisory-av26-1194",
+   "title": "Apache Solr CVE-2026-86312: ping health-check endpoint can trigger unintended functionality",
+   "n_events": 1,
+   "last_seen": "2026-11-23T15:45:39Z",
+   "first_event_title": "Apache security advisory (AV26-1194)"
+  },
+  {
+   "id": "cisco-security-advisory-av26-1127",
+   "title": "Cisco security advisory (AV26-1127)",
+   "n_events": 2,
+   "last_seen": "2026-11-05T03:58:31.000Z",
+   "first_event_title": "Cisco security advisory (AV26-1127)"
+  },
+  {
+   "id": "cisco-security-advisory-av26-1175",
+   "title": "Cisco security advisory (AV26-1175)",
+   "n_events": 3,
+   "last_seen": "2026-11-24T16:03:12.000Z",
+   "first_event_title": "Cisco security advisory (AV26-1175)"
+  },
+  {
+   "id": "control-systems-moxa-security-advisory-av26-1089",
+   "title": "[Control Systems] Moxa security advisory (AV26-1089)",
+   "n_events": 1,
+   "last_seen": "2026-10-27T13:35:40Z",
+   "first_event_title": "[Control Systems] Moxa security advisory (AV26-1089)"
+  },
+  {
+   "id": "control-systems-moxa-security-advisory-av26-1187",
+   "title": "[Control Systems] Moxa security advisory (AV26-1187)",
+   "n_events": 1,
+   "last_seen": "2026-11-20T15:50:59Z",
+   "first_event_title": "[Control Systems] Moxa security advisory (AV26-1187)"
+  },
+  {
+   "id": "craft-cms-security-advisory-av26-1086",
+   "title": "Craft CMS security advisory (AV26-1086)",
+   "n_events": 2,
+   "last_seen": "2026-10-26T17:00:13.000Z",
+   "first_event_title": "Craft CMS security advisory (AV26-1086)"
+  },
+  {
+   "id": "fortinet-security-advisory-av26-812",
+   "title": "Fortinet security advisory (AV26-812)",
+   "n_events": 2,
+   "last_seen": "2026-08-13T10:40:57Z",
+   "first_event_title": "Fortinet security advisory (AV26-812)"
+  },
+  {
+   "id": "github-security-advisory-av26-1172",
+   "title": "GitHub security advisory (AV26-1172)",
+   "n_events": 1,
+   "last_seen": "2026-11-18T14:40:41Z",
+   "first_event_title": "GitHub security advisory (AV26-1172)"
+  },
+  {
+   "id": "gnu-security-advisory-av26-1173",
+   "title": "GNU security advisory (AV26-1173)",
+   "n_events": 1,
+   "last_seen": "2026-11-18T15:41:31Z",
+   "first_event_title": "GNU security advisory (AV26-1173)"
+  },
+  {
+   "id": "google-security-advisory-av26-904",
+   "title": "Google security advisory (AV26-904)",
+   "n_events": 2,
+   "last_seen": "2026-09-09T20:49:30Z",
+   "first_event_title": "Google security advisory (AV26-904)"
+  },
+  {
+   "id": "grafana-security-advisory-av26-860",
+   "title": "Grafana Alloy Vulnerability CVE-2026-19516",
+   "n_events": 3,
+   "last_seen": "2026-10-13T16:00:56.470Z",
+   "first_event_title": "Grafana security advisory (AV26-860)"
+  },
+  {
+   "id": "hashicorp-security-advisory-av26-797",
+   "title": "HashiCorp security advisory (AV26-797)",
+   "n_events": 1,
+   "last_seen": "2026-08-11T14:05:42Z",
+   "first_event_title": "HashiCorp security advisory (AV26-797)"
+  },
+  {
+   "id": "hashicorp-security-advisory-av26-817",
+   "title": "HashiCorp security advisory (AV26-817)",
+   "n_events": 1,
+   "last_seen": "2026-08-14T16:05:44Z",
+   "first_event_title": "HashiCorp security advisory (AV26-817)"
+  },
+  {
+   "id": "ibm-security-advisory-av26-1040",
+   "title": "IBM security advisory (AV26-1040)",
+   "n_events": 1,
+   "last_seen": "2026-10-14T18:40:41Z",
+   "first_event_title": "IBM security advisory (AV26-1040)"
+  },
+  {
+   "id": "ibm-security-advisory-av26-1135",
+   "title": "IBM security advisory (AV26-1135)",
+   "n_events": 11,
+   "last_seen": "2026-11-11T05:15:06.000Z",
+   "first_event_title": "IBM security advisory (AV26-1135)"
+  },
+  {
+   "id": "ibm-security-advisory-av26-1162",
+   "title": "IBM security advisory (AV26-1162)",
+   "n_events": 1,
+   "last_seen": "2026-11-16T14:50:50Z",
+   "first_event_title": "IBM security advisory (AV26-1162)"
+  },
+  {
+   "id": "ibm-security-advisory-av26-1189",
+   "title": "IBM security advisory (AV26-1189)",
+   "n_events": 1,
+   "last_seen": "2026-11-23T13:51:00Z",
+   "first_event_title": "IBM security advisory (AV26-1189)"
+  },
+  {
+   "id": "ivanti-security-advisory-av26-805",
+   "title": "Ivanti security advisory (AV26-805)",
+   "n_events": 1,
+   "last_seen": "2026-08-11T20:20:39Z",
+   "first_event_title": "Ivanti security advisory (AV26-805)"
+  },
+  {
+   "id": "ivanti-security-advisory-av26-897",
+   "title": "Ivanti September 2026 security advisory: EPMM, ITSM, Sentry vulnerabilities",
+   "n_events": 3,
+   "last_seen": "2026-09-09T06:39:58Z",
+   "first_event_title": "Ivanti security advisory (AV26-897)"
+  },
+  {
+   "id": "cisa-warns-of-4-exploited-flaws-linked-to-ransomware-cryptominin",
+   "title": "CISA Warns of 4 Exploited Flaws Linked to Ransomware, Cryptomining, and LLMjacking Attacks",
+   "n_events": 21,
+   "last_seen": "2026-11-23T23:33:23.000Z",
+   "first_event_title": "CISA Warns of 4 Exploited Flaws Linked to Ransomware, Cryptomining, and LLMjacking Attacks"
+  },
+  {
+   "id": "active-exploitation-of-cisco-secure-firewall-management-center-v",
+   "title": "Root RCE Zero-Day in Cisco Secure Email Gateway Under Active Exploitation",
+   "n_events": 38,
+   "last_seen": "2026-11-16T08:01:25.000Z",
+   "first_event_title": "Cisco confirms CVE-2026-20079 Secure FMC flaw exploited in attacks"
+  },
+  {
+   "id": "able2shell-frequently-asked-questions-for-reported-n-able-n-cent",
+   "title": "Able2Shell: Frequently asked questions for reported N-able N-central zero-day vulnerabilities",
+   "n_events": 88,
+   "last_seen": "2026-11-19T05:25:04.000Z",
+   "first_event_title": "Able2Shell: Frequently asked questions for reported N-able N-central zero-day vulnerabilities"
+  },
+  {
+   "id": "cve-2026-90817-critical-rce-in-redcap-13-3-0-unauth-attackers-ca",
+   "title": "CVE-2026-90817: Critical RCE in REDCap via survey hash code injection",
+   "n_events": 12,
+   "last_seen": "2026-11-19T08:50:02.644Z",
+   "first_event_title": "CVE-2026-90817: CRITICAL RCE in REDCap (13.3.0+). Unauth attackers can exploit improper code generation via survey hash for full server comp"
+  },
+  {
+   "id": "signalwire-critical-freeswitch-vulnerabilities-cve-2026-116779",
+   "title": "SignalWire Critical FreeSWITCH Vulnerabilities CVE-2026-116779",
+   "n_events": 9,
+   "last_seen": "2026-11-12T23:41:25.000Z",
+   "first_event_title": "SignalWire patched 3 critical FreeSWITCH vulnerabilities: actively exploited RCE flaw CVE-2026-116779, plus CVE-2026-116785 and CVE-2026-116"
+  },
+  {
+   "id": "cisa-adds-four-cves-to-kev-catalog-on-nov-9",
+   "title": "CISA adds four CVEs to KEV catalog on Nov 9",
+   "n_events": 14,
+   "last_seen": "2026-11-10T21:01:32.818Z",
+   "first_event_title": "CISA added four CVEs to its KEV catalog on Nov. 9 based on exploitation evidence: GPUStack CVE-2026-102895, FreeSWITCH CVE-2026-116779, Open"
+  },
+  {
+   "id": "jfrog-artifactory-vulnerabilities-actively-exploited-in-the-wild",
+   "title": "JFrog Artifactory Vulnerabilities Actively Exploited in the Wild to Gain Administrative Control Indicators extracted from public reporting.",
+   "n_events": 21,
+   "last_seen": "2026-09-25T23:20:27.000Z",
+   "first_event_title": "JFrog Artifactory Vulnerabilities Actively Exploited in the Wild to Gain Administrative Control Indicators extracted from public reporting. "
+  }
+ ]
+}
