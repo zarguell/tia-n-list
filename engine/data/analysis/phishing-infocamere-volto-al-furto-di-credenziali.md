@@ -1,0 +1,3 @@
+CERT-AGID published an alert titled "Phishing Infocamere volto al furto di credenziali" warning of a credential-stealing phishing campaign that uses the Infocamere name. The event points to the Italian CERT notice and carries the Italian business-registry brand as the lure. No CVE is involved, and the stored event text does not describe a compromise of Infocamere itself.
+
+The available notice contains no sender domains, URLs, victim counts or dates beyond the alert link, so the campaign's scale and targeting cannot be stated from this record. Watch for CERT-AGID follow-up with sender addresses and linked pages, and for any reports of Italian businesses handing over account credentials or payment data through the lure.
