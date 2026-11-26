@@ -1,0 +1,1 @@
+CISA added CVE-2024-36401, the OSGeo GeoServer GeoTools evaluation-injection vulnerability, to its Known Exploited Vulnerabilities Catalog based on evidence of active exploitation. The alert says Federal Civilian Executive Branch agencies must remediate by the catalog due date and urges all organizations to prioritize KEV remediation.
