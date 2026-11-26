@@ -55,6 +55,23 @@ page hero among them — kept printing triage identifiers a reader cannot
 resolve. Unlike its WARN sibling the class is narrow and mechanical (delete the
 parenthesis, keep the sentence), so it quarantines like any other hard error;
 ids quoted inside code spans stay legal.
+
+A fifth class is also hard: a malformed attributive compound / dropped word
+(MALFORMED_COMPOUND_RE / malformed_compound_hits, 2026-10-26 audit Issue 4).
+The published 2026-10-26 digest said "makes this a patch immediately item for
+any estate running AOS-8" — the compound adjective lost its hyphen and left
+the adverb `immediately` in the attributive slot, and NOTHING in this gate
+looked at word order (banned strings and grounding cannot), so it shipped and
+the audit could only repair it by hand. The rule matches article + word +
+lowercase `-ly` adverb + generic head noun, excludes the `-ly` adjectives that
+are legal attributives, and fires for both digests (fail closed, like the
+coverage-link invariant) and analyses (quarantine + requeue).
+
+The scope is deliberately tighter than "an adverb between two nouns", because
+this class is HARD on both paths: see MALFORMED_COMPOUND_HEAD for why a head
+must be a noun-only word ("a reboot immediately fixes the bug" is English, not
+a defect), and why the article is lowercase-only (sentence-initial `A patch
+immediately item` still escapes — a documented gap, not a claimed catch).
 """
 import glob
 import json
@@ -125,6 +142,57 @@ TRIAGE_BOOKKEEPING = (
 # identifier — without that guard the two-letter prefixes match inside prose.
 INTERNAL_ID_RE = re.compile(
     r"(?<![A-Za-z0-9_])(?:masto|mf|rd|x|desk|rss|bsky):[0-9A-Za-z_]+")
+
+# Malformed attributive compound / dropped word (2026-10-26 audit Issue 4).
+# The published 2026-10-26 digest read "the unauthenticated path to admin makes
+# this a patch immediately item for any estate running AOS-8": the compound
+# adjective lost its hyphen, leaving the adverb `immediately` in the attributive
+# slot between the modifier noun (`patch`) and the head noun (`item`). No claim
+# was false, so nothing in the pipeline saw it — banned strings and grounding
+# cannot catch word order, and the audit could only repair the sentence by hand
+# (its corrective license needs a contradicting source, which a grammar defect
+# never supplies).
+#
+# The detectable shape is narrow and mechanical: article + word + LOWERCASE
+# `-ly` adverb + generic head noun. Precision notes, all of them load-bearing:
+#   * the head-noun list is deliberately small and generic (item/issue/thing/
+#     priority...). Wide nouns are where false positives live ("a monthly
+#     patch", "a missed July update");
+#   * the adverb must be lowercase, so a capitalized `July` cannot fake `-ly`;
+#   * LY_ADJECTIVES excludes the adjectives that end in `-ly` (monthly, weekly,
+#     daily, friendly, likely, ...), which are legal attributives;
+#   * scanning all 2,627 stored digest/analysis files (2026-11-26) returned
+#     exactly one hit on the pre-fix store — the defect above — and zero after
+#     the digest was corrected. That precision is why the rule is HARD for the
+#     digest, which fails the build closed by design (ship-clean gate; only
+#     TODAY's digest is re-linted, so historical digests are never re-checked),
+#     and hard for analyses, where quarantine + requeue is self-healing.
+#   * a head must be a NOUN-ONLY word. The same word order is grammatical when
+#     the head doubles as a third-person verb — "a reboot immediately fixes the
+#     bug", "a restart usually fixes the appliance", "a decision usually
+#     matters", "an update usually issues a token" — and a regex that only sees
+#     article + word + -ly adverb + head cannot tell the two apart, so the
+#     verb-shaped plurals (fixes, issues, steps, actions, matters, concerns,
+#     tasks) are NOT heads. Singular heads are safe: English has no "a <noun>
+#     <adverb> <verb>" shape, so "a patch immediately fix" is always a defect.
+#     (2026-11-26 review: an earlier draft carried the verb plurals and flagged
+#     four of those five sentences; the corpus had zero instances either way,
+#     so this arm is pure precision — a false positive here fails a build.)
+MALFORMED_COMPOUND_HEAD = (
+    "item", "items", "issue", "thing", "things", "one",
+    "task", "priority", "priorities", "problem", "problems",
+    "concern", "matter", "step", "action", "fix",
+)
+LY_ADJECTIVES = frozenset({
+    "monthly", "weekly", "daily", "hourly", "yearly", "timely",
+    "friendly", "likely", "unlikely", "costly", "lovely", "lively",
+    "lonely", "elderly", "silly", "deadly", "holy", "curly",
+    "early", "only", "family", "orderly", "scholarly", "chilly",
+    "burly", "jolly", "kindly", "sickly", "stately", "unruly",
+})
+MALFORMED_COMPOUND_RE = re.compile(
+    r"\b(?:a|an)\s+[A-Za-z][\w'-]*\s+([a-z]+ly)\s+(" +
+    "|".join(MALFORMED_COMPOUND_HEAD) + r")\b")
 
 
 # Structure contract: prompts/tia-hourly.md promises "2-4 short plain
@@ -425,6 +493,37 @@ def triage_bookkeeping_hits(text):
     return out
 
 
+def malformed_compound_hits(text):
+    """HARD violation: a dropped-hyphen / dropped-word compound in prose.
+
+    2026-10-26 audit Issue 4: "makes this a patch immediately item for any
+    estate running AOS-8" shipped in the published digest — a malformed
+    compound ("patch-immediately item") that no rule could see, because
+    banned strings and grounding checks say nothing about word order. See
+    MALFORMED_COMPOUND_RE for the exact shape and its precision notes.
+
+    Returns one message per occurrence naming the matched phrase, so the fix
+    is obvious in the log (hyphenate the compound or rewrite the phrase: "an
+    immediate patch"). The hint quotes the canonical defective/legal pair
+    instead of interpolating the matched head, because "an immediate items"
+    (or any fabricated article + plural) reads as nonsense in the log. Code
+    spans and fenced blocks are stripped first, so a quoted example stays
+    legal.
+    """
+    stripped = re.sub(r"```.*?```", "", text or "", flags=re.S)
+    stripped = re.sub(r"`[^`\n]+`", "", stripped)
+    out = []
+    for m in MALFORMED_COMPOUND_RE.finditer(stripped):
+        adv = m.group(1)
+        if adv in LY_ADJECTIVES:
+            continue
+        out.append(f"malformed compound {m.group(0)!r} (adverb {adv!r} sits "
+                   f"in the attributive slot: hyphenate the compound or move "
+                   f"the adverb in front of the noun, e.g. 'a patch "
+                   f"immediately item' -> 'an immediate patch')")
+    return out
+
+
 def raw_html_hits(text):
     """Literal HTML in agent prose that breaks the rendered site.
 
@@ -489,6 +588,7 @@ def lint_analysis(text, story=None, subject_title=None, source_text=None):
         out.append(f"internal event id {ev_id!r} (published prose names the "
                    f"story, never the ingest object; drop the "
                    f"parenthetical)")
+    out.extend(malformed_compound_hits(text))
     if any(l.lstrip().startswith("#") for l in text.splitlines()):
         out.append("markdown heading line (prompts ban headings)")
     if not MIN_LEN <= len(text) <= MAX_LEN:
@@ -550,10 +650,13 @@ def depth_violations(text, score):
 
 
 def lint_digest(text):
-    """Violations for one daily digest (plain markdown). Banned strings only
-    plus the coverage-link invariant — no length/paragraph bounds (long-form
-    is legal here)."""
+    """Violations for one daily digest (plain markdown). Banned strings plus
+    the coverage-link invariant — no length/paragraph bounds (long-form is
+    legal here) — and the malformed-compound rule (2026-10-26 audit Issue 4:
+    "makes this a patch immediately item" shipped because nothing in this
+    gate looked at word order)."""
     out = _banned_hits(text)
+    out.extend(malformed_compound_hits(text))
     if not DIGEST_LINK_RE.search(text):
         out.append("no stories/ link (digests always link their coverage)")
     return out

@@ -700,6 +700,98 @@ with tempfile.TemporaryDirectory() as td:
               open(os.path.join(stories_dir, "leak-story.json"))))
     log.clear()
 
+# --- 10: malformed compound / dropped word (2026-10-26 audit Issue 4) --------
+# The published 2026-10-26 digest read "... makes this a patch immediately item
+# for any estate running AOS-8": a malformed compound that no gate saw, because
+# banned strings and grounding say nothing about word order. Contract: the
+# adverb-in-the-attributive-slot shape is a HARD violation for digests (which
+# fail the build closed) and for analyses (quarantine + requeue is
+# self-healing), and the legal near-misses never fire.
+SHIPPED = ("No exploitation telemetry is reported yet, but the unauthenticated "
+           "path to admin makes this a patch immediately item for any estate "
+           "running AOS-8.")
+hits = prose_lint.malformed_compound_hits(SHIPPED)
+check("the shipped 2026-10-26 sentence is flagged", len(hits) == 1)
+check("the message names the phrase and the adverb",
+      "'a patch immediately item'" in hits[0] and "'immediately'" in hits[0]
+      if hits else False)
+check("the corrected sentence passes",
+      prose_lint.malformed_compound_hits(
+          SHIPPED.replace("a patch immediately item", "an immediate patch"))
+      == [])
+check("hyphenated legal variant passes",
+      prose_lint.malformed_compound_hits(
+          "makes this a patch-immediately item") == [])
+check("malformed compound fails lint_digest",
+      any("malformed compound" in m
+          for m in prose_lint.lint_digest(
+              GOOD_DIGEST + " " + SHIPPED)))
+check("clean digest has no malformed-compound violation",
+      prose_lint.lint_digest(GOOD_DIGEST) == [])
+check("malformed compound fails lint_analysis (hard, quarantine path)",
+      any("malformed compound" in m
+          for m in prose_lint.lint_analysis(GOOD + "\n\n" + SHIPPED)))
+# Negatives: the legal shapes that a loose rule would wrongly flag. Sources:
+# the false positives an earlier draft produced over the 2,627-file store, plus
+# -ly adjectives in the attributive slot.
+for legal in ("a monthly patch for every estate",
+              "a missed July update shipped late",
+              "a weekly issue roundup",
+              "a fully remote attacker",
+              "a newly discovered flaw",
+              "a friendly item in the queue",
+              "a costly mistake",
+              "a quickly fixed bug in 2.3.1"):
+    check(f"legal phrase not flagged: {legal!r}",
+          prose_lint.malformed_compound_hits(legal) == [])
+check("code-span example stays legal",
+      prose_lint.malformed_compound_hits(
+          "the phrase `a patch immediately item` is banned") == [])
+check("capitalized July cannot fake an adverb",
+      prose_lint.malformed_compound_hits("a routine July item") == [])
+
+# --- 10b: the head must be noun-only (2026-11-26 review) --------------------
+# An earlier draft listed the verb-shaped plurals fixes/issues/steps/actions/
+# matters/concerns/tasks as heads, so ordinary grammatical prose — article +
+# subject + adverb + VERB — tripped a HARD rule. That is not academic: the
+# digest arm fails the build closed (site-deploy refuses to publish) and the
+# analysis arm quarantines + requeues up to MAX_ANALYSIS_QUARANTINES times,
+# so a false positive costs a publish or an analysis. Each sentence below was
+# flagged by the pre-review module and must stay legal.
+for grammatical in ("a reboot immediately fixes the bug",
+                    "a restart usually fixes the appliance",
+                    "a patch typically fixes the issue",
+                    "a hotfix immediately fixes the crash",
+                    "an update usually issues a new token",
+                    "a decision usually matters under review",
+                    "a leak usually concerns the vendor",
+                    "an analyst usually tasks the vendor",
+                    "a bad revert quickly steps on the next release"):
+    check(f"grammatical subject+adverb+verb not flagged: {grammatical!r}",
+          prose_lint.malformed_compound_hits(grammatical) == [])
+# ...while every retained head still fires, singular and plural, so the prune
+# narrowed the head set without hollowing the rule out.
+for defective in ("makes this a patch immediately item",
+                  "makes this a patch immediately items",
+                  "makes this a patch immediately issue",
+                  "makes this a patch immediately priority",
+                  "makes this a patch immediately problems",
+                  "makes this a patch immediately step",
+                  "makes this a patch immediately fix"):
+    check(f"defective compound still flagged: {defective!r}",
+          len(prose_lint.malformed_compound_hits(defective)) == 1)
+# The log hint must not fabricate an article + plural (the pre-review message
+# rendered the nonsense "e.g. 'an immediate fixes'").
+hint = prose_lint.malformed_compound_hits(SHIPPED)[0]
+check("hint quotes the canonical repair, not a fabricated phrase",
+      "'an immediate patch'" in hint and "an immediate item" not in hint)
+# Documented gap, pinned so a future widening has to say so out loud: the
+# article must be lowercase, so a sentence-initial 'A' escapes the rule.
+check("sentence-initial 'A' escapes (documented gap)",
+      prose_lint.malformed_compound_hits(
+          "A patch immediately item ships today.") == [])
+
+
 print()
 if FAILS:
     print(f"FAILED: {len(FAILS)} check(s): {', '.join(FAILS)}")
