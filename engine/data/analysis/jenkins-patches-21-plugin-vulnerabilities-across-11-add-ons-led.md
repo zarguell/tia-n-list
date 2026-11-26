@@ -1,0 +1,3 @@
+SecurityOnline reported that Jenkins patched 21 plugin vulnerabilities across 11 add-ons, led by a high-risk sandbox bypass tracked as CVE-2026-136834. The report also mentions remote code execution bugs among the fixes, so the update is broader than a single plugin issue.
+
+The event snippet does not list the other plugins, affected versions, fixed builds or CVSS scores. Watch for the Jenkins advisory index and confirm which plugin updates are required, especially any sandbox escape available to users who should be confined to job configuration. Until the plugins are known, the safest action is to inventory installed plugin versions against the advisory rather than assume the 21 fixes apply evenly.
