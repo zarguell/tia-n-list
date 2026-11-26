@@ -1,0 +1,3 @@
+Flight Centre Travel Group disclosed on November 26 that it detected unusual activity in a third-party accommodation booking platform used by several of its leisure travel brands. The company is investigating whether customer records were exposed. ABC describes the incident as a significant data breach, and the coverage identifies passport details among the personal data at issue.
+
+Because the affected platform is described as a third-party booking system, the vendor relationship, the brands that used it and the exact fields exposed are central to scoping the incident. The reporting does not establish a victim count or confirm the full extent of the exposure. Flight Centre has apologised and says it is investigating the cyber breach.
