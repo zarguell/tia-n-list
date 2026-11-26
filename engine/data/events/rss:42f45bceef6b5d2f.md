@@ -1,1 +1,1 @@
-삼성 One UI 9.5 베타 버전이 출시되었으며 삼성 팬들을 위한 새로운 기능들이 포함되어 있습니다.현재로서는 갤럭시 S26을 소유한 사용자들에게만 적용되면 사용자 분들이 눈낄이 갈만한 기능은 삼성의 기본 카메라 .. Article Link: 삼성 갤럭시 스마트폰 One UI 9.5 업데이트로 갤럭시 S26 카메라 성능 향상
+Samsung has released a One UI 9.5 beta with new features for Samsung fans. For now, the feature likely to interest users is limited to Galaxy S26 owners and concerns Samsung's default camera .. Article Link: Samsung Galaxy smartphone One UI 9.5 update improves Galaxy S26 camera performance (https://malware.news/t/one-ui-9-5-s26/127652#post_1)
