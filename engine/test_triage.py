@@ -505,6 +505,85 @@ finally:
     _restore_stubs()
     shutil.rmtree(tmp)
 
+# 9. write-time shell invariant (2026-10-26 audit Issue 2)
+# The audit opened with `dedup_invariants: in-shell: 2` and repaired the DATA
+# with repair_dedupe.py; nothing at write time stopped a story with
+# `merged_into` from carrying events, so the invariant only surfaced at the
+# next audit. Contract: apply() leaves EVERY redirect shell with 0 events -
+# both a story merge and a keep reassignment (which empties the old holder),
+# plus a legacy shell that already held events when the run started (those
+# move to the live canonical through the redirect chain, never get dropped
+# while a live target exists).
+tmp = tempfile.mkdtemp()
+try:
+    for var, sub in [("EVENTS", "events"), ("STORIES", "stories"),
+                     ("ANALYSIS", "analysis"), ("TRIAGE", "triage")]:
+        d = os.path.join(tmp, sub)
+        os.makedirs(d)
+        setattr(triage, var, d)
+    setattr(triage, "STATE", os.path.join(tmp, "triage", "state.json"))
+    setattr(triage, "NEEDS", os.path.join(tmp, "needs-analysis.json"))
+    setattr(triage, "DATA", tmp)
+
+    for eid in ("k1", "m1", "x1"):
+        json.dump({"id": eid, "title": f"Event {eid}", "source": "x",
+                   "url": f"https://x.test/{eid}",
+                   "published_at": "2026-10-26T10:00:00Z", "cves": [],
+                   "kind": "original"},
+                  open(os.path.join(tmp, "events", f"{eid}.json"), "w"))
+    seeds = [("keep-a", ["k1"], None), ("keep-b", [], None),
+             ("merge-frag", ["m1"], None), ("merge-canon", [], None),
+             ("legacy-live", [], None), ("legacy-shell", ["x1"], "legacy-live")]
+    for sid, evs, ptr in seeds:
+        s = {"id": sid, "title": f"Story {sid}",
+             "first_seen": "2026-10-26T10:00:00Z",
+             "last_seen": "2026-10-26T10:00:00Z", "sources": ["x"],
+             "n_sources": 1, "cves": [], "score": 4.0,
+             "reddit_signal": {"posts": 0, "best_score": 0},
+             "events": [{"event_id": e, "label": "original"} for e in evs]}
+        if ptr:
+            s["merged_into"] = ptr
+        json.dump(s, open(os.path.join(tmp, "stories", f"{sid}.json"), "w"))
+
+    import store as store_mod
+    import score as score_mod
+    _stub(store_mod, "load_events", lambda: {
+        e: json.load(open(os.path.join(tmp, "events", f"{e}.json")))
+        for e in ("k1", "m1", "x1")})
+    _stub(score_mod, "hot_score", lambda s, ev, rd: {"score": 4.0})
+
+    decfile = os.path.join(tmp, "decisions.json")
+    json.dump({"decisions": [{"event_id": "k1", "action": "keep",
+                                "story": "keep-b"}],
+               "merges": [{"from": "merge-frag", "into": "merge-canon"}]},
+              open(decfile, "w"))
+    buf = io.StringIO()
+    with contextlib.redirect_stdout(buf):
+        triage.apply(decfile)
+
+    st = {sid: json.load(open(os.path.join(tmp, "stories", f"{sid}.json")))
+          for sid, _e, _p in seeds}
+    shells = {sid: s for sid, s in st.items() if s.get("merged_into")}
+    check("keep reassignment leaves every merged_into shell with 0 events",
+          {sid: s["events"] for sid, s in shells.items()},
+          {"keep-a": [], "merge-frag": [], "legacy-shell": []})
+    check("story merge leaves the fragment shell with 0 events",
+          (st["merge-frag"].get("merged_into"), st["merge-frag"]["events"]),
+          ("merge-canon", []))
+    check("no story carrying merged_into holds any event",
+          [sid for sid, s in st.items()
+           if s.get("merged_into") and s.get("events")], [])
+    check("legacy shell's stranded event moved to the live canonical",
+          [r["event_id"] for r in st["legacy-live"]["events"]], ["x1"])
+    check("keep landing in the target story",
+          [r["event_id"] for r in st["keep-b"]["events"]], ["k1"])
+    check("shell invariant repair is logged",
+          "shell invariant" in buf.getvalue(), True)
+finally:
+    _restore_stubs()
+    shutil.rmtree(tmp)
+
+
 print()
 if failures:
     print(f"FAIL: {len(failures)} triage checks failed")

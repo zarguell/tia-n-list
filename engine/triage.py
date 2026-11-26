@@ -402,6 +402,48 @@ def _live_target(stories, sid):
     return None
 
 
+def _enforce_shell_invariants(stories):
+    """Write-time invariant: a redirect shell holds ZERO events.
+
+    Every path above marks a story away by setting ``merged_into`` and is
+    expected to leave the shell empty, but nothing ASSERTED it before the
+    write: the 2026-10-26 audit opened with `dedup_invariants: in-shell: 2`
+    — two emptied shells still carried event references — and only a
+    post-hoc data repair (repair_dedupe.py) could fix it. The invariant
+    audit.py checks must hold at write time instead.
+
+    A shell found holding events is repaired here, in the same order
+    repair_dedupe uses: events move to the live canonical story through the
+    redirect chain (they render nowhere inside a shell, which only renders a
+    redirect), or are cleared when the chain has no live target. Either way
+    the WARN names the shell so a writer that keeps producing this shape
+    stays visible in the log. Returns the number of shells repaired.
+
+    Mutation is in place; the caller persists the store.
+    """
+    repaired = 0
+    for sid in sorted(stories):
+        s = stories[sid]
+        if not s.get("merged_into") or not s.get("events"):
+            continue
+        target = _live_target(stories, sid)
+        moved = 0
+        if target:
+            for ref in list(s["events"]):
+                ev = _read_event(ref.get("event_id", ""))
+                if ev and _absorb(stories[target], ev, "update"):
+                    ev["kind"] = "update"
+                    _write_event(ev)
+                    moved += 1
+        print(f"  WARN: shell invariant: {sid} (merged_into "
+              f"{s['merged_into']}) held {len(s.get('events', []))} event(s) "
+              f"-> {'moved to ' + target if moved else 'cleared, no live target'}")
+        s["events"] = []
+        s["n_sources"] = 0
+        repaired += 1
+    return repaired
+
+
 def _sole_holder(stories, eid):
     """The active story whose ONLY event is this one (the mechanical merge's
     fresh mint). Reusing it instead of creating a twin prevents -2 slug
@@ -754,6 +796,13 @@ def apply(decisions_path):
     # repair_shells.py (explicit store-wide sweep, committed by the next
     # publish). lifecycle.tombstone_orphans itself is unchanged.
 
+    # Write-time invariant, before ANY store write: a story carrying
+    # merged_into is a redirect shell and holds 0 events (audit.py
+    # dedup_invariants `in-shell`). Telemetry above already auto-reassigns a
+    # double-referenced keep; this is the backstop for every other path that
+    # decides a shell's fate in this run.
+    shells_repaired = _enforce_shell_invariants(stories)
+
     # persist stories
     for s in stories.values():
         write_json(os.path.join(STORIES, s["id"] + ".json"), s)
@@ -805,6 +854,9 @@ def apply(decisions_path):
     state["processed"] = sorted(processed)
     _save_state(state)
     print(f"triage applied: {moved} kept/moved, {drops} dropped, {denied} low-trust mints denied, {len(merges)} merges, needs-analysis {len(queue)}")
+    if shells_repaired:
+        print(f"  WARN: {shells_repaired} redirect shell(s) held events and were "
+              f"repaired at write time (shell invariant)")
     if ignored:
         print(f"  WARN: {ignored} decision entries could not be parsed from {decisions_path}")
     if not decisions and not merges:
