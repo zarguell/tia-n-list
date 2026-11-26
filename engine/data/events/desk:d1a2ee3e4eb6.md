@@ -1,0 +1,1 @@
+A court found that Arion Kurtaj was part of Lapsus$ and committed acts including the Rockstar Games hack while on bail. Jurors heard that he used an Amazon Fire Stick, hotel television, phone, keyboard and mouse after his laptop was confiscated, then posted 90 gameplay clips and a message in Rockstar's internal Slack.

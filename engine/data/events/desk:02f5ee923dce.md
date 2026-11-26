@@ -1,0 +1,1 @@
+Kurtaj pleaded guilty at Woolwich Crown Court to the 2022 Rockstar hack and other attacks carried out with Lapsus$. The BBC reported that he used an Amazon Fire Stick, hotel television and Bluetooth peripherals after his computer was confiscated, stealing 90 clips showing nearly 60 minutes of gameplay and threatening to release source code through Rockstar's internal Slack.
