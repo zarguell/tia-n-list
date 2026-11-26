@@ -1,0 +1,1 @@
+NVD published CVE-2026-133275 on 19 November 2026, describing insufficient file type validation in the Audio, Web and Video Conferencing component of Mitel MiCollab through 10.3 (10.3.0.18). An unauthenticated attacker could upload arbitrary files to the target system. NVD maps the issue to Mitel identifier MTLVULN-1861.
