@@ -1,0 +1,1 @@
+L’obiettivo della campagna è legato al furto di credenziali CIE per ottenere l’identità digitale del cittadino, utilizzabile per accedere a numerosi servizi online della Pubblica Amministrazione e di soggetti privati aderenti. Article Link: L’identità digitale CIE nel mirino dei criminali con phishing interattivo – CERT-AGID
