@@ -55,6 +55,17 @@ page hero among them — kept printing triage identifiers a reader cannot
 resolve. Unlike its WARN sibling the class is narrow and mechanical (delete the
 parenthesis, keep the sentence), so it quarantines like any other hard error;
 ids quoted inside code spans stay legal.
+
+A fifth class is also hard: a malformed attributive compound / dropped word
+(MALFORMED_COMPOUND_RE / malformed_compound_hits, 2026-10-26 audit Issue 4).
+The published 2026-10-26 digest said "makes this a patch immediately item for
+any estate running AOS-8" — the compound adjective lost its hyphen and left
+the adverb `immediately` in the attributive slot, and NOTHING in this gate
+looked at word order (banned strings and grounding cannot), so it shipped and
+the audit could only repair it by hand. The rule matches article + word +
+lowercase `-ly` adverb + generic head noun, excludes the `-ly` adjectives that
+are legal attributives, and fires for both digests (fail closed, like the
+coverage-link invariant) and analyses (quarantine + requeue).
 """
 import glob
 import json
@@ -125,6 +136,46 @@ TRIAGE_BOOKKEEPING = (
 # identifier — without that guard the two-letter prefixes match inside prose.
 INTERNAL_ID_RE = re.compile(
     r"(?<![A-Za-z0-9_])(?:masto|mf|rd|x|desk|rss|bsky):[0-9A-Za-z_]+")
+
+# Malformed attributive compound / dropped word (2026-10-26 audit Issue 4).
+# The published 2026-10-26 digest read "the unauthenticated path to admin makes
+# this a patch immediately item for any estate running AOS-8": the compound
+# adjective lost its hyphen, leaving the adverb `immediately` in the attributive
+# slot between the modifier noun (`patch`) and the head noun (`item`). No claim
+# was false, so nothing in the pipeline saw it — banned strings and grounding
+# cannot catch word order, and the audit could only repair the sentence by hand
+# (its corrective license needs a contradicting source, which a grammar defect
+# never supplies).
+#
+# The detectable shape is narrow and mechanical: article + word + LOWERCASE
+# `-ly` adverb + generic head noun. Precision notes, all of them load-bearing:
+#   * the head-noun list is deliberately small and generic (item/issue/thing/
+#     priority...). Wide nouns are where false positives live ("a monthly
+#     patch", "a missed July update");
+#   * the adverb must be lowercase, so a capitalized `July` cannot fake `-ly`;
+#   * LY_ADJECTIVES excludes the adjectives that end in `-ly` (monthly, weekly,
+#     daily, friendly, likely, ...), which are legal attributives;
+#   * scanning all 2,627 stored digest/analysis files (2026-11-26) returned
+#     exactly one hit on the pre-fix store — the defect above — and zero after
+#     the digest was corrected. That precision is why the rule is HARD for the
+#     digest, which fails the build closed by design (ship-clean gate), and
+#     hard for analyses, where quarantine + requeue is self-healing.
+MALFORMED_COMPOUND_HEAD = (
+    "item", "items", "issue", "issues", "thing", "things", "one",
+    "task", "tasks", "priority", "priorities", "problem", "problems",
+    "concern", "concerns", "matter", "matters", "step", "steps",
+    "action", "actions", "fix", "fixes",
+)
+LY_ADJECTIVES = frozenset({
+    "monthly", "weekly", "daily", "hourly", "yearly", "timely",
+    "friendly", "likely", "unlikely", "costly", "lovely", "lively",
+    "lonely", "elderly", "silly", "deadly", "holy", "curly",
+    "early", "only", "family", "orderly", "scholarly", "chilly",
+    "burly", "jolly", "kindly", "sickly", "stately", "unruly",
+})
+MALFORMED_COMPOUND_RE = re.compile(
+    r"\b(?:a|an)\s+[A-Za-z][\w'-]*\s+([a-z]+ly)\s+(" +
+    "|".join(MALFORMED_COMPOUND_HEAD) + r")\b")
 
 
 # Structure contract: prompts/tia-hourly.md promises "2-4 short plain
@@ -425,6 +476,33 @@ def triage_bookkeeping_hits(text):
     return out
 
 
+def malformed_compound_hits(text):
+    """HARD violation: a dropped-hyphen / dropped-word compound in prose.
+
+    2026-10-26 audit Issue 4: "makes this a patch immediately item for any
+    estate running AOS-8" shipped in the published digest — a malformed
+    compound ("patch-immediately item") that no rule could see, because
+    banned strings and grounding checks say nothing about word order. See
+    MALFORMED_COMPOUND_RE for the exact shape and its precision notes.
+
+    Returns one message per occurrence naming the matched phrase, so the fix
+    is obvious in the log (hyphenate the compound or rewrite the phrase: "an
+    immediate patch"). Code spans and fenced blocks are stripped first, so a
+    quoted example stays legal.
+    """
+    stripped = re.sub(r"```.*?```", "", text or "", flags=re.S)
+    stripped = re.sub(r"`[^`\n]+`", "", stripped)
+    out = []
+    for m in MALFORMED_COMPOUND_RE.finditer(stripped):
+        adv = m.group(1)
+        if adv in LY_ADJECTIVES:
+            continue
+        out.append(f"malformed compound {m.group(0)!r} (adverb {adv!r} in the "
+                   f"attributive slot: hyphenate the compound or rewrite the "
+                   f"phrase, e.g. 'an immediate {m.group(2)}')")
+    return out
+
+
 def raw_html_hits(text):
     """Literal HTML in agent prose that breaks the rendered site.
 
@@ -489,6 +567,7 @@ def lint_analysis(text, story=None, subject_title=None, source_text=None):
         out.append(f"internal event id {ev_id!r} (published prose names the "
                    f"story, never the ingest object; drop the "
                    f"parenthetical)")
+    out.extend(malformed_compound_hits(text))
     if any(l.lstrip().startswith("#") for l in text.splitlines()):
         out.append("markdown heading line (prompts ban headings)")
     if not MIN_LEN <= len(text) <= MAX_LEN:
@@ -550,10 +629,13 @@ def depth_violations(text, score):
 
 
 def lint_digest(text):
-    """Violations for one daily digest (plain markdown). Banned strings only
-    plus the coverage-link invariant — no length/paragraph bounds (long-form
-    is legal here)."""
+    """Violations for one daily digest (plain markdown). Banned strings plus
+    the coverage-link invariant — no length/paragraph bounds (long-form is
+    legal here) — and the malformed-compound rule (2026-10-26 audit Issue 4:
+    "makes this a patch immediately item" shipped because nothing in this
+    gate looked at word order)."""
     out = _banned_hits(text)
+    out.extend(malformed_compound_hits(text))
     if not DIGEST_LINK_RE.search(text):
         out.append("no stories/ link (digests always link their coverage)")
     return out

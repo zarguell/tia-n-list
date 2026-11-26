@@ -700,6 +700,57 @@ with tempfile.TemporaryDirectory() as td:
               open(os.path.join(stories_dir, "leak-story.json"))))
     log.clear()
 
+# --- 10: malformed compound / dropped word (2026-10-26 audit Issue 4) --------
+# The published 2026-10-26 digest read "... makes this a patch immediately item
+# for any estate running AOS-8": a malformed compound that no gate saw, because
+# banned strings and grounding say nothing about word order. Contract: the
+# adverb-in-the-attributive-slot shape is a HARD violation for digests (which
+# fail the build closed) and for analyses (quarantine + requeue is
+# self-healing), and the legal near-misses never fire.
+SHIPPED = ("No exploitation telemetry is reported yet, but the unauthenticated "
+           "path to admin makes this a patch immediately item for any estate "
+           "running AOS-8.")
+hits = prose_lint.malformed_compound_hits(SHIPPED)
+check("the shipped 2026-10-26 sentence is flagged", len(hits) == 1)
+check("the message names the phrase and the adverb",
+      "'a patch immediately item'" in hits[0] and "'immediately'" in hits[0]
+      if hits else False)
+check("the corrected sentence passes",
+      prose_lint.malformed_compound_hits(
+          SHIPPED.replace("a patch immediately item", "an immediate patch"))
+      == [])
+check("hyphenated legal variant passes",
+      prose_lint.malformed_compound_hits(
+          "makes this a patch-immediately item") == [])
+check("malformed compound fails lint_digest",
+      any("malformed compound" in m
+          for m in prose_lint.lint_digest(
+              GOOD_DIGEST + " " + SHIPPED)))
+check("clean digest has no malformed-compound violation",
+      prose_lint.lint_digest(GOOD_DIGEST) == [])
+check("malformed compound fails lint_analysis (hard, quarantine path)",
+      any("malformed compound" in m
+          for m in prose_lint.lint_analysis(GOOD + "\n\n" + SHIPPED)))
+# Negatives: the legal shapes that a loose rule would wrongly flag. Sources:
+# the false positives an earlier draft produced over the 2,627-file store, plus
+# -ly adjectives in the attributive slot.
+for legal in ("a monthly patch for every estate",
+              "a missed July update shipped late",
+              "a weekly issue roundup",
+              "a fully remote attacker",
+              "a newly discovered flaw",
+              "a friendly item in the queue",
+              "a costly mistake",
+              "a quickly fixed bug in 2.3.1"):
+    check(f"legal phrase not flagged: {legal!r}",
+          prose_lint.malformed_compound_hits(legal) == [])
+check("code-span example stays legal",
+      prose_lint.malformed_compound_hits(
+          "the phrase `a patch immediately item` is banned") == [])
+check("capitalized July cannot fake an adverb",
+      prose_lint.malformed_compound_hits("a routine July item") == [])
+
+
 print()
 if FAILS:
     print(f"FAILED: {len(FAILS)} check(s): {', '.join(FAILS)}")
