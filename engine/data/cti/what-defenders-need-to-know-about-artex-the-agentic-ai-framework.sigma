@@ -1,0 +1,33 @@
+title: ARTEX-Abused C2 Infrastructure - BLOODALCHEMY and wisp-agent Hosts
+id: 6c0e2fdd-be5b-42b1-9854-4092b3475313
+status: experimental
+description: Detects endpoint network connections to infrastructure that Microsoft, Darktrace and Datadog tied to post-exploitation activity from ARTEX-abused intrusions in October and November 2026 - BLOODALCHEMY command-and-control traffic to nginxmysql.com and 45.153.126.223 between 23 October and 2 November, and the wisp-agent download from 213.111.150.145 on port 8099 on 5 November. High value for retro-hunting because ARTEX projects are forks that change file signatures but rarely rotate already-published C2 hosts.
+references:
+  - https://www.microsoft.com/en-us/security/blog/2026/11/25/what-defenders-need-to-know-artex-agentic-ai-framework-threat-actors-abuse/
+  - https://darktrace.com/blog/agentic-attacks-in-the-wild-inside-three-artex-investigations
+  - https://securitylabs.datadoghq.com/articles/artex-agentic-attacks-aws-environments/
+author: Tia N. List
+date: 2026/11/26
+tags:
+  - attack.t1071
+  - attack.t1105
+logsource:
+  category: network_connection
+  product: windows
+detection:
+  selection_domain:
+    DestinationHostname|endswith:
+      - 'nginxmysql.com'
+  selection_ip:
+    DestinationIp:
+      - '45.153.126.223'
+      - '213.111.150.145'
+  filter_local:
+    DestinationIp|cidr:
+      - '10.0.0.0/8'
+      - '172.16.0.0/12'
+      - '192.168.0.0/16'
+  condition: (selection_domain or selection_ip) and not filter_local
+falsepositives:
+  - Shared hosting or sinkhole infrastructure could resolve the same addresses after takedown; confirm with the destination port (8099 for the wisp-agent download) and with concurrent cloud control-plane anomalies such as FilterLogEvents enumeration before escalating
+level: high

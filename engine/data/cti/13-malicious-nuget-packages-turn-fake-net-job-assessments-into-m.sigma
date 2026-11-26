@@ -1,0 +1,29 @@
+title: NuGet Fake-Job-Assessment Sideload - osk.exe Started From a User-Writable Path
+id: 2dd18dd5-4940-4b1f-ad84-382a8b3d56f8
+status: experimental
+description: Detects the final stage of the 13 malicious NuGet packages reported by Socket in November 2026, where a build analyzer stages OskSupport.dll into %LOCALAPPDATA%\osk\ next to a copied osk.exe and a later button control starts that copy with a hidden window. The Windows on-screen keyboard only runs from System32, so an osk.exe executing from a user profile or temp directory is the campaign's sideload marker.
+references:
+  - https://socket.dev/blog/malicious-nuget-packages-fake-job-assessments
+  - https://corgea.com/research/winui-nuget-fake-job-assessment-msbuild-osk-sideload-november-2026
+  - https://thehackernews.com/2026/11/13-malicious-nuget-packages-turn-fake.html
+author: Tia N. List
+date: 2026/11/26
+tags:
+  - attack.t1195
+  - attack.t1036
+  - attack.t1105
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection_image:
+    Image|endswith: '\osk.exe'
+  selection_userpath:
+    Image|startswith:
+      - 'C:\Users\'
+      - 'C:\Windows\Temp\'
+      - 'C:\ProgramData\'
+  condition: selection_image and selection_userpath
+falsepositives:
+  - Developer or accessibility tooling that copies the on-screen keyboard next to an application bundle; verify the parent process (the campaign chain starts under dotnet.exe or MSBuild-heavy IDE hosts) and the presence of OskSupport.dll in the same directory
+level: high
