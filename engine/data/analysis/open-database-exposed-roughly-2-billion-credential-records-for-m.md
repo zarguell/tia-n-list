@@ -1,0 +1,3 @@
+An open, unprotected database held roughly 2 billion credential records, according to researcher Jeremiah Fowler. The indexed report says the exposed records include entries linked to Gmail, Facebook, Instagram, Amazon, ChatGPT and many other online services, and the source URL points to a write-up covering credentials and session tokens.
+
+No owner, discovery date, record provenance, breach window or notification status is given in the two available items, so the count should be read as records in an exposed store rather than confirmed compromised accounts at those services. Watch for the researcher's methodology, evidence that session tokens were live, and any service-specific invalidation notices.

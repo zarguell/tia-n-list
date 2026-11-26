@@ -1,0 +1,3 @@
+The only material in this story is a Reuters exclusive headlined as Microsoft declaring a Code Red response after a historic global outage, with internal memos cited as the basis. The quoted fragment begins with the claim that top engineering personnel were deployed, then cuts off. No service, date, duration, cause, customer impact or CVE is given in the captured text.
+
+The claim concerns how Microsoft's engineering organization responded to a large availability event, not a vulnerability disclosure. Without the memo text or the full report, the Code Red label cannot be tied to a specific failure or remediation step. Watch for the full Reuters account, any Microsoft statement and whether the outage connects to earlier security incidents.
