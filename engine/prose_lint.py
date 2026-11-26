@@ -66,6 +66,12 @@ the audit could only repair it by hand. The rule matches article + word +
 lowercase `-ly` adverb + generic head noun, excludes the `-ly` adjectives that
 are legal attributives, and fires for both digests (fail closed, like the
 coverage-link invariant) and analyses (quarantine + requeue).
+
+The scope is deliberately tighter than "an adverb between two nouns", because
+this class is HARD on both paths: see MALFORMED_COMPOUND_HEAD for why a head
+must be a noun-only word ("a reboot immediately fixes the bug" is English, not
+a defect), and why the article is lowercase-only (sentence-initial `A patch
+immediately item` still escapes — a documented gap, not a claimed catch).
 """
 import glob
 import json
@@ -158,13 +164,24 @@ INTERNAL_ID_RE = re.compile(
 #   * scanning all 2,627 stored digest/analysis files (2026-11-26) returned
 #     exactly one hit on the pre-fix store — the defect above — and zero after
 #     the digest was corrected. That precision is why the rule is HARD for the
-#     digest, which fails the build closed by design (ship-clean gate), and
-#     hard for analyses, where quarantine + requeue is self-healing.
+#     digest, which fails the build closed by design (ship-clean gate; only
+#     TODAY's digest is re-linted, so historical digests are never re-checked),
+#     and hard for analyses, where quarantine + requeue is self-healing.
+#   * a head must be a NOUN-ONLY word. The same word order is grammatical when
+#     the head doubles as a third-person verb — "a reboot immediately fixes the
+#     bug", "a restart usually fixes the appliance", "a decision usually
+#     matters", "an update usually issues a token" — and a regex that only sees
+#     article + word + -ly adverb + head cannot tell the two apart, so the
+#     verb-shaped plurals (fixes, issues, steps, actions, matters, concerns,
+#     tasks) are NOT heads. Singular heads are safe: English has no "a <noun>
+#     <adverb> <verb>" shape, so "a patch immediately fix" is always a defect.
+#     (2026-11-26 review: an earlier draft carried the verb plurals and flagged
+#     four of those five sentences; the corpus had zero instances either way,
+#     so this arm is pure precision — a false positive here fails a build.)
 MALFORMED_COMPOUND_HEAD = (
-    "item", "items", "issue", "issues", "thing", "things", "one",
-    "task", "tasks", "priority", "priorities", "problem", "problems",
-    "concern", "concerns", "matter", "matters", "step", "steps",
-    "action", "actions", "fix", "fixes",
+    "item", "items", "issue", "thing", "things", "one",
+    "task", "priority", "priorities", "problem", "problems",
+    "concern", "matter", "step", "action", "fix",
 )
 LY_ADJECTIVES = frozenset({
     "monthly", "weekly", "daily", "hourly", "yearly", "timely",
@@ -487,8 +504,11 @@ def malformed_compound_hits(text):
 
     Returns one message per occurrence naming the matched phrase, so the fix
     is obvious in the log (hyphenate the compound or rewrite the phrase: "an
-    immediate patch"). Code spans and fenced blocks are stripped first, so a
-    quoted example stays legal.
+    immediate patch"). The hint quotes the canonical defective/legal pair
+    instead of interpolating the matched head, because "an immediate items"
+    (or any fabricated article + plural) reads as nonsense in the log. Code
+    spans and fenced blocks are stripped first, so a quoted example stays
+    legal.
     """
     stripped = re.sub(r"```.*?```", "", text or "", flags=re.S)
     stripped = re.sub(r"`[^`\n]+`", "", stripped)
@@ -497,9 +517,10 @@ def malformed_compound_hits(text):
         adv = m.group(1)
         if adv in LY_ADJECTIVES:
             continue
-        out.append(f"malformed compound {m.group(0)!r} (adverb {adv!r} in the "
-                   f"attributive slot: hyphenate the compound or rewrite the "
-                   f"phrase, e.g. 'an immediate {m.group(2)}')")
+        out.append(f"malformed compound {m.group(0)!r} (adverb {adv!r} sits "
+                   f"in the attributive slot: hyphenate the compound or move "
+                   f"the adverb in front of the noun, e.g. 'a patch "
+                   f"immediately item' -> 'an immediate patch')")
     return out
 
 
