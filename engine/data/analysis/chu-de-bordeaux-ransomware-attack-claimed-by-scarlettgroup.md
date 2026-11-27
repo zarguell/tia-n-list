@@ -1,0 +1,3 @@
+ScarlettGroup claimed responsibility for a ransomware attack on CHU de Bordeaux and threatened to publish patients' medical records. The available reports establish the group's claim and extortion threat, but do not independently confirm the volume of stolen data, whether records were published, or the effect on hospital services.
+
+A healthcare target raises the potential impact beyond ordinary data theft because exposed medical files can reveal sensitive treatment information. Watch for confirmation from CHU de Bordeaux or French authorities, details of affected systems and patient data, any service disruption, and evidence that the group has released authentic records rather than using the threat only to pressure the hospital.
