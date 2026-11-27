@@ -1,0 +1,5 @@
+1Password disclosed that an intruder used a single employee's corporate GitHub account to push malicious code into the company's own backend services, causing those services to download customer records. The attacker also copied source code from private repositories and gained access to the CI/CD pipeline that builds and ships software, raising the prospect of supply-chain tampering beyond the immediate data exposure.
+
+The incident matters because a compromised developer identity bridged into both customer data stores and the software delivery pipeline, two high-value targets at once. With access to CI/CD, the risk extends past confidentiality toward integrity of shipped product, and the customer-record exfiltration is a direct privacy exposure even if the company characterizes the scope as limited.
+
+Watch for 1Password's follow-up on which customer records were touched, whether any shipped artifacts were altered, and what controls failed on the GitHub account. The key question is whether the CI/CD access translated into modified builds or remained reconnaissance, and how the company hardens developer identity going forward.
