@@ -1,0 +1,1 @@
+Cloud One leadership said the platform hosted two named mission applications plus 97 others and had a 100% success rate against 10 million adversarial penetration attempts per year. The commentary said TICMS tracked munitions assets across 210 worldwide locations after moving to Cloud One in 2020.
