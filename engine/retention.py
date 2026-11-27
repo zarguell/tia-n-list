@@ -124,18 +124,30 @@ def classify_all(stories=None, immutable=None, digest=None):
     return out
 
 
+def _monthly_rates(tiers, stories, months=3):
+    """({tier: stories/month}, [recent month strings]) from first_seen."""
+    per = Counter()
+    for sid, (tier, _) in tiers.items():
+        per[(tier, (stories[sid].get("first_seen") or "")[:7])] += 1
+    recent = sorted({m for _, m in per if m})[-months:]
+    if not recent:
+        return {t: 0.0 for t in TIER_RANK}, []
+    rate = {t: sum(per[(t, m)] for m in recent) / len(recent) for t in TIER_RANK}
+    return rate, recent
+
+
+def _plateau(rate):
+    """stories retained at steady state = rate x horizon in months."""
+    return {t: rate.get(t, 0.0) * TIER_YEARS[t] * 12 for t in TIER_YEARS}
+
+
 def report(stories=None):
     """Counts per tier, monthly rates and the steady-state page estimate."""
     stories = load_stories() if stories is None else stories
     tiers = classify_all(stories)
-    months = Counter()
-    for sid, (tier, _) in tiers.items():
-        months[(tier, (stories[sid].get("first_seen") or "")[:7])] += 1
-    recent = sorted({m for _, m in months if m})[-3:]
-    rate = {t: (sum(months[(t, m)] for m in recent) / len(recent)) if recent else 0.0
-            for t in ("A", "B", "C")}
-    live = {t: rate[t] * TIER_YEARS[t] * 12 for t in TIER_YEARS}
-    unknown = sum(1 for t, r in tiers.values() if r.startswith("peak unknown"))
+    rate, recent = _monthly_rates(tiers, stories)
+    live = _plateau(rate)
+    unknown = sum(1 for _, reason in tiers.values() if reason.startswith("peak unknown"))
     return {
         "total": len(tiers),
         "tiers": dict(Counter(t for t, _ in tiers.values())),
