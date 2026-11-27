@@ -1,0 +1,3 @@
+A security alert says Mitel MiCollab AWV versions up to 10.3 are vulnerable to CVE-2026-133324, an unauthenticated authentication bypass. The event material does not provide a fixed release, affected configuration, CVSS score or evidence of exploitation, so the immediate signal is a vulnerable component rather than a confirmed attack campaign.
+
+An unauthenticated bypass can undermine access controls on collaboration infrastructure, but the available text does not establish the full impact. Watch for Mitel's advisory to confirm patched versions, prerequisites and any workaround, and for vendor or CISA statements about observed exploitation. Operators should verify whether the AWV component is deployed and exposed, then apply the vendor fix when it is identified.

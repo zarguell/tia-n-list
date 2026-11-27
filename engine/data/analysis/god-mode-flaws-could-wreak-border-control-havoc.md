@@ -1,0 +1,3 @@
+Dark Reading reported vulnerabilities in online visa and immigration systems used by Nigeria, Ethiopia, Zambia, Sri Lanka, Fiji and Ghana that could allow attackers to disrupt traveler entry. The available report presents a possible disruption scenario, not a documented intrusion, and the event material names no CVE, vendor, affected version or confirmed outage.
+
+The operational stakes are high because these systems sit directly in the path of border processing and international travel. Watch for vendor or government advisories that identify the flawed components, exploitation evidence and mitigations. Until then, the 'God Mode' label is a description of potential impact rather than proof that any of the six countries was attacked.
