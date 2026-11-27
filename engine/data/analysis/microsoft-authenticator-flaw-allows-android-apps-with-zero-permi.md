@@ -1,4 +1,4 @@
-A flaw in Microsoft Authenticator allows Android apps with zero permissions to steal authentication tokens. The event references CVE-2026-80097. The attack vector relies on the Authenticator app's handling of token storage or presentation, enabling a malicious app on the same device to extract credentials without requesting sensitive permissions.
+A flaw in Microsoft Authenticator allows Android apps with zero permissions to steal authentication tokens. The flaw is tracked as CVE-2026-80097. The attack vector relies on the Authenticator app's handling of token storage or presentation, enabling a malicious app on the same device to extract credentials without requesting sensitive permissions.
 
 Because the vulnerability lives in the authenticator application rather than the Android OS, users who rely on Microsoft Authenticator for multi-factor authentication are exposed until an app update is applied. The event does not specify affected Authenticator versions or whether Microsoft has released a patch, but the CVE tagging implies advisory-level acknowledgment.
 

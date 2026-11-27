@@ -47,6 +47,19 @@ violation, because the family is wide (100+ stored analyses say "the event
 it would pull every affected live card and requeue against a prompt that
 reproduces it until the retry cap, for prose a reader still understands.
 
+One arm of that WARN family was PROMOTED to hard: the precise `the event
+(reference|references|referenced|referencing)` construction (EVENT_REFERENCE_RE
+/ event_reference_hits, 2026-10-26 audit Issue 8 + Rec 4). The applied card
+e8f2664e00bd (PR #150) deliberately shipped the whole family WARN-only; the
+audit's remaining ask was a hard gate on the single construction it actually
+saw, and 17 of them shipped in ONE lint run. Only that shape is hard — the rest
+of the family ("attaches to the existing", "is the original mint", "no existing
+cluster covers", "the new story is appropriate") stays WARN, because THOSE are
+the wide phrasings (100+ stored analyses say "the event …") whose mass
+quarantine is the flood risk documented below. Flipping just the observed
+construction keeps the rule narrow, mechanical (rewrite the sentence to name
+the report), and bounded by the store it was measured on.
+
 A fourth class IS hard: bare internal event/channel ids (`masto:`, `mf:`, `rd:`,
 `x:`, `desk:`, `rss:`, `bsky:`) printed in analysis prose (INTERNAL_ID_RE /
 internal_id_hits, 2026-10-25 audit Issue 1 + Rec 1). The bookkeeping WARN above
@@ -109,10 +122,15 @@ SLOP = [
 # reported per occurrence, but NOT a hard violation, because the family is
 # broad and the analysis prompt does not ban the wording — see the module
 # docstring. One pattern per observed construction; deliberately
-# high-precision.
+# high-precision. EXCEPTION: the `the event (reference|references|referenced|
+# referencing)` construction was promoted to a HARD violation (2026-10-26
+# audit Issue 8 + Rec 4) and lives in EVENT_REFERENCE_RE below, so that arm
+# is deliberately absent from this tuple.
+# NOTE: the "the event (reference|references|referenced|referencing)" arm
+# that used to open this tuple is now the HARD EVENT_REFERENCE_RE below
+# (2026-10-26 audit Issue 8 + Rec 4) — it lives in exactly one place, so it
+# is never double-reported as a WARN alongside the quarantine.
 TRIAGE_BOOKKEEPING = (
-    # "The event references …", "the event reference to …"
-    r"\bthe event (?:reference|references|referenced|referencing)\b",
     # "attaches to the existing critical Magento story"
     r"\battaches? to the existing\b",
     # "The event is the original mint for this new story"
@@ -471,6 +489,40 @@ def specificity_backlog(analysis_dir, stories=None):
     return out
 
 
+# The one arm of the bookkeeping family that is HARD (2026-10-26 audit
+# Issue 8 + Rec 4, the residual of applied card e8f2664e00bd / PR #150).
+# `the event (reference|references|referenced|referencing)` narrates the
+# ingest object in reader-facing prose, and the WARN-only treatment left the
+# class routine: the audit counted 17 of them in a single lint run and the
+# files shipped anyway. The shape is fixed and mechanical (say what was
+# reported, not that the ingest object references it), so it quarantines and
+# requeues like the other hard prose errors. Precision: the regex is the
+# identical construction the WARN used, including its case-insensitivity —
+# no code-span stripping, so backticking the phrase cannot buy an exemption
+# from a rule about sentences. The WIDE family stays WARN (see the module
+# docstring) so the 100-file flood is still avoided.
+EVENT_REFERENCE_RE = re.compile(
+    r"\bthe event (?:reference|references|referenced|referencing)\b",
+    re.IGNORECASE)
+
+
+def event_reference_hits(text):
+    """HARD violation: `the event references …` bookkeeping in analysis prose.
+
+    2026-10-26 audit Issue 8 + Rec 4: the narrow construction (not the whole
+    bookkeeping family) quarantines — see EVENT_REFERENCE_RE. Returns one
+    message per occurrence naming the matched phrase, so the log says which
+    sentence to rewrite (name the report instead: "BleepingComputer reported
+    …", "the offseq radar entry notes …")."""
+    out = []
+    for m in EVENT_REFERENCE_RE.finditer(text or ""):
+        out.append(f"internal triage bookkeeping {m.group(0)!r} (published "
+                   f"prose names the story and its reporting, never the "
+                   f"ingest/triage state; rewrite the sentence to name the "
+                   f"report itself)")
+    return out
+
+
 def triage_bookkeeping_hits(text):
     """DISTINCT WARN: internal triage bookkeeping in published analysis
     prose, one message per occurrence (2026-10-17 audit Issue 2 / Rec 4b).
@@ -482,7 +534,11 @@ def triage_bookkeeping_hits(text):
     (see TRIAGE_BOOKKEEPING + the module docstring). quarantine_analysis
     logs these as WARN and keeps the file; the audit/desk acts on them.
     Curly apostrophes normalize to straight ones first, mirroring
-    _banned_hits."""
+    _banned_hits.
+
+    One construction is NOT WARN — `the event references/reference/…` — and
+    deliberately lives in event_reference_hits (HARD, 2026-10-26 audit
+    Issue 8 + Rec 4), never in this tuple."""
     low = (text or "").replace("\u2019", "'")
     out = []
     for pat in TRIAGE_BOOKKEEPING:
@@ -589,6 +645,7 @@ def lint_analysis(text, story=None, subject_title=None, source_text=None):
                    f"story, never the ingest object; drop the "
                    f"parenthetical)")
     out.extend(malformed_compound_hits(text))
+    out.extend(event_reference_hits(text))
     if any(l.lstrip().startswith("#") for l in text.splitlines()):
         out.append("markdown heading line (prompts ban headings)")
     if not MIN_LEN <= len(text) <= MAX_LEN:
@@ -707,9 +764,11 @@ def quarantine_analysis(stories_dir, analysis_dir, story, now=None, log=print):
     triage = triage_bookkeeping_hits(text)
     if triage:
         # Distinct WARN (2026-10-17 audit Issue 2 / Rec 4b): kept, never a
-        # hard violation — see TRIAGE_BOOKKEEPING. Logged before the
-        # quarantine branch so a bookkeeping-leaking analysis that ALSO
-        # hard-fails still records it for the desk.
+        # hard violation — see TRIAGE_BOOKKEEPING (the `the event references`
+        # arm is the one exception: it is HARD via event_reference_hits, so
+        # it never reaches here). Logged before the quarantine branch so a
+        # bookkeeping-leaking analysis that ALSO hard-fails still records it
+        # for the desk.
         log(f"WARN analysis/{sid}.md: triage-bookkeeping (kept): "
             f"{'; '.join(triage)}")
     if not violations:

@@ -22,10 +22,15 @@ verify gate; this suite pins the prose twin:
      preserved, clean/missing analyses are untouched;
   6. ssg.run_prose_gate: quarantines live cards only (orphan files left
      alone), returns today's digest violations (fail-closed for the caller),
-     skips silently when no digest exists.
+     skips silently when no digest exists;
+  7. `the event (reference|references|referenced|referencing)` is a HARD
+     violation (2026-10-26 audit Issue 8 + Rec 4) — all four word forms,
+     case-insensitive, in lint_analysis and through the quarantine path —
+     while the REST of the internal-bookkeeping family stays WARN-only.
 
 Run: python3 engine/test_prose_lint.py   (exit 0 = pass)
 """
+import glob
 import json
 import os
 import sys
@@ -627,6 +632,12 @@ with tempfile.TemporaryDirectory() as td:
 # pipeline bookkeeping into published prose and "pass the soft lint, which
 # only WARNs" — this rule makes the leak visible per occurrence without
 # quarantining the 27 stored analyses that use the same phrasing.)
+#
+# UPDATE (2026-10-26 audit Issue 8 + Rec 4 / section 7b below): the
+# `the event references|reference|…` arm was PROMOTED to a hard violation.
+# The fixtures stay verbatim as the text that shipped, so the same two
+# analyses now split one sentence off to the hard gate (the reference arm)
+# and keep the REST of the family WARN-only.
 BLOCKSTRAP_ANALYSIS = (
     "CVE-2026-103849, named BlockStrap, is a maximum-severity remote code "
     "execution vulnerability in Adobe Commerce and Magento through version "
@@ -650,29 +661,49 @@ FASTAPIADMIN_ANALYSIS = (
     "whether the project issues an immediate patch. The new story is "
     "appropriate because no existing cluster covers this CVE.")
 
-check("BlockStrap analysis is grounded/clean on the hard gate (WARN-only leak)",
-      prose_lint.lint_analysis(BLOCKSTRAP_ANALYSIS) == [])
-check("FastapiAdmin analysis is grounded/clean on the hard gate (WARN-only leak)",
-      prose_lint.lint_analysis(FASTAPIADMIN_ANALYSIS) == [])
+check("BlockStrap analysis hard-fails ONLY the promoted reference arm",
+      prose_lint.lint_analysis(BLOCKSTRAP_ANALYSIS) == [
+          "internal triage bookkeeping 'The event references' (published "
+          "prose names the story and its reporting, never the "
+          "ingest/triage state; rewrite the sentence to name the report "
+          "itself)"])
+check("FastapiAdmin analysis hard-fails ONLY the promoted reference arm",
+      prose_lint.lint_analysis(FASTAPIADMIN_ANALYSIS) == [
+          "internal triage bookkeeping 'the event reference' (published "
+          "prose names the story and its reporting, never the "
+          "ingest/triage state; rewrite the sentence to name the report "
+          "itself)"])
 bs_hits = prose_lint.triage_bookkeeping_hits(BLOCKSTRAP_ANALYSIS)
 fa_hits = prose_lint.triage_bookkeeping_hits(FASTAPIADMIN_ANALYSIS)
-check("BlockStrap bookkeeping flagged per occurrence (2)", len(bs_hits) == 2)
-check("BlockStrap flags 'The event references' + 'attaches to the existing'",
-      any("'The event references'" in m for m in bs_hits)
-      and any("'attaches to the existing'" in m for m in bs_hits))
-check("FastapiAdmin bookkeeping flagged per occurrence (4)", len(fa_hits) == 4)
-check("FastapiAdmin flags reference/mint/cluster + 'new story' bookkeeping",
-      any("the event reference" in m for m in fa_hits)
-      and any("is the original mint" in m for m in fa_hits)
+check("BlockStrap bookkeeping flagged per occurrence (1 left after the "
+      "reference arm moved to HARD)", len(bs_hits) == 1)
+check("BlockStrap still flags 'attaches to the existing' as WARN",
+      any("'attaches to the existing'" in m for m in bs_hits))
+check("FastapiAdmin bookkeeping flagged per occurrence (3 left)",
+      len(fa_hits) == 3)
+check("FastapiAdmin flags mint/cluster + 'new story' bookkeeping",
+      any("is the original mint" in m for m in fa_hits)
       and any("no existing cluster covers" in m for m in fa_hits)
       and any("The new story is appropriate" in m for m in fa_hits))
+check("the promoted arm lives in exactly ONE place (never WARN + HARD)",
+      not any("event reference" in m.lower()
+              for m in bs_hits + fa_hits))
 check("clean grounded analysis has no bookkeeping hits",
       prose_lint.triage_bookkeeping_hits(GOOD) == [])
 check("bookkeeping rule is case-insensitive",
       prose_lint.triage_bookkeeping_hits(
-          GOOD + " THE EVENT REFERENCES a wire report.") != [])
-# The exact ship-blocking case: a bookkeeping-leaking analysis must NOT
-# quarantine (that is the whole point of WARN vs a hard rule).
+          GOOD + " THE NEW STORY IS APPROPRIATE for the wire report.") != [])
+# The exact ship-blocking case for the REMAINING family: a bookkeeping leak
+# must NOT quarantine (that is the whole point of WARN vs a hard rule).
+# BLOCKSTRAP_ANALYSIS minus its promoted reference sentence is the fixture.
+WARN_ONLY_ANALYSIS = BLOCKSTRAP_ANALYSIS.replace(
+    "The event references BleepingComputer coverage and attaches to the "
+    "existing",
+    "BleepingComputer covered the flaw and the report attaches to the "
+    "existing")
+check("WARN-only fixture really carries no promoted construction",
+      prose_lint.event_reference_hits(WARN_ONLY_ANALYSIS) == []
+      and len(prose_lint.triage_bookkeeping_hits(WARN_ONLY_ANALYSIS)) == 1)
 with tempfile.TemporaryDirectory() as td:
     stories_dir = os.path.join(td, "stories")
     analysis_dir = os.path.join(td, "analysis")
@@ -683,7 +714,7 @@ with tempfile.TemporaryDirectory() as td:
                "analysis": {"updated_at": "z"}},
               open(os.path.join(stories_dir, "leak-story.json"), "w"))
     open(os.path.join(analysis_dir, "leak-story.md"), "w").write(
-        BLOCKSTRAP_ANALYSIS)
+        WARN_ONLY_ANALYSIS)
     v = prose_lint.quarantine_analysis(stories_dir, analysis_dir,
                                        {"id": "leak-story"}, log=log.append)
     check("bookkeeping leak does NOT quarantine (no hard violations)",
@@ -694,10 +725,82 @@ with tempfile.TemporaryDirectory() as td:
           len(log) == 1 and "triage-bookkeeping (kept)" in log[0]
           and "leak-story" in log[0])
     check("bookkeeping WARN is per occurrence",
-          log[0].count("internal triage bookkeeping") == 2)
+          log[0].count("internal triage bookkeeping") == 1)
     check("story json analysis marker untouched by the WARN",
           "analysis" in json.load(
               open(os.path.join(stories_dir, "leak-story.json"))))
+    log.clear()
+
+# --- 7b: `the event references …` is a HARD violation -------------------------
+# 2026-10-26 audit Issue 8 + Rec 4: the applied card e8f2664e00bd (PR #150)
+# shipped the whole bookkeeping family WARN-only; `prose_lint` logged it and
+# shipped the file by design, so the class became routine — 17 analyses in ONE
+# lint run. The narrow construction is promoted to hard (quarantine + requeue),
+# the wide family above stays WARN. Pinned here: all four word forms, the
+# case-insensitivity, the narrow scope (no near-miss false positives), and the
+# quarantine/requeue half.
+for _form in ("reference", "references", "referenced", "referencing"):
+    check(f"'the event {_form}' is flagged by event_reference_hits",
+          len(prose_lint.event_reference_hits(
+              f"The report arrived and the event {_form} a vendor advisory."))
+          == 1)
+for _shape in ("The event references a wire report.",
+               "THE EVENT REFERENCE to radar.offseq.com",
+               "The Event Referenced the advisory."):
+    check(f"case-insensitive match: {_shape[:34]!r}",
+          any("internal triage bookkeeping" in m for m in
+              prose_lint.event_reference_hits(_shape)))
+check("the promoted construction is a HARD violation in lint_analysis",
+      any("internal triage bookkeeping" in m
+          and "the event references" in m.lower()
+          for m in prose_lint.lint_analysis(
+              GOOD.replace("The reporting outlet confirms",
+                           "The event references a vendor advisory. The "
+                           "reporting outlet confirms"))))
+check("the message names the phrase and says what to do",
+      "'the event references'" in prose_lint.event_reference_hits(
+          "the event references a blog post")[0]
+      and "rewrite the sentence" in prose_lint.event_reference_hits(
+          "the event references a blog post")[0])
+check("near-misses do NOT match (narrow scope)",
+      prose_lint.event_reference_hits(
+          "An event reference table lists 4,100 rows. The events referenced "
+          "in the log match CVE-2026-1234. The event data was scrubbed "
+          "within 3 hours. A reference to the event appears below.") == [])
+check("the rest of the family is NOT event_reference_hits",
+      prose_lint.event_reference_hits(
+          "it attaches to the existing story, is the original mint, no "
+          "existing cluster covers it, the new story is appropriate") == [])
+check("clean prose has no event-reference violation",
+      prose_lint.event_reference_hits(GOOD) == []
+      and prose_lint.lint_analysis(GOOD) == [])
+# Self-healing half: a live analysis carrying the construction is quarantined
+# to .rejects/ and the story json's analysis marker is cleared, which re-queues
+# it through merge.emit_needs (queues on a missing analysis file).
+with tempfile.TemporaryDirectory() as td:
+    stories_dir = os.path.join(td, "stories")
+    analysis_dir = os.path.join(td, "analysis")
+    os.makedirs(stories_dir)
+    os.makedirs(analysis_dir)
+    log = []
+    json.dump({"id": "ref-story", "title": "BlockStrap Magento RCE",
+               "analysis": {"updated_at": "z"}},
+              open(os.path.join(stories_dir, "ref-story.json"), "w"))
+    open(os.path.join(analysis_dir, "ref-story.md"), "w").write(
+        BLOCKSTRAP_ANALYSIS)
+    v = prose_lint.quarantine_analysis(stories_dir, analysis_dir,
+                                       {"id": "ref-story"}, log=log.append)
+    check("event-reference leak quarantines the analysis",
+          bool(v) and not os.path.exists(
+              os.path.join(analysis_dir, "ref-story.md"))
+          and len(glob.glob(os.path.join(analysis_dir, ".rejects",
+                                         "ref-story-*.md"))) == 1)
+    check("quarantine names the promoted construction",
+          any("internal triage bookkeeping" in m for m in v)
+          and any("quarantined to .rejects" in m for m in log))
+    check("quarantined story is re-queued (analysis marker cleared)",
+          "analysis" not in json.load(
+              open(os.path.join(stories_dir, "ref-story.json"))))
     log.clear()
 
 # --- 10: malformed compound / dropped word (2026-10-26 audit Issue 4) --------
