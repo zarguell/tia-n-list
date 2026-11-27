@@ -1,0 +1,39 @@
+title: SoftwareOK Q-Dir/DesktopOK Trojanized Installer - DSV2 Python RAT Execution and Persistence
+id: c0159bca-e2ca-4257-8754-2ef55a2b81b4
+status: experimental
+description: Detects the DSV2 Python RAT stage delivered by trojanized Q-Dir and DesktopOK installers on SoftwareOK's official download and update paths (ASEC, November 2026). The wrapper runs the genuine signed utility from C:\Users\Public, drops 7zr.exe plus dsv2_py39_agent.7z and installs a self-contained Python RAT under C:\ProgramData\Microsoft\DeviceSync\b2 that beacons to 8.210.69.51:9876. The rule fires on the two documented execution anchors - pythonw.exe running py_client_dsv2.py from a DeviceSync directory, and the scheduled task \UPnp\MicrosoftEdge_dcntel that ASEC found on infected hosts.
+references:
+  - https://asec.ahnlab.com/en/96827/
+  - https://thehackernews.com/2026/11/hackers-trojanize-official-q-dir-and.html
+  - https://github.com/ScoopInstaller/Extras/issues/19427
+author: Tia N. List
+date: 2026/11/27
+tags:
+  - attack.t1195
+  - attack.t1036
+  - attack.t1053
+  - attack.t1059
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection_python_rat:
+    Image|endswith: '\pythonw.exe'
+    CommandLine|contains: 'py_client_dsv2.py'
+  selection_devicesync_dir:
+    CommandLine|contains:
+      - 'Microsoft\DeviceSync'
+      - 'DeviceSync\b2'
+  selection_task_registration:
+    Image|endswith: '\schtasks.exe'
+    CommandLine|contains|all:
+      - 'MicrosoftEdge_dcntel'
+      - '\UPnp\'
+  filter_vendor_installer:
+    ParentImage|endswith:
+      - '\q-dir.exe'
+      - '\DesktopOK.exe'
+  condition: (selection_python_rat and selection_devicesync_dir and not filter_vendor_installer) or selection_task_registration
+falsepositives:
+  - Legitimate pythonw.exe scripts launched from a Microsoft DeviceSync directory are not expected on Windows endpoints; verify the parent process and the presence of py_client_dsv2.py plus dsv2_py39_agent.7z in the same tree before closing as benign
+level: high

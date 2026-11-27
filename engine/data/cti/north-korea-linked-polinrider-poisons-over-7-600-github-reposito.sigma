@@ -1,0 +1,41 @@
+title: PolinRider Python Loader - Interactive node Process Spawned by Python or pytest
+id: c0c6b079-4852-43ab-af03-97c5169cfa88
+status: experimental
+description: Detects the import-time stage of the PolinRider loader, which is hidden in a small utils package or in conftest.py inside poisoned GitHub repositories and executed when a developer runs the test suite or opens the project (SafeDep, November 2026). The 58-line standard-library Python loader queries the Ethplorer API and an Ethereum RPC node, decodes the next stage from transaction calldata and writes it into a detached interactive Node REPL (`node -i`) so the payload never touches disk as a module. A node.exe spawned in interactive mode as a child of a Python or pytest process is the campaign's process-tree marker.
+references:
+  - https://safedep.io/polinrider-ethereum-c2-github-repositories
+  - https://opensourcemalware.com/blog/polinrider-rides-again-north-korean-attack-expands-across-github
+  - https://thehackernews.com/2026/11/north-korea-linked-polinrider-poisons.html
+author: Tia N. List
+date: 2026/11/27
+tags:
+  - attack.t1195
+  - attack.t1059
+  - attack.t1027
+  - attack.t1102
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection_node:
+    Image|endswith: '\node.exe'
+  selection_interactive:
+    CommandLine|contains:
+      - ' -i'
+      - ' --interactive'
+  selection_python_parent:
+    ParentImage|endswith:
+      - '\python.exe'
+      - '\python3.exe'
+      - '\pythonw.exe'
+      - '\pytest.exe'
+      - '\py.exe'
+  filter_known_dev_tooling:
+    ParentImage|endswith:
+      - '\code.exe'
+      - '\node.exe'
+      - '\npm.cmd'
+  condition: selection_node and selection_interactive and selection_python_parent and not filter_known_dev_tooling
+falsepositives:
+  - Developer and CI tooling that intentionally starts an interactive Node REPL from a Python wrapper (for example notebook bridges or JS-isolation helpers). Triage by checking whether conftest.py or a utils module in the same repository was imported, and by egress to api.ethplorer.io or public Ethereum RPC endpoints, which ordinary builds rarely need
+level: medium
