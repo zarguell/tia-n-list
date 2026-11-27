@@ -71,6 +71,7 @@ def main():
         for d in (store_stories, events_dir):
             os.makedirs(d)
         archive.retention.STORIES_DIR = store_stories
+        archive.EVENTS_DIR = events_dir
         for sid, st in stories.items():
             with open(os.path.join(store_stories, sid + ".json"), "w") as f:
                 json.dump(st, f)
@@ -84,7 +85,7 @@ def main():
         archive.plan(stories, expirable, digest={"cited"}, analysis_ids={"analyzed"})
         ok &= check("dry run touches nothing", sorted(os.listdir(store_stories)), before)
 
-        moved = archive.apply_moves(["old-cold"], stories, events_dir, arch, log=lambda *_: None)
+        moved = archive.apply_moves(["old-cold"], stories, arch)
         ok &= check("apply moves the story", moved, 1)
         ok &= check("story removed from the hot store",
                     os.path.exists(os.path.join(store_stories, "old-cold.json")), False)
@@ -98,7 +99,7 @@ def main():
         ok &= check("verify is clean", archive.verify(arch), [])
         ok &= check("read back", sorted(archive.load_archived(arch)), ["old-cold"])
 
-        archive.apply_moves(["old-cold"], stories, events_dir, arch, log=lambda *_: None)
+        archive.apply_moves(["old-cold"], stories, arch)
         ok &= check("second apply appends nothing",
                     len(open(os.path.join(arch, "manifest.jsonl")).read().strip().splitlines()), 1)
 

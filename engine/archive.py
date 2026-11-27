@@ -48,6 +48,10 @@ import store  # noqa: E402
 
 ARCHIVE_ENV = "TIA_ARCHIVE_ROOT"
 
+# The hot store's event directory. A module attribute (not a parameter) so tests
+# can point it at a tmp store the way they already do for retention.STORIES_DIR.
+EVENTS_DIR = store.EVENTS_DIR
+
 
 def _sha(path):
     h = hashlib.sha256()
@@ -163,7 +167,7 @@ def _manifest_ids(archive_root):
     return done
 
 
-def _archive_files(sid, st, events_dir, archive_root):
+def _archive_files(sid, st, archive_root):
     """Copy the story record and its exclusive event files; return manifest files."""
     entries = []
     with open(os.path.join(retention.STORIES_DIR, sid + ".json"), "rb") as f:
@@ -174,7 +178,7 @@ def _archive_files(sid, st, events_dir, archive_root):
     for e in st.get("events") or []:
         eid = e.get("event_id")
         for ext in (".json", ".md"):
-            src = os.path.join(events_dir, str(eid) + ext)
+            src = os.path.join(EVENTS_DIR, str(eid) + ext)
             if not eid or not os.path.exists(src):
                 continue
             with open(src, "rb") as f:
@@ -185,7 +189,7 @@ def _archive_files(sid, st, events_dir, archive_root):
     return entries
 
 
-def _unlink_story(sid, st, events_dir):
+def _unlink_story(sid, st):
     """Remove the hot-store originals — only after the manifest line exists."""
     try:
         os.remove(os.path.join(retention.STORIES_DIR, sid + ".json"))
@@ -194,12 +198,12 @@ def _unlink_story(sid, st, events_dir):
     for e in st.get("events") or []:
         for ext in (".json", ".md"):
             try:
-                os.remove(os.path.join(events_dir, str(e.get("event_id")) + ext))
+                os.remove(os.path.join(EVENTS_DIR, str(e.get("event_id")) + ext))
             except OSError:
                 pass
 
 
-def apply_moves(move, stories, events_dir, archive_root, tier_of=None, log=print):
+def apply_moves(move, stories, archive_root, tier_of=None):
     """Copy, record, then unlink — in that order, per story.
 
     A crash between the steps leaves the archive complete and the store
@@ -215,12 +219,12 @@ def apply_moves(move, stories, events_dir, archive_root, tier_of=None, log=print
                     "id": sid, "tier": (tier_of or {}).get(sid, ""),
                     "events": [e.get("event_id") for e in st.get("events") or []
                                if e.get("event_id")],
-                    "files": _archive_files(sid, st, events_dir, archive_root)}
+                    "files": _archive_files(sid, st, archive_root)}
             with open(manifest, "a", encoding="utf-8") as f:
                 f.write(json.dumps(line, sort_keys=True) + "\n")
-        _unlink_story(sid, st, events_dir)
-    log(f"archive: moved {len(move)} story file(s) into {archive_root} "
-        f"(manifest {manifest})")
+        _unlink_story(sid, st)
+    print(f"archive: moved {len(move)} story file(s) into {archive_root} "
+          f"(manifest {manifest})")
     return len(move)
 
 
@@ -344,8 +348,7 @@ def _cmd_sweep(args):
         return 0
     if not args.apply:
         return 0
-    apply_moves(move, stories, store.EVENTS_DIR, args.archive_root,
-                tier_of=_tier_of(stories))
+    apply_moves(move, stories, args.archive_root, tier_of=_tier_of(stories))
     return 0
 
 
