@@ -18,5 +18,6 @@ $PY test_feeds.py
 $PY test_redirects.py
 $PY test_retention.py
 $PY test_store_cache.py
+$PY test_archive.py
 $PY test_sigma.py
 $PY ssg.py

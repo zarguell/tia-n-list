@@ -102,6 +102,41 @@ A page may be removed only when nothing published still points at its URL:
   resolver (the primitive landed in #233). Archiving therefore costs one map
   key, not a stub page.
 
+## Archive repo (step 3 scaffolding)
+
+`engine/archive.py` is the only code allowed to move story data out of the hot
+store. Layout — data only, private, never published:
+
+```
+manifest.jsonl          one appended line per archived story (id, tier, sha256s)
+stories/<id>.json       the story record as it left the store
+events/<event-id>.{json,md}   only events no live story references
+analysis/<id>.md        only when the story brought one (blocked today)
+```
+
+```bash
+python3 engine/archive.py                          # dry run, report only
+python3 engine/archive.py --json                   # machine-readable plan
+python3 engine/archive.py --archive-root DIR --apply
+python3 engine/archive.py --archive-root DIR --verify
+```
+
+It blocks rather than guesses: redirect targets (their URL is a `redirects.json`
+key), digest-cited stories (the link rewrite is step 3 proper), stories with an
+analysis file, and stories sharing an event with a story that stays. `--apply`
+copies every file, appends the manifest line, and only then unlinks the
+originals, so an interrupted run leaves a complete archive and an untouched
+store; a second run is a no-op.
+
+One-time setup (owner):
+
+```bash
+gh repo create zarguell/tia-n-list-archive --private \
+  --description "Cold store for aged-out Tia N. List stories (never published)"
+git clone git@github.com:zarguell/tia-n-list-archive.git ~/repos/tia-n-list-archive
+export TIA_ARCHIVE_ROOT=~/repos/tia-n-list-archive   # in the cron env
+```
+
 ## Rollout
 
 1. **Report only** (this change): `--report` and `--horizons` price every
