@@ -14,5 +14,6 @@ $PY test_score.py
 $PY test_digest_candidates.py
 $PY test_lowtrust.py
 $PY test_ssg.py
+$PY test_feeds.py
 $PY test_sigma.py
 $PY ssg.py
