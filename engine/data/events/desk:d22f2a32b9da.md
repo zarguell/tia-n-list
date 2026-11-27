@@ -1,0 +1,1 @@
+Cacti published a pre-authentication SQL injection advisory for `graph_view.php` affecting versions up to and including 1.2.30, fixed by the 1.2.31 release. The flaw was reachable without credentials on installs that had guest graph viewing enabled, the same precondition the current zero-day requires.
