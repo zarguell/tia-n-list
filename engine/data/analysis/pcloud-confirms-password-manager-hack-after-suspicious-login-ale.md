@@ -1,0 +1,5 @@
+pCloud confirmed a cyberattack against pCloud Pass after customers reported new-device alerts for an unfamiliar device named "pd" at 45.131.244.7 in Luxembourg. Several users said the alerts arrived despite two-factor authentication, while some saw no matching device in their account. Other recipients said they had never used pCloud Pass or had asked for the linked storage account to be deleted almost a year earlier.
+
+pCloud described the incident as quickly contained and said a small number of pCloud Pass email addresses were exposed and login attempts were made. The discrepancy between alerts and visible device listings leaves the intrusion path and actual account access unclear. The report does not establish theft of passwords or vault contents.
+
+Watch for pCloud to identify the initial access vector, explain the "pd" device and Luxembourg address, and state whether sessions or credentials were revoked. Users should review active sessions and change reused passwords, but the exposed email addresses and login attempts are the only confirmed data-impact details in the report.
