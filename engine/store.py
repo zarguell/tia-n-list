@@ -12,8 +12,10 @@ URLs are scheme-filtered here (http/https only) so feed-controlled values can
 never become javascript:/data: hrefs anywhere downstream.
 """
 import glob
+import hashlib
 import json
 import os
+import sqlite3
 from urllib.parse import urlsplit
 
 ENGINE = os.path.dirname(os.path.abspath(__file__))
@@ -56,9 +58,31 @@ def write_json(path, obj, indent=1):
     return path
 
 
-def load_events():
-    """All events as {id: {...meta, content_md, url}} — content merged from the
-    .md sidecar, url scheme-filtered."""
+EVENTS_CACHE = os.path.join(DATA, ".events-cache.sqlite3")
+
+
+def _fingerprint():
+    """(fingerprint, filenames) for the event store, from ONE scandir pass.
+
+    mtime_ns + size of every .json/.md file: editing either side invalidates,
+    adding or deleting a file changes the digest. ~88.8k entries on
+    2026-11-27 costs ~0.1 s, against 16.3 s to parse every file (measured).
+    """
+    parts = []
+    for entry in os.scandir(EVENTS_DIR):
+        if not entry.name.endswith((".json", ".md")):
+            continue
+        try:
+            st = entry.stat()
+        except OSError:
+            continue
+        parts.append(f"{entry.name}:{st.st_mtime_ns}:{st.st_size}")
+    parts.sort()
+    digest = hashlib.sha256("\n".join(parts).encode("utf-8")).hexdigest()
+    return digest, [p.split(":", 1)[0] for p in parts]
+
+
+def _read_events_files():
     import sys
     events = {}
     for path in sorted(glob.glob(os.path.join(EVENTS_DIR, "*.json"))):
@@ -73,6 +97,67 @@ def load_events():
         meta["content_md"] = md_text
         meta["url"] = safe_url(meta.get("url") or "")
         events[eid] = meta
+    return events
+
+
+def _cache_read(digest):
+    """Events from the derived cache, or None when it is missing/stale/damaged."""
+    try:
+        with sqlite3.connect(f"file:{EVENTS_CACHE}?mode=ro", uri=True) as db:
+            row = db.execute("SELECT value FROM meta WHERE key='fingerprint'").fetchone()
+            if not row or row[0] != digest:
+                return None
+            events = {}
+            for eid, meta_json, content_md in db.execute(
+                    "SELECT id, meta, content_md FROM events"):
+                meta = json.loads(meta_json)
+                meta["content_md"] = content_md
+                events[eid] = meta
+            return events
+    except (sqlite3.Error, OSError, ValueError):
+        return None
+
+
+def _cache_write(digest, events):
+    """Atomically replace the cache. Failure is a no-op: files stay the truth."""
+    tmp = EVENTS_CACHE + ".tmp"
+    try:
+        with sqlite3.connect(tmp) as db:
+            db.execute("CREATE TABLE meta (key TEXT PRIMARY KEY, value TEXT)")
+            db.execute("CREATE TABLE events (id TEXT PRIMARY KEY, meta TEXT, content_md TEXT)")
+            db.execute("INSERT INTO meta VALUES ('fingerprint', ?)", (digest,))
+            db.executemany(
+                "INSERT INTO events VALUES (?, ?, ?)",
+                ((eid, json.dumps({k: v for k, v in meta.items() if k != "content_md"}),
+                  meta.get("content_md") or "") for eid, meta in events.items()))
+            db.commit()
+        os.replace(tmp, EVENTS_CACHE)
+    except (sqlite3.Error, OSError):
+        try:
+            os.remove(tmp)
+        except OSError:
+            pass
+
+
+def load_events(use_cache=True):
+    """All events as {id: {...meta, content_md, url}} — content merged from the
+    .md sidecar, url scheme-filtered.
+
+    Performance (2026-11-27): 44,402 events = 88,806 files, 16.3 s per call,
+    and 14 call sites across the hourly passes (merge twice, triage, cti,
+    ssg, ...). The files stay the source of truth; a derived sqlite cache
+    keyed on a scandir fingerprint makes a warm call ~0.4 s. Any sqlite
+    problem falls back to reading every file, so a corrupt or unreadable
+    cache can never blind the pipeline.
+    """
+    if not use_cache:
+        return _read_events_files()
+    digest, _ = _fingerprint()
+    events = _cache_read(digest)
+    if events is not None:
+        return events
+    events = _read_events_files()
+    _cache_write(digest, events)
     return events
 
 
