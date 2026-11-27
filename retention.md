@@ -1,8 +1,9 @@
 # Retention policy — how long a story page stays published
 
-Status: **proposal, report-only**. Nothing is deleted, moved or delisted by
-this policy yet. `engine/retention.py --report` prices it against the live
-store; the archive sweep is a later, flag-gated step.
+Status: **decided 2026-11-27 (owner): A 3y / B 3y / C 6mo**, report-only.
+Nothing is deleted, moved or delisted. `engine/retention.py --report` prices
+the policy and `--expiring` is the dry-run sweep; the real sweep is a later,
+flag-gated step.
 
 This exists because the site is a research archive whose product is *lasting*.
 "Delete old pages" is therefore an editorial promise, not a size knob — so the
@@ -13,7 +14,7 @@ before anything is removed.
 
 | tier | keeps | horizon | membership |
 |---|---|---|---|
-| **A** | long | 5 years | `peak_score ≥ 7.5` (the `hottest` display band) **or** cited by an immutable published artifact (a CTI case, and the STIX snapshot built from it) |
+| **A** | long | 3 years | `peak_score ≥ 7.5` (the `hottest` display band) **or** cited by an immutable published artifact (a CTI case, and the STIX snapshot built from it) |
 | **B** | medium | 3 years | digest-cited, or `peak_score ≥ 5.0` (`hot` band) |
 | **C** | short | 6 months | everything else |
 
@@ -42,10 +43,10 @@ as "never mattered".
 
 ```
 tier   keep    live   stories/mo   stories at plateau
-A       5.0y    1294          326                 19580
-B       3.0y     910          183                  6600
+A       3.0y    1294          326                 11736
+B       3.0y     910          183                  6588
 C       0.5y    6107         1696                 10178
-                                                  36358
+                                                  28526
 ```
 
 The arithmetic is deliberately blunt: plateau = (recent 3-month rate) ×
@@ -62,14 +63,32 @@ Alternatives, same measurement:
 
 | horizons (A/B/C) | stories at plateau |
 |---|---|
-| 5y / 3y / 6mo (proposed) | 36,358 |
-| 3y / 3y / 6mo | 28,526 |
+| 5y / 3y / 6mo | 36,358 |
+| **3y / 3y / 6mo (chosen)** | **28,526** |
 | 3y / 2y / 6mo | 26,326 |
 
 Today the store holds 11,396 stories and the published artifact is **9,960
-files / 143.5 MB** (after the redirect-map change). A plateau around 36k
-stories is roughly 2.5× today in pages — comfortable on GitHub Pages' 1 GB, and
+files / 143.5 MB** (after the redirect-map change). A plateau of ~28.5k stories
+is roughly 2× today in pages — comfortable on GitHub Pages' 1 GB, and
 *incompatible with Cloudflare's 20,000-file free cap* at any horizon.
+
+## Dry-run sweep (step 2, running)
+
+`python3 engine/retention.py --expiring` (read-only, nothing deleted):
+
+```
+expirable        212     horizon elapsed, no live citation at all
+needs-digest       0     expired but a digest page links it — rewrite first
+immutable       1294     tier A: never expires
+inside          6805     horizon not elapsed
+unknown-date       0     unparseable last_seen: never expires (fail safe)
+merged          3085     redirect map key, not a page
+```
+
+`expires_at()` measures from **last_seen, not first_seen** — a story that keeps
+receiving events is live coverage and must not expire on its birthday. Only 212
+stories are expirable today because the site is 13 months old; the number grows
+to the C-tier plateau (~10k) over the next two years.
 
 ## Link integrity outranks deletion
 
