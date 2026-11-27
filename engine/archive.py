@@ -38,7 +38,7 @@ import hashlib
 import json
 import os
 import sys
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 
 ENGINE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, ENGINE)
@@ -284,55 +284,74 @@ def load_archived(archive_root):
     return out
 
 
-def main(argv=None):
+def _parser():
     ap = argparse.ArgumentParser(description="archive aged-out stories (dry run by default)")
     ap.add_argument("--archive-root", default=os.environ.get(ARCHIVE_ENV))
     ap.add_argument("--apply", action="store_true", help="copy + remove (default: report only)")
     ap.add_argument("--verify", action="store_true", help="check an existing archive repo")
     ap.add_argument("--json", action="store_true")
     ap.add_argument("--today", help="YYYY-MM-DD override (tests)")
-    args = ap.parse_args(argv)
+    return ap
 
-    if args.verify:
-        if not args.archive_root:
-            print(f"need --archive-root or ${ARCHIVE_ENV}", file=sys.stderr)
-            return 2
-        problems = verify(args.archive_root)
-        print(f"verify {args.archive_root}: {len(problems)} problem(s)")
-        for p in problems[:20]:
-            print(f"  {p}")
-        return 0 if not problems else 1
 
-    today = None
-    if args.today:
-        from datetime import date
-        today = date.fromisoformat(args.today)
+def _analysis_ids():
+    directory = os.path.join(ENGINE, "data", "analysis")
+    if not os.path.isdir(directory):
+        return set()
+    return {os.path.splitext(n)[0] for n in os.listdir(directory)}
+
+
+def _tier_of(stories):
+    return {sid: tier for sid, (tier, _) in retention.classify_all(stories).items()}
+
+
+def _cmd_verify(args):
+    if not args.archive_root:
+        print(f"need --archive-root or ${ARCHIVE_ENV}", file=sys.stderr)
+        return 2
+    problems = verify(args.archive_root)
+    print(f"verify {args.archive_root}: {len(problems)} problem(s)")
+    for problem in problems[:20]:
+        print(f"  {problem}")
+    return 0 if not problems else 1
+
+
+def _candidate_plan(today):
     stories = retention.load_stories()
-    events_dir = store.EVENTS_DIR
-    exp = retention.expiring(stories, today=today)["expirable"]
-    analysis_ids = {os.path.splitext(n)[0] for n in
-                    os.listdir(os.path.join(ENGINE, "data", "analysis"))} \
-        if os.path.isdir(os.path.join(ENGINE, "data", "analysis")) else set()
-    tier_of = {sid: tier for sid, (tier, _) in retention.classify_all(stories).items()}
-    move, event_ids, blocked = plan(stories, exp, digest=set(), analysis_ids=analysis_ids)
+    expirable = retention.expiring(stories, today=today)["expirable"]
+    move, event_ids, blocked = plan(stories, expirable, digest=set(),
+                                    analysis_ids=_analysis_ids())
+    return stories, expirable, move, event_ids, blocked
 
-    if args.json:
-        print(json.dumps({"expirable": len(exp), "would_move": move,
-                          "events": len(event_ids), "blocked": blocked}, indent=1))
-        return 0
-    print(f"dry run — expirable {len(exp)}, would move {len(move)} story(ies), "
+
+def _report(expirable, move, event_ids, blocked):
+    print(f"dry run — expirable {len(expirable)}, would move {len(move)} story(ies), "
           f"{len(event_ids)} event file pair(s); blocked {len(blocked)}")
     for sid, why in list(blocked.items())[:5]:
         print(f"  blocked {sid}: {why}")
-    if not args.apply:
-        if not args.archive_root:
-            print(f"  (set --archive-root or ${ARCHIVE_ENV} to apply)")
+
+
+def _cmd_sweep(args):
+    today = date.fromisoformat(args.today) if args.today else None
+    stories, expirable, move, event_ids, blocked = _candidate_plan(today)
+    if args.json:
+        print(json.dumps({"expirable": len(expirable), "would_move": move,
+                          "events": len(event_ids), "blocked": blocked}, indent=1))
         return 0
+    _report(expirable, move, event_ids, blocked)
     if not args.archive_root:
-        print(f"--apply needs --archive-root or ${ARCHIVE_ENV}", file=sys.stderr)
-        return 2
-    apply_moves(move, stories, events_dir, args.archive_root, tier_of=tier_of)
+        print(f"  (set --archive-root or ${ARCHIVE_ENV} to apply)")
+        return 0
+    if not args.apply:
+        return 0
+    apply_moves(move, stories, store.EVENTS_DIR, args.archive_root,
+                tier_of=_tier_of(stories))
     return 0
+
+
+def main(argv=None):
+    args = _parser().parse_args(argv)
+    return _cmd_verify(args) if args.verify else _cmd_sweep(args)
 
 
 if __name__ == "__main__":
