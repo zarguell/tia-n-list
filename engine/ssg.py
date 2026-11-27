@@ -14,6 +14,7 @@ Hybrid store:
 
 Outputs:
   index.html, style.css, 404.html, robots.txt, sitemap.xml, stories.json
+  redirects.json                   merged story URL -> canonical URL (404 map)
   stories/<id>/index.html          per-story timeline pages
   daily/<date>/index.html          daily top-stories digest page
   feeds/index.html                 feeds index
@@ -39,6 +40,12 @@ from zoneinfo import ZoneInfo
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from markdown import markdown as md_to_html
 import bleach
+
+import redirects as redir_mod
+
+# merged story id -> canonical id, filled by load_stories() (one pass over the
+# store) and consumed by write() so no generated page links a merged-away URL.
+STORY_CANON = {}
 
 ENGINE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(ENGINE)                       # repo root = Pages root
@@ -622,6 +629,7 @@ def _build_cards(parsed, max_score):
 
 def load_stories(events):
     import lifecycle
+    import redirects as redir_mod
     # ---- cold-tier freeze ----
     # STALE-FILE FINDING (2026-09-24, leaf verification): ssg.py has NO
     # prune/cleanup pass — main() and write() only ever create or overwrite;
@@ -643,15 +651,43 @@ def load_stories(events):
     # Single story pass (perf phase 1): the old code globbed + parsed every
     # story json twice (once for max_score, once for cards).
     parsed = []
+    all_stories = {}
     max_score = 1
     for path in sorted(glob.glob(os.path.join(STORIES_DIR, "*.json"))):
         st = json.load(open(path))
+        all_stories[st["id"]] = st
         if st["id"] in frozen:
             continue
         evs = [events[e["event_id"]] for e in st["events"] if e["event_id"] in events]
         max_score = max(max_score, st.get("score", 0))
         parsed.append((st, evs))
+    # Pinned by a redirect: every merged-away URL must land somewhere, so the
+    # story a merge chain terminates at renders even when the cold tier froze
+    # it. A redirect to a 404 is worse than a low-score page, and this is the
+    # smallest possible pin set (2026-11-27: 1 story — the CTI case for the
+    # "astra" story linked a merged shell whose canonical was frozen, which
+    # only looked healthy because the shell rendered an absolute-URL stub that
+    # the link lint skips).
+    chains_all = redir_mod.build_map(all_stories, renderable=set(all_stories))
+    have = {st["id"] for st, _ in parsed}
+    pinned = sorted(set(chains_all.values()) - have)
+    for sid in pinned:
+        st = all_stories[sid]
+        evs = [events[e["event_id"]] for e in st["events"] if e["event_id"] in events]
+        max_score = max(max_score, st.get("score", 0))
+        parsed.append((st, evs))
     cards = _build_cards(parsed, max_score)
+    if pinned:
+        print(f"  redirect-pinned stories rendered despite the cold tier: "
+              f"{len(pinned)}")
+    # Merged-story redirect map (one key per merge, never one page per merge):
+    # built from the SAME single story pass, and only for chains that end at a
+    # story this build renders — a canonical that is missing has no page, so it
+    # is dropped rather than guessed at. Consumed by write() (href
+    # canonicalization) and published as redirects.json for 404s.
+    global STORY_CANON
+    STORY_CANON = redir_mod.build_map(all_stories,
+                                      renderable={c["id"] for c in cards})
     # kev cross-link join: which of a story's CVEs have a kevrichment record?
     # (story cves are CVE_RE-validated + upper-cased at ingestion, so the
     # normalized membership check is exact; template renders linked chips)
@@ -1115,6 +1151,11 @@ SKIPPED = 0
 
 def write(rel, content):
     global WROTE, SKIPPED
+    if rel.endswith(".html") and STORY_CANON:
+        # No generated page may link a merged-away story's URL: the stub pages
+        # those links used to reach are gone (one redirects.json key each now),
+        # so rewrite at the single point every module writes through.
+        content = redir_mod.canon_hrefs(content, STORY_CANON, BASE_URL)
     path = os.path.join(ROOT, rel)
     os.makedirs(os.path.dirname(path), exist_ok=True)
     # Write-if-changed (perf phase 1): 8k+ files per build, a handful ever
@@ -1635,13 +1676,12 @@ def main():
         write(f"stories/{c['id']}/index.html", render("story.html", active=None, story=c,
                                        og_url=site_url(f"stories/{c['id']}/")))
 
-    # stories merged away by the LLM triage gate keep their URL working as a
-    # redirect to the canonical story (digest links + old URLs must resolve)
-    for path in sorted(glob.glob(os.path.join(STORIES_DIR, "*.json"))):
-        st = json.load(open(path))
-        if st.get("merged_into"):
-            write(f"stories/{st['id']}/index.html",
-                  render("redirect.html", target_abs=site_url(f"stories/{st['merged_into']}/")))
+    # stories merged away by the LLM triage gate keep their URL working through
+    # redirects.json (one key per merge) + the 404 resolver, not through a
+    # rendered stub page per merge — 3,085 such pages, ~780/month of growth,
+    # 44% of every published story page (measured 2026-11-27). In-page links
+    # never need the resolver: write() canonicalizes them (see redirects.py).
+    write("redirects.json", json.dumps(redir_mod.published_map(STORY_CANON), indent=0) + "\n")
     years = sorted({c["first_seen"][:4] for c in cards}, reverse=True)
     months = [(i, __import__("calendar").month_name[i]) for i in range(1, 13)]
     write("stories/index.html", render("stories-all.html", active="all", og_url=site_url("stories/"),

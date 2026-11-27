@@ -42,6 +42,7 @@ PUBLISHED_FILES = (
     "sitemap.xml",
     "stories.json",
     "stories-index.json",
+    "redirects.json",
     "deploy.json",
 )
 PUBLISHED_DIRS = (

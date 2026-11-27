@@ -51,6 +51,7 @@ def fake_site(root):
           "# generated static site (built by CI)\n"
           "/index.html\n/style.css\n/404.html\n/deploy.json\n"
           "/robots.txt\n/stories.json\n/stories-index.json\n/sitemap.xml\n"
+          "/redirects.json\n"
           "/stories/\n/daily/\n/feeds/\n/posts/\n/cti/\n/methodology/\n"
           "/about/\n/kev/\n/megapatch/\n"
           "# source-only\n"
@@ -64,7 +65,7 @@ def fake_site(root):
           "<script>var t = '<a href=\"' + pageHref(p) + '\">';"
           "fetch('stories-index.json');</script></body></html>")
     for name in ("404.html", "style.css", "robots.txt", "sitemap.xml",
-                 "stories.json", "stories-index.json", "deploy.json"):
+                 "stories.json", "stories-index.json", "redirects.json", "deploy.json"):
         write(os.path.join(root, name), "x")
     write(os.path.join(root, "stories", "index.html"), "<html>all</html>")
     write(os.path.join(root, "stories", "a-story", "index.html"), "<html>s</html>")
