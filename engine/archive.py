@@ -68,26 +68,54 @@ def event_refs(stories):
     return refs
 
 
-def _blocked_reason(sid, stories, targets, digest, analysis_ids):
+# Per-story guards, as a table (house style: registries, not branches).
+# Each entry: (name, applies(context), reason to report). A story blocks on the
+# FIRST rule that applies, so the reason names the most fundamental obstacle.
+_STORY_GUARDS = (
+    ("missing", lambda c: c["sid"] not in c["stories"], "story file missing"),
+    ("target", lambda c: c["sid"] in c["targets"],
+     "redirect target (its URL is a map key)"),
+    ("digest", lambda c: c["sid"] in c["digest"],
+     "digest-cited (link rewrite lands with step 3)"),
+    ("analysis", lambda c: c["sid"] in c["analysis_ids"], "has an analysis file"),
+)
+
+
+def _blocked_reason(sid, ctx):
     """Why a candidate may not move, or None when it is clean."""
-    if sid not in stories:
-        return "story file missing"
-    if sid in targets:
-        return "redirect target (its URL is a map key)"
-    if sid in digest:
-        return "digest-cited (link rewrite lands with step 3)"
-    if sid in analysis_ids:
-        return "has an analysis file"
+    case = dict(ctx, sid=sid)
+    for _name, applies, reason in _STORY_GUARDS:
+        if applies(case):
+            return reason
     return None
 
 
 def _shares_stored_event(story, refs, candidates):
     """True when any of the story's events is also read by a story that stays."""
-    for e in story.get("events") or []:
-        eid = e.get("event_id")
-        if eid and refs.get(eid, set()) - candidates:
-            return True
-    return False
+    return any(refs.get(e.get("event_id"), set()) - candidates
+               for e in story.get("events") or [] if e.get("event_id"))
+
+
+def _split_candidates(expirable, ctx):
+    """(clean ids, {blocked id: reason}) — per-story guards only."""
+    clean, blocked = [], {}
+    for sid in sorted(expirable):
+        reason = _blocked_reason(sid, ctx)
+        if reason:
+            blocked[sid] = reason
+        else:
+            clean.append(sid)
+    return clean, blocked
+
+
+def _split_shared(clean, stories, refs):
+    """(ids whose events are exclusive, ids blocked by a shared event)."""
+    staying = set(clean)
+    exclusive, shared = [], []
+    for sid in clean:
+        target = shared if _shares_stored_event(stories[sid], refs, staying) else exclusive
+        target.append(sid)
+    return exclusive, shared
 
 
 def plan(stories, expirable, digest=None, analysis_ids=None):
@@ -98,23 +126,15 @@ def plan(stories, expirable, digest=None, analysis_ids=None):
     story that stays must not move, and the story that owns it cannot go either
     — its page would lose the text it renders.
     """
-    digest = digest or set()
-    analysis_ids = analysis_ids or set()
-    refs = event_refs(stories)
-    targets = {st["merged_into"] for st in stories.values() if st.get("merged_into")}
-    blocked, candidates = {}, []
-    for sid in sorted(expirable):
-        reason = _blocked_reason(sid, stories, targets, digest, analysis_ids)
-        if reason:
-            blocked[sid] = reason
-        else:
-            candidates.append(sid)
-    moving, shared = [], set(candidates)
-    for sid in candidates:
-        if _shares_stored_event(stories[sid], refs, shared):
-            blocked[sid] = "shares an event with a story that stays"
-        else:
-            moving.append(sid)
+    ctx = {
+        "stories": stories,
+        "targets": {st["merged_into"] for st in stories.values() if st.get("merged_into")},
+        "digest": digest or set(),
+        "analysis_ids": analysis_ids or set(),
+    }
+    clean, blocked = _split_candidates(expirable, ctx)
+    moving, shared = _split_shared(clean, stories, event_refs(stories))
+    blocked.update({sid: "shares an event with a story that stays" for sid in shared})
     kept = {e["event_id"] for sid in moving
             for e in stories[sid].get("events") or [] if e.get("event_id")}
     return moving, sorted(kept), blocked
