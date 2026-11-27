@@ -42,6 +42,16 @@ def resolve(story_id, stories):
         cur = nxt
 
 
+def _canonical_for(story_id, story, stories, renderable):
+    """The canonical id this shell should redirect to, or None to leave it out."""
+    if not story.get("merged_into"):
+        return None
+    canon = resolve(story_id, stories)
+    if canon in (None, story_id) or canon not in renderable:
+        return None
+    return canon
+
+
 def build_map(stories, renderable=None):
     """merged id -> canonical id, chains resolved, unresolvable ids dropped.
 
@@ -52,14 +62,10 @@ def build_map(stories, renderable=None):
     """
     if renderable is None:
         renderable = {sid for sid, st in stories.items() if not st.get("merged_into")}
-    out = {}
-    for sid, st in stories.items():
-        if not st.get("merged_into"):
-            continue
-        canon = resolve(sid, stories)
-        if canon and canon != sid and canon in renderable:
-            out[sid] = canon
-    return out
+    return {sid: canon
+            for sid, st in stories.items()
+            for canon in [_canonical_for(sid, st, stories, renderable)]
+            if canon}
 
 
 def published_map(mapping):
