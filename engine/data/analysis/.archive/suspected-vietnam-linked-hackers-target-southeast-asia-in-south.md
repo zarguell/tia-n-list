@@ -1,0 +1,3 @@
+The Hacker News reports that SOCRadar attributed five intrusions in Thailand to a previously undocumented, suspected Vietnam-sponsored group it calls WeaveLotus. The targets were military, government and legislative organizations across Southeast Asia. The stated goal was to collect intelligence on South China Sea defense and military agreements.
+
+The case matters because the reported activity combines a new intrusion set with repeated targeting of strategically sensitive institutions. The summary does not establish the initial-access method, malware, confirmed theft, or intrusions outside Thailand, and the Vietnam attribution remains suspected. Watch for SOCRadar's technical indicators and a victim-by-victim timeline to test the scope and attribution.
