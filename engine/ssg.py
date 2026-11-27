@@ -17,7 +17,8 @@ Outputs:
   stories/<id>/index.html          per-story timeline pages
   daily/<date>/index.html          daily top-stories digest page
   feeds/index.html                 feeds index
-  feeds/feed-all.xml               every article (every story event)
+  feeds/feed-all.xml               newest FEED_ALL_LIMIT story events (count-
+                                   capped; it used to be every event ever)
   feeds/feed-hot.xml               stories above the hot threshold
   feeds/feed-daily.xml             today's top stories (the digest)
 
@@ -88,6 +89,16 @@ def site_url(path):
     """Join a base-relative path (e.g. 'stories/x/' or '/daily/') to the site URL."""
     return BASE_URL + "/" + path.lstrip("/")
 HOT_THRESHOLD = 5.0      # display "hot" = the heat() h2 band; merge.py keeps its own 3.3 analysis-queue gate
+
+# feed-all used to carry EVERY event ever published: 17,352 items / 12.8 MB by
+# 2026-11-27, rebuilt hourly, so one hourly-polling reader downloaded 12.8 MB
+# per change (~9 GB/month) — eleven such readers exhausted GitHub Pages' whole
+# 100 GB/month soft bandwidth budget, invisibly (the site has no analytics).
+# A feed is a follow stream, not an archive: the site's /stories/ page and the
+# per-event pages are the archive. The cap is a COUNT, not a day window, so the
+# bound holds when the publishing rate rises; 500 items is ~11 days of coverage
+# at the 2026-11 rate (~1,400 events/month) and ~365 KB instead of 12.8 MB.
+FEED_ALL_LIMIT = 500
 DIGEST_TOP_N = 10      # not a hard limit — how many stories the digest page lists
 INLINE_CASES = 4       # CTI coverage rows: cases shown inline before the disclosure
 
@@ -679,7 +690,13 @@ def load_stories(events):
 
 # ---------- feed contexts (RSS is an MVP requirement) ----------
 
-def feed_all_items(cards):
+def feed_all_items(cards, limit=FEED_ALL_LIMIT):
+    """Newest `limit` story events, newest first (see FEED_ALL_LIMIT).
+
+    The cap applies to the GLOBAL sort, not per story: a story with many
+    update events competes for the window like any other item, and the window
+    is never filled with older items to reach `limit`.
+    """
     items = []
     for c in cards:
         for e in c["events"]:
@@ -691,6 +708,7 @@ def feed_all_items(cards):
                 "description": e["snippet"],
             })
     items.sort(key=lambda i: i["iso"], reverse=True)
+    items = items[:limit] if limit is not None else items
     for it in items:
         del it["iso"]
     return items
@@ -1704,7 +1722,7 @@ def main():
     all_items = feed_all_items(cards)
     feeds = [
         ("feeds/feed-all.xml", "Tia N. List — Every article",
-         "Every article, newest first.", "/feeds/feed-all.xml",
+         f"The newest {FEED_ALL_LIMIT} articles, newest first.", "/feeds/feed-all.xml",
          all_items, rfc_now),
         ("feeds/feed-hot.xml", "Tia N. List — Hot stories",
          f"Stories scoring {HOT_THRESHOLD}+ on the hot ranking.", "/feeds/feed-hot.xml",
