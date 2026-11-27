@@ -59,53 +59,54 @@ def check(name, got, expect, detail=""):
     return ok
 
 
-def main():
-    ok = True
-    limit = ssg.FEED_ALL_LIMIT
-
-    # ---- 1. cap holds, and the constant stays in a sane band ----
-    # A count cap, not a day window: the bound must survive a doubling of the
-    # publishing rate, so assert the knob itself cannot be raised to "all".
-    ok &= check("FEED_ALL_LIMIT is a real bound", 1 <= limit <= 2000, True,
-                f"limit={limit}")
-    big = [card(f"s{i}",
-                [event(f"s{i}", j, iso(1 + (i * 3 + j) % 27, (i + j) % 24))
-                 for j in range(3)])
-           for i in range(600)]                     # 1,800 events, all > limit
-    items = ssg.feed_all_items(big)
+def check_cap(items, limit):
+    """Sections 1-3: the cap holds, and it keeps the newest tail in order."""
+    ok = check("FEED_ALL_LIMIT is a real bound", 1 <= limit <= 2000, True,
+               f"limit={limit}")
     ok &= check("feed-all capped at the limit", len(items), limit)
-    ok &= check("feed-all keeps one item per event", len(items) == limit, True)
-
-    # ---- 2/3. the window is the newest items, still newest-first ----
     stamps = [i["pub_date"] for i in items]
     parsed = [parsedate_to_datetime(s) for s in stamps]
     ok &= check("feed-all is newest-first after the cap",
                 all(a >= b for a, b in zip(parsed, parsed[1:])), True)
-    all_stamps = sorted((parsedate_to_datetime(e["pub_date"])
-                         for c in big for e in c["events"]), reverse=True)
-    ok &= check("feed-all window is the newest tail, not the oldest head",
-                parsed[0] == all_stamps[0] and parsed[-1] == all_stamps[limit - 1],
-                True, f"newest={parsed[0]} oldest_kept={parsed[-1]}")
+    return ok, parsed
 
-    # ---- 4. global window: one noisy story cannot reserve a quota ----
-    noisy = [card("noisy", [event("noisy", j, iso(27, j % 24)) for j in range(limit * 2)])]
+
+def check_newest_tail(parsed, corpus, limit):
+    """Section 2: the window is the newest items, never the oldest head."""
+    all_stamps = sorted((parsedate_to_datetime(e["pub_date"])
+                         for c in corpus for e in c["events"]), reverse=True)
+    return check("feed-all window is the newest tail, not the oldest head",
+                 parsed[0] == all_stamps[0] and parsed[-1] == all_stamps[limit - 1],
+                 True, f"newest={parsed[0]} oldest_kept={parsed[-1]}")
+
+
+def check_global_window(limit):
+    """Section 4: one noisy story cannot reserve a quota of the window."""
+    noisy = [card("noisy", [event("noisy", j, iso(27, j % 24))
+                            for j in range(limit * 2)])]
     quiet = [card(f"q{i}", [event(f"q{i}", 0, iso(2, 0))]) for i in range(50)]
     mixed = ssg.feed_all_items(noisy + quiet)
-    ok &= check("global window: only the newest limit events survive",
-                len(mixed), limit)
+    ok = check("global window: only the newest limit events survive",
+               len(mixed), limit)
     ok &= check("global window excludes older stories when the noisy one fills it",
                 all(i["link"].startswith("stories/noisy/") for i in mixed), True,
                 f"kept={sorted({i['link'].split('/')[1] for i in mixed})[:3]}")
+    return ok
 
-    # ---- 5. under-limit corpora pass through untouched ----
+
+def check_under_limit():
+    """Section 5: a feed that fits is never padded or trimmed."""
     small = [card(f"t{i}", [event(f"t{i}", 0, iso(1 + i, 0))]) for i in range(5)]
     got = ssg.feed_all_items(small)
-    ok &= check("under-limit feed is not padded or trimmed", len(got), 5)
+    ok = check("under-limit feed is not padded or trimmed", len(got), 5)
     ok &= check("under-limit feed is newest-first",
                 [i["link"] for i in got],
                 [f"stories/t{i}/#0" for i in range(4, -1, -1)])
+    return ok
 
-    # ---- 6. rendered XML byte budget (the actual regression: 12.8 MB) ----
+
+def check_render(items, limit):
+    """Section 6: the rendered XML byte budget — the actual 12.8 MB regression."""
     rendered = ssg.env.get_template("feed.xml").render(feed={
         "title": "Tia N. List — Every article",
         "description": f"The newest {limit} articles, newest first.",
@@ -114,21 +115,39 @@ def main():
         "entries": items,
     })
     n_bytes = len(rendered.encode("utf-8"))
-    ok &= check(f"rendered feed-all under {FEED_ALL_BYTE_BUDGET // 1024} KiB",
-                n_bytes < FEED_ALL_BYTE_BUDGET, True, f"bytes={n_bytes}")
+    ok = check(f"rendered feed-all under {FEED_ALL_BYTE_BUDGET // 1024} KiB",
+               n_bytes < FEED_ALL_BYTE_BUDGET, True, f"bytes={n_bytes}")
     ok &= check("rendered feed-all has exactly one <item> per entry",
                 rendered.count("<item>"), limit)
+    return ok
 
-    # ---- 7. feed-hot is untouched by the cap ----
+
+def check_hot_untouched():
+    """Section 7: the cap belongs to feed-all, not to every feed."""
     hot_cards = [card(f"h{i}", [event(f"h{i}", 0, iso(1 + i % 25, i % 24))],
                       score=ssg.HOT_THRESHOLD + 1) for i in range(60)]
     hot_cards.append(card("cold", [event("cold", 0, iso(1, 0))],
                           score=ssg.HOT_THRESHOLD - 1))
     hot = ssg.feed_hot_items(hot_cards)
-    ok &= check("feed-hot keeps every hot story (no cap applied)", len(hot), 60)
+    ok = check("feed-hot keeps every hot story (no cap applied)", len(hot), 60)
     ok &= check("feed-hot still drops sub-threshold stories",
                 any("cold" in i["link"] for i in hot), False)
+    return ok
 
+
+def main():
+    limit = ssg.FEED_ALL_LIMIT
+    corpus = [card(f"s{i}",
+                   [event(f"s{i}", j, iso(1 + (i * 3 + j) % 27, (i + j) % 24))
+                    for j in range(3)])
+              for i in range(600)]                     # 1,800 events, all > limit
+    items = ssg.feed_all_items(corpus)
+    ok, parsed = check_cap(items, limit)
+    ok &= check_newest_tail(parsed, corpus, limit)
+    ok &= check_global_window(limit)
+    ok &= check_under_limit()
+    ok &= check_render(items, limit)
+    ok &= check_hot_untouched()
     print("ALL PASS" if ok else "FAILURES")
     return 0 if ok else 1
 
