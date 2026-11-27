@@ -5,4 +5,28 @@
 <h1 class="page-title">Page not found</h1>
 <p class="lead">Nothing here — a typo’d link, a renamed story, or a page that never existed.</p>
 <p><a href="./">Hot stories</a> · <a href="stories/">All stories</a> · <a href="daily/">Daily digests</a></p>
+<script>
+// Merged-story URLs resolve through the build's redirect map (engine/redirects.py):
+// one key per merge in redirects.json instead of a rendered stub page per merge.
+// Same-origin only — a target must look like "stories/<id>/", never an absolute URL,
+// so a corrupted map can never turn this page into an open redirect.
+(function () {
+  function target(path, map) {
+    var m = /^\/*stories\/([a-z0-9-]+)\/?$/.exec(path);
+    var id = m && map ? map[m[1]] : null;
+    var t = (typeof id === 'string') ? 'stories/' + id + '/' : null;
+    return (t && /^stories\/[a-z0-9-]+\/$/.test(t)) ? t : null;
+  }
+  window.__tiaRedirectTarget = target;
+  var base = new URL(document.baseURI).pathname;   // "/tia-n-list/"
+  var here = location.pathname;
+  if (here.indexOf(base) === 0) { here = here.slice(base.length); }
+  fetch(base + 'redirects.json').then(function (r) {
+    return r.ok ? r.json() : null;
+  }).then(function (map) {
+    var t = target(here, map);
+    if (t) { location.replace(base + t); }
+  }).catch(function () {});
+})();
+</script>
 {% endblock %}
