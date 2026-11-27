@@ -54,7 +54,7 @@ def main():
     }
     expirable = ["old-cold", "shared", "cited", "analyzed", "winner"]
     move, event_ids, blocked = archive.plan(
-        stories, None, expirable,
+        stories, expirable,
         digest={"cited"}, analysis_ids={"analyzed"})
     ok &= check("only the clean story moves", move, ["old-cold"])
     ok &= check("its events move", event_ids, ["e1"])
@@ -81,7 +81,7 @@ def main():
                     f.write(json.dumps(body) if body else f"body {eid}")
 
         before = sorted(os.listdir(store_stories))
-        archive.plan(stories, None, expirable, digest={"cited"}, analysis_ids={"analyzed"})
+        archive.plan(stories, expirable, digest={"cited"}, analysis_ids={"analyzed"})
         ok &= check("dry run touches nothing", sorted(os.listdir(store_stories)), before)
 
         moved = archive.apply_moves(["old-cold"], stories, events_dir, arch, log=lambda *_: None)

@@ -68,36 +68,56 @@ def event_refs(stories):
     return refs
 
 
-def plan(stories, events, expirable, digest=None, analysis_ids=None):
-    """(story ids to move, event ids to move, {blocked id: reason}). Pure."""
+def _blocked_reason(sid, stories, targets, digest, analysis_ids):
+    """Why a candidate may not move, or None when it is clean."""
+    if sid not in stories:
+        return "story file missing"
+    if sid in targets:
+        return "redirect target (its URL is a map key)"
+    if sid in digest:
+        return "digest-cited (link rewrite lands with step 3)"
+    if sid in analysis_ids:
+        return "has an analysis file"
+    return None
+
+
+def _shares_stored_event(story, refs, candidates):
+    """True when any of the story's events is also read by a story that stays."""
+    for e in story.get("events") or []:
+        eid = e.get("event_id")
+        if eid and refs.get(eid, set()) - candidates:
+            return True
+    return False
+
+
+def plan(stories, expirable, digest=None, analysis_ids=None):
+    """(story ids to move, event ids to move, {blocked id: reason}). Pure.
+
+    Two phases, because the second depends on the whole candidate set: first
+    the per-story guards, then the shared-event filter. An event shared with a
+    story that stays must not move, and the story that owns it cannot go either
+    — its page would lose the text it renders.
+    """
     digest = digest or set()
     analysis_ids = analysis_ids or set()
     refs = event_refs(stories)
     targets = {st["merged_into"] for st in stories.values() if st.get("merged_into")}
-    move, blocked = [], {}
+    blocked, candidates = {}, []
     for sid in sorted(expirable):
-        st = stories.get(sid)
-        if st is None:
-            blocked[sid] = "story file missing"
-        elif sid in targets:
-            blocked[sid] = "redirect target (its URL is a map key)"
-        elif sid in digest:
-            blocked[sid] = "digest-cited (link rewrite lands with step 3)"
-        elif sid in analysis_ids:
-            blocked[sid] = "has an analysis file"
+        reason = _blocked_reason(sid, stories, targets, digest, analysis_ids)
+        if reason:
+            blocked[sid] = reason
         else:
-            move.append(sid)
-    # An event shared with a story that stays must not move, and the story that
-    # owns it cannot go either (its page would lose the text it renders).
-    candidates = set(move)
-    for sid in list(move):
-        if any(refs.get(e["event_id"], set()) - candidates
-               for e in stories[sid].get("events") or [] if e.get("event_id")):
+            candidates.append(sid)
+    moving, shared = [], set(candidates)
+    for sid in candidates:
+        if _shares_stored_event(stories[sid], refs, shared):
             blocked[sid] = "shares an event with a story that stays"
-            move.remove(sid)
-    kept = {e["event_id"] for sid in move
+        else:
+            moving.append(sid)
+    kept = {e["event_id"] for sid in moving
             for e in stories[sid].get("events") or [] if e.get("event_id")}
-    return move, sorted(kept), blocked
+    return moving, sorted(kept), blocked
 
 
 def _write(path, data):
@@ -184,33 +204,50 @@ def apply_moves(move, stories, events_dir, archive_root, tier_of=None, log=print
     return len(move)
 
 
+def _entry_problems(archive_root, entry):
+    """Missing file or sha256 drift for one manifest file entry."""
+    path = os.path.join(archive_root, entry["path"])
+    if not os.path.exists(path):
+        return [entry["path"]]
+    if _sha(path) != entry["sha256"]:
+        return [f"{entry['path']} (sha256 mismatch)"]
+    return []
+
+
+def _record_problems(archive_root, line):
+    """(listed id or None, problems) for one manifest line."""
+    try:
+        rec = json.loads(line)
+    except ValueError:
+        return None, ["unparseable manifest line"]
+    problems = []
+    for entry in rec.get("files", []):
+        problems += _entry_problems(archive_root, entry)
+    return rec.get("id"), problems
+
+
+def _unlisted_story_files(archive_root, listed):
+    """stories/*.json present in the archive but absent from the manifest."""
+    stories_dir = os.path.join(archive_root, "stories")
+    if not os.path.isdir(stories_dir):
+        return []
+    return [f"stories/{name}" for name in sorted(os.listdir(stories_dir))
+            if name.endswith(".json") and name[:-5] not in listed]
+
+
 def verify(archive_root):
-    """Manifest entries without files, or files without a manifest line."""
-    missing, orphans = [], []
-    listed = set()
+    """Manifest entries without files (or sha drift), plus unlisted story files."""
     manifest_path = os.path.join(archive_root, "manifest.jsonl")
     if not os.path.exists(manifest_path):
         return ["manifest.jsonl missing"]
+    problems, listed = [], set()
     with open(manifest_path, encoding="utf-8") as f:
         for line in f:
-            try:
-                rec = json.loads(line)
-            except ValueError:
-                missing.append("unparseable manifest line")
-                continue
-            listed.add(rec["id"])
-            for entry in rec.get("files", []):
-                path = os.path.join(archive_root, entry["path"])
-                if not os.path.exists(path):
-                    missing.append(entry["path"])
-                elif _sha(path) != entry["sha256"]:
-                    missing.append(f"{entry['path']} (sha256 mismatch)")
-    stories_dir = os.path.join(archive_root, "stories")
-    if os.path.isdir(stories_dir):
-        for name in sorted(os.listdir(stories_dir)):
-            if name.endswith(".json") and name[:-5] not in listed:
-                orphans.append(f"stories/{name}")
-    return missing + orphans
+            sid, found = _record_problems(archive_root, line)
+            problems += found
+            if sid:
+                listed.add(sid)
+    return problems + _unlisted_story_files(archive_root, listed)
 
 
 def load_archived(archive_root):
@@ -257,7 +294,7 @@ def main(argv=None):
                     os.listdir(os.path.join(ENGINE, "data", "analysis"))} \
         if os.path.isdir(os.path.join(ENGINE, "data", "analysis")) else set()
     tier_of = {sid: tier for sid, (tier, _) in retention.classify_all(stories).items()}
-    move, event_ids, blocked = plan(stories, None, exp, digest=set(), analysis_ids=analysis_ids)
+    move, event_ids, blocked = plan(stories, exp, digest=set(), analysis_ids=analysis_ids)
 
     if args.json:
         print(json.dumps({"expirable": len(exp), "would_move": move,
