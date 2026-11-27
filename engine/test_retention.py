@@ -90,6 +90,48 @@ def main():
     finally:
         retention.TIER_YEARS.update(saved)
 
+    # 6. dry-run sweep: horizons run from last_seen, and guards hold
+    from datetime import date
+    today = date(2026, 11, 27)
+
+    def aged(peak, last, first="2025-01-01T00:00:00Z"):
+        st = story(peak=peak)
+        st.update(last_seen=last, first_seen=first)
+        return st
+
+    stories = {
+        "cold-old": aged(1.0, "2026-04-01T00:00:00Z"),        # C, past 6mo
+        "cold-new": aged(1.0, "2026-10-01T00:00:00Z"),        # C, inside
+        "revived": aged(1.0, "2026-11-20T00:00:00Z",
+                        first="2024-01-01T00:00:00Z"),        # last_seen rescues it
+        "warm-old": aged(5.5, "2025-01-01T00:00:00Z"),        # B, past 3y? no
+        "hottest": aged(8.0, "2024-01-01T00:00:00Z"),         # A: never
+        "cited": aged(1.0, "2023-01-01T00:00:00Z"),           # B (3y) + digest -> blocked
+        "no-date": {"id": "no-date", "peak_score": 1.0},      # fail safe
+        "shell": {"id": "shell", "merged_into": "cited"},     # map key
+    }
+    saved = dict(retention.TIER_YEARS)
+    try:
+        retention.TIER_YEARS.update({"A": 3, "B": 3, "C": 0.5})
+        b = retention.expiring(stories, today=today,
+                               immutable={"hottest"}, digest={"cited"})
+        ok &= check("expired C story is expirable", "cold-old" in b["expirable"], True)
+        ok &= check("fresh C story is inside its horizon", "cold-new" in b["inside"], True)
+        ok &= check("last_seen rescues an old story", "revived" in b["inside"], True)
+        ok &= check("tier A never expires", "hottest" in b["immutable"], True)
+        ok &= check("digest-cited expiry needs the link rewrite",
+                    "cited" in b["needs-digest"], True)
+        ok &= check("digest-cited is not silently expirable",
+                    "cited" in b["expirable"], False)
+        ok &= check("unparseable date never expires", "no-date" in b["unknown-date"], True)
+        ok &= check("merged shell is a map key, not an expiry",
+                    "shell" in b["merged"], True)
+        ok &= check("expiry date = last_seen + horizon",
+                    retention.expires_at(aged(1.0, "2026-01-01T00:00:00Z"), "C"),
+                    date(2026, 7, 2))
+    finally:
+        retention.TIER_YEARS.update(saved)
+
     print("ALL PASS" if ok else "FAILURES")
     return 0 if ok else 1
 
