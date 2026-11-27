@@ -87,23 +87,16 @@ def plan(stories, events, expirable, digest=None, analysis_ids=None):
             blocked[sid] = "has an analysis file"
         else:
             move.append(sid)
-    moving = set(move)
-    event_ids = set()
-    for sid in move:
-        for e in stories[sid].get("events") or []:
-            eid = e.get("event_id")
-            if not eid:
-                continue
-            if refs.get(eid, set()) - moving:
-                blocked[sid] = "shares an event with a story that stays"
-                move.remove(sid)
-                moving.discard(sid)
-                break
-            event_ids.add(eid)
-    # re-derive the event set after any removal
-    kept = set()
-    for sid in move:
-        kept.update(e["event_id"] for e in stories[sid].get("events") or [] if e.get("event_id"))
+    # An event shared with a story that stays must not move, and the story that
+    # owns it cannot go either (its page would lose the text it renders).
+    candidates = set(move)
+    for sid in list(move):
+        if any(refs.get(e["event_id"], set()) - candidates
+               for e in stories[sid].get("events") or [] if e.get("event_id")):
+            blocked[sid] = "shares an event with a story that stays"
+            move.remove(sid)
+    kept = {e["event_id"] for sid in move
+            for e in stories[sid].get("events") or [] if e.get("event_id")}
     return move, sorted(kept), blocked
 
 
@@ -115,67 +108,80 @@ def _write(path, data):
     os.replace(tmp, path)
 
 
-def apply_moves(move, stories, events_dir, archive_root, tier_of=None, log=print):
-    """Copy story records + their exclusive events, then remove them from the store.
-
-    Order per story: copy every file, append the manifest line, only then
-    unlink the originals. A crash between those steps leaves the archive with
-    a real copy and the store intact — the next run re-copies and re-appends
-    nothing (the manifest is checked for the id first).
-    """
-    manifest_path = os.path.join(archive_root, "manifest.jsonl")
+def _manifest_ids(archive_root):
+    """Ids already recorded (so a re-run appends nothing)."""
+    path = os.path.join(archive_root, "manifest.jsonl")
     done = set()
-    if os.path.exists(manifest_path):
-        with open(manifest_path, encoding="utf-8") as f:
-            for line in f:
-                try:
-                    done.add(json.loads(line)["id"])
-                except (ValueError, KeyError):
-                    continue
-    moved = 0
+    if not os.path.exists(path):
+        return done
+    with open(path, encoding="utf-8") as f:
+        for line in f:
+            try:
+                done.add(json.loads(line)["id"])
+            except (ValueError, KeyError):
+                continue
+    return done
+
+
+def _archive_files(sid, st, events_dir, archive_root):
+    """Copy the story record and its exclusive event files; return manifest files."""
+    entries = []
+    with open(os.path.join(retention.STORIES_DIR, sid + ".json"), "rb") as f:
+        raw = f.read()
+    rel = f"stories/{sid}.json"
+    _write(os.path.join(archive_root, rel), raw)
+    entries.append({"path": rel, "sha256": _sha(os.path.join(archive_root, rel))})
+    for e in st.get("events") or []:
+        eid = e.get("event_id")
+        for ext in (".json", ".md"):
+            src = os.path.join(events_dir, str(eid) + ext)
+            if not eid or not os.path.exists(src):
+                continue
+            with open(src, "rb") as f:
+                data = f.read()
+            rel = f"events/{eid}{ext}"
+            _write(os.path.join(archive_root, rel), data)
+            entries.append({"path": rel, "sha256": _sha(os.path.join(archive_root, rel))})
+    return entries
+
+
+def _unlink_story(sid, st, events_dir):
+    """Remove the hot-store originals — only after the manifest line exists."""
+    try:
+        os.remove(os.path.join(retention.STORIES_DIR, sid + ".json"))
+    except OSError:
+        pass
+    for e in st.get("events") or []:
+        for ext in (".json", ".md"):
+            try:
+                os.remove(os.path.join(events_dir, str(e.get("event_id")) + ext))
+            except OSError:
+                pass
+
+
+def apply_moves(move, stories, events_dir, archive_root, tier_of=None, log=print):
+    """Copy, record, then unlink — in that order, per story.
+
+    A crash between the steps leaves the archive complete and the store
+    intact: the copy and manifest line are durable before anything is removed,
+    and a re-run skips ids the manifest already names.
+    """
+    done = _manifest_ids(archive_root)
+    manifest = os.path.join(archive_root, "manifest.jsonl")
     for sid in move:
         st = stories[sid]
-        src = os.path.join(store.STORIES_DIR if hasattr(store, "STORIES_DIR") else "", sid + ".json")
-        entries = []
         if sid not in done:
-            story_path = os.path.join(retention.STORIES_DIR, sid + ".json")
-            with open(story_path, "rb") as f:
-                raw = f.read()
-            _write(os.path.join(archive_root, "stories", sid + ".json"), raw)
-            entries.append({"path": f"stories/{sid}.json", "sha256": _sha(os.path.join(archive_root, "stories", sid + ".json"))})
-            for e in st.get("events") or []:
-                eid = e.get("event_id")
-                for ext in (".json", ".md"):
-                    src_e = os.path.join(events_dir, eid + ext)
-                    if not os.path.exists(src_e):
-                        continue
-                    with open(src_e, "rb") as f:
-                        data = f.read()
-                    rel = f"events/{eid}{ext}"
-                    _write(os.path.join(archive_root, rel), data)
-                    entries.append({"path": rel, "sha256": _sha(os.path.join(archive_root, rel))})
             line = {"ts": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
                     "id": sid, "tier": (tier_of or {}).get(sid, ""),
-                    "events": [e.get("event_id") for e in st.get("events") or [] if e.get("event_id")],
-                    "files": entries}
-            with open(manifest_path, "a", encoding="utf-8") as f:
+                    "events": [e.get("event_id") for e in st.get("events") or []
+                               if e.get("event_id")],
+                    "files": _archive_files(sid, st, events_dir, archive_root)}
+            with open(manifest, "a", encoding="utf-8") as f:
                 f.write(json.dumps(line, sort_keys=True) + "\n")
-        # removal last: the archive copy is durable before the store changes
-        try:
-            os.remove(os.path.join(retention.STORIES_DIR, sid + ".json"))
-        except OSError:
-            pass
-        for e in st.get("events") or []:
-            eid = e.get("event_id")
-            for ext in (".json", ".md"):
-                try:
-                    os.remove(os.path.join(events_dir, eid + ext))
-                except OSError:
-                    pass
-        moved += 1
-    log(f"archive: moved {moved} story file(s) into {archive_root} "
-        f"(manifest {manifest_path})")
-    return moved
+        _unlink_story(sid, st, events_dir)
+    log(f"archive: moved {len(move)} story file(s) into {archive_root} "
+        f"(manifest {manifest})")
+    return len(move)
 
 
 def verify(archive_root):
