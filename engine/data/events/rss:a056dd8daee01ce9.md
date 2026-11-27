@@ -1,0 +1,1 @@
+The security startup consolidates four legacy security tools into an autonomous platform that uses context-aware AI to trace sensitive data lineage, analyze user intent, and automatically remediate threats across enterprise environments.
