@@ -213,21 +213,40 @@ def freeze_sweep(stories, referenced=None, log=print):
 
     Eligibility (ALL must hold — each criterion independently blocks):
     not merged_into, not already frozen, not digest-referenced (live URLs),
-    no truthy "analysis" key (a written analysis = someone cared), age over
+    not the target of another story's merge (its URL is a redirect
+destination), no truthy "analysis" key (a written analysis = someone cared), age over
     FREEZE_MIN_AGE_DAYS, peak_score under FREEZE_PEAK, n_sources within
     FREEZE_MAX_SOURCES, and no CVE in the CISA KEV catalog (remediation-
     relevant by definition — see _kev_cves). Saves frozen.json once at the
     end; logs one summary line (count + first few ids), never per-id spam —
     this runs hourly.
+
+    Also HEALS the frozen set: an id that became a merge target stays off
+    the cold tier, so the invariant "frozen ∩ merge_targets = ∅" holds on
+    every run rather than waiting for someone to notice a redirect that
+    lands on nothing.
     """
     if referenced is None:
         referenced = referenced_story_ids()
     frozen = frozen_ids()
     kev = _kev_cves()
+    # A merge target is not freezable. Another story's URL redirects to it, and
+    # redirects.json only maps a chain whose destination this build renders, so
+    # a frozen merge target publishes a redirect to a 404. That state is
+    # invisible while the merge target still rendered a stub page — the
+    # 2026-11-27 stub removal found 186 of them.
+    targets = {s["merged_into"] for s in stories.values() if s.get("merged_into")}
+    healed = sorted(frozen & targets)
+    if healed:
+        frozen -= set(healed)
+        _save_frozen(frozen)
+        log(f"lifecycle: thawed {len(healed)} frozen merge target(s) "
+            f"(another story redirects to them): "
+            f"{', '.join(healed[:3])}{'...' if len(healed) > 3 else ''}")
     newly = []
     for sid, s in stories.items():
-        if (sid in frozen or sid in referenced or s.get("merged_into")
-                or s.get("analysis")):
+        if (sid in frozen or sid in referenced or sid in targets
+                or s.get("merged_into") or s.get("analysis")):
             continue
         if age_days(s.get("first_seen") or "") <= FREEZE_MIN_AGE_DAYS:
             continue

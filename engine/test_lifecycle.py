@@ -131,6 +131,28 @@ with tempfile.TemporaryDirectory() as td:
     newly = lifecycle.freeze_sweep(stories)
     check("empty analysis marker does not block", newly == {"falsy-analysis"})
 
+    # --- merge targets are not freezable, and a frozen target heals ---------
+    # A merged-away URL redirects to its target; redirects.json only maps a
+    # chain whose destination renders, so freezing the target would publish a
+    # redirect to a 404 (2026-11-27: 186 such chains, invisible while the
+    # target still had a stub page).
+    log.clear()
+    stories["winner"] = eligible_story("winner", peak_score=0.0)
+    stories["shell"] = eligible_story("shell", merged_into="winner",
+                                      events=[], peak_score=0.0)
+    newly = lifecycle.freeze_sweep(stories, log=log.append)
+    check("merge target is never frozen", "winner" not in newly
+          and "winner" not in lifecycle.frozen_ids())
+    check("the merged shell itself is not frozen either", "shell" not in newly)
+
+    lifecycle._save_frozen(lifecycle.frozen_ids() | {"winner"})   # stale state
+    log.clear()
+    newly = lifecycle.freeze_sweep(stories, log=log.append)
+    check("frozen merge target is thawed", "winner" not in lifecycle.frozen_ids())
+    check("thaw is reported", any("thawed 1" in m for m in log))
+    check("heal does not disturb unrelated frozen ids",
+          "falsy-analysis" in lifecycle.frozen_ids())
+
 # --- 2: frozen file round-trip + tolerant loader ----------------------------
 with tempfile.TemporaryDirectory() as td:
     setup_store(td)
