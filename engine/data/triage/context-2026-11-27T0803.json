@@ -1,0 +1,480 @@
+{
+ "date": "2026-11-27",
+ "decisions_path": "engine/data/triage/decisions-2026-11-27T0803.json",
+ "instructions": "For every new event decide: (1) keep or drop \u2014 keep only stories worth covering (real security events, vulnerabilities, attacks, breaches, advisories with substance); drop press releases, vendor marketing, generic explainers, and anything duplicating an existing story. (2) If keep, assign the event to the RIGHT story: an existing candidate story id if it belongs there (this FIXES mechanical clustering \u2014 e.g. different outlets' Patch Tuesday roundups are ONE story), or NEW with a clean story_title. (3) merges: list candidate stories that are really the same story (from = fragment, into = the most complete one). (4) For every kept event that names CVEs, optionally assess exploitation: exploited = the event reports OBSERVED in-the-wild exploitation (implants, victim counts, campaigns, CISA KEV confirmation); suspected = public exploit code/PoC or likely-but-unconfirmed. Attribute ONLY the CVEs you can tie to the claim \u2014 a bulletin's blanket 'actively exploited' does NOT flag all its CVEs. Omit the exploitation field when the event makes no claim.\n(5) LOW-TRUST events (\"low_trust\": true \u2014 AI-drafted aggregator reposts, late and overstated): treat as unverified leads. When the text attributes the claim to a named primary source (a researcher firm like watchTowr, a vendor advisory, CISA, a major outlet) and attribution_urls or a web search (/home/ubuntu/repos/cronman/bin/web-search.sh \"query\") locate that primary source CONFIRMING the claim, include a provenance object in the decision: {\"url\": <primary url>, \"source\": <domain>, \"evidence\": <one line>, \"verified\": true}. VERIFIED provenance lets the event mint a story (credited to the primary source) and count as a development; without it, a low-trust event can only attach to an EXISTING story, never mint. If you cannot verify, keep/drop on normal merit and omit provenance.\n\nWrite decisions as JSON with EXACTLY this shape:\n{\n  \"decisions\": [\n    {\"event_id\": \"<id>\", \"action\": \"keep\", \"story\": \"<existing candidate story id>\", \"reason\": \"...\"},\n    {\"event_id\": \"<id>\", \"action\": \"keep\", \"story\": \"NEW\", \"story_title\": \"<clean title>\", \"reason\": \"...\"},\n    {\"event_id\": \"<id>\", \"action\": \"drop\", \"reason\": \"...\"}\n  ],\n  \"merges\": [{\"from\": \"<fragment story id>\", \"into\": \"<canonical story id>\"}]\n}\nFor events marked \"low_trust\" (AI-drafted aggregator reposts) a decision\nmay carry an optional \"provenance\" object when you VERIFIED the claim at\nthe named primary source: {\"event_id\": ..., \"action\": \"keep\", ...}\n  \"provenance\": {\"url\": \"<primary source url>\", \"source\": \"<domain>\", \"evidence\": \"<one line>\"}\nOnly include provenance when the primary source (vendor advisory, CISA,\nthe named researcher/outlet) really carries the claim \u2014 verified\nprovenance lets a low-trust event mint a story and set freshness; without\nit the event can only amplify an existing story.\nSTRICT KEY NAMES: the array key is \"decisions\" (never \"events\"); the story\nkey is \"story\" (never \"story_id\"); \"story\" holds a candidate_stories id\nverbatim or the literal string \"NEW\". Optional per-event field\n\"exploitation\": {\"CVE-...\": {\"status\": \"exploited|suspected\", \"evidence\": \"1-2 sentences\"}}.",
+ "new_events": [
+  {
+   "id": "rss:cdefe73537e2cfc0",
+   "title": "Hex Package Manager Warns of Potential Data Breach",
+   "source": "securityweek.com",
+   "published_at": "2026-11-27T07:44:49Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Hex, the package manager for Elixir and Erlang, fell victim to a cyberattack involving unauthorized access to its web servers. The incident occurred on November 23, when the attackers exploited a vulnerability in hex.pm "
+  },
+  {
+   "id": "rss:3a78f19dd2f94e69",
+   "title": "SAP Confirms Cyberattack, Source Code Reportedly Compromised",
+   "source": "securityweek.com",
+   "published_at": "2026-11-27T07:36:14Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Enterprise software giant SAP has confirmed it is investigating a cybersecurity incident following reports that threat actors targeted its development infrastructure. German publication Der Spiegel [paywalled] broke the "
+  },
+  {
+   "id": "rss:c73e4fdeb2dd0263",
+   "title": "Standard Chartered\u2019s Crypto Unit Zodia Custody Hit by Data Breach, Exposing Client and Employee Information",
+   "source": "gbhackers.com",
+   "published_at": "2026-11-27T06:07:26Z",
+   "cves": [],
+   "low_trust": false,
+   "attribution_urls": [],
+   "snippet": "Standard Chartered\u2019s cryptocurrency custody unit, Zodia Custody, disclosed a security breach that exposed information about some institutional clients and employees. Chief Executive Richard Clark told Reuters on November"
+  }
+ ],
+ "candidate_stories": [
+  {
+   "id": "hex-package-manager-warns-of-potential-data-breach",
+   "title": "Hex Package Manager Warns of Potential Data Breach",
+   "n_events": 1,
+   "last_seen": "2026-11-27T07:44:49Z",
+   "first_event_title": "Hex Package Manager Warns of Potential Data Breach"
+  },
+  {
+   "id": "sap-confirms-cyberattack-source-code-reportedly-compromised",
+   "title": "SAP Confirms Cyberattack, Source Code Reportedly Compromised",
+   "n_events": 1,
+   "last_seen": "2026-11-27T07:36:14Z",
+   "first_event_title": "SAP Confirms Cyberattack, Source Code Reportedly Compromised"
+  },
+  {
+   "id": "13-malicious-nuget-packages-turn-fake-net-job-assessments-into-m",
+   "title": "13 Malicious NuGet Packages Turn Fake .NET Job Assessments Into Malware Delivery Traps",
+   "n_events": 10,
+   "last_seen": "2026-11-27T06:37:03.000Z",
+   "first_event_title": "13 Malicious NuGet Packages Turn Fake .NET Job Assessments Into Malware Delivery Traps"
+  },
+  {
+   "id": "cisa-warns-hackers-are-actively-exploiting-cisco-vmware-sap-and",
+   "title": "CISA Warns Hackers Are Actively Exploiting Cisco, VMware, SAP, and Apache Vulnerabilities",
+   "n_events": 73,
+   "last_seen": "2026-11-27T06:35:35.000Z",
+   "first_event_title": "CISA Warns Hackers Are Actively Exploiting Cisco, VMware, SAP, and Apache Vulnerabilities"
+  },
+  {
+   "id": "unpatched-cacti-zero-day-enables-rce-in-just-four-http-requests",
+   "title": "Unpatched Cacti Zero-Day Enables RCE in Just Four HTTP Requests via Guest Access",
+   "n_events": 8,
+   "last_seen": "2026-11-27T06:22:00.000Z",
+   "first_event_title": "Unpatched Cacti Zero-Day Enables RCE in Just Four HTTP Requests via Guest Access"
+  },
+  {
+   "id": "standard-chartered-s-crypto-unit-zodia-custody-hit-by-data-breac",
+   "title": "Standard Chartered\u2019s Crypto Unit Zodia Custody Hit by Data Breach, Exposing Client and Employee Information",
+   "n_events": 1,
+   "last_seen": "2026-11-27T06:07:26Z",
+   "first_event_title": "Standard Chartered\u2019s Crypto Unit Zodia Custody Hit by Data Breach, Exposing Client and Employee Information"
+  },
+  {
+   "id": "cto-of-ransomwarehelp-indicted-for-wire-fraud",
+   "title": "CTO of \u2018RansomwareHelp\u2019 Indicted for Wire Fraud",
+   "n_events": 13,
+   "last_seen": "2026-11-27T06:05:04.000Z",
+   "first_event_title": "CTO of \u2018RansomwareHelp\u2019 Indicted for Wire Fraud"
+  },
+  {
+   "id": "switzerland-confirms-ai-assisted-cyberattacks-breached-critical",
+   "title": "Switzerland Confirms AI-Assisted Cyberattacks Breached Critical Infrastructure Operators",
+   "n_events": 1,
+   "last_seen": "2026-11-27T06:04:20Z",
+   "first_event_title": "Switzerland Confirms AI-Assisted Cyberattacks Breached Critical Infrastructure Operators"
+  },
+  {
+   "id": "mitel-openscape-4000-v11-r2-14-fixes-two-cvss-10-0-authenticatio",
+   "title": "Mitel OpenScape 4000 V11 R2.14 fixes two CVSS 10.0 authentication bypass and command injection flaws",
+   "n_events": 4,
+   "last_seen": "2026-11-27T06:00:36.000Z",
+   "first_event_title": "Mitel OpenScape 4000 fixes two CVSS 10.0 flaws, an authentication bypass and a command injection, in V11 R2.14. OpenScape 4000 Manager is af"
+  },
+  {
+   "id": "1password-says-a-hacker-used-an-employee-s-github-account-to-tak",
+   "title": "1Password says a hacker used an employee\u2019s GitHub account to take customer data",
+   "n_events": 36,
+   "last_seen": "2026-11-27T06:00:21.350Z",
+   "first_event_title": "1Password says a hacker used an employee\u2019s GitHub account to take customer data"
+  },
+  {
+   "id": "sap-hit-by-suspected-cyberattack-hackers-reportedly-steal-github",
+   "title": "SAP Hit by Suspected Cyberattack, Hackers Reportedly Steal GitHub Tokens and Source Code",
+   "n_events": 2,
+   "last_seen": "2026-11-27T05:57:36.000Z",
+   "first_event_title": "SAP Hit by Suspected Cyberattack, Hackers Reportedly Steal GitHub Tokens and Source Code"
+  },
+  {
+   "id": "openssh-on-musl-linux-has-been-letting-people-into-password-less",
+   "title": "openssh on musl linux has been letting people into password-less accounts since 2016",
+   "n_events": 84,
+   "last_seen": "2026-11-27T05:50:17.000Z",
+   "first_event_title": "openssh on musl linux has been letting people into password-less accounts since 2016"
+  },
+  {
+   "id": "easyequities-confirms-security-incident-affecting-client-logins",
+   "title": "EasyEquities confirms security incident affecting client logins",
+   "n_events": 1,
+   "last_seen": "2026-11-27T05:49:39.000Z",
+   "first_event_title": "EasyEquities, the most popular self-service share trading platform in South Africa (literally everyone I know IRL uses it) has been hit by a"
+  },
+  {
+   "id": "bitcoin-core-privacy-flaw-allows-attackers-to-track-wallet-addre",
+   "title": "Bitcoin Core wallet rebroadcast flaw lets attackers link addresses to node IPs",
+   "n_events": 1,
+   "last_seen": "2026-11-27T05:27:49Z",
+   "first_event_title": "Bitcoin Core Privacy Flaw Allows Attackers to Track Wallet Addresses for Less Than $1"
+  },
+  {
+   "id": "north-korea-linked-polinrider-poisons-over-7-600-github-reposito",
+   "title": "North Korea-Linked PolinRider Poisons Over 7,600 GitHub Repositories to Spread Malware",
+   "n_events": 8,
+   "last_seen": "2026-11-27T05:23:28Z",
+   "first_event_title": "North Korea-Linked PolinRider Poisons Over 7,600 GitHub Repositories to Spread Malware"
+  },
+  {
+   "id": "eneco-belgium-data-breach-exposes-104-000-customers-via-password",
+   "title": "Eneco Belgium data breach affects more than 104,000 customers via password reset",
+   "n_events": 1,
+   "last_seen": "2026-11-27T05:06:15.622Z",
+   "first_event_title": "Eneco Belgium data breach affects more than 104,000 customers via password reset"
+  },
+  {
+   "id": "node-js-27-alpha-released-with-http-vulnerability-fix-and-tls-re",
+   "title": "Node.js 27 Alpha Released With HTTP Vulnerability Fix and TLS Renegotiation Opt-In",
+   "n_events": 0,
+   "last_seen": "2026-11-27T04:50:07Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "webmin-save-log-cgi-os-command-injection-cve-2026-137715",
+   "title": "Webmin save_log.cgi OS command injection (CVE-2026-137715)",
+   "n_events": 1,
+   "last_seen": "2026-11-27T04:30:36.000Z",
+   "first_event_title": "CVE-2026-137715 (HIGH): Webmin \u22642.670 exposes OS command injection via save_log.cgi log path. Shared hosting with Webalizer enabled is at gr"
+  },
+  {
+   "id": "fifa-says-hackers-accessed-limited-set-of-personal-and-business",
+   "title": "FIFA says hackers accessed \u2018limited set of personal and business information\u2019",
+   "n_events": 11,
+   "last_seen": "2026-11-27T03:39:22.000Z",
+   "first_event_title": "FIFA says hackers accessed \u2018limited set of personal and business information\u2019"
+  },
+  {
+   "id": "cve-2026-127163-pylxd-certificate-validation-flaw-fixed-in-2-4-3",
+   "title": "CVE-2026-127163: pylxd certificate validation flaw fixed in 2.4.3",
+   "n_events": 6,
+   "last_seen": "2026-11-27T02:47:46.000Z",
+   "first_event_title": "CRITICAL vuln in Canonical pylxd (2.4.2 \u2013 https:// radar.offseq.com/threat/cve-20 26-127163-cwe-295-improper-certificate-validation-in-canon"
+  },
+  {
+   "id": "openai-warns-gpt-6-2-astra-will-hit-usage-limits-40-faster-becau",
+   "title": "OpenAI warns GPT-6.2 Astra will hit usage limits 40% faster because it fixed a bug",
+   "n_events": 0,
+   "last_seen": "2026-11-27T02:20:07.208Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "cisa-kev-two-new-joomla-extension-entries-added-july-10-icagenda",
+   "title": "CISA KEV: Two New Joomla Extension Entries Added July 10 \u2014 iCagenda and Balbooa Forms",
+   "n_events": 15,
+   "last_seen": "2026-11-27T01:52:03.000Z",
+   "first_event_title": "CISA KEV: Two New Joomla Extension Entries Added July 10 \u2014 iCagenda and Balbooa Forms"
+  },
+  {
+   "id": "solarwinds-serv-u-2026-4-fixes-18-vulnerabilities-including-nine",
+   "title": "SolarWinds Serv-U 2026.4 fixes 18 vulnerabilities, including nine CVSS 9.1 RCE and root bugs",
+   "n_events": 6,
+   "last_seen": "2026-11-27T01:51:29.000Z",
+   "first_event_title": "New Serv-U 2026.4 update fixes 18 SolarWinds Serv-U vulnerabilities, including nine CVSS 9.1 RCE and root bugs like CVE-2026-82316. Patch no"
+  },
+  {
+   "id": "drupal-core-rce-cve-2026-132165-and-gadget-chain-cve-2026-132166",
+   "title": "Drupal core RCE CVE-2026-132165 and gadget chain CVE-2026-132166 patched in 11.4.13",
+   "n_events": 44,
+   "last_seen": "2026-11-27T01:50:47.000Z",
+   "first_event_title": "Drupal core security update patches Drupal Remote Code Execution flaw CVE-2026-132165 and gadget chain CVE-2026-132166. Upgrade to 11.4.13 o"
+  },
+  {
+   "id": "greynoise-reports-active-intrusion-campaign-against-check-point",
+   "title": "GreyNoise reports active intrusion campaign against Check Point Security Management servers",
+   "n_events": 27,
+   "last_seen": "2026-11-27T01:22:04.000Z",
+   "first_event_title": "Active Intrusion Campaign Against Check Point Security Management Servers GreyNoise recently discovered an intrusion campaign targeting Chec"
+  },
+  {
+   "id": "vcenter-zero-day-cve-2026-123890-exploited-by-armory-castle-befo",
+   "title": "vCenter zero-day CVE-2026-123890 exploited by ARMORY CASTLE before Broadcom patch (VMSA-2026-0009)",
+   "n_events": 65,
+   "last_seen": "2026-11-27T01:19:55.000Z",
+   "first_event_title": "vCenter zero-day CVE-2026-123890 was exploited by ARMORY CASTLE before Broadcom patched it in VMSA-2026-0009. Attack chain, fixes and huntin"
+  },
+  {
+   "id": "software-supply-chain-attack-via-the-official-softwareok-website",
+   "title": "Software Supply Chain Attack via the Official SoftwareOK Website: Tampering with Q-Dir and DesktopOK Installation Files",
+   "n_events": 2,
+   "last_seen": "2026-11-26T23:51:22Z",
+   "first_event_title": "Software Supply Chain Attack via the Official SoftwareOK Website: Tampering with Q-Dir and DesktopOK Installation Files"
+  },
+  {
+   "id": "cve-2026-99515-linux-iommufd-event-queue-use-after-free",
+   "title": "CVE-2026-99515: Linux iommufd event queue use-after-free",
+   "n_events": 1,
+   "last_seen": "2026-11-26T23:45:10.000Z",
+   "first_event_title": "\ud83d\udc27 SIGINT // Ubuntu Watch \u2014 2026-11-27 A use-after-free in Linux iommufd event queue teardown is a bad day if you run VFIO or PCIe passthroug"
+  },
+  {
+   "id": "karte-breach-exposes-smbc-mufg-and-zozo-customer-data",
+   "title": "KARTE breach exposes SMBC, MUFG and ZOZO customer data",
+   "n_events": 2,
+   "last_seen": "2026-11-26T23:01:31.000Z",
+   "first_event_title": "SMBC, MUFG and ZOZO lost tens of millions of records through the KARTE marketing platform, and each says the data \"cannot identify anyone\": "
+  },
+  {
+   "id": "threatsday-10m-nginx-services-at-risk-250-malicious-extensions-a",
+   "title": "ThreatsDay: 10M NGINX Services at Risk, 250+ Malicious Extensions, AI Server Hijacking + 17 More Stories",
+   "n_events": 1,
+   "last_seen": "2026-11-26T19:39:57Z",
+   "first_event_title": "ThreatsDay: 10M NGINX Services at Risk, 250+ Malicious Extensions, AI Server Hijacking + 17 More Stories"
+  },
+  {
+   "id": "cisa-adds-six-known-exploited-vulnerabilities-to-catalog",
+   "title": "CISA adds six known exploited vulnerabilities to catalog",
+   "n_events": 17,
+   "last_seen": "2026-11-26T19:37:17.000Z",
+   "first_event_title": "I'm late in posting today but happy Patch Tuesday. CISA added 6 new vulnerabilities to the KEV Catalog, two are zero-days but only one is ne"
+  },
+  {
+   "id": "microsoft-confirms-entra-connect-health-exposure-of-tenant-metad",
+   "title": "Microsoft confirms Entra Connect Health exposure of tenant metadata and admin emails",
+   "n_events": 10,
+   "last_seen": "2026-11-26T19:34:57.189Z",
+   "first_event_title": "Microsoft confirmed a Microsoft Entra Connect Health exposure that leaked tenant metadata and admin emails. Learn what was accessed and how "
+  },
+  {
+   "id": "australia-s-flight-centre-data-breach-exposes-customer-records-a",
+   "title": "Australia\u2019s Flight Centre Data Breach Exposes Customer Records and Passport Details",
+   "n_events": 8,
+   "last_seen": "2026-11-26T19:01:38.000Z",
+   "first_event_title": "Australia\u2019s Flight Centre Data Breach Exposes Customer Records and Passport Details"
+  },
+  {
+   "id": "european-commission-confirms-ai-assisted-cyberattack-disrupted-s",
+   "title": "European Commission Confirms AI-Assisted Cyberattack Disrupted Services",
+   "n_events": 32,
+   "last_seen": "2026-11-26T18:43:16.373Z",
+   "first_event_title": "European Commission Confirms AI-Assisted Cyberattack Disrupted Services"
+  },
+  {
+   "id": "azure-flaw-exploited-to-target-secrets-at-norwegian-energy-firms",
+   "title": "Azure API Management flaw exploited to steal secrets from Norwegian energy firms",
+   "n_events": 20,
+   "last_seen": "2026-11-26T18:43:13.165Z",
+   "first_event_title": "Azure Flaw Exploited to Target Secrets at Norwegian Energy Firms"
+  },
+  {
+   "id": "microsoft-declares-code-red-after-historic-global-outage-exposes",
+   "title": "Microsoft Declares \u2018Code Red\u2019 After Historic Global Outage Exposes Critical Engineering Flaws",
+   "n_events": 2,
+   "last_seen": "2026-11-26T18:00:02.000Z",
+   "first_event_title": "\ud83d\ude40 EXCLUSIVE: Microsoft declares 'Code Red' after historic outage, internal memos show // Reuters \"Despite deploying top engineering personne"
+  },
+  {
+   "id": "nordvpn-black-friday-deal-get-78-off-vpn-plans-in-2026",
+   "title": "NordVPN Black Friday Deal: Get 78% off VPN plans in 2026",
+   "n_events": 0,
+   "last_seen": "2026-11-26T17:58:42Z",
+   "first_event_title": ""
+  },
+  {
+   "id": "rackspace-shuts-down-spot-cloud-platform-after-security-breach",
+   "title": "Rackspace shuts down Spot cloud platform after security breach",
+   "n_events": 5,
+   "last_seen": "2026-11-26T17:30:01.000Z",
+   "first_event_title": "Rackspace shuts down Spot cloud platform after security breach"
+  },
+  {
+   "id": "remus-stealer-uses-a-fake-google-sheets-extension-to-steal-gmail",
+   "title": "Remus Stealer Uses a Fake Google Sheets Extension to Steal Gmail Messages",
+   "n_events": 9,
+   "last_seen": "2026-11-26T17:22:14.772Z",
+   "first_event_title": "Remus Stealer Uses a Fake Google Sheets Extension to Steal Gmail Messages"
+  },
+  {
+   "id": "sys010-malware-abuses-browser-management-to-spy-on-gmail-outlook",
+   "title": "SYS010 malware uses browser management to steal Gmail and Outlook data",
+   "n_events": 10,
+   "last_seen": "2026-11-26T17:22:04.181Z",
+   "first_event_title": "SYS010 malware abuses browser management to spy on Gmail, Outlook"
+  },
+  {
+   "id": "adobe-security-advisory-av26-1092",
+   "title": "Adobe security advisory (AV26-1092)",
+   "n_events": 2,
+   "last_seen": "2026-10-30T08:01:42.000Z",
+   "first_event_title": "Adobe security advisory (AV26-1092)"
+  },
+  {
+   "id": "apache-security-advisory-av26-1194",
+   "title": "Apache Solr CVE-2026-86312: ping health-check endpoint can trigger unintended functionality",
+   "n_events": 1,
+   "last_seen": "2026-11-23T15:45:39Z",
+   "first_event_title": "Apache security advisory (AV26-1194)"
+  },
+  {
+   "id": "apple-security-advisory-av26-839",
+   "title": "Apple security advisory (AV26-839)",
+   "n_events": 1,
+   "last_seen": "2026-08-21T13:55:45Z",
+   "first_event_title": "Apple security advisory (AV26-839)"
+  },
+  {
+   "id": "atlassian-security-advisory-av26-829",
+   "title": "Atlassian security advisory (AV26-829)",
+   "n_events": 1,
+   "last_seen": "2026-08-19T13:00:44Z",
+   "first_event_title": "Atlassian security advisory (AV26-829)"
+  },
+  {
+   "id": "cisco-security-advisory-av26-1127",
+   "title": "Cisco security advisory (AV26-1127)",
+   "n_events": 2,
+   "last_seen": "2026-11-05T03:58:31.000Z",
+   "first_event_title": "Cisco security advisory (AV26-1127)"
+  },
+  {
+   "id": "cisco-security-advisory-av26-1175",
+   "title": "Cisco security advisory (AV26-1175)",
+   "n_events": 3,
+   "last_seen": "2026-11-24T16:03:12.000Z",
+   "first_event_title": "Cisco security advisory (AV26-1175)"
+  },
+  {
+   "id": "cisco-security-advisory-av26-834",
+   "title": "Cisco security advisory (AV26-834)",
+   "n_events": 1,
+   "last_seen": "2026-08-20T13:50:44Z",
+   "first_event_title": "Cisco security advisory (AV26-834)"
+  },
+  {
+   "id": "control-systems-hitachi-security-advisory-av26-1208",
+   "title": "[Control systems] Hitachi security advisory (AV26-1208)",
+   "n_events": 1,
+   "last_seen": "2026-11-25T19:25:39Z",
+   "first_event_title": "[Control systems] Hitachi security advisory (AV26-1208)"
+  },
+  {
+   "id": "control-systems-johnson-controls-security-advisory-av26-837",
+   "title": "[Control Systems] Johnson Controls security advisory (AV26-837)",
+   "n_events": 1,
+   "last_seen": "2026-08-20T20:00:44Z",
+   "first_event_title": "[Control Systems] Johnson Controls security advisory (AV26-837)"
+  },
+  {
+   "id": "control-systems-moxa-security-advisory-av26-1089",
+   "title": "[Control Systems] Moxa security advisory (AV26-1089)",
+   "n_events": 1,
+   "last_seen": "2026-10-27T13:35:40Z",
+   "first_event_title": "[Control Systems] Moxa security advisory (AV26-1089)"
+  },
+  {
+   "id": "control-systems-moxa-security-advisory-av26-1187",
+   "title": "[Control Systems] Moxa security advisory (AV26-1187)",
+   "n_events": 1,
+   "last_seen": "2026-11-20T15:50:59Z",
+   "first_event_title": "[Control Systems] Moxa security advisory (AV26-1187)"
+  },
+  {
+   "id": "craft-cms-security-advisory-av26-1086",
+   "title": "Craft CMS security advisory (AV26-1086)",
+   "n_events": 2,
+   "last_seen": "2026-10-26T17:00:13.000Z",
+   "first_event_title": "Craft CMS security advisory (AV26-1086)"
+  },
+  {
+   "id": "fortinet-security-advisory-av26-812",
+   "title": "Fortinet security advisory (AV26-812)",
+   "n_events": 2,
+   "last_seen": "2026-08-13T10:40:57Z",
+   "first_event_title": "Fortinet security advisory (AV26-812)"
+  },
+  {
+   "id": "gitlab-security-advisory-av26-1210",
+   "title": "GitLab security advisory (AV26-1210)",
+   "n_events": 1,
+   "last_seen": "2026-11-25T21:15:40Z",
+   "first_event_title": "GitLab security advisory (AV26-1210)"
+  },
+  {
+   "id": "gitlab-security-advisory-av26-827",
+   "title": "GitLab security advisory (AV26-827)",
+   "n_events": 1,
+   "last_seen": "2026-08-18T14:10:41Z",
+   "first_event_title": "GitLab security advisory (AV26-827)"
+  },
+  {
+   "id": "google-security-advisory-av26-904",
+   "title": "Google security advisory (AV26-904)",
+   "n_events": 2,
+   "last_seen": "2026-09-09T20:49:30Z",
+   "first_event_title": "Google security advisory (AV26-904)"
+  },
+  {
+   "id": "google-security-advisory-av26-939",
+   "title": "Google security advisory (AV26-939)",
+   "n_events": 1,
+   "last_seen": "2026-09-18T15:55:39Z",
+   "first_event_title": "Google security advisory (AV26-939)"
+  },
+  {
+   "id": "grafana-security-advisory-av26-860",
+   "title": "Grafana Alloy Vulnerability CVE-2026-19516",
+   "n_events": 3,
+   "last_seen": "2026-10-13T16:00:56.470Z",
+   "first_event_title": "Grafana security advisory (AV26-860)"
+  },
+  {
+   "id": "hashicorp-security-advisory-av26-791",
+   "title": "HashiCorp security advisory (AV26-791)",
+   "n_events": 1,
+   "last_seen": "2026-08-10T14:15:44Z",
+   "first_event_title": "HashiCorp security advisory (AV26-791)"
+  },
+  {
+   "id": "hashicorp-security-advisory-av26-797",
+   "title": "HashiCorp security advisory (AV26-797)",
+   "n_events": 1,
+   "last_seen": "2026-08-11T14:05:42Z",
+   "first_event_title": "HashiCorp security advisory (AV26-797)"
+  },
+  {
+   "id": "compromised-rust-crate-with-18-000-downloads-steals-source-code",
+   "title": "Compromised Rust Crate With 18,000+ Downloads Steals Source Code During Builds",
+   "n_events": 2,
+   "last_seen": "2026-08-21T06:07:20Z",
+   "first_event_title": "Compromised Rust Crate With 18,000+ Downloads Steals Source Code During Builds"
+  },
+  {
+   "id": "crowdsec-confirms-source-code-stolen-in-supply-chain-attack",
+   "title": "CrowdSec Confirms Source Code Stolen in Supply Chain Attack",
+   "n_events": 3,
+   "last_seen": "2026-11-16T06:29:42Z",
+   "first_event_title": "CrowdSec Confirms Source Code Stolen in Supply Chain Attack"
+  },
+  {
+   "id": "red-heron-hackers-exploit-critical-gitea-rce-to-steal-source-cod",
+   "title": "Red Heron Hackers Exploit Critical Gitea RCE to Steal Source Code and Deploy Linux Malware",
+   "n_events": 17,
+   "last_seen": "2026-09-28T14:00:04.000Z",
+   "first_event_title": "Red Heron Hackers Exploit Critical Gitea RCE to Steal Source Code and Deploy Linux Malware"
+  }
+ ]
+}
