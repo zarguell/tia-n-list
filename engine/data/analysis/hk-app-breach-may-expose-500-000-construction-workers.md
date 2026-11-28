@@ -1,0 +1,3 @@
+Unauthorized access to the Construction Industry Council's app server potentially exposed personal data of about 500,000 registered construction workers, the council said on November 28. RTHK and SCMP put the affected population at about 500,000 of 587,000 registered users. The data may include names, dates of birth and ID numbers; RTHK reported that no financial data was involved.
+
+The exposure is substantial because birth dates and ID numbers can support identity fraud even without payment data. Watch for the council's formal notification, a final affected-user count and any expansion to other CIC services. Affected users should verify official notices and monitor for identity misuse. The available reports do not establish how the attacker obtained access.
